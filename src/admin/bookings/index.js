@@ -27,6 +27,9 @@ const BookingsTable = () => {
 	};
 	document.addEventListener( 'DOMContentLoaded', () => {
 		const table = document.querySelector( '.em-bookings-table' );
+		if ( ! table ) {
+			return;
+		}
 		const tableBody = table.querySelector( 'tbody' );
 		console.log( tableBody );
 		document.addEventListener( 'click', ( event ) => {
