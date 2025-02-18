@@ -209,6 +209,8 @@ class EM_Bookings extends EM_Object implements Iterator {
 		//$tickets = new \Contexis\Events\Tickets\Tickets($tickets);
 		return apply_filters('em_bookings_get_available_tickets', $this->get_tickets(), $this);
 	}
+
+	
 	
 	/**
 	 * Deprecated - was never used and therefore is deprecated, will always return an array() and will eventually be removed entirely.
