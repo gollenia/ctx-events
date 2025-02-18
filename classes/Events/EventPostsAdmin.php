@@ -188,11 +188,10 @@ class EM_Event_Posts_Admin{
 	    $columns = array_merge($id_array, $columns, array(
 	    	'location' => __('Location','events'),
 	    	'date-time' => __('Date and Time','events'),
-	    	'author' => __('Owner','events'),
+	    	'bookingdate' => __('Booking Date','events'),
 	    	'extra' => '',
 			'spaces' => __('Available','events'),
 			'booked' => __('Booked','events'),
-			'actions' => __('Actions', 'events')
 	    ));
 	    if( !get_option('dbem_locations_enabled') ){
 	    	unset($columns['location']);
@@ -257,8 +256,31 @@ class EM_Event_Posts_Admin{
 					</div>
 					<?php endif;
 				}
-				
 				break;
+			
+			case 'bookingdate':
+				$start = $EM_Event->rsvp_start();
+				$end = $EM_Event->rsvp_end();
+				if(!$start || !$end){
+					echo __('No booking date set','events');
+					break;
+				}
+				if( $start->getTimestamp() > time() ){
+					$description = __("Booking starts", "events");
+					$date = \Contexis\Events\Intl\Date::get_date($start->getTimestamp());
+					$color = '#b32d2e';
+				}elseif( $end->getTimestamp() < time() ){
+					$description = __("Booking ended", "events");
+					$date = \Contexis\Events\Intl\Date::get_date($end->getTimestamp());
+					$color = '#b32d2e';
+				}else{
+					$description = __("Booking open until", "events");
+					$date = \Contexis\Events\Intl\Date::get_date($end->getTimestamp());
+					$color = '#0073aa';
+				}
+				echo "<div style=\"color: $color\"><strong>$description</strong><br /><time>$date</time></div>";
+				break;
+
 			case 'spaces':
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($EM_Event->event_rsvp) && $EM_Event->can_manage('manage_bookings','manage_others_bookings')){
 					?>
@@ -303,6 +325,7 @@ class EM_Event_Posts_Admin{
 			unset($actions['inline hide-if-no-js']);
 			unset($actions['edit']);
 			$actions['duplicate'] = '<a href="'.$EM_Event->duplicate_url().'" title="'.sprintf(__('Duplicate %s','events'), __('Event','events')).'">'.__('Duplicate','events').'</a>';
+			$actions['bookings'] = '<a href="'.$EM_Event->get_bookings_url().'" title="'.__('View Bookings','events').'">'.__('Bookings','events').'</a>';
 		}
 		return $actions;
 	}
@@ -411,12 +434,9 @@ class EM_Event_Recurring_Posts_Admin{
 					//get meta value to see if post has location, otherwise
 					$EM_Location = $EM_Event->get_location();
 					if( !empty($EM_Location->location_id) ){
-						$actions = array();
-						if( $EM_Location->can_manage('edit_locations', 'edit_others_locations') ) {
-							$actions[] = "<a href='". esc_url($EM_Location->get_edit_url())."'>". esc_html__('Edit') ."</a>";
-						}
-						echo "<strong><a href='". $EM_Location->get_permalink()."'>" . $EM_Location->location_name . "</a></strong>";
-						echo "<span class='row-actions'> - ". implode(' | ', $actions) . "</span>";
+						
+						echo "<strong><a href='". esc_url($EM_Location->get_edit_url())."'>" . $EM_Location->location_name . "</a></strong>";
+						
 						echo "<br/>" . $EM_Location->location_address . " - " . $EM_Location->location_town;
 					}else{
 						echo __('None','events');
