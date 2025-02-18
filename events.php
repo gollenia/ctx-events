@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Setting constants
 
 class Events {
-	const VERSION = '6.82';
+	const VERSION = '6.83';
 	const DIR = __DIR__;
 }
 
@@ -108,6 +108,7 @@ if( is_admin() ){
 	require_once __DIR__ . '/admin/em-help.php';
 	require_once __DIR__ . '/admin/em-options.php';
 	require_once __DIR__ . '/admin/em-data-privacy.php';
+	require_once __DIR__ . '/admin/em-dashboard.php';
 
 	require_once __DIR__ . '/classes/Events/EventPostAdmin.php';
 	require_once __DIR__ . '/classes/Events/EventPostsAdmin.php';
