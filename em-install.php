@@ -170,7 +170,6 @@ function em_create_events_table() {
 		recurrence_rsvp_days int(3) NULL DEFAULT NULL,
 		blog_id bigint(20) unsigned NULL DEFAULT NULL,
 		group_id bigint(20) unsigned NULL DEFAULT NULL,
-		event_language varchar(14) NULL DEFAULT NULL,
 		event_translation tinyint(1) unsigned NOT NULL DEFAULT 0,
 		PRIMARY KEY  (event_id)
 		) DEFAULT CHARSET=utf8 ;";
@@ -655,6 +654,11 @@ function em_upgrade_current_installation(){
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.82 ) {
 		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ALTER COLUMN booking_donation SET TYPE decimal(14,4)');
+	}
+
+	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.83 ) {
+		global $wpdb;
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_language');
 	}
 }
 
