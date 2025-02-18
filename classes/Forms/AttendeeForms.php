@@ -12,7 +12,7 @@ class EM_Attendees_Form {
 	
 	public static function init(){
 		//Exporting
-		add_action('init', array('EM_Attendees_Form', 'intercept_csv_export'),10); //show booking form and ticket summary
+		
 		add_action('em_bookings_table_export_options', array('EM_Attendees_Form', 'em_bookings_table_export_options')); //show booking form and ticket summary
 		
 		//Booking interception - will not trigger on multi-booking checkout
@@ -254,81 +254,7 @@ class EM_Attendees_Form {
 	 * Intercepts a CSV export request before the core version hooks in and using similar code generates a breakdown of bookings with all attendees included at the end.
 	 * Hooking into the original version of this will cause more looping, which is why we're flat out overriding this here.
 	 */
-	public static function intercept_csv_export(){
-		if( !empty($_REQUEST['action']) && $_REQUEST['action'] == 'export_bookings_csv' && !empty($_REQUEST['show_attendees']) && wp_verify_nonce($_REQUEST['_wpnonce'], 'export_bookings_csv')){
-			$EM_Event = false;
-			if( !empty($_REQUEST['event_id']) ){
-				$EM_Event = EM_Event::find( absint($_REQUEST['event_id']) );
-			}
-			$title = $EM_Event ? $EM_Event->event_slug : "all";
-
-			if( !empty($_REQUEST['cols']) && is_array($_REQUEST['cols']) ){
-				$cols = array();
-				foreach($_REQUEST['cols'] as $col => $active){
-					if( $active ){ $cols[] = $col; }
-				}
-				$_REQUEST['cols'] = $cols;
-			}
-			$_REQUEST['limit'] = 0;
-		
-			//generate bookings export according to search request
-			$EM_Bookings_Table = new EM_Bookings_Table(true);
-			$alphabet = range('A', 'Z');
-			
-			//Rows
-			$EM_Bookings_Table->limit = 250; //if you're having server memory issues, try messing with this number
-			$EM_Bookings = $EM_Bookings_Table->get_bookings();
-			$form_fields = self::get_form($EM_Event->event_id)->form_fields;
-			
-			$headers = $EM_Bookings_Table->get_headers(true);
-			$registration_length = count($headers);
-			$titles = array_fill(0, count($headers), '<b><middle><style height="50" bgcolor="#f2f2f2" color="#000000"></style></middle></b>');
-			$titles[0] = '<b><middle><style height="25" bgcolor="#f2f2f2" color="#000000">' . __('Registration Fields','events') . '</style></middle></b>';
-			foreach($headers as $key => $header){
-				$headers[$key] = '<b><middle><style height="50" bgcolor="#f2f2f2" color="#000000">' . $header . '</style></middle></b>';
-			}
-			if( !empty($_REQUEST['event_id']) ){
-				$i = 0;
-				foreach($form_fields as $field ){
-					if( $field['type'] != 'html' ){
-						$headers[] = EM_Bookings_Table::sanitize_spreadsheet_cell('<b><middle><style height="25" bgcolor="#e2efda" color="#375623">' . $field['label'] . '</style></middle></b>');
-						$titles[] = $i == 0 ? '<b><middle><style height="25" bgcolor="#e2efda" color="#375623">' . __('Attendee','events') . '</style></middle></b>' : '<b><middle><style height="25" bgcolor="#e2efda" color="#375623"></style></middle></b>';
-						$i++;
-					}
-				}
-			}
-			
-			$excel_sheet = [$titles];
-			$excel_sheet[] = $headers;
-			
-
-			while(!empty($EM_Bookings->bookings)){
-				foreach( $EM_Bookings->bookings as $EM_Booking ) {
-					$attendees_data = self::get_booking_attendees($EM_Booking);
-					foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
-						$orig_row = $EM_Bookings_Table->get_row_csv($ticket_booking);
-						if( !empty($attendees_data[$ticket_booking->ticket_id]) ){ 
-							foreach($attendees_data[$ticket_booking->ticket_id] as $attendee_title => $attendee_data){
-								$row = $orig_row;
-								foreach( $attendee_data as $field_value){
-									$row[] = EM_Bookings_Table::sanitize_spreadsheet_cell($field_value);
-								}
-								array_push($excel_sheet, $row);
-							}
-						}
-					}
-				}
-				//reiterate loop
-				$EM_Bookings_Table->offset += $EM_Bookings_Table->limit;
-				$EM_Bookings = $EM_Bookings_Table->get_bookings();
-			}
-			$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
-			$xlsx->mergeCells('A1:'. $alphabet[$registration_length-1].'1');
-			$xlsx->mergeCells($alphabet[$registration_length].'1:'. $alphabet[count($headers)-1].'1');
-			$xlsx->downloadAs($title . '-' . lcfirst(__('Bookings', 'events')) . '.xlsx');
-			exit();
-		}
-	}
+	
 	
 	public static function em_bookings_table_export_options(){
 		?>
