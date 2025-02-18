@@ -586,8 +586,12 @@ class EM_Bookings extends EM_Object implements Iterator {
 		return apply_filters('em_bookings_get', $EM_Bookings);
 	}
 	
-	public static function count( $args = array() ){
-		return self::get($args, true);
+	public static function count( $args = array() ) : int {
+		$return = self::get($args, true);
+		if( is_numeric($return) ){
+			return $return;
+		}
+		return 0;
 	}
 	
 
