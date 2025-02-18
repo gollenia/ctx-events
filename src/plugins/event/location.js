@@ -31,8 +31,6 @@ const locationSelector = () => {
 		}
 
 		result.map( ( location ) => {
-
-			
 			locations.push( {
 				value: location.location_id,
 				label: location.title.raw,
@@ -46,8 +44,6 @@ const locationSelector = () => {
 
 		return locations;
 	}, [] );
-
-	console.log( meta._location_id );
 
 	return (
 		<PluginDocumentSettingPanel

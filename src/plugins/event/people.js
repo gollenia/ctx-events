@@ -32,11 +32,10 @@ const peopleSelector = () => {
 		}
 
 		list.map( ( speaker ) => {
-			console.log( speaker );
 			speakers.push( {
 				value: speaker.id,
 				label: speaker.title.raw,
-				media: speaker.meta.thumbnail
+				media: speaker.meta.thumbnail,
 			} );
 		} );
 

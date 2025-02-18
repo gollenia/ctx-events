@@ -4,7 +4,7 @@ import React from 'react';
 
 const TicketEditor = ( props ) => {
 	const { ticket, onUpdate, onCancel, setTicket } = props;
-
+	console.log( 'ticket', ticket );
 	if ( ! ticket ) return null;
 	return (
 		<>
@@ -114,7 +114,7 @@ const TicketEditor = ( props ) => {
 				<FlexItem>
 					<Button
 						variant="primary"
-						disabled={ ! ticket.ticket_name || ! ticket.dicket_description }
+						disabled={ ! ticket.ticket_name }
 						onClick={ () => {
 							onUpdate();
 						} }

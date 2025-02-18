@@ -14,16 +14,20 @@ const TicketModal = ( props ) => {
 	const currentPost = select( 'core/editor' ).getCurrentPost();
 	const postId = currentPost.id;
 
-	const [ isOpen, setIsOpen ] = useState( false );
 	const [ tickets, setTickets ] = useState( [] );
 	const [ currentTicket, setCurrentTicket ] = useState( {} );
 	if ( postType !== 'event' ) return <></>;
 
 	useEffect( () => {
 		//if ( Object.keys( currentTicket ).length == 0 ) return;
-		apiFetch( { path: 'events/v2/tickets?post_id=' + postId } ).then( ( response ) => {
-			setTickets( response );
-		} );
+		apiFetch( { path: 'events/v2/tickets?post_id=' + postId } )
+			.then( ( response ) => {
+				console.log( response );
+				setTickets( response );
+			} )
+			.catch( ( error ) => {
+				console.log( error );
+			} );
 	}, [ currentTicket ] );
 
 	const closeModal = () => {
@@ -38,7 +42,7 @@ const TicketModal = ( props ) => {
 			data: { post_id: postId, id: ticket_id },
 		} )
 			.then( ( response ) => {
-				setTickets( tickets.splice( index, 1 ) );
+				setTickets( tickets.filter( ( _, i ) => i !== index ) );
 			} )
 			.catch( ( error ) => {
 				console.log( error );
@@ -102,6 +106,12 @@ const TicketModal = ( props ) => {
 											onDelete={ onDelete }
 											onSelect={ ( index ) => {
 												setCurrentTicket( tickets[ index ] );
+											} }
+											onDuplicate={ ( index ) => {
+												const newTicket = { ...tickets[ index ] };
+												newTicket.ticket_id = 0;
+												newTicket.is_new = true;
+												setCurrentTicket( newTicket );
 											} }
 										/>
 									) ) }

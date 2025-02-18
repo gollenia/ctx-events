@@ -19,6 +19,7 @@
 		margin: 0;
 		padding: 0;
 		text-transform: uppercase;
+		color: #666;
 	}
 
 	&-item {
@@ -40,6 +41,10 @@
 		i {
 			font-size: 30px !important;
 		}
+	}
+
+	&-text {
+		margin-top: 0.4rem;
 	}
 
 	&-action {

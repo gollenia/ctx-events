@@ -40,7 +40,7 @@ const edit = ( props ) => {
 
 	return (
 		<div { ...blockProps }>
-			<Inspector { ...props } />
+			<Inspector { ...props } meta={ meta } setMeta={ setMeta } />
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
@@ -48,7 +48,7 @@ const edit = ( props ) => {
 				</div>
 				<div>
 					<RichText
-						tagName="h5"
+						tagName="h4"
 						className="event-details_title description-editable"
 						placeholder={ __( 'Date', 'events' ) }
 						value={ description }

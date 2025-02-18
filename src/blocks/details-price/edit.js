@@ -40,7 +40,7 @@ const edit = ( props ) => {
 				</div>
 				<div>
 					<RichText
-						tagName="h5"
+						tagName="h4"
 						className="event-details_title description-editable"
 						placeholder={ __( 'Price', 'events' ) }
 						value={ description }

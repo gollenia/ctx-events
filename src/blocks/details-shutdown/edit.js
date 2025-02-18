@@ -1,7 +1,7 @@
 /**
  * Wordpress dependencies
  */
-import { RichText, useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
 import { useEntityProp } from '@wordpress/core-data';
@@ -53,21 +53,16 @@ const edit = ( props ) => {
 					<i className="material-icons material-symbols-outlined">event_busy</i>
 				</div>
 				<div>
-					<RichText
-						tagName="h5"
-						className="event-details_title description-editable"
-						placeholder={ __( 'Booking end', 'events' ) }
-						value={ description }
-						onChange={ ( value ) => {
-							setAttributes( { description: value } );
-						} }
-					/>
-					<span className="event-details_audience description-editable">
+					<h4 className="event-details_title">
 						{ bookingEnded
-							? 'Booking ended'
+							? __( 'Booking ended', 'events' )
 							: bookingStarted
-							? `Booking ends ${ endFormatted() }`
-							: 'Booking starts at ' + startFormatted() }
+							? __( 'Booking end', 'events' )
+							: __( 'Booking start', 'events' ) }
+					</h4>
+
+					<span className="event-details_audience description-editable">
+						{ bookingEnded || bookingStarted ? endFormatted() : startFormatted() }
 					</span>
 				</div>
 			</div>
