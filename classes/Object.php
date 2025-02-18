@@ -6,7 +6,7 @@
 class EM_Object {
 	public array $fields = [];
 	/**
-	 * @var array Associative array of shortname => property names for this object. For example, an EM_Event object will have a 'language' key to 'event_language' value.
+	 * @var array Associative array of shortname => property names for this object.
 	 */
 	//protected $shortnames = array();
 	public array $required_fields = [];
@@ -928,24 +928,21 @@ class EM_Object {
 		}
 	}
 
-	/**
-	 * Returns this object in the form of an array, useful for saving directly into a database table.
-	 * @return array
-	 */
-	function to_array($db = false){
-		$array = array();
+	function to_array(bool $sql_compatible = false) : array {
+		$array = [];
 		foreach ( $this->fields as $key => $val ) {
-			if($db){
-				if( !empty($this->$key) || $this->$key === 0 || $this->$key === '0' || empty($val['null']) ){
-					$array[$key] = $this->$key;
-				}elseif( $this->$key === null && !empty($val['null']) ){
-					$array[$key] = null;
-				}
-			}else{
+			if(!$sql_compatible) {
 				$array[$key] = $this->$key;
+				continue;
+			}
+
+			if ( !empty($this->$key) || $this->$key === 0 || $this->$key === '0' || empty($val['null']) ) {
+				$array[$key] = $this->$key;
+			} elseif ( $this->$key === null && !empty($val['null']) ) {
+				$array[$key] = null;
 			}
 		}
-		return apply_filters('em_to_array', $array);
+		return $array;
 	}
 	
 
