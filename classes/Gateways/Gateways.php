@@ -59,15 +59,15 @@ class EM_Gateways {
 	}
 	
 	static function em_bookings_table($EM_Bookings_Table){
-		$EM_Bookings_Table->statuses['awaiting-online'] = array('label'=>__('Awaiting Online Payment','events'), 'search'=>4);
-		$EM_Bookings_Table->statuses['awaiting-payment'] = array('label'=>__('Awaiting Offline Payment','events'), 'search'=>5);
-		$EM_Bookings_Table->statuses['needs-attention']['search'] = array(0,4,5);
+		$EM_Bookings_Table->states['awaiting-online'] = array('label'=>__('Awaiting Online Payment','events'), 'search'=>4);
+		$EM_Bookings_Table->states['awaiting-payment'] = array('label'=>__('Awaiting Offline Payment','events'), 'search'=>5);
+		$EM_Bookings_Table->states['needs-attention']['search'] = array(0,4,5);
 		if( !get_option('dbem_bookings_approval') ){
-			$EM_Bookings_Table->statuses['needs-attention']['search'] = array(5);
+			$EM_Bookings_Table->states['needs-attention']['search'] = array(5);
 		}else{
-			$EM_Bookings_Table->statuses['needs-attention']['search'] = array(0,5);
+			$EM_Bookings_Table->states['needs-attention']['search'] = array(0,5);
 		}
-		$EM_Bookings_Table->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $EM_Bookings_Table->statuses) ) ? $_REQUEST['status']:get_option('dbem_default_bookings_search','needs-attention');
+		$EM_Bookings_Table->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $EM_Bookings_Table->states) ) ? $_REQUEST['status']:get_option('dbem_default_bookings_search','needs-attention');
 	}
 
 	static function register_gateway($gateway, $class) {
