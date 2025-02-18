@@ -275,15 +275,6 @@ function wp_events_plugin_init(){
 
 
 
-function supported_custom_fields($supported, $remove = []){
-	foreach($supported as $key => $support_field){
-		if( in_array($support_field, $remove) ){
-			unset($supported[$key]);
-		}
-	}
-	return $supported;
-}
-
 function em_map_meta_cap( $caps, $cap, $user_id, $args ) {
     if( !empty( $args[0]) ){
 		/* Handle event reads */
