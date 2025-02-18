@@ -348,7 +348,7 @@ class EM_Booking extends EM_Object{
 		return true;
 	}
 
-	public static function get_available_statuses() : array {
+	public static function get_available_states() : array {
 		$statuses = array(
 			'all' => array('label'=>__('All','events'), 'search'=>false),
 			'pending' => array('label'=>__('Pending','events'), 'search'=>0),
