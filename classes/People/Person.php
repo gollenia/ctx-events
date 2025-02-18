@@ -19,11 +19,10 @@ class EM_Person extends WP_User {
 			$person_id = $person_id->ID; //create new object if passed a wp_user
 		}
 		if( is_numeric($person_id) && $person_id == 0 ){
-			
 			$this->data = new stdClass();
 			$this->ID = 0;
 			$this->display_name = 'Anonymous User';
-			$this->user_email = 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
+			$this->user_email = $_REQUEST['user_email'] ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
 		}
 		if($username){
 			parent::__construct($person_id, $username);
@@ -31,7 +30,7 @@ class EM_Person extends WP_User {
 			$this->data = new stdClass();
 			$this->ID = 0;
 			$this->display_name = 'Anonymous User';
-			$this->user_email = 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
+			$this->user_email = $_REQUEST['user_email'] ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
 		}else{
 			parent::__construct($person_id);
 		}
@@ -49,7 +48,7 @@ class EM_Person extends WP_User {
 			$status_condition = " AND booking_status IN (".implode(',', $status).")";
 		}
 		$EM_Booking = EM_Booking::find(); //empty booking for fields
-		$results = $wpdb->get_results("SELECT b.".implode(', b.', array_keys($EM_Booking->fields))." FROM ".EM_BOOKINGS_TABLE." b, ".EM_EVENTS_TABLE." e WHERE e.event_id=b.event_id AND person_id={$this->ID} {$blog_condition} {$status_condition} ORDER BY event_start_date ASC",ARRAY_A);
+		$results = $wpdb->get_results("SELECT b.".implode(', b.', array_keys($EM_Booking->fields))." FROM ".EM_BOOKINGS_TABLE." b, ".EM_EVENTS_TABLE." e WHERE e.event_id=b.event_id AND booking_meta CONTAINS {$this->user_mail} {$blog_condition} {$status_condition} ORDER BY event_start_date ASC",ARRAY_A);
 		$bookings = array();
 		if($ids_only){
 			foreach($results as $booking_data){
