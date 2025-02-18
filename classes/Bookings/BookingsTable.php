@@ -58,20 +58,7 @@ class EM_Bookings_Table {
 	
 	
 	function __construct($show_tickets = false){
-		$this->statuses = array(
-			'all' => array('label'=>__('All','events'), 'search'=>false),
-			'pending' => array('label'=>__('Pending','events'), 'search'=>0),
-			'confirmed' => array('label'=>__('Confirmed','events'), 'search'=>1), 
-			'cancelled' => array('label'=>__('Cancelled','events'), 'search'=>3),
-			'rejected' => array('label'=>__('Rejected','events'), 'search'=>2),
-			'needs-attention' => array('label'=>__('Needs Attention','events'), 'search'=>array(0)),
-			'incomplete' => array('label'=>__('Incomplete Bookings','events'), 'search'=>array(0))
-		);
-		if( !get_option('dbem_bookings_approval') ){
-			unset($this->statuses['pending']);
-			unset($this->statuses['incomplete']);
-			$this->statuses['confirmed']['search'] = array(0,1);
-		}
+		$this->statuses = \EM_Booking::get_available_statuses();
 		//Set basic vars
 		$this->order = ( !empty($_REQUEST ['order']) && $_REQUEST ['order'] == 'DESC' ) ? 'DESC':'ASC';
 		$this->orderby = ( !empty($_REQUEST ['orderby']) ) ? sanitize_sql_orderby($_REQUEST['orderby']):'booking_name';
@@ -80,6 +67,7 @@ class EM_Bookings_Table {
 		$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;
 		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], \EM_Object::get_scopes()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
 		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->statuses) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
+		
 		//build template of possible columns
 		$this->cols_template = apply_filters('em_bookings_table_cols_template', array(
 			'user_login' => __('Username', 'events'),
@@ -172,7 +160,7 @@ class EM_Bookings_Table {
 		global $EM_Person;
 		if( !empty($this->person) && is_object($this->person) ){
 			return $this->person;
-		}elseif( !empty($_REQUEST['person_id']) && !empty($EM_Person) && is_object($EM_Person) ){
+		}elseif( !empty($_REQUEST['user_email']) && !empty($EM_Person) && is_object($EM_Person) ){
 			return $EM_Person;
 		}
 		return false;
@@ -383,6 +371,7 @@ class EM_Bookings_Table {
 							<?php
 							foreach ( $this->statuses as $key => $value ) {
 								$selected = "";
+								
 								if ($key == $this->status)
 									$selected = "selected='selected'";
 								echo "<option value='".esc_attr($key)."' $selected>".esc_html($value['label'])."</option>  ";
@@ -558,7 +547,7 @@ class EM_Bookings_Table {
 			case 'booking_status':
 				if( $format == 'csv' ) return $EM_Booking->get_status();
 				$status = array_search($EM_Booking->booking_status, array_column($this->statuses, 'search'));
-				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$this->get_status_icon($status).'</i>'.ucwords($EM_Booking->get_status()).'</span>';
+				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$EM_Booking->get_status_icon().'</i>'.ucwords($EM_Booking->get_status()).'</span>';
 				break;
 			case 'booking_date':
 				return \Contexis\Events\Intl\Date::get_date($EM_Booking->date()->getTimestamp()) . " " . \Contexis\Events\Intl\Date::get_time($EM_Booking->date()->getTimestamp());
