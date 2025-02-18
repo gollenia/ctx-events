@@ -9,6 +9,19 @@ use WP_REST_Server;
 
 class TicketsController {
 
+	private array $allowed_fields = [
+		'event_id',
+		'ticket_name',
+		'ticket_description',
+		'ticket_min',
+		'ticket_max',
+		'ticket_price',
+		'ticket_spaces',
+		'ticket_required',
+		'ticket_order',
+		'ticket_meta',
+	];
+
 	public static function init() {
 		$instance = new self();
 		add_action('rest_api_init', array($instance, 'register_rest_route') );
@@ -46,38 +59,33 @@ class TicketsController {
 	 * Create a new ticket
 	 *
 	 * @param \WP_REST_Request $request
-	 * @return void
+	 * @return \WP_REST_Response
 	 */
 	public function create_ticket($request) {
 		$ticket = new Ticket();
 
-
 		$event = \EM_Event::find($request->get_param('post_id'), 'post_id');
+		$data = $request->get_params();
 
 		$ticket->event_id = $event->event_id;
-		$ticket->ticket_name = $request->get_param('ticket_name');
-		$ticket->ticket_description = $request->get_param('ticket_description');
-		$ticket->ticket_min = $request->get_param('ticket_min');
-		$ticket->ticket_max = $request->get_param('ticket_max');
-		$ticket->ticket_price = $request->get_param('ticket_price');
-		$ticket->ticket_spaces = $request->get_param('ticket_spaces');
-		$ticket->ticket_required = $request->get_param('ticket_required');
-		$ticket->ticket_order = $request->get_param('ticket_order');
 		
+		foreach($data as $key => $value) {
+			if(!in_array($key, $this->allowed_fields)) {
+				continue;
+			}
+			$ticket->$key = $value;
+		}
+
 		$ticket->ticket_meta = [
 			'primary' => 0,
 		];
 		//$ticket->compat_keys();
 		$result = $ticket->save();
-		if($result) {
-			http_response_code(201);
-		} else {
-			http_response_code(400);
-		}
 
+		$response = new WP_REST_Response(['ticket' => $ticket, 'request' => $request, 'errors' => $ticket->errors]);
+		$response->set_status($result ? 200 : 400);
 
-		return apply_filters('em_tickets_response', ['ticket' => $ticket, 'request' => $request]);
-		
+		return $response;
 	}
 
 	/**
@@ -92,6 +100,9 @@ class TicketsController {
 		$data = $request->get_params();
 		
 		foreach($data as $key => $value) {
+			if(!in_array($key, $this->allowed_fields)) {
+				continue;
+			}
 			$ticket->$key = $value;
 		}
 
@@ -114,7 +125,10 @@ class TicketsController {
 	public function delete_ticket($request) {
 		$id = $request->get_param('id');
 		$ticket = new Ticket($id);
-		$ticket->delete();
+		$result = $ticket->delete();
+
+		$response = new WP_REST_Response(['success' => $result]);
+		$response->set_status($result ? 200 : 400);	 
 		return new WP_REST_Response(true);
 	}
 
