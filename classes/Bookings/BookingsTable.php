@@ -2,63 +2,35 @@
 //Builds a table of bookings, still work in progress...
 // May be replaced by JS App in future
 class EM_Bookings_Table {
-	/**
-	 * associative array of columns that'll be shown in order from left to right
-	 * 
-	 * * key - column name in the databse, what will be used when searching
-	 * * value - label for use in column headers 
-	 * @var array
-	 */
-	public $cols = ['user_name','event_name','booking_spaces','booking_status','booking_price','donation'];
-	/**
-	 * Asoociative array of available column keys and corresponding headers, which will be used to display this table of bookings
-	 * @var array
-	 */
-	public $cols_template = [];
-	public $sortable_cols = ['booking_date'];
+	
+	public array $cols = ['user_name','event_name','booking_spaces','booking_status','booking_price','donation'];
+	public array $cols_template = [];
+	public array $sortable_cols = ['booking_date'];
 	/**
 	 * Object we're viewing bookings in relation to.
 	 * @var object
 	 */
 	public $cols_view;
-	/**
-	 * Index key used for looking up status information we're filtering in the booking table 
-	 * @var string
-	 */
-	public $string = 'needs-attention';
-	/**
-	 * Associative array of status information.
-	 * 
-	 * * key - status index value
-	 * * value - associative array containing keys
-	 * ** label - the label for use in filter forms
-	 * ** search - array or integer status numbers to search 
-	 * 
-	 * @var array
-	 */
-	public $statuses = array();
-	/**
-	 * Maximum number of rows to show
-	 * @var int
-	 */
-	public $limit = 20;
-	public $order = 'ASC';
-	public $orderby = 'booking_name';
-	public $page = 1;
-	public $offset = 0;
-	public $scope = 'future';
+	
+	public array $states = [];
+	public int $limit = 20;
+	public string $order = 'ASC';
+	public string $orderby = 'booking_name';
+	public int $page = 1;
+	public int $offset = 0;
+	public string $scope = 'future';
 	public bool $show_tickets = false;
-	public $bookings_count = 0;
+	public int $bookings_count = 0;
 	public EM_Bookings $bookings;
-	public $status = '';
-	public $cols_tickets_template = array();
-	public $person;
-	public $ticket;
-	public $event;
+	public string $status = '';
+	public array $cols_tickets_template = [];
+	public EM_Person $person;
+	public EM_Ticket $ticket;
+	public EM_Event $event;
 	
 	
 	function __construct($show_tickets = false){
-		$this->statuses = \EM_Booking::get_available_statuses();
+		$this->states = \EM_Booking::get_available_states();
 		//Set basic vars
 		$this->order = ( !empty($_REQUEST ['order']) && $_REQUEST ['order'] == 'DESC' ) ? 'DESC':'ASC';
 		$this->orderby = ( !empty($_REQUEST ['orderby']) ) ? sanitize_sql_orderby($_REQUEST['orderby']):'booking_name';
@@ -66,7 +38,7 @@ class EM_Bookings_Table {
 		$this->page = ( !empty($_REQUEST['pno']) && is_numeric($_REQUEST['pno']) ) ? $_REQUEST['pno']:1;
 		$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;
 		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], \EM_Object::get_scopes()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
-		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->statuses) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
+		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->states) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
 		
 		//build template of possible columns
 		$this->cols_template = apply_filters('em_bookings_table_cols_template', array(
@@ -206,12 +178,12 @@ class EM_Bookings_Table {
 			'offset' => $this->offset,
 			'order' => $this->order,
 			'orderby' => $this->orderby,
-			'status' => $this->statuses[$this->status]['search'],
+			'status' => $this->states[$this->status]['search'],
 			'scope' => $EM_Event ? false : $this->scope,
 		];
-		if( $EM_Event !== false ){
-			$args['event'] = $EM_Event->event_id;
-		}
+
+		if( $EM_Event !== false ) $args['event'] = $EM_Event->event_id;
+		
 		$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
 		$this->bookings_count = EM_Bookings::count($args);
 		$this->bookings = EM_Bookings::get($args);
@@ -263,8 +235,9 @@ class EM_Bookings_Table {
 				</div>
 			</form>
 		</div>
+		<?php if ( $EM_Event ) : ?>
 		<div id="em-bookings-table-export" class="em-bookings-table-overlay" style="display:none;" title="<?php esc_attr_e('Export Bookings','events'); ?>">
-			<form id="em-bookings-table-export-form" class="em-bookings-table-form" action="" method="post">
+			<form id="em-bookings-table-export-form" class="em-bookings-table-form" action="<?php echo admin_url('admin-ajax.php') ?>" method="post">
 				<p><?php esc_html_e('Select the options below and export all the bookings you have currently filtered (all pages) into a CSV spreadsheet format.','events') ?></p>
 				
 				<p>
@@ -315,10 +288,11 @@ class EM_Bookings_Table {
 				<input type="hidden" name="scope" value='<?php echo esc_attr($this->scope); ?>' />
 				<input type="hidden" name="status" value='<?php echo esc_attr($this->status); ?>' />
 				<input type="hidden" name="no_save" value='1' />
-				<input type="hidden" name="_wpnonce" value="<?php echo wp_create_nonce('export_bookings_csv'); ?>" />
-				<input type="hidden" name="action" value="export_bookings_csv" />
+				<input type="hidden" name="_wpnonce" value="<?php echo wp_create_nonce('em_export_bookings_xls'); ?>" />
+				<input type="hidden" name="action" value="em_export_bookings_xls" />
 			</form>
 		</div>
+		<?php endif; ?>
 		<br class="clear" />
 		<?php
 	}
@@ -345,7 +319,9 @@ class EM_Bookings_Table {
 				
 				<div class='tablenav'>
 					<div class="alignleft actions">
+						<?php if( $EM_Event ): ?>
 						<a href="#" class="em-bookings-table-export button-secondary" id="em-bookings-table-export-trigger" rel="#em-bookings-table-export" title="<?php _e('Export these bookings.','events'); ?>"><i class="material-symbols-outlined">export_notes</i></a>
+						<?php endif; ?>
 						<a href="#" class="em-bookings-table-settings button-secondary" id="em-bookings-table-settings-trigger" rel="#em-bookings-table-settings"><i class="material-symbols-outlined">table</i></a>
 						<?php if( $EM_Event === false ): ?>
 						<select name="scope">
@@ -369,7 +345,7 @@ class EM_Bookings_Table {
 						</select>
 						<select name="status">
 							<?php
-							foreach ( $this->statuses as $key => $value ) {
+							foreach ( $this->states as $key => $value ) {
 								$selected = "";
 								
 								if ($key == $this->status)
@@ -546,7 +522,7 @@ class EM_Bookings_Table {
 				break;
 			case 'booking_status':
 				if( $format == 'csv' ) return $EM_Booking->get_status();
-				$status = array_search($EM_Booking->booking_status, array_column($this->statuses, 'search'));
+				$status = array_search($EM_Booking->booking_status, array_column($this->states, 'search'));
 				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$EM_Booking->get_status_icon().'</i>'.ucwords($EM_Booking->get_status()).'</span>';
 				break;
 			case 'booking_date':
@@ -622,7 +598,7 @@ class EM_Bookings_Table {
 	function get_row_csv($EM_Booking){
 	    $row = $this->get_row($EM_Booking, 'csv');
 	    foreach($row as $k=>$v){
-			var_dump($v['content']);
+			
 	    	$row[$k] = html_entity_decode($v['content']);
 	    } //remove things like &amp; which may have been saved to the DB directly
 	    return $row;
