@@ -43,7 +43,7 @@ class EM_Booking extends EM_Object{
 
 	var $notes;
 
-	protected string $booking_date;
+	public string $booking_date;
 	protected EM_DateTime $date;
 	protected $person;
 
@@ -348,12 +348,47 @@ class EM_Booking extends EM_Object{
 		return true;
 	}
 
+	public static function get_available_statuses() : array {
+		$statuses = array(
+			'all' => array('label'=>__('All','events'), 'search'=>false),
+			'pending' => array('label'=>__('Pending','events'), 'search'=>0),
+			'confirmed' => array('label'=>__('Confirmed','events'), 'search'=>1), 
+			'cancelled' => array('label'=>__('Cancelled','events'), 'search'=>3),
+			'rejected' => array('label'=>__('Rejected','events'), 'search'=>2),
+			'needs-attention' => array('label'=>__('Needs Attention','events'), 'search'=>array(0)),
+			'incomplete' => array('label'=>__('Incomplete Bookings','events'), 'search'=>array(0))
+		);	
+
+		if( !get_option('dbem_bookings_approval') ){
+			unset($statuses['pending']);
+			unset($statuses['incomplete']);
+			$statuses['confirmed']['search'] = array(0,1);
+		}
+		
+		return apply_filters('em_booking_statuses', $statuses);
+	}
+
 	function retrieve_status($request) 
 	{
 		if( $request->has_param('status') )	return $request->get_param('status');
 		if( !$request->has_param('gateway') ) return self::PENDING;
 		global $EM_Gateways;
 		$EM_Gateways[$request['gateway']]->booking_add($this);
+	}
+
+	function get_status_icon () {
+		$icons = [
+			'pending',
+			'check_circle',
+			'check_circle',
+			'block',
+			'pan_tool',
+			'overview',
+			'overview',
+			'credit_card_clock',
+			'overview',
+		];
+		return $icons[$this->booking_status];
 	}
 	
 	function validate( bool $override_availability = false ) : bool
