@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Events
-Version: 6.8.2
+Version: 6.8.3
 Plugin URI: https://github.com/gollenia/events
 Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, ical, booking registration and more!
 Author: Marcus Sykes, Thomas Gollenia
