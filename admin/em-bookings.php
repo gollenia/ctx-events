@@ -27,7 +27,7 @@ function em_bookings_page(){
 		do_action('em_bookings_'.$_REQUEST['action']);
 	}elseif( !empty($_REQUEST['booking_id']) ){
 		em_bookings_single();
-	}elseif( !empty($_REQUEST['person_id']) ){
+	}elseif( !empty($_REQUEST['user_email']) ){
 		em_bookings_person();
 	}elseif( !empty($_REQUEST['ticket_id']) ){
 		em_bookings_ticket();
@@ -117,7 +117,7 @@ function em_bookings_event(){
 		<h2><?php esc_html_e('Bookings','events'); ?></h2>
 		<?php
 		$EM_Bookings_Table = new EM_Bookings_Table();
-		$EM_Bookings_Table->status = 'all';
+		//$EM_Bookings_Table->status = 'all';
 		$EM_Bookings_Table->output();
   		?>
 		<?php do_action('em_bookings_event_footer', $EM_Event); ?>
@@ -179,37 +179,7 @@ function em_bookings_ticket(){
 	<?php	
 }
 
-/**
- * Shows a single booking for a single person. 
- */
-function em_bookings_single(){
-	global $EM_Booking, $EM_Notices; /* @var $EM_Booking EM_Booking */
-	//check that user can access this page
-	if( is_object($EM_Booking) && !$EM_Booking->can_manage() ){
-		?>
-		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
-		<?php
-		return false;
-	}
-	do_action('em_booking_admin', $EM_Booking);
-	?>
-	<div >
-		<?php $EM_Event = $EM_Booking->get_event(); 
-		?>
-		<h1>
-		
 
-  			<?php echo sprintf(__('Edit Booking for %s', 'events' ), $EM_Event->event_name); ?>
-		</h1>
-  		
-		<div id="booking-admin" data-id="<?php echo $EM_Booking->booking_id ?>"></div>
-		<?php do_action('em_bookings_admin_booking_event', $EM_Event); ?>
-	
-		<?php do_action('em_bookings_single_footer', $EM_Booking); ?>
-	</div>
-	<?php
-	
-}
 
 /**
  * Shows all bookings made by one person.
@@ -263,7 +233,7 @@ function em_bookings_person(){
 		<h2><?php esc_html_e('Past And Present Bookings','events'); ?></h2>
 		<?php
 		$EM_Bookings_Table = new EM_Bookings_Table();
-		$EM_Bookings_Table->status = 'all';
+		//$EM_Bookings_Table->status = 'all';
 		$EM_Bookings_Table->scope = 'all';
 		$EM_Bookings_Table->output();
   		?>
