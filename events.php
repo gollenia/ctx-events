@@ -1,32 +1,18 @@
 <?php
 /*
 Plugin Name: Events
-Version: 6.8.3
 Plugin URI: https://github.com/gollenia/events
-Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, ical, booking registration and more!
-Author: Marcus Sykes, Thomas Gollenia
+Description: Event registration and booking management for WordPress. Recurring events, locations, ical, booking registration and more!
+Version: 6.8.3
+Requires at least: 6.7
+Requires PHP: 8.0
+License: GPL3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Author: Thomas Gollenia
 Author URI: https://github.com/gollenia/events
 Text Domain: events
+Domain Path: /languages
 */
-
-/*
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
-
-// Setting constants
 
 class Events {
 	const VERSION = '6.83';

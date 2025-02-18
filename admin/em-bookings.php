@@ -242,6 +242,36 @@ function em_bookings_person(){
 	<?php
 }
 
+function em_bookings_single() {
+	$EM_Booking = new EM_Booking($_REQUEST['booking_id']);
+	
+	?>
+	<div class='wrap' id="em-bookings-admin-booking">
+		<h1 class="wp-heading-inline">
+  			<?php __('Edit Booking', 'events-manager'); ?>
+		</h1>
+  		<div class="metabox-holder">
+	  		<div class="postbox-container" style="width:99.5%">
+				
+					
+					
+						<?php
+						
+						$EM_Event = $EM_Booking->get_event();
+						?>
+						<div id="booking-admin" data-id="<?php echo $EM_Booking->booking_id ?>"></div>
+						<?php do_action('em_bookings_admin_booking_event', $EM_Event); ?>
+				
+				
+				<?php do_action('em_bookings_single_metabox_footer', $EM_Booking); ?>
+			</div>
+		</div>
+		<br style="clear:both;" />
+		<?php do_action('em_bookings_single_footer', $EM_Booking); ?>
+	</div>
+	<?php
+}
+
 function em_printable_booking_report() {
 	global $EM_Event;
 	//check that user can access this page

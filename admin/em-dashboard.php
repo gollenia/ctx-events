@@ -23,7 +23,7 @@ class Dashboard {
 		<table style="width:100%">
 			<?php foreach($bookings as $booking) : ?>
 				<?php 
-					$status = array_search($EM_Booking->booking_status, array_column($booking->get_statuus(), 'search'));
+					$status = array_search($EM_Booking->booking_status, array_column($booking->get_states(), 'search'));
 				?>
 				<tr>
 					<td><span class="em-label em-label-<?php echo $status ?>"><i class="material-symbols-outlined"><?php echo $booking->get_status_icon() ?></i></span></td>
