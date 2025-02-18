@@ -55,7 +55,7 @@ class Ticket extends \EM_Object{
 	 * Contains only bookings belonging to this ticket.
 	 * @var EM_Booking
 	 */
-	public array $bookings = array();
+	public $bookings;
 	public array $required_fields = array('ticket_name');
 	protected $start;
 	protected $end;
@@ -485,16 +485,17 @@ class Ticket extends \EM_Object{
 	function delete(){
 		global $wpdb;
 		$result = false;
-		if( $this->can_manage() ){
-			if( count($this->get_bookings()->bookings) == 0 ){
-				$sql = $wpdb->prepare("DELETE FROM ". EM_TICKETS_TABLE . " WHERE ticket_id=%d", $this->ticket_id);
-				$result = $wpdb->query( $sql );
-			}else{
-				$this->feedback_message = __('You cannot delete a ticket that has a booking on it.','events');
-				$this->add_error($this->feedback_message);
-				return false;
-			}
+		if(!$this->can_manage()) return false;
+		
+		if( count($this->get_bookings()->bookings) == 0 ){
+			$sql = $wpdb->prepare("DELETE FROM ". EM_TICKETS_TABLE . " WHERE ticket_id=%d", $this->ticket_id);
+			$result = $wpdb->query( $sql );
+		}else{
+			$this->feedback_message = __('You cannot delete a ticket that has a booking on it.','events');
+			$this->add_error($this->feedback_message);
+			return false;
 		}
+		
 		return apply_filters('em_ticket_delete', $result !== false, $this);
 	}
 
