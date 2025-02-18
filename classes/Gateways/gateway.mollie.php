@@ -521,7 +521,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 		$methods	= array();
 		$mollie 	= self::start_mollie();
 		$all 		= $mollie->methods->all(['locale' => get_locale(), 'includeWallets' => 'applepay,googlepay']);
-		var_dump($all);
+		//var_dump($all);
 		foreach( $all as $method ) {
 
 			$texts = self::mollie_method($method->id);
