@@ -9,7 +9,6 @@ use \Contexis\Events\EventPost;
  * The single event might be part of a set of recurring events, but if loaded by specific event id then any operations and saves are 
  * specifically done on this event. However, if you edit the recurring group, any changes made to single events are overwritten.
  *
- * @property string $language           Language of the event, shorthand for event_language
  * @property string $translation        Whether or not a event is a translation (i.e. it was translated from an original event), shorthand for event_translation
  * @property int $parent                Event ID of parent event, shorthand for event_parent
  * @property int $id                    The Event ID, case sensitive, shorthand for event_id
@@ -94,6 +93,8 @@ class EM_Event extends \EM_Object{
 	var $event_rsvp_start;
 	var $event_rsvp_end;
 
+	
+
 	var $event_rsvp_donation;
 
 	var $event_rsvp_spaces;
@@ -112,7 +113,6 @@ class EM_Event extends \EM_Object{
 	var $event_status;
 	var $blog_id = 0;
 	var $group_id;
-	var $event_language;
 	var $event_translation = 0;
 	/**
 	 * Populated with the non-hidden event post custom fields (i.e. not starting with _) 
@@ -162,7 +162,6 @@ class EM_Event extends \EM_Object{
 		'event_private' => array( 'name'=>'status', 'type'=>'%d', 'null'=>true ),
 		'blog_id' => array( 'name'=>'blog_id', 'type'=>'%d', 'null'=>true ),
 		'group_id' => array( 'name'=>'group_id', 'type'=>'%d', 'null'=>true ),
-		'event_language' => array( 'type'=>'%s', 'null'=>true ),
 		'event_translation' => array( 'type'=>'%d'),
 		'recurrence' => array( 'name'=>'recurrence', 'type'=>'%d', 'null'=>false ), //is this a recurring event template
 		'recurrence_interval' => array( 'name'=>'interval', 'type'=>'%d', 'null'=>true ), //every x day(s)/week(s)/month(s)
@@ -177,7 +176,6 @@ class EM_Event extends \EM_Object{
 	
 	/*
 	protected $shortnames = array(
-		'language' => 'event_language',
 		'translation' => 'event_translation',
 		'parent' => 'event_parent',
 		'id' => 'event_id',
@@ -195,7 +193,7 @@ class EM_Event extends \EM_Object{
 	 */
 	var $rsvp_end;
 
-	var $rspv_start = null;
+	var $rsvp_start = null;
 	
 	/**
 	 * @var EM_Location
@@ -867,7 +865,8 @@ class EM_Event extends \EM_Object{
 	 * Will automatically detect whether it's a new or existing event. 
 	 * @return boolean
 	 */
-	function save(){
+	function save()
+	{
 		global $blog_id, $EM_SAVING_EVENT;
 		$EM_SAVING_EVENT = true; //this flag prevents our dashboard save_post hooks from going further
 		if( !$this->can_manage('edit_events', 'edit_others_events') && empty($this->event_id) ){
@@ -1088,8 +1087,8 @@ class EM_Event extends \EM_Object{
 		$EM_Event->get_bookings()->get_tickets()->event_id = null;
 		//if bookings reset ticket ids and duplicate tickets
 		foreach($EM_Event->get_bookings()->get_tickets()->tickets as $ticket){
-			$ticket->ticket_id = null;
-			$ticket->event_id = null;
+			$ticket->ticket_id = 0;
+			$ticket->event_id = 0;
 		}
 		do_action('em_event_duplicate_pre', $EM_Event, $this);
 		$EM_Event->duplicated = true;
@@ -1300,19 +1299,15 @@ class EM_Event extends \EM_Object{
 		return $this->rsvp_end;
 	}
 
-	public function rsvp_start( $utc_timezone = false ) {
-		if(!empty($this->rsvp_start) ) return $this->rsvp_start;
-		
+	public function rsvp_start( $utc_timezone = false ) : DateTime
+	{ 		
 		if( empty($this->event_rsvp_start ) ){ 
-			//no date defined means event start date/time is used
-			$this->event_rsvp_start = $this->start()->copy();
-			return $this->rsvp_start;
+			$this->event_rsvp_start = new DateTime($this->post_date);	
+			return $this->event_rsvp_start;
 		}
 		
-		try {
+		if(gettype($this->event_rsvp_start) == 'string'){
 			$this->event_rsvp_start = new DateTime($this->event_rsvp_start);
-		} catch (Exception $e) {
-			$this->event_rsvp_start = $this->start()->copy();
 		}
 
 		return $this->event_rsvp_start;
@@ -1416,44 +1411,52 @@ class EM_Event extends \EM_Object{
 	public function has_location(){
 		return !empty($this->location_id);
 	}
-	
 
-
-
-	public function can_book(){
-
+	public function can_book() : bool
+	{
 		if(!$this->event_rsvp) {
-			echo __("Booking for this event is disabled", "events");
 			return false;
 		}
 		if( $this->get_spaces() <= 0 ) {
-			echo __("No spaces left for this event", "events");
 			return false;
 		}
 		if( !$this->booking_has_started()) {
-			echo __("Booking has not started yet", "events");
 			return false;
 		}
 		if( $this->booking_has_ended()) {
-			echo __("Booking has ended", "events");
 			return false;
 		}
 		if( $this->get_bookings()->get_available_spaces() == 0 ) return false;
 		
-		
 		return apply_filters('em_event_can_book', true, $this);
+	}
+
+	public function no_booking_reason() : string
+	{
+		if(!$this->event_rsvp) {
+			return __("Booking for this event is disabled", "events");
+		}
+		if( $this->get_spaces() <= 0 ) {
+			return __("No spaces left for this event", "events");
+		}
+		if( !$this->booking_has_started()) {
+			return __("Booking has not started yet", "events");
+		}
+		if( $this->booking_has_ended()) {
+			return __("Booking has ended", "events");
+		}
+		if( $this->get_bookings()->get_available_spaces() == 0 ) return __("No spaces left for this event", "events");
+		return "";
 	}
 	
 	function booking_has_started(){
 		$now = new DateTime();
-		if( $this->rspv_start == 0 ) return true;
 		$start = $this->rsvp_start();
 		return $start->getTimestamp() < $now->getTimestamp();
 	}
 
 	function booking_has_ended(){
 		$now = new DateTime();
-		if( $this->rspv_end == 0 ) return false;
 		$end = $this->rsvp_end();
 		return $end->getTimestamp() < $now->getTimestamp();
 	}
@@ -1653,7 +1656,6 @@ class EM_Event extends \EM_Object{
 	 	
 		preg_match_all('/\{([a-zA-Z0-9_\-,]+)\}(.+?)\{\/\1\}/s', $event_string, $conditionals);
 		if( count($conditionals[0]) > 0 ){
-			//Check if the language we want exists, if not we take the first language there
 			foreach($conditionals[1] as $key => $condition){
 
 				$show_condition = match($condition) {
@@ -2637,9 +2639,8 @@ class EM_Event extends \EM_Object{
 	}	
 	
 
-	function to_array( $db = false ){
+	function to_array( bool $db = false ) : array {
 		$event_array = parent::to_array($db);
-		//we reset start/end datetimes here, based on the EM_DateTime objects if they are valid
 		$event_array['event_start'] = $this->start()->valid ? $this->start(true)->format('Y-m-d H:i:s') : null;
 		$event_array['event_end'] = $this->end()->valid ? $this->end(true)->format('Y-m-d H:i:s') : null;
 		return apply_filters('em_event_to_array', $event_array, $this);
@@ -2650,59 +2651,19 @@ class EM_Event extends \EM_Object{
 		return apply_filters('em_event_can_manage', parent::can_manage($owner_capability, $admin_capability, $user_to_check), $this, $owner_capability, $admin_capability, $user_to_check);
 	}
 }
-/*
-function em_ascii_encode($e){
-	$output = '';
-    for ($i = 0; $i < strlen($e); $i++) { $output .= '&#'.ord($e[$i]).';'; }
-    return $output;
-}
-*/
+
 //TODO placeholder targets filtering could be streamlined better
 /**
  * This is a temporary filter function which mimicks the old filters in the old 2.x placeholders function
  * @param string $result
  * @param EM_Event $event
  * @param string $placeholder
- * @param string $target
+ *
+ *  @param string $target
  * @return mixed
  */
 /*
-function em_event_output_placeholder($result,$event,$placeholder,$target='html'){
-	if( $target == 'raw' ) return $result;
-	if( in_array($placeholder, array("#_EXCERPT",'#_EVENTEXCERPT','#_EVENTEXCERPTCUT', "#_LOCATIONEXCERPT")) && $target == 'html' ){
-		$result = apply_filters('dbem_notes_excerpt', $result);
-	}elseif( $placeholder == '#_CONTACTEMAIL' && $target == 'html' ){
-		$result = em_ascii_encode($event->get_contact()->user_email);
-	}elseif( in_array($placeholder, array('#_EVENTNOTES','#_NOTES','#_DESCRIPTION','#_LOCATIONNOTES','#_CATEGORYNOTES','#_CATEGORYDESCRIPTION')) ){
-		if($target == 'rss'){
-			$result = apply_filters('dbem_notes_rss', $result);
-			$result = apply_filters('the_content_rss', $result);
-		}elseif($target == 'map'){
-			$result = apply_filters('dbem_notes_map', $result);
-		}elseif($target == 'ical'){
-			$result = apply_filters('dbem_notes_ical', $result);
-		}elseif ($target == "email"){    
-			$result = apply_filters('dbem_notes_email', $result); 
-	  	}else{ //html
-			$result = apply_filters('dbem_notes', $result);
-		}
-	}elseif( in_array($placeholder, array("#_NAME",'#_LOCATION','#_TOWN','#_ADDRESS','#_LOCATIONNAME',"#_EVENTNAME","#_LOCATIONNAME",'#_CATEGORY')) ){
-		if ($target == "rss"){
-			$result = apply_filters('dbem_general_rss', $result);
-	  	}elseif ($target == "ical"){    
-			$result = apply_filters('dbem_general_ical', $result); 
-	  	}elseif ($target == "email"){    
-			$result = apply_filters('dbem_general_email', $result); 
-	  	}else{ //html
-			$result = apply_filters('dbem_general', $result); 
-	  	}				
-	}
-	return $result;
-}
 
-add_filter('em_category_output_placeholder','em_event_output_placeholder',1,4);
-add_filter('em_event_output_placeholder','em_event_output_placeholder',1,4);
-add_filter('em_location_output_placeholder','em_event_output_placeholder',1,4);
 */
 // FILTERS
 // filters for general events field (corresponding to those of  "the _title")
