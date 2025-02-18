@@ -22,7 +22,7 @@ class EM_Person extends WP_User {
 			$this->data = new stdClass();
 			$this->ID = 0;
 			$this->display_name = 'Anonymous User';
-			$this->user_email = $_REQUEST['user_email'] ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
+			$this->user_email = array_key_exists('user_email', $_REQUEST) ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
 		}
 		if($username){
 			parent::__construct($person_id, $username);
@@ -30,7 +30,7 @@ class EM_Person extends WP_User {
 			$this->data = new stdClass();
 			$this->ID = 0;
 			$this->display_name = 'Anonymous User';
-			$this->user_email = $_REQUEST['user_email'] ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
+			$this->user_email = array_key_exists('user_email', $_REQUEST) ? $_REQUEST['user_email'] : 'anonymous@'.preg_replace('/https?:\/\//', '', get_site_url());
 		}else{
 			parent::__construct($person_id);
 		}
