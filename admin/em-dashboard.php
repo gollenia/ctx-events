@@ -23,11 +23,11 @@ class Dashboard {
 		<table style="width:100%">
 			<?php foreach($bookings as $booking) : ?>
 				<?php 
-					$status = array_search($EM_Booking->booking_status, array_column($booking->get_states(), 'search'));
+					$status = array_search($booking->booking_status, array_column($booking->get_available_states(), 'search'));
 				?>
 				<tr>
 					<td><span class="em-label em-label-<?php echo $status ?>"><i class="material-symbols-outlined"><?php echo $booking->get_status_icon() ?></i></span></td>
-					<td><a href="#"> <?php echo $booking->get_person()->get_name(); ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
+					<td><a href="#"> <?php echo $booking->full_name; ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
 					<td><span class="em-date"><?php echo date('d.m.Y', strtotime($booking->booking_date)); ?></span></td>
 			</tr>
 			<?php endforeach; ?>

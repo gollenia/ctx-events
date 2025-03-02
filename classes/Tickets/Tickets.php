@@ -8,83 +8,97 @@ namespace Contexis\Events\Tickets;
  */
 class Tickets extends \EM_Object implements \Iterator, \Countable {
 	
-	/**
-	 * Array of Ticket objects for a specific event
-	 * @var array
-	 */
-	var $tickets = array();
 
-	var $index = 0;
-	/**
-	 * @var int
-	 */
-	var $event_id;
-	/**
-	 * @var EM_Booking
-	 */
-	var $booking;
-	var $spaces;
+	public array $tickets = [];
+	public int $index = 0;
+	public int $event_id = 0;
+	public \EM_Booking $booking;
+	private int $spaces = 0;
 	
-	
-	/**
-	 * Creates an Tickets instance
-	 * @param mixed $event
-	 */
-	function __construct( $object = false ){
-		global $wpdb;
-		if( is_numeric($object) || (is_object($object) && in_array(get_class($object), array("EM_Event","EM_Booking"))) ){
-			$this->event_id = (is_object($object)) ? $object->event_id:$object;
-			$orderby_option = get_option('dbem_bookings_tickets_orderby');
-			$order_by = get_option('dbem_bookings_tickets_ordering') ? array('ticket_order ASC') : array();
-			$ticket_orderby_options = apply_filters('em_tickets_orderby_options', array(
-				'ticket_price DESC, ticket_name ASC'=>__('Ticket Price (Descending)','events'),
-				'ticket_price ASC, ticket_name ASC'=>__('Ticket Price (Ascending)','events'),
-				'ticket_name ASC, ticket_price DESC'=>__('Ticket Name (Ascending)','events'),
-				'ticket_name DESC, ticket_price DESC'=>__('Ticket Name (Descending)','events')
-			));
-			if( array_key_exists($orderby_option, $ticket_orderby_options) ){
-				$order_by[] = $orderby_option;
-			}else{
-				$order_by[] = 'ticket_price DESC, ticket_name ASC';
-			}
-		    if( is_object($object) && get_class($object) == 'EM_Booking' ){
-				$sql = "SELECT * FROM ". EM_TICKETS_TABLE ." WHERE ticket_id IN (SELECT ticket_id FROM ".EM_TICKETS_BOOKINGS_TABLE." WHERE booking_id='{$object->booking_id}') ORDER BY ".implode(',', $order_by);
-		    }else{
-		        $sql = "SELECT * FROM ". EM_TICKETS_TABLE ." WHERE event_id ='{$this->event_id}' ORDER BY ".implode(',', $order_by);
-		    }
-			$tickets = $wpdb->get_results($sql, ARRAY_A);
-			foreach ($tickets as $ticket){
-				$ticket = new Ticket($ticket);
-				$ticket->event_id = $this->event_id;
-				$this->tickets[$ticket->ticket_id] = $ticket;
-                
-			}
-		}elseif( is_array($object) ){ //expecting an array of Ticket objects or ticket db array
-			if( is_object(current($object)) && get_class(current($object)) == 'Ticket' ){
-			    foreach($object as $ticket){
-					$this->tickets[$ticket->ticket_id] = $ticket;
-			    }
-			}else{
-				foreach($object as $ticket){
-					$ticket = new Ticket($ticket);
-					$ticket->event_id = $this->event_id;
-					$this->tickets[$ticket->ticket_id] = $ticket;				
-				}
-			}
+
+	private function get_ticket_sorting() {
+		$orderby_option = get_option('dbem_bookings_tickets_orderby');
+		$order_by = get_option('dbem_bookings_tickets_ordering') ? array('ticket_order ASC') : array();
+		$ticket_orderby_options = apply_filters('em_tickets_orderby_options', array(
+			'ticket_price DESC, ticket_name ASC'=>__('Ticket Price (Descending)','events'),
+			'ticket_price ASC, ticket_name ASC'=>__('Ticket Price (Ascending)','events'),
+			'ticket_name ASC, ticket_price DESC'=>__('Ticket Name (Ascending)','events'),
+			'ticket_name DESC, ticket_price DESC'=>__('Ticket Name (Descending)','events')
+		));
+
+		if( array_key_exists($orderby_option, $ticket_orderby_options) ) {
+			$order_by[] = $orderby_option;
+			return $order_by;
 		}
-		do_action('em_tickets', $this, $object);
+		
+		$order_by[] = 'ticket_price DESC, ticket_name ASC';
+		return $order_by;
+	}
+
+	public static function find_by_event_id($event_id) {
+		global $wpdb;
+		$instance = new self();
+		$instance->event_id = $event_id;
+		$order_by = $instance->get_ticket_sorting();
+		$sql = "SELECT * FROM ". EM_TICKETS_TABLE ." WHERE event_id ='{$instance->event_id}' ORDER BY ".implode(',', $order_by);
+		$tickets = $wpdb->get_results($sql, ARRAY_A);
+		$instance->tickets = $instance->prepare_tickets($tickets);
+		return $instance;
+	}
+
+	public static function find_by_booking(\EM_Booking $booking) {
+		global $wpdb;
+		$instance = new self();
+		$instance->booking = $booking->booking;
+		$instance->event_id = $booking->event_id;
+		$order_by = $instance->get_ticket_sorting();
+		$sql = "SELECT * FROM ". EM_TICKETS_TABLE ." WHERE ticket_id IN (SELECT ticket_id FROM ".EM_TICKETS_BOOKINGS_TABLE." WHERE booking_id='{$instance->booking->booking_id}') ORDER BY ".implode(',', $order_by);
+		$tickets = $wpdb->get_results($sql, ARRAY_A);
+		$instance->tickets = $instance->prepare_tickets($tickets);
+		return $instance;
+	}
+
+	public static function find_by_booking_id(int $booking_id) {
+		$booking = new \EM_Booking($booking_id);
+		return self::find_by_booking($booking);
+	}
+
+	public static function find_by_ids(array $ticket_ids = []) {
+		$instance = new self();
+		if (empty($ticket_ids)) return $instance; 
+		if( is_object(current($ticket_ids)) && get_class(current($ticket_ids)) == 'Ticket' ){
+			foreach($ticket_ids as $ticket){
+				$instance->tickets[$ticket->ticket_id] = $ticket;
+			}
+
+			return $instance;
+		}
+		
+		foreach($ticket_ids as $ticket){
+			$ticket = new Ticket($ticket);
+			$ticket->event_id = $instance->event_id;
+			$instance->tickets[$ticket->ticket_id] = $ticket;				
+		}
+
+		return $instance;
+		
+	}
+
+	private function prepare_tickets(array $tickets_array) {
+		$tickets = [];
+		foreach ($tickets_array as $ticket){
+			$ticket = new Ticket($ticket);
+			$ticket->event_id = $this->event_id;
+			$tickets[$ticket->ticket_id] = $ticket;
+		}
+		return $tickets;
 	}
 	
 	/**
 	 * @return EM_Event
 	 */
-	function get_event(){
-		global $EM_Event;
-		if( is_object($EM_Event) && $EM_Event->event_id == $this->event_id ){
-			return $EM_Event;
-		}else{
-			return new \EM_Event($this->event_id);
-		}
+	function get_event() : \EM_Event {
+		return \EM_Event::find_by_event_id($this->event_id);
 	}
 
 	/**
@@ -156,7 +170,9 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 	/**
 	 * Retrieve multiple ticket info via POST
 	 * @return boolean
+	 * @todo This function is not used anywhere in the plugin. It should be removed.
 	 */
+	/*
 	function get_post(){
 		//Build Event Array
 		do_action('em_tickets_get_post_pre', $this);
@@ -195,7 +211,8 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 		}
 		return apply_filters('em_tickets_get_post', count($this->errors) == 0, $this);
 	}
-	
+	*/
+
 	/**
 	 * Go through the tickets in this object and validate them 
 	 */

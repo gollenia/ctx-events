@@ -1,6 +1,6 @@
 <?php
 $id = get_the_ID();
-$event = EM_Event::find($id, 'post_id');
+$event = EM_Event::find_by_post(get_post());
 $location = $event->get_location();
 if(empty($location->location_id)) return;
 $block_attributes = get_block_wrapper_attributes();

@@ -63,6 +63,6 @@ class EM_Categories extends EM_Taxonomy_Terms {
 	
 	public static function get_default_search( $array_or_defaults = array(), $array = array() ){
 		self::$instance = new EM_Categories();
-		return parent::get_default_search($defaults,$array);
+		return parent::get_default_search($array_or_defaults,$array);
 	}
 }

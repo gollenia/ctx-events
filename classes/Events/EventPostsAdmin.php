@@ -63,7 +63,7 @@ class EM_Event_Posts_Admin{
 	
     public static function admin_notices(){
         if( !empty($_REQUEST['recurrence_id']) && is_numeric($_REQUEST['recurrence_id']) ){
-            $EM_Event = EM_Event::find( absint($_REQUEST['recurrence_id']) );
+            $EM_Event = EM_Event::find_by_event_id( absint($_REQUEST['recurrence_id']) );
             ?>
             <div class="notice notice-info">
                 <p><?php echo sprintf(esc_html__('You are viewing individual recurrences of recurring event %s.', 'events'), '<a href="'.$EM_Event->get_edit_url().'">'.$EM_Event->event_name.'</a>'); ?></p>
@@ -200,8 +200,7 @@ class EM_Event_Posts_Admin{
 	}
 	
 	public static function columns_output( $column ) {
-		global $post, $EM_Event;
-		$EM_Event = EM_Event::find($post, 'post_id');
+		$EM_Event = EM_Event::find_by_post_id(get_the_ID());
 		
 		/* @var $post EM_Event */
 		switch ( $column ) {
@@ -285,7 +284,7 @@ class EM_Event_Posts_Admin{
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($EM_Event->event_rsvp) && $EM_Event->can_manage('manage_bookings','manage_others_bookings')){
 					?>
 					
-					<b><?php echo $EM_Event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $EM_Event->get_spaces(); ?>
+					<b><?php echo $EM_Event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $EM_Event->get_bookings()->get_spaces(); ?>
 					
 				
 					<?php
@@ -293,9 +292,9 @@ class EM_Event_Posts_Admin{
 				}
 				break;
 			case 'booked':
-				if( get_option('dbem_rsvp_enabled') == 1 && !empty($EM_Event->event_rsvp) && $EM_Event->get_spaces()){
-					$booked_percent = $EM_Event->get_bookings()->get_booked_spaces() / ($EM_Event->get_spaces() / 100);
-					$pending_percent = $EM_Event->get_bookings()->get_pending_spaces() / ($EM_Event->get_spaces() / 100);
+				if( get_option('dbem_rsvp_enabled') == 1 && !empty($EM_Event->event_rsvp) && $EM_Event->get_bookings()->get_spaces()){
+					$booked_percent = $EM_Event->get_bookings()->get_booked_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
+					$pending_percent = $EM_Event->get_bookings()->get_pending_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
 					?>
 					
 					<b style="white-space: nowrap;"><?php echo $EM_Event->get_bookings()->get_booked_spaces(); echo " ";  ?> /
@@ -320,8 +319,7 @@ class EM_Event_Posts_Admin{
 	
 	public static function row_actions($actions, $post){
 		if($post->post_type == EM_POST_TYPE_EVENT){
-			global $post, $EM_Event;
-			$EM_Event = EM_Event::find($post, 'post_id');
+			$EM_Event = EM_Event::find_by_post($post);
 			unset($actions['inline hide-if-no-js']);
 			unset($actions['edit']);
 			$actions['duplicate'] = '<a href="'.$EM_Event->duplicate_url().'" title="'.sprintf(__('Duplicate %s','events'), __('Event','events')).'">'.__('Duplicate','events').'</a>';
@@ -422,9 +420,9 @@ class EM_Event_Recurring_Posts_Admin{
 
 	
 	public static function columns_output( $column ) {
-		global $post, $EM_Event;
+		global $post;
 		if( $post->post_type == 'event-recurring' ){
-			$post = $EM_Event = EM_Event::find($post);
+			$EM_Event = EM_Event::find_by_post($post);
 			/* @var $post EM_Event */
 			switch ( $column ) {
 				case 'event-id':
@@ -434,9 +432,7 @@ class EM_Event_Recurring_Posts_Admin{
 					//get meta value to see if post has location, otherwise
 					$EM_Location = $EM_Event->get_location();
 					if( !empty($EM_Location->location_id) ){
-						
 						echo "<strong><a href='". esc_url($EM_Location->get_edit_url())."'>" . $EM_Location->location_name . "</a></strong>";
-						
 						echo "<br/>" . $EM_Location->location_address . " - " . $EM_Location->location_town;
 					}else{
 						echo __('None','events');
@@ -456,8 +452,7 @@ class EM_Event_Recurring_Posts_Admin{
 	
 	public static function row_actions($actions, $post){
 		if($post->post_type == 'event-recurring'){
-			global $post, $EM_Event;
-			$EM_Event = EM_Event::find($post, 'post_id');
+			$EM_Event = EM_Event::find_by_post($post);
 			unset($actions['inline hide-if-no-js']);
 			$actions['duplicate'] = '<a href="'.$EM_Event->duplicate_url().'" title="'.sprintf(__('Duplicate %s','events'), __('Event','events')).'">'.__('Duplicate','events').'</a>';
 		}

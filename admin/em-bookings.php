@@ -1,20 +1,4 @@
 <?php 
-/**
- * Deprecated - see em-actions.php - this will be removed at some point in 6.0
- * Check if there's any admin-related actions to take for bookings. All actions are caught here.
- * @return null
- * @todo remove in 6.0
- */
-function em_admin_actions_bookings() {
-	global $EM_Event;	
-	if( is_object($EM_Event) && !empty($_REQUEST['action']) ){
-		if( $_REQUEST['action'] == 'bookings_export_csv' && wp_verify_nonce($_REQUEST['_wpnonce'],'bookings_export_csv') ){
-			$EM_Event->get_bookings()->export_csv();
-			exit();
-		}
-	}
-}
-add_action('admin_init','em_admin_actions_bookings',100);
 
 /**
  * Decide what content to show in the bookings section. 
@@ -70,7 +54,9 @@ function em_bookings_dashboard(){
  * Shows all booking data for a single event 
  */
 function em_bookings_event(){
-	global $EM_Event,$EM_Person,$EM_Notices;
+	global $EM_Notices;
+	$EM_Event = EM_Event::find_by_event_id($_REQUEST['event_id']);
+	
 	//check that user can access this page
 	if( is_object($EM_Event) && !$EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
 		?>
@@ -96,9 +82,9 @@ function em_bookings_event(){
 			<p><strong><?php esc_html_e('Event Name','events'); ?></strong> : <?php echo esc_html($EM_Event->event_name); ?></p>
 			<p>
 				<strong><?php esc_html_e('Availability','events'); ?></strong> : 
-				<?php echo $EM_Event->get_bookings()->get_booked_spaces() . '/'. $EM_Event->get_spaces() ." ". __('Spaces confirmed','events'); ?>
+				<?php echo $EM_Event->get_bookings()->get_booked_spaces() . '/'. $EM_Event->get_bookings()->get_spaces() ." ". __('Spaces confirmed','events'); ?>
 				<?php if( get_option('dbem_bookings_approval_reserved') ): ?>
-				, <?php echo $EM_Event->get_bookings()->get_available_spaces() . '/'. $EM_Event->get_spaces() ." ". __('Available spaces','events'); ?>
+				, <?php echo $EM_Event->get_bookings()->get_available_spaces() . '/'. $EM_Event->get_bookings()->get_spaces() ." ". __('Available spaces','events'); ?>
 				<?php endif; ?>
 			</p>
 			<p>
@@ -117,7 +103,7 @@ function em_bookings_event(){
 		<h2><?php esc_html_e('Bookings','events'); ?></h2>
 		<?php
 		$EM_Bookings_Table = new EM_Bookings_Table();
-		//$EM_Bookings_Table->status = 'all';
+		$EM_Bookings_Table->status = 'all';
 		$EM_Bookings_Table->output();
   		?>
 		<?php do_action('em_bookings_event_footer', $EM_Event); ?>
@@ -185,10 +171,10 @@ function em_bookings_ticket(){
  * Shows all bookings made by one person.
  */
 function em_bookings_person(){	
-	global $EM_Person, $EM_Notices;
-	$EM_Person->get_bookings();
+	global $EM_Notices;
+	
 	$has_booking = false;
-	foreach($EM_Person->get_bookings() as $EM_Booking){
+	foreach(EM_Bookings->find(array('booking_mail' => $_REQUEST['booking_mail'])) as $EM_Booking){
 		if($EM_Booking->can_manage('manage_bookings','manage_others_bookings')){
 			$has_booking = true;
 		}
@@ -205,12 +191,8 @@ function em_bookings_person(){
 		<?php if( is_admin() ): ?><h1 class="wp-heading-inline"><?php else: ?><h2><?php endif; ?>
   			<?php esc_html_e('Manage Person\'s Booking', 'events'); ?>
   		<?php if( is_admin() ): ?></h1><?php endif; ?>
-  			<?php if( current_user_can('edit_users') ) : ?>
-  			<a href="<?php echo admin_url('user-edit.php?user_id='.$EM_Person->ID); ?>" class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Edit User','events') ?></a>
-  			<?php endif; ?>
-  			<?php if( current_user_can('delete_users') ) : ?>
-  			<a href="<?php echo wp_nonce_url( admin_url("users.php?action=delete&amp;user=$EM_Person->ID"), 'bulk-users' ); ?>" class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Delete User','events') ?></a>
-  			<?php endif; ?>
+  			
+  			
 		<?php if( !is_admin() ): ?></h2><?php else: ?><hr class="wp-header-end" /><?php endif; ?>
   		<?php if( !is_admin() ) echo $EM_Notices; ?>
 		<?php do_action('em_bookings_person_header'); ?>
@@ -222,7 +204,7 @@ function em_bookings_person(){
 							<?php esc_html_e( 'Personal Details', 'events'); ?>
 						</h3>
 						<div class="">
-							<?php echo $EM_Person->display_summary(); ?>
+							<h1><?php echo $EM_Booking->full_name; ?></h1>
 						</div>
 					</div> 
 				</div>
@@ -237,7 +219,7 @@ function em_bookings_person(){
 		$EM_Bookings_Table->scope = 'all';
 		$EM_Bookings_Table->output();
   		?>
-		<?php do_action('em_bookings_person_footer', $EM_Person); ?>
+		<?php do_action('em_bookings_person_footer'); ?>
 	</div>
 	<?php
 }
@@ -252,9 +234,6 @@ function em_bookings_single() {
 		</h1>
   		<div class="metabox-holder">
 	  		<div class="postbox-container" style="width:99.5%">
-				
-					
-					
 						<?php
 						
 						$EM_Event = $EM_Booking->get_event();
@@ -272,19 +251,4 @@ function em_bookings_single() {
 	<?php
 }
 
-function em_printable_booking_report() {
-	global $EM_Event;
-	//check that user can access this page
-	if( isset($_GET['page']) && $_GET['page']=='events-bookings' && isset($_GET['action']) && $_GET['action'] == 'bookings_report' && is_object($EM_Event)){
-		if( is_object($EM_Event) && !$EM_Event->can_manage('edit_events','edit_others_events') ){
-			?>
-			<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
-			<?php
-			return false;
-		}
-		em_locate_template('templates/bookings-event-printable.php', true);
-		die();
-	}
-} 
-add_action('admin_init', 'em_printable_booking_report');
 ?>

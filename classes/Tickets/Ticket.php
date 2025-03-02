@@ -457,7 +457,7 @@ class Ticket extends \EM_Object{
 	 * @return EM_Event 
 	 */
 	function get_event(){
-		return \EM_Event::find($this->event_id);
+		return \EM_Event::find_by_event_id($this->event_id);
 	}
 	
 	/**

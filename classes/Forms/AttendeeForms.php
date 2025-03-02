@@ -46,7 +46,7 @@ class EM_Attendees_Form {
 	public static function get_form($EM_Event = false){
 		if( empty(self::$form) || (!empty($EM_Event) && (empty(self::$form->event_id) || $EM_Event->event_id != self::$form->event_id)) ){
 
-			if(is_numeric($EM_Event)){ $EM_Event = EM_Event::find($EM_Event); }
+			if(is_numeric($EM_Event)){ $EM_Event = EM_Event::find_by_event_id($EM_Event); }
 			
 			self::$form_id = get_post_meta($EM_Event->post_id, '_attendee_form', true);
 

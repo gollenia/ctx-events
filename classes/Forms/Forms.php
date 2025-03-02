@@ -17,7 +17,7 @@ class EM_Form extends EM_Object {
 		'user_url' => 'Website',
 	);
 	protected $custom_user_fields = [];
-	public $form_required_error = 'bimmling';
+	public $form_required_error = '';
 	static $validate;
 	/**
 	 * If this form represents user fields, then it's set to true, otherwise set to false
@@ -67,12 +67,7 @@ class EM_Form extends EM_Object {
 	    	if( array_key_exists($field['type'], $this->custom_user_fields) && array_key_exists($field['fieldid'], $custom_user_fields) ){
 	    	    $field = $custom_user_fields[$field['fieldid']];
 	    	}
-			//dates and time are special
 			
-			//check that user fields were indeed submitted for validation by logged in users, or were not editable, in which case we populate form with previously saved data 
-			if( array_key_exists($field['type'], $this->user_fields) && !self::validate_reg_fields($field) ){
-				$this->field_values[$fieldid] = EM_User_Fields::get_user_meta(get_current_user_id(), $field['type']);
-			}
 		}
 		return true;
 	}
@@ -292,7 +287,7 @@ class EM_Form extends EM_Object {
 				
 				default:
 					//Registration and custom fields
-					//$is_manual_booking_new_user = (is_user_logged_in() && !empty($_REQUEST['manual_booking']) && wp_verify_nonce($_REQUEST['manual_booking'], 'em_manual_booking_'.$_REQUEST['event_id']) && $_REQUEST['person_id'] == -1 );
+					
 					if( array_key_exists($field['type'], $this->user_fields) && self::validate_reg_fields($field) ){
 						
 						//add field-specific validation
@@ -492,7 +487,6 @@ class EM_Form extends EM_Object {
 	}
 
 	public static function validate_reg_fields( $field = false ){
-		if( EM_Gateways::is_manual_booking(true) ) return true; //short circuit if we're on a manual booking for a new user
 		if( !empty($field['type']) && $field['type'] == 'user_login' && is_user_logged_in() ) return false;
 		$validate =  true;
 		return $validate && self::show_reg_fields( $field );

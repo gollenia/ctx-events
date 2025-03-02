@@ -60,24 +60,31 @@ class EM_Gateways_Transactions{
 	}
 	
 	function ajax(){
-		if( wp_verify_nonce($_REQUEST['_wpnonce'],'em_transactions_table') ){
-			//Get the context
-			global $EM_Event, $EM_Booking, $EM_Person;
-			$ticket = new \Contexis\Events\Tickets\Ticket();
-			em_load_event();
-			$context = false;
-			if( !empty($_REQUEST['booking_id']) && is_object($EM_Booking) && $EM_Booking->can_manage('manage_bookings','manage_others_bookings') ){
-				$context = $EM_Booking;
-			}elseif( !empty($_REQUEST['event_id']) && is_object($EM_Event) && $EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
-				$context = $EM_Event;
-			}elseif( !empty($_REQUEST['person_id']) && is_object($EM_Person) && current_user_can('manage_bookings') ){
-				$context = $EM_Person;
-			}elseif( !empty($_REQUEST['ticket_id']) && is_object($ticket) && $ticket->can_manage('manage_bookings','manage_others_bookings') ){
-				$context = $ticket;
-			}			
-			echo $this->mytransactions($context);
-			exit;
+		if (!wp_verify_nonce($_REQUEST['_wpnonce'], 'em_transactions_table')) {
+			return;
 		}
+	
+		$context = false;
+	
+		if (!empty($_REQUEST['booking_id'])) {
+			$booking = \EM_Booking::find($_REQUEST['booking_id']);
+			if ($booking && $booking->can_manage('manage_bookings', 'manage_others_bookings')) {
+				$context = $booking;
+			}
+		} elseif (!empty($_REQUEST['event_id'])) {
+			$event = \EM_Event::find_by_event_id($_REQUEST['event_id']);
+			if ($event && $event->can_manage('manage_bookings', 'manage_others_bookings')) {
+				$context = $event;
+			}
+		} elseif (!empty($_REQUEST['ticket_id'])) {
+			$ticket = new \Contexis\Events\Tickets\Ticket($_REQUEST['ticket_id']);
+			if ($ticket->can_manage('manage_bookings', 'manage_others_bookings')) {
+				$context = $ticket;
+			}
+		}
+	
+		echo $this->mytransactions($context);
+		exit;
 	}
 	
 	function output( $context = false ) {
@@ -120,7 +127,6 @@ class EM_Gateways_Transactions{
 	}
 
 	function mytransactions($context=false) {
-		global $EM_Person;
 		$transactions = $this->get_transactions($context);
 		$total = $this->total_transactions;
 
@@ -147,8 +153,6 @@ class EM_Gateways_Transactions{
 		<form id="em-transactions-table-form" class="transactions-filter" action="" method="post">
 			<?php if( is_object($context) && get_class($context)=="EM_Event" ): ?>
 			<input type="hidden" name="event_id" value='<?php echo $context->event_id ?>' />
-			<?php elseif( is_object($context) && get_class($context)=="EM_Person" ): ?>
-			<input type="hidden" name="person_id" value='<?php echo $context->ID ?>' />
 			<?php elseif( is_object($context) && (get_class($context)=="EM_Booking" || get_class($context)=="EM_Multiple_Booking") ): ?>
 			<input type="hidden" name="booking_id" value='<?php echo $context->booking_id ?>' />
 			<?php elseif( is_object($context) && get_class($context)=="Ticket" ): ?>
@@ -182,8 +186,6 @@ class EM_Gateways_Transactions{
 					<button id="post-query-submit" class="button-secondary" type="" value="" ><?php esc_attr_e( 'Filter' )?>
 					<?php if( is_object($context) && get_class($context)=="EM_Event" ): ?>
 					<?php esc_html_e('Displaying Event','events'); ?> : <?php echo $context->event_name; ?>
-					<?php elseif( is_object($context) && get_class($context)=="EM_Person" ): ?>
-					<?php esc_html_e('Displaying User','events'); echo ' : '.$context->get_name(); ?>
 					<?php endif; ?>
 				</div>
 				<?php 
@@ -237,22 +239,19 @@ class EM_Gateways_Transactions{
 		ob_start();
 		if($transactions) {
 			foreach($transactions as $key => $transaction) {
+				$EM_Booking = EM_Booking::find($transaction->booking_id);
 				?>
 				<tr valign="middle" class="alternate">
 					<td>
 						<?php
-							$EM_Booking = EM_Booking::find($transaction->booking_id);
-							if( get_class($EM_Booking) == 'EM_Multiple_Booking' ){
-								$link = add_query_arg(['booking_id'=>$EM_Booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null], $EM_Booking->get_admin_url());
-								echo '<a href="'.$link.'">'.$EM_Booking->get_event()->event_name.'</a>';
-							}else{
-								echo '<a href="'.$EM_Booking->get_event()->get_bookings_url().'">'.$EM_Booking->get_event()->event_name.'</a>';
-							}
+							
+							echo '<a href="'.$EM_Booking->get_booking_url().'">'.$EM_Booking->full_name.'</a>';
+							
 						?>
 					</td>
 					<td>
 						<?php
-							echo '<a href="'.$EM_Booking->get_person()->get_bookings_url().'">'. $EM_Booking->person->get_name() .'</a>';
+							echo '<a href="'.$EM_Booking->get_event()->get_bookings_url().'">'. $EM_Booking->get_event()->event_name .'</a>';
 						?>
 					</td>
 					<td class="column-date">
@@ -344,10 +343,8 @@ class EM_Gateways_Transactions{
 			$booking_condition = "event_id = ".$context->event_id;
 			
 			$conditions[] = $booking_condition;		
-		}elseif( is_object($context) && get_class($context)=="EM_Person" ){
-			$join = " JOIN $table ON $table.booking_id=tx.booking_id";
-			$conditions[] = "person_id = ".$context->ID;			
-		}elseif( is_object($context) && get_class($context)=="EM_Ticket" && $context->can_manage('manage_bookings','manage_others_bookings') ){
+		}
+		elseif( is_object($context) && get_class($context)=="EM_Ticket" && $context->can_manage('manage_bookings','manage_others_bookings') ){
 			$booking_ids = array();
 			$ticket = $context;
 			foreach( EM_Bookings::get( array('ticket_id' => $ticket->ticket_id, 'array' => 'booking_id') ) as $booking ){
@@ -380,28 +377,28 @@ class EM_Gateways_Transactions{
 	 * ----------------------------------------------------------
 	 */
 	
-	function em_bookings_table_rows_col($value, $col, $EM_Booking, $EM_Bookings_Table, $format){
-		global $EM_Event;
-		if( $col == 'gateway_txn_id' ){
-			//check if this isn't a multiple booking, otherwise look for info from main booking
-			
-			//get latest transaction with an ID
-			$old_limit = $this->limit;
-			$old_orderby = $this->orderby;
-			$old_page = $this->page;
-			$this->limit = $this->page = 1;
-			$this->orderby = 'booking_date';
-			$transactions = $this->get_transactions($EM_Booking);
-			if(count($transactions) > 0){
-				$value = $transactions[0]->transaction_gateway_id;
-			}
-			$this->limit = $old_limit;
-			$this->orderby = $old_orderby;
-			$this->page = $old_page;
-		}elseif( $col == 'payment_total' ){
-			$value = $EM_Booking->get_total_paid(true);
-		}
-		return $value;
+	function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	{
+		return match ($column) {
+			'gateway_txn_id' => $this->get_latest_transaction_id($EM_Booking),
+			'payment_total' => $EM_Booking->get_total_paid(true),
+			default => '',
+		};
+	}
+
+	private function get_latest_transaction_id($EM_Booking): string
+	{
+		$old_limit = $this->limit;
+		$old_orderby = $this->orderby;
+		$old_page = $this->page;
+
+		$this->limit = $this->page = 1;
+		$this->orderby = 'booking_date';
+		$transactions = $this->get_transactions($EM_Booking);
+
+		[$this->limit, $this->orderby, $this->page] = [$old_limit, $old_orderby, $old_page];
+
+		return !empty($transactions) ? $transactions[0]->transaction_gateway_id : '';
 	}
 	
 	function em_bookings_table_cols_template($template, $EM_Bookings_Table){

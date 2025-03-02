@@ -8,7 +8,6 @@ use Contexis\Events\Tickets\TicketsBookings;
  * Contains all information and relevant functions surrounding a single booking made with Events Manager
  * @property int|false $booking_status
  * @property string $language
- * @property EM_Person $person
  */
 class EM_Booking extends EM_Object{
 
@@ -21,18 +20,18 @@ class EM_Booking extends EM_Object{
 	
 	public $booking_id;
 	public $event_id = 0;
-	public $person_id;
 	public ?float $booking_price = null;
 	public float $booking_donation = 0;
 	public int $booking_spaces;
 	public string $booking_comment = "";
 	public $booking_status = false;
 	public array $booking_meta = []; 
+	public string $booking_mail;
 
 	public array $fields = array(
 		'booking_id' => array('name'=>'id','type'=>'%d'),
 		'event_id' => array('name'=>'event_id','type'=>'%d'),
-		'person_id' => array('name'=>'person_id','type'=>'%d'),
+		'booking_mail' => array('name'=>'email','type'=>'%s'),
 		'booking_price' => array('name'=>'price','type'=>'%f'),
 		'booking_spaces' => array('name'=>'spaces','type'=>'%d'),
 		'booking_comment' => array('name'=>'comment','type'=>'%s'),
@@ -47,7 +46,7 @@ class EM_Booking extends EM_Object{
 	protected EM_DateTime $date;
 	protected $person;
 
-	public array $required_fields = [ 'booking_id', 'event_id', 'person_id', 'booking_spaces' ];
+	public array $required_fields = [ 'booking_id', 'event_id', 'booking_spaces' ];
 	public string $feedback_message = "";
 	public array $errors = [];
 	
@@ -89,6 +88,7 @@ class EM_Booking extends EM_Object{
 			$this->from_array($booking);
 			$this->previous_status = $this->booking_status;
 			$this->booking_date = !empty($booking['booking_date']) ? $booking['booking_date']:false;
+			$this->booking_mail = $booking['booking_meta']['registration']['user_email'];
 		}
 		do_action('em_booking', $this, $booking_data);
 	}
@@ -105,22 +105,28 @@ class EM_Booking extends EM_Object{
 		);
 	}
 
-	
+	//@TODO: user_mail, booking_mail, email...!?
 	function __get( string $var ) : mixed
 	{
-	    if( $var == 'timestamp' ){
-	    	if( $this->date() === false ) return 0;
-	    	return $this->date()->getTimestampWithOffset();
-	    }elseif( $var == 'language' ){
-	    	if( !empty($this->booking_meta['lang']) ){
-	    		return $this->booking_meta['lang'];
-		    }
-	    }elseif( $var == 'booking_status' ){
-			return ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1:$this->booking_status;
-	    }elseif( $var == 'person' ){
-	    	return $this->get_person();
-	    }
-	    return null;
+		switch ($var) {
+			case 'timestamp':
+				return $this->date() === false ? 0 : $this->date()->getTimestampWithOffset();
+			case 'language':
+				return !empty($this->booking_meta['lang']) ? $this->booking_meta['lang'] : null;
+			case 'booking_status':
+				return ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1 : $this->booking_status;
+			case 'first_name':
+				return $this->booking_meta['registration']['first_name'] ?? "";
+			case 'last_name':
+				return $this->booking_meta['registration']['last_name'] ?? "";
+			case 'email':
+				return $this->booking_meta['registration']['user_email'] ?? "";
+			case 'full_name':
+				return $this->first_name . ' ' . $this->last_name;
+			default:
+				return null;
+		}
+	    
 	}
 	
 	public function __set( string $property, mixed $value ) : void 
@@ -143,7 +149,7 @@ class EM_Booking extends EM_Object{
 	
 	public function __sleep() : array 
 	{
-		$array = array('booking_id','event_id','person_id','booking_price','booking_spaces','booking_comment','booking_status','booking_donation','booking_meta','notes','booking_date','person','feedback_message','errors','mails_sent','custom','previous_status','status_array','manage_override','tickets_bookings');
+		$array = array('booking_id','event_id','booking_mail','booking_price','booking_spaces','booking_comment','booking_status','booking_donation','booking_meta','notes','booking_date','feedback_message','errors','mails_sent','custom','previous_status','status_array','manage_override','tickets_bookings');
 		if( !empty($this->bookings) ) $array[] = 'bookings'; // EM Pro backwards compatibility
 		return apply_filters('em_booking_sleep', $array, $this);
 	}
@@ -207,10 +213,9 @@ class EM_Booking extends EM_Object{
 			return apply_filters('em_booking_save', false, $this, false);
 		}
 
-		// Update prices, spaces, person_id
+		// Update prices, spaces
 		$this->get_spaces(true);
 		$this->booking_price = $this->get_price();
-		$this->person_id = $this->person_id ?: $this->get_person()->ID;
 		
 		// Prepare data for saving
 		$data = $this->to_array();
@@ -293,7 +298,6 @@ class EM_Booking extends EM_Object{
 		$result = $wpdb->get_row($sql, ARRAY_A);
 		if($result){
 			$this->from_array($result);
-			$this->person = new EM_Person($this->person_id);
 			return true;
 		}
 
@@ -313,6 +317,7 @@ class EM_Booking extends EM_Object{
 			unset($registration[$key]);
 		}
 
+		$this->booking_mail = $this->booking_meta['registration']['user_email'];
 		$this->booking_meta['booking'] = $registration;
 		$this->booking_meta['attendees'] = $request['attendees'];
 		$this->booking_meta['gateway'] = $request['gateway'];
@@ -321,7 +326,6 @@ class EM_Booking extends EM_Object{
 		}
 
 		if( isset($request['donation']) && floatval($request['donation'] > 0) ){
-			file_put_contents('/var/www/vhosts/kids-team.internal/log/debug.log', print_r(floatval($request['donation']), TRUE));
 			$this->booking_donation = floatval($request['donation']);
 		}
 		
@@ -344,7 +348,6 @@ class EM_Booking extends EM_Object{
 
 		$this->booking_spaces = count($request['attendees']);
 		$this->retrieve_status($request);
-		$this->get_person();
 		return true;
 	}
 
@@ -390,13 +393,18 @@ class EM_Booking extends EM_Object{
 		];
 		return $icons[$this->booking_status];
 	}
+
+	function get_booking_url() : string 
+	{
+		if( $this->booking_id == 0 ) return $this->get_admin_url();
+		return add_query_arg(['booking_id'=>$this->booking_id, 'em_ajax'=>null, 'em_obj'=>null], $this->get_admin_url());
+	}
 	
 	function validate( bool $override_availability = false ) : bool
 	{
 		//step 1, basic info
 		$basic = ( 
 			(empty($this->event_id) || is_numeric($this->event_id)) && 
-			(empty($this->person_id) || is_numeric($this->person_id)) &&
 			is_numeric($this->booking_spaces) && $this->booking_spaces > 0
 		);
 		//give some errors in step 1
@@ -589,14 +597,9 @@ class EM_Booking extends EM_Object{
 	 * Gets the event this booking belongs to and saves a reference in the event property
 	 * @return EM_Event
 	 */
-	function get_event(){
-		global $EM_Event;
-		if( is_object($this->event) && get_class($this->event)=='EM_Event' && ($this->event->event_id == $this->event_id )) {
-			return $this->event;
-		}elseif( is_object($EM_Event) && $EM_Event->event_id == $this->event_id ){
-			$this->event = $EM_Event;
-		}else{
-			$this->event = EM_Event::find($this->event_id, 'event_id');
+	function get_event() : EM_Event {
+		if (!isset($this->event) || !($this->event instanceof EM_Event) || $this->event->event_id !== $this->event_id) {
+			$this->event = EM_Event::find_by_event_id($this->event_id);
 		}
 		return apply_filters('em_booking_get_event', $this->event, $this);
 	}
@@ -609,7 +612,7 @@ class EM_Booking extends EM_Object{
 		if( is_object($this->tickets) && get_class($this->tickets)=='Tickets' ){
 			return apply_filters('em_booking_get_tickets', $this->tickets, $this);
 		}else{
-			$this->tickets = new \Contexis\Events\Tickets\Tickets($this);
+			$this->tickets = \Contexis\Events\Tickets\Tickets::find_by_booking($this);
 		}
 		return apply_filters('em_booking_get_tickets', $this->tickets, $this);
 	}
@@ -623,70 +626,6 @@ class EM_Booking extends EM_Object{
 			$this->tickets_bookings = new \Contexis\Events\Tickets\TicketsBookings($this);
 		} 
 		return apply_filters('em_booking_get_tickets_bookings', $this->tickets_bookings, $this);
-	}
-	
-	/**
-	 * @return EM_Person
-	 */
-	function get_person()
-	{
-		
-		global $EM_Person;
-		
-		if( is_object($this->person) && get_class($this->person)=='EM_Person' && ($this->person->ID == $this->person_id || empty($this->person_id) ) ) {
-		
-		} elseif( is_object($EM_Person) && ($EM_Person->ID === $this->person_id || $this->booking_id == '') ){
-			$this->person = $EM_Person;
-			$this->person_id = $this->person->ID;
-		} elseif( is_numeric($this->person_id) ){
-			$this->person = new EM_Person($this->person_id);
-		} else{
-			$this->person = new EM_Person(0);
-			$this->person_id = $this->person->ID;
-		}
-
-		//override any registration data into the person objet
-		if( !empty($this->booking_meta['registration']) ){
-			foreach($this->booking_meta['registration'] as $key => $value){
-				$this->person->$key = $value;
-			}
-		}
-		
-		$this->person->user_email = ( !empty($this->booking_meta['registration']['user_email']) ) ? $this->booking_meta['registration']['user_email']:$this->person->user_email;
-		//if a full name is given, overwrite the first/last name values IF they are also not defined
-		if( !empty($this->booking_meta['registration']['user_name']) ){
-			if( !empty($this->booking_meta['registration']['first_name']) ){
-				//first name is defined, so we remove it from full name in case we need the rest for surname
-				$last_name = trim(str_replace($this->booking_meta['registration']['first_name'], '', $this->booking_meta['registration']['user_name']));
-				//if last name isn't defined, provide the rest of the name minus the first name we just removed
-				if( empty($this->booking_meta['registration']['last_name']) ){
-					$this->booking_meta['registration']['last_name'] = $last_name;
-				}
-			}else{
-				//no first name defined, check for last name and act accordingly
-				if( !empty($this->booking_meta['registration']['last_name']) ){
-					//we do opposite of above, remove last name from full name and use the rest as first name
-					$first_name = trim(str_replace($this->booking_meta['registration']['last_name'], '', $this->booking_meta['registration']['user_name']));
-					$this->booking_meta['registration']['first_name'] = $first_name;
-				}else{
-					//no defined first or last name, so we use the name and take first string for first name, second part for surname
-					$name_string = explode(' ',$this->booking_meta['registration']['user_name']);
-					$this->booking_meta['registration']['first_name'] = array_shift($name_string);
-					$this->booking_meta['registration']['last_name'] = implode(' ', $name_string);
-				}
-			}
-		}
-		$this->person->user_firstname = ( !empty($this->booking_meta['registration']['first_name']) ) ? $this->booking_meta['registration']['first_name']:__('Guest User','events');
-		$this->person->first_name = $this->person->user_firstname;
-		$this->person->user_lastname = ( !empty($this->booking_meta['registration']['last_name']) ) ? $this->booking_meta['registration']['last_name']:'';
-		$this->person->last_name = $this->person->user_lastname;
-		//build display name
-		$full_name = trim($this->person->user_firstname  . " " . $this->person->user_lastname);
-		
-		$this->person->display_name = ( empty($full_name) ) ? __('Guest User','events') : $full_name;
-		$this->person->loaded_no_user = $this->booking_id;
-		
-		return apply_filters('em_booking_get_person', $this->person, $this);
 	}
 
 	
@@ -800,7 +739,7 @@ class EM_Booking extends EM_Object{
 	 * @return mixed
 	 */
 	function is_no_user(){
-		return apply_filters('em_booking_is_no_user', $this->get_person()->ID === 0, $this);
+		return true;
 	}
 	
 	/**
@@ -853,7 +792,7 @@ class EM_Booking extends EM_Object{
 					$replace = $this->booking_id;
 					break;
 				case '#_BOOKINGNAME':
-					$replace = $this->get_person()->get_name();
+					$replace = $this->full_name;
 					break;
 				case '#_BOOKINGEMAIL':
 					$replace = $this->booking_meta['registration']['user_email'];
@@ -969,7 +908,7 @@ class EM_Booking extends EM_Object{
 					$attachments = $msg['user']['attachments'];
 				}
 				//Send to the person booking
-				if( !$this->email_send( $msg['user']['subject'], $msg['user']['body'], $this->get_person()->user_email, $attachments) ){
+				if( !$this->email_send( $msg['user']['subject'], $msg['user']['body'], $this->booking_mail, $attachments) ){
 					$result = false;
 				}else{
 					$this->mails_sent++;
@@ -1118,25 +1057,5 @@ class EM_Booking extends EM_Object{
 
 		return $enabled;
 	}
-
-	/**
-	 * Returns this object in the form of an array
-	 * @return array
-	 */
-	function to_array($person = false) : array 
-	{
-		$booking = array();
-		//Core Data
-		$booking = parent::to_array();
-		//Person Data
-		if($person && is_object($this->person)){
-			$person = $this->person->to_array();
-			$booking = array_merge($booking, $person);
-		}
-		return $booking;
-	}
-
-	
-
 
 }

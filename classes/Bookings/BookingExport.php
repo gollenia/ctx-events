@@ -15,7 +15,7 @@ class BookingExport
 			wp_die(__('No event ID provided.','events-manager'));
 		}
 
-		$EM_Event = EM_Event::find( absint($_REQUEST['event_id']) );
+		$EM_Event = EM_Event::find_by_event_id( absint($_REQUEST['event_id']) );
 
 		if( !$EM_Event ){
 			wp_die(__('Event not found.','events-manager'));
@@ -32,8 +32,8 @@ class BookingExport
 			return;
 		}
 
-		$show_tickets = isset($_REQUEST['show_tickets']) && $_REQUEST['show_tickets'] == 1;
-		$EM_Bookings_Table = new EM_Bookings_Table($show_tickets);
+		
+		$EM_Bookings_Table = new EM_Bookings_Table();
 	
 		$EM_Bookings_Table->limit = 500;
 		$EM_Bookings = $EM_Bookings_Table->get_bookings();
@@ -74,7 +74,8 @@ class BookingExport
 
 	public function export_attendees_xls($EM_Event){
 		
-		$EM_Bookings_Table = new EM_Bookings_Table(true);
+		
+		$EM_Bookings_Table = new EM_Bookings_Table();
 		$alphabet = range('A', 'Z');
 		
 		$EM_Bookings_Table->limit = 500; 

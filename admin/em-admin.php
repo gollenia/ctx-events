@@ -99,16 +99,7 @@ function em_plugin_action_links($actions, $file, $plugin_data) {
 
 add_filter( 'plugin_action_links_events/events.php', 'em_plugin_action_links', 10, 3 );
 
-function em_user_action_links( $actions, $user ){
-	if (!is_admin() && !current_user_can( 'manage_others_bookings')) return $actions;
-	
-	$bookings_link = EM_ADMIN_URL. "&page=events-bookings&person_id=".$user->ID;
-	$actions['bookings'] = "<a href='$bookings_link'>" . __( 'Bookings','events') . "</a>";
-	
-	return $actions;
-}
 
-add_filter('user_row_actions','em_user_action_links',10,2);
 
 
 ?>

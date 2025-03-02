@@ -1,6 +1,6 @@
 <?php
 
-$event = \EM_Event::find(get_the_ID(), 'post_id');
+$event = EM_Event::find_by_post(get_post());
 
 if(!$event->can_book()) {
 	return;

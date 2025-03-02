@@ -129,7 +129,7 @@ class BookingsRest {
 		$booking = $request->has_param('id') ? \EM_Booking::find($request->get_param('id')) : false;
 		$event_id = $booking ? $booking->event_id : intval($request->get_param('event_id'));
 		
-		$event = \EM_Event::find($event_id, $booking ? 'event_id' : 'post_id');
+		$event = $booking ? \EM_Event::find_by_event_id($event_id) : \EM_Event::find_by_post_id($event_id);
 		if(!$event || ($request->get_param('id') && !$booking)) {
 			return new WP_REST_Response(['error' => __('Booking not found', 'events')], 404);
 		}

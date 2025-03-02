@@ -48,10 +48,8 @@ class EM_Location_Post_Admin{
 	
 	public static function trashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_LOCATION){
-			global $EM_Notices;
 			$EM_Location = EM_Location::get($post_id,'post_id');
 			$EM_Location->set_status(-1);
-			$EM_Notices->remove_all(); //no validation/notices needed
 		}
 	}
 	
@@ -64,10 +62,8 @@ class EM_Location_Post_Admin{
 	
 	public static function untrashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_LOCATION){
-			global $EM_Notices;
 			$EM_Location = new EM_Location($post_id,'post_id');
 			$EM_Location->set_status($EM_Location->get_status());
-			$EM_Notices->remove_all(); //no validation/notices needed
 		}
 	}
 	

@@ -151,9 +151,9 @@ class EM_Taxonomy_Terms extends EM_Object implements Iterator, Countable{
 	 */
 	public function get_event(){
 		if( is_numeric($this->event_id) ){
-			return EM_Event::find($this->event_id);
+			return EM_Event::find_by_event_id($this->event_id);
 		}else{
-			return new EM_Event();
+			return new EM_Event;
 		}
 	}
 		

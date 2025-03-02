@@ -109,7 +109,11 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 
 		$mollie 	= self::start_mollie();
 
-		$description = $booking->output(get_option('em_mollie_description') ?? sprintf( esc_html__('%s tickets for %s', 'events'), '#_BOOKINGSPACES', '#_EVENTNAME'));
+		$description = get_option('em_mollie_description');
+		if (empty($description)) {
+			$description = sprintf( esc_html__('%s tickets for %s', 'events'), '#_BOOKINGSPACES', '#_EVENTNAME');
+		}
+		$description = $booking->output($description);
 
 		$args = [
 			'amount'  		=> [
@@ -123,8 +127,8 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 			'sequenceType'  => 'oneoff',  			// Default for single payment.
 			'metadata'  	=> [
 				'booking_id' 	=> $booking->booking_id,
-				'name'    		=> $booking->get_person()->get_name(),
-				'email'   		=> $booking->get_person()->user_email,
+				'name'    		=> $booking->full_name,
+				'email'   		=> $booking->booking_mail,
 			],
 		];
 		

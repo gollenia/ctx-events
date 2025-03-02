@@ -3,7 +3,7 @@
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/events
 Description: Event registration and booking management for WordPress. Recurring events, locations, ical, booking registration and more!
-Version: 6.8.3
+Version: 6.8.5
 Requires at least: 6.7
 Requires PHP: 8.0
 License: GPL3
@@ -15,7 +15,7 @@ Domain Path: /languages
 */
 
 class Events {
-	const VERSION = '6.83';
+	const VERSION = '6.85';
 	const DIR = __DIR__;
 }
 
@@ -67,14 +67,15 @@ require_once __DIR__ . '/classes/Categories/Categories.php';
 require_once __DIR__ . '/classes/Events/Event.php';
 require_once __DIR__ . '/classes/Events/EventPost.php';
 require_once __DIR__ . '/classes/Events/Events.php';
+require_once __DIR__ . '/classes/Events/EventView.php';
 require_once __DIR__ . '/classes/Locations/Location.php';
 
 require_once __DIR__ . '/classes/Locations/LocationPost.php';
 require_once __DIR__ . '/classes/Locations/Locations.php';
 require_once __DIR__ . '/classes/Emails/Mailer.php';
 require_once __DIR__ . '/classes/Notices.php';
-require_once __DIR__ . '/classes/People/People.php';
-require_once __DIR__ . '/classes/People/Person.php';
+//require_once __DIR__ . '/classes/People/People.php';
+//require_once __DIR__ . '/classes/People/Person.php';
 require_once __DIR__ . '/classes/Permalinks.php';
 require_once __DIR__ . '/classes/Speaker/Speakers.php';
 
@@ -93,7 +94,7 @@ if( is_admin() ){
 	require_once __DIR__ . '/admin/em-docs.php';
 	require_once __DIR__ . '/admin/em-help.php';
 	require_once __DIR__ . '/admin/em-options.php';
-	require_once __DIR__ . '/admin/em-data-privacy.php';
+	//require_once __DIR__ . '/admin/em-data-privacy.php';
 	require_once __DIR__ . '/admin/em-dashboard.php';
 
 	require_once __DIR__ . '/classes/Events/EventPostAdmin.php';
@@ -107,7 +108,6 @@ if( is_admin() ){
 	/*
 	require_once __DIR__ . '/admin/bookings/em-cancelled.php';
 	require_once __DIR__ . '/admin/bookings/em-confirmed.php';
-	
 	require_once __DIR__ . '/admin/bookings/em-rejected.php';
 	require_once __DIR__ . '/admin/bookings/em-pending.php';
 	require_once __DIR__ . '/admin/bookings/em-person.php';
@@ -176,36 +176,21 @@ function em_init(){
 add_filter('init','em_init',1);
 
 /**
- * This function will load an event into the global $EM_Event variable during page initialization, provided an event_id is given in the url via GET or POST.
+ * This function will load an event into the variable during page initialization, provided an event_id is given in the url via GET or POST.
  * global $EM_Recurrences also holds global array of recurrence objects when loaded in this instance for performance
  * All functions (admin and public) can now work off this object rather than it around via arguments.
  * @return null
  */
 function em_load_event(){
-	global $EM_Event, $EM_Recurrences, $EM_Location, $EM_Person, $EM_Booking, $EM_Category;
+	global $EM_Recurrences, $EM_Location, $EM_Booking, $EM_Category;
 	if (defined('EM_LOADED')) return;
 	
 	$EM_Recurrences = array();
-
-	if( isset( $_REQUEST['event_id'] ) && is_numeric($_REQUEST['event_id']) && !is_object($EM_Event) ){
-		$EM_Event = new \EM_Event( absint($_REQUEST['event_id']) );
-	}elseif( isset($_REQUEST['post']) && (get_post_type($_REQUEST['post']) == 'event' || get_post_type($_REQUEST['post']) == 'event-recurring') ){
-		$EM_Event = \EM_Event::find($_REQUEST['post'], 'post_id');
-	}
 
 	if( isset($_REQUEST['location_id']) && is_numeric($_REQUEST['location_id']) && !is_object($EM_Location) ){
 		$EM_Location = new \EM_Location( absint($_REQUEST['location_id']) );
 	}elseif( isset($_REQUEST['post']) && get_post_type($_REQUEST['post']) == 'location' ){
 		$EM_Location = EM_Location::get($_REQUEST['post'], 'post_id');
-	}
-
-	if( is_user_logged_in() || (!empty($_REQUEST['person_id']) && is_numeric($_REQUEST['person_id'])) ){
-		//make the request id take priority, this shouldn't make it into unwanted objects if they use theobj::get_person().
-		if( !empty($_REQUEST['person_id']) ){
-			$EM_Person = new \EM_Person( absint($_REQUEST['person_id']) );
-		}else{
-			$EM_Person = new \EM_Person( get_current_user_id() );
-		}
 	}
 
 	if( isset($_REQUEST['booking_id']) && is_numeric($_REQUEST['booking_id']) && !is_object($_REQUEST['booking_id']) ){
@@ -251,20 +236,6 @@ function em_locate_template( $template_name, $load=false, $the_args = array() ) 
 	return $located;
 }
 
-
-/**
- * Monitors event saves and changes the rss pubdate and a last modified option so it's current
- * @param boolean $result
- * @return boolean
- */
-function em_modified_monitor($result){
-	if($result){
-	    update_option('em_last_modified', time());
-	}
-	return $result;
-}
-add_filter('em_event_save', 'em_modified_monitor', 10,1);
-add_filter('em_location_save', 'em_modified_monitor', 10,1);
 
 
 register_activation_hook( __FILE__,function() {

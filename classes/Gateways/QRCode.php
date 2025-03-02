@@ -9,7 +9,8 @@ use \chillerlan\QRCode\Data\QRMatrix;
 use \chillerlan\QRCode\Output\QROutputInterface;
 use \chillerlan\QRCode\Common\EccLevel;
 use \chillerlan\QRCode\Output\QRMarkupSVG;
-use \chillerlan\QRCode\Output\QRGdImagePNG;
+use chillerlan\QRCode\Output\QRGdImagePNG;
+
 
 
 
@@ -37,13 +38,14 @@ class EM_QRCode {
 	 * @return void
 	 */
     public function generate_qr_code() {
+		
 		if(empty($_REQUEST['booking_id'])) return;
-
+		
 		$format = $_REQUEST['format'] ?? 'svg';
 		if($format != 'png' && $format != 'svg') $format = 'svg';
 		
 		$booking = \EM_Booking::find(absint($_REQUEST['booking_id']));
-		$event = \EM_Event::find($booking->event_id); 
+		$event = \EM_Event::find_by_event_id($booking->event_id); 
 
 		$data = Data::create()
 			->setName(get_option("em_offline_beneficiary", true))
@@ -52,27 +54,26 @@ class EM_QRCode {
 			->setAmount($booking->get_price());
 		$options = new QROptions();
 
-		$options->version = 5;
-		$options->outputInterface = QRGdImagePNG::class;
-		$options->eccLevel = EccLevel::L;
-		$options->imageBase64 = false;
-		$options->addQuietzone = true;
-		$options->scale               = 20;
-		$options->imageTransparent = true;
-		$options->keepAsSquare = [
-			QRMatrix::M_FINDER|QRMatrix::M_DARKMODULE, 
-			QRMatrix::M_LOGO, 
-			QRMatrix::M_FINDER_DOT, 
-			QRMatrix::M_ALIGNMENT|QRMatrix::M_DARKMODULE
-		];
-		$options->drawCircularModules = true;
-		$options->circleRadius = 0.4;
-		$options->svgConnectPaths = true;
-
+		$options = new QROptions([
+			'version' => 7,
+			'eccLevel' => EccLevel::M, // required by EPC standard
+			'imageBase64' => false,
+			'addQuietzone'           => true,
+			'imageTransparent'       => false,
+			'keepAsSquare' => [QRMatrix::M_FINDER|QRMatrix::M_DARKMODULE, QRMatrix::M_LOGO, QRMatrix::M_FINDER_DOT, QRMatrix::M_ALIGNMENT|QRMatrix::M_DARKMODULE],
+			'drawCircularModules' => true,
+			'circleRadius' => 0.4,
+			'outputInterface' => QRGdImagePNG::class,
+			'connectPaths' => true
+		]);
 		$qrcode = new QRCode($options);
-		$image = $qrcode->render($data);
-		header($format == 'png' ? 'Content-Type: image/png' : 'Content-Type: image/svg+xml');
-		echo($image);
+		if ($format === 'png') {
+			header('Content-Type: image/png');
+			echo $qrcode->render($data);
+		} else {
+			header('Content-Type: image/svg+xml');
+			echo $qrcode->render($data);
+		}
 		
 		wp_die();
     }

@@ -40,7 +40,7 @@ class EM_Coupons extends EM_Object {
 		add_filter('em_booking_get_price_adjustments', array('EM_Coupons', 'em_booking_get_price_adjustments'), 10, 3);
 		//add coupon info to CSV
 		add_action('em_bookings_table_cols_template', array('EM_Coupons', 'em_bookings_table_cols_template'),10,1);
-		add_filter('em_bookings_table_rows_col_coupon', array('EM_Coupons', 'em_bookings_table_rows_col_coupon'), 10, 3);
+		add_filter('em_bookings_table_rows_col', array('EM_Coupons', 'em_bookings_table_rows_col'), 10, 3);
 		//add css for coupon field
 		
 	}
@@ -253,7 +253,7 @@ class EM_Coupons extends EM_Object {
 
 		if(!$event_id) return array_merge($result, ["message" => __('No event given','events')]);
 	
-		$EM_Event = new EM_Event($event_id);
+		$EM_Event = EM_Event::find_by_event_id($event_id);
 		$EM_Coupon = self::event_get_coupon($request->get_param('code'), $EM_Event);
 
 		if (empty($EM_Event->event_id) || !is_object($EM_Coupon)) return array_merge($result, ["message" => __('Coupon Invalid','events')]);
@@ -347,8 +347,8 @@ class EM_Coupons extends EM_Object {
 					$EM_Booking->get_event()->event_name,
 					\Contexis\Events\Intl\Date::get_date($EM_Booking->date()->getTimestamp()),
 					$EM_Booking->get_price(),
-					$EM_Booking->get_person()->get_name(),
-					$EM_Booking->get_person()->user_email,
+					$EM_Booking->full_name,
+					$EM_Booking->booking_mail,
 					$EM_Booking->get_spaces(),
 					$coupon->coupon_name,
 					\Contexis\Events\Intl\Price::format( $EM_Booking->get_price()),
@@ -557,7 +557,7 @@ class EM_Coupons extends EM_Object {
 	public static function coupon_check_ajax(){
 		$result = array('result'=>false, 'message'=> __('Coupon Not Found', 'events'));
 		if(!empty($_REQUEST['event_id'])){
-			$EM_Event = new EM_Event($_REQUEST['event_id']);
+			$EM_Event = EM_Event::find_by_event_id($_REQUEST['event_id']);
 			$EM_Coupon = self::event_get_coupon($_REQUEST['coupon_code'], $EM_Event);
 			if( !empty($EM_Event->event_id) && is_object($EM_Coupon) ){
 				if( $EM_Coupon->is_valid() ){
@@ -664,19 +664,10 @@ class EM_Coupons extends EM_Object {
 		return $template;
 	}
 	
-	public static function em_bookings_table_rows_col_coupon($val, $EM_Booking){
-		//if in MB mode, change $EM_Booking with the main booking to grab coupon info, given that we don't support per-event coupons in MB mode atm
-		
-		//check if coupon code exists for this booking, if so, get it and replace $val with coupon code
-		if( self::booking_has_coupons($EM_Booking) ){
-			$vals = array();
-			$coupons = self::booking_get_coupons($EM_Booking);
-			foreach( $coupons as $EM_Coupon ){
-				$vals[] = $EM_Coupon->coupon_code;
-			}
-			$val = implode(' ', $vals);
-		}
-		return $val;
+	public static function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	{
+		if ($column != 'coupon' || !self::booking_has_coupons($EM_Booking)) return '';
+		return implode(' ', array_map(fn($c) => $c->coupon_code, self::booking_get_coupons($EM_Booking)));
 	}
 
 	/* Overrides EM_Object method to apply a filter to result
@@ -693,7 +684,7 @@ class EM_Coupons extends EM_Object {
 			$conditions['event'] = "coupon_id IN (SELECT meta_value FROM ".EM_META_TABLE." WHERE object_id='{$args['event']}' AND meta_key='event-coupon')";
 			//search event-wide coupons by default
 			if( !empty($args['eventwide']) ){
-				$EM_Event = EM_Event::find($args['event']);
+				$EM_Event = EM_Event::find_by_event_id($args['event']);
 				if( !empty($EM_Event->event_id) ){
 					if( $args['eventwide'] === 1 || $args['eventwide'] === true ){
 						//in this case, we explicitly want eventwide coupons

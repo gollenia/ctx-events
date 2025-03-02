@@ -64,7 +64,7 @@ class TicketsController {
 	public function create_ticket($request) {
 		$ticket = new Ticket();
 
-		$event = \EM_Event::find($request->get_param('post_id'), 'post_id');
+		$event = \EM_Event::find_by_post_id($request->get_param('post_id'), 'post_id');
 		$data = $request->get_params();
 
 		$ticket->event_id = $event->event_id;
@@ -138,9 +138,9 @@ class TicketsController {
 
 	function read_tickets($request) {
 		
-		$event = \EM_Event::find($request->get_param('post_id'), 'post_id');
+		$event = \EM_Event::find_by_post_id($request->get_param('post_id'), 'post_id');
 		
-		$ticket_data = new \Contexis\Events\Tickets\Tickets($event);
+		$ticket_data = \Contexis\Events\Tickets\Tickets::find_by_event_id($event->event_id);
 		
 		
 		$tickets = [];

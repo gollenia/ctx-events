@@ -2,51 +2,22 @@
 /**
  * Performs actions on init. This works for both ajax and normal requests, the return results depends if an em_ajax flag is passed via POST or GET.
  * 
- * @todo This whole file must be split up and the wp_ajax_ functions should be replaced with the REST API where possible
+ * @TODO: This whole file must be split up and the wp_ajax_ functions should be replaced with the REST API where possible
  */
 function em_init_actions() {
-	global $wpdb,$EM_Notices,$EM_Event; 
+	global $EM_Notices; 
 	if( defined('DOING_AJAX') && DOING_AJAX ) $_REQUEST['em_ajax'] = true;
 	
 	//Event Actions
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,5) == 'event' ){
 		//Load the event object, with saved event if requested
 		if( !empty($_REQUEST['event_id']) ){
-			$EM_Event = new EM_Event( absint($_REQUEST['event_id']) );
+			$EM_Event = EM_Event::find_by_event_id($_REQUEST['event_id']);
 		}else{
-			$EM_Event = new EM_Event();
+			$EM_Event = new EM_Event;
 		}
 		
-		if ( $_REQUEST['action'] == 'event_duplicate' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_duplicate_'.$EM_Event->event_id) ) {
-			$event = $EM_Event->duplicate();
-			if( $event === false ){
-				$EM_Notices->add_error($EM_Event->errors, true);
-				wp_safe_redirect( wp_validate_redirect(wp_get_raw_referer(), false ) );
-			}else{
-				$EM_Notices->add_confirm($event->feedback_message, true);
-				wp_safe_redirect( $event->get_edit_url() );
-			}
-			exit();
-		}
-		if ( $_REQUEST['action'] == 'event_delete' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_delete_'.$EM_Event->event_id) ) { 
-			//DELETE action
-			$selectedEvents = !empty($_REQUEST['events']) ? $_REQUEST['events']:'';
-			if( is_array($selectedEvents) && array_is_list($selectedEvents) && !empty($selectedEvents) ){
-				$events_result = EM_Events::delete( $selectedEvents );
-			}elseif( is_object($EM_Event) ){
-				$events_result = $EM_Event->delete();
-			}		
-			$plural = (count($selectedEvents) > 1) ? __('Events','events'):__('Event','events');
-			if($events_result){
-				$message = ( !empty($EM_Event->feedback_message) ) ? $EM_Event->feedback_message : sprintf(__('%s successfully deleted.','events'),$plural);
-				$EM_Notices->add_confirm( $message, true );
-			}else{
-				$message = ( !empty($EM_Event->errors) ) ? $EM_Event->errors : sprintf(__('%s could not be deleted.','events'),$plural);
-				$EM_Notices->add_error( $message, true );		
-			}
-			wp_safe_redirect( wp_validate_redirect(wp_get_raw_referer(), false ) );
-			exit();
-		}elseif( $_REQUEST['action'] == 'event_detach' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_detach_'.get_current_user_id().'_'.$EM_Event->event_id) ){ 
+		if( $_REQUEST['action'] == 'event_detach' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_detach_'.get_current_user_id().'_'.$EM_Event->event_id) ){ 
 			//Detach event and move on
 			if($EM_Event->detach()){
 				$EM_Notices->add_confirm( $EM_Event->feedback_message, true );
@@ -78,25 +49,23 @@ function em_init_actions() {
 		}
 	}
 
-	
-	//Booking Actions
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,7) == 'booking' && (is_user_logged_in() || ($_REQUEST['action'] == 'booking_add')) ){
 		
-		global $EM_Event, $EM_Booking;
+		$event_id = !empty($_REQUEST['event_id']) ? $_REQUEST['event_id'] : 0;
+		$EM_Event = EM_Event::find_by_event_id($event_id);
+		global $EM_Booking;
 		//Load the booking object, with saved booking if requested
 		$EM_Booking = ( !empty($_REQUEST['booking_id']) ) ? EM_Booking::find($_REQUEST['booking_id']) : EM_Booking::find();
 		if( !empty($EM_Booking->event_id) ){
 			//Load the event object, with saved event if requested
 			$EM_Event = $EM_Booking->get_event();
 		}elseif( !empty($_REQUEST['event_id']) ){
-			$EM_Event = new EM_Event( absint($_REQUEST['event_id']) );
+			$EM_Event = EM_Event::find_by_event_id($_REQUEST['event_id']);
 		}
-		$allowed_actions = array('bookings_approve'=>'approve','bookings_reject'=>'reject','bookings_unapprove'=>'unapprove', 'bookings_delete'=>'delete', 'bookings_cancel'=>'cancel');
 		$result = false;
 		$feedback = '';
 		
 		if( $_REQUEST['action'] == 'booking_resend_email' ){
-			
 			if( $EM_Booking->can_manage('manage_bookings','manage_others_bookings') ){
 				if( $EM_Booking->email(false, true) ){
 				    if( $EM_Booking->mails_sent > 0 ) {
@@ -115,7 +84,6 @@ function em_init_actions() {
 			}
 		}
 
-		//header( 'Content-Type: application/javascript; charset=UTF-8', true );
 		$return = array('result'=>$result, 'message'=>$feedback, 'error'=>$EM_Booking->get_errors());
 		
 		//wp_die();
@@ -136,60 +104,3 @@ function em_init_actions() {
 }
 add_action('init','em_init_actions',11);
 
-/**
- * Handles AJAX Bookings admin table filtering, view changes and pagination
- */
-function em_ajax_bookings_table(){
-    check_admin_referer('em_bookings_table');
-	$EM_Bookings_Table = new EM_Bookings_Table();
-	$EM_Bookings_Table->output_table();
-	exit();
-}
-add_action('wp_ajax_em_bookings_table','em_ajax_bookings_table');
-
-/**
- * Handles AJAX Searching and Pagination for events, locations, tags and categories
- */
-function em_ajax_search_and_pagination(){
-	$args = array( 'owner' => false, 'pagination' => 1, 'ajax' => true);
-	echo '<div class="em-search-ajax">';
-	ob_start();
-	if( $_REQUEST['action'] == 'search_events' ){
-		$args['scope'] = 'future';
-		$args = EM_Events::get_post_search($args);
-		$args['limit'] = !empty($args['limit']) ? $args['limit'] : 0;
-	}elseif( $_REQUEST['action'] == 'search_events_grouped' && defined('DOING_AJAX') ){
-		$args['scope'] = 'future';
-		$args = EM_Events::get_post_search($args);
-		$args['limit'] = !empty($args['limit']) ? $args['limit'] : 0;
-		em_locate_template('templates/events-list-grouped.php', true, array('args'=>$args)); //if successful, this template overrides the settings and defaults, including search
-	}elseif( $_REQUEST['action'] == 'search_locations' && defined('DOING_AJAX') ){
-		$args = EM_Locations::get_post_search($args);
-		$args['limit'] = !empty($args['limit']) ? $args['limit'] : 20;
-		em_locate_template('templates/locations-list.php', true, array('args'=>$args)); //if successful, this template overrides the settings and defaults, including search
-	}elseif( $_REQUEST['action'] == 'search_tags' && defined('DOING_AJAX') ){
-		$args = EM_Tags::get_post_search($args);
-		$args['limit'] = !empty($args['limit']) ? $args['limit'] : 20;
-		em_locate_template('templates/tags-list.php', true, array('args'=>$args)); //if successful, this template overrides the settings and defaults, including search
-	}elseif( $_REQUEST['action'] == 'search_cats' && defined('DOING_AJAX') ){
-		$args = EM_Categories::get_post_search($args);
-		$args['limit'] = !empty($args['limit']) ? $args['limit'] : 20;
-		em_locate_template('templates/categories-list.php', true, array('args'=>$args)); //if successful, this template overrides the settings and defaults, including search
-	}
-	echo '</div>';
-	echo apply_filters('em_ajax_'.$_REQUEST['action'], ob_get_clean(), $args);
-	exit();
-}
-add_action('wp_ajax_nopriv_search_events','em_ajax_search_and_pagination');
-add_action('wp_ajax_search_events','em_ajax_search_and_pagination');
-add_action('wp_ajax_nopriv_search_events_grouped','em_ajax_search_and_pagination');
-add_action('wp_ajax_search_events_grouped','em_ajax_search_and_pagination');
-add_action('wp_ajax_nopriv_search_locations','em_ajax_search_and_pagination');
-add_action('wp_ajax_search_locations','em_ajax_search_and_pagination');
-add_action('wp_ajax_nopriv_search_tags','em_ajax_search_and_pagination');
-add_action('wp_ajax_search_tags','em_ajax_search_and_pagination');
-add_action('wp_ajax_nopriv_search_cats','em_ajax_search_and_pagination');
-add_action('wp_ajax_search_cats','em_ajax_search_and_pagination');
-
-
-?>

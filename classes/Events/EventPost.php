@@ -3,6 +3,7 @@
 namespace Contexis\Events;
 
 use Contexis\Events\Intl\Date;
+use EM_Event;
 
 /**
  * Controls how events are queried and displayed via the WordPress Custom Post APIs
@@ -30,12 +31,11 @@ class EventPost {
 	}
 	
 	public static function publish_future_post($post_id){
-		global $EM_Event;
 		$post_type = get_post_type($post_id);
 		$is_post_type = $post_type == self::TYPE || $post_type == 'event-recurring';
 		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
 		if(!defined('UNTRASHING_'.$post_id) && $is_post_type && $saving_status ){
-		    $EM_Event = \EM_Event::find($post_id, 'post_id');
+		    $EM_Event = \EM_Event::find_by_post_id($post_id, 'post_id');
 		    $EM_Event->set_status(1);
 		}
 	}
@@ -55,7 +55,7 @@ class EventPost {
 		$id = $request->get_param('id');
 		if(!$id) return $result;
 		
-		$event = new \EM_Event($id, 'post_id');
+		$event = EM_Event::find_by_post_id($id);
 		
 		$result['success'] = true;
 
@@ -140,7 +140,7 @@ class EventPost {
 	public static function the_date( $the_date, $d = '', $post = null ){
 		$post = get_post( $post );
 		if( $post->post_type == self::TYPE ){
-			$EM_Event = \EM_Event::find($post);
+			$EM_Event = \EM_Event::find_by_post($post);
 			if ( '' == $d ){
 				$the_date = $EM_Event->start()->i18n(get_option('date_format'));
 			}else{
@@ -153,7 +153,7 @@ class EventPost {
 	public static function the_time( $the_time, $f = '', $post = null ){
 		$post = get_post( $post );
 		if( $post->post_type == self::TYPE ){
-			$EM_Event = \EM_Event::find($post);
+			$EM_Event = \EM_Event::find_by_post($post);
 			if ( '' == $f ){
 				$the_time = $EM_Event->start()->i18n(get_option('time_format'));
 			}else{

@@ -40,7 +40,7 @@ class EM_Events extends EM_Object {
 			//We can just get all the events here and return them
 			$events = array();
 			foreach($args as $event_id){
-				$events[$event_id] = EM_Event::find($event_id);
+				$events[$event_id] = EM_Event::find_by_event_id($event_id);
 			}
 			return apply_filters('em_events_get', $events, $args);
 		}
@@ -51,7 +51,7 @@ class EM_Events extends EM_Object {
 		$offset = ( $limit != "" && is_numeric($args['offset']) ) ? "OFFSET {$args['offset']}" : '';
 		
 		//Get fields that we can use in ordering and grouping, which can be event and location (excluding ambiguous) fields
-		$EM_Event = new EM_Event();
+		$EM_Event = new EM_Event;
 		$EM_Location = new EM_Location();
 		$event_fields = array_keys($EM_Event->fields);
 		$location_fields = array(); //will contain location-specific fields, not ambiguous ones
@@ -147,7 +147,7 @@ class EM_Events extends EM_Object {
 		$events = array();
 		
 		foreach ( $results as $event ){
-			$events[] = EM_Event::find($event['post_id'], 'post_id');
+			$events[] = EM_Event::find_by_post_id($event['post_id']);
 		}
 		
 		return apply_filters('em_events_get', $events, $args);

@@ -249,7 +249,6 @@ class EM_Custom_Emails_Admin {
 	}
 	
 	public static function editor_get_post( $custom_email_defaults = array(), $param = 'em_custom_email' ){
-		global $allowedposttags;
 		$emails = !empty($custom_email_defaults) ? $custom_email_defaults : self::get_default_emails(); //override defaults
 		$custom_emails = array();
 		foreach( $emails as $email_group_name => $email_group ){
@@ -379,7 +378,6 @@ class EM_Custom_Emails_Admin {
 	}
 
 	public static function get_gateway_default_emails( $EM_Gateway = false ){
-		global $EM_Gateways;
 		$emails = array();
 		$gateways = is_object($EM_Gateway) ? array($EM_Gateway->gateway => $EM_Gateway->title) : EM_Gateways::active_gateways();		
 		foreach($gateways as $gateway => $gateway_name ){
@@ -456,8 +454,9 @@ class EM_Custom_Emails_Admin {
 		}
 	}
 	
-	public static function event_meta_box(){
-		global $EM_Event;
+	public static function event_meta_box($post){
+		$EM_Event = EM_Event::find_by_post_id($post->ID);
+		
 		//get custom email values if they exist
 		$custom_email_values = EM_Custom_Emails::get_event_emails($EM_Event);
 		$custom_admin_emails = false;

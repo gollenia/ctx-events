@@ -98,7 +98,7 @@ class EM_Emails {
 	    	//get ppl attending
 	    	foreach( $EM_Event->get_bookings()->get_bookings()->bookings as $EM_Booking ){ //get confirmed bookings
 	    	    /* @var $EM_Booking EM_Booking */
-	    	    if( is_email($EM_Booking->get_person()->user_email) ){
+	    	    if( is_email($EM_Booking->booking_mail) ){
 	    	    	do_action('em_booking_email_before_send', $EM_Booking);
 	    	    	
 	    	    	if( empty($subject_format) ){
@@ -107,7 +107,7 @@ class EM_Emails {
 	    	    	}
 	    	    	$subject = $EM_Booking->output($subject_format,'raw');
 	    	    	$message = $EM_Booking->output($message_format,$output_type);
-		    	    $emails[] = array($EM_Booking->get_person()->user_email, $subject, $message, $EM_Booking->booking_id);
+		    	    $emails[] = array($EM_Booking->booking_mail, $subject, $message, $EM_Booking->booking_id);
 		    	    do_action('em_booking_email_after_send', $EM_Booking);
 	    	    }
 	    	}

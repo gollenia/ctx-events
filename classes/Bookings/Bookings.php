@@ -158,21 +158,18 @@ class EM_Bookings extends EM_Object implements Iterator {
 	/**
 	 * Smart event locator, saves a database read if possible. Note that if an event doesn't exist, a blank object will be created to prevent duplicates.
 	 */
-	function get_event(){
-		global $EM_Event;
-		if( is_object($EM_Event) && $EM_Event->event_id == $this->event_id ){
-			return $EM_Event;
-		}else{
-			if( is_numeric($this->event_id) && $this->event_id > 0 ){
-				return EM_Event::find($this->event_id, 'event_id');
-			}elseif( is_array($this->bookings) ){
-				foreach($this->bookings as $EM_Booking){
-					/* @var $EM_Booking EM_Booking */
-					return EM_Event::find($EM_Booking->event_id, 'event_id');
-				}
+	public function get_event() : ?EM_Event {
+		if (!empty($this->event_id) && is_numeric($this->event_id)) {
+			return EM_Event::find_by_event_id($this->event_id);
+		}
+		
+		if (!empty($this->bookings) && is_array($this->bookings)) {
+			foreach ($this->bookings as $EM_Booking) {
+				return EM_Event::find_by_event_id($EM_Booking->event_id);
 			}
 		}
-		return EM_Event::find($this->event_id, 'event_id');
+		
+		return null; // Stattdessen null zurückgeben, wenn nix gefunden wurde.
 	}
 	
 	/**
@@ -182,7 +179,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 	 */
 	function get_tickets( $force_reload = false ){
 		if( !is_object($this->tickets) || $force_reload ){
-			$this->tickets = new \Contexis\Events\Tickets\Tickets($this->event_id);
+			$this->tickets = \Contexis\Events\Tickets\Tickets::find_by_event_id($this->event_id);
 		}else{
 			$this->tickets->event_id = $this->event_id;
 		}
@@ -206,7 +203,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 				}
 			}
 		}
-		//$tickets = new \Contexis\Events\Tickets\Tickets($tickets);
+		
 		return apply_filters('em_bookings_get_available_tickets', $this->get_tickets(), $this);
 	}
 
@@ -236,21 +233,6 @@ class EM_Bookings extends EM_Object implements Iterator {
 	
 	function has_space( $include_member_tickets = false ){
 		return count($this->get_available_tickets( $include_member_tickets )->tickets) > 0;
-	}
-	
-	function has_open_time(){
-	    $return = false;
-	    $EM_Event = $this->get_event();
-	    if( $EM_Event->rsvp_end()->getTimestamp() > time() && $EM_Event->event_rsvp_start()->getTimestamp() < time() ){
-	    	$return = true;
-	    }
-	    return $return;
-	}
-	
-	function is_open($include_member_tickets = false){
-		//TODO extend booking options
-		$return = $this->has_open_time() && $this->has_space($include_member_tickets);
-		return apply_filters('em_bookings_is_open', $return, $this, $include_member_tickets);
 	}
 	
 	/**
@@ -366,9 +348,9 @@ class EM_Bookings extends EM_Object implements Iterator {
 			
 		}
 		
-		//check overall events cap
-		if(!empty($this->get_event()->event_spaces) && $this->get_event()->event_spaces < $this->spaces) {
-			$this->spaces = $this->get_event()->event_spaces;
+		$event = $this->get_event();
+		if(!empty($event->event_spaces) && $event->event_spaces < $this->spaces) {
+			$this->spaces = $event->event_spaces;
 
 		}
 
@@ -484,25 +466,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 		return $EM_Bookings;
 	}
 	
-	/**
-	 * Checks if a person with similar details has booked for this before
-	 * @param $person_id
-	 * @return EM_Booking
-	 */
-	function find_previous_booking($EM_Booking){
-		//First see if we have a similar person on record that's making this booking
-		$EM_Booking->person->load_similar();
-		//If person exists on record, see if they've booked this event before, if so return the booking.
-		if( is_numeric($EM_Booking->person->ID) && $EM_Booking->person->ID > 0 ){
-			$EM_Booking->person_id = $EM_Booking->person->ID;
-			foreach ($this->load() as $booking){
-				if( $booking->person_id == $EM_Booking->person->ID ){
-					return $booking;
-				}
-			}
-		}
-		return false;
-	}
+	
 	
 	/**
 	 * Get bookings that match the array of arguments passed.
@@ -644,9 +608,6 @@ class EM_Bookings extends EM_Object implements Iterator {
 			$conditions['status'] = 'booking_status IN ('.implode(',',$args['status']).')';
 		}elseif( !is_array($args['status']) && preg_match('/^([0-9],?)+$/', $args['status']) ){
 			$conditions['status'] = 'booking_status IN ('.$args['status'].')';
-		}
-		if( is_numeric($args['person']) ){
-			$conditions['person'] = EM_BOOKINGS_TABLE.'.person_id='.$args['person'];
 		}
 		if( empty($conditions['event']) && $args['event'] === false ){
 		    $conditions['event'] = EM_BOOKINGS_TABLE.'.event_id != 0';

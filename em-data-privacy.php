@@ -14,11 +14,7 @@ function em_data_privacy_consent_checkbox( $EM_Object = false ){
 	// buddyboss unfix since bb v1.6.0
 	if( !empty($bb_fix) ) add_filter( 'the_privacy_policy_link', 'bp_core_change_privacy_policy_link_on_private_network', 999999, 2 );
 	// check if consent was previously given and check box if true
-	if( is_user_logged_in() ){
-        $consent_given_already = get_user_meta( get_current_user_id(), 'em_data_privacy_consent', true );
-        if( !empty($consent_given_already) && get_option('dbem_data_privacy_consent_remember') == 1 ) return; //ignore if consent given as per settings
-		if( !empty($consent_given_already) && get_option('dbem_data_privacy_consent_remember') == 2 ) $checked = true;
-    }
+
     if( empty($checked) && !empty($_REQUEST['data_privacy_consent']) ) $checked = true;
     // output checkbox
 	?>
@@ -46,11 +42,7 @@ function em_data_privacy_consent_hooks(){
 		 * Wrapper function in case old overriden templates didn't pass the EM_Event object and depended on global value
 		 * @param EM_Event $event
 		 */
-		function em_data_privacy_consent_event_checkbox( $event ){
-			if( empty($event) ){ global $EM_Event; }
-			else{ $EM_Event = $event ; }
-			em_data_privacy_consent_checkbox($EM_Event);
-		}
+		
 		add_action('em_event_get_post_meta', 'em_data_privacy_cpt_get_post', 10, 2);
 		add_action('em_event_validate', 'em_data_privacy_cpt_validate', 10, 2);
 	}
@@ -67,7 +59,7 @@ function em_data_privacy_consent_hooks(){
 		}
 		add_action('em_location_get_post_meta', 'em_data_privacy_cpt_get_post', 10, 2);
 		add_action('em_location_validate', 'em_data_privacy_cpt_validate', 10, 2);
-		add_action('em_location_save', 'em_data_privacy_cpt_save', 10, 2);
+		
 	}
 }
 if( !is_admin() || ( defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['action']) && !in_array($_REQUEST['action'], array('booking_add_one')) ) ){
@@ -81,11 +73,7 @@ if( !is_admin() || ( defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['ac
  * @return bool
  */
 function em_data_privacy_consent_booking_validate( $result, $EM_Booking ){
-	if( is_user_logged_in() && ($EM_Booking->person_id == get_current_user_id() || $EM_Booking->person_id === null) ){
-		//check if consent was previously given and ignore if settings dictate so
-		$consent_given_already = get_user_meta( get_current_user_id(), 'em_data_privacy_consent', true );
-		if( !empty($consent_given_already) && get_option('dbem_data_privacy_consent_remember') == 1 ) return $result; //ignore if consent given as per settings
-	}
+	
     if( empty($EM_Booking->booking_meta['consent']) ){
 	    $EM_Booking->add_error( sprintf(__('You must allow us to collect and store your data in order for us to process your booking.', 'events')) );
 	    $result = false;
@@ -93,20 +81,7 @@ function em_data_privacy_consent_booking_validate( $result, $EM_Booking ){
     return $result;
 }
 
-/**
- * Updates or adds the consent date of user account meta if booking was submitted by a user and consent was given.
- * @param bool $result
- * @param EM_Booking $EM_Booking
- * @return bool
- */
-function em_data_privacy_consent_booking_save( $result, $EM_Booking ){
-    if( $result ){
-        if( $EM_Booking->person_id != 0 ){
-            update_user_meta( $EM_Booking->person_id, 'em_data_privacy_consent', current_time('mysql') );
-        }
-    }
-    return $result;
-}
+
 
 /**
  * Save consent to event or location object
@@ -134,11 +109,7 @@ function em_data_privacy_cpt_get_post($result, $EM_Object ){
  */
 function em_data_privacy_cpt_validate( $result, $EM_Object ){
 	if( !empty($EM_Object->post_id) ) return $result;
-	if( is_user_logged_in() ){
-		//check if consent was previously given and ignore if settings dictate so
-		$consent_given_already = get_user_meta( get_current_user_id(), 'em_data_privacy_consent', true );
-		if( !empty($consent_given_already) && get_option('dbem_data_privacy_consent_remember') == 1 ) return $result; //ignore if consent given as per settings
-	}
+	
 	$attributes = get_class($EM_Object) == 'EM_Event' ? 'event_attributes':'location_attributes';
 	if( empty($EM_Object->{$attributes}['_consent_given']) ){
 		$EM_Object->add_error( sprintf(__('Please check the consent box so we can collect and store your submitted information.', 'events')) );
@@ -147,18 +118,3 @@ function em_data_privacy_cpt_validate( $result, $EM_Object ){
 	return $result;
 }
 
-/**
- * When an event or location is saved and consent is given or supplied again, update user account with latest consent date IF the object isn't associated with an anonymous user.
- * @param bool $result
- * @param EM_Event|EM_Location $EM_Object
- * @return bool
- */
-function em_data_privacy_cpt_save( $result, $EM_Object ){
-	$attributes = get_class($EM_Object) == 'EM_Event' ? 'event_attributes':'location_attributes';
-	if( $result && !empty($EM_Object->{$attributes}['_consent_given'])){
-		if( $EM_Object->post_author != get_option('dbem_events_anonymous_user') ){
-			update_user_meta( $EM_Object->post_author, 'em_data_privacy_consent', current_time('mysql') );
-		}
-	}
-    return $result;
-}

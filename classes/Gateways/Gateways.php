@@ -43,7 +43,6 @@ class EM_Gateways {
 			'zip' => "Zip/Postal Code",
 			'country' => "Country",
 			'phone' => "Phone",
-			'fax' => "Fax",
 			'company' => "Company",
 		);
 		//data privacy - transaction history
@@ -249,22 +248,7 @@ class EM_Gateways {
 	static function em_booking_js(){
 		include(dirname(__FILE__).'/gateways.js');
 	}
-	
-	/**
-	 * Verification of whether current page load is for a manual booking or not. If $new_registration is true, it will also check whether a new user registration
-	 * is being requested and return true or false depending on both conditions being met. 
-	 * @param boolean $new_registration
-	 * @return boolean
-	 */
-	public static function is_manual_booking( $new_registration = true ){
-		if( !empty($_REQUEST['manual_booking']) && wp_verify_nonce($_REQUEST['manual_booking'], 'em_manual_booking_'.$_REQUEST['event_id']) ){
-			if( $new_registration ){
-				return empty($_REQUEST['person_id']) || $_REQUEST['person_id'] < 0;
-			}
-			return true;
-		}
-		return false;
-	}
+
 	
 	/*
 	 * ----------------------------------------------------------
@@ -291,18 +275,12 @@ class EM_Gateways {
 	 * ----------------------------------------------------------
 	 */
 	
-	public static function em_bookings_table_rows_col($value, $col, $EM_Booking, $EM_Bookings_Table, $csv){
-		global $EM_Event;
-		if( $col == 'gateway' ){
-			//get latest transaction with an ID
-			if( !empty($EM_Booking->booking_meta['gateway']) ){
-				$gateway = EM_Gateways::get_gateway($EM_Booking->booking_meta['gateway']);
-				$value = $gateway->title;
-			}else{
-				$value = __('None','events');
-			}
-		}
-		return $value;
+	public static function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	{
+		if ($column != 'gateway') return '';
+		if( empty($EM_Booking->booking_meta['gateway']) ) return __('None','events');
+		$gateway = EM_Gateways::get_gateway($EM_Booking->booking_meta['gateway']);
+		return $gateway->title;
 	}
 	
 	public static function em_bookings_table_cols_template($template, $EM_Bookings_Table){
@@ -310,55 +288,10 @@ class EM_Gateways {
 		return $template;
 	}
 
-	/*
-	 * --------------------------------------------------
-	* USER FIELDS - Adds user details link for use by gateways and options to form editor
-	* --------------------------------------------------
-	*/
-	/**
-	 * Returns value of a customer field, which are common fields for payment gateways linked to custom user fields in the forms editor.
-	 * @param string $field_name
-	 * @param EM_Booking $EM_Booking
-	 * @param string $user_or_id
-	 * @return string
-	 */
-	static function get_customer_field($field_name, $EM_Booking = false, $user_or_id = false){
-		//get user id
-		if( is_numeric($user_or_id) ){
-			$user_id = (int) $user_or_id; 
-		}elseif(is_object($user_or_id)){
-			$user_id = $user_or_id->ID;
-		}elseif( !empty($EM_Booking->person_id) ){
-			$user_id = $EM_Booking->person_id;		
-		}else{
-			$user_id = get_current_user_id();
-		}
-		//get real field id
-		if( array_key_exists($field_name, self::$customer_fields) ){
-			$associated_fields = get_option('emp_gateway_customer_fields');
-			$form_field_id = $associated_fields[$field_name];
-		}
-		if( empty($form_field_id) ) return '';
-		//determine field value
-		if( $user_id === 0 && !empty($EM_Booking) ){ //no-user mode is assumed since id is exactly 0
-			//get meta from booking if user meta isn't available
-			if( !empty($EM_Booking->booking_meta['registration'][$form_field_id])){
-				return $EM_Booking->booking_meta['registration'][$form_field_id];
-			}
-		}elseif( !empty($user_id) ){
-			//get corresponding user meta field, the one in $EM_Booking takes precedence as it may be newer
-			if( !empty($EM_Booking->booking_meta['registration'][$form_field_id]) ){
-				return $EM_Booking->booking_meta['registration'][$form_field_id];
-			}else{
-    			$value = get_user_meta($user_id, $form_field_id, true);
-				return $value;
-			}			
-		}
-		return '';
-	}
+	
+	
 	
 	static function customer_fields_admin_actions() {
-		global $EM_Notices;
 		if( !empty($_REQUEST['page']) && $_REQUEST['page'] == 'events-forms-editor' ){
 			if( !empty($_REQUEST['form_name']) && 'gateway_customer_fields' == $_REQUEST['form_name'] && wp_verify_nonce($_REQUEST['_wpnonce'], 'gateway_customer_fields_'.get_current_user_id()) ){
 				//save values
@@ -367,7 +300,6 @@ class EM_Gateways {
 					$gateway_fields[$field_key] = ( !empty($_REQUEST[$field_key]) ) ? $_REQUEST[$field_key]:'';
 				}
 				update_option('emp_gateway_customer_fields',$gateway_fields);
-				$EM_Notices->add_confirm(__('Changes Saved','events'));
 			}
 		}
 		

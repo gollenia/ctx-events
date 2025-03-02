@@ -1,5 +1,3 @@
-# This workflow runs composer and deploys the theme on a server
-
 name: Deploy on kids-team Server
 
 on:

@@ -69,7 +69,7 @@ class EM_Locations extends EM_Object {
 		$offset = ( $limit != "" && is_numeric($args['offset']) ) ? "OFFSET {$args['offset']}" : '';
 		
 		//Get fields that we can use in ordering and grouping, which can be event and location (excluding ambiguous) fields
-		$EM_Event = new EM_Event(); //blank event for below
+		$EM_Event = new EM_Event; //blank event for below
 		$EM_Location = new EM_Location(0); //blank location for below
 		$location_fields = array_keys($EM_Location->fields);
 		$event_fields = array(); //will contain event-specific fields, not ambiguous ones

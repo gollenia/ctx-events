@@ -31,7 +31,7 @@ class EM_Object {
 	 */
 	public static function get_default_search($defaults=array(), $array = array()){
 		
-		//TODO accept all objects as search options as well as ids (e.g. location vs. location_id, person vs. person_id)
+		//TODO accept all objects as search options as well as ids (e.g. location vs. location_id)
 		//Create minimal defaults array, merge it with supplied defaults array
 		$super_defaults = array(
 			'limit' => false,
@@ -569,20 +569,16 @@ class EM_Object {
 		//END TAXONOMY FILTERS
 	
 		//If we want rsvped items, we usually check the event
-		if( $bookings == 1 ){
-			$conditions['bookings'] = 'event_rsvp=1';
-		}elseif( $bookings === 'user' && is_user_logged_in()){
-			//get bookings of user
-			$EM_Person = new EM_Person(get_current_user_id());
-			$booking_ids = $EM_Person->get_bookings(true);
-			if( count($booking_ids) > 0 ){
-				$conditions['bookings'] = "(event_id IN (SELECT event_id FROM ".EM_BOOKINGS_TABLE." WHERE booking_id IN (".implode(',',$booking_ids).")))";
-			}else{
+			if( $bookings == 1 ){
+				$conditions['bookings'] = 'event_rsvp=1';
+			}elseif( $bookings === 'user' && is_user_logged_in()){
+				//get bookings of user
+				
 				$conditions['bookings'] = "(event_id = 0)";
+				
+			}elseif( $bookings == 0 && $bookings !== false ){
+				$conditions['bookings'] = 'event_rsvp=0';
 			}
-		}elseif( $bookings == 0 && $bookings !== false ){
-			$conditions['bookings'] = 'event_rsvp=0';
-		}
 		//Default ownership belongs to an event, child objects can just overwrite this if needed.
 		if( is_numeric($owner) ){
 			$conditions['owner'] = 'event_owner='.$owner;

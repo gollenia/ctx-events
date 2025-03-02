@@ -68,11 +68,6 @@ function em_bookings_events_table() {
 					</select>
 					<button id="post-query-submit" class="button-secondary" type="" value="" ><?php esc_attr_e( 'Filter' )?>
 				</div>
-				<!--
-				<div class="view-switch">
-					<a href="/wp-admin/edit.php?mode=list"><img class="current" id="view-switch-list" src="http://wordpress.lan/wp-includes/images/blank.gif" width="20" height="20" title="List View" alt="List View" name="view-switch-list" /></a> <a href="/wp-admin/edit.php?mode=excerpt"><img id="view-switch-excerpt" src="http://wordpress.lan/wp-includes/images/blank.gif" width="20" height="20" title="Excerpt View" alt="Excerpt View" name="view-switch-excerpt" /></a>
-				</div>
-				-->
 				<?php 
 				if ( $events_count >= $limit ) {
 					$events_nav = Contexis\Events\Admin\Pagination::paginate( $events_count, $limit, $page, array('em_ajax'=>0, 'em_obj'=>'em_bookings_events_table'));
@@ -83,7 +78,6 @@ function em_bookings_events_table() {
 			<div class="clear"></div>
 			<?php
 			if (empty ( $events )) {
-				// TODO localize
 				_e ( 'no events','events');
 			} else {
 			?>
@@ -109,9 +103,9 @@ function em_bookings_events_table() {
 						$style = "";
 						$booked_percent = 0;
 						$pending_percent = 0;
-						if($EM_Event->get_spaces() > 0) {
-							$booked_percent = $EM_Event->get_bookings()->get_booked_spaces() / ($EM_Event->get_spaces() / 100);
-							$pending_percent = $EM_Event->get_bookings()->get_pending_spaces() / ($EM_Event->get_spaces() / 100);
+						if($EM_Event->get_bookings()->get_spaces()  > 0) {
+							$booked_percent = $EM_Event->get_bookings()->get_booked_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
+							$pending_percent = $EM_Event->get_bookings()->get_pending_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
 						}
 						
 						
@@ -129,7 +123,7 @@ function em_bookings_events_table() {
 							</td>
 							<td>
 								
-							<b><?php echo $EM_Event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $EM_Event->get_spaces(); ?>
+							<b><?php echo $EM_Event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $EM_Event->get_bookings()->get_spaces(); ?>
 					
 							</td>
 							<td >

@@ -26,7 +26,7 @@ class EM_Event_Post_Admin{
 	public static function admin_head(){
 		global $post, $EM_Event;
 		if( empty($EM_Event) && !empty($post) && $post->post_type == EM_POST_TYPE_EVENT ){
-			$EM_Event = EM_Event::find($post->ID, 'post_id');
+			$EM_Event = EM_Event::find_by_post($post);
 		}
 	}
 	
@@ -81,7 +81,7 @@ class EM_Event_Post_Admin{
 		if( !$untrashing && $is_post_type && $saving_status ){
 			if( true ){ 
 				//this is only run if we know form data was submitted, hence the nonce
-				$EM_Event = EM_Event::find($post_ID, 'post_id');
+				$EM_Event = EM_Event::find_by_post($post_ID);
 				$EM_Event->post_type = $post_type;
 				//Handle Errors by making post draft
 				$get_meta = $EM_Event->get_post_meta();
@@ -93,9 +93,11 @@ class EM_Event_Post_Admin{
 	}
 	
 	public static function save_post($post_id, $post = false){
-		global $wpdb, $EM_Event, $EM_Notices, $EM_SAVING_EVENT, $EM_EVENT_SAVE_POST; /* @var EM_Notices $EM_Notices */
-		
-		if( !empty($EM_SAVING_EVENT) ) return; //never proceed with this if using EM_Event::save();
+		global $EM_Notices, $EM_EVENT_SAVE_POST; /* @var EM_Notices $EM_Notices */
+		static $is_saving = false;
+
+		if( $is_saving ) return; //prevent infinite loops
+		$is_saving = true;
 		if ( isset($_GET['preview_id']) && isset($_GET['preview_nonce']) && wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $post_id ) ) return; //don't proceed with saving when previewing, may cause issues
 		$post_type = get_post_type($post_id);
 		$is_post_type = $post_type == EM_POST_TYPE_EVENT || $post_type == 'event-recurring';
@@ -107,14 +109,13 @@ class EM_Event_Post_Admin{
 			$server_timezone = date_default_timezone_get();
 			date_default_timezone_set('UTC');
 			//grab event, via post info, reset the $EM_Event variable
-			$EM_Event = new EM_Event($post_id, 'post_id'); 
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			$EM_Event->post_type = $post_type;
 			//check whether this is a quick save or not, then save accordingly
 			
 			//this is only run if we know form data was submitted, hence the nonce
 			$get_meta = $EM_Event->get_post_meta();
 			$validate_meta = $EM_Event->validate_meta(); //Handle Errors by making post draft
-			do_action('em_event_save_pre', $EM_Event); //technically, the event is saved... but the meta isn't. wp doesn't give an pre-intervention action for this (or does it?)
 			//if we execute a location save here, we will screw up the current save_post $wp_filter pointer executed in do_action()
 			//therefore, we save the current pointer position (priority) and set it back after saving the location further down
 			global $wp_filter, $wp_current_filter;
@@ -154,23 +155,21 @@ class EM_Event_Post_Admin{
 			self::maybe_publish_location($EM_Event);
 			//Set server timezone back, even though it should be UTC anyway
 			date_default_timezone_set($server_timezone);
-			file_put_contents('/var/www/vhosts/kids-team.internal/log/wp_insert_post_data.log', print_r($EM_Notices, true));
 		}
+		$is_saving = false;
 	}
 	
-	/**
-	 * Refreshes the cache of the current global $EM_Event, provided the refresh_cache flag is set to true within the object and the object has a published state
-	 */
-	public static function refresh_cache(){
-		global $EM_Event;
-		//if this is a published event, and the refresh_cache flag was added to this event during save_post, refresh the meta and update the cache
-		if( !empty($EM_Event->refresh_cache) && !empty($EM_Event->post_id) && $EM_Event->is_published() ){
-			$post = get_post($EM_Event->post_id);
-			$EM_Event->load_postdata($post);
-			unset($EM_Event->refresh_cache);
-			wp_cache_set($EM_Event->event_id, $EM_Event, 'em_events');
-			wp_cache_set($EM_Event->post_id, $EM_Event->event_id, 'em_events_ids');
+	public static function refresh_cache(?\EM_Event $event = null) {
+		if (!$event || empty($event->refresh_cache) || empty($event->post_id) || !$event->is_published()) {
+			return;
 		}
+	
+		$post = get_post($event->post_id);
+		$event->load_postdata($post);
+		unset($event->refresh_cache);
+	
+		wp_cache_set($event->event_id, $event, 'em_events');
+		wp_cache_set($event->post_id, $event->event_id, 'em_events_ids');
 	}
 	
 	/**
@@ -190,7 +189,7 @@ class EM_Event_Post_Admin{
 
 	public static function before_delete_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
-			$EM_Event = EM_Event::find($post_id,'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			do_action('em_event_delete_pre ',$EM_Event);
 			$EM_Event->delete_meta();
 		}
@@ -198,10 +197,8 @@ class EM_Event_Post_Admin{
 	
 	public static function trashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
-			global $EM_Notices;
-			$EM_Event = EM_Event::find($post_id,'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			$EM_Event->set_status(-1);
-			$EM_Notices->remove_all(); //no validation/notices needed
 		}
 	}
 	
@@ -214,33 +211,25 @@ class EM_Event_Post_Admin{
 	
 	public static function untrashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
-			global $EM_Notices, $EM_Event;
-			$EM_Event = new EM_Event($post_id, 'post_id'); //get a refreshed $EM_Event because otherwise statuses don't get updated by WP
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			$EM_Event->set_status( $EM_Event->get_status() );
-			$EM_Notices->remove_all(); //no validation/notices needed
 		}
 	}
 	
-	public static function meta_boxes( $post ){
-		global $EM_Event;
-		//since this is the first point when the admin area loads event stuff, we load our EM_Event here
-		if( empty($EM_Event) && !empty($post) ){
-			$EM_Event = EM_Event::find($post->ID, 'post_id');
-		}
-		
-		if( get_option('dbem_rsvp_enabled', true) && $EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
-			add_meta_box('em-event-bookings', __('Bookings/Registration','events'), array('EM_Event_Post_Admin','meta_box_bookings'),EM_POST_TYPE_EVENT, 'normal','high');
-		}
-
-		
-		
-	}		
+	public static function meta_boxes($post) {
+		$event = EM_Event::find_by_post($post);
 	
-	public static function meta_box_metadump(){
-		global $post,$EM_Event;
-		echo "<pre>"; print_r($EM_Event); echo "</pre>";		
+		if (get_option('dbem_rsvp_enabled', true) && $event->can_manage('manage_bookings','manage_others_bookings')) {
+			add_meta_box(
+				'em-event-bookings',
+				__('Bookings/Registration', 'events'),
+				array('EM_Event_Post_Admin', 'meta_box_bookings'),
+				EM_POST_TYPE_EVENT,
+				'normal',
+				'high'
+			);
+		}
 	}
-	
 	
 	public static function meta_box_date(){
 		//create meta box check of date nonce
@@ -249,35 +238,13 @@ class EM_Event_Post_Admin{
 	}
 
 
-	public static function meta_box_bookings(){
-		em_locate_template('forms/event/bookings.php', true);
-		add_action('admin_footer',array('EM_Event_Post_Admin','meta_box_bookings_overlay'));
-	}
+	public static function meta_box_bookings($post){
+		$event = EM_Event::find_by_post($post);
+		echo '<div id="event-rsvp-options">';
 	
-	public static function meta_box_bookings_overlay(){
-		em_locate_template('forms/tickets-form.php', true); //put here as it can't be in the add event form
-	}
-	
-
-	
-	public static function meta_box_ms_categories(){
-		global $EM_Event;
+			do_action('em_events_admin_bookings_footer', $event); 
 		
-		$categories = EM_Categories::get(array('hide_empty'=>false));
-		?>
-		<?php if( count($categories) > 0 ): ?>
-			<p class="ms-global-categories">
-			 <?php $selected = $EM_Event->get_categories()->get_ids(); ?>
-			 <?php $walker = new EM_Walker_Category(); ?>
-			 <?php $args_em = array( 'hide_empty' => 0, 'name' => 'event_categories[]', 'hierarchical' => true, 'id' => EM_TAXONOMY_CATEGORY, 'taxonomy' => EM_TAXONOMY_CATEGORY, 'selected' => $selected, 'walker'=> $walker); ?>
-			 <?php echo walk_category_dropdown_tree($categories, 0, $args_em); ?>
-			</p>
-		<?php else: ?>
-			<p><?php sprintf(__('No categories available, <a href="%s">create one here first</a>','events'), get_bloginfo('wpurl').'/wp-admin/admin.php?page=events-categories'); ?></p>
-		<?php endif; ?>
-		<!-- END Categories -->
-		<?php
-		
+		echo "</div>";
 	}
 }
 add_action('admin_init',array('EM_Event_Post_Admin','init'));
@@ -308,8 +275,7 @@ class EM_Event_Recurring_Post_Admin{
 	public static function admin_head(){
 		global $post, $EM_Event;
 		if( !empty($post) && $post->post_type == 'event-recurring' ){
-			$EM_Event = EM_Event::find($post->ID, 'post_id');
-			//quick hacks to make event admin table make more sense for events
+			$EM_Event = EM_Event::find_by_post($post);
 			?>
 			<script type="text/javascript">
 				jQuery(document).ready( function($){
@@ -328,17 +294,16 @@ class EM_Event_Recurring_Post_Admin{
 	 * @param int $post_id
 	 */
 	public static function save_post($post_id){
-		global $wpdb, $EM_Notices, $EM_SAVING_EVENT, $EM_EVENT_SAVE_POST;
+		global $EM_SAVING_EVENT, $EM_EVENT_SAVE_POST;
 		if( !empty($EM_SAVING_EVENT) ) return; //never proceed with this if using EM_Event::save(); which only gets executed outside wp admin
 		$post_type = get_post_type($post_id);
 		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
 		if(!defined('UNTRASHING_'.$post_id) && $post_type == 'event-recurring' && $saving_status && !empty($EM_EVENT_SAVE_POST) ){
-			$EM_Event = EM_Event::find($post_id, 'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			$EM_Event->post_type = $post_type;
 			//get the list post IDs for recurrences this recurrence
 		 	if( !$EM_Event->save_events() && ( $EM_Event->is_published() || 'future' == $EM_Event->post_status ) ){
 				$EM_Event->set_status(null, true);
-				$EM_Notices->add_error(__ ( 'Something went wrong with the recurrence update...', 'events'). __ ( 'There was a problem saving the recurring events.', 'events'));
 		 	}
 		}
 		$EM_EVENT_SAVE_POST = false; //last filter of save_post in EM for events
@@ -346,7 +311,7 @@ class EM_Event_Recurring_Post_Admin{
 
 	public static function before_delete_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
-			$EM_Event = EM_Event::find($post_id,'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			do_action('em_event_delete_pre ',$EM_Event);
 			//now delete recurrences
 			//only delete other events if this isn't a draft-never-published event
@@ -366,8 +331,7 @@ class EM_Event_Recurring_Post_Admin{
 	
 	public static function trashed_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
-			global $EM_Notices, $wpdb;
-			$EM_Event = EM_Event::find($post_id,'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			$EM_Event->set_status(null);
 			//only trash other events if this isn't a draft-never-published event
 			if( !empty($EM_Event->event_id) ){
@@ -380,16 +344,14 @@ class EM_Event_Recurring_Post_Admin{
     				}
     			}
 			}
-			$EM_Notices->remove_all(); //no validation/notices needed
 		}
 	}
 	
 	public static function untrash_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
-			global $wpdb;
 			//set a constant so we know this event doesn't need 'saving'
 			if(!defined('UNTRASHING_'.$post_id)) define('UNTRASHING_'.$post_id, true);
-			$EM_Event = EM_Event::find($post_id,'post_id');
+			$EM_Event = EM_Event::find_by_post_id($post_id);
 			//only untrash other events if this isn't a draft-never-published event, because if so it never had other events to untrash
 			if( !empty($EM_Event->event_id) ){
     			$events_array = EM_Events::get( array('recurrence_id'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
@@ -405,18 +367,12 @@ class EM_Event_Recurring_Post_Admin{
 	
 	public static function untrashed_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
-			global $EM_Notices,$EM_Event;
-			$EM_Event->set_status(1);
-			$EM_Notices->remove_all(); //no validation/notices needed
+			EM_Event::find_by_post_id($post_id)->set_status(1);
 		}
 	}
 	
 	public static function meta_boxes( $post ){
-		global $EM_Event;
-		//since this is the first point when the admin area loads event stuff, we load our EM_Event here
-		if( empty($EM_Event) && !empty($post) ){
-			$EM_Event = EM_Event::find($post->ID, 'post_id');
-		}
+		$EM_Event = EM_Event::find_by_post($post) ?? new EM_Event();
 		
 	
 		if( get_option('dbem_rsvp_enabled') && $EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
@@ -426,9 +382,6 @@ class EM_Event_Recurring_Post_Admin{
 		
 	}
 	
-	public static function meta_box_recurrence(){
-	    ?><input type="hidden" name="_emnonce" value="<?php echo wp_create_nonce('edit_event'); ?>" /><?php
-		em_locate_template('forms/event/recurring-when.php', true);
-	}
+
 }
 add_action('admin_init',array('EM_Event_Recurring_Post_Admin','init'));

@@ -369,7 +369,7 @@ class EM_Coupons_Admin {
 									<?php echo $EM_Booking->output('#_BOOKINGSLINK') ?>
 									<?php if( in_array($EM_Booking->booking_status, array(2,3)) ) echo '<p class="description">('. $EM_Booking->get_status() . ')</p> '; ?>
 								</td>
-								<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;person_id=<?php echo $EM_Booking->person_id; ?>"><?php echo $EM_Booking->person->get_name() ?></a></td>
+								<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $EM_Booking->booking_mail; ?>"><?php echo $EM_Booking->full_name ?></a></td>
 								<td><?php echo $EM_Booking->get_spaces() ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Booking->get_price()); ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Coupon->get_discount($base_price)); ?> <p class="description">(<?php echo $EM_Coupon->get_discount_text(); ?>)</p></td>

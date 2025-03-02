@@ -246,9 +246,9 @@ function em_create_bookings_table() {
 	$sql = "CREATE TABLE ".$table_name." (
 		booking_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		event_id bigint(20) unsigned NULL,
-		person_id bigint(20) unsigned NOT NULL,
 		booking_spaces smallint(5) NOT NULL,
 		booking_comment text DEFAULT NULL,
+		booking_mail TEXT NULL DEFAULT NULL,
 		booking_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		booking_status bool NOT NULL DEFAULT 1,
  		booking_price decimal(14,4) unsigned NOT NULL DEFAULT 0,
@@ -258,7 +258,7 @@ function em_create_bookings_table() {
 		) DEFAULT CHARSET=utf8 ;";
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 	dbDelta($sql);
-	em_sort_out_table_nu_keys($table_name, array('event_id','person_id','booking_status'));
+	em_sort_out_table_nu_keys($table_name, array('event_id','booking_status'));
 }
 
 
@@ -579,7 +579,7 @@ function em_add_options() {
 		'em_offline_option_name' => __('Pay Offline', 'events'),
 		'em_offline_booking_feedback' => __('Booking successful.', 'events'),
 		'em_offline_button' => __('Pay Offline', 'events'),
-		'emp_gateway_customer_fields' => ['address' => 'dbem_address','address_2' => 'dbem_address_2','city' => 'dbem_city','state' => 'dbem_state','zip' => 'dbem_zip','country' => 'dbem_country','phone' => 'dbem_phone','fax' => 'dbem_fax','company' => 'dbem_company'],
+		'emp_gateway_customer_fields' => ['address' => 'dbem_address','address_2' => 'dbem_address_2','city' => 'dbem_city','state' => 'dbem_state','zip' => 'dbem_zip','country' => 'dbem_country','phone' => 'dbem_phone','company' => 'dbem_company'],
 		'em_user_fields' => [
 			'dbem_address' => array ( 'label' => __('Address','events'), 'type' => 'text', 'fieldid'=>'dbem_address', 'required'=>1 ),
 			'dbem_address_2' => array ( 'label' => __('Address Line 2','events'), 'type' => 'text', 'fieldid'=>'dbem_address_2' ),
@@ -588,7 +588,6 @@ function em_add_options() {
 			'dbem_zip' => array ( 'label' => __('Zip/Post Code','events'), 'type' => 'text', 'fieldid'=>'dbem_zip', 'required'=>1 ),
 			'dbem_country' => array ( 'label' => __('Country','events'), 'type' => 'country', 'fieldid'=>'dbem_country', 'required'=>1 ),
 			'dbem_phone' => array ( 'label' => __('Phone','events'), 'type' => 'text', 'fieldid'=>'dbem_phone' ),
-			'dbem_fax' => array ( 'label' => __('Fax','events'), 'type' => 'text', 'fieldid'=>'dbem_fax' ),
 			'dbem_company' => array ( 'label' => __('Company','events'), 'type' => 'text', 'fieldid'=>'dbem_company' ),
 		]
 		
@@ -622,11 +621,10 @@ function em_add_options() {
 }
 
 function em_upgrade_current_installation(){
-
+	global $wpdb;
 
 	//update version
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.7 ) {
-		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_rsvp_end datetime NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_rsvp_start datetime NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_speaker_id bigint(20) unsigned NULL DEFAULT NULL');
@@ -636,7 +634,6 @@ function em_upgrade_current_installation(){
 	}
 
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.8 ) {
-		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ADD COLUMN booking_donation decimal(10,2) NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax_rate');
@@ -647,18 +644,24 @@ function em_upgrade_current_installation(){
 	}
 
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.81 ) {
-		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_location_type');
 	}
 
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.82 ) {
-		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ALTER COLUMN booking_donation SET TYPE decimal(14,4)');
 	}
 
 	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.83 ) {
-		global $wpdb;
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_language');
+	}
+
+	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.84 ) {
+		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ADD COLUMN booking_mail TEXT NULL');
+		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax');
+	}
+
+	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.85 ) {
+		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN person_id');
 	}
 }
 

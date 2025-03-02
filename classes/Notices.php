@@ -4,7 +4,7 @@
      * @author marcus
      *
      */
-    class EM_Notices implements Iterator, JsonSerializable {
+    class EM_Notices implements Iterator {
     	/**
     	 * If object has been displayed, this gets set to true, can be checked to avoid duplicates.
     	 * @var boolean
@@ -228,18 +228,6 @@
             return $this->count('confirms');
         }
         
-        // Encoiding in JsonSerializable
-
-		#[\ReturnTypeWillChange]
-	    function jsonSerialize(){
-        	$notices = array();
-	        foreach( $notices as $k => $v ){
-	        	if( !empty($v) ){
-	        		$notices[$k] = $v;
-		        }
-	        }
-        	return $notices;
-	    }
 
 		//Iterator Implementation
 

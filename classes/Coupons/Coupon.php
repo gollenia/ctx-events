@@ -40,10 +40,7 @@ class EM_Coupon extends EM_Object {
 	public string $feedback_message = ""; 
 	var array $errors = array();
 	var $count = 0;
-	/**
-	 * @var EM_Person
-	 */
-	public $person;
+
 	
 	
 	/**
@@ -98,18 +95,11 @@ class EM_Coupon extends EM_Object {
 		return $price - $this->apply_discount($price);
 	}
 	
-	function get_person(){
-		global $EM_Person;
-		if( is_object($this->person) && get_class($this->person)=='EM_Person' && ($this->person->ID == $this->coupon_owner || empty($this->coupon_owner) ) ){
-			//This person is already included, so don't do anything
-		}elseif( is_object($EM_Person) && ($EM_Person->ID === $this->coupon_owner || $this->coupon_id == '') ){
-			$this->person = $EM_Person;
-		}elseif( is_numeric($this->coupon_owner) ){
-			$this->person = new EM_Person(new WP_User($this->coupon_owner));
-		}else{
-			$this->person = new EM_Person(0);
+	function get_person() {
+		if (!is_numeric($this->coupon_owner)) {
+			return null;
 		}
-		return apply_filters('em_coupon_get_person', $this->person, $this);
+		return get_userdata($this->coupon_owner);
 	}
 	
 	/**
