@@ -153,7 +153,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 		 if( get_option('em_mollie_return_page') ){
 			 return get_permalink(get_option( 'em_mollie_return_page') );
 		 }
-		 return $event->output("#_EVENTURL");
+		 return $event->get_permalink();
 	}
 
 
@@ -515,7 +515,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 	 */
 	static function get_methods() : array {
 		if( !self::start_mollie() ) {
-			return false;
+			return [];
 		}
 
 		$methods = get_option('mollie_activated_methods');
@@ -524,8 +524,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 
 		$methods	= array();
 		$mollie 	= self::start_mollie();
-		$all 		= $mollie->methods->all(['locale' => get_locale(), 'includeWallets' => 'applepay,googlepay']);
-		//var_dump($all);
+		$all 		= $mollie->methods->allActive(['locale' => get_locale(), 'includeWallets' => 'applepay,googlepay']);
 		foreach( $all as $method ) {
 
 			$texts = self::mollie_method($method->id);

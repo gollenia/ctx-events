@@ -20,7 +20,6 @@ class EM_Bookings_Table {
 	public int $offset = 0;
 	public string $scope = 'future';
 	public bool $show_tickets = false;
-	public int $bookings_count = 0;
 	public ?EM_Bookings $bookings;
 	public string $status = '';
 	public array $cols_tickets_template = [];
@@ -89,6 +88,14 @@ class EM_Bookings_Table {
 		$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;
 		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], \EM_Object::get_scopes()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
 		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->states) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
+		
+		if(empty($_REQUEST['no_save'])) {
+			$this->save_user_preferences();
+		}
+
+		if( !empty($_REQUEST['event_id']) && $_REQUEST['event_id'] != 0 ){
+			$this->event = EM_Event::find_by_event_id($_REQUEST['event_id']);
+		}
 
 		if(empty($_REQUEST['cols'])) {
 			$this->load_user_preferences();
@@ -108,13 +115,7 @@ class EM_Bookings_Table {
 			$this->cols[] = sanitize_text_field($column);
 		}
 
-		if(empty($_REQUEST['no_save'])) {
-			$this->save_user_preferences();
-		}
-
-		if( !empty($_REQUEST['event_id']) && $_REQUEST['event_id'] != 0 ){
-			$this->event = EM_Event::find_by_event_id($_REQUEST['event_id']);
-		}
+		
 	}
 
 
@@ -182,15 +183,13 @@ class EM_Bookings_Table {
 		];
 
 		if( $this->event !== null ) $args['event'] = $this->event->event_id;
-		
 		$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
-		$this->bookings_count = EM_Bookings::count($args);
 		$this->bookings = EM_Bookings::get($args);
 		return $this->bookings;
 	}
 	
 	function get_count(){
-		return $this->bookings_count;
+		return count($this->bookings);
 	}
 	
 	function output(){
@@ -352,8 +351,8 @@ class EM_Bookings_Table {
 						
 					</div>
 					<?php 
-					if ( $this->bookings_count >= $this->limit ) {
-						$bookings_nav = Contexis\Events\Admin\Pagination::paginate( $this->bookings_count, $this->limit, $this->page, array(),'#%#%','#');
+					if ( count($this->bookings) >= $this->limit ) {
+						$bookings_nav = Contexis\Events\Admin\Pagination::paginate( count($this->bookings), $this->limit, $this->page, array(),'#%#%','#');
 						echo $bookings_nav;
 					}
 					?>
@@ -371,7 +370,7 @@ class EM_Bookings_Table {
 							<th class='manage-column' scope='col'><?php echo implode("</th><th class='manage-column' scope='col'>", $this->get_headers()); ?></th>
 						</tr>
 					</thead>
-					<?php if( $this->bookings_count > 0 ): ?>
+					<?php if( count($this->bookings) > 0 ): ?>
 					<tbody>
 						<?php 
 						
@@ -410,7 +409,7 @@ class EM_Bookings_Table {
 					<?php endif; ?>
 				</table>
 				</div>
-				<?php if( !empty($bookings_nav) && $this->bookings_count >= $this->limit ) : ?>
+				<?php if( !empty($bookings_nav) && count($this->bookings) >= $this->limit ) : ?>
 				<div class='tablenav'>
 					<?php echo $bookings_nav; ?>
 					<div class="clear"></div>

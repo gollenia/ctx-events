@@ -144,7 +144,7 @@ class EventView {
 					if( is_array($image_size) && !(array_is_list($image_size) && count($image_size) > 1) ) break;
 
 					
-					$replace = get_the_post_thumbnail($this->event->ID, $image_size, array('alt' => esc_attr($this->event->event_name)) );
+					$replace = get_the_post_thumbnail($this->event->post_id, $image_size, array('alt' => esc_attr($this->event->event_name)) );
 					
 					$image_attr = '';
 					$image_args = array();
@@ -277,7 +277,7 @@ class EventView {
 					break;
 				case '#_ATTENDEESLIST':
 					ob_start();
-					$template = em_locate_template('placeholders/attendeeslist.php', true, array('EM_Event'=>$this->event));
+					$template = \em_locate_template('placeholders/attendeeslist.php', true, array('EM_Event'=>$this->event));
 					$replace = ob_get_clean();
 					break;
 				case '#_ATTENDEESPENDINGLIST':
@@ -341,7 +341,7 @@ class EventView {
 				$event_string = $this->event->get_location()->output($event_string, $target);
 			}else{
 				$EM_Location = new EM_Location();
-				$event_string = $EM_Location->output($event_string, $target);
+				$event_string = LocationView::render($EM_Location, $event_string, $target);
 			}
 		}
 		

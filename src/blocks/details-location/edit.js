@@ -31,14 +31,15 @@ const edit = ( props ) => {
 
 	const query = {
 		per_page: 1,
+		include: [ meta._location_id ],
 		_embed: true,
-		metaKey: '_location_id',
-		metaValue: meta._location_id,
 	};
 
-	const post = useSelect( ( select ) => select( 'core' ).getEntityRecords( 'postType', 'location', query ) );
+	const location = useSelect( ( select ) =>
+		select( 'core' ).getEntityRecord( 'postType', 'location', meta._location_id )
+	);
 
-	const location = post?.length ? post[ 0 ] : null;
+	console.log( 'location', location );
 
 	const blockProps = useBlockProps( { className: 'event-details-item' } );
 
@@ -47,7 +48,7 @@ const edit = ( props ) => {
 		location?._embedded?.[ 'wp:featuredmedia' ]?.length &&
 		location?._embedded?.[ 'wp:featuredmedia' ][ 0 ].media_details.sizes?.thumbnail?.source_url;
 
-	console.log( 'location', hasPhoto );
+	console.log( 'location in det', meta._location_id );
 
 	return (
 		<div { ...blockProps }>

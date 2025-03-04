@@ -27,8 +27,16 @@ use \Contexis\Events\Options;
 					
 				$location_options = array();
 				$location_options[0] = __('no default location','events');
-				$EM_Locations = EM_Locations::get([]);
+				$query = new WP_Query(array('post_type'=>EM_POST_TYPE_LOCATION, 'posts_per_page'=>-1));
 				
+				if( $query->have_posts() ){
+					while ( $query->have_posts() ) {
+						$query->the_post();
+						$location_options[get_the_ID()] = get_the_title();
+					}
+				}
+				wp_reset_postdata();
+
 				foreach($EM_Locations as $EM_Location){
 					$location_options[$EM_Location->location_id] = $EM_Location->location_name;
 				}

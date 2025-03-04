@@ -872,7 +872,7 @@ class EM_Booking extends EM_Object{
 		}
 		//run event output too, since this is never run from within events and will not infinitely loop
 		$EM_Event = apply_filters('em_booking_output_event', $this->get_event(), $this); //allows us to override the booking event info if it belongs to a parent or translation
-		$output_string = $EM_Event->output($output_string, $target);
+		$output_string = EventView::render($EM_Event, $output_string, $target);
 		return apply_filters('em_booking_output', $output_string, $this, $format, $target);	
 	}
 	

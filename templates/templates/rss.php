@@ -28,7 +28,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 		while( count($EM_Events) > 0 ){
 			foreach ( $EM_Events as $EM_Event ) {
 				/* @var $EM_Event EM_Event */
-				$description = $EM_Event->output( get_option ( 'dbem_rss_description_format' ), "rss");
+				$description = EventView::render($EM_Event, get_option ( 'dbem_rss_description_format' ), "rss");
 				$description = ent2ncr(convert_chars($description)); //Some RSS filtering
 				$event_url = $EM_Event->get_permalink;
 				?>

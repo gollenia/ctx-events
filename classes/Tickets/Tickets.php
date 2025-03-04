@@ -35,9 +35,10 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 		return $order_by;
 	}
 
-	public static function find_by_event_id($event_id) {
+	public static function find_by_event_id(int $event_id) {
 		global $wpdb;
 		$instance = new self();
+		if( $event_id == 0 ) return $instance;
 		$instance->event_id = $event_id;
 		$order_by = $instance->get_ticket_sorting();
 		$sql = "SELECT * FROM ". EM_TICKETS_TABLE ." WHERE event_id ='{$instance->event_id}' ORDER BY ".implode(',', $order_by);

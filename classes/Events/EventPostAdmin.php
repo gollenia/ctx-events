@@ -38,7 +38,7 @@ class EM_Event_Post_Admin{
 				$warning = "<p><strong>".__( 'WARNING: This is a recurring event.', 'events')."</strong></p>";
 				$warning .= "<p>". __( 'Modifications to recurring events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events') . '</p>';
 				$warning .= "<p>". __( 'Bookings to individual event recurrences will be preserved if event times and ticket settings are not modified.', 'events') . '</p>';
-				$warning .= '<p><a href="'. esc_url( add_query_arg(array('scope'=>'all', 'recurrence_id'=>$EM_Event->event_id), em_get_events_admin_url()) ).'">'. esc_html__('You can edit individual recurrences and disassociate them with this recurring event.','events') . '</a></p>';
+				$warning .= '<p><a href="'. esc_url( add_query_arg(array('scope'=>'all', 'recurrence_id'=>$EM_Event->event_id), admin_url('edit.php?post_type=event')) ).'">'. esc_html__('You can edit individual recurrences and disassociate them with this recurring event.','events') . '</a></p>';
 				?><div class="notice notice-warning is-dismissible"><?php echo $warning; ?></div><?php
 			} elseif ( $EM_Event->is_recurrence() ) {
 				$warning = "<p><strong>".__('WARNING: This is a recurrence in a set of recurring events.', 'events')."</strong></p>";
@@ -81,7 +81,7 @@ class EM_Event_Post_Admin{
 		if( !$untrashing && $is_post_type && $saving_status ){
 			if( true ){ 
 				//this is only run if we know form data was submitted, hence the nonce
-				$EM_Event = EM_Event::find_by_post($post_ID);
+				$EM_Event = EM_Event::find_by_post_id($post_ID);
 				$EM_Event->post_type = $post_type;
 				//Handle Errors by making post draft
 				$get_meta = $EM_Event->get_post_meta();
@@ -92,74 +92,51 @@ class EM_Event_Post_Admin{
 		return $data;
 	}
 	
-	public static function save_post($post_id, $post = false){
-		global $EM_Notices, $EM_EVENT_SAVE_POST; /* @var EM_Notices $EM_Notices */
-		static $is_saving = false;
+	public static function save_post(int $post_id, WP_Post $post){
+		global $EM_Notices; /* @var EM_Notices $EM_Notices */
 
-		if( $is_saving ) return; //prevent infinite loops
-		$is_saving = true;
-		if ( isset($_GET['preview_id']) && isset($_GET['preview_nonce']) && wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $post_id ) ) return; //don't proceed with saving when previewing, may cause issues
-		$post_type = get_post_type($post_id);
-		$is_post_type = $post_type == EM_POST_TYPE_EVENT || $post_type == 'event-recurring';
-		$doing_add_meta_ajax = defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['action']) && $_REQUEST['action'] == 'add-meta' && check_ajax_referer( 'add-meta', '_ajax_nonce-add-meta', false ); //we don't need to save anything here, we don't use this action
-		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE') && !$doing_add_meta_ajax;
-		$EM_EVENT_SAVE_POST = true; //first filter for save_post in EM for events
-		if(!defined('UNTRASHING_'.$post_id) && $is_post_type && $saving_status ){
-			//Reset server timezone to UTC in case other plugins are doing something naughty
-			$server_timezone = date_default_timezone_get();
-			date_default_timezone_set('UTC');
-			//grab event, via post info, reset the $EM_Event variable
-			$EM_Event = EM_Event::find_by_post_id($post_id);
-			$EM_Event->post_type = $post_type;
-			//check whether this is a quick save or not, then save accordingly
-			
-			//this is only run if we know form data was submitted, hence the nonce
-			$get_meta = $EM_Event->get_post_meta();
-			$validate_meta = $EM_Event->validate_meta(); //Handle Errors by making post draft
-			//if we execute a location save here, we will screw up the current save_post $wp_filter pointer executed in do_action()
-			//therefore, we save the current pointer position (priority) and set it back after saving the location further down
-			global $wp_filter, $wp_current_filter;
-			$wp_filter_priority = key($wp_filter['save_post']);
-			$tag = end($wp_current_filter);
-			//save the event meta, whether validated or not and which includes saving a location
-			$save_meta = $EM_Event->save_meta();
-			//reset save_post pointer in $wp_filter to its original position
-			reset( $wp_filter[$tag] );
-			do{
-				if( key($wp_filter[$tag]) == $wp_filter_priority ) break; 
-			}while ( next($wp_filter[$tag]) !== false );
-			//save categories in case of default category
-			$EM_Event->get_categories()->save();
-			//continue whether all went well or not
-			if( !$get_meta || !$validate_meta || !$save_meta ){
-				//failed somewhere, set to draft, don't publish
-				$EM_Event->set_status(null, true);
-				if( $EM_Event->is_recurring() ){
-					$EM_Notices->add_error( '<strong>'.__('Your event details are incorrect and recurrences cannot be created, please correct these errors first:','events').'</strong>', true); //Always seems to redirect, so we make it static
-				}else{
-					$EM_Notices->add_error( '<strong>'.sprintf(__('Your %s details are incorrect and cannot be published, please correct these errors first:','events'),__('event','events')).'</strong>', true); //Always seems to redirect, so we make it static
-				}
-				$EM_Notices->add_error($EM_Event->get_errors(), true); //Always seems to redirect, so we make it static
-				apply_filters('em_event_save', false, $EM_Event);
+		if ( isset($_GET['preview_id']) && isset($_GET['preview_nonce']) && wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $post_id ) ) return; 
+
+		$post_type = get_post_type($post);
+		$is_post_type = $post_type == \Contexis\Events\Events\EventPost::POST_TYPE || $post_type == 'event-recurring';
+		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
+		if(defined('UNTRASHING_'.$post_id) || !$is_post_type || !$saving_status) return;
+		
+		$EM_Event = EM_Event::find_by_post_id($post_id);
+		
+		$get_meta = $EM_Event->get_post_meta();
+		$validate_meta = $EM_Event->validate_meta(); //Handle Errors by making post draft
+		$save_meta = $EM_Event->save_meta();
+		$EM_Event->get_categories()->save();
+
+		if( !$get_meta || !$validate_meta || !$save_meta ){
+			//failed somewhere, set to draft, don't publish
+			$EM_Event->set_status(null, true);
+			if( $EM_Event->is_recurring() ){
+				$EM_Notices->add_error( '<strong>'.__('Your event details are incorrect and recurrences cannot be created, please correct these errors first:','events').'</strong>', true); //Always seems to redirect, so we make it static
 			}else{
-				//if this is just published, we need to email the user about the publication, or send to pending mode again for review
-				if( (!$EM_Event->is_recurring() && !current_user_can('publish_events')) || ($EM_Event->is_recurring() && !current_user_can('publish_recurring_events')) ){
-					if( $EM_Event->is_published() ){ $EM_Event->set_status(0, true); } //no publishing and editing... security threat
-				}
-				apply_filters('em_event_save', true, $EM_Event);
-				//flag a cache refresh if we get here
-				$EM_Event->refresh_cache = true;
-				add_filter('save_post', 'EM_Event_Post_Admin::refresh_cache', 100000000);
+				$EM_Notices->add_error( '<strong>'.sprintf(__('Your %s details are incorrect and cannot be published, please correct these errors first:','events'),__('event','events')).'</strong>', true); //Always seems to redirect, so we make it static
 			}
-			
-			self::maybe_publish_location($EM_Event);
-			//Set server timezone back, even though it should be UTC anyway
-			date_default_timezone_set($server_timezone);
+			$EM_Notices->add_error($EM_Event->get_errors(), true); //Always seems to redirect, so we make it static
+			apply_filters('em_event_save', false, $EM_Event);
+		}else{
+			//if this is just published, we need to email the user about the publication, or send to pending mode again for review
+			if( (!$EM_Event->is_recurring() && !current_user_can('publish_events')) || ($EM_Event->is_recurring() && !current_user_can('publish_recurring_events')) ){
+				if( $EM_Event->is_published() ){ $EM_Event->set_status(0, true); } //no publishing and editing... security threat
+			}
+			apply_filters('em_event_save', true, $EM_Event);
+			//flag a cache refresh if we get here
+
+			add_filter('save_post', 'EM_Event_Post_Admin::refresh_cache', 10, 2);
 		}
-		$is_saving = false;
+		
+		self::maybe_publish_location($EM_Event);
+		
 	}
 	
-	public static function refresh_cache(?\EM_Event $event = null) {
+	public static function refresh_cache(int $post_id = 0) { 
+		error_log($post_id);
+		$event = EM_Event::find_by_post_id($post_id);
 		if (!$event || empty($event->refresh_cache) || empty($event->post_id) || !$event->is_published()) {
 			return;
 		}
@@ -172,18 +149,12 @@ class EM_Event_Post_Admin{
 		wp_cache_set($event->post_id, $event->event_id, 'em_events_ids');
 	}
 	
-	/**
-	 * Publish the location if the event has just been approved and the location is pending. We assume an editor published the event and approves the location too.
-	 * @param EM_Event $EM_Event
-	 */
+
 	public static function maybe_publish_location($EM_Event){
 		//do a dirty update for location too if it's not published
 		if( $EM_Event->is_published() && !empty($EM_Event->location_id) ){
 			$EM_Location = $EM_Event->get_location();
-			if( $EM_Location->location_status !== 1 ){
-				//let's also publish the location
-				$EM_Location->set_status(1, true);
-			}
+			
 		}
 	}
 
@@ -309,7 +280,7 @@ class EM_Event_Recurring_Post_Admin{
 		$EM_EVENT_SAVE_POST = false; //last filter of save_post in EM for events
 	}
 
-	public static function before_delete_post($post_id){
+	public static 	function before_delete_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
 			$EM_Event = EM_Event::find_by_post_id($post_id);
 			do_action('em_event_delete_pre ',$EM_Event);

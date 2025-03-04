@@ -90,7 +90,8 @@ class EM_Gateway_Offline extends EM_Gateway {
 	}
 	
 	function em_bookings_pending_count($count){
-		return $count + EM_Bookings::count(array('status'=>'5'));
+		$EM_Bookings = EM_Bookings::get(array('status'=>5));
+		return $count + $EM_Bookings->count();
 	}
 	
 

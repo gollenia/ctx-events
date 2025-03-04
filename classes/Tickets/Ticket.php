@@ -473,7 +473,7 @@ class Ticket extends \EM_Object{
 				}
 			}
 		}
-		$this->bookings = new \EM_Bookings($bookings);
+		$this->bookings = \EM_Bookings::from_bookings($bookings);
 		return $this->bookings;
 	}
 	

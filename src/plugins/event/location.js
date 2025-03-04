@@ -30,9 +30,11 @@ const locationSelector = () => {
 			return locations;
 		}
 
+		console.log( 'locationList', result );
+
 		result.map( ( location ) => {
 			locations.push( {
-				value: location.location_id,
+				value: location.id,
 				label: location.title.raw,
 				media:
 					location &&

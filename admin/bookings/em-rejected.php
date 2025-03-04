@@ -21,7 +21,7 @@ function em_bookings_rejected_table(){
 			return false;
 		}
 	}
-	$bookings_count = (is_array($EM_Bookings->bookings)) ? count($EM_Bookings->bookings):0;
+	$bookings_count = count($EM_Bookings);
 	?>
 		<div class='wrap em_bookings_pending_table em_obj'>
 			<form id='bookings-filter' method='get' action='<?php bloginfo('wpurl') ?>/wp-admin/edit.php'>

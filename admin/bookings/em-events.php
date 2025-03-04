@@ -116,7 +116,7 @@ function em_bookings_events_table() {
 						<tr <?php echo "$class $style"; ?>>
 							<td>
 								<strong>
-									<?php echo $EM_Event->output('#_BOOKINGSLINK'); ?>
+									<?php echo EventView::render($EM_Event, '#_BOOKINGSLINK'); ?>
 									</strong>
 									<div class="row-actions "><span class="trash"><a href="https://kids-team.internal/wp-admin/post.php?post=27&amp;action=trash&amp;_wpnonce=8ebb708296" class="submitdelete" aria-label="„Teenagerfreizeit“ in den Papierkorb verschieben">Buchungen löschen</a> | </span><span class="trash"><a href="https://kids-team.internal/events/teenagerfreizeit/" rel="bookmark" aria-label="„Teenagerfreizeit“ ansehen">Absagen</a></span></div>
 								

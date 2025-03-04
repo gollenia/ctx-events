@@ -62,23 +62,22 @@ class EM_Location_Posts_Admin{
 	}
 	
 	public static function columns_output( $column ) {
-		global $post;
-		$post = EM_Location::get($post); 
+		$location = EM_Location::find_by_post(get_post()); 
 		switch ( $column ) {
 			case 'location-id':
-				echo $post->location_id;
+				echo $location->location_id;
 				break;
 			case 'address':
-				echo $post->location_address;
+				echo $location->location_address;
 				break;
 			case 'town':
-				echo $post->location_town;
+				echo $location->location_town;
 				break;
 			case 'zip':
-				echo $post->location_postcode;
+				echo $location->location_postcode;
 				break;
 			case 'country':
-				echo $post->location_country;
+				echo $location->location_country;
 				break;
 		}
 	}

@@ -43,14 +43,8 @@ class EM_Taxonomy_Terms extends EM_Object implements Iterator, Countable{
 			$this->event_id = $data->event_id;
 			$this->post_id = $data->post_id;
 			
-			if( !$data->blog_id && !is_main_site() ){
-				if( !$this->blog_id ) $this->blog_id = get_current_site()->blog_id;
-				switch_to_blog($this->blog_id);
-				$results = get_the_terms( $data->post_id, $this->taxonomy );
-				restore_current_blog();
-			}else{
-				$results = get_the_terms( $data->post_id, $this->taxonomy );
-			}
+			$results = get_the_terms( $data->post_id, $this->taxonomy );
+			
 			if( is_array($results) ){
 				foreach($results as $result){
 					$this->terms[$result->term_id] = new $this->term_class($result);

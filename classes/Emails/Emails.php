@@ -92,7 +92,7 @@ class EM_Emails {
 	    //make sure we don't get past events, only events starting that specific date
 	    add_filter('pre_option_dbem_events_current_are_past', '__return_true');
 		$output_type = get_option('dbem_smtp_html') ? 'html':'email';
-	    foreach( EM_Events::get(array('scope'=>$scope,'private'=>1,'blog'=>get_current_blog_id())) as $EM_Event ){
+	    foreach( EM_Events::get(array('scope'=>$scope,'private'=>1)) as $EM_Event ){
 	        /* @var $EM_Event EM_Event */
 	        $emails = array();
 	    	//get ppl attending

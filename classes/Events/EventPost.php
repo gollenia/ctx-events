@@ -1,8 +1,7 @@
 <?php
 
-namespace Contexis\Events;
+namespace Contexis\Events\Events;
 
-use Contexis\Events\Intl\Date;
 use EM_Event;
 
 /**
@@ -12,7 +11,7 @@ use EM_Event;
  */
 class EventPost {
 
-	const TYPE = "event";
+	const POST_TYPE = "event";
 	
 	public static function init(){
 
@@ -32,7 +31,7 @@ class EventPost {
 	
 	public static function publish_future_post($post_id){
 		$post_type = get_post_type($post_id);
-		$is_post_type = $post_type == self::TYPE || $post_type == 'event-recurring';
+		$is_post_type = $post_type == self::POST_TYPE || $post_type == 'event-recurring';
 		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
 		if(!defined('UNTRASHING_'.$post_id) && $is_post_type && $saving_status ){
 		    $EM_Event = \EM_Event::find_by_post_id($post_id, 'post_id');
@@ -117,29 +116,9 @@ class EventPost {
 
 	}
 	
-	/**
-	 * Overrides the default post format of an event and can display an event as a page, which uses the page.php template.
-	 * @param string $template
-	 * @return string
-	 */
-	public static function single_template($template){
-		return $template;
-	}
-
-	
-	
-	public static function enable_the_content( $content ){
-		add_filter('the_content', array('EM_Event_Post','the_content'));
-		return $content;
-	}
-	public static function disable_the_content( $content ){
-		remove_filter('the_content', array('EM_Event_Post','the_content'));
-		return $content;
-	}
-	
 	public static function the_date( $the_date, $d = '', $post = null ){
 		$post = get_post( $post );
-		if( $post->post_type == self::TYPE ){
+		if( $post->post_type == self::POST_TYPE ){
 			$EM_Event = \EM_Event::find_by_post($post);
 			if ( '' == $d ){
 				$the_date = $EM_Event->start()->i18n(get_option('date_format'));
@@ -152,7 +131,7 @@ class EventPost {
 	
 	public static function the_time( $the_time, $f = '', $post = null ){
 		$post = get_post( $post );
-		if( $post->post_type == self::TYPE ){
+		if( $post->post_type == self::POST_TYPE ){
 			$EM_Event = \EM_Event::find_by_post($post);
 			if ( '' == $f ){
 				$the_time = $EM_Event->start()->i18n(get_option('time_format'));

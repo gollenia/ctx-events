@@ -370,7 +370,7 @@ class EM_Event_Recurring_Posts_Admin{
 			<p><?php esc_html_e( 'Modifications to recurring events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events'); ?></p>
 			<p><?php esc_html_e( 'Bookings to individual event recurrences will be preserved if event times and ticket settings are not modified.', 'events'); ?></p>
 			<p>
-				<a href="<?php echo esc_url( em_get_events_admin_url() ); ?>">
+				<a href="<?php echo esc_url( admin_url('edit.php?post_type=event') ); ?>">
 					<strong><?php esc_html_e('You can edit individual recurrences and disassociate them with a recurring event to prevent getting overwritten.', 'events'); ?></strong>
 				</a>
 	    	</p>
@@ -440,7 +440,7 @@ class EM_Event_Recurring_Posts_Admin{
 					break;
 				case 'date-time':
 					echo $EM_Event->get_recurrence_description();
-					$edit_url = add_query_arg(array('scope'=>'all', 'recurrence_id'=>$EM_Event->event_id), em_get_events_admin_url());
+					$edit_url = add_query_arg(array('scope'=>'all', 'recurrence_id'=>$EM_Event->event_id), admin_url('edit.php?post_type=event'));
 					$link_text = sprintf(__('View %s', 'events'), __('Recurrences', 'events'));
 					echo "<br /><span class='row-actions'>
 							<a href='". esc_url($edit_url) ."'>". esc_html($link_text) ."</a>

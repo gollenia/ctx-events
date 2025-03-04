@@ -31,7 +31,7 @@ const BookingsTable = () => {
 			return;
 		}
 		const tableBody = table.querySelector( 'tbody' );
-		console.log( tableBody );
+		console.log( 'Brunsbüttel' );
 		document.addEventListener( 'click', ( event ) => {
 			if ( event.target.classList.contains( 'em-bookings-action' ) ) {
 				const data = event.target.dataset;

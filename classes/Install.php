@@ -25,7 +25,7 @@ class Install {
 		remove_action('before_delete_post',array('EM_Location_Post_Admin','before_delete_post'),10,1);
 		remove_action('before_delete_post',array('EM_Event_Post_Admin','before_delete_post'),10,1);
 		remove_action('before_delete_post',array('EM_Event_Recurring_Post_Admin','before_delete_post'),10,1);
-		$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".EM_Event::POST_TYPE."','".EM_POST_TYPE_LOCATION."','event-recurring')");
+		$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".\Contexis\Events\Events\EventPost::POST_TYPE."','".EM_POST_TYPE_LOCATION."','event-recurring')");
 		foreach($post_ids as $post_id){
 			wp_delete_post($post_id);
 		}
@@ -49,7 +49,6 @@ class Install {
 		
 		$wpdb->query('DELETE FROM '.$wpdb->options.' WHERE option_name LIKE \'em_%\' OR option_name LIKE \'dbem_%\'');
 		
-		deactivate_plugin(array('events/events.php'), true);
 		wp_safe_redirect(admin_url('plugins.php?deactivate=true'));
 		exit();
 	}

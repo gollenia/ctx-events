@@ -45,12 +45,9 @@ class ExportApi {
 		
 		$this->pdf->WriteHTML($this->generate_table());
 		
-		
-		//echo '<h1>Monatsprogramm ' . wp_date('F Y', strtotime($this->start_date)) . '</h1>';
-		//echo $this->generate_table();
-		
+
 		$this->pdf->Output();
-		//var_dump($this->month);
+	
 		wp_die();
 	}
 

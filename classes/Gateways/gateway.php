@@ -483,7 +483,7 @@ class EM_Gateway {
 	 * @return string
 	 */
 	function get_payment_return_api_url(){
-		return get_rest_url( get_current_blog_id(), 'events/v1/gateways/'.$this->gateway.'/notify' );
+		return get_rest_url( null, 'events/v1/gateways/'.$this->gateway.'/notify' );
 	}
 
 	/**

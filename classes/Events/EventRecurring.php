@@ -253,10 +253,9 @@ Class EventRecurring extends EM_Event {
 			}else{
 				//we go through all event main data and meta data, we delete and recreate all meta data
 				//now unset some vars we don't need to deal with since we're just updating data in the wp_em_events and posts table
-				unset( $event['event_date_created'], $event['recurrence_id'], $event['recurrence'], $event['event_start_date'], $event['event_end_date'], $event['event_parent'] );
+				unset( $event['event_date_created'], $event['recurrence_id'], $event['recurrence'], $event['event_start_date'], $event['event_end_date']);
 				$event['event_date_modified'] = current_time('mysql'); //since the recurrences are modified but not recreated
 				unset( $post_fields['comment_count'], $post_fields['guid'], $post_fields['menu_order']);
-				unset( $meta_fields['_event_parent'] ); // we'll ignore this and add it manually
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
@@ -330,7 +329,7 @@ Class EventRecurring extends EM_Event {
 			 	//first, delete all bookings & tickets if we haven't done so during the reschedule above - something we'll want to change later if possible so bookings can be modified without losing all data
 			 	if( !$this->recurring_reschedule ){
 				 	//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-			 		$EM_Bookings = new EM_Bookings();
+			 		$EM_Bookings = new EM_Bookings;
 			 		$tickets = new \Contexis\Events\Tickets\Tickets();
 			 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 			 			if($event['recurrence_id'] == $this->event_id){
@@ -397,7 +396,7 @@ Class EventRecurring extends EM_Event {
 			 	}
 		 	}elseif( $this->recurring_delete_bookings ){
 		 		//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-		 		$EM_Bookings = new EM_Bookings();
+		 		$EM_Bookings = new EM_Bookings;
 		 		$tickets = new \Contexis\Events\Tickets\Tickets();
 		 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 		 			if($event['recurrence_id'] == $this->event_id){

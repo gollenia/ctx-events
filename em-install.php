@@ -2,15 +2,16 @@
 
 function em_uninstall() {
 	global $wpdb;
-	//delete EM posts
+
 	remove_action('before_delete_post',array('EM_Location_Post_Admin','before_delete_post'),10,1);
 	remove_action('before_delete_post',array('EM_Event_Post_Admin','before_delete_post'),10,1);
 	remove_action('before_delete_post',array('EM_Event_Recurring_Post_Admin','before_delete_post'),10,1);
-	$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".EM_Event::POST_TYPE."','".EM_POST_TYPE_LOCATION."','event-recurring')");
+	$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".\Contexis\Events\Events\EventPost::POST_TYPE."','".EM_POST_TYPE_LOCATION."','event-recurring')");
+
 	foreach($post_ids as $post_id){
 		wp_delete_post($post_id);
 	}
-	//delete categories
+
 	$cat_terms = get_terms(EM_TAXONOMY_CATEGORY, array('hide_empty'=>false));
 	foreach($cat_terms as $cat_term){
 		wp_delete_term($cat_term->term_id, EM_TAXONOMY_CATEGORY);
@@ -41,18 +42,18 @@ function em_uninstall() {
 
 function em_install() {
 
-	
+    $installed_version = \Contexis\Events\Utilities::get_installed_version();
+    $plugin_version = \Contexis\Events\Utilities::get_plugin_version();
 
-	global $wp_rewrite;
-	$wp_rewrite->flush_rules();
-	$old_version = get_option('dbem_version');	
+    if (version_compare($installed_version, $plugin_version, '>=')) {
+        return;
+    }
    	
-	if( Events::VERSION > $old_version || $old_version == '' ){
-		if( get_option('dbem_upgrade_throttle') <= time() || !get_option('dbem_upgrade_throttle') ){
-		 	// Creates the events table if necessary
+	if( $installed_version === '0.0.0' ){
+		if (get_option('dbem_upgrade_throttle', 0) <= time()) {
+			update_option('dbem_upgrade_throttle', time() + 60);
 			em_create_events_table();
 			em_create_events_meta_table();
-			em_create_locations_table();
 			em_create_bookings_table();
 			em_create_tickets_table();
 			em_create_tickets_bookings_table();
@@ -60,34 +61,26 @@ function em_install() {
 			em_create_coupons_table(); 
 			em_create_reminders_table();
 			em_create_bookings_relationships_table();
-					
-			//set caps and options
 			em_set_capabilities();
 			em_add_options();
-			em_upgrade_current_installation();
-			do_action('events_manager_updated', $old_version );
-			//Update Version
-		  	update_option('dbem_version', Events::VERSION);
-			delete_option('dbem_upgrade_throttle');
-			delete_option('dbem_upgrade_throttle_time');
-			
-			global $wp_rewrite;
-			$wp_rewrite->flush_rules();
-			
-			update_option('dbem_flush_needed',1);
-			add_action ( 'admin_notices', function() {
-				echo '<div class="updated"><p>'.__('Events has been updated to version ',  'events'). Events::VERSION . '</p></div>';
-			});
-		}else{
-			function em_upgrading_in_progress_notification(){
-				?><div class="error"><p>Events Manager upgrade still in progress. Please be patient, this message should disappear once the upgrade is complete.</p></div><?php
-			}
-			add_action ( 'admin_notices', 'em_upgrading_in_progress_notification' );
-			add_action ( 'network_admin_notices', 'em_upgrading_in_progress_notification' );
-			return;
 		}
 	}
-	restore_previous_locale(); //now that we're done, switch back to current language (if applicable)
+	delete_option('dbem_upgrade_throttle');
+
+	if( version_compare($installed_version, $plugin_version, '<') ){
+		em_upgrade_current_installation();
+		update_option('dbem_version', $plugin_version);
+	}
+	
+
+	global $wp_rewrite;
+	$wp_rewrite->flush_rules();
+	
+	
+	update_option('dbem_flush_needed',1);
+	add_action ( 'admin_notices', function() use ($plugin_version) { 
+		echo '<div class="updated"><p>'.__('Events has been updated to version ',  'events'). $plugin_version. '</p></div>';
+	});
 }
 
 /**
@@ -135,7 +128,6 @@ function em_create_events_table() {
 	$sql = "CREATE TABLE ".$table_name." (
 		event_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		post_id bigint(20) unsigned NOT NULL,
-		event_parent bigint(20) unsigned NULL DEFAULT NULL,
 		event_slug VARCHAR( 200 ) NULL DEFAULT NULL,
 		event_owner bigint(20) unsigned DEFAULT NULL,
 		event_status tinyint(1) NULL DEFAULT NULL,
@@ -168,8 +160,6 @@ function em_create_events_table() {
 		recurrence_byweekno int(4) NULL DEFAULT NULL,
 		recurrence_days int(4) NULL DEFAULT NULL,
 		recurrence_rsvp_days int(3) NULL DEFAULT NULL,
-		blog_id bigint(20) unsigned NULL DEFAULT NULL,
-		group_id bigint(20) unsigned NULL DEFAULT NULL,
 		event_translation tinyint(1) unsigned NOT NULL DEFAULT 0,
 		PRIMARY KEY  (event_id)
 		) DEFAULT CHARSET=utf8 ;";
@@ -177,7 +167,7 @@ function em_create_events_table() {
 
 	dbDelta($sql);
 
-	em_sort_out_table_nu_keys($table_name, array('event_status','post_id','blog_id','group_id','location_id','event_start', 'event_end', 'event_start_date', 'event_end_date'));
+	em_sort_out_table_nu_keys($table_name, array('event_status','post_id','location_id','event_start', 'event_end', 'event_start_date', 'event_end_date'));
 }
 
 function em_create_events_meta_table(){
@@ -198,44 +188,6 @@ function em_create_events_meta_table(){
 
 	dbDelta($sql);
 	em_sort_out_table_nu_keys($table_name, array('object_id','meta_key'));
-}
-
-function em_create_locations_table() {
-
-	global  $wpdb, $user_level;
-	$table_name = $wpdb->prefix.'em_locations';
-
-	// Creating the events table
-	$sql = "CREATE TABLE ".$table_name." (
-		location_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-		post_id bigint(20) unsigned NOT NULL,
-		blog_id bigint(20) unsigned NULL DEFAULT NULL,
-		location_parent bigint(20) unsigned NULL DEFAULT NULL,
-		location_slug VARCHAR( 200 ) NULL DEFAULT NULL,
-		location_name text NULL DEFAULT NULL,
-		location_owner bigint(20) unsigned NOT NULL DEFAULT 0,
-		location_address VARCHAR( 200 ) NULL DEFAULT NULL,
-		location_town VARCHAR( 200 ) NULL DEFAULT NULL,
-		location_state VARCHAR( 200 ) NULL DEFAULT NULL, 
-		location_postcode VARCHAR( 10 ) NULL DEFAULT NULL,
-		location_region VARCHAR( 200 ) NULL DEFAULT NULL,
-		location_country CHAR( 2 ) NULL DEFAULT NULL,
-		location_latitude DECIMAL( 9, 6 ) NULL DEFAULT NULL,
-		location_longitude DECIMAL( 9, 6 ) NULL DEFAULT NULL,
-		location_url VARCHAR( 400 ) NULL DEFAULT NULL,
-		post_content longtext NULL DEFAULT NULL,
-		location_status int(1) NULL DEFAULT NULL,
-		location_private tinyint(1) unsigned NOT NULL DEFAULT 0,
-		location_language varchar(14) NULL DEFAULT NULL,
-		location_translation tinyint(1) unsigned NOT NULL DEFAULT 0,
-		PRIMARY KEY  (location_id)
-		) DEFAULT CHARSET=utf8 ;";
-
-	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-	dbDelta($sql);
-	em_sort_out_table_nu_keys($table_name, array('location_state','location_region','location_country','post_id','blog_id'));
-	
 }
 
 function em_create_bookings_table() {
@@ -345,7 +297,6 @@ function em_create_coupons_table() {
 	$sql = "CREATE TABLE ".$table_name." (
 		  coupon_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		  coupon_owner bigint(20) unsigned NOT NULL,
-		  blog_id bigint(20) unsigned DEFAULT NULL,
 		  coupon_code varchar(20) NOT NULL,
 		  coupon_name text NOT NULL,
 		  coupon_description text NULL,
@@ -398,8 +349,6 @@ function em_create_bookings_relationships_table(){
 
 function em_add_options() {
 	global $wp_locale, $wpdb;
-	$decimal_point = !empty($wp_locale->number_format['decimal_point']) ? $wp_locale->number_format['decimal_point']:'.';
-	$thousands_sep = !empty($wp_locale->number_format['thousands_sep']) ? $wp_locale->number_format['thousands_sep']:',';
 	$email_footer = '<br/><br/>-------------------------------<br/>Powered by Events Manager - http://wp-events-plugin.com';
 	$respondent_email_body_localizable = __("Dear #_BOOKINGNAME, <br/>You have successfully reserved #_BOOKINGSPACES space/spaces for #_EVENTNAME.<br/>When : #_EVENTDATES @ #_EVENTTIMES<br/>Where : #_LOCATIONNAME - #_LOCATIONFULLLINE<br/>Yours faithfully,<br/>#_CONTACTNAME",'events').$email_footer;
 	$respondent_email_pending_body_localizable = __("Dear #_BOOKINGNAME, <br/>You have requested #_BOOKINGSPACES space/spaces for #_EVENTNAME.<br/>When : #_EVENTDATES @ #_EVENTTIMES<br/>Where : #_LOCATIONNAME - #_LOCATIONFULLLINE<br/>Your booking is currently pending approval by our administrators. Once approved you will receive an automatic confirmation.<br/>Yours faithfully,<br/>#_CONTACTNAME",'events').$email_footer;
@@ -427,8 +376,6 @@ function em_add_options() {
 	$contact_person_emails['rejected'] = sprintf(__('The following booking is %s :','events'),strtolower(__('Rejected','events'))).'<br/>'.$contact_person_email_body_template;
 	//registration email content
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
-	$booking_registration_email_subject = sprintf(__('[%s] Your username and password', 'events'), $blogname);
-	$booking_registration_email_body = "";
 	$respondent_email_body_localizable = __("Dear #_BOOKINGNAME, <br />This is a reminder about your #_BOOKINGSPACES space/spaces reserved for #_EVENTNAME.<br />When : #_EVENTDATES @ #_EVENTTIMES<br />Where : #_LOCATIONNAME - #_LOCATIONFULLLINE<br />We look forward to seeing you there!<br />Yours faithfully,<br />#_CONTACTNAME",'events').$email_footer;
 	//all the options
 	$dbem_options = array(
@@ -622,46 +569,76 @@ function em_add_options() {
 
 function em_upgrade_current_installation(){
 	global $wpdb;
+	add_action('admin_notices', function(){
+		echo '<div class="updated"><p>'.__('Updating').'</p></div>';
+	});
 
-	//update version
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.7 ) {
+	$installed_version = \Contexis\Events\Utilities::get_installed_version();
+
+	if( version_compare($installed_version, '6.7.0') < 0 ){
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_rsvp_end datetime NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_rsvp_start datetime NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_speaker_id bigint(20) unsigned NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' ADD COLUMN event_audience text NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_rsvp_date');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_rsvp_time');
+
+		\Contexis\Events\Utilities::set_installed_version('6.7.0');
 	}
 
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.8 ) {
+	if( version_compare($installed_version, '6.8.7') < 0 ){
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ADD COLUMN booking_donation decimal(10,2) NULL DEFAULT NULL');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax_rate');
 		$wpdb->query('ALTER TABLE '.EM_COUPONS_TABLE.' DROP COLUMN coupon_tax');
 		$wpdb->query('ALTER TABLE '.EM_TICKETS_TABLE.' DROP COLUMN ticket_parent');
-		delete_option('dbem_bookings_tax');
-		delete_option('dbem_bookings_tax_auto_add');
-	}
-
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.81 ) {
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_location_type');
-	}
-
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.82 ) {
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ALTER COLUMN booking_donation SET TYPE decimal(14,4)');
-	}
-
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.83 ) {
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_language');
-	}
-
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.84 ) {
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ADD COLUMN booking_mail TEXT NULL');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax');
+		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN person_id');
+		delete_option('dbem_bookings_tax');
+		delete_option('dbem_bookings_tax_auto_add');
+
+		\Contexis\Events\Utilities::set_installed_version('6.8.7');
 	}
 
-	if( get_option('dbem_version') != '' && get_option('dbem_version') < 6.85 ) {
-		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN person_id');
+	if( version_compare($installed_version, '6.9.0') < 0 ){
+
+		$batch_size = 100;
+		$offset = 0;
+		
+		while($events = EM_Events::get(['limit' => $batch_size, 'offset' => $offset])) {
+			foreach($events as $event) {
+				if($event->location_id == 0) continue;
+				$location = EM_Location::find_by_location_id($event->location_id);
+				if(!$location) {
+					error_log("Location für Event {$event->event_id} nicht gefunden!");
+					continue;
+				}
+				if($location->post_id == 0) {
+					error_log("Location {$location->location_id} hat keine Post-ID!");
+					continue;
+				}
+				$event->location_id = $location->post_id;
+				update_post_meta($event->post_id, '_location_id', $location->post_id);
+				$event->save();
+				error_log("Event {$event->event_id}: Location-ID von {$location->post_id} auf {$location->post_id} aktualisiert.");
+			}
+			$offset += $batch_size;
+		}
+		global $wpdb;
+		$wpdb->query('DROP TABLE IF EXISTS '.EM_LOCATIONS_TABLE);
+		\Contexis\Events\Utilities::set_installed_version('6.9.0');
+	}
+
+	if( version_compare($installed_version, '6.9.1') < 0 ){
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_parent');
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN group_id');
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN blog_id');
+		$wpdb->query('ALTER TABLE '.EM_COUPONS_TABLE.' DROP COLUMN blog_id');
+		\Contexis\Events\Utilities::set_installed_version('6.9.1');
 	}
 }
 

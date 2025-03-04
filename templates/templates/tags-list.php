@@ -5,7 +5,6 @@
  * You can override the default display settings pages by copying this file to yourthemefolder/plugins/events/templates/ and modifying it however you need.
  * You can display locations (or whatever) however you wish, there are a few variables made available to you:
  * 
- * $args - the args passed onto EM_Locations::output()
  * 
  */
 $args = apply_filters('em_content_tags_args', $args); 

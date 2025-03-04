@@ -7,7 +7,8 @@ function em_admin_menu(){
 		$bookings_num = '';
 		$bookings_pending_count = apply_filters('em_bookings_pending_count',0);
 		if( get_option('dbem_bookings_approval') == 1){ 
-			$bookings_pending_count += EM_Bookings::count(array('status'=>'0', 'blog'=>get_current_blog_id()));
+			$EM_Bookings = EM_Bookings::get(array('status'=>0));
+			$bookings_pending_count += count($EM_Bookings);
 		}
 		if($bookings_pending_count > 0){
 			$bookings_num = '<span class="update-plugins count-'.$bookings_pending_count.'"><span class="plugin-count">'.$bookings_pending_count.'</span></span>';
@@ -18,14 +19,14 @@ function em_admin_menu(){
    	}
 	//Count pending events
 	$events_num = '';
-	$events_pending_count = EM_Events::count(array('status'=>0, 'scope'=>'all', 'blog'=>get_current_blog_id()));
+	$events_pending_count = EM_Events::count(array('status'=>0, 'scope'=>'all'));
 	//TODO Add flexible permissions
 	if($events_pending_count > 0){
 		$events_num = '<span class="update-plugins count-'.$events_pending_count.'"><span class="plugin-count">'.$events_pending_count.'</span></span>';
 	}
 	//Count pending recurring events
 	$events_recurring_num = '';
-	$events_recurring_pending_count = EM_Events::count(array('status'=>0, 'recurring'=>1, 'scope'=>'all', 'blog'=>get_current_blog_id()));
+	$events_recurring_pending_count = EM_Events::count(array('status'=>0, 'recurring'=>1, 'scope'=>'all'));
 	//TODO Add flexible permissions
 	if($events_recurring_pending_count > 0){
 		$events_recurring_num = '<span class="update-plugins count-'.$events_recurring_pending_count.'"><span class="plugin-count">'.$events_recurring_pending_count.'</span></span>';

@@ -1,22 +1,19 @@
 <?php
 
 
-use \Contexis\Events\EventPost;
+use \Contexis\Events\Events\EventPost;
 
 class EM_Event extends \EM_Object{ 
 
-	const POST_TYPE = "event";
-	/* Field Names */
-	var $event_id;
-	var $post_id;
-	var $event_parent;
-	var $event_slug;
-	var $event_owner;
-	var $event_name;
-	var $event_image;
-	var $coupon_ids;
-	var $coupons;
-	var $coupons_count;
+	public int $event_id = 0;
+	public string $event_slug;
+	public int $event_owner = 0;
+	public string $event_name;
+	public int $location_id = 0;
+	
+	public array $coupon_ids = [];
+	public array $coupons = [];
+	public int $coupons_count = 0;
 	
 	protected $event_start_time = '00:00:00';
 	protected $event_end_time = '00:00:00';
@@ -24,24 +21,20 @@ class EM_Event extends \EM_Object{
 	protected $event_end_date;
 	protected $event_start;
 	protected $event_end;
-	var $event_all_day;
+	public bool $event_all_day = false;
 	protected $event_timezone;
-	var $post_content;
-	var $event_rsvp = 0;
+	
+	public bool $event_rsvp = false;
 	var $event_rsvp_start;
 	var $event_rsvp_end;
-
 	var $event_rsvp_donation;
-
 	var $event_rsvp_spaces;
+	public string $event_date_modified;
+	public string $event_date_created;
 	var $event_spaces;
 	var $event_private;
-	var $location_id;
-	
 	var $recurrence_id;
 	var $event_status;
-	var $blog_id = 0;
-	var $group_id;
 	var $event_translation = 0;
 	/**
 	 * Populated with the non-hidden event post custom fields (i.e. not starting with _) 
@@ -64,7 +57,6 @@ class EM_Event extends \EM_Object{
 	public array $fields = array(
 		'event_id' => array( 'name'=>'id', 'type'=>'%d' ),
 		'post_id' => array( 'name'=>'post_id', 'type'=>'%d' ),
-		'event_parent' => array( 'type'=>'%d', 'null'=>true ),
 		'event_slug' => array( 'name'=>'slug', 'type'=>'%s', 'null'=>true ),
 		'event_owner' => array( 'name'=>'owner', 'type'=>'%d', 'null'=>true ),
 		'event_name' => array( 'name'=>'name', 'type'=>'%s', 'null'=>true ),
@@ -86,8 +78,6 @@ class EM_Event extends \EM_Object{
 		'recurrence_id' => array( 'name'=>'recurrence_id', 'type'=>'%d', 'null'=>true ),
 		'event_status' => array( 'name'=>'status', 'type'=>'%d', 'null'=>true ),
 		'event_private' => array( 'name'=>'status', 'type'=>'%d', 'null'=>true ),
-		'blog_id' => array( 'name'=>'blog_id', 'type'=>'%d', 'null'=>true ),
-		'group_id' => array( 'name'=>'group_id', 'type'=>'%d', 'null'=>true ),
 		'event_translation' => array( 'type'=>'%d'),
 		'recurrence' => array( 'name'=>'recurrence', 'type'=>'%d', 'null'=>false ), //is this a recurring event template
 		'recurrence_interval' => array( 'name'=>'interval', 'type'=>'%d', 'null'=>true ), //every x day(s)/week(s)/month(s)
@@ -97,6 +87,7 @@ class EM_Event extends \EM_Object{
 		'recurrence_byweekno' => array( 'name'=>'byweekno', 'type'=>'%d', 'null'=>true ), //if monthly which week (-1 is last)
 		'recurrence_rsvp_days' => array( 'name'=>'recurrence_rsvp_days', 'type'=>'%d', 'null'=>true ), //days before or after start date to generat bookings cut-off date
 	);
+
 	var $post_fields = array('event_slug','event_owner','event_name','event_private','event_status','event_attributes','post_id','post_content'); 
 	var $recurrence_fields = array('recurrence', 'recurrence_interval', 'recurrence_freq', 'recurrence_days', 'recurrence_byday', 'recurrence_byweekno', 'recurrence_rsvp_days');
 	var $image_url = '';
@@ -116,14 +107,16 @@ class EM_Event extends \EM_Object{
 	var $recurring_recreate_bookings;
 	var $recurring_delete_bookings = false;
 	var $just_added_event = false;
-	
-	var $ID;
+	private string $force_status = '';
+
+	public int $post_id = 0;
 	var $post_date;
 	var $post_date_gmt;
 	var $post_title;
 	var $post_excerpt = '';
 	var $post_status;
 	var $post_name;
+	var $post_content;
 	
 	var $post_modified;
 	var $post_modified_gmt;
@@ -138,48 +131,14 @@ class EM_Event extends \EM_Object{
 		);
 	}
 	
-	
 	function __get( $var ){
 		if(!isset($this->$var))	return null; 
 
-		if( $var == 'event_date_modified' || $var == 'event_date_created'){
-	        global $wpdb;
-	        $row = $wpdb->get_row($wpdb->prepare("SELECT event_date_created, event_date_modified FROM ".EM_EVENTS_TABLE.' WHERE event_id=%s', $this->event_id));
-	        if( $row ){
-	            $this->event_date_modified = $row->event_date_modified;
-	            $this->event_date_created = $row->event_date_created;
-	            return $this->$var;
-	        }
-	    } elseif ( $var == 'event_timezone' ){
+		if ( $var == 'event_timezone' ){
 	    	return $this->get_timezone()->getName();
 	    }
 	    
 	    return $this->$var;
-	}
-	
-	public function __set( $prop, $val ){
-		if( $prop == 'event_start_date' || $prop == 'event_end_date' ){
-			//if date is valid, set it, if not set it to null
-			$this->$prop = preg_match('/^\d{4}-\d{2}-\d{2}$/', $val) ? $val : null;
-			if( $prop == 'event_start_date') $this->event_start = $this->start()->getTimestamp();
-			elseif( $prop == 'event_end_date') $this->event_end = $this->end()->getTimestamp();
-			elseif( $prop == 'event_rsvp_end') $this->rsvp_end = null;
-		}elseif( $prop == 'event_start_time' || $prop == 'event_end_time' ){
-			$this->$prop = preg_match('/^\d{2}:\d{2}:\d{2}$/', $val) ? $val : '00:00:00';
-		}
-		//deprecated properties, use start()->setTimestamp() instead
-		elseif( $prop == 'start' || $prop == 'end' || $prop == 'rsvp_end' ){
-			if( is_numeric($val) ){
-				$this->$prop()->setTimestamp( (int) $val);
-			}elseif( is_string($val) ){
-				$this->$val = new EM_DateTime($val, $this->event_timezone);
-			}
-		}
-		//anything else
-		else{
-			$this->$prop = $val;
-		}
-		
 	}
 	
 	public function __isset( $prop ){
@@ -252,7 +211,7 @@ class EM_Event extends \EM_Object{
         return $ticket_collection;
 	}
 
-	private function get_image() {
+	public function get_image() {
 
 		$thumbnail = get_post_thumbnail_id($this->post_id);
 
@@ -274,15 +233,18 @@ class EM_Event extends \EM_Object{
 	function load_postdata(WP_Post $event_post)
 	{
 		
-		if( is_object($event_post) && ($event_post->post_type == 'event-recurring' || $event_post->post_type == EM_POST_TYPE_EVENT) ){
+		if( is_object($event_post) && ($event_post->post_type == 'event-recurring' || $event_post->post_type == EventPost::POST_TYPE) ){
 			//load post data - regardless
 			$this->post_id = absint($event_post->ID);
+			$this->post_type = $event_post->post_type;
 			$this->event_name = $event_post->post_title;
 			$this->event_owner = $event_post->post_author;
 			$this->post_content = $event_post->post_content;
 			$this->post_excerpt = $event_post->post_excerpt;
 			$this->event_slug = $event_post->post_name;
-			$this->event_image = $this->get_image();
+			
+			$this->event_date_created = $event_post->post_date;
+			$this->event_date_modified = $event_post->post_modified;
 
 			foreach( $event_post as $key => $value ){ //merge post object into this object
 				$this->$key = $value;
@@ -325,7 +287,6 @@ class EM_Event extends \EM_Object{
 				}
 			}
 			$this->get_status();
-			//$this->compat_keys();
 		}elseif( !empty($this->post_id) ){
 			//we have an orphan... show it, so that we can at least remove it on the front-end
 			global $wpdb;
@@ -333,8 +294,7 @@ class EM_Event extends \EM_Object{
 			$event_array = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".EM_EVENTS_TABLE." WHERE post_id=%d",$this->post_id), ARRAY_A);
 			
 		    if( is_array($event_array) ){
-				$this->orphaned_event = true;
-				$this->post_id = $this->ID = $event_array['post_id'] = null; //reset post_id because it doesn't really exist
+				$this->post_id = $event_array['post_id'] = 0; //reset post_id because it doesn't really exist
 				$this->from_array($event_array);
 		    }
 		}
@@ -360,13 +320,13 @@ class EM_Event extends \EM_Object{
 		
 		//Check if this is recurring or not early on so we can take appropriate action further down
 		$this->recurrence = get_post_type($this->post_id) == 'event-recurring' ? 1:0;
-		$this->post_type = $this->recurrence ? 'event-recurring':EM_POST_TYPE_EVENT;
+		$this->post_type = $this->recurrence ? 'event-recurring':EventPost::POST_TYPE;
 		
 		$this->event_timezone = EM_DateTimeZone::create()->getName();
 		
 		$this->event_start = $this->event_end = null;
 
-		$this->event_rsvp = get_post_meta($this->post_id, '_event_rsvp', true) ? 1:0;
+		$this->event_rsvp = get_post_meta($this->post_id, '_event_rsvp', true) == 1;
 		$this->event_start_date = get_post_meta($this->post_id, '_event_start_date', true) ?? date('Y-m-d')	;
 		$this->event_end_date = get_post_meta($this->post_id, '_event_end_date', true) ?? date('Y-m-d')	;
 		
@@ -384,9 +344,6 @@ class EM_Event extends \EM_Object{
 		
 		//Get Location Info
 		$this->location_id = get_option('dbem_locations_enabled') ? get_post_meta($this->post_id, '_location_id', true) : 0;
-		
-		//group id
-		$this->group_id = (!empty($_POST['group_id']) && is_numeric($_POST['group_id'])) ? absint($_POST['group_id']):0;
 		
 		//Recurrence data
 		if( $this->is_recurring() ){
@@ -505,68 +462,44 @@ class EM_Event extends \EM_Object{
 	}
 	
 	function validate(){
+		
 		$validate_post = true;
 		if( empty($this->event_name) ){
 			$validate_post = false; 
 			$this->add_error( sprintf(__("%s is required.", 'events'), __('Event name','events')) );
 		}
-		//anonymous submissions and guest basic info
-		
-		$validate_tickets = true; //must pass if we can't validate bookings
+
+		$validate_tickets = true; 
 		if( $this->can_manage('manage_bookings','manage_others_bookings') ){
 		    $validate_tickets = $this->get_bookings()->get_tickets()->validate();
 		}
 		
 		$validate_meta = $this->validate_meta();
 		if( $validate_post && $validate_meta && $validate_tickets ){
-			//if we're all good, let's save the event
 			$this->force_status = 'publish';
 		}
-		file_put_contents('/var/www/vhosts/kids-team.internal/log/eventerrors.log', print_r(['post' => $validate_post, 'meta' => $validate_meta, 'tickets' => $validate_tickets], true));
 		return apply_filters('em_event_validate', $validate_post && $validate_meta && $validate_tickets, $this );		
 	}
 	
 	function validate_meta(){
-		if ( !session_id() ) {
-			session_start();
-		}
-		$missing_fields = Array ();
-		foreach ( array('event_start_date') as $field ) {
-			if ( $this->$field == "") {
-				$missing_fields[$field] = $field;
-			}
-		}
+		
 		if( preg_match('/\d{4}-\d{2}-\d{2}/', $this->event_start_date) && preg_match('/\d{4}-\d{2}-\d{2}/', $this->event_end_date) ){
 			if( $this->start()->getTimestamp() > $this->end()->getTimestamp() ){
 				$this->add_error(__('Events cannot start after they end.','events'));
 			}elseif( $this->is_recurring() && $this->recurrence_days == 0 && $this->start()->getTimestamp() > $this->end()->getTimestamp() ){
 				$this->add_error(__('Events cannot start after they end.','events').' '.__('For recurring events that end the following day, ensure you make your event last 1 or more days.'));
 			}
-		}else{
-			if( !empty($missing_fields['event_start_date']) ) { unset($missing_fields['event_start_date']); }
-			if( !empty($missing_fields['event_end_date']) ) { unset($missing_fields['event_end_date']); }
-			$this->add_error(__('Dates must have correct formatting. Please use the date picker provided.','events'));
-		}
-		if( $this->event_rsvp ){
-		    
-
 		}
 		if( get_option('dbem_locations_enabled') ){
 			if( $this->has_location() ){
-				// physical location
 				if( empty($this->location_id) && !$this->get_location()->validate() ){
-					// new location doesn't validate
 					$this->add_error($this->get_location()->get_errors());
-				}elseif( !empty($this->location_id) && !$this->get_location()->location_id ){
-					// non-existent location selected
+				}elseif( !empty($this->location_id) && !$this->get_location()->post_id ){
 					$this->add_error( __('Please select a valid location.', 'events') );
 				}
 			}
 		}
-		if ( count($missing_fields) > 0){
-			// TODO Create friendly equivelant names for missing fields notice in validation
-			$this->add_error( __( 'Missing fields: ', 'events') . implode ( ", ", $missing_fields ) . ". " );
-		}
+	
 		if ( $this->is_recurring() ){
 		    if( $this->event_end_date == "" || $this->event_end_date == $this->event_start_date){
 		        $this->add_error( __( 'Since the event is repeated, you must specify an event end date greater than the start date.', 'events'));
@@ -575,7 +508,7 @@ class EM_Event extends \EM_Object{
 		        $this->add_error( __( 'Please specify what days of the week this event should occur on.', 'events'));
 		    }
 		}
-		
+		error_log(print_r($this->errors, true));
 		return apply_filters('em_event_validate_meta', count($this->errors) == 0, $this );
 	}
 	
@@ -621,7 +554,7 @@ class EM_Event extends \EM_Object{
 			$post_save = true;
 			//refresh this event with wp post info we'll put into the db
 			$post_data = get_post($post_id);
-			$this->post_id = $this->ID = $post_id;
+			$this->post_id = $post_id;
 			$this->post_type = $post_data->post_type;
 			$this->event_slug = $post_data->post_name;
 			$this->event_owner = $post_data->post_author;
@@ -658,7 +591,6 @@ class EM_Event extends \EM_Object{
 		do_action('em_event_save_meta_pre', $this);
 		
 		//first save location
-		if( empty($this->location_id) ) $this->location_id = 0;
 		//Update Post Meta
 		$current_meta_values = $this->get_event_meta();
 		foreach( $this->fields as $key => $field_info ){
@@ -667,7 +599,7 @@ class EM_Event extends \EM_Object{
 				//ignore certain fields and delete if not new
 				if( !$this->is_recurring() && in_array($key, $this->recurrence_fields) ) $save_meta_key = false;
 				if( !$this->is_recurrence() && $key == 'recurrence_id' ) $save_meta_key = false;
-				$ignore_zero_keys = array('group_id', 'event_all_day', 'event_parent', 'event_translation');
+				$ignore_zero_keys = array('event_all_day', 'event_translation');
 				if( in_array($key, $ignore_zero_keys) && empty($this->$key) ) $save_meta_key = false;
 				
 			}elseif( array_key_exists('_'.$key, $current_meta_values) && $key != 'event_attributes' ){ //we should delete event_attributes, but maybe something else uses it without us knowing
@@ -699,27 +631,23 @@ class EM_Event extends \EM_Object{
 		
 		if( empty($this->event_id) || !$this->event_exists() ){
 			$this->previous_status = 0; //for sure this was previously status 0
-			$this->event_date_created = $event_array['event_date_created'] = current_time('mysql');
+			
 			if ( !$wpdb->insert(EM_EVENTS_TABLE, $event_array) ){
 				$this->add_error( $wpdb->last_error );
 			}else{
 				//success, so link the event with the post via an event id meta value for easy retrieval
 				$this->event_id = $wpdb->insert_id;
 				update_post_meta($this->post_id, '_event_id', $this->event_id);
-				$this->feedback_message = sprintf(__('Successfully saved %s','events'),__('Event','events'));
 				$this->just_added_event = true; //make an easy hook
 				$this->get_bookings()->bookings = array(); //set bookings array to 0 to avoid an extra DB query
 				do_action('em_event_save_new', $this);
 			} 
 		}else{
 			$event_array['post_content'] = $this->post_content; //in case the content was removed, which is acceptable
-			
 			$this->get_previous_status();
-			$this->event_date_modified = $event_array['event_date_modified'] = current_time('mysql');
 			if ( $wpdb->update(EM_EVENTS_TABLE, $event_array, array('event_id'=>$this->event_id) ) === false ){
 				$this->add_error( $wpdb->last_error );			
 			}else{
-				//Also set the status here if status != previous status
 				if( $this->previous_status != $this->get_status() ) $this->set_status($this->get_status());
 				$this->feedback_message = sprintf(__('Successfully saved %s','events'),__('Event','events'));
 			}
@@ -728,7 +656,7 @@ class EM_Event extends \EM_Object{
 		
 		
 		//Add/Delete Tickets
-		if($this->event_rsvp == 0 & !$this->just_added_event){
+		if(!$this->event_rsvp && !$this->just_added_event){
 			$this->get_bookings()->get_tickets()->delete();
 			$this->get_bookings()->delete();
 		}elseif( $this->can_manage('manage_bookings','manage_others_bookings') ){
@@ -762,7 +690,7 @@ class EM_Event extends \EM_Object{
 
 	function event_exists() {
 		global $wpdb;
-		if (empty($this->event_id)) return false;
+		if ($this->event_id === 0) return false;
 		if( !empty($this->orphaned_event ) && !empty($this->post_id) ) return true; 
 		return $wpdb->get_var('SELECT post_id FROM '.EM_EVENTS_TABLE." WHERE event_id={$this->event_id}") == $this->post_id;
 	}
@@ -779,20 +707,18 @@ class EM_Event extends \EM_Object{
 		$EM_Event = clone $this;
 		$EM_Event->get_categories(); //before we remove event/post ids
 		$EM_Event->get_bookings()->get_tickets(); //in case this wasn't loaded and before we reset ids
-		$EM_Event->event_id = null;
-		$EM_Event->post_id = null;
-		$EM_Event->ID = null;
+		$EM_Event->event_id = 0;
+		$EM_Event->post_id = 0;
 		$EM_Event->post_name = '';
 		$EM_Event->location_id = $EM_Event->location_id ?? 0;
-		$EM_Event->get_bookings()->event_id = null;
-		$EM_Event->get_bookings()->get_tickets()->event_id = null;
+		$EM_Event->get_bookings()->event_id = 0;
+		$EM_Event->get_bookings()->get_tickets()->event_id = 0;
 		//if bookings reset ticket ids and duplicate tickets
 		foreach($EM_Event->get_bookings()->get_tickets()->tickets as $ticket){
 			$ticket->ticket_id = 0;
 			$ticket->event_id = 0;
 		}
 		do_action('em_event_duplicate_pre', $EM_Event, $this);
-		$EM_Event->duplicated = true;
 		$EM_Event->force_status = 'draft';
 		if( !$EM_Event->save() ) return;
 		
@@ -805,8 +731,8 @@ class EM_Event extends \EM_Object{
 		$EM_Tags->save();
 	
 		//other non-EM post meta inc. featured image
-		$event_meta = $this->get_event_meta($this->blog_id);
-		$new_event_meta = $EM_Event->get_event_meta($EM_Event->blog_id);
+		$event_meta = $this->get_event_meta();
+		$new_event_meta = $EM_Event->get_event_meta();
 		$event_meta_inserts = array();
 		//Get custom fields and post meta - adapted from $this->load_post_meta()
 		foreach($event_meta as $event_meta_key => $event_meta_vals){
@@ -922,12 +848,6 @@ class EM_Event extends \EM_Object{
 		}else{
 			$set_status = $status ? 1:0; //published or pending post
 			$post_status = $set_status ? 'publish':'pending';
-			if( empty($this->post_name) ){
-				//published or pending posts should have a valid post slug
-				$slug = sanitize_title($this->post_title);
-				$this->post_name = wp_unique_post_slug( $slug, $this->post_id, $post_status, EM_POST_TYPE_EVENT, 0);
-				$set_post_name = true;
-			}
 			if($set_post_status){
 				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_name' => $this->post_name ), array( 'ID' => $this->post_id ) );
 			}elseif( !empty($set_post_name) ){
@@ -1086,13 +1006,8 @@ class EM_Event extends \EM_Object{
 	 * @return EM_Location
 	 */
 	function get_location() {
-		global $EM_Location;
-		if( is_object($EM_Location) && $EM_Location->location_id == $this->location_id ){
-			$this->location = $EM_Location;
-		}else{
-			if( !is_object($this->location) || $this->location->location_id != $this->location_id ){
-				$this->location = apply_filters('em_event_get_location', EM_Location::get($this->location_id), $this);
-			}
+		if( !is_object($this->location) || $this->location->location_id != $this->location_id ){
+			$this->location = apply_filters('em_event_get_location', EM_Location::find_by_post_id($this->location_id), $this);
 		}
 		return $this->location;
 	}
@@ -1102,7 +1017,7 @@ class EM_Event extends \EM_Object{
 	 * @return bool
 	 */
 	public function has_location(){
-		return !empty($this->location_id);
+		return $this->location_id > 0;
 	}
 
 	public function can_book() : bool
@@ -1170,15 +1085,15 @@ class EM_Event extends \EM_Object{
 	 * @param boolean $force_reload
 	 * @return EM_Bookings
 	 */
-	function get_bookings( $force_reload = false ){
+	function get_bookings( $force_reload = false ) : EM_Bookings {
 		if( get_option('dbem_rsvp_enabled') ){
 			if( (!$this->bookings || $force_reload) ){
-				$this->bookings = new EM_Bookings($this);
+				$this->bookings = EM_Bookings::from_event($this);
 			}
 			$this->bookings->event_id = $this->event_id; //always refresh event_id
 			$this->bookings = apply_filters('em_event_get_bookings', $this->bookings, $this);
 		}else{
-			return new EM_Bookings();
+			return new EM_Bookings;
 		}
 		//TODO for some reason this returned instance doesn't modify the original, e.g. try $this->get_bookings()->add($EM_Booking) and see how $this->bookings->feedback_message doesn't change
 		return $this->bookings;
@@ -1255,9 +1170,6 @@ class EM_Event extends \EM_Object{
 		return \Contexis\Events\Intl\Date::get_date($this->start()->getTimestamp(), $this->end()->getTimestamp());
 	}
 	
-	/**********************************************************
-	 * RECURRENCE METHODS
-	 ***********************************************************/
 	
 	/**
 	 * Returns true if this is a recurring event.
@@ -1473,10 +1385,9 @@ class EM_Event extends \EM_Object{
 			}else{
 				//we go through all event main data and meta data, we delete and recreate all meta data
 				//now unset some vars we don't need to deal with since we're just updating data in the wp_em_events and posts table
-				unset( $event['event_date_created'], $event['recurrence_id'], $event['recurrence'], $event['event_start_date'], $event['event_end_date'], $event['event_parent'] );
+				unset( $event['event_date_created'], $event['recurrence_id'], $event['recurrence'], $event['event_start_date'], $event['event_end_date'] );
 				$event['event_date_modified'] = current_time('mysql'); //since the recurrences are modified but not recreated
 				unset( $post_fields['comment_count'], $post_fields['guid'], $post_fields['menu_order']);
-				unset( $meta_fields['_event_parent'] ); // we'll ignore this and add it manually
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
@@ -1550,7 +1461,7 @@ class EM_Event extends \EM_Object{
 			 	//first, delete all bookings & tickets if we haven't done so during the reschedule above - something we'll want to change later if possible so bookings can be modified without losing all data
 			 	if( !$this->recurring_reschedule ){
 				 	//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-			 		$EM_Bookings = new EM_Bookings();
+			 		$EM_Bookings = new EM_Bookings;
 			 		$tickets = new \Contexis\Events\Tickets\Tickets();
 			 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 			 			if($event['recurrence_id'] == $this->event_id){
@@ -1581,7 +1492,7 @@ class EM_Event extends \EM_Object{
 			 				if( empty($v) && $k != 'ticket_name' ){ 
 			 					$ticket[$k] = 'NULL';
 			 				}else{
-			 					$data_type = !empty($ticket->fields[$k]['type']) ? $ticket->fields[$k]['type']:'%s';
+			 					$data_type = !empty($ticket['fields'][$k]['type']) ? $ticket['fields'][$k]['type']:'%s';
 			 					if(is_array($ticket[$k])) $v = serialize($ticket[$k]);
 			 					$ticket[$k] = $wpdb->prepare($data_type,$v);
 			 				}
@@ -1617,7 +1528,7 @@ class EM_Event extends \EM_Object{
 			 	}
 		 	}elseif( $this->recurring_delete_bookings ){
 		 		//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-		 		$EM_Bookings = new EM_Bookings();
+		 		$EM_Bookings = new EM_Bookings;
 		 		$tickets = new \Contexis\Events\Tickets\Tickets();
 		 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 		 			if($event['recurrence_id'] == $this->event_id){
@@ -1879,35 +1790,3 @@ class EM_Event extends \EM_Object{
 		return apply_filters('em_event_can_manage', parent::can_manage($owner_capability, $admin_capability, $user_to_check), $this, $owner_capability, $admin_capability, $user_to_check);
 	}
 }
-
-// FILTERS
-// filters for general events field (corresponding to those of  "the _title")
-add_filter('dbem_general', 'wptexturize');
-add_filter('dbem_general', 'convert_chars');
-add_filter('dbem_general', 'trim');
-// filters for the notes field in html (corresponding to those of  "the _content")
-add_filter('dbem_notes', 'wptexturize');
-add_filter('dbem_notes', 'convert_smilies');
-add_filter('dbem_notes', 'convert_chars');
-add_filter('dbem_notes', 'wpautop');
-add_filter('dbem_notes', 'prepend_attachment');
-add_filter('dbem_notes', 'do_shortcode');
-// filters for the notes field in html (corresponding to those of  "the _content")
-add_filter('dbem_notes_excerpt', 'wptexturize');
-add_filter('dbem_notes_excerpt', 'convert_smilies');
-add_filter('dbem_notes_excerpt', 'convert_chars');
-add_filter('dbem_notes_excerpt', 'wpautop');
-add_filter('dbem_notes_excerpt', 'prepend_attachment');
-add_filter('dbem_notes_excerpt', 'do_shortcode');
-// RSS content filter
-add_filter('dbem_notes_rss', 'convert_chars', 8);
-add_filter('dbem_general_rss', 'esc_html', 8);
-// Notes map filters
-add_filter('dbem_notes_map', 'convert_chars', 8);
-add_filter('dbem_notes_map', 'js_escape');
-//embeds support if using placeholders
-if ( is_object($GLOBALS['wp_embed']) ){
-	add_filter( 'dbem_notes', array( $GLOBALS['wp_embed'], 'run_shortcode' ), 8 );
-	add_filter( 'dbem_notes', array( $GLOBALS['wp_embed'], 'autoembed' ), 8 );
-}
-

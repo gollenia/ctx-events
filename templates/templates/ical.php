@@ -21,7 +21,7 @@ $timezones = array();
 //calendar header
 $output_header = "BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//wp-events-plugin.com//".Events::VERSION."//EN";
+PRODID:-//kids-team//events//EN";
 
 //if timezone is supported, we output the blog timezone here
 if( $timezone_support ){
@@ -81,24 +81,23 @@ while ( count($EM_Events) > 0 ){
 		}
 		
 		//formats
-		$summary = em_mb_ical_wordwrap('SUMMARY:'.$EM_Event->output($summary_format,'ical'));
-		$description = em_mb_ical_wordwrap('DESCRIPTION:'.$EM_Event->output($description_format,'ical'));
+		$summary = em_mb_ical_wordwrap('SUMMARY:' . EventView::render($EM_Event, $summary_format,'ical'));
+		$description = em_mb_ical_wordwrap('DESCRIPTION:' . EventView::render($EM_Event, $description_format,'ical'));
 		$url = 'URL:'.$EM_Event->get_permalink();
 		$url = wordwrap($url, 74, "\n ", true);
 		$location = $geo = $apple_geo = $apple_location = $apple_location_title = $apple_structured_location = $categories = false;
 		if( $EM_Event->location_id ){
-			$location = em_mb_ical_wordwrap('LOCATION:'.$EM_Event->output($location_format, 'ical'));
+			$location = em_mb_ical_wordwrap('LOCATION:' . EventView::render($EM_Event, $location_format, 'ical'));
 			if( $EM_Event->get_location()->location_latitude || $EM_Event->get_location()->location_longitude ){
 				$geo = 'GEO:'.$EM_Event->get_location()->location_latitude.";".$EM_Event->get_location()->location_longitude;
 			}
-			if( !defined('EM_ICAL_APPLE_STRUCT') || !EM_ICAL_APPLE_STRUCT ){
-				$apple_location = str_replace(';', '', html_entity_decode(str_replace('\;', ';', $EM_Event->output('#_LOCATIONFULLLINE, #_LOCATIONCOUNTRY', 'ical'))));
-				$apple_location_title = str_replace('\;', '', html_entity_decode(str_replace('\;', ';', $EM_Event->output('#_LOCATIONNAME', 'ical'))));
-				$apple_geo = !empty($geo) ? $EM_Event->get_location()->location_latitude.",".$EM_Event->get_location()->location_longitude:'0,0';
-				$apple_structured_location = "X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS={$apple_location};X-APPLE-RADIUS=100;X-TITLE={$apple_location_title}:geo:{$apple_geo}";
-				$apple_structured_location = str_replace('"', '\"', $apple_structured_location); //google chucks a wobbly with these on this line
-				$apple_structured_location = em_mb_ical_wordwrap($apple_structured_location);
-			}
+			
+			$apple_location = str_replace(';', '', html_entity_decode(str_replace('\;', ';', EventView::render($EM_Event, '#_LOCATIONFULLLINE, #_LOCATIONCOUNTRY', 'ical'))));
+			$apple_location_title = str_replace('\;', '', html_entity_decode(str_replace('\;', ';', EventView::render($EM_Event, '#_LOCATIONNAME', 'ical'))));
+			$apple_geo = !empty($geo) ? $EM_Event->get_location()->location_latitude.",".$EM_Event->get_location()->location_longitude:'0,0';
+			$apple_structured_location = "X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS={$apple_location};X-APPLE-RADIUS=100;X-TITLE={$apple_location_title}:geo:{$apple_geo}";
+			$apple_structured_location = str_replace('"', '\"', $apple_structured_location); //google chucks a wobbly with these on this line
+			$apple_structured_location = em_mb_ical_wordwrap($apple_structured_location);
 		}
 		$categories = array();
 		foreach( $EM_Event->get_categories() as $EM_Category ){ /* @var EM_Category $EM_Category */

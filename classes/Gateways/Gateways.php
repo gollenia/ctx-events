@@ -409,7 +409,7 @@ class EM_Gateways {
 			    );
 			    
 				$EM_Event = $EM_Booking->get_event(); //handle potentially deleted events in a MB booking
-				$event_string = !empty($EM_Event->post_id) ? $EM_Event->output('#_EVENTLINK - #_EVENTDATES @ #_EVENTTIMES') : __('Deleted Event', 'events');
+				$event_string = !empty($EM_Event->post_id) ? EventView::render($EM_Event, '#_EVENTLINK - #_EVENTDATES @ #_EVENTTIMES') : __('Deleted Event', 'events');
 				$transactions_item['data'][] = array('name' => __('Event','events'), 'value' => $event_string );
                 
 			    $transactions_item['data'][] = array('name' => __('Status','events'), 'value' => $transaction->transaction_status );

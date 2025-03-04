@@ -544,7 +544,6 @@ class EM_Object {
 					    if( !empty($tax_data['context']) && static::$context == 'location' && in_array( static::$context, $tax_data['context']) ){
 					        //context can be either locations or events, since those are the only two CPTs we deal with
 						    $post_context = EM_LOCATIONS_TABLE.".post_id";
-						    $ms_context = EM_LOCATIONS_TABLE.".event_id";
 					    }
 					    //build conditions
 						

@@ -13,8 +13,6 @@ class EM_Coupons extends EM_Object {
 	    
 		//add field to booking form and ajax
 		
-		add_action('em_booking_form_footer', array('EM_Coupons', 'em_booking_form_footer'),1,2);
-		//meta box hook for adding coupons to booking info
 		add_filter('em_event_get_post_meta',array('EM_Coupons', 'em_event_get_post_meta'),10,2);
 		add_filter('em_event_save_meta',array('EM_Coupons', 'em_event_save_meta'),10,2);
 		add_filter('em_event_save_events',array('EM_Coupons', 'em_event_save_events'),10,3);
@@ -127,7 +125,7 @@ class EM_Coupons extends EM_Object {
 	    	if( !empty($EM_Event->event_id) ){
 	    		$EM_Event->coupons_count = EM_Coupons::count(array('event'=>$EM_Event->event_id));
 	    	}else{
-	    		$EM_Event->coupons_count = array();
+	    		$EM_Event->coupons_count = 0;
 	    	}
 	    }
 	    return $EM_Event->coupons_count > 0;
@@ -535,22 +533,6 @@ class EM_Coupons extends EM_Object {
 		return apply_filters('em_coupons_refresh_counts', $result, $EM_Booking);
 	}
 	
-	/**
-	 * Outputs coupon code input field at bottom of booking form.
-	 * @param EM_Event $EM_Event
-	 */
-	public static function em_booking_form_footer($EM_Event){
-		if( !$EM_Event->is_free(true) && EM_Coupons::event_has_coupons($EM_Event) > 0){
-			?>
-			<p class="em-bookings-form-coupon input-text my-8">
-				<label><?php _e('Coupon Code','events'); ?></label>
-				<input type="text" name="coupon_code" class="input em-coupon-code" />
-			</p>
-			<?php
-			add_action('em_booking_js_footer', array('EM_Coupons', 'em_booking_js_footer') );
-		}
-	}
-	
 	
 	
 	
@@ -587,7 +569,7 @@ class EM_Coupons extends EM_Object {
 	 * @param boolean $count
 	 * @return array
 	 */
-	public static function get( $args = array(), $count=false ){
+	public static function get( $args = array(), $count=false ) : array {
 		global $wpdb;
 		$coupons_table = EM_COUPONS_TABLE;
 		$coupons = array();
@@ -619,7 +601,6 @@ class EM_Coupons extends EM_Object {
 		
 		$selectors = '*';
 		if( !empty($args['ids']) ) $selectors = 'coupon_id';
-		if( $count ) $selectors = 'COUNT(*)';
 		
 		//Create the SQL statement and execute
 		$sql = "
@@ -632,10 +613,6 @@ class EM_Coupons extends EM_Object {
 		//If we only want the ids, the $selectors was already modified, so return a col instead
 		if( !empty($args['ids']) ) {
 			return apply_filters('em_coupons_get_ids', $wpdb->get_col($sql), $args);
-		}
-		//If we're only counting results, return the number of results
-		if( $count ){
-			return apply_filters('em_coupons_get_array', $wpdb->get_var($sql), $args);	
 		}
 		
 		$results = $wpdb->get_results($sql, ARRAY_A);
@@ -651,8 +628,8 @@ class EM_Coupons extends EM_Object {
 		return apply_filters('em_coupons_get', $coupons, $args);
 	}
 	
-	public static function count($args = array() ){
-		return self::get($args, true);
+	public static function count($args = array() ) : int {
+		return count(self::get($args, true));
 	}
 	
 	/*

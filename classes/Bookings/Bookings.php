@@ -7,13 +7,14 @@ use Contexis\Events\Tickets\Ticket;
  * @author marcus
  * @property EM_Booking[] $bookings
  */
-class EM_Bookings extends EM_Object implements Iterator {
+class EM_Bookings extends EM_Object implements Iterator, Countable {
 	
 	/**
 	 * Array of EM_Booking objects for a specific event
 	 * @var EM_Booking[]
 	 */
-	protected $bookings;
+	public array $bookings = [];
+	private int $position = 0;
 	/**
 	 * @var Tickets
 	 */
@@ -21,7 +22,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 	/**
 	 * @var int
 	 */
-	var $event_id;
+	public int $event_id = 0;
 	/**
 	 * How many spaces this event has
 	 * @var int
@@ -45,27 +46,35 @@ class EM_Bookings extends EM_Object implements Iterator {
 	protected $booked_spaces;
 	protected $pending_spaces;
 	protected $available_spaces;
-	
-	/**
-	 * Creates an EM_Bookings instance, currently accepts an EM_Event object (gets all bookings for that event) or array of any EM_Booking objects, which can be manipulated in bulk with helper functions.
-	 * @param EM_Event $event
-	 * @return null
-	 */
-	function __construct( $data = false ){
-		if( is_object($data) && get_class($data) == "EM_Event" ){ //Creates a blank bookings object if needed
-			$this->event_id = $data->event_id;
-			return;
+
+	public static function from_event(EM_Event $event) : EM_Bookings {
+		$instance = new self();
+		$instance->event_id = $event->event_id;
+		$instance->load();
+		return $instance;
+	}
+
+	public static function from_bookings(array $bookings) : EM_Bookings {
+		$instance = new self();
+		foreach( $bookings as $EM_Booking ){
+			if( get_class($EM_Booking) == 'EM_Booking') $instance->bookings[] = $EM_Booking;
 		}
-		
-		if( !is_array($data) ) return;
-		foreach( $data as $EM_Booking ){
-			if( get_class($EM_Booking) == 'EM_Booking') $this->bookings[] = $EM_Booking;
+		return $instance;
+	}
+
+	public static function from_booking_ids(array $booking_ids) : EM_Bookings {
+		$instance = new self();
+		foreach( $booking_ids as $booking_id ){
+			$instance->bookings[] = EM_Booking::find($booking_id);
 		}
+		return $instance;
+	}
+
+	public static function find() {
+		return new self();
 	}
 	
-	public function __get( $var ){
-		return $var == 'bookings' ? $this->load() : $this->$var;
-	}
+
 	
 	public function __set( $var, $val ){
 		if( $var == 'bookings' ){
@@ -414,7 +423,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 				$confirmed[] = $EM_Booking;
 			}
 		}
-		$EM_Bookings = new EM_Bookings($confirmed);
+		$EM_Bookings = EM_Bookings::from_bookings($confirmed);
 		return $EM_Bookings;		
 	}
 	
@@ -424,7 +433,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 	 */
 	function get_pending_bookings(){
 		if( get_option('dbem_bookings_approval') == 0 ){
-			return new EM_Bookings();
+			return new EM_Bookings;
 		}
 		$pending = array();
 		foreach ( $this->load() as $EM_Booking ){
@@ -432,7 +441,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 				$pending[] = $EM_Booking;
 			}
 		}
-		$EM_Bookings = new EM_Bookings($pending);
+		$EM_Bookings = EM_Bookings::from_bookings($pending);
 		return $EM_Bookings;	
 	}	
 	
@@ -447,7 +456,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 				$rejected[] = $EM_Booking;
 			}
 		}
-		$EM_Bookings = new EM_Bookings($rejected);
+		$EM_Bookings = EM_Bookings::from_bookings($rejected);
 		return $EM_Bookings;
 	}	
 	
@@ -462,37 +471,15 @@ class EM_Bookings extends EM_Object implements Iterator {
 				$cancelled[] = $EM_Booking;
 			}
 		}
-		$EM_Bookings = new EM_Bookings($cancelled);
+		$EM_Bookings = EM_Bookings::from_bookings($cancelled);
 		return $EM_Bookings;
 	}
 	
-	
-	
-	/**
-	 * Get bookings that match the array of arguments passed.
-	 * @return array 
-	 * @static
-	 */
-	public static function get( $args = array(), $count = false ){
-		global $wpdb,$current_user;
+
+	public static function get( $args = array() ) : EM_Bookings {
+		global $wpdb;
 		$bookings_table = EM_BOOKINGS_TABLE;
 		$events_table = EM_EVENTS_TABLE;
-		$locations_table = EM_LOCATIONS_TABLE;
-		
-		//Quick version, we can accept an array of IDs, which is easy to retrieve
-		if( is_array($args) && !empty($args) && array_is_list($args) ){ //Array of numbers, assume they are event IDs to retreive
-			//We can just get all the events here and return them
-			$sql = "
-				SELECT * FROM $bookings_table b 
-				LEFT JOIN $events_table e ON e.event_id=b.event_id 
-				WHERE booking_id=".implode(" OR booking_id=", $args);
-			$results = $wpdb->get_results(apply_filters('em_bookings_get_sql',$sql),ARRAY_A);
-			$bookings = array();
-			foreach($results as $result){
-				$bookings[] = EM_Booking::find($result);
-			}
-			return $bookings; //We return all the bookings matched as an EM_Booking array. 
-		}
 		
 		//We assume it's either an empty array or array of search arguments to merge with defaults			
 		$args = self::get_default_search($args);
@@ -512,9 +499,7 @@ class EM_Bookings extends EM_Object implements Iterator {
 		//Now, build orderby sql
 		$orderby_sql = ( count($orderby) > 0 ) ? 'ORDER BY '. implode(', ', $orderby) : 'ORDER BY booking_date';
 		//Selectors
-		if( $count ){
-			$selectors = 'COUNT(*)';
-		}elseif( is_array($args['array']) ){
+		if( is_array($args['array']) ){
 			$selectors = implode(',', $args['array']);
 		}else{
 			$selectors = '*';
@@ -523,39 +508,20 @@ class EM_Bookings extends EM_Object implements Iterator {
 		$sql = apply_filters('em_bookings_get_sql',"
 			SELECT $selectors FROM $bookings_table 
 			LEFT JOIN $events_table ON {$events_table}.event_id={$bookings_table}.event_id 
-			LEFT JOIN $locations_table ON {$locations_table}.location_id={$events_table}.location_id
 			$where
 			$orderby_sql
 			$limit $offset
 		", $args);
 		
-		//If we're only counting results, return the number of results
-		if( $count ){
-			return apply_filters('em_bookings_get_count', $wpdb->get_var($sql), $args);		
-		}
 		$results = $wpdb->get_results($sql, ARRAY_A);
 
-		//If we want results directly in an array, why not have a shortcut here?
-		if( !empty($args['array']) ){
-			return $results;
-		}
-		
-		//Make returned results EM_Booking objects
 		$results = (is_array($results)) ? $results:array();
 		$bookings = array();
 		foreach ( $results as $booking ){
 			$bookings[] = EM_Booking::find($booking);
 		}
-		$EM_Bookings = new EM_Bookings($bookings);
-		return apply_filters('em_bookings_get', $EM_Bookings);
-	}
-	
-	public static function count( $args = array() ) : int {
-		$return = self::get($args, true);
-		if( is_numeric($return) ){
-			return $return;
-		}
-		return 0;
+		$EM_Bookings = EM_Bookings::from_bookings($bookings);
+		return $EM_Bookings;
 	}
 	
 
@@ -639,7 +605,6 @@ class EM_Bookings extends EM_Object implements Iterator {
 		$defaults = array(
 			'status' => false,
 			'person' => true, //to add later, search by person's bookings...
-			'blog' => get_current_blog_id(),
 			'ticket_id' => false,
 			'array' => false //returns an array of results if true, if an array or text it's assumed an array of specific table fields or single field name requested 
 		);
@@ -650,23 +615,23 @@ class EM_Bookings extends EM_Object implements Iterator {
 			$defaults = array_merge($defaults, $array_or_defaults);
 		}
 		//clean up array value
-		if( !empty($args['array']) ){
+		if( !empty($array['array']) ){
 			$EM_Booking = new EM_Booking();
-			if( is_array($args['array']) ){
+			if( is_array($array['array']) ){
 				$clean_arg = array();
-				foreach( $args['array'] as $k => $field ){
+				foreach( $array['array'] as $k => $field ){
 					if( array_key_exists($field, $EM_Booking->fields) ){
 						$clean_arg[] = $field;
 					}
 				}
-				$args['array'] = !empty($clean_arg) ? $clean_arg : true; //if invalid args given, just return all fields
-			}elseif( is_string($args['array']) && array_key_exists($args['array'], $EM_Booking->fields) ){
-				$args['array'] = array($args['array']);
+				$search_defaults['array'] = !empty($clean_arg) ? $clean_arg : true; //if invalid args given, just return all fields
+			}elseif( is_string($array['array']) && array_key_exists($array['array'], $EM_Booking->fields) ){
+				$search_defaults['array'] = array($array['array']);
 			}else{
-				$args['array'] = true;
+				$search_defaults['array'] = true;
 			}
 		}else{
-			$args['array'] = false;
+			$search_defaults['array'] = false;
 		}
 		//figure out default owning permissions
 		if( !current_user_can('edit_others_events') ){
@@ -678,40 +643,28 @@ class EM_Bookings extends EM_Object implements Iterator {
 		return apply_filters('em_bookings_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
 	}
 
-	//Iterator Implementation - if we iterate this object, we automatically invoke the load() function first
-	//and load up all bookings to go through from the database.
-	#[\ReturnTypeWillChange]
     public function rewind() : void {
-    	$this->load();
-        reset($this->bookings);
+    	$this->position = 0;
     }  
 
-	#[\ReturnTypeWillChange]
     public function current() : mixed {
-    	$this->load();
-        $var = current($this->bookings);
-        return $var;
+    	return $this->bookings[$this->position];
     }  
 
-	#[\ReturnTypeWillChange]
     public function key() : mixed{
-    	$this->load();
-        $var = key($this->bookings);
-        return $var;
+    	return $this->position;
     }  
 
-	#[\ReturnTypeWillChange]
-    public function next() : mixed {
-    	$this->load();
-        $var = next($this->bookings);
-        return $var;
+    public function next() : void {
+    	++$this->position;
     }  
 
-	#[\ReturnTypeWillChange]
     public function valid() : bool {
-    	$this->load();
-        $key = key($this->bookings);
-        return ($key !== NULL && $key !== FALSE);
+    	return isset($this->array[$this->position]);
+    }
+
+	public function count(): int {
+        return count($this->bookings);
     }
 }
 ?>

@@ -2,7 +2,7 @@
 $id = get_the_ID();
 $event = EM_Event::find_by_post(get_post());
 $location = $event->get_location();
-if(empty($location->location_id)) return;
+if(empty($location->post_id)) return;
 $block_attributes = get_block_wrapper_attributes();
 
 $has_photo = strpos($block_attributes, 'is-style-photo') !== false;

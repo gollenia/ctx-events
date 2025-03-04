@@ -175,7 +175,7 @@ class EM_Events extends EM_Object {
 			$tags = new EM_Tags($event);
 			$speaker = \Contexis\Events\Speaker::get($event->speaker_id);
 			$price = 0;
-			$booking = new \EM_Bookings($event);
+			$booking = EM_Bookings::from_event($event);
 			$tickets = $booking->get_tickets()->tickets;
 			if(!empty($tickets)) {
 				$first_ticket = key($tickets);
@@ -185,13 +185,13 @@ class EM_Events extends EM_Object {
 
 			array_push($result, [
 				'bookings' => [
-					'has_bookings' => $event->event_rsvp ? true : false,
+					'has_bookings' => $event->event_rsvp,
 					'spaces' => $booking->get_available_spaces()
 				],
-				'ID' => $event->ID,
+				'ID' => $event->post_id,
 				'event_id' => $event->event_id,
-				'link' => get_permalink($event->ID),
-				'image' => $event->event_image,
+				'link' => get_permalink($event->post_id),
+				'image' => $event->get_image(),
 				'category' => $category ? [ 
 					'id' => $category->id,
 					'color' => $category->color, 
@@ -199,7 +199,7 @@ class EM_Events extends EM_Object {
 					'slug' => $category->slug
 				] : false,
 				'location' => [ 
-					'ID' => $location->ID,
+					'ID' => $location->post_id,
 					'location_id' => $location->location_id, 
 					'address' => $location->location_address,
 					'zip' => $location->location_postcode,
@@ -219,11 +219,11 @@ class EM_Events extends EM_Object {
 				'single_day' => $event->event_start_date == $event->event_end_date,
 				'audience' => $audience,
 				'excerpt' => $event->post_excerpt,
-				'title' => $event->post_title,
+				'title' => $event->event_name,
 				'speaker' => $speaker,
 				'tags' => $tags->terms,
-				'allowDonation' => get_metadata('post', $event->ID, '_event_rsvp_donation', true) == "1",
-				'bookingStart' => get_post_meta($event->ID, '_event_rsvp_start', true),
+				'allowDonation' => get_metadata('post', $event->post_id, '_event_rsvp_donation', true) == "1",
+				'bookingStart' => get_post_meta($event->post_id, '_event_rsvp_start', true),
 				'bookingEnd' => $event->rsvp_end()->getTimestamp() * 1000,
 				'bookingEndFormatted' => \Contexis\Events\Intl\Date::get_date($event->rsvp_end()->getTimestamp())
 			]);
@@ -402,7 +402,7 @@ class EM_Events extends EM_Object {
 	 */
 	protected static function build_sql_ambiguous_fields_helper( $fields, $reserved_fields = array(), $prefix = 'table_name' ){
 		//This will likely be removed when PHP 5.3 is the minimum and LSB is a given
-		return parent::build_sql_ambiguous_fields_helper($fields, array('post_id', 'location_id', 'blog_id'), EM_EVENTS_TABLE);
+		return parent::build_sql_ambiguous_fields_helper($fields, array('post_id', 'location_id'), EM_EVENTS_TABLE);
 	}
 	
 	/* 
@@ -427,7 +427,6 @@ class EM_Events extends EM_Object {
 			'region' => false,
 			'postcode' => false,
 			'exclude' => false,
-			'blog' => get_current_blog_id(),
 			'private' => current_user_can('read_private_events'),
 			'private_only' => false,
 			'post_id' => false,

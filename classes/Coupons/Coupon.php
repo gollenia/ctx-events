@@ -9,7 +9,6 @@ class EM_Coupon extends EM_Object {
 	var $coupon_owner = '';
 	var $owner = '';
 	var $id = '';
-	var $blog_id = '';
 	var $coupon_code = '';
 	var $coupon_name = '';
 	var $coupon_description = '';
@@ -24,7 +23,6 @@ class EM_Coupon extends EM_Object {
 	public array $fields = array( 
 		'coupon_id' => array('name'=>'id','type'=>'%d'),
 		'coupon_owner' => array('name'=>'owner','type'=>'%d'),
-		'blog_id' => array('name'=>'blog_id','type'=>'%d', 'null'=>true),
 		'coupon_code' => array('name'=>'name','type'=>'%s'), 
 		'coupon_name' => array('name'=>'name','type'=>'%s'), 
 		'coupon_description' => array('name'=>'description','type'=>'%s','null'=>true),
@@ -55,10 +53,8 @@ class EM_Coupon extends EM_Object {
 		$this->required_fields = array("coupon_name" => __('Name', 'events'), "coupon_discount" => __('Discount', 'events'), "coupon_code" => __('Code', 'events'));
 		//Get the array/coupon_id
 		if( is_numeric($id) && $search_by == 'id' ){
-			//search by coupon_id, get post_id and blog_id (if in ms mode) and load the post
 			$coupon = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".EM_COUPONS_TABLE." WHERE coupon_id=%d",$id), ARRAY_A);
 		}elseif( $search_by == 'code' ){
-			//search by coupon_id, get post_id and blog_id (if in ms mode) and load the post
 			$coupon = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".EM_COUPONS_TABLE." WHERE coupon_code='%s'",$id), ARRAY_A);
 		}elseif( is_array($id) ){
 			$coupon = $id;

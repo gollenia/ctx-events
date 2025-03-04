@@ -3,7 +3,7 @@
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/events
 Description: Event registration and booking management for WordPress. Recurring events, locations, ical, booking registration and more!
-Version: 6.8.5
+Version: 6.9.0
 Requires at least: 6.7
 Requires PHP: 8.0
 License: GPL3
@@ -15,12 +15,8 @@ Domain Path: /languages
 */
 
 class Events {
-	const VERSION = '6.85';
 	const DIR = __DIR__;
 }
-
-
-
 
 function em_load_textdomain() {
 	load_plugin_textdomain('events', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); 
@@ -42,6 +38,7 @@ require_once( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
 // INCLUDES
 //Base classes
 require_once __DIR__ . '/polyfill.php';
+require_once __DIR__ . '/classes/Utilities.php';
 require_once __DIR__ . '/Assets.php';
 require_once __DIR__ . '/classes/Options.php';
 require_once __DIR__ . '/classes/Object.php';
@@ -72,6 +69,7 @@ require_once __DIR__ . '/classes/Locations/Location.php';
 
 require_once __DIR__ . '/classes/Locations/LocationPost.php';
 require_once __DIR__ . '/classes/Locations/Locations.php';
+require_once __DIR__ . '/classes/Locations/LocationView.php';
 require_once __DIR__ . '/classes/Emails/Mailer.php';
 require_once __DIR__ . '/classes/Notices.php';
 //require_once __DIR__ . '/classes/People/People.php';
@@ -164,14 +162,12 @@ function em_init(){
 	}
 	$EM_Mailer = new \EM_Mailer();
 	//Upgrade/Install Routine
-	if( is_admin() && current_user_can('manage_options') ){
-		if( Events::VERSION > get_option('dbem_version', 0) ){
-			require_once( dirname(__FILE__).'/em-install.php');
-			em_install();
-		}
+	if( !is_admin() || !current_user_can('manage_options') ) return;
+
+	if (version_compare(\Contexis\Events\Utilities::get_installed_version(), \Contexis\Events\Utilities::get_plugin_version(), '<')) {
+		require_once( dirname(__FILE__).'/em-install.php');
+		em_install();
 	}
-	//fire a loaded hook, most plugins should consider going through here to load anything EM related
-	do_action('events_manager_loaded');
 }
 add_filter('init','em_init',1);
 
@@ -186,12 +182,6 @@ function em_load_event(){
 	if (defined('EM_LOADED')) return;
 	
 	$EM_Recurrences = array();
-
-	if( isset($_REQUEST['location_id']) && is_numeric($_REQUEST['location_id']) && !is_object($EM_Location) ){
-		$EM_Location = new \EM_Location( absint($_REQUEST['location_id']) );
-	}elseif( isset($_REQUEST['post']) && get_post_type($_REQUEST['post']) == 'location' ){
-		$EM_Location = EM_Location::get($_REQUEST['post'], 'post_id');
-	}
 
 	if( isset($_REQUEST['booking_id']) && is_numeric($_REQUEST['booking_id']) && !is_object($_REQUEST['booking_id']) ){
 		$EM_Booking = \EM_Booking::find( absint($_REQUEST['booking_id']) );
@@ -223,8 +213,8 @@ function em_locate_template( $template_name, $load=false, $the_args = array() ) 
 	$located = locate_template(array('plugins/events/'.$template_name));
 	if( !$located ){
 		$located = apply_filters('em_locate_template_default', $located, $template_name, $load, $the_args);
-		if ( !$located && file_exists(Events::DIR.'/templates/'.$template_name) ) {
-			$located = Events::DIR.'/templates/'.$template_name;
+		if ( !$located && file_exists(__DIR__.'/templates/'.$template_name) ) {
+			$located = __DIR__.'/templates/'.$template_name;
 		}
 	}
 	$located = apply_filters('em_locate_template', $located, $template_name, $load, $the_args);

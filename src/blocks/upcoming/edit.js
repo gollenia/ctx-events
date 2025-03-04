@@ -57,7 +57,7 @@ const EditUpcoming = ( props ) => {
 		}
 
 		list.map( ( location ) => {
-			locationOptionsArray.push( { value: location.location_id, label: location.title.raw } );
+			locationOptionsArray.push( { value: location.id, label: location.title.raw } );
 		} );
 
 		return locationOptionsArray;
