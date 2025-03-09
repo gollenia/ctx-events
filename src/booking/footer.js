@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import sendOrder from './modules/sendOrder';
 
 const Footer = ( { state, dispatch } ) => {
-	const { data, request, wizard, modal } = state;
+	const { event, request, wizard, modal } = state;
 
 	const [ TICKETS, REGISTRATION, PAYMENT, SUCCESS ] = [
 		wizard.step == 0,
@@ -13,13 +13,13 @@ const Footer = ( { state, dispatch } ) => {
 
 	const TICKETS_MISSING =
 		( TICKETS && request.tickets.length == 0 ) ||
-		( REGISTRATION && data.attendee_fields.length == 0 && request.tickets.length == 0 );
+		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.tickets.length == 0 );
 	const ATTENDEES_MISSING = TICKETS && request.tickets.length > 0 && ! wizard.steps.tickets.valid;
 	const REGISTRATION_MISSING = REGISTRATION && ! wizard.steps.registration.valid;
 	const PAYMENT_MISSING = PAYMENT && request.gateway == '';
 	const ONLINE_PAYMENT = request.gateway != 'offline';
 	const PRIVACY_MISSING =
-		data?.l10n?.consent &&
+		event?.l10n?.consent &&
 		( ( PAYMENT && ! request.registration.data_privacy_consent ) ||
 			( ! wizard.steps.payment.enabled && REGISTRATION && ! request.registration.data_privacy_consent ) );
 

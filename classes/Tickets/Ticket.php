@@ -477,6 +477,27 @@ class Ticket extends \EM_Object{
 		return $this->bookings;
 	}
 	
+	public function get_rest_fields() {
+
+		$fields = [];
+		$raw_fields = \EM_Attendees_Form::get_attendee_form($this->get_event()->post_id);
+		foreach($raw_fields as $field) {
+			$fields[$field['fieldid']] = '';
+		}
+
+		return [
+			
+                "id" => $this->id,
+                "event_id" => $this->event_id,
+                "is_available" => $this->is_available,
+                "max" => intval($this->ticket_max ? min( $this->ticket_spaces, $this->ticket_max ) : $this->ticket_spaces),
+                "price" => floatval($this->ticket_price),
+                "min" => $this->ticket_min ?: 0,
+                "name" => $this->ticket_name,
+                "description" => $this->ticket_description,
+				"fields" => $fields
+		];
+	}
 
 	/**
 	 * I wonder what this does....

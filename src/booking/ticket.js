@@ -42,7 +42,7 @@ const Ticket = ( props ) => {
 									payload: { form: 'ticket', index, field: field.fieldid, value: value },
 								} );
 							} }
-							locale={ state.data.l10n.locale }
+							locale={ window.eventBookingLocalization.locale }
 						/>
 					);
 				} ) }

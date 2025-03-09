@@ -259,7 +259,7 @@ Class EventRecurring extends EM_Event {
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
-				$events = EM_Events::get( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
+				$events = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
 			 	foreach($events as $event_array){ /* @var $EM_Event EM_Event */
 			 		//set new start/end times to obtain accurate timestamp according to timezone and DST
 			 		$EM_DateTime = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);
@@ -619,7 +619,7 @@ Class EventRecurring extends EM_Event {
 		global $wpdb;
 		//get post and event ids of recurrences
 		$post_ids = $event_ids = array();
-		$events_array = EM_Events::get( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>false, 'array'=>true) ); //only get recurrences that aren't trashed or drafted
+		$events_array = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>false, 'array'=>true) ); //only get recurrences that aren't trashed or drafted
 		foreach( $events_array as $event_array ){
 			$post_ids[] = absint($event_array['post_id']);
 			$event_ids[] = absint($event_array['event_id']);

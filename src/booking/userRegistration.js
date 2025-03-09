@@ -32,10 +32,10 @@ const UserRegistration = ( props ) => {
 									payload: { form: 'registration', field: field.fieldid, value: event },
 								} );
 							} }
-							locale={ data.l10n.locale }
+							locale={ window.eventBookingLocalization.locale }
 						/>
 					) ) }
-					{ data.event?.is_free && data?.l10n?.consent && (
+					{ data.event?.is_free && window.eventBookingLocalization.consent && (
 						<InputField
 							type="checkbox"
 							onChange={ ( event ) => {

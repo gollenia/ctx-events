@@ -10,7 +10,7 @@ import Summary from './summary';
 
 const Payment = ( props ) => {
 	const {
-		state: { request, response, data },
+		state: { request, response, event },
 		state,
 		dispatch,
 	} = props;
@@ -19,9 +19,9 @@ const Payment = ( props ) => {
 
 	const gatewayOptions = () => {
 		const result = {};
-		if ( data?.available_gateways == undefined ) return result;
-		Object.keys( data.available_gateways ).forEach( ( id ) => {
-			result[ id ] = data.available_gateways[ id ].title;
+		if ( event?.available_gateways == undefined ) return result;
+		Object.keys( event?.available_gateways ).forEach( ( id ) => {
+			result[ id ] = event.available_gateways[ id ].title;
 		} );
 		return result;
 	};
@@ -33,8 +33,8 @@ const Payment = ( props ) => {
 			</div>
 			<div>
 				<form className="form--trap form grid xl:grid--columns-6 grid--gap-8">
-					{ data?.event?.has_coupons && <Coupon state={ state } dispatch={ dispatch } /> }
-					{ Object.keys( data.available_gateways ).length > 1 && (
+					{ event?.has_coupons && <Coupon state={ state } dispatch={ dispatch } /> }
+					{ Object.keys( event.available_gateways ).length > 1 && (
 						<InputField
 							label={ __( 'Payment Method', 'events' ) }
 							options={ gatewayOptions() }
@@ -44,13 +44,13 @@ const Payment = ( props ) => {
 							} }
 							type={ 'select' }
 							value={ request.gateway }
-							locale={ data.l10n.locale }
+							locale={ event.l10n.locale }
 						/>
 					) }
-					{ data.allow_donation && (
+					{ event.allow_donation && window.eventBookingLocalization.donation != '' && (
 						<div className="donation" style={ { gridColumn: 'span 6' } }>
 							<h4>{ __( 'Donation', 'events' ) }</h4>
-							<p dangerouslySetInnerHTML={ { __html: data.l10n.donation } }></p>
+							<p dangerouslySetInnerHTML={ { __html: window.eventBookingLocalization.donation } }></p>
 							<InputField
 								onChange={ ( value ) => {
 									if ( ! value ) {
@@ -65,7 +65,7 @@ const Payment = ( props ) => {
 								value={ allowDonation }
 								name={ 'allow_donation' }
 								help={ __( 'Yes, I want to donate', 'events' ) }
-								locale={ data.l10n.locale }
+								locale={ event.l10n.locale }
 								className="donation-checkbox"
 							/>
 							<InputField
@@ -83,11 +83,11 @@ const Payment = ( props ) => {
 								disabled={ ! allowDonation }
 								value={ request.donation.amount }
 								name={ 'donation' }
-								locale={ data.l10n.locale }
+								locale={ window.eventBookingLocalization.locale }
 							/>
 						</div>
 					) }
-					{ data?.l10n?.consent && (
+					{ window.eventBookingLocalization.consent != '' && (
 						<InputField
 							onChange={ ( event ) => {
 								dispatch( {
@@ -98,8 +98,8 @@ const Payment = ( props ) => {
 							type={ 'checkbox' }
 							value={ request.registration.data_privacy_consent }
 							name={ 'data_privacy_consent' }
-							help={ data?.l10n?.consent }
-							locale={ data.l10n.locale }
+							help={ window.eventBookingLocalization.consent }
+							locale={ window.eventBookingLocalization.locale }
 						/>
 					) }
 

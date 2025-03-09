@@ -31,14 +31,23 @@ function em_bookings_events_table() {
 			$title = __ ( 'All Events', 'events');
 			break;
 		default :
-			$title = __ ( 'Future Events', 'events');
+			$title = __ ( 'Future Events', 'events'); 
 			$scope = "future";
 	}
 	$owner = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
-	$events = EM_Events::get( array('scope'=>$scope, 'limit'=>$limit, 'offset' => $offset, 'order'=>$order, 'orderby'=>'event_start', 'bookings'=>true, 'owner' => $owner, 'pagination' => 1 ) );
-	$events_count = EM_Events::$num_rows_found;
-	
-	$use_events_end = get_option ( 'dbem_use_event_end' );
+	$events = EM_Events::find( [
+		'scope'=>$scope, 
+		'limit'=>$limit, 
+		'offset' => $offset, 
+		'order'=>$order, 
+		'orderby'=>'event_start', 
+		'bookings'=> 1, 
+		'owner' => $owner, 
+		'pagination' => 1 
+		] );
+
+	$events_count = $events->count();
+
 	?>
 	<div class="wrap em_bookings_events_table em_obj">
 		
@@ -97,7 +106,7 @@ function em_bookings_events_table() {
 					$rowno = 0;
 					foreach ( $events as $EM_Event ) {
 						/* @var $event EM_Event */
-
+						//var_dump( get_post_meta( $EM_Event->post_id, '_event_rsvp', true ) );
 						$rowno++;
 						$class = ($rowno % 2) ? ' class="alternate"' : '';
 						$style = "";

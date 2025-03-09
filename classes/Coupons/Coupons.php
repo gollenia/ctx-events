@@ -525,7 +525,6 @@ class EM_Coupons extends EM_Object {
 	public static function refresh_counts( $EM_Booking ){
 		$result = true;
 		$coupons = self::booking_get_coupons($EM_Booking);
-		file_put_contents('/var/www/vhosts/kids-team.internal/log/coupons.txt', print_r($coupons, true));
 		foreach( $coupons as $EM_Coupon ){ /* @var EM_Coupon $EM_Coupon */
 
 			$result = $EM_Coupon->recount() !== false && $result;

@@ -53,7 +53,7 @@ class ExportApi {
 
 	public function get_event_data() {
 		if(empty($this->month)) return;
-		$events = EM_Events::get_rest(['scope' => join(",", [$this->start_date, $this->end_date])]);
+		$events = EM_Events::find(['scope' => join(",", [$this->start_date, $this->end_date])]);
 		foreach($events as $event) {
 			array_push($this->month[wp_date('d', $event['start'])]['events'], $event);
 		}
@@ -61,8 +61,7 @@ class ExportApi {
 
 	public function get_featured_events() {
 		if(!array_key_exists('featured', $_REQUEST)) return [];
-		
-		return EM_Events::get_rest(['scope' => 'future', 'category' => $_REQUEST['important']]);
+		return EM_Events::find(['scope' => 'future', 'category' => $_REQUEST['featured']]);
 	}
 
 	public function get_pdf_fonts() {

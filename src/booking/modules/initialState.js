@@ -61,7 +61,7 @@ const initialState = {
 		gateway: 'offline',
 		coupon: '',
 	},
-	data: false,
+	event: false,
 };
 
 export default initialState;

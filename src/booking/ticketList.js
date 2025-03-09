@@ -5,14 +5,14 @@ import Ticket from './ticket';
 const TicketList = ( props ) => {
 	const { state, dispatch } = props;
 
-	const { request, data } = state;
+	const { request, event } = state;
 
 	const form = useRef( null );
 
 	return (
 		<div className="ticket-grid">
 			<Summary state={ state } dispatch={ dispatch } />
-			{ data.attendee_fields.length > 0 && (
+			{ event.forms.attendee_fields.length > 0 && (
 				<form className="ticket-grid-form" role="form" ref={ form } id="user-attendee-form">
 					<div id="firstTicket"></div>
 					{ request.tickets.map( ( ticket, index ) => (

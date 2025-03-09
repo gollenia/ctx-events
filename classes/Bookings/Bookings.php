@@ -7,7 +7,7 @@ use Contexis\Events\Tickets\Ticket;
  * @author marcus
  * @property EM_Booking[] $bookings
  */
-class EM_Bookings extends EM_Object implements Iterator, Countable {
+class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 	
 	/**
 	 * Array of EM_Booking objects for a specific event
@@ -643,25 +643,9 @@ class EM_Bookings extends EM_Object implements Iterator, Countable {
 		return apply_filters('em_bookings_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
 	}
 
-    public function rewind() : void {
-    	$this->position = 0;
-    }  
-
-    public function current() : mixed {
-    	return $this->bookings[$this->position];
-    }  
-
-    public function key() : mixed{
-    	return $this->position;
-    }  
-
-    public function next() : void {
-    	++$this->position;
-    }  
-
-    public function valid() : bool {
-    	return isset($this->array[$this->position]);
-    }
+   public function getIterator() : ArrayIterator {
+		return new ArrayIterator($this->bookings);
+	}
 
 	public function count(): int {
         return count($this->bookings);

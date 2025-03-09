@@ -4,10 +4,10 @@ const initializer = ( initialState ) => initialState;
 
 const reducer = ( state = {}, action ) => {
 	const { type, payload } = action;
-	const { data } = state;
+	const { event } = state;
 	switch ( type ) {
-		case 'SET_DATA':
-			state.data = payload;
+		case 'SET_EVENT':
+			state.event = payload;
 			state.wizard.step = payload?.attendee_fields?.length === 0 ? 1 : 0;
 			return { ...state };
 
@@ -29,7 +29,7 @@ const reducer = ( state = {}, action ) => {
 		case 'SET_MODAL':
 			state.modal.visible = payload;
 			state.modal.title = payload
-				? `${ __( 'Registration', 'events' ) } ${ data.event?.title }`
+				? `${ __( 'Registration', 'events' ) } ${ event?.title }`
 				: state.originalDocumentTitle;
 			return { ...state };
 

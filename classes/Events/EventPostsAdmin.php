@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Utilities;
+
 class EM_Event_Posts_Admin{
 	public static function init(){
 		global $pagenow;
@@ -73,23 +76,7 @@ class EM_Event_Posts_Admin{
         }
     }
 	
-	/**
-	 * Handles WP_Query filter option in the admin area, which gets executed before EM_Event_Post::parse_query
-	 * Not yet in use 
-	 */
-	public static function parse_query(){
-		global $wp_query;
-		//Search Query Filtering
-	    if( !empty($wp_query->query_vars[EM_TAXONOMY_CATEGORY]) && is_numeric($wp_query->query_vars[EM_TAXONOMY_CATEGORY]) ){
-	        //sorts out filtering admin-side as it searches by id
-	        $term = get_term_by('id', $wp_query->query_vars[EM_TAXONOMY_CATEGORY], EM_TAXONOMY_CATEGORY);
-	        $wp_query->query_vars[EM_TAXONOMY_CATEGORY] = ( $term !== false && !is_wp_error($term) )? $term->slug:0;
-	    }
-		if( !empty($wp_query->query_vars['post_type']) && ($wp_query->query_vars['post_type'] == EM_POST_TYPE_EVENT || $wp_query->query_vars['post_type'] == 'event-recurring') && (empty($wp_query->query_vars['post_status']) || !in_array($wp_query->query_vars['post_status'],array('trash','pending','draft'))) ) {
-		    //Set up Scope for EM_Event_Post
-			$scope = $wp_query->query_vars['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'future';
-		}
-	}
+
 	
 	/**
 	 * Adds Future view to make things simpler, and also changes counts if user doesn't have edit_others_events permission
@@ -112,7 +99,7 @@ class EM_Event_Posts_Admin{
 				}
 				$args = array('scope'=>'future', 'status'=>'all');
 				if( $post_type == 'event-recurring' ) $args['recurring'] = 1;
-				$num_posts->em_future = EM_Events::count($args);
+				$num_posts->em_future = EM_Events::find($args)->count();
 				wp_cache_set($cache_key, $num_posts, 'counts');
 			}
 			$class = '';
@@ -136,8 +123,10 @@ class EM_Event_Posts_Admin{
 	
 	public static function restrict_manage_posts(){
 		global $wp_query;
-		if( $wp_query->query_vars['post_type'] == EM_POST_TYPE_EVENT || $wp_query->query_vars['post_type'] == 'event-recurring' ){
+		Utilities::object_to_js_console($wp_query);
+		if( $wp_query->query_vars['post_type'] == 'event' || $wp_query->query_vars['post_type'] == 'event-recurring' ){
 			?>
+			
 			<select name="scope">
 				<?php
 				$scope = (!empty($wp_query->query_vars['scope'])) ? $wp_query->query_vars['scope']:'future';
@@ -163,6 +152,7 @@ class EM_Event_Posts_Admin{
             	<input type="hidden" name="author" value="<?php echo esc_attr($_REQUEST['author']); ?>" />
             	<?php            	
             }
+			
 		}
 	}
 	

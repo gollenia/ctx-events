@@ -609,7 +609,7 @@ function em_upgrade_current_installation(){
 		$batch_size = 100;
 		$offset = 0;
 		
-		while($events = EM_Events::get(['limit' => $batch_size, 'offset' => $offset])) {
+		while($events = EM_Events::find(['limit' => $batch_size, 'offset' => $offset])) {
 			foreach($events as $event) {
 				if($event->location_id == 0) continue;
 				$location = EM_Location::find_by_location_id($event->location_id);

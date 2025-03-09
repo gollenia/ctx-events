@@ -5,7 +5,7 @@ class EM_Location_Post {
 	public static function init(){ 
 		//Front Side Modifiers
 		if( !is_admin() ){
-			add_filter('rest_api_init', ['EM_Location_Post','register_rest_fields']);
+			
 		}
 
 		add_action( 'init', ['EM_Location_Post', "register_meta"] );
@@ -31,13 +31,7 @@ class EM_Location_Post {
 		return $template;
 	}
 
-	public static function register_rest_fields() {
-		register_rest_field(
-			'location', 
-			'location_id', //New Field Name in JSON RESPONSEs
-			['get_callback' => ['EM_Location_Post','add_id_to_rest']]
-		);
-	}
+	
 
 	public static function meta_query_filter() {
 		add_filter(
@@ -54,10 +48,6 @@ class EM_Location_Post {
 		  );
 	}
 
-	public static function add_id_to_rest($object) {
-		$EM_Location = EM_Location::find_by_post_id($object["id"]);
-		return $EM_Location->location_id;
-	}
 
 
 	public static function refresh_cache(){

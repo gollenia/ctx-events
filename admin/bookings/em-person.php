@@ -24,7 +24,7 @@ function em_bookings_person_table(){
 		foreach($bookings as $EM_Booking){
 			$event_ids[] = $EM_Booking->event_id;
 		}
-		$events = EM_Events::get($event_ids);
+		$events = EM_Events::find($event_ids);
 	}
 	?>
 		<div class='wrap em_bookings_pending_table em_obj'>

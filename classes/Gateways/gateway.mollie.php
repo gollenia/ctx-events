@@ -54,7 +54,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 		
 	}
 
-	function get_rest() {
+	function get_rest_fields() {
 		return array(
 			'name' => $this->gateway,
 			"title" => get_option('em_'.$this->gateway.'_option_name'),

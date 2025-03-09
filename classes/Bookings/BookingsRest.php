@@ -141,11 +141,11 @@ class BookingsRest {
 
 		$data = [
 			'rest_url' => get_rest_url(),
-			'event' => \EM_Events::get_rest(['event' => $event->event_id])[0],
+			'event' => $event->get_rest_fields(),
 			'registration_fields' => \EM_Booking_Form::get_booking_form($event->post_id),
 		    'attendee_fields' => \EM_Attendees_Form::get_attendee_form($event->post_id),
-			'available_tickets' => $event->get_tickets_rest(),
-			'available_gateways' => \EM_Gateways::get_rest(),
+			'available_tickets' => $event->get_tickets->get_rest_fields(),
+			'available_gateways' => \EM_Gateways::get_rest_fields(),
 			'allow_donation' => $event->event_rsvp_donation,
 			'l10n' => [
 				"consent" => get_option("dbem_privacy_message"),

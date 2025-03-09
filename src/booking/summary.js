@@ -4,7 +4,7 @@ import Gateway from './gateway';
 import { formatCurrency } from './modules/priceUtils';
 
 function Summary( { state, dispatch } ) {
-	const { data, response, request, wizard } = state;
+	const { event, response, request, wizard } = state;
 
 	const [ TICKETS, REGISTRATION, PAYMENT, SUCCESS ] = [
 		wizard.step == 0,
@@ -17,9 +17,9 @@ function Summary( { state, dispatch } ) {
 
 	const ticketPrice = ( key ) => {
 		return (
-			data.available_tickets[ key ].price *
+			event.tickets_available[ key ].price *
 			request.tickets.reduce( ( n, ticket ) => {
-				return n + ( ticket.id == data.available_tickets[ key ].id );
+				return n + ( ticket.id == event.tickets_available[ key ].id );
 			}, 0 )
 		);
 	};
@@ -33,7 +33,7 @@ function Summary( { state, dispatch } ) {
 
 	const calculateFullPrice = () => {
 		let sum = 0;
-		for ( let ticket in data.available_tickets ) {
+		for ( let ticket in event.tickets_available ) {
 			sum += ticketPrice( ticket );
 		}
 
@@ -53,23 +53,23 @@ function Summary( { state, dispatch } ) {
 	return (
 		<>
 			<div className="list ticket-summary">
-				{ Object.keys( data.available_tickets ).map( ( id, key ) => {
+				{ Object.keys( event.tickets_available ).map( ( id, key ) => {
 					const maxSpaces = Math.min(
-						data.available_spaces - request.tickets.length,
-						data.available_tickets[ id ].max - countTicketsById( id )
+						event.available_spaces - request.tickets.length,
+						event.tickets_available[ id ].max - countTicketsById( id )
 					);
 
 					return (
 						<div className="list__item" key={ key }>
 							<div className="list__content">
-								<div className="list__title">{ data.available_tickets[ id ].name }</div>
-								<div className="list__subtitle">{ data.available_tickets[ id ].description }</div>
+								<div className="list__title">{ event.tickets_available[ id ].name }</div>
+								<div className="list__subtitle">{ event.tickets_available[ id ].description }</div>
 								<div className="list__subtitle">
 									{ __( 'Base price:', 'events' ) }{ ' ' }
 									{ formatCurrency(
-										data.available_tickets[ id ].price,
-										data.l10n.locale,
-										data.l10n.currency
+										event.tickets_available[ id ].price,
+										window.eventBookingLocalization.locale,
+										window.eventBookingLocalization.currency
 									) }
 								</div>
 								{ maxSpaces < 5 && (
@@ -81,24 +81,28 @@ function Summary( { state, dispatch } ) {
 
 							<div className="list__actions">
 								<span className="button button--pseudo nowrap">
-									{ formatCurrency( ticketPrice( id ), data.l10n.locale, data.l10n.currency ) }
+									{ formatCurrency(
+										ticketPrice( id ),
+										window.eventBookingLocalization.locale,
+										window.eventBookingLocalization.currency
+									) }
 								</span>
-								{ data.attendee_fields.length == 0 && (
+								{ event.forms.attendee_fields.length == 0 && (
 									<div className="number-picker">
 										<button
 											className="button button--primary button--icon"
 											onClick={ () => dispatch( { type: 'REMOVE_TICKET', payload: { id } } ) }
-											disabled={ data.available_tickets[ id ].min == countTicketsById( id ) }
+											disabled={ event.tickets_available[ id ].min == countTicketsById( id ) }
 										></button>
-										<input value={ countTicketsById( data.available_tickets[ id ].id ) } />
+										<input value={ countTicketsById( event.tickets_available[ id ].id ) } />
 										<button
 											className="button button--primary button--icon"
 											onClick={ () => dispatch( { type: 'ADD_TICKET', payload: id } ) }
-											disabled={ data.available_tickets[ id ].max == countTicketsById( id ) }
+											disabled={ event.tickets_available[ id ].max == countTicketsById( id ) }
 										></button>
 									</div>
 								) }
-								{ data.attendee_fields.length > 0 && wizard.step == 0 && (
+								{ event.forms.attendee_fields.length > 0 && wizard.step == 0 && (
 									<>
 										<button
 											className={ `button button--primary button--icon ${
@@ -106,8 +110,8 @@ function Summary( { state, dispatch } ) {
 											}` }
 											onClick={ () => dispatch( { type: 'ADD_TICKET', payload: id } ) }
 											disabled={
-												data.available_tickets[ id ].max == countTicketsById( id ) ||
-												request.tickets.length == data.available_spaces
+												event.tickets_available[ id ].max == countTicketsById( id ) ||
+												request.tickets.length == event.available_spaces
 											}
 										>
 											<i className="material-icons material-symbols-outlined">add_circle</i>
@@ -129,9 +133,13 @@ function Summary( { state, dispatch } ) {
 							<b className="button button--pseudo nowrap">
 								{ response.coupon.percent
 									? response.coupon.discount + ' %'
-									: formatCurrency( response.coupon.discount, data.l10n.locale, data.l10n.currency ) }
+									: formatCurrency(
+											response.coupon.discount,
+											window.eventBookingLocalization.locale,
+											window.eventBookingLocalization.currency
+									  ) }
 							</b>
-							{ data.attendee_fields.length == 0 && (
+							{ event.forms.attendee_fields.length == 0 && (
 								<div className="number-picker invisible">
 									<button className="button button--primary button--icon"></button>
 									<input />
@@ -149,9 +157,13 @@ function Summary( { state, dispatch } ) {
 					</div>
 					<div className="list__actions">
 						<b className="button button--pseudo nowrap">
-							{ formatCurrency( fullPrice, data.l10n.locale, data.l10n.currency ) }
+							{ formatCurrency(
+								fullPrice,
+								window.eventBookingLocalization.locale,
+								window.eventBookingLocalization.currency
+							) }
 						</b>
-						{ data.attendee_fields.length == 0 && (
+						{ event.forms.attendee_fields.length == 0 && (
 							<div className="number-picker invisible">
 								<button className="button button--primary button--icon"></button>
 								<input />

@@ -1,7 +1,9 @@
 <?php
 
 $event = EM_Event::find_by_post(get_post());
-
+if(!$event) {
+	return;
+}
 if(!$event->can_book()) {
 	return;
 }

@@ -91,59 +91,7 @@ function wp_events_plugin_init(){
 	]));
 	
 	$event_post_type_supports = apply_filters('em_cp_event_supports', ['title','editor','excerpt','thumbnail','author','custom-fields']);
-	$event_post_type = [	
-		'public' => true,
-		'hierarchical' => false,
-		'show_ui' => true,
-		'show_in_menu' => true,
-		'show_in_rest' => true,
-		'show_in_nav_menus'=>true,
-		'can_export' => true,
-		'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
-		'publicly_queryable' => true,
-		'rewrite' => ['slug' => EM_POST_TYPE_EVENT_SLUG,'with_front'=>false],
-		'has_archive' => false,
-		'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
-		'template' => [
-				['ctx-blocks/grid-row', [], [
-					['ctx-blocks/grid-column', ['widthLarge' => 2], [['core/paragraph', ['placeholder' => 'Event-Beschreibung']],]],
-					['ctx-blocks/grid-column', ['widthLarge' => 1], [
-						['events-manager/details', []],
-					]]
-				]],
-				['core/separator'],
-				['core/group', ['layout' => ['type' => 'flex', 'flexWrap' => 'nowrap', 'justifyContent' => 'right']], [['events-manager/booking', ['title' => 'Anmeldung']]]]
-		],
-		'capability_type' => 'event',
-		'capabilities' => [
-			'publish_posts' => 'publish_events',
-			'edit_posts' => 'edit_events',
-			'edit_others_posts' => 'edit_others_events',
-			'delete_posts' => 'delete_events',
-			'delete_others_posts' => 'delete_others_events',
-			'read_private_posts' => 'read_private_events',
-			'edit_post' => 'edit_event',
-			'delete_post' => 'delete_event',
-			'read_post' => 'read_event',		
-		],
-		'label' => __('Events','events'),
-		'description' => __('Display events on your blog.','events'),
-		'labels' => [
-			'name' => __('Events','events'),
-			'singular_name' => __('Event','events'),
-			'menu_name' => __('Events','events'),
-			'add_new_item' => __('Add New Event','events'),
-			'edit' => __('Edit','events'),
-			'edit_item' => __('Edit Event','events'),
-			'view' => __('View','events'),
-			'view_item' => __('View Event','events'),
-			'search_items' => __('Search Events','events'),
-			'not_found' => __('No Events Found','events'),
-			'not_found_in_trash' => __('No Events Found in Trash','events'),
-			'parent' => __('Parent Event','events'),
-		],
-		'menu_icon' => 'dashicons-calendar-alt'
-	];
+	
 	if ( get_option('dbem_recurrence_enabled') ){
 		$event_recurring_post_type = apply_filters('em_cpt_event_recurring', [	
 			'public' => apply_filters('em_cp_event_recurring_public', false),
@@ -256,7 +204,6 @@ function wp_events_plugin_init(){
 	
 	if( strstr(EM_POST_TYPE_EVENT_SLUG, EM_POST_TYPE_LOCATION_SLUG) !== false ){
 		//Now register posts, but check slugs in case of conflicts and reorder registrations
-		register_post_type(EM_POST_TYPE_EVENT, $event_post_type);
 		if ( get_option('dbem_recurrence_enabled') ){
 			register_post_type('event-recurring', $event_recurring_post_type);
 		}
@@ -264,7 +211,6 @@ function wp_events_plugin_init(){
 		
 	}else{
 		register_post_type(EM_POST_TYPE_LOCATION, $location_post_type);
-		register_post_type(EM_POST_TYPE_EVENT, $event_post_type);
 		//Now register posts, but check slugs in case of conflicts and reorder registrations
 		if ( get_option('dbem_recurrence_enabled') ){
 			register_post_type('event-recurring', $event_recurring_post_type);

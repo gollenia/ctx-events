@@ -1,7 +1,7 @@
 <?php 
 
-$id = get_the_ID();
-$event = EM_Event::find_by_post(get_post());
+global $post;
+$event = EM_Event::find_by_post($post);
 if(!$event) return;
 
 if($attributes['overwritePrice']) {

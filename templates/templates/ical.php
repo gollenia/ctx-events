@@ -15,7 +15,7 @@ $args = !empty($args) ? $args:array(); /* @var $args array */
 $args = array_merge(array('limit'=>$page_limit, 'page'=>'1', 'owner'=>false, 'orderby'=>'event_start_date,event_start_time', 'scope' => 'future' ), $args);
 $args = apply_filters('em_calendar_template_args',$args);
 //get first round of events to show, we'll start adding more via the while loop
-$EM_Events = EM_Events::get( $args );
+$EM_Events = EM_Events::find( $args );
 $timezones = array();
 
 //calendar header
@@ -159,7 +159,7 @@ END:VEVENT";
 	}else{
 	    //get next page of results
 	    $args['page']++;
-		$EM_Events = EM_Events::get( $args );
+		$EM_Events = EM_Events::find( $args );
 	}
 }
 

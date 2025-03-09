@@ -114,6 +114,14 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 		}
 		return apply_filters('em_tickets_has_ticket',false, false,$this);
 	}
+
+	public function get_rest_fields() {
+		$data = [];
+		foreach($this->tickets as $ticket) {
+			$data[$ticket->ticket_id] = $ticket->get_rest_fields();
+		}
+		return $data;
+	}
 	
 	/**
 	 * Get the first Ticket object in this instance. Returns false if no tickets available.

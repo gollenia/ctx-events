@@ -1,8 +1,7 @@
 <?php 
-
-$id = get_the_ID();
-
-$speakerId = $attributes['customSpeakerId'] ?: EM_Event::find_by_post(get_post())->speaker_id;
+$event = EM_Event::find_by_post(get_post());
+if(!$event) return;
+$speakerId = $attributes['customSpeakerId'] ?: $event->speaker_id;
 if(!$speakerId) { return; }
 $speaker = \Contexis\Events\Speaker::get($speakerId);
 

@@ -9,14 +9,14 @@ import { formatCurrency } from './modules/priceUtils';
 const Success = ( props ) => {
 	const { state, dispatch } = props;
 
-	const { request, response, data } = state;
+	const { request, response, event } = state;
 
 	const { booking } = response;
 	const { gateway } = booking;
 
 	if ( ! response.booking.booking_id ) return null;
 
-	if ( data.event.is_free ) {
+	if ( event.is_free ) {
 		return (
 			<>
 				<p dangerouslySetInnerHTML={ { __html: response.booking.message } }></p>

@@ -456,6 +456,21 @@ class EM_Booking extends EM_Object{
 	{
 		return EM_Gateways::get_gateway($this->booking_meta['gateway'])->get_payment_info($this);
 	}
+
+	function get_rest_fields() {
+		return [
+			'date' => $this->get_booking_date(),
+			'id' => $this->booking_id,
+			'status' => $this->status,
+			'status_array' => $this->status_array,
+			'price' => $this->get_price(),
+			'donation' => $this->booking_donation,
+			'paid' => $this->get_price_summary_array(),
+			'gateway' => $this->booking_meta['gateway'],
+			'coupon' => isset($this->booking_meta['coupon']) ? $this->booking_meta['coupon'] : null,
+			'note' => isset($this->booking_meta['note']) ? $this->booking_meta['note'] : null,
+		];
+	}
 	
 	/**
 	 * Get the total number of spaces booked in THIS booking. Setting $force_refresh to true will recheck spaces, even if previously done so.

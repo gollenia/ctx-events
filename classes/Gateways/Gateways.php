@@ -105,12 +105,12 @@ class EM_Gateways {
 	 * Returns an array of all registered gateway objects
 	 * @return array
 	 */
-	static function get_rest() {
+	static function get_rest_fields() {
 		global $EM_Gateways;
 		$gateways = array();
 		foreach($EM_Gateways as $EM_Gateway){
 			if($EM_Gateway->is_active()){
-				$gateways[$EM_Gateway->gateway] = $EM_Gateway->get_rest();
+				$gateways[$EM_Gateway->gateway] = $EM_Gateway->get_rest_fields();
 			}
 		}
 		return $gateways; 

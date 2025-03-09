@@ -28,7 +28,7 @@ class EM_Taxonomy_Frontend {
 	public static function init(){
 		if( !is_admin() ){
 			add_filter('taxonomy_template', array(self::$this_class,'template'), 99);
-			add_filter('parse_query', array(self::$this_class,'parse_query'));
+			//add_filter('parse_query', array(self::$this_class,'parse_query'));
 		}
 	}
 	

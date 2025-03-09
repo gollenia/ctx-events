@@ -62,6 +62,7 @@ require_once __DIR__ . '/classes/Categories/Category.php';
 require_once __DIR__ . '/classes/Categories/Categories.php';
 
 require_once __DIR__ . '/classes/Events/Event.php';
+require_once __DIR__ . '/classes/Events/EventRestController.php';
 require_once __DIR__ . '/classes/Events/EventPost.php';
 require_once __DIR__ . '/classes/Events/Events.php';
 require_once __DIR__ . '/classes/Events/EventView.php';

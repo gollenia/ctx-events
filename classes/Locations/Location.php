@@ -136,6 +136,19 @@ class EM_Location extends EM_Object {
 			$this->post_status = $location_post->post_status;
 			$this->post_type = $location_post->post_type;
 	}
+
+	public function get_rest_fields() {
+		return [ 
+			'id' => $this->post_id, 
+			'address' => $this->location_address,
+			'zip' => $this->location_postcode,
+			'city' => $this->location_town,
+			'name' => $this->location_name,
+			'url' => $this->location_url,
+			'country' => $this->location_country,
+			'state' => $this->location_state,
+		];
+	}
 	
 	/**
 	 * Retrieve event information via POST (used in situations where posts aren't submitted via WP)
@@ -201,7 +214,7 @@ class EM_Location extends EM_Object {
 	}
 	
 	function has_events( $status = 1 ){	
-		$events_count = EM_Events::count(array('location_id' => $this->location_id, 'status' => $status));
+		$events_count = EM_Events::find(array('location_id' => $this->location_id, 'status' => $status))->count();
 		return apply_filters('em_location_has_events', $events_count > 0, $this);
 	}
 	

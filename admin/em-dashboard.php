@@ -22,6 +22,7 @@ class Dashboard {
 		?>
 		<table style="width:100%">
 			<?php foreach($bookings as $booking) : ?>
+				
 				<?php 
 					$status = array_search($booking->booking_status, array_column($booking->get_available_states(), 'search'));
 				?>

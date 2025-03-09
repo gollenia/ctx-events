@@ -175,11 +175,34 @@ class EM_Event extends \EM_Object{
 		return $post ? self::find_by_post($post) : null;
 	}
 
-	public static function find_by_post(WP_Post $post) : ?EM_Event
+	public static function find_by_post(?WP_Post $post) : ?EM_Event
 	{
+		if(!$post) return null;
 		$instance = new self();
 		$instance->load_postdata($post);
 		return $instance;
+	}
+
+	public function get_rest_fields() : array {
+		return [
+			'id' => $this->post_id,
+			'link' => get_permalink($this->post_id),
+			'image' => $this->get_image(),
+			'titel' => $this->event_name,
+			'has_coupons' => \EM_Coupons::event_has_coupons($this),
+			'date' => \Contexis\Events\Intl\Date::get_date($this->start()->getTimestamp(), $this->end()->getTimestamp()),
+			'time' => \Contexis\Events\Intl\Date::get_time($this->start()->getTimestamp(), $this->end()->getTimestamp()),
+			'price' => new \Contexis\Events\Intl\Price($this),
+			'is_free' => $this->is_free(),
+			'start' => $this->start()->getTimestamp(),
+			'end' => $this->end()->getTimestamp(),
+			'is_single_day' => $this->event_start_date == $this->event_end_date,
+			'audience' => $this->event_audience,
+			'excerpt' => $this->post_excerpt,
+			'allow_donation' => get_metadata('post', $this->post_id, '_event_rsvp_donation', true) == "1",
+			'booking_start' => get_post_meta($this->post_id, '_event_rsvp_start', true),
+			'booking_end' => get_post_meta($this->post_id, '_event_rsvp_end', true),
+		];
 	}
 
 	
@@ -1391,7 +1414,7 @@ class EM_Event extends \EM_Object{
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
-				$events = EM_Events::get( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
+				$events = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
 			 	foreach($events as $event_array){ /* @var $EM_Event EM_Event */
 			 		//set new start/end times to obtain accurate timestamp according to timezone and DST
 			 		$EM_DateTime = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);

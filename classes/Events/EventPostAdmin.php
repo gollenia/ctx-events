@@ -287,7 +287,7 @@ class EM_Event_Recurring_Post_Admin{
 			//now delete recurrences
 			//only delete other events if this isn't a draft-never-published event
 			if( !empty($EM_Event->event_id) ){
-    			$events_array = EM_Events::get( array('recurrence'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
+    			$events_array = EM_Events::find( array('recurrence'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
     			foreach($events_array as $event){
     				/* @var $event EM_Event */
     				if($EM_Event->event_id == $event->recurrence_id && !empty($event->recurrence_id) ){ //double check the event is a recurrence of this event
@@ -307,7 +307,7 @@ class EM_Event_Recurring_Post_Admin{
 			//only trash other events if this isn't a draft-never-published event
 			if( !empty($EM_Event->event_id) ){
     			//now trash recurrences
-    			$events_array = EM_Events::get( array('recurrence_id'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
+    			$events_array = EM_Events::find( array('recurrence_id'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
     			foreach($events_array as $event){
     				/* @var $event EM_Event */
     				if($EM_Event->event_id == $event->recurrence_id ){ //double check the event is a recurrence of this event
@@ -325,7 +325,7 @@ class EM_Event_Recurring_Post_Admin{
 			$EM_Event = EM_Event::find_by_post_id($post_id);
 			//only untrash other events if this isn't a draft-never-published event, because if so it never had other events to untrash
 			if( !empty($EM_Event->event_id) ){
-    			$events_array = EM_Events::get( array('recurrence_id'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
+    			$events_array = EM_Events::find( array('recurrence_id'=>$EM_Event->event_id, 'scope'=>'all', 'status'=>'everything' ) );
     			foreach($events_array as $event){
     				/* @var $event EM_Event */
     				if($EM_Event->event_id == $event->recurrence_id){

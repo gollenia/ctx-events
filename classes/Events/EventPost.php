@@ -3,6 +3,8 @@
 namespace Contexis\Events\Events;
 
 use EM_Event;
+use Events;
+use WP_Query;
 
 /**
  * Controls how events are queried and displayed via the WordPress Custom Post APIs
@@ -16,28 +18,11 @@ class EventPost {
 	public static function init(){
 
 		$instance = new self;
-		//Front Side Modifiers
-		if( !is_admin() ){
-			//Override post template tags
-			add_filter('get_the_date',array($instance,'the_date'),10,3);
-			add_filter('get_the_time',array($instance,'the_time'),10,3);
-		}
+		add_action('init', array($instance, 'register_post_type'));
 		add_action('parse_query', array($instance,'parse_query'));
-		add_action('publish_future_post',array($instance,'publish_future_post'),10,1);
 		add_action('rest_api_init', array($instance, 'register_meta') );
-		add_action('rest_api_init',array($instance,'register_rest'),10,1);
-		
-	}
-	
-	public static function publish_future_post($post_id){
-		$post_type = get_post_type($post_id);
-		$is_post_type = $post_type == self::POST_TYPE || $post_type == 'event-recurring';
-		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
-		if(!defined('UNTRASHING_'.$post_id) && $is_post_type && $saving_status ){
-		    $EM_Event = \EM_Event::find_by_post_id($post_id, 'post_id');
-		    $EM_Event->set_status(1);
-		}
-	}
+		//add_filter('rest_prepare_event', array('EventRestController', 'prepare_event'), 10, 3);		
+	}	
 
 
 	/**
@@ -68,6 +53,116 @@ class EventPost {
 		$result['data'] = $data;
 
 		return $result;
+	}
+
+	function prepare_event($response, $post, $request) {
+		$event = \EM_Event::find_by_post($post);
+		
+		if (!$event->event_exists()) {
+			return new \WP_REST_Response([
+				'error' => __('Event not found', 'events')
+			], 404);
+		}
+	
+		// Basisdaten des WordPress-Posts holen
+		$post_data = $response->get_data();
+	
+		// Custom-Felder aus dem Event-Objekt holen
+		$event_data = $event->get_rest_fields();
+	
+		// Angeforderte Felder ermitteln
+		$requested_fields = $request->get_param('_fields');
+		$requested_fields = is_array($requested_fields) ? $requested_fields : explode(',', (string) $requested_fields);
+		$requested_fields = array_filter($requested_fields);
+	
+		// Falls _fields gesetzt wurde, nur diese Felder zurückgeben
+		if (!empty($requested_fields)) {
+			$post_data = array_intersect_key($post_data, array_flip($requested_fields));
+			$event_data = array_intersect_key($event_data, array_flip($requested_fields));
+		}
+	
+		// Beide Arrays zusammenführen (Post + Event-spezifische Daten)
+		$data = array_merge($post_data, $event_data);
+	
+		// Zusätzliche Verknüpfungen laden, falls angefordert
+		if (in_array('location', $requested_fields)) {
+			$data['location'] = $event->get_location()->get_rest_fields();
+		}
+	
+		if (in_array('speaker', $requested_fields)) {
+			$data['speaker'] = \Contexis\Events\Speaker::get($event->speaker_id)->get_rest_fields();
+		}
+	
+		if (in_array('tags', $requested_fields)) {
+			$data['tags'] = $event->get_taxonomies()->get_rest_fields();
+		}
+	
+		if (in_array('tickets', $requested_fields)) {
+			$data['tickets'] = $event->get_bookings()->get_available_tickets()->get_rest_fields();
+		}
+	
+		return rest_ensure_response($data);
+	}
+
+	public function register_post_type() {
+		$labels = [
+			'name' => __('Events','events'),
+			'singular_name' => __('Event','events'),
+			'menu_name' => __('Events','events'),
+			'add_new_item' => __('Add New Event','events'),
+			'edit' => __('Edit','events'),
+			'edit_item' => __('Edit Event','events'),
+			'view' => __('View','events'),
+			'view_item' => __('View Event','events'),
+			'search_items' => __('Search Events','events'),
+			'not_found' => __('No Events Found','events'),
+			'not_found_in_trash' => __('No Events Found in Trash','events'),
+			'parent' => __('Parent Event','events'),
+		];
+
+		$event_post_type = [	
+			'public' => true,
+			'hierarchical' => false,
+			'show_ui' => true,
+			'show_in_menu' => true,
+			'show_in_rest' => true,
+			'show_in_nav_menus'=>true,
+			'can_export' => true,
+			'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
+			'publicly_queryable' => true,
+			'rewrite' => ['slug' => EM_POST_TYPE_EVENT_SLUG,'with_front'=>false],
+			'has_archive' => false,
+			'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
+			'template' => [
+					['ctx-blocks/grid-row', [], [
+						['ctx-blocks/grid-column', ['widthLarge' => 2], [['core/paragraph', ['placeholder' => 'Event-Beschreibung']],]],
+						['ctx-blocks/grid-column', ['widthLarge' => 1], [
+							['events-manager/details', []],
+						]]
+					]],
+					['core/separator'],
+					['core/group', ['layout' => ['type' => 'flex', 'flexWrap' => 'nowrap', 'justifyContent' => 'right']], [['events-manager/booking', ['title' => 'Anmeldung']]]]
+			],
+			'capability_type' => 'event',
+			'capabilities' => [
+				'publish_posts' => 'publish_events',
+				'edit_posts' => 'edit_events',
+				'edit_others_posts' => 'edit_others_events',
+				'delete_posts' => 'delete_events',
+				'delete_others_posts' => 'delete_others_events',
+				'read_private_posts' => 'read_private_events',
+				'edit_post' => 'edit_event',
+				'delete_post' => 'delete_event',
+				'read_post' => 'read_event',		
+			],
+			'label' => __('Events','events'),
+			'description' => __('Display events on your blog.','events'),
+			'labels' => $labels,
+			//'rest_controller_class' => '\Contexis\Events\Events\EventRestController',
+			'menu_icon' => 'dashicons-calendar-alt'
+		];
+		
+		register_post_type( 'event', $event_post_type );
 	}
 
 	public function register_meta() {
@@ -116,138 +211,30 @@ class EventPost {
 
 	}
 	
-	public static function the_date( $the_date, $d = '', $post = null ){
-		$post = get_post( $post );
-		if( $post->post_type == self::POST_TYPE ){
-			$EM_Event = \EM_Event::find_by_post($post);
-			if ( '' == $d ){
-				$the_date = $EM_Event->start()->i18n(get_option('date_format'));
-			}else{
-				$the_date = $EM_Event->start()->i18n($d);
-			}
+	public static function parse_query(WP_Query $query) : WP_Query{
+		if(!isset($query->query_vars['post_type'])){
+			return $query;
 		}
-		return $the_date;
-	}
-	
-	public static function the_time( $the_time, $f = '', $post = null ){
-		$post = get_post( $post );
-		if( $post->post_type == self::POST_TYPE ){
-			$EM_Event = \EM_Event::find_by_post($post);
-			if ( '' == $f ){
-				$the_time = $EM_Event->start()->i18n(get_option('time_format'));
-			}else{
-				$the_time = $EM_Event->start()->i18n($f);
-			}
+		if( $query->query_vars['post_type'] != 'event' && $query->query_vars['post_type'] != 'event-recurring' ){
+			return $query;
 		}
-		return $the_time;
-	}
-	
-	public static function parse_query(){
-	    global $wp_query;
-		//Search Query Filtering
-		if( is_admin() ){
-		    if( !empty($wp_query->query_vars[EM_TAXONOMY_CATEGORY]) && is_numeric($wp_query->query_vars[EM_TAXONOMY_CATEGORY]) ){
-		        //sorts out filtering admin-side as it searches by id
-		        $term = get_term_by('id', $wp_query->query_vars[EM_TAXONOMY_CATEGORY], EM_TAXONOMY_CATEGORY);
-		        $wp_query->query_vars[EM_TAXONOMY_CATEGORY] = ( $term !== false && !is_wp_error($term) )? $term->slug:0;
-		    }
+		
+		if( !$query->is_main_query() ){
+			return $query;
 		}
-		//Scoping
-		if( !empty($wp_query->query_vars['post_type']) && ($wp_query->query_vars['post_type'] == EM_POST_TYPE_EVENT || $wp_query->query_vars['post_type'] == 'event-recurring') && (empty($wp_query->query_vars['post_status']) || !in_array($wp_query->query_vars['post_status'],array('trash','pending','draft'))) ) {
-		    $query = array();
-			//Let's deal with the scope - default is future
-			if( is_admin() ){
-				$scope = $wp_query->query_vars['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'future';
-				//TODO limit what a user can see admin side for events/locations/recurring events
-				if( !empty($wp_query->query_vars['recurrence_id']) && is_numeric($wp_query->query_vars['recurrence_id']) ){
-				    $query[] = array( 'key' => '_recurrence_id', 'value' => $wp_query->query_vars['recurrence_id'], 'compare' => '=' );
-				}
-			}else{
-				if( !empty($wp_query->query_vars['calendar_day']) ) $wp_query->query_vars['scope'] = $wp_query->query_vars['calendar_day'];
-				if( empty($wp_query->query_vars['scope']) ){
-					
-						$scope = $wp_query->query_vars['scope'] = 'all'; //otherwise we'll get 404s for past events
-					
-				}else{
-					$scope = $wp_query->query_vars['scope'];
-				}
-			}
-			if ( $scope == 'today' || $scope == 'tomorrow' || preg_match ( "/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/", $scope ) ) {
-				$EM_DateTime = new \EM_DateTime($scope); //create default time in blog timezone
-				if( get_option('dbem_events_current_are_past') && $wp_query->query_vars['post_type'] != 'event-recurring' ){
-					$query[] = array( 'key' => '_event_start_date', 'value' => $EM_DateTime->getDate() );
-				}else{
-					$query[] = array( 'key' => '_event_start_date', 'value' => $EM_DateTime->getDate(), 'compare' => '<=', 'type' => 'DATE' );
-					$query[] = array( 'key' => '_event_end_date', 'value' => $EM_DateTime->getDate(), 'compare' => '>=', 'type' => 'DATE' );
-				}				
-			}elseif ($scope == "future" || $scope == 'past' ){
-				$EM_DateTime = new \EM_DateTime(); //create default time in blog timezone
-				$EM_DateTime->setTimezone('UTC');
-				$compare = $scope == 'future' ? '>=' : '<';
-				if( get_option('dbem_events_current_are_past') && $wp_query->query_vars['post_type'] != 'event-recurring' ){
-					$query[] = array( 'key' => '_event_start', 'value' => $EM_DateTime->getDateTime(), 'compare' => $compare, 'type' => 'DATETIME' );
-				}else{
-					$query[] = array( 'key' => '_event_end', 'value' => $EM_DateTime->getDateTime(), 'compare' => $compare, 'type' => 'DATETIME' );
-				}
-			}elseif ($scope == "month" || $scope == "next-month" || $scope == 'this-month'){
-				$EM_DateTime = new \EM_DateTime(); //create default time in blog timezone
-				if( $scope == 'next-month' ) $EM_DateTime->add(new \DateInterval('P1M'));
-				$start_month = $scope == 'this-month' ? $EM_DateTime->getDate() : $EM_DateTime->modify('first day of this month')->getDate();
-				$end_month = $EM_DateTime->modify('last day of this month')->getDate();
-				if( get_option('dbem_events_current_are_past') && $wp_query->query_vars['post_type'] != 'event-recurring' ){
-					$query[] = array( 'key' => '_event_start_date', 'value' => array($start_month,$end_month), 'type' => 'DATE', 'compare' => 'BETWEEN');
-				}else{
-					$query[] = array( 'key' => '_event_start_date', 'value' => $end_month, 'compare' => '<=', 'type' => 'DATE' );
-					$query[] = array( 'key' => '_event_end_date', 'value' => $start_month, 'compare' => '>=', 'type' => 'DATE' );
-				}
-			}elseif ($scope == "week" || $scope == 'this-week'){
-				$EM_DateTime = new \EM_DateTime(); //create default time in blog timezone
-				list($start_date, $end_date) = $EM_DateTime->get_week_dates( $scope );
-				if( get_option('dbem_events_current_are_past') && $wp_query->query_vars['post_type'] != 'event-recurring' ){
-					$query[] = array( 'key' => '_event_start_date', 'value' => array($start_date,$end_date), 'type' => 'DATE', 'compare' => 'BETWEEN');
-				}else{
-					$query[] = array( 'key' => '_event_start_date', 'value' => $end_date, 'compare' => '<=', 'type' => 'DATE' );
-					$query[] = array( 'key' => '_event_end_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' );
-				}
-			}elseif( !empty($scope) ){
-				$query = apply_filters('em_event_post_scope_meta_query', $query, $scope);
-			}
-		  	if( !empty($query) && is_array($query) ){
-				$wp_query->query_vars['meta_query'] = $query;
-		  	}
-		  	if( is_admin() ){
-		  		//admin areas don't need special ordering, so make it simple
-		  		if( !empty($_REQUEST['orderby']) && $_REQUEST['orderby'] != 'date-time' ){
-		  			$wp_query->query_vars['orderby'] = sanitize_key($_REQUEST['orderby']);
-		  		}else{
-				  	$wp_query->query_vars['orderby'] = 'meta_value';
-				  	$wp_query->query_vars['meta_key'] = '_event_start_local';
-				  	$wp_query->query_vars['meta_type'] = 'DATETIME';
-		  		}
-				$wp_query->query_vars['order'] = (!empty($_REQUEST['order']) && preg_match('/^(ASC|DESC)$/i', $_REQUEST['order'])) ? $_REQUEST['order']:'ASC';
-		  	}
-		}elseif( !empty($wp_query->query_vars['post_type']) && $wp_query->query_vars['post_type'] == EM_POST_TYPE_EVENT ){
-			$wp_query->query_vars['scope'] = 'all';
-			if( $wp_query->query_vars['post_status'] == 'pending' ){
-			  	$wp_query->query_vars['orderby'] = 'meta_value';
-			  	$wp_query->query_vars['order'] = 'ASC';
-			  	$wp_query->query_vars['meta_key'] = '_event_start_local';
-			  	$wp_query->query_vars['meta_type'] = 'DATETIME';	
-			}
-		}
+		$args = [];
+		$args['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'future';
+		if(!empty($_REQUEST['orderby'])) $args['orderby'] = $_REQUEST['orderby'];
+		if(!empty($_REQUEST['order'])) $args['order'] = $_REQUEST['order'];
+		if(!empty($_REQUEST['event-categories'])) $args['event-categories'] = $_REQUEST['event-categories'];
+		
+
+		$args = \Em_Events::get_query_args($args);
+		$query->query_vars = array_merge($query->query_vars, $args);
+
+		return $query;
+		
 	}
-
-	public function register_rest() {
-		register_rest_route( 'events/v2', '/events/', ['method' => 'GET', 'callback' => [$this, 'get_rest_data'], 'permission_callback' => '__return_true'], true );
-		register_rest_route( 'events/v2', '/bookinginfo/(?P<id>\d+)', ['method' => 'GET', 'callback' => [$this, 'get_rest_bookinginfo'], 'permission_callback' => '__return_true'], true );
-
-	}
-
-	public function get_rest_data($request) {
-		$args = $request->get_params();
-		return \EM_Events::get_rest($args);
-	}
-
 
 	public function get_attendees($booking) {
 		$result = [];

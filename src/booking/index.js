@@ -31,16 +31,19 @@ const Booking = ( { post, open } ) => {
 
 	const [ state, dispatch ] = useReducer( reducer, initialState );
 
-	const { wizard, modal, data, request, response } = state;
+	const { wizard, modal, event, request, response } = state;
 
 	console.log( state );
 
 	useEffect( () => {
+		const abortController = new AbortController();
+		const { signal } = abortController;
 		apiFetch( {
-			path: `/events/v2/booking?event_id=${ post }`,
+			path: `/events/v2/event/${ post }?fields=forms,event,tickets,gateways`,
 		} )
 			.then( ( data ) => {
-				dispatch( { type: 'SET_DATA', payload: data } );
+				console.log( data );
+				dispatch( { type: 'SET_EVENT', payload: data } );
 				dispatch( { type: 'SET_INIT_STATE', payload: STATES.LOADING } );
 			} )
 			.catch( ( error ) => {
@@ -50,7 +53,7 @@ const Booking = ( { post, open } ) => {
 	}, [] );
 
 	useEffect( () => {
-		if ( ! data ) return;
+		if ( ! event ) return;
 		if ( ! wizard.checkValidity ) return;
 		dispatch( {
 			type: 'VALIDITY',
@@ -58,7 +61,8 @@ const Booking = ( { post, open } ) => {
 				tickets: document.getElementById( 'user-attendee-form' )?.checkValidity() && request.tickets.length > 0,
 				registration:
 					document.getElementById( 'user-registration-form' )?.checkValidity() && request.tickets.length > 0,
-				payment: ! data?.l10n?.consent || ( data?.l10n?.consent && request.registration.data_privacy_consent ),
+				payment:
+					! event?.l10n?.consent || ( event?.l10n?.consent && request.registration.data_privacy_consent ),
 			},
 		} );
 	}, [ state ] );
@@ -68,7 +72,7 @@ const Booking = ( { post, open } ) => {
 			<div className="alert alert--error">{ __( 'An error occured. Please try again later.', 'events' ) }</div>
 		);
 
-	if ( ! data ) return <></>;
+	if ( ! event ) return <></>;
 
 	return (
 		<div>
@@ -78,7 +82,7 @@ const Booking = ( { post, open } ) => {
 						<div className="event-modal-caption">
 							<div className="">
 								<b className="margin--0">{ __( 'Booking', 'events' ) }</b>
-								<h3 className="margin--0">{ data?.event?.title }</h3>
+								<h3 className="margin--0">{ event?.title }</h3>
 							</div>
 							<WizardGuide state={ state } />
 						</div>
@@ -102,7 +106,7 @@ const Booking = ( { post, open } ) => {
 						<>
 							<div className="event-modal-content">
 								<Wizard state={ state } dispatch={ dispatch }>
-									{ data.attendee_fields?.length > 0 && (
+									{ event.forms.attendee_fields?.length > 0 && (
 										<WizardStep
 											valid={ wizard.steps.tickets.valid }
 											invalidMessage={

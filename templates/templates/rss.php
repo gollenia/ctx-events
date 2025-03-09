@@ -23,7 +23,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 		$args = !empty($args) ? $args:array(); /* @var $args array */
 		$args = array_merge(array('scope'=>get_option('dbem_rss_scope'), 'owner'=>false, 'limit'=>$page_limit, 'page'=>1, 'order'=>get_option('dbem_rss_order'), 'orderby'=>get_option('dbem_rss_orderby')), $args);
 		$args = apply_filters('em_rss_template_args',$args);
-		$EM_Events = EM_Events::get( $args );
+		$EM_Events = EM_Events::find( $args );
 		$count = 0;
 		while( count($EM_Events) > 0 ){
 			foreach ( $EM_Events as $EM_Event ) {
@@ -48,7 +48,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
         	}else{
         	    //get next page of results
         	    $args['page']++;
-        		$EM_Events = EM_Events::get( $args );
+        		$EM_Events = EM_Events::find( $args );
         	}
 		}
 		?>

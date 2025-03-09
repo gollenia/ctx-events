@@ -2,7 +2,7 @@
 
 $id = get_the_ID();
 $event = EM_Event::find_by_post(get_post());
-if(!$event->event_rsvp) return;
+if(!$event || !$event->event_rsvp) return;
 
 $date_start = $event->rsvp_start()->getTimestamp();
 $date_end = $event->rsvp_end()->getTimestamp();
