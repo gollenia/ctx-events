@@ -1,16 +1,16 @@
 <?php
-
+use \Contexis\Events\Models\Event;
 class EventView {
 
-	private EM_Event $event;
+	private Event $event;
 
-	public static function render(EM_Event $event, string $format, string $target="html") {
+	public static function render(Event $event, string $format, string $target="html") {
 		$instance = new self();
 		$instance->event = $event;
 		return $instance->print($event, $format, $target);
 	}
 
-	private function print(EM_Event $event, string $format, string $target="html") {	
+	private function print(Event $event, string $format, string $target="html") {	
 		
 	 	$event_string = $format;
 
@@ -271,18 +271,18 @@ class EventView {
 					break;
 				case '#_ATTENDEES':
 					ob_start();
-					$template = em_locate_template('placeholders/attendees.php', true, array('EM_Event'=>$this->event));
+					$template = em_locate_template('placeholders/attendees.php', true, array('Event'=>$this->event));
 					
 					$replace = ob_get_clean();
 					break;
 				case '#_ATTENDEESLIST':
 					ob_start();
-					$template = \em_locate_template('placeholders/attendeeslist.php', true, array('EM_Event'=>$this->event));
+					$template = \em_locate_template('placeholders/attendeeslist.php', true, array('Event'=>$this->event));
 					$replace = ob_get_clean();
 					break;
 				case '#_ATTENDEESPENDINGLIST':
 					ob_start();
-					$template = em_locate_template('placeholders/attendeespendinglist.php', true, array('EM_Event'=>$this->event));
+					$template = em_locate_template('placeholders/attendeespendinglist.php', true, array('Event'=>$this->event));
 					$replace = ob_get_clean();
 					break;
 				//Ical Stuff

@@ -1,9 +1,12 @@
 <?php
 
+namespace Contexis\Events\Models;
 
+use Contexis\Events\Collections\EventCollection;
 use \Contexis\Events\Events\EventPost;
+use WP_Post;
 
-class EM_Event extends \EM_Object{ 
+class Event extends \EM_Object{ 
 
 	public int $event_id = 0;
 	public string $event_slug;
@@ -160,14 +163,14 @@ class EM_Event extends \EM_Object{
 		$this->location = null;
 	}
 
-	public static function find_by_event_id(int $event_id) : ?EM_Event
+	public static function find_by_event_id(int $event_id) : ?Event
 	{
 		global $wpdb;
 		$post_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM ".EM_EVENTS_TABLE." WHERE event_id = %d", $event_id));
 		return $post_id ? self::find_by_post_id($post_id) : null;
 	}
 
-	public static function find_by_post_id(int $post_id = 0) : ?EM_Event
+	public static function find_by_post_id(int $post_id = 0) : ?Event
 	{
 		if( $post_id == 0 ) return new self();
 		$post = get_post($post_id);
@@ -175,7 +178,7 @@ class EM_Event extends \EM_Object{
 		return $post ? self::find_by_post($post) : null;
 	}
 
-	public static function find_by_post(?WP_Post $post) : ?EM_Event
+	public static function find_by_post(?WP_Post $post) : ?Event
 	{
 		if(!$post) return null;
 		$instance = new self();
@@ -415,7 +418,7 @@ class EM_Event extends \EM_Object{
 				}elseif( !empty($deleting_bookings) ){
 					$this->recurring_delete_bookings = true;
 				}
-				unset($EM_Event);
+				unset($event);
 			}else{
 				//new event so we create everything from scratch
 				$this->recurring_reschedule = $this->recurring_recreate_bookings = true;
@@ -720,42 +723,42 @@ class EM_Event extends \EM_Object{
 	
 	/**
 	 * Duplicates this event and returns the duplicated event. Will return false if there is a problem with duplication.
-	 * @return EM_Event
+	 * @return Event
 	 */
 	function duplicate(){
 		global $wpdb;
 		//First, duplicate.
 		if( !$this->can_manage('edit_events','edit_others_events') ) return apply_filters('em_event_duplicate', false, $this);
 		
-		$EM_Event = clone $this;
-		$EM_Event->get_categories(); //before we remove event/post ids
-		$EM_Event->get_bookings()->get_tickets(); //in case this wasn't loaded and before we reset ids
-		$EM_Event->event_id = 0;
-		$EM_Event->post_id = 0;
-		$EM_Event->post_name = '';
-		$EM_Event->location_id = $EM_Event->location_id ?? 0;
-		$EM_Event->get_bookings()->event_id = 0;
-		$EM_Event->get_bookings()->get_tickets()->event_id = 0;
+		$event = clone $this;
+		$event->get_categories(); //before we remove event/post ids
+		$event->get_bookings()->get_tickets(); //in case this wasn't loaded and before we reset ids
+		$event->event_id = 0;
+		$event->post_id = 0;
+		$event->post_name = '';
+		$event->location_id = $event->location_id ?? 0;
+		$event->get_bookings()->event_id = 0;
+		$event->get_bookings()->get_tickets()->event_id = 0;
 		//if bookings reset ticket ids and duplicate tickets
-		foreach($EM_Event->get_bookings()->get_tickets()->tickets as $ticket){
+		foreach($event->get_bookings()->get_tickets()->tickets as $ticket){
 			$ticket->ticket_id = 0;
 			$ticket->event_id = 0;
 		}
-		do_action('em_event_duplicate_pre', $EM_Event, $this);
-		$EM_Event->force_status = 'draft';
-		if( !$EM_Event->save() ) return;
+		do_action('em_event_duplicate_pre', $event, $this);
+		$event->force_status = 'draft';
+		if( !$event->save() ) return;
 		
-		$EM_Event->feedback_message = sprintf(__("%s successfully duplicated.", 'events'), __('Event','events'));
+		$event->feedback_message = sprintf(__("%s successfully duplicated.", 'events'), __('Event','events'));
 		//save tags here - eventually will be moved into part of $this->save();
 		
-		$EM_Tags = new EM_Tags($this);
-		$EM_Tags->event_id = $EM_Event->event_id;
-		$EM_Tags->post_id = $EM_Event->post_id;
+		$EM_Tags = new \EM_Tags($this);
+		$EM_Tags->event_id = $event->event_id;
+		$EM_Tags->post_id = $event->post_id;
 		$EM_Tags->save();
 	
 		//other non-EM post meta inc. featured image
 		$event_meta = $this->get_event_meta();
-		$new_event_meta = $EM_Event->get_event_meta();
+		$new_event_meta = $event->get_event_meta();
 		$event_meta_inserts = array();
 		//Get custom fields and post meta - adapted from $this->load_post_meta()
 		foreach($event_meta as $event_meta_key => $event_meta_vals){
@@ -763,7 +766,7 @@ class EM_Event extends \EM_Object{
 			if( is_array($event_meta_vals) ){
 				if( !array_key_exists($event_meta_key, $new_event_meta) &&  !in_array($event_meta_key, array('_event_attributes', '_edit_last', '_edit_lock')) ){
 					foreach($event_meta_vals as $event_meta_val){
-						$event_meta_inserts[] = "({$EM_Event->post_id}, '{$event_meta_key}', '{$event_meta_val}')";
+						$event_meta_inserts[] = "({$event->post_id}, '{$event_meta_key}', '{$event_meta_val}')";
 					}
 				}
 			}
@@ -772,11 +775,11 @@ class EM_Event extends \EM_Object{
 		if( !empty($event_meta_inserts) ){
 			$wpdb->query('INSERT INTO '.$wpdb->postmeta." (post_id, meta_key, meta_value) VALUES ".implode(', ', $event_meta_inserts));
 		}
-		if( array_key_exists('_event_approvals_count', $event_meta) ) update_post_meta($EM_Event->post_id, '_event_approvals_count', 0);
+		if( array_key_exists('_event_approvals_count', $event_meta) ) update_post_meta($event->post_id, '_event_approvals_count', 0);
 		//copy anything from the em_meta table too
-		$wpdb->query('INSERT INTO '.EM_META_TABLE." (object_id, meta_key, meta_value) SELECT '{$EM_Event->event_id}', meta_key, meta_value FROM ".EM_META_TABLE." WHERE object_id='{$this->event_id}'");
+		$wpdb->query('INSERT INTO '.EM_META_TABLE." (object_id, meta_key, meta_value) SELECT '{$event->event_id}', meta_key, meta_value FROM ".EM_META_TABLE." WHERE object_id='{$this->event_id}'");
 		//set event to draft status
-		return apply_filters('em_event_duplicate', $EM_Event, $this);
+		return apply_filters('em_event_duplicate', $event, $this);
 
 		//TODO add error notifications for duplication failures.
 		
@@ -799,8 +802,8 @@ class EM_Event extends \EM_Object{
 		    if( !is_admin() ){
 				include_once('EventPostAdmin.php');
 				if( !defined('EM_EVENT_DELETE_INCLUDE') ){
-					EM_Event_Post_Admin::init();
-					EM_Event_Recurring_Post_Admin::init();
+					\EM_Event_Post_Admin::init();
+					\EM_Event_Recurring_Post_Admin::init();
 					define('EM_EVENT_DELETE_INCLUDE',true);
 				}
 		    }
@@ -906,7 +909,7 @@ class EM_Event extends \EM_Object{
 	 * Returns an EM_DateTime object of the event start date/time in local timezone of event.
 	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
 	 * @return EM_DateTime
-	 * @see EM_Event::get_datetime()
+	 * @see Event::get_datetime()
 	 */
 	public function start( $utc_timezone = false ){
 		return apply_filters('em_event_start', $this->get_datetime('start', $utc_timezone), $this);
@@ -916,7 +919,7 @@ class EM_Event extends \EM_Object{
 	 * Returns an EM_DateTime object of the event end date/time in local timezone of event
 	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
 	 * @return EM_DateTime
-	 * @see EM_Event::get_datetime()
+	 * @see Event::get_datetime()
 	 */
 	public function end( $utc_timezone = false ){
 		return apply_filters('em_event_end', $this->get_datetime('end', $utc_timezone), $this);
@@ -1010,7 +1013,7 @@ class EM_Event extends \EM_Object{
 	}
 	
 	/**
-	 * Returns an EM_Categories object of the EM_Event instance.
+	 * Returns an EM_Categories object of the Event instance.
 	 * @return EM_Categories
 	 */
 	function get_categories() {
@@ -1217,12 +1220,12 @@ class EM_Event extends \EM_Object{
 	}
 	
 	/**
-	 * Gets the event recurrence template, which is an EM_Event object (based off an event-recurring post)
-	 * @return EM_Event
+	 * Gets the event recurrence template, which is an Event object (based off an event-recurring post)
+	 * @return Event
 	 */
-	function get_event_recurrence(){
+	function get_event_recurrence() : Event{
 		if(!$this->is_recurring()){
-			return EM_Event::find_by_event_id($this->recurrence_id);
+			return Event::find_by_event_id($this->recurrence_id);
 		}else{
 			return $this;
 		}
@@ -1414,8 +1417,8 @@ class EM_Event extends \EM_Object{
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
-				$events = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
-			 	foreach($events as $event_array){ /* @var $EM_Event EM_Event */
+				$events = EventCollection::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
+			 	foreach($events as $event_array){ /* @var $event Event */
 			 		//set new start/end times to obtain accurate timestamp according to timezone and DST
 			 		$EM_DateTime = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);
 			 		$start_timestamp = $EM_DateTime->getTimestamp();
@@ -1643,10 +1646,10 @@ class EM_Event extends \EM_Object{
 			$event_ids = $wpdb->get_col( $sql );
 			// go through each event and delete individually so individual hooks are fired appropriately
 			foreach($event_ids as $event_id){
-				$EM_Event = EM_Event::find_by_event_id( $event_id );
-				if($EM_Event->recurrence_id == $this->event_id){
-					$EM_Event->delete(true);
-					$events_array[] = $EM_Event;
+				$event = Event::find_by_event_id( $event_id );
+				if($event->recurrence_id == $this->event_id){
+					$event->delete(true);
+					$events_array[] = $event;
 				}
 			}
 			$result = !empty($events_array) || (is_array($event_ids) && empty($event_ids)); // success if we deleted something, or if there was nothing to delete in the first place
@@ -1754,44 +1757,44 @@ class EM_Event extends \EM_Object{
 	}
 	
 	function get_recurrence_description() {
-		$EM_Event_Recurring = $this->get_event_recurrence(); 
+		$event_recurring = $this->get_event_recurrence(); 
 		$recurrence = $this->to_array();
 		$weekdays_name = array( translate('Sunday'),translate('Monday'),translate('Tuesday'),translate('Wednesday'),translate('Thursday'),translate('Friday'),translate('Saturday'));
 		$monthweek_name = array('1' => __('the first %s of the month', 'events'),'2' => __('the second %s of the month', 'events'), '3' => __('the third %s of the month', 'events'), '4' => __('the fourth %s of the month', 'events'), '5' => __('the fifth %s of the month', 'events'), '-1' => __('the last %s of the month', 'events'));
-		$output = sprintf (__('From %1$s to %2$s', 'events'),  $EM_Event_Recurring->event_start_date, $EM_Event_Recurring->event_end_date).", ";
-		if ($EM_Event_Recurring->recurrence_freq == 'daily')  {
+		$output = sprintf (__('From %1$s to %2$s', 'events'),  $event_recurring->event_start_date, $event_recurring->event_end_date).", ";
+		if ($event_recurring->recurrence_freq == 'daily')  {
 			$freq_desc =__('everyday', 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc = sprintf (__("every %s days", 'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc = sprintf (__("every %s days", 'events'), $event_recurring->recurrence_interval);
 			}
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'weekly')  {
-			$weekday_array = explode(",", $EM_Event_Recurring->recurrence_byday);
+		}elseif ($event_recurring->recurrence_freq == 'weekly')  {
+			$weekday_array = explode(",", $event_recurring->recurrence_byday);
 			$natural_days = array();
 			foreach($weekday_array as $day){
 				array_push($natural_days, $weekdays_name[$day]);
 			}
 			$output .= implode(", ", $natural_days);
 			$freq_desc = " " . __("every week", 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc = " ".sprintf (__("every %s weeks", 'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc = " ".sprintf (__("every %s weeks", 'events'), $event_recurring->recurrence_interval);
 			}
 			
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'monthly')  {
-			$weekday_array = explode(",", $EM_Event_Recurring->recurrence_byday);
+		}elseif ($event_recurring->recurrence_freq == 'monthly')  {
+			$weekday_array = explode(",", $event_recurring->recurrence_byday);
 			$natural_days = array();
 			foreach($weekday_array as $day){
 				if( is_numeric($day) ){
 					array_push($natural_days, $weekdays_name[$day]);
 				}
 			}
-			$freq_desc = sprintf (($monthweek_name[$EM_Event_Recurring->recurrence_byweekno]), implode(" and ", $natural_days));
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc .= ", ".sprintf (__("every %s months",'events'), $EM_Event_Recurring->recurrence_interval);
+			$freq_desc = sprintf (($monthweek_name[$event_recurring->recurrence_byweekno]), implode(" and ", $natural_days));
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc .= ", ".sprintf (__("every %s months",'events'), $event_recurring->recurrence_interval);
 			}
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'yearly')  {
+		}elseif ($event_recurring->recurrence_freq == 'yearly')  {
 			$freq_desc = __("every year", 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc .= sprintf (__("every %s years",'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc .= sprintf (__("every %s years",'events'), $event_recurring->recurrence_interval);
 			}
 		}else{
 			$freq_desc = "[ERROR: corrupted database record]";

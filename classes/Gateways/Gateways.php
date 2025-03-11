@@ -149,7 +149,7 @@ class EM_Gateways {
 	
 	/**
 	 * Intercepted when a booking is about to be added and saved, calls the relevant booking gateway action provided gateway is provided in submitted request variables.
-	 * @param EM_Event $EM_Event the event the booking is being added to
+	 * @param Event $event the event the booking is being added to
 	 * @param EM_Booking $EM_Booking the new booking to be added
 	 * @param boolean $post_validation
 	 */
@@ -160,8 +160,8 @@ class EM_Gateways {
 		$EM_Gateways[$gateway]->booking_add($booking, $post_validation);
 	}
 	
-	static function event_booking_form_footer( $EM_Event ){
-		if(!$EM_Event->is_free(true) ){
+	static function event_booking_form_footer( $event ){
+		if(!$event->is_free(true) ){
 		    self::booking_form_footer();
 		}
 	}
@@ -358,7 +358,7 @@ class EM_Gateways {
 	/**
 	 * This gets called when a booking form created using the old buttons API, and calls subsequent gateways to output their buttons.
 	 * @param string $button
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return string
 	 */
 	static function booking_form_buttons($button = ''){
@@ -374,7 +374,7 @@ class EM_Gateways {
 					}
 				}
 			}
-			//$gateway_buttons = apply_filters('em_gateway_buttons', $gateway_buttons, $EM_Event);
+			//$gateway_buttons = apply_filters('em_gateway_buttons', $gateway_buttons, $event);
 			if( count($gateway_buttons) > 0 ){
 				$button = '<div class="em-gateway-buttons"><div class="em-gateway-button first">'. implode('</div><div class="em-gateway-button">', $gateway_buttons).'</div></div>';			
 			}
@@ -408,8 +408,8 @@ class EM_Gateways {
 				    'data' => array() // replace this with assoc array of name/value key arrays
 			    );
 			    
-				$EM_Event = $EM_Booking->get_event(); //handle potentially deleted events in a MB booking
-				$event_string = !empty($EM_Event->post_id) ? EventView::render($EM_Event, '#_EVENTLINK - #_EVENTDATES @ #_EVENTTIMES') : __('Deleted Event', 'events');
+				$event = $EM_Booking->get_event(); //handle potentially deleted events in a MB booking
+				$event_string = !empty($event->post_id) ? EventView::render($event, '#_EVENTLINK - #_EVENTDATES @ #_EVENTTIMES') : __('Deleted Event', 'events');
 				$transactions_item['data'][] = array('name' => __('Event','events'), 'value' => $event_string );
                 
 			    $transactions_item['data'][] = array('name' => __('Status','events'), 'value' => $transaction->transaction_status );

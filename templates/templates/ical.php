@@ -1,5 +1,8 @@
 <?php 
 //define and clean up formats for display
+
+use Contexis\Events\Collections\EventCollection;
+
 $summary_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", "#_EVENTNAME" ) );
 $description_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", "#_EVENTEXCERPT" ) );
 $location_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", "#_LOCATIONNAME, #_LOCATIONFULLLINE, #_LOCATIONCOUNTRY" ) );
@@ -15,7 +18,7 @@ $args = !empty($args) ? $args:array(); /* @var $args array */
 $args = array_merge(array('limit'=>$page_limit, 'page'=>'1', 'owner'=>false, 'orderby'=>'event_start_date,event_start_time', 'scope' => 'future' ), $args);
 $args = apply_filters('em_calendar_template_args',$args);
 //get first round of events to show, we'll start adding more via the while loop
-$EM_Events = EM_Events::find( $args );
+$events = EventCollection::find( $args );
 $timezones = array();
 
 //calendar header
@@ -38,75 +41,75 @@ echo preg_replace("/([^\r])\n/", "$1\r\n", $output_header);
 
 //loop through events
 $count = 0;
-while ( count($EM_Events) > 0 ){
-	foreach ( $EM_Events as $EM_Event ) {
-		/* @var $EM_Event EM_Event */
+while ( count($events) > 0 ){
+	foreach ( $events as $event ) {
+		/* @var $event Event */
 	    if( $ical_limit != 0 && $count > $ical_limit ) break; //we've reached our maximum
 	    //figure out the timezone of this event, or if it's an offset and add to list of timezones and date ranges to define in VTIMEZONE
-	    $show_timezone = $timezone_support && !preg_match('/^UTC/', $EM_Event->get_timezone()->getName());
+	    $show_timezone = $timezone_support && !preg_match('/^UTC/', $event->get_timezone()->getName());
 	    if( $show_timezone ){
-	    	$timezone = $EM_Event->start()->getTimezone()->getName();
+	    	$timezone = $event->start()->getTimezone()->getName();
 	    	if( empty($timezones[$timezone]) ){
-	    		$timezones[$timezone] = array( $EM_Event->start()->getTimestamp(), $EM_Event->end()->getTimestamp() );
+	    		$timezones[$timezone] = array( $event->start()->getTimestamp(), $event->end()->getTimestamp() );
 	    	}else{
-	    		if( $timezones[$timezone][0] > $EM_Event->start()->getTimestamp() ) $timezones[$timezone][0] = $EM_Event->start()->getTimestamp();
-	    		if( $timezones[$timezone][1] < $EM_Event->end()->getTimestamp() ) $timezones[$timezone][1] = $EM_Event->end()->getTimestamp();
+	    		if( $timezones[$timezone][0] > $event->start()->getTimestamp() ) $timezones[$timezone][0] = $event->start()->getTimestamp();
+	    		if( $timezones[$timezone][1] < $event->end()->getTimestamp() ) $timezones[$timezone][1] = $event->end()->getTimestamp();
 	    	}
 	    }
 	    //calculate the times along with timezone offsets
-		if($EM_Event->event_all_day){
+		if($event->event_all_day){
 			//we get local time since we're representing a date not a time
-			$dateStart	= ';VALUE=DATE:'.$EM_Event->start()->format('Ymd'); //all day
-			$dateEnd	= ';VALUE=DATE:'.$EM_Event->end()->copy()->add(new DateInterval('P1D'))->format('Ymd'); //add one day
+			$dateStart	= ';VALUE=DATE:'.$event->start()->format('Ymd'); //all day
+			$dateEnd	= ';VALUE=DATE:'.$event->end()->copy()->add(new DateInterval('P1D'))->format('Ymd'); //add one day
 		}else{
 			//get date output with timezone and local time if timezone output is enabled, or UTC time if not and/or if offset is manual
 			if( $show_timezone ){
 				//show local time and define a timezone
-				$dateStart	= ':'.$EM_Event->start()->format('Ymd\THis');
-				$dateEnd = ':'.$EM_Event->end()->format('Ymd\THis');
+				$dateStart	= ':'.$event->start()->format('Ymd\THis');
+				$dateEnd = ':'.$event->end()->format('Ymd\THis');
 			}else{
 				//create a UTC equivalent time for all events irrespective of timezone
-				$dateStart	= ':'.$EM_Event->start(true)->format('Ymd\THis\Z');
-				$dateEnd = ':'.$EM_Event->end(true)->format('Ymd\THis\Z');
+				$dateStart	= ':'.$event->start(true)->format('Ymd\THis\Z');
+				$dateEnd = ':'.$event->end(true)->format('Ymd\THis\Z');
 			}
 		}
 		if( $show_timezone ){
 			$dateStart = ';TZID='.$timezone . $dateStart;
 			$dateEnd = ';TZID='.$timezone . $dateEnd;
 		}
-		if( !empty($EM_Event->event_date_modified) && $EM_Event->event_date_modified != '0000-00-00 00:00:00' ){
-			$dateModified =  get_gmt_from_date($EM_Event->event_date_modified, 'Ymd\THis\Z');
+		if( !empty($event->event_date_modified) && $event->event_date_modified != '0000-00-00 00:00:00' ){
+			$dateModified =  get_gmt_from_date($event->event_date_modified, 'Ymd\THis\Z');
 		}else{
-		    $dateModified = get_gmt_from_date($EM_Event->post_modified, 'Ymd\THis\Z');
+		    $dateModified = get_gmt_from_date($event->post_modified, 'Ymd\THis\Z');
 		}
 		
 		//formats
-		$summary = em_mb_ical_wordwrap('SUMMARY:' . EventView::render($EM_Event, $summary_format,'ical'));
-		$description = em_mb_ical_wordwrap('DESCRIPTION:' . EventView::render($EM_Event, $description_format,'ical'));
-		$url = 'URL:'.$EM_Event->get_permalink();
+		$summary = em_mb_ical_wordwrap('SUMMARY:' . EventView::render($event, $summary_format,'ical'));
+		$description = em_mb_ical_wordwrap('DESCRIPTION:' . EventView::render($event, $description_format,'ical'));
+		$url = 'URL:'.$event->get_permalink();
 		$url = wordwrap($url, 74, "\n ", true);
 		$location = $geo = $apple_geo = $apple_location = $apple_location_title = $apple_structured_location = $categories = false;
-		if( $EM_Event->location_id ){
-			$location = em_mb_ical_wordwrap('LOCATION:' . EventView::render($EM_Event, $location_format, 'ical'));
-			if( $EM_Event->get_location()->location_latitude || $EM_Event->get_location()->location_longitude ){
-				$geo = 'GEO:'.$EM_Event->get_location()->location_latitude.";".$EM_Event->get_location()->location_longitude;
+		if( $event->location_id ){
+			$location = em_mb_ical_wordwrap('LOCATION:' . EventView::render($event, $location_format, 'ical'));
+			if( $event->get_location()->location_latitude || $event->get_location()->location_longitude ){
+				$geo = 'GEO:'.$event->get_location()->location_latitude.";".$event->get_location()->location_longitude;
 			}
 			
-			$apple_location = str_replace(';', '', html_entity_decode(str_replace('\;', ';', EventView::render($EM_Event, '#_LOCATIONFULLLINE, #_LOCATIONCOUNTRY', 'ical'))));
-			$apple_location_title = str_replace('\;', '', html_entity_decode(str_replace('\;', ';', EventView::render($EM_Event, '#_LOCATIONNAME', 'ical'))));
-			$apple_geo = !empty($geo) ? $EM_Event->get_location()->location_latitude.",".$EM_Event->get_location()->location_longitude:'0,0';
+			$apple_location = str_replace(';', '', html_entity_decode(str_replace('\;', ';', EventView::render($event, '#_LOCATIONFULLLINE, #_LOCATIONCOUNTRY', 'ical'))));
+			$apple_location_title = str_replace('\;', '', html_entity_decode(str_replace('\;', ';', EventView::render($event, '#_LOCATIONNAME', 'ical'))));
+			$apple_geo = !empty($geo) ? $event->get_location()->location_latitude.",".$event->get_location()->location_longitude:'0,0';
 			$apple_structured_location = "X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS={$apple_location};X-APPLE-RADIUS=100;X-TITLE={$apple_location_title}:geo:{$apple_geo}";
 			$apple_structured_location = str_replace('"', '\"', $apple_structured_location); //google chucks a wobbly with these on this line
 			$apple_structured_location = em_mb_ical_wordwrap($apple_structured_location);
 		}
 		$categories = array();
-		foreach( $EM_Event->get_categories() as $EM_Category ){ /* @var EM_Category $EM_Category */
+		foreach( $event->get_categories() as $EM_Category ){ /* @var EM_Category $EM_Category */
 			$categories[] = $EM_Category->name;
 		}
-		$image = $EM_Event->get_image_url();
+		$image = $event->get_image_url();
 		
 		//create a UID, make it unique and update independent
-		$UID = $EM_Event->event_id . '@' . $site_domain;
+		$UID = $event->event_id . '@' . $site_domain;
 		
 		$UID = wordwrap("UID:".$UID, 74, "\r\n ", true);
 		
@@ -159,7 +162,7 @@ END:VEVENT";
 	}else{
 	    //get next page of results
 	    $args['page']++;
-		$EM_Events = EM_Events::find( $args );
+		$events = EventCollection::find( $args );
 	}
 }
 

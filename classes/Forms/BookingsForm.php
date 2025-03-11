@@ -1,6 +1,6 @@
 <?php
 
-use Contexis\Events\Blocks\Block;
+use Contexis\Events\Models\Event;
 
 class EM_Booking_Form {
 	static $validate;
@@ -51,13 +51,13 @@ class EM_Booking_Form {
 	/**
 	 * @param EM_Booking $EM_Booking
 	 */
-	public static function get_form( $EM_Event = false ){
+	public static function get_form( $event = false ){
 	    //make sure we don't need to get another form rather than the one already stored in this object
 		if(!empty(self::$form)) return self::$form;
 
-		if(is_numeric($EM_Event)){ $EM_Event = EM_Event::find_by_event_id($EM_Event); }
+		if(is_numeric($event)){ $event = Event::find_by_event_id($event); }
 
-		self::$form_id = $EM_Event ? get_post_meta($EM_Event->post_id, '_booking_form', true) : 0;
+		self::$form_id = $event ? get_post_meta($event->post_id, '_booking_form', true) : 0;
 
 		$form_data = EM_Form::get_form_data(self::$form_id);
 
@@ -85,14 +85,14 @@ class EM_Booking_Form {
 	
 	/*
 	public static function booking_form($event = false){
-		gnobal $EM_Event;
-        $event = empty($event) ? $EM_Event : $event;
+		gnobal $event;
+        $event = empty($event) ? $event : $event;
         echo self::get_form($event);
 	}
 
     public static function booking_form_json($event = false){
-		gnobal $EM_Event;
-        $event = empty($event) ? $EM_Event : $event;
+		gnobal $event;
+        $event = empty($event) ? $event : $event;
         return self::get_form($event)->form_fields;
 	}
 	*/
@@ -177,8 +177,8 @@ class EM_Booking_Form {
 	}
 	
 	public static function em_bookings_table_cols_template($template, $EM_Bookings_Table){
-		$EM_Event = $EM_Bookings_Table->event;
-		$event_id = (!empty($EM_Event->event_id)) ? $EM_Event->event_id:false;
+		$event = $EM_Bookings_Table->event;
+		$event_id = (!empty($event->event_id)) ? $event->event_id:false;
 		$EM_Form = self::get_form($event_id);
 		foreach($EM_Form->form_fields as $field_id => $field ){
 		    if( $EM_Form->is_normal_field($field_id) ){ //user fields already handled, htmls shouldn't show

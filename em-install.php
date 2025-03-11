@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Collections\EventCollection;
+
 function em_uninstall() {
 	global $wpdb;
 
@@ -48,7 +50,7 @@ function em_install() {
     if (version_compare($installed_version, $plugin_version, '>=')) {
         return;
     }
-   	
+   	var_dump($installed_version);
 	if( $installed_version === '0.0.0' ){
 		if (get_option('dbem_upgrade_throttle', 0) <= time()) {
 			update_option('dbem_upgrade_throttle', time() + 60);
@@ -204,7 +206,7 @@ function em_create_bookings_table() {
 		booking_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		booking_status bool NOT NULL DEFAULT 1,
  		booking_price decimal(14,4) unsigned NOT NULL DEFAULT 0,
- 		booking_donation decimal(14,4) NOT NULL DEFAULT 0,
+ 		booking_donation decimal(10,2) unsigned NOT NULL DEFAULT 0,
 		booking_meta LONGTEXT NULL,
 		PRIMARY KEY  (booking_id)
 		) DEFAULT CHARSET=utf8 ;";
@@ -593,7 +595,7 @@ function em_upgrade_current_installation(){
 		$wpdb->query('ALTER TABLE '.EM_COUPONS_TABLE.' DROP COLUMN coupon_tax');
 		$wpdb->query('ALTER TABLE '.EM_TICKETS_TABLE.' DROP COLUMN ticket_parent');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_location_type');
-		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ALTER COLUMN booking_donation SET TYPE decimal(14,4)');
+		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ALTER COLUMN booking_donation SET TYPE decimal(10,2)');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_language');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' ADD COLUMN booking_mail TEXT NULL');
 		$wpdb->query('ALTER TABLE '.EM_BOOKINGS_TABLE.' DROP COLUMN booking_tax');
@@ -609,7 +611,10 @@ function em_upgrade_current_installation(){
 		$batch_size = 100;
 		$offset = 0;
 		
-		while($events = EM_Events::find(['limit' => $batch_size, 'offset' => $offset])) {
+		while($events = Events::find(['limit' => $batch_size, 'paged' => $offset])) {
+			if($offset == 100) break;
+			error_log("offset: " . $offset);
+
 			foreach($events as $event) {
 				if($event->location_id == 0) continue;
 				$location = EM_Location::find_by_location_id($event->location_id);
@@ -630,7 +635,7 @@ function em_upgrade_current_installation(){
 		}
 		global $wpdb;
 		$wpdb->query('DROP TABLE IF EXISTS '.EM_LOCATIONS_TABLE);
-		\Contexis\Events\Utilities::set_installed_version('6.9.0');
+		//\Contexis\Events\Utilities::set_installed_version('6.9.0');
 	}
 
 	if( version_compare($installed_version, '6.9.1') < 0 ){
@@ -638,7 +643,7 @@ function em_upgrade_current_installation(){
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN group_id');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN blog_id');
 		$wpdb->query('ALTER TABLE '.EM_COUPONS_TABLE.' DROP COLUMN blog_id');
-		\Contexis\Events\Utilities::set_installed_version('6.9.1');
+		//\Contexis\Events\Utilities::set_installed_version('6.9.1');
 	}
 }
 

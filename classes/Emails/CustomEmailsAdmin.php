@@ -455,13 +455,13 @@ class EM_Custom_Emails_Admin {
 	}
 	
 	public static function event_meta_box($post){
-		$EM_Event = EM_Event::find_by_post_id($post->ID);
+		$event = Event::find_by_post_id($post->ID);
 		
 		//get custom email values if they exist
-		$custom_email_values = EM_Custom_Emails::get_event_emails($EM_Event);
+		$custom_email_values = EM_Custom_Emails::get_event_emails($event);
 		$custom_admin_emails = false;
 		if( get_option('dbem_custom_emails_events_admins')){
-			$custom_admin_emails = EM_Custom_Emails::get_event_admin_emails($EM_Event);
+			$custom_admin_emails = EM_Custom_Emails::get_event_admin_emails($event);
 		}
 		
 		echo '<p>'. sprintf(__('Below you can modify the emails that are sent when bookings are made. This will override the default emails located in your %s settings page.','events'), '<a href="'.admin_url('edit.php?post_type=event&page=events-options#emails:booking-emails').'">'.esc_html('Booking Email Templates','events').'</a>');
@@ -472,26 +472,26 @@ class EM_Custom_Emails_Admin {
 		self::emails_editor($custom_email_values, array(), $custom_admin_emails);
 	}
 
-	public static function em_event_get_post_meta( $result, $EM_Event ){ 
+	public static function em_event_get_post_meta( $result, $event ){ 
 		if( current_user_can(self::$caps['custom_emails']) ){
-			$EM_Event->custom_booking_emails = self::editor_get_post();
+			$event->custom_booking_emails = self::editor_get_post();
 			if( get_option('dbem_custom_emails_events_admins')){
-				$EM_Event->custom_admin_emails = self::editor_admin_emails_get_post();
+				$event->custom_admin_emails = self::editor_admin_emails_get_post();
 			}
 		}
 		return $result;
 	}
 	
-	public static function em_event_validate_meta( $result, $EM_Event ){
+	public static function em_event_validate_meta( $result, $event ){
 		//validate emails
 		$email_errors = false;
-		if( !empty($EM_Event->custom_admin_emails) && is_array($EM_Event->custom_admin_emails) ){
-			foreach($EM_Event->custom_admin_emails as $group_key => $emails){
+		if( !empty($event->custom_admin_emails) && is_array($event->custom_admin_emails) ){
+			foreach($event->custom_admin_emails as $group_key => $emails){
 				if( !empty($emails) ){
 					$emails = explode(',',$emails);
 					foreach ($emails as $email){
 						if( !is_email($email) ){
-							unset($EM_Event->custom_admin_emails[$group_key]);
+							unset($event->custom_admin_emails[$group_key]);
 							$email_errors = true;
 						}
 					}
@@ -505,34 +505,34 @@ class EM_Custom_Emails_Admin {
 		return $result;
 	}
 	
-	public static function em_event_save_meta( $result, $EM_Event ){
+	public static function em_event_save_meta( $result, $event ){
 		global $wpdb;
-		if( current_user_can(self::$caps['custom_emails']) && !empty($EM_Event->post_id) ){
-			if( !empty($EM_Event->custom_booking_emails) ){
-				$sql = $wpdb->prepare('SELECT meta_id FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-emails');
+		if( current_user_can(self::$caps['custom_emails']) && !empty($event->post_id) ){
+			if( !empty($event->custom_booking_emails) ){
+				$sql = $wpdb->prepare('SELECT meta_id FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-emails');
 				$meta_id = $wpdb->get_var($sql);
 				if( $meta_id > 0 ){
-					$wpdb->update(EM_META_TABLE, array('meta_value'=>serialize($EM_Event->custom_booking_emails)), array('meta_id'=>$meta_id), array('%s'));
+					$wpdb->update(EM_META_TABLE, array('meta_value'=>serialize($event->custom_booking_emails)), array('meta_id'=>$meta_id), array('%s'));
 				}else{
-					$wpdb->insert(EM_META_TABLE, array('object_id'=>$EM_Event->event_id, 'meta_key'=>'event-emails', 'meta_value' => serialize($EM_Event->custom_booking_emails)), array('%d','%s','%s'));
+					$wpdb->insert(EM_META_TABLE, array('object_id'=>$event->event_id, 'meta_key'=>'event-emails', 'meta_value' => serialize($event->custom_booking_emails)), array('%d','%s','%s'));
 				}
-			}elseif( isset($EM_Event->custom_booking_emails) ){
+			}elseif( isset($event->custom_booking_emails) ){
 				//only delete if custom_booking_emails property is set, since that only happens when populating a specific event in the admin, not another event on the side
-				$sql = $wpdb->prepare('DELETE FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-emails');
+				$sql = $wpdb->prepare('DELETE FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-emails');
 				$wpdb->query($sql);
 			}
 			if( get_option('dbem_custom_emails_events_admins')){
-				if( !empty($EM_Event->custom_admin_emails) ){
-					$sql = $wpdb->prepare('SELECT meta_id FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-admin-emails');
+				if( !empty($event->custom_admin_emails) ){
+					$sql = $wpdb->prepare('SELECT meta_id FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-admin-emails');
 					$meta_id = $wpdb->get_var($sql);
 					if( $meta_id > 0 ){
-						$wpdb->update(EM_META_TABLE, array('meta_value'=>serialize($EM_Event->custom_admin_emails)), array('meta_id'=>$meta_id), array('%s'));
+						$wpdb->update(EM_META_TABLE, array('meta_value'=>serialize($event->custom_admin_emails)), array('meta_id'=>$meta_id), array('%s'));
 					}else{
-						$wpdb->insert(EM_META_TABLE, array('object_id'=>$EM_Event->event_id, 'meta_key'=>'event-admin-emails', 'meta_value' => serialize($EM_Event->custom_admin_emails)), array('%d','%s','%s'));
+						$wpdb->insert(EM_META_TABLE, array('object_id'=>$event->event_id, 'meta_key'=>'event-admin-emails', 'meta_value' => serialize($event->custom_admin_emails)), array('%d','%s','%s'));
 					}
-				}elseif( isset($EM_Event->custom_admin_emails) ){
+				}elseif( isset($event->custom_admin_emails) ){
 					//only delete if custom_admin_emails property is set, since that only happens when populating a specific event in the admin, not another event on the side
-    				$sql = $wpdb->prepare('DELETE FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-admin-emails');
+    				$sql = $wpdb->prepare('DELETE FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-admin-emails');
     				$wpdb->query($sql);
     			}
 			}
@@ -540,7 +540,7 @@ class EM_Custom_Emails_Admin {
 		return $result;
 	}
 	
-	public static function em_event_save_events( $result, $EM_Event, $event_ids, $post_ids ){
+	public static function em_event_save_events( $result, $event, $event_ids, $post_ids ){
 		global $wpdb;
 		if( $result && current_user_can(self::$caps['custom_emails']) ){
 			//delete all previous records of event coupons
@@ -549,14 +549,14 @@ class EM_Custom_Emails_Admin {
 			}
 			//create inserts
 			$inserts = array();
-			if( !empty($EM_Event->custom_booking_emails) ){
+			if( !empty($event->custom_booking_emails) ){
 				foreach($event_ids as $event_id){
-					$inserts[] = $wpdb->prepare("(%d, 'event-emails', %s)", array($event_id, serialize($EM_Event->custom_booking_emails)));
+					$inserts[] = $wpdb->prepare("(%d, 'event-emails', %s)", array($event_id, serialize($event->custom_booking_emails)));
 				}
 			}
-			if( !empty($EM_Event->custom_admin_emails) ){
+			if( !empty($event->custom_admin_emails) ){
 				foreach($event_ids as $event_id){
-					$inserts[] = $wpdb->prepare("(%d, 'event-admin-emails', %s)", array($event_id, serialize($EM_Event->custom_admin_emails)));
+					$inserts[] = $wpdb->prepare("(%d, 'event-admin-emails', %s)", array($event_id, serialize($event->custom_admin_emails)));
 				}
 			}
 			if( !empty($inserts) ){

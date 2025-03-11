@@ -13,6 +13,13 @@ Author URI: https://github.com/gollenia/events
 Text Domain: events
 Domain Path: /languages
 */
+xdebug_start_trace("/var/www/vhosts/kids-team.enroute/log/trace.log", XDEBUG_TRACE_COMPUTERIZED);
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error) {
+        error_log("Shutdown wegen: " . print_r($error, true));
+    }
+});
 
 class Events {
 	const DIR = __DIR__;
@@ -61,10 +68,10 @@ require_once __DIR__ . '/classes/Bookings/BookingExport.php';
 require_once __DIR__ . '/classes/Categories/Category.php';
 require_once __DIR__ . '/classes/Categories/Categories.php';
 
-require_once __DIR__ . '/classes/Events/Event.php';
+require_once __DIR__ . '/classes/Models/Event.php';
 require_once __DIR__ . '/classes/Events/EventRestController.php';
 require_once __DIR__ . '/classes/Events/EventPost.php';
-require_once __DIR__ . '/classes/Events/Events.php';
+require_once __DIR__ . '/classes/Collections/EventCollection.php';
 require_once __DIR__ . '/classes/Events/EventView.php';
 require_once __DIR__ . '/classes/Locations/Location.php';
 

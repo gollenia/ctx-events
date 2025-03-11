@@ -2,7 +2,7 @@
 /**
  * Outputs a checkbox that can be used to obtain consent.
  * Complete nonsense, change!
- * @param EM_Event|EM_Location|EM_Booking|bool $EM_Object
+ * @param Event|EM_Location|EM_Booking|bool $EM_Object
  */
 function em_data_privacy_consent_checkbox( $EM_Object = false ){
 	if( !empty($EM_Object) && (!empty($EM_Object->booking_id) || !empty($EM_Object->post_id)) ) return; //already saved so consent was given at one point
@@ -31,7 +31,7 @@ function em_data_privacy_consent_checkbox( $EM_Object = false ){
 function em_data_privacy_consent_hooks(){
 	//BOOKINGS
 	if( get_option('dbem_data_privacy_consent_bookings') == 1 || ( get_option('dbem_data_privacy_consent_bookings') == 2 && !is_user_logged_in() ) ){
-	    add_action('em_booking_form_footer', 'em_data_privacy_consent_checkbox', 9, 0); //supply 0 args since arg is $EM_Event and callback will think it's an event submission form
+	    add_action('em_booking_form_footer', 'em_data_privacy_consent_checkbox', 9, 0); //supply 0 args since arg is $event and callback will think it's an event submission form
 		add_filter('em_booking_validate', 'em_data_privacy_consent_booking_validate', 10, 2);
 		
 	}
@@ -39,8 +39,8 @@ function em_data_privacy_consent_hooks(){
 	if( get_option('dbem_data_privacy_consent_events') == 1 || ( get_option('dbem_data_privacy_consent_events') == 2 && !is_user_logged_in() ) ){
 		add_action('em_front_event_form_footer', 'em_data_privacy_consent_event_checkbox', 9, 1);
 		/**
-		 * Wrapper function in case old overriden templates didn't pass the EM_Event object and depended on global value
-		 * @param EM_Event $event
+		 * Wrapper function in case old overriden templates didn't pass the Event object and depended on global value
+		 * @param Event $event
 		 */
 		
 		add_action('em_event_get_post_meta', 'em_data_privacy_cpt_get_post', 10, 2);
@@ -86,12 +86,12 @@ function em_data_privacy_consent_booking_validate( $result, $EM_Booking ){
 /**
  * Save consent to event or location object
  * @param bool $result
- * @param EM_Event|EM_Location $EM_Object
+ * @param Event|EM_Location $EM_Object
  * @return bool
  */
 function em_data_privacy_cpt_get_post($result, $EM_Object ){
 	if( !empty($_REQUEST['data_privacy_consent']) ){
-		if( get_class($EM_Object) == 'EM_Event' ){
+		if( get_class($EM_Object) == 'Event' ){
 			$EM_Object->event_attributes['_consent_given'] = 1;
 			$EM_Object->get_location()->location_attributes['_consent_given'] = 1;
 		}else{
@@ -104,13 +104,13 @@ function em_data_privacy_cpt_get_post($result, $EM_Object ){
 /**
  * Validate the consent provided to events and locations.
  * @param bool $result
- * @param EM_Event|EM_Location $EM_Object
+ * @param Event|EM_Location $EM_Object
  * @return bool
  */
 function em_data_privacy_cpt_validate( $result, $EM_Object ){
 	if( !empty($EM_Object->post_id) ) return $result;
 	
-	$attributes = get_class($EM_Object) == 'EM_Event' ? 'event_attributes':'location_attributes';
+	$attributes = get_class($EM_Object) == 'Event' ? 'event_attributes':'location_attributes';
 	if( empty($EM_Object->{$attributes}['_consent_given']) ){
 		$EM_Object->add_error( sprintf(__('Please check the consent box so we can collect and store your submitted information.', 'events')) );
 		$result = false;

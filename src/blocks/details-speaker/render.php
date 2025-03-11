@@ -1,5 +1,5 @@
 <?php 
-$event = EM_Event::find_by_post(get_post());
+$event = \Contexis\Events\Models\Event::find_by_post(get_post());
 if(!$event) return;
 $speakerId = $attributes['customSpeakerId'] ?: $event->speaker_id;
 if(!$speakerId) { return; }

@@ -44,5 +44,10 @@
 			"Contexis\\Events\\Intl\\": "classes/Intl/",
 			"Contexis\\Events\\Admin\\": "classes/Admin/"
 		}
+	},
+	"require-dev": {
+		"phpstan/phpstan": "^2.1",
+		"php-stubs/wordpress-stubs": "^6.7",
+		"szepeviktor/phpstan-wordpress": "^2.0"
 	}
 }

@@ -2,10 +2,10 @@
 
 namespace Contexis\Events\Tickets;
 
-use EM_Event;
-use EM_Gateway;
 use WP_REST_Response;
 use WP_REST_Server;
+
+use \Contexis\Events\Models\Event;
 
 class TicketsController {
 
@@ -64,7 +64,7 @@ class TicketsController {
 	public function create_ticket($request) {
 		$ticket = new Ticket();
 
-		$event = \EM_Event::find_by_post_id($request->get_param('post_id'), 'post_id');
+		$event = Event::find_by_post_id($request->get_param('post_id'));
 		$data = $request->get_params();
 
 		$ticket->event_id = $event->event_id;
@@ -122,7 +122,7 @@ class TicketsController {
 	 * @param \WP_REST_Request $request
 	 * @return void
 	 */
-	public function delete_ticket($request) {
+	public function delete_ticket($request) : WP_REST_Response {
 		$id = $request->get_param('id');
 		$ticket = new Ticket($id);
 		$result = $ticket->delete();
@@ -138,7 +138,7 @@ class TicketsController {
 
 	function read_tickets($request) {
 		
-		$event = \EM_Event::find_by_post_id($request->get_param('post_id'), 'post_id');
+		$event = Event::find_by_post_id($request->get_param('post_id'), 'post_id');
 		
 		$ticket_data = \Contexis\Events\Tickets\Tickets::find_by_event_id($event->event_id);
 		

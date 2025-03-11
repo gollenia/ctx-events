@@ -1,5 +1,8 @@
 <?php
 //Admin functions
+
+use Contexis\Events\Collections\EventCollection;
+
 function em_admin_menu(){
 	global $menu, $submenu, $pagenow;
 	//Count pending bookings	
@@ -19,14 +22,14 @@ function em_admin_menu(){
    	}
 	//Count pending events
 	$events_num = '';
-	$events_pending_count = EM_Events::find(array('status'=>0, 'scope'=>'all'))->count();
+	$events_pending_count = EventCollection::find(array('status'=>0, 'scope'=>'all'))->count();
 	//TODO Add flexible permissions
 	if($events_pending_count > 0){
 		$events_num = '<span class="update-plugins count-'.$events_pending_count.'"><span class="plugin-count">'.$events_pending_count.'</span></span>';
 	}
 	//Count pending recurring events
 	$events_recurring_num = '';
-	$events_recurring_pending_count = EM_Events::find(array('status'=>0, 'recurring'=>1, 'scope'=>'all'))->count();
+	$events_recurring_pending_count = EventCollection::find(array('status'=>0, 'recurring'=>1, 'scope'=>'all'))->count();
 	//TODO Add flexible permissions
 	if($events_recurring_pending_count > 0){
 		$events_recurring_num = '<span class="update-plugins count-'.$events_recurring_pending_count.'"><span class="plugin-count">'.$events_recurring_pending_count.'</span></span>';

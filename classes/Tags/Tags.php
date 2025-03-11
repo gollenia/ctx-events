@@ -8,7 +8,7 @@ class EM_Tags extends EM_Taxonomy_Terms {
 	protected $ajax_search_action = 'search_tags';
 	
 	/**
-	 * Creates an EM_Tags instance, currently accepts an EM_Event object (gets all Categories for that event) or array of any EM_Category objects, which can be manipulated in bulk with helper functions.
+	 * Creates an EM_Tags instance, currently accepts an Event object (gets all Categories for that event) or array of any EM_Category objects, which can be manipulated in bulk with helper functions.
 	 * @param mixed $data
 	 * @return null
 	 */

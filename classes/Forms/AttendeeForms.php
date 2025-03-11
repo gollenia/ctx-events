@@ -1,4 +1,6 @@
 <?php
+
+use \Contexis\Events\Models\Event;
 include('AttendeeForm.php');
 class EM_Attendees_Form {
 	static $validate;
@@ -40,15 +42,15 @@ class EM_Attendees_Form {
 	
 	/**
 	 * Get the EM_Attendee_Form (Extended EM_Form)
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return EM_Attendee_Form
 	 */
-	public static function get_form($EM_Event = false){
-		if( empty(self::$form) || (!empty($EM_Event) && (empty(self::$form->event_id) || $EM_Event->event_id != self::$form->event_id)) ){
+	public static function get_form($event = false){
+		if( empty(self::$form) || (!empty($event) && (empty(self::$form->event_id) || $event->event_id != self::$form->event_id)) ){
 
-			if(is_numeric($EM_Event)){ $EM_Event = EM_Event::find_by_event_id($EM_Event); }
+			if(is_numeric($event)){ $event = Event::find_by_event_id($event); }
 			
-			self::$form_id = get_post_meta($EM_Event->post_id, '_attendee_form', true);
+			self::$form_id = get_post_meta($event->post_id, '_attendee_form', true);
 
 			$form_data = EM_Form::get_form_data(self::$form_id);
 
@@ -73,11 +75,11 @@ class EM_Attendees_Form {
 	}
 	
 	/**
-	 * Gets the form ID to use from a given EM_Event object or returns the default form id if not defined or no object passed
-	 * @param EM_Event $EM_Event
+	 * Gets the form ID to use from a given Event object or returns the default form id if not defined or no object passed
+	 * @param Event $event
 	 */
-	public static function get_form_id($EM_Event = false){
-		$custom_form_id = ( !empty($EM_Event->post_id) ) ? get_post_meta($EM_Event->post_id, '_custom_attendee_form', true):0;
+	public static function get_form_id($event = false){
+		$custom_form_id = ( !empty($event->post_id) ) ? get_post_meta($event->post_id, '_custom_attendee_form', true):0;
 		$form_id = empty($custom_form_id) ? get_option('em_attendee_form_fields') : $custom_form_id;
 	    return $form_id;
 	}
@@ -284,22 +286,22 @@ class EM_Attendees_Form {
 	
 	/**
 	 * Saves the custom attendee form as post meta. This is done on em_event_save_meta_pre since at that point we know the post id and this will get passed onto recurrences as well.
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 */
-	public static function em_event_save_meta_pre($EM_Event){
+	public static function em_event_save_meta_pre($event){
 		global $wpdb;
-		if( !empty($EM_Event->duplicated) ) return; //if just duplicated, we ignore this and let EM carry over duplicate event data
-		if( $EM_Event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && is_numeric($_REQUEST['custom_attendee_form']) ){
+		if( !empty($event->duplicated) ) return; //if just duplicated, we ignore this and let EM carry over duplicate event data
+		if( $event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && is_numeric($_REQUEST['custom_attendee_form']) ){
 			//Make sure form id exists
 			$id = $wpdb->get_var('SELECT meta_id FROM '.EM_META_TABLE." WHERE meta_id='{$_REQUEST['custom_attendee_form']}'");
 			if( $id == $_REQUEST['custom_attendee_form'] ){
 				//add or modify custom booking form id in post data
-				update_post_meta($EM_Event->post_id, '_custom_attendee_form', $id);
+				update_post_meta($event->post_id, '_custom_attendee_form', $id);
 			}
-		}elseif( $EM_Event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && $_REQUEST['custom_attendee_form'] == 'none' ){
-			update_post_meta($EM_Event->post_id, '_custom_attendee_form', 'none');
+		}elseif( $event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && $_REQUEST['custom_attendee_form'] == 'none' ){
+			update_post_meta($event->post_id, '_custom_attendee_form', 'none');
 		}else{
-			delete_post_meta($EM_Event->post_id, '_custom_attendee_form');
+			delete_post_meta($event->post_id, '_custom_attendee_form');
 		}
 	}
 

@@ -3,6 +3,7 @@
 use Contexis\Events\Intl\Date;
 use Contexis\Events\Tickets\Tickets;
 use Contexis\Events\Tickets\TicketsBookings;
+use Contexis\Events\Models\Event;
 
 /**
  * Contains all information and relevant functions surrounding a single booking made with Events Manager
@@ -610,11 +611,11 @@ class EM_Booking extends EM_Object{
 	
 	/**
 	 * Gets the event this booking belongs to and saves a reference in the event property
-	 * @return EM_Event
+	 * @return Event
 	 */
-	function get_event() : EM_Event {
-		if (!isset($this->event) || !($this->event instanceof EM_Event) || $this->event->event_id !== $this->event_id) {
-			$this->event = EM_Event::find_by_event_id($this->event_id);
+	function get_event() : Event {
+		if (!isset($this->event) || !($this->event instanceof Event) || $this->event->event_id !== $this->event_id) {
+			$this->event = Event::find_by_event_id($this->event_id);
 		}
 		return apply_filters('em_booking_get_event', $this->event, $this);
 	}
@@ -886,8 +887,8 @@ class EM_Booking extends EM_Object{
 			$output_string = str_replace($full_result, $replacement , $output_string );
 		}
 		//run event output too, since this is never run from within events and will not infinitely loop
-		$EM_Event = apply_filters('em_booking_output_event', $this->get_event(), $this); //allows us to override the booking event info if it belongs to a parent or translation
-		$output_string = EventView::render($EM_Event, $output_string, $target);
+		$event = apply_filters('em_booking_output_event', $this->get_event(), $this); //allows us to override the booking event info if it belongs to a parent or translation
+		$output_string = EventView::render($event, $output_string, $target);
 		return apply_filters('em_booking_output', $output_string, $this, $format, $target);	
 	}
 	
@@ -909,8 +910,8 @@ class EM_Booking extends EM_Object{
 			
 			do_action('em_booking_email_before_send', $this);
 			//get event info and refresh all bookings
-			$EM_Event = $this->get_event(); //We NEED event details here.
-			$EM_Event->get_bookings(true); //refresh all bookings
+			$event = $this->get_event(); //We NEED event details here.
+			$event->get_bookings(true); //refresh all bookings
 			//messages can be overridden just before being sent
 			$msg = $this->email_messages();
 
@@ -935,9 +936,9 @@ class EM_Booking extends EM_Object{
 				//get admin emails that need to be notified, hook here to add extra admin emails
 				$admin_emails = str_replace(' ','',get_option('dbem_bookings_notify_admin'));
 				$admin_emails = apply_filters('em_booking_admin_emails', explode(',', $admin_emails), $this); //supply emails as array
-				if( get_option('dbem_bookings_contact_email') == 1 && !empty($EM_Event->get_contact()->user_email) ){
+				if( get_option('dbem_bookings_contact_email') == 1 && !empty($event->get_contact()->user_email) ){
 				    //add event owner contact email to list of admin emails
-				    $admin_emails[] = $EM_Event->get_contact()->user_email;
+				    $admin_emails[] = $event->get_contact()->user_email;
 				}
 				foreach($admin_emails as $key => $email){ if( !is_email($email) ) unset($admin_emails[$key]); } //remove bad emails
 				//proceed to email admins if need be

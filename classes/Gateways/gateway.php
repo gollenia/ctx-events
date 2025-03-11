@@ -128,7 +128,7 @@ class EM_Gateway {
 
 	/**
 	 * Triggered by the em_booking_add_yourgateway action, modifies the booking status if the event isn't free and also adds a filter to modify user feedback returned.
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @param EM_Booking $EM_Booking
 	 * @param boolean $post_validation
 	 */

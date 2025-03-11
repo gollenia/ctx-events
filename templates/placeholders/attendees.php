@@ -1,7 +1,7 @@
 <?php
-/* @var $EM_Event EM_Event */
+/* @var $event Event */
 $people = array();
-$EM_Bookings = $EM_Event->get_bookings();
+$EM_Bookings = $event->get_bookings();
 
 if (count($EM_Bookings->bookings) > 0) {
     ?>

@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Models\Event;
+
 if( !class_exists('EM_Permalinks') ){
 	class EM_Permalinks {
 		static $em_queryvars = array(
@@ -49,8 +51,8 @@ if( !class_exists('EM_Permalinks') ){
 				if( $wp_query->get('event_slug') ){
 					$event = $wpdb->get_row('SELECT event_id, post_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get('event_slug')."'", ARRAY_A);
 					if( !empty($event) ){
-						$EM_Event = EM_Event::find_by_event_id($event['event_id']);
-						$url = get_permalink($EM_Event->post_id);
+						$event = Event::find_by_event_id($event['event_id']);
+						$url = get_permalink($event->post_id);
 					}
 				}elseif( $wp_query->get('category_slug') ){
 					$url = get_term_link($wp_query->get('category_slug'), EM_TAXONOMY_CATEGORY);

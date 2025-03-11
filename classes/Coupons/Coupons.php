@@ -1,4 +1,6 @@
 <?php
+
+use Contexis\Events\Models\Event;
 //TODO make coupons stackable
 //TODO add logging of coupon useage in seperate log table
 require_once('Coupon.php');
@@ -64,14 +66,14 @@ class EM_Coupons extends EM_Object {
 
 	/**
 	 * @param int $code
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return EM_Coupon|boolean
 	 */
-	public static function event_get_coupon($code, $EM_Event){
+	public static function event_get_coupon($code, $event){
 		//get coupons that are event and sitewide
-		if(!isset($EM_Event->event_id)) return false;
+		if(!isset($event->event_id)) return false;
 		
-		$coupons = EM_Coupons::get(array('code'=>$code,'event'=>$EM_Event->event_id));
+		$coupons = EM_Coupons::get(array('code'=>$code,'event'=>$event->event_id));
 
 		if( count($coupons) == 0) return false;
 		
@@ -86,49 +88,49 @@ class EM_Coupons extends EM_Object {
 	
 	/**
 	 * Gets all coupons available to an event
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return array
 	 */
-	public static function event_get_coupons($EM_Event){
-	    if( empty($EM_Event->coupons) ){
-	    	if( !empty($EM_Event->event_id) ){
-	    		$EM_Event->coupons = EM_Coupons::get(array('event'=>$EM_Event->event_id));
+	public static function event_get_coupons($event){
+	    if( empty($event->coupons) ){
+	    	if( !empty($event->event_id) ){
+	    		$event->coupons = EM_Coupons::get(array('event'=>$event->event_id));
 	    	}else{
-	    		$EM_Event->coupons = array();
+	    		$event->coupons = array();
 	    	}
 	    }
-	    return $EM_Event->coupons; 
+	    return $event->coupons; 
 	}
 	
 	/**
 	 * Gets all coupon ids available to an event
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return array
 	 */
-	public static function event_get_coupon_ids($EM_Event){
-	    if( empty($EM_Event->coupon_ids) ){
-	    	if( !empty($EM_Event->event_id) ){
-	    		$EM_Event->coupon_ids = EM_Coupons::get(array('event'=>$EM_Event->event_id, 'ids'=>true));
+	public static function event_get_coupon_ids($event){
+	    if( empty($event->coupon_ids) ){
+	    	if( !empty($event->event_id) ){
+	    		$event->coupon_ids = EM_Coupons::get(array('event'=>$event->event_id, 'ids'=>true));
 	    	}else{
-	    		$EM_Event->coupon_ids = array();
+	    		$event->coupon_ids = array();
 	    	}
 	    }
-	    return $EM_Event->coupon_ids;
+	    return $event->coupon_ids;
 	}
 	
 	/**
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return boolean
 	 */
-	public static function event_has_coupons($EM_Event){
-	    if( !isset($EM_Event->coupon_count) ){
-	    	if( !empty($EM_Event->event_id) ){
-	    		$EM_Event->coupons_count = EM_Coupons::count(array('event'=>$EM_Event->event_id));
+	public static function event_has_coupons($event){
+	    if( !isset($event->coupon_count) ){
+	    	if( !empty($event->event_id) ){
+	    		$event->coupons_count = EM_Coupons::count(array('event'=>$event->event_id));
 	    	}else{
-	    		$EM_Event->coupons_count = 0;
+	    		$event->coupons_count = 0;
 	    	}
 	    }
-	    return $EM_Event->coupons_count > 0;
+	    return $event->coupons_count > 0;
 	}
 	
 	/* Booking Helpers */
@@ -251,10 +253,10 @@ class EM_Coupons extends EM_Object {
 
 		if(!$event_id) return array_merge($result, ["message" => __('No event given','events')]);
 	
-		$EM_Event = EM_Event::find_by_event_id($event_id);
-		$EM_Coupon = self::event_get_coupon($request->get_param('code'), $EM_Event);
+		$event = Event::find_by_event_id($event_id);
+		$EM_Coupon = self::event_get_coupon($request->get_param('code'), $event);
 
-		if (empty($EM_Event->event_id) || !is_object($EM_Coupon)) return array_merge($result, ["message" => __('Coupon Invalid','events')]);
+		if (empty($event->event_id) || !is_object($EM_Coupon)) return array_merge($result, ["message" => __('Coupon Invalid','events')]);
 
 		if(!$EM_Coupon->is_valid()) return $result;
 	
@@ -412,23 +414,23 @@ class EM_Coupons extends EM_Object {
 		return $replace; //no need for a filter, use the em_booking_email_placeholders filter
 	}
 	
-	public static function em_event_get_post_meta($result, $EM_Event){
-		$EM_Event->coupons = array();
+	public static function em_event_get_post_meta($result, $event){
+		$event->coupons = array();
 		if(!empty($_REQUEST['em_coupons']) && is_array($_REQUEST['em_coupons'])){
-		 	$EM_Event->coupons = EM_Coupons::get($_REQUEST['em_coupons']);
+		 	$event->coupons = EM_Coupons::get($_REQUEST['em_coupons']);
 		}
 		return $result;
 	}
 	
-	public static function em_event_save_meta($result, $EM_Event){
+	public static function em_event_save_meta($result, $event){
 		global $wpdb;
-		if( $result && !empty($EM_Event->event_id) ){
-			$wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='event-coupon' AND object_id=".$EM_Event->event_id);
+		if( $result && !empty($event->event_id) ){
+			$wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='event-coupon' AND object_id=".$event->event_id);
 			$inserts = array();
-			foreach(self::event_get_coupons($EM_Event) as $EM_Coupon){
+			foreach(self::event_get_coupons($event) as $EM_Coupon){
 				//save record of coupons
 				if( !$EM_Coupon->coupon_eventwide ){
-					$inserts[] = $wpdb->prepare("( %d, 'event-coupon', %d )", array($EM_Event->event_id, $EM_Coupon->coupon_id));
+					$inserts[] = $wpdb->prepare("( %d, 'event-coupon', %d )", array($event->event_id, $EM_Coupon->coupon_id));
 				}
 			}
 			if( count($inserts) > 0 ) $wpdb->query('INSERT INTO '.EM_META_TABLE." (object_id, meta_key, meta_value) VALUES ".implode(',', $inserts));
@@ -436,7 +438,7 @@ class EM_Coupons extends EM_Object {
 		return $result;
 	}
 	
-	public static function em_event_save_events($result, $EM_Event, $event_ids){
+	public static function em_event_save_events($result, $event, $event_ids){
 		global $wpdb;
 		if( $result ){
 			//delete all previous records of event coupons
@@ -445,7 +447,7 @@ class EM_Coupons extends EM_Object {
 			}
 			//build template insert
 			$insert_templates = $inserts = array();
-			foreach(self::event_get_coupons($EM_Event) as $EM_Coupon){
+			foreach(self::event_get_coupons($event) as $EM_Coupon){
 				$insert_templates[] = "( %d, 'event-coupon', ". $wpdb->prepare("%d )", array($EM_Coupon->coupon_id));
 			}
 			if( count($insert_templates) > 0 ){
@@ -460,11 +462,11 @@ class EM_Coupons extends EM_Object {
 		return $result;
 	}
 	
-	public static function em_event_delete_meta($result, $EM_Event){
+	public static function em_event_delete_meta($result, $event){
 		//TODO deleted events should delete coupon references
 		global $wpdb;
 		if($result){
-			$result_coupons = $wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='event-coupon' AND object_id=".$EM_Event->event_id);
+			$result_coupons = $wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='event-coupon' AND object_id=".$event->event_id);
 		}
 		return $result && $result_coupons !== false;
 	}
@@ -538,9 +540,9 @@ class EM_Coupons extends EM_Object {
 	public static function coupon_check_ajax(){
 		$result = array('result'=>false, 'message'=> __('Coupon Not Found', 'events'));
 		if(!empty($_REQUEST['event_id'])){
-			$EM_Event = EM_Event::find_by_event_id($_REQUEST['event_id']);
-			$EM_Coupon = self::event_get_coupon($_REQUEST['coupon_code'], $EM_Event);
-			if( !empty($EM_Event->event_id) && is_object($EM_Coupon) ){
+			$event = Event::find_by_event_id($_REQUEST['event_id']);
+			$EM_Coupon = self::event_get_coupon($_REQUEST['coupon_code'], $event);
+			if( !empty($event->event_id) && is_object($EM_Coupon) ){
 				if( $EM_Coupon->is_valid() ){
 					$result['result'] = true;
 					$result['message'] = $EM_Coupon->get_discount_text();
@@ -554,12 +556,12 @@ class EM_Coupons extends EM_Object {
 	}
 	
 	/**
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 */
-	public static function admin_meta_box($EM_Event){
+	public static function admin_meta_box($event){
 		//load this only when needed, so moved into the EM_Coupons_Admin object, 
 		include_once('CouponsAdmin.php');
-		EM_Coupons_Admin::admin_meta_box($EM_Event);
+		EM_Coupons_Admin::admin_meta_box($event);
 	}
 	
 	/**
@@ -581,7 +583,7 @@ class EM_Coupons extends EM_Object {
 			foreach($results as $result){
 				$coupons[$result['coupon_id']] = new EM_Coupon($result);
 			}
-			return apply_filters('em_coupons_get', $coupons, $args); //We return all the events matched as an EM_Event array. 
+			return apply_filters('em_coupons_get', $coupons, $args); //We return all the events matched as an Event array. 
 		}
 		
 		//We assume it's either an empty array or array of search arguments to merge with defaults			
@@ -660,14 +662,14 @@ class EM_Coupons extends EM_Object {
 			$conditions['event'] = "coupon_id IN (SELECT meta_value FROM ".EM_META_TABLE." WHERE object_id='{$args['event']}' AND meta_key='event-coupon')";
 			//search event-wide coupons by default
 			if( !empty($args['eventwide']) ){
-				$EM_Event = EM_Event::find_by_event_id($args['event']);
-				if( !empty($EM_Event->event_id) ){
+				$event = Event::find_by_event_id($args['event']);
+				if( !empty($event->event_id) ){
 					if( $args['eventwide'] === 1 || $args['eventwide'] === true ){
 						//in this case, we explicitly want eventwide coupons
-						$conditions['eventwide'] = "coupon_eventwide=1 AND coupon_owner='{$EM_Event->event_owner}'";
+						$conditions['eventwide'] = "coupon_eventwide=1 AND coupon_owner='{$event->event_owner}'";
 					}else{
 						//if not explicitly requested in args, then we just search for eventwide according to event owner
-						$conditions['event'] .= " OR (coupon_eventwide=1 AND coupon_owner='{$EM_Event->event_owner}')";
+						$conditions['event'] .= " OR (coupon_eventwide=1 AND coupon_owner='{$event->event_owner}')";
 					}
 				}
 			}
@@ -726,7 +728,7 @@ class EM_Coupons extends EM_Object {
 	}
 
 
-	public static function get_options(\EM_Event $event) : array {
+	public static function get_options(Event $event) : array {
 		$coupons = [];
 		foreach(\EM_Coupons::event_get_coupons($event) as $coupon) {
 			$coupons[] = (array) $coupon->get_option_field();

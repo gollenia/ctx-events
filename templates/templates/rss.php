@@ -4,7 +4,10 @@
  * This page handles the even RSS feed.
  * You can override this file by and copying it to yourthemefolder/plugins/events/templates/ and modifying as necessary.
  * 
- */ 
+ */
+
+use Contexis\Events\Collections\EventCollection;
+
 header ( "Content-type: application/rss+xml; charset=UTF-8" );
 echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 ?>
@@ -23,20 +26,20 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 		$args = !empty($args) ? $args:array(); /* @var $args array */
 		$args = array_merge(array('scope'=>get_option('dbem_rss_scope'), 'owner'=>false, 'limit'=>$page_limit, 'page'=>1, 'order'=>get_option('dbem_rss_order'), 'orderby'=>get_option('dbem_rss_orderby')), $args);
 		$args = apply_filters('em_rss_template_args',$args);
-		$EM_Events = EM_Events::find( $args );
+		$events = EventCollection::find( $args );
 		$count = 0;
-		while( count($EM_Events) > 0 ){
-			foreach ( $EM_Events as $EM_Event ) {
-				/* @var $EM_Event EM_Event */
-				$description = EventView::render($EM_Event, get_option ( 'dbem_rss_description_format' ), "rss");
+		while( count($events) > 0 ){
+			foreach ( $events as $event ) {
+				/* @var $event Event */
+				$description = EventView::render($event, get_option ( 'dbem_rss_description_format' ), "rss");
 				$description = ent2ncr(convert_chars($description)); //Some RSS filtering
-				$event_url = $EM_Event->get_permalink;
+				$event_url = $event->get_permalink;
 				?>
 				<item>
-					<title><?php echo $EM_Event->event_name; ?></title>
+					<title><?php echo $event->event_name; ?></title>
 					<link><?php echo $event_url; ?></link>
 					<guid><?php echo $event_url; ?></guid>
-					<pubDate><?php echo $EM_Event->start(true)->format('D, d M Y H:i:s +0000'); ?></pubDate>
+					<pubDate><?php echo $event->start(true)->format('D, d M Y H:i:s +0000'); ?></pubDate>
 					<description><![CDATA[<?php echo $description; ?>]]></description>
 				</item>
 				<?php
@@ -48,7 +51,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
         	}else{
         	    //get next page of results
         	    $args['page']++;
-        		$EM_Events = EM_Events::find( $args );
+        		$events = EventCollection::find( $args );
         	}
 		}
 		?>

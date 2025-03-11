@@ -1,33 +1,37 @@
 <?php
-//TODO EM_Events is currently static, better we make this non-static so we can loop sets of events, and standardize with other objects.
 
-use Contexis\Events\Utilities;
+namespace Contexis\Events\Collections;
+use WP_Query;
+use WP_Post;
+use Countable;
+use IteratorAggregate;
+use Contexis\Events\Models\Event;
 
-/**
- * Use this class to query and manipulate sets of events. If dealing with more than one event, you probably want to use this class in some way.
- *
- */
-class EM_Events extends EM_Object implements Countable, IteratorAggregate {
+
+class EventCollection implements Countable, IteratorAggregate {
 	
+	/** @var Event[] */
 	protected array $events = [];
 
 	public static function find($args = []) {
 		return self::query(null, $args);
 	}
 
-	public static function query(?WP_Query $query = null, array $args = []) : EM_Events {
+	public static function query(?WP_Query $query = null, array $args = []) : EventCollection {
 		$queryArgs = self::get_query_args($args);
     
 		if (!$query) {
+			var_dump("Having a new query");
 			$query = new WP_Query($queryArgs);
 		} else {
 			foreach ($queryArgs as $key => $value) {
 				$query->set($key, $value);
+				var_dump($key, $value);
 			}
 			$query->query($query->query_vars); // Query erneut ausführen
     	}
 		
-		$ret = array_map(fn($post) => EM_Event::find_by_post($post), $query->posts);
+		$ret = array_map(fn($post) => Event::find_by_post($post), $query->posts);
 
 		$instance = new self();
 		$instance->events = $ret;
@@ -46,10 +50,12 @@ class EM_Events extends EM_Object implements Countable, IteratorAggregate {
 	}
 
 	public static function get_query_args($args) { 
-		//var_dump($args);
+		
 		$queryArgs = [
             'meta_query'     => ['relation' => 'AND'],
             'tax_query'      => [],
+			'posts_per_page' => $args['limit'] ?: 100,
+			'paged'		 => $args['paged'] ?: 0,
         ];
 
 		if(empty($args['post_type'])) {
@@ -152,6 +158,8 @@ class EM_Events extends EM_Object implements Countable, IteratorAggregate {
 		if(!empty($args['offset'])) {
 			$queryArgs['offset'] = $args['offset'];
 		}
+
+		
 		
 		return $queryArgs;
 	

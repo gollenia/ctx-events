@@ -1,7 +1,7 @@
 <?php 
 
 $id = get_the_ID();
-$event = EM_Event::find_by_post(get_post());
+$event = \Contexis\Events\Models\Event::find_by_post(get_post());
 if(!$event || !$event->event_rsvp) return;
 $spaces = $event->get_bookings()->get_available_spaces();
 

@@ -1,8 +1,9 @@
 <?php
 
+use \Contexis\Events\Models\Event;
 function em_docs_init($force_init = false){
 	global $pagenow;
-	if( ($pagenow == 'edit.php' && !empty($_GET['page']) && $_GET['page']=='events-help' && class_exists('EM_Event')) || $force_init){
+	if( ($pagenow == 'edit.php' && !empty($_GET['page']) && $_GET['page']=='events-help' && class_exists('Event')) || $force_init){
 		add_action('wp_head', 'emd_head');
 		//Generate the docs
 		global $EM_Documentation;

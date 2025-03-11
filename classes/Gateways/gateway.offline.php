@@ -1,6 +1,6 @@
 <?php
 use Contexis\Events\Options;
-
+use Contexis\Events\Models\Event;
 
 /**
  * This Gateway is slightly special, because as well as providing functions that need to be activated, there are offline payment functions that are always there e.g. adding manual payments.
@@ -59,7 +59,7 @@ class EM_Gateway_Offline extends EM_Gateway {
 			'error' => "No IBAN available. Please add an IBAN in the offline payment gateway"
 		];
 		
-		$event = EM_Event::find_by_event_id($booking->event_id);
+		$event = Event::find_by_event_id($booking->event_id);
 
 		$result['gateway'] = [
 			"purpose" => $booking->booking_id . "-" . $event->post_name . "-" . $booking->booking_meta['registration']['last_name'],
@@ -99,7 +99,7 @@ class EM_Gateway_Offline extends EM_Gateway {
 	/**
 	 * Modifies the booking status if the event isn't free and also adds a filter to modify user feedback returned.
 	 * Triggered by the em_booking_add_yourgateway action.
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @param EM_Booking $EM_Booking
 	 * @param boolean $post_validation
 	 */
@@ -154,14 +154,14 @@ class EM_Gateway_Offline extends EM_Gateway {
 
 	/**
 	 * Called instead of the filter in EM_Gateways if a manual booking is being made
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 */
-	function em_booking_form_footer($EM_Event){
-		if( $EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
+	function em_booking_form_footer($event){
+		if( $event->can_manage('manage_bookings','manage_others_bookings') ){
 			//Admin is adding a booking here, so let's show a different form here.
 			?>
 			<input type="hidden" name="gateway" value="<?php echo $this->gateway; ?>" />
-			<input type="hidden" name="manual_booking" value="<?php echo wp_create_nonce('em_manual_booking_'.$EM_Event->event_id); ?>" />
+			<input type="hidden" name="manual_booking" value="<?php echo wp_create_nonce('em_manual_booking_'.$event->event_id); ?>" />
 			<p class="em-booking-gateway" id="em-booking-gateway">
 				<label><?php _e('Amount Paid','events'); ?></label>
 				<input type="text" name="payment_amount" id="em-payment-amount" value="<?php if(!empty($_REQUEST['payment_amount'])) echo esc_attr($_REQUEST['payment_amount']); ?>">

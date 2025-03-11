@@ -1,6 +1,6 @@
 <?php 
 
-$event = EM_Event::find_by_post(get_post());
+$event = \Contexis\Events\Models\Event::find_by_post(get_post());
 if(!$event) return;
 $time = \Contexis\Events\Intl\Date::get_time($event->start()->getTimestamp(), $event->end()->getTimestamp());
 

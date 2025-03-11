@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Collections\EventCollection;
+
 /**
  * Object that holds location info and related functions
  *
@@ -214,7 +216,7 @@ class EM_Location extends EM_Object {
 	}
 	
 	function has_events( $status = 1 ){	
-		$events_count = EM_Events::find(array('location_id' => $this->location_id, 'status' => $status))->count();
+		$events_count = EventCollection::find(array('location_id' => $this->location_id, 'status' => $status))->count();
 		return apply_filters('em_location_has_events', $events_count > 0, $this);
 	}
 	

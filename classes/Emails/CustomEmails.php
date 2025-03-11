@@ -1,4 +1,6 @@
 <?php
+
+use \Contexis\Events\Models\Event;
 class EM_Custom_Emails{
 	
 	/**
@@ -64,13 +66,13 @@ class EM_Custom_Emails{
 	
 	/**
 	 * Returns an array of email templates specific to the supplied event
-	 * @param EM_Event $EM_Event the event object which may contain custom emails
+	 * @param Event $event the event object which may contain custom emails
 	 * @return array
 	 */
-	public static function get_event_emails( $EM_Event ){
+	public static function get_event_emails( $event ){
 		global $wpdb;
-		if(empty($EM_Event->event_id)) return [];
-		$sql = $wpdb->prepare('SELECT meta_value FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-emails');
+		if(empty($event->event_id)) return [];
+		$sql = $wpdb->prepare('SELECT meta_value FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-emails');
 		$emails = maybe_unserialize($wpdb->get_var($sql));
 		
 		if( !is_array($emails) ) return [];
@@ -79,15 +81,15 @@ class EM_Custom_Emails{
 	
 	/**
 	 * Returns an array of additional admin emails specific to the supplied event
-	 * @param EM_Event $EM_Event the event object which may contain custom emails
+	 * @param Event $event the event object which may contain custom emails
 	 * @return array
 	 */
-	public static function get_event_admin_emails( $EM_Event ){
+	public static function get_event_admin_emails( $event ){
 		global $wpdb;
 		$custom_admin_emails = array();
-		if( !empty($EM_Event->event_id) ){
+		if( !empty($event->event_id) ){
 		    //get stored event emails from em_meta table
-			$sql = $wpdb->prepare('SELECT meta_value FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $EM_Event->event_id, 'event-admin-emails');
+			$sql = $wpdb->prepare('SELECT meta_value FROM '.EM_META_TABLE." WHERE object_id = %d AND meta_key = %s LIMIT 1", $event->event_id, 'event-admin-emails');
 			$possible_email_values = maybe_unserialize($wpdb->get_var($sql));
 			
 			if( is_array($possible_email_values) ){
@@ -259,13 +261,13 @@ class EM_Custom_Emails{
 
 	/**
 	 * @param array $export_item
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 * @return array
 	 */
-	public static function em_data_privacy_export_events_item($export_item, $EM_Event ){
+	public static function em_data_privacy_export_events_item($export_item, $event ){
 		
-		$admin_emails = self::get_event_admin_emails($EM_Event);
-		$event_emails = self::get_event_emails($EM_Event);
+		$admin_emails = self::get_event_admin_emails($event);
+		$event_emails = self::get_event_emails($event);
 		if( !empty($admin_emails) ){
 			$admin_emails_export = array();
 			foreach( $admin_emails as $admin_email_type => $admin_email_type_emails ){

@@ -5,7 +5,7 @@
  * @param int $event_id
  */
 function em_bookings_rejected_table(){
-	global $EM_Event;
+	
 	$ticket = new \Contexis\Events\Tickets\Ticket();
 	$action_scope = ( !empty($_REQUEST['em_obj']) && $_REQUEST['em_obj'] == 'em_bookings_confirmed_table' );
 	$limit = ( $action_scope && !empty($_GET['limit']) ) ? $_GET['limit'] : 20;//Default limit
@@ -15,8 +15,8 @@ function em_bookings_rejected_table(){
 	if( is_object($ticket) ){
 		$EM_Bookings = $ticket->get_bookings()->get_rejected_bookings();
 	}else{
-		if( is_object($EM_Event) ){
-			$EM_Bookings = $EM_Event->get_bookings()->get_rejected_bookings();
+		if( is_object($event) ){
+			$EM_Bookings = $event->get_bookings()->get_rejected_bookings();
 		}else{
 			return false;
 		}

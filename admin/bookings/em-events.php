@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Collections\EventCollection;
+
 /**
  * Determines whether to show event page or events page, and saves any updates to the event or events
  * @return null
@@ -35,7 +37,7 @@ function em_bookings_events_table() {
 			$scope = "future";
 	}
 	$owner = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
-	$events = EM_Events::find( [
+	$events = EventCollection::find( [
 		'scope'=>$scope, 
 		'limit'=>$limit, 
 		'offset' => $offset, 
@@ -104,40 +106,40 @@ function em_bookings_events_table() {
 				<tbody>
 					<?php 
 					$rowno = 0;
-					foreach ( $events as $EM_Event ) {
-						/* @var $event EM_Event */
-						//var_dump( get_post_meta( $EM_Event->post_id, '_event_rsvp', true ) );
+					foreach ( $events as $event ) {
+						/* @var $event Event */
+						//var_dump( get_post_meta( $event->post_id, '_event_rsvp', true ) );
 						$rowno++;
 						$class = ($rowno % 2) ? ' class="alternate"' : '';
 						$style = "";
 						$booked_percent = 0;
 						$pending_percent = 0;
-						if($EM_Event->get_bookings()->get_spaces()  > 0) {
-							$booked_percent = $EM_Event->get_bookings()->get_booked_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
-							$pending_percent = $EM_Event->get_bookings()->get_pending_spaces() / ($EM_Event->get_bookings()->get_spaces() / 100);
+						if($event->get_bookings()->get_spaces()  > 0) {
+							$booked_percent = $event->get_bookings()->get_booked_spaces() / ($event->get_bookings()->get_spaces() / 100);
+							$pending_percent = $event->get_bookings()->get_pending_spaces() / ($event->get_bookings()->get_spaces() / 100);
 						}
 						
 						
-						if ($EM_Event->start()->getTimestamp() < time() && $EM_Event->end()->getTimestamp() < time()){
+						if ($event->start()->getTimestamp() < time() && $event->end()->getTimestamp() < time()){
 							$style = "style ='background-color: #FADDB7;'";
 						}							
 						?>
 						<tr <?php echo "$class $style"; ?>>
 							<td>
 								<strong>
-									<?php echo EventView::render($EM_Event, '#_BOOKINGSLINK'); ?>
+									<?php echo EventView::render($event, '#_BOOKINGSLINK'); ?>
 									</strong>
 									<div class="row-actions "><span class="trash"><a href="https://kids-team.internal/wp-admin/post.php?post=27&amp;action=trash&amp;_wpnonce=8ebb708296" class="submitdelete" aria-label="„Teenagerfreizeit“ in den Papierkorb verschieben">Buchungen löschen</a> | </span><span class="trash"><a href="https://kids-team.internal/events/teenagerfreizeit/" rel="bookmark" aria-label="„Teenagerfreizeit“ ansehen">Absagen</a></span></div>
 								
 							</td>
 							<td>
 								
-							<b><?php echo $EM_Event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $EM_Event->get_bookings()->get_spaces(); ?>
+							<b><?php echo $event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_bookings()->get_spaces(); ?>
 					
 							</td>
 							<td >
-								<b><?php echo $EM_Event->get_bookings()->get_booked_spaces(); echo " ";  ?> /
-								<?php echo $EM_Event->get_bookings()->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
+								<b><?php echo $event->get_bookings()->get_booked_spaces(); echo " ";  ?> /
+								<?php echo $event->get_bookings()->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
 								<div class="em-booking-graph">
 									<?php if($booked_percent < 100) { ?>
 										<div class="em-booking-graph-booked <?php if($pending_percent) echo "cut" ?>" style="width:<?php echo $booked_percent ?>%;"></div>
@@ -149,7 +151,7 @@ function em_bookings_events_table() {
 								</div>
 							</td>
 							<td>
-								<?php echo $EM_Event->output_dates() ?>
+								<?php echo $event->output_dates() ?>
 							</td>
 						</tr>
 						<?php

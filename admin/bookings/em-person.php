@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Collections\EventCollection;
+
 /**
  * Generates a "widget" table of confirmed bookings for a specific event.
  * 
@@ -24,7 +26,7 @@ function em_bookings_person_table(){
 		foreach($bookings as $EM_Booking){
 			$event_ids[] = $EM_Booking->event_id;
 		}
-		$events = EM_Events::find($event_ids);
+		$events = EventCollection::find($event_ids);
 	}
 	?>
 		<div class='wrap em_bookings_pending_table em_obj'>
@@ -74,13 +76,13 @@ function em_bookings_person_table(){
 						$rowno = 0;
 						$event_count = 0;
 						foreach ($bookings as $EM_Booking) {
-							$EM_Event = $events[$EM_Booking->event_id];							
-							if( $EM_Event->can_manage('edit_events','edit_others_events') && ($rowno < $limit || empty($limit)) && ($event_count >= $offset || $offset === 0) ) {
+							$event = $events[$EM_Booking->event_id];							
+							if( $event->can_manage('edit_events','edit_others_events') && ($rowno < $limit || empty($limit)) && ($event_count >= $offset || $offset === 0) ) {
 								$rowno++;
 								?>
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $EM_Booking->booking_id ?>' name='bookings[]'/></th>
-									<td><a class="row-title" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $EM_Event->event_id ?>"><?php echo ($EM_Event->event_name); ?></a></td>
+									<td><a class="row-title" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $event->event_id ?>"><?php echo ($event->event_name); ?></a></td>
 									<td><?php echo $EM_Booking->get_spaces() ?></td>
 									<td><?php echo $EM_Booking->status_array[$EM_Booking->booking_status]; ?>
 									</td>

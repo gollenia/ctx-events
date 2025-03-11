@@ -1,7 +1,7 @@
 <?php 
 
 $id = get_the_ID();
-$event = EM_Event::find_by_post_id($id);
+$event = \Contexis\Events\Models\Event::find_by_post_id($id);
 if(!$event) return;
 $date = \Contexis\Events\Intl\Date::get_date($event->start()->getTimestamp(), $event->end()->getTimestamp());
 $ical = $attributes['iCalLink'] ?: false;

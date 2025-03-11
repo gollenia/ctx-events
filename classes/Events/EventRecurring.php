@@ -1,6 +1,9 @@
 <?php
 
-Class EventRecurring extends EM_Event {
+use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Models\Event;
+
+class EventRecurring extends Event {
 
 	var $recurrence_id;
 	var $recurrence = 0;
@@ -48,12 +51,12 @@ Class EventRecurring extends EM_Event {
 	}
 	
 	/**
-	 * Gets the event recurrence template, which is an EM_Event object (based off an event-recurring post)
-	 * @return EM_Event
+	 * Gets the event recurrence template, which is an Event object (based off an event-recurring post)
+	 * @return Event
 	 */
 	function get_event_recurrence(){
 		if(!$this->is_recurring()){
-			return EM_Event::find_by_event_id($this->recurrence_id);
+			return Event::find_by_event_id($this->recurrence_id);
 		}else{
 			return $this;
 		}
@@ -259,8 +262,8 @@ Class EventRecurring extends EM_Event {
 				// clean the meta fields array to contain only the fields we actually need to overwrite i.e. delete and recreate, to avoid deleting unecessary individula recurrence data
 				$exclude_meta_update_keys = apply_filters('em_event_save_events_exclude_update_meta_keys', array('_parent_id'), $this);
 				//now we go through the recurrences and check whether things relative to dates need to be changed
-				$events = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
-			 	foreach($events as $event_array){ /* @var $EM_Event EM_Event */
+				$events = EventCollection::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
+			 	foreach($events as $event_array){ /* @var $event Event */
 			 		//set new start/end times to obtain accurate timestamp according to timezone and DST
 			 		$EM_DateTime = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);
 			 		$start_timestamp = $EM_DateTime->getTimestamp();
@@ -492,10 +495,10 @@ Class EventRecurring extends EM_Event {
 			$event_ids = $wpdb->get_col( $sql );
 			// go through each event and delete individually so individual hooks are fired appropriately
 			foreach($event_ids as $event_id){
-				$EM_Event = EM_Event::find_by_event_id( $event_id );
-				if($EM_Event->recurrence_id == $this->event_id){
-					$EM_Event->delete(true);
-					$events_array[] = $EM_Event;
+				$event = Event::find_by_event_id( $event_id );
+				if($event->recurrence_id == $this->event_id){
+					$event->delete(true);
+					$events_array[] = $event;
 				}
 			}
 			$result = !empty($events_array) || (is_array($event_ids) && empty($event_ids)); // success if we deleted something, or if there was nothing to delete in the first place
@@ -619,7 +622,7 @@ Class EventRecurring extends EM_Event {
 		global $wpdb;
 		//get post and event ids of recurrences
 		$post_ids = $event_ids = array();
-		$events_array = EM_Events::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>false, 'array'=>true) ); //only get recurrences that aren't trashed or drafted
+		$events_array = EventCollection::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>false, 'array'=>true) ); //only get recurrences that aren't trashed or drafted
 		foreach( $events_array as $event_array ){
 			$post_ids[] = absint($event_array['post_id']);
 			$event_ids[] = absint($event_array['event_id']);
@@ -649,44 +652,44 @@ Class EventRecurring extends EM_Event {
 	 * @return string
 	 */
 	function get_recurrence_description() {
-		$EM_Event_Recurring = $this->get_event_recurrence(); 
+		$event_recurring = $this->get_event_recurrence(); 
 		$recurrence = $this->to_array();
 		$weekdays_name = array( translate('Sunday'),translate('Monday'),translate('Tuesday'),translate('Wednesday'),translate('Thursday'),translate('Friday'),translate('Saturday'));
 		$monthweek_name = array('1' => __('the first %s of the month', 'events'),'2' => __('the second %s of the month', 'events'), '3' => __('the third %s of the month', 'events'), '4' => __('the fourth %s of the month', 'events'), '5' => __('the fifth %s of the month', 'events'), '-1' => __('the last %s of the month', 'events'));
-		$output = sprintf (__('From %1$s to %2$s', 'events'),  $EM_Event_Recurring->event_start_date, $EM_Event_Recurring->event_end_date).", ";
-		if ($EM_Event_Recurring->recurrence_freq == 'daily')  {
+		$output = sprintf (__('From %1$s to %2$s', 'events'),  $event_recurring->event_start_date, $event_recurring->event_end_date).", ";
+		if ($event_recurring->recurrence_freq == 'daily')  {
 			$freq_desc =__('everyday', 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc = sprintf (__("every %s days", 'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc = sprintf (__("every %s days", 'events'), $event_recurring->recurrence_interval);
 			}
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'weekly')  {
-			$weekday_array = explode(",", $EM_Event_Recurring->recurrence_byday);
+		}elseif ($event_recurring->recurrence_freq == 'weekly')  {
+			$weekday_array = explode(",", $event_recurring->recurrence_byday);
 			$natural_days = array();
 			foreach($weekday_array as $day){
 				array_push($natural_days, $weekdays_name[$day]);
 			}
 			$output .= implode(", ", $natural_days);
 			$freq_desc = " " . __("every week", 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc = " ".sprintf (__("every %s weeks", 'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc = " ".sprintf (__("every %s weeks", 'events'), $event_recurring->recurrence_interval);
 			}
 			
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'monthly')  {
-			$weekday_array = explode(",", $EM_Event_Recurring->recurrence_byday);
+		}elseif ($event_recurring->recurrence_freq == 'monthly')  {
+			$weekday_array = explode(",", $event_recurring->recurrence_byday);
 			$natural_days = array();
 			foreach($weekday_array as $day){
 				if( is_numeric($day) ){
 					array_push($natural_days, $weekdays_name[$day]);
 				}
 			}
-			$freq_desc = sprintf (($monthweek_name[$EM_Event_Recurring->recurrence_byweekno]), implode(" and ", $natural_days));
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc .= ", ".sprintf (__("every %s months",'events'), $EM_Event_Recurring->recurrence_interval);
+			$freq_desc = sprintf (($monthweek_name[$event_recurring->recurrence_byweekno]), implode(" and ", $natural_days));
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc .= ", ".sprintf (__("every %s months",'events'), $event_recurring->recurrence_interval);
 			}
-		}elseif ($EM_Event_Recurring->recurrence_freq == 'yearly')  {
+		}elseif ($event_recurring->recurrence_freq == 'yearly')  {
 			$freq_desc = __("every year", 'events');
-			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc .= sprintf (__("every %s years",'events'), $EM_Event_Recurring->recurrence_interval);
+			if ($event_recurring->recurrence_interval > 1 ) {
+				$freq_desc .= sprintf (__("every %s years",'events'), $event_recurring->recurrence_interval);
 			}
 		}else{
 			$freq_desc = "[ERROR: corrupted database record]";

@@ -1,4 +1,6 @@
 <?php
+
+use \Contexis\Events\Models\Event;
 class EM_Taxonomy_Terms extends EM_Object implements Iterator, Countable{
 	protected $meta_key = 'event-taxonomy';
 	protected $taxonomy = 'event-taxonomy';
@@ -33,13 +35,13 @@ class EM_Taxonomy_Terms extends EM_Object implements Iterator, Countable{
 	public $post_id;
 	
 	/**
-	 * Creates an EM_Taxonomy_Terms instance, currently accepts an EM_Event object (gets all Taxonomy Terms for that event) or array of any EM_Taxonomy_Term objects, which can be manipulated in bulk with helper functions.
+	 * Creates an EM_Taxonomy_Terms instance, currently accepts an Event object (gets all Taxonomy Terms for that event) or array of any EM_Taxonomy_Term objects, which can be manipulated in bulk with helper functions.
 	 * @param mixed $data
 	 * @return null
 	 */
 	public function __construct( $data = false ){
 		global $wpdb;
-		if( is_object($data) && get_class($data) == "EM_Event" && !empty($data->post_id) ){ //Creates a blank taxonomies object if needed
+		if( is_object($data) && get_class($data) == "Event" && !empty($data->post_id) ){ //Creates a blank taxonomies object if needed
 			$this->event_id = $data->event_id;
 			$this->post_id = $data->post_id;
 			
@@ -141,13 +143,13 @@ class EM_Taxonomy_Terms extends EM_Object implements Iterator, Countable{
 	
 	/**
 	 * Gets the event for this object, or a blank event if none exists
-	 * @return EM_Event
+	 * @return Event
 	 */
 	public function get_event(){
 		if( is_numeric($this->event_id) ){
-			return EM_Event::find_by_event_id($this->event_id);
+			return Event::find_by_event_id($this->event_id);
 		}else{
-			return new EM_Event;
+			return new Event;
 		}
 	}
 		

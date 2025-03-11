@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Collections\EventCollection;
+
 class EM_Emails {
 	/**
 	 * Sets up email cron and filters/actions
@@ -92,11 +95,11 @@ class EM_Emails {
 	    //make sure we don't get past events, only events starting that specific date
 	    add_filter('pre_option_dbem_events_current_are_past', '__return_true');
 		$output_type = get_option('dbem_smtp_html') ? 'html':'email';
-	    foreach( EM_Events::find(array('scope'=>$scope,'private'=>1)) as $EM_Event ){
-	        /* @var $EM_Event EM_Event */
+	    foreach( EventCollection::find(array('scope'=>$scope,'private'=>1)) as $event ){
+	        /* @var $event Event */
 	        $emails = array();
 	    	//get ppl attending
-	    	foreach( $EM_Event->get_bookings()->get_bookings()->bookings as $EM_Booking ){ //get confirmed bookings
+	    	foreach( $event->get_bookings()->get_bookings()->bookings as $EM_Booking ){ //get confirmed bookings
 	    	    /* @var $EM_Booking EM_Booking */
 	    	    if( is_email($EM_Booking->booking_mail) ){
 	    	    	do_action('em_booking_email_before_send', $EM_Booking);
@@ -117,11 +120,11 @@ class EM_Emails {
 		    	    //create invite ical
 		    	    $upload_dir = wp_upload_dir();
 		    	    if( file_exists(trailingslashit($upload_dir['basedir'])."em-cache") || mkdir(trailingslashit($upload_dir['basedir'])."em-cache") ){
-		    	    $icalfilename = trailingslashit($upload_dir['basedir'])."em-cache/invite_".$EM_Event->event_id.".ics";
+		    	    $icalfilename = trailingslashit($upload_dir['basedir'])."em-cache/invite_".$event->event_id.".ics";
 		    	    $icalfile = fopen($icalfilename,'w+');
 		    	    if( $icalfile ){
 						ob_start();
-						em_locate_template('templates/ical.php', true, array('args'=>array('event'=>$EM_Event->event_id)));
+						em_locate_template('templates/ical.php', true, array('args'=>array('event'=>$event->event_id)));
 						$icalcontent = preg_replace("/([^\r])\n/", "$1\r\n", ob_get_clean());
 						fwrite($icalfile, $icalcontent);
 						fclose($icalfile);
@@ -131,7 +134,7 @@ class EM_Emails {
 		    	    }
 	    	    }
 	    	    foreach($emails as $email){
-			    	$wpdb->insert(EM_EMAIL_QUEUE_TABLE, array('email'=>$email[0],'subject'=>$email[1],'body'=>$email[2],'attachment'=>$attachments,'event_id'=>$EM_Event->event_id,'booking_id'=>$email[3]));
+			    	$wpdb->insert(EM_EMAIL_QUEUE_TABLE, array('email'=>$email[0],'subject'=>$email[1],'body'=>$email[2],'attachment'=>$attachments,'event_id'=>$event->event_id,'booking_id'=>$email[3]));
 	    	    }
 	    	}
 	    }

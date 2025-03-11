@@ -1,6 +1,8 @@
 <?php
 
 namespace Contexis\Events\Tickets;
+
+use \Contexis\Events\Models\Event;
 /**
  * Deals with the ticket info for an event
  * @author marcus
@@ -96,10 +98,10 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 	}
 	
 	/**
-	 * @return EM_Event
+	 * @return Event
 	 */
-	function get_event() : \EM_Event {
-		return \EM_Event::find_by_event_id($this->event_id);
+	function get_event() : Event {
+		return Event::find_by_event_id($this->event_id);
 	}
 
 	/**
@@ -281,13 +283,13 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 	
 	/**
 	 * Returns the columns used in ticket public pricing tables/forms
-	 * @param unknown_type $EM_Event
+	 * @param unknown_type $event
 	 */
-	function get_ticket_columns($EM_Event = false){
-		if( !$EM_Event ) $EM_Event = $this->get_event();
+	function get_ticket_columns($event = false){
+		if( !$event ) $event = $this->get_event();
 		$columns = array( 'type' => __('Ticket Type','events'), 'price' => __('Price','events'), 'spaces' => __('Spaces','events'));
-		if( $EM_Event->is_free() ) unset($columns['price']); //add event price
-		return apply_filters('em_booking_form_tickets_cols', $columns, $EM_Event );
+		if( $event->is_free() ) unset($columns['price']); //add event price
+		return apply_filters('em_booking_form_tickets_cols', $columns, $event );
 	}
 	
 	//Iterator Implementation

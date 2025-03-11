@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Models\Event;
+
 /**
  * Generates a "widget" table of pending bookings with some quick admin operation options. 
  * If event id supplied then only pending bookings for that event will show.
@@ -7,7 +9,6 @@
  * @param int $event_id
  */
 function em_bookings_pending_table($event_id = false){
-	global $EM_Event;
 	
 	$ticket = new \Contexis\Events\Tickets\Ticket();
 	if( get_option('dbem_bookings_approval') == 0 ){
@@ -24,8 +25,8 @@ function em_bookings_pending_table($event_id = false){
 	if( is_object($ticket) ){
 		$EM_Bookings = $ticket->get_bookings()->get_pending_bookings();
 	}else{
-		if( is_object($EM_Event) ){
-			$EM_Bookings = $EM_Event->get_bookings()->get_pending_bookings();
+		if( is_object($event) ){
+			$EM_Bookings = $event->get_bookings()->get_pending_bookings();
 		}else{
 			//To optimize performance, we can do one query here for all pending bookings to show.
 			$EM_Bookings = EM_Bookings::get(array('status'=>0));
@@ -34,7 +35,7 @@ function em_bookings_pending_table($event_id = false){
 			foreach($EM_Bookings->bookings as $EM_Booking){
 				//create event
 				if( !array_key_exists($EM_Booking->event_id,$events) ){
-					$events[$EM_Booking->event_id] = EM_Event::find_by_event_id($EM_Booking->event_id);
+					$events[$EM_Booking->event_id] = Event::find_by_event_id($EM_Booking->event_id);
 				}
 			}
 		}
@@ -78,7 +79,7 @@ function em_bookings_pending_table($event_id = false){
 								<input class='select-all' type="checkbox" value='1' />
 							</th>
 							<th class='manage-column' scope='col'><?php _e('Booker', 'events'); ?></th>
-							<?php if( !is_object($EM_Event) && !is_object($ticket) ): ?>
+							<?php if( !is_object($event) && !is_object($ticket) ): ?>
 							<th class='manage-column' scope="col"><?php _e('Event', 'events'); ?></th>
 							<?php endif; ?>
 							<th class='manage-column' scope='col'><?php _e('E-mail', 'events'); ?></th>
@@ -98,7 +99,7 @@ function em_bookings_pending_table($event_id = false){
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $EM_Booking->booking_id ?>' name='bookings[]'/></th>
 									<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;person_id=<?php echo $EM_Booking->person->ID; ?>"><?php echo $EM_Booking->person->get_name() ?></a></td>
-									<?php if( !is_object($EM_Event) && !is_object($ticket) ): ?>
+									<?php if( !is_object($event) && !is_object($ticket) ): ?>
 									<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $EM_Booking->event_id; ?>"><?php echo $events[$EM_Booking->event_id]->name ?></a></td>
 									<?php endif; ?>
 									<td><?php echo $EM_Booking->person->user_email ?></td>

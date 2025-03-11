@@ -1,4 +1,6 @@
 <?php
+
+use Contexis\Events\Models\Event;
 //Builds a table of bookings, still work in progress...
 // May be replaced by JS App in future
 class EM_Bookings_Table {
@@ -24,7 +26,7 @@ class EM_Bookings_Table {
 	public string $status = '';
 	public array $cols_tickets_template = [];
 	public ?\Contexis\Events\Tickets\Ticket $ticket;
-	public ?EM_Event $event = null;
+	public ?Event $event = null;
 	
 	
 	function __construct(){
@@ -94,7 +96,7 @@ class EM_Bookings_Table {
 		}
 
 		if( !empty($_REQUEST['event_id']) && $_REQUEST['event_id'] != 0 ){
-			$this->event = EM_Event::find_by_event_id($_REQUEST['event_id']);
+			$this->event = Event::find_by_event_id($_REQUEST['event_id']);
 		}
 
 		if(empty($_REQUEST['cols'])) {

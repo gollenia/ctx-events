@@ -2,7 +2,8 @@
 
 namespace Contexis\Events\Events;
 
-use EM_Event;
+use Contexis\Events\Collections\EventCollection;
+use \Contexis\Events\Models\Event;
 use Events;
 use WP_Query;
 
@@ -39,7 +40,7 @@ class EventPost {
 		$id = $request->get_param('id');
 		if(!$id) return $result;
 		
-		$event = EM_Event::find_by_post_id($id);
+		$event = Event::find_by_post_id($id);
 		
 		$result['success'] = true;
 
@@ -56,7 +57,7 @@ class EventPost {
 	}
 
 	function prepare_event($response, $post, $request) {
-		$event = \EM_Event::find_by_post($post);
+		$event = Event::find_by_post($post);
 		
 		if (!$event->event_exists()) {
 			return new \WP_REST_Response([
@@ -229,9 +230,9 @@ class EventPost {
 		if(!empty($_REQUEST['event-categories'])) $args['event-categories'] = $_REQUEST['event-categories'];
 		
 
-		$args = \Em_Events::get_query_args($args);
+		$args = EventCollection::get_query_args($args);
 		$query->query_vars = array_merge($query->query_vars, $args);
-
+		\Contexis\Events\Utilities::object_to_js_console($query->query_vars);
 		return $query;
 		
 	}

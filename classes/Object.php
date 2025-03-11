@@ -18,7 +18,7 @@ class EM_Object {
 	/**
 	 * Provides context in searches where ambiguous field names may coincide between event and location database searches requiring a specific field name for each type.
 	 * For example, status, location, taxonomy and language arguments are used interchangeably in event and location searches but both have different field names.
-	 * Child classes such as EM_Events and EM_Locations will override this field with 'event' or 'location' respectively to determine context.
+	 * Child classes such as EventCollection and EM_Locations will override this field with 'event' or 'location' respectively to determine context.
 	 * @var string
 	 */
 	protected static $context = 'object_type';
@@ -50,8 +50,8 @@ class EM_Object {
 			'tag' => 0,
 			'location' => false,
 			'event' => false,
-			'event_status' => false, //automatically set to 'status' value if in EM_Events, useful only for EM_Locations
-			'location_status' => false,  //automatically set to 'status' value if in EM_Locations, useful only for EM_Events
+			'event_status' => false, //automatically set to 'status' value if in EventCollection, useful only for EM_Locations
+			'location_status' => false,  //automatically set to 'status' value if in EM_Locations, useful only for EventCollection
 			'offset'=>0,
 			'page'=>1,//basically, if greater than 0, calculates offset at end
 			'page_queryvar'=>null,
@@ -428,11 +428,11 @@ class EM_Object {
 			$conditions['event'] = " {$events_table}.event_id = $event";
 		}elseif ( is_array($event) && !empty($event) && array_is_list($event) ){ //array of ids
 			$conditions['event'] = "{$events_table}.event_id IN (" . implode(',', $event) .')';
-		}elseif ( is_object($event) && get_class($event)=='EM_Event' ){ //Now we deal with objects
+		}elseif ( is_object($event) && get_class($event)=='Event' ){ //Now we deal with objects
 			$conditions['event'] = " {$events_table}.event_id = $event->event_id";
-		}elseif ( is_array($event) && @get_class(current($event))=='EM_Event') { //we can accept array of ids or EM_event objects
-			foreach($event as $EM_Event){
-				$event_ids[] = $EM_Event->event_id;
+		}elseif ( is_array($event) && @get_class(current($event))=='Event') { //we can accept array of ids or EM_event objects
+			foreach($event as $event){
+				$event_ids[] = $event->event_id;
 			}
 			$conditions['event'] = "{$events_table}.event_id IN (" . implode(',', $event_ids) .')';
 		}
@@ -817,11 +817,7 @@ class EM_Object {
 	 */
 	/*
 	function get_id(){
-	    switch( get_class($this) ){
-	        case 'EM_Event':
-	            return $this->event_id;
-	        case 'EM_Location':
-	            return $this->location_id;
+	    switch( get_class($this) ) 		{
 	        case 'EM_Category':
 	            return $this->term_id;
 	        case 'EM_Tag':
@@ -843,7 +839,7 @@ class EM_Object {
 	function get_owner(){
 		if( !empty($this->owner) ) return $this->owner;
 	    switch( get_class($this) ){
-	        case 'EM_Event':
+	        case 'Event':
 	            return $this->event_owner;
 	        case 'EM_Location':
 	            return $this->location_owner;
@@ -853,7 +849,7 @@ class EM_Object {
 
 	function get_id(){
 		switch( get_class($this) ){
-	        case 'EM_Event':
+	        case 'Event':
 	            return $this->event_id;
 	        case 'EM_Location':
 	            return $this->location_id;

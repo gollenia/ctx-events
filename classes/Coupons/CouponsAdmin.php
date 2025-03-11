@@ -27,13 +27,13 @@ class EM_Coupons_Admin {
     }
 	
 	/**
-	 * @param EM_Event $EM_Event
+	 * @param Event $event
 	 */
-	static function admin_meta_box($EM_Event){
+	static function admin_meta_box($event){
 		//Get available coupons for user
 		if( !is_user_logged_in() ) return null;
 		//get event owner to search for
-		$owner = empty($EM_Event->event_owner) ? get_current_user_id() : $EM_Event->event_owner;
+		$owner = empty($event->event_owner) ? get_current_user_id() : $event->event_owner;
 		?>
 		
 		<h3><?php _e('Coupons','events'); ?></h3>
@@ -64,16 +64,16 @@ class EM_Coupons_Admin {
     		<?php
     		//get event owner's coupons
 			$coupon_args = array( 'sitewide'=>0, 'eventwide'=>0 );
-    		$coupons = apply_filters('em_coupons_admin_meta_box_coupons', EM_Coupons::get($coupon_args), $coupon_args, $EM_Event );
+    		$coupons = apply_filters('em_coupons_admin_meta_box_coupons', EM_Coupons::get($coupon_args), $coupon_args, $event );
     		//loop through coupons and output checkboxes, or let user know no coupons were created.
 			if( count($coupons) > 0 ): foreach($coupons as $EM_Coupon): /* @var $EM_Coupon EM_Coupon */  ?>
 			
 			<tr>
 				<th>
-    				<input type="checkbox" name="em_coupons[]" value="<?php  echo esc_attr($EM_Coupon->coupon_id); ?>" <?php if(in_array($EM_Coupon->coupon_id, EM_Coupons::event_get_coupon_ids($EM_Event))) echo 'checked="checked"'; ?>/>
+    				<input type="checkbox" name="em_coupons[]" value="<?php  echo esc_attr($EM_Coupon->coupon_id); ?>" <?php if(in_array($EM_Coupon->coupon_id, EM_Coupons::event_get_coupon_ids($event))) echo 'checked="checked"'; ?>/>
 				</th>
 				<td class="code">
-    				<?php if( apply_filters('em_coupons_admin_meta_box_show_code', true, $EM_Coupon, $EM_Event) ): ?>
+    				<?php if( apply_filters('em_coupons_admin_meta_box_show_code', true, $EM_Coupon, $event) ): ?>
 				    	<?php echo esc_html($EM_Coupon->coupon_code); ?>
 					<?php endif; ?>
 				</td>
@@ -86,7 +86,7 @@ class EM_Coupons_Admin {
 			</tr>
     		<?php endforeach; ?><?php endif; ?>
 			<?php $coupon_args = array('owner'=>$owner, 'sitewide'=>1, 'eventwide'=>1 );
-			$coupons = apply_filters('em_coupons_admin_meta_box_coupons', EM_Coupons::get($coupon_args), $coupon_args, $EM_Event );
+			$coupons = apply_filters('em_coupons_admin_meta_box_coupons', EM_Coupons::get($coupon_args), $coupon_args, $event );
 			if( count($coupons) > 0 ): ?>
 				
 				<?php foreach($coupons as $EM_Coupon): /* @var $EM_Coupon EM_Coupon */ ?>
@@ -95,7 +95,7 @@ class EM_Coupons_Admin {
     				<input disabled type="checkbox" name="em_coupons[]" checked="checked"/>
 				</th>
 				<td class="code">
-    				<?php if( apply_filters('em_coupons_admin_meta_box_show_code', true, $EM_Coupon, $EM_Event) ): ?>
+    				<?php if( apply_filters('em_coupons_admin_meta_box_show_code', true, $EM_Coupon, $event) ): ?>
 				    	<?php echo esc_html($EM_Coupon->coupon_code); ?>
 					<?php endif; ?>
 				</td>

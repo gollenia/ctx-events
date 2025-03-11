@@ -230,28 +230,28 @@ function em_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if( !empty($post->post_type) && $post->post_type == 'revision' ) $post = get_post($post->post_parent);
 			if( empty($post->post_type) || !in_array($post->post_type, array(EM_POST_TYPE_EVENT, 'event-recurring')) ) return $caps;
 			//continue with getting post type and assigning caps
-			$EM_Event = EM_Event::find_by_post($post);
-			$post_type = get_post_type_object( $EM_Event->post_type );
+			$event = \Contexis\Events\Models\Event::find_by_post($post);
+			$post_type = get_post_type_object( $event->post_type );
 			/* Set an empty array for the caps. */
 			$caps = [];
 			//Filter according to event caps
 			switch( $cap ){
 				case 'read_event':
-					if ( 'private' != $EM_Event->post_status )
+					if ( 'private' != $event->post_status )
 						$caps[] = 'read';
-					elseif ( $user_id == $EM_Event->event_owner )
+					elseif ( $user_id == $event->event_owner )
 						$caps[] = 'read';
 					else
 						$caps[] = $post_type->cap->read_private_posts;
 					break;
 				case 'edit_event':
-					if ( $user_id == $EM_Event->event_owner )
+					if ( $user_id == $event->event_owner )
 						$caps[] = $post_type->cap->edit_posts;
 					else
 						$caps[] = $post_type->cap->edit_others_posts;
 					break;
 				case 'delete_event':
-					if ( $user_id == $EM_Event->event_owner )
+					if ( $user_id == $event->event_owner )
 						$caps[] = $post_type->cap->delete_posts;
 					else
 						$caps[] = $post_type->cap->delete_others_posts;
@@ -264,28 +264,28 @@ function em_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if( !empty($post->post_type) && $post->post_type == 'revision' ) $post = get_post($post->post_parent);
 			if( empty($post->post_type) || $post->post_type != 'event-recurring' ) return $caps;
 			//continue with getting post type and assigning caps
-			$EM_Event = EM_Event::find_by_post($post);
-			$post_type = get_post_type_object( $EM_Event->post_type );
+			$event = \Contexis\Events\Models\Event::find_by_post($post);
+			$post_type = get_post_type_object( $event->post_type );
 			/* Set an empty array for the caps. */
 			$caps = [];
 			//Filter according to recurring_event caps
 			switch( $cap ){
 				case 'read_recurring_event':
-					if ( 'private' != $EM_Event->post_status )
+					if ( 'private' != $event->post_status )
 						$caps[] = 'read';
-					elseif ( $user_id == $EM_Event->event_owner )
+					elseif ( $user_id == $event->event_owner )
 						$caps[] = 'read';
 					else
 						$caps[] = $post_type->cap->read_private_posts;
 					break;
 				case 'edit_recurring_event':
-					if ( $user_id == $EM_Event->event_owner )
+					if ( $user_id == $event->event_owner )
 						$caps[] = $post_type->cap->edit_posts;
 					else
 						$caps[] = $post_type->cap->edit_others_posts;
 					break;
 				case 'delete_recurring_event':
-					if ( $user_id == $EM_Event->event_owner )
+					if ( $user_id == $event->event_owner )
 						$caps[] = $post_type->cap->delete_posts;
 					else
 						$caps[] = $post_type->cap->delete_others_posts;

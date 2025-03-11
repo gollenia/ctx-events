@@ -10,7 +10,7 @@ use \chillerlan\QRCode\Output\QROutputInterface;
 use \chillerlan\QRCode\Common\EccLevel;
 use \chillerlan\QRCode\Output\QRMarkupSVG;
 use chillerlan\QRCode\Output\QRGdImagePNG;
-
+use Contexis\Events\Models\Event;
 
 
 
@@ -45,7 +45,7 @@ class EM_QRCode {
 		if($format != 'png' && $format != 'svg') $format = 'svg';
 		
 		$booking = \EM_Booking::find(absint($_REQUEST['booking_id']));
-		$event = \EM_Event::find_by_event_id($booking->event_id); 
+		$event = Event::find_by_event_id($booking->event_id); 
 
 		$data = Data::create()
 			->setName(get_option("em_offline_beneficiary", true))

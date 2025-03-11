@@ -1,6 +1,6 @@
 <?php
 global $post;
-$event = EM_Event::find_by_post($post);
+$event = \Contexis\Events\Models\Event::find_by_post($post);
 
 if(!$event) return;
 $location = $event->get_location();

@@ -2,7 +2,8 @@
 
 namespace Contexis\Events\Events;
 
-use EM_Events;
+use Contexis\Events\Collections\EventCollection;
+use \Contexis\Events\Models\Event;
 
 class EventRestController 
 {
@@ -59,7 +60,7 @@ class EventRestController
 			'offset',
 		];
       
-		$posts = \EM_Events::find_posts($request->get_params());
+		$posts = EventCollection::find_posts($request->get_params());
 
         $data = array();
 
@@ -92,7 +93,7 @@ class EventRestController
     }
 
 	public function prepare_item_for_response( $post, $request ) {
-        $event = \EM_Event::find_by_post($post);
+        $event = Event::find_by_post($post);
 		if(!$event->event_exists()) {
 			return new \WP_REST_Response([
 				'error' => __('Event not found', 'events')
@@ -182,7 +183,7 @@ class EventRestController
 				'error' => __('No event ID given', 'events')
 			], 400);
 		}
-		$event = \EM_Event::find_by_post_id($id);
+		$event = Event::find_by_post_id($id);
 		if(!$event) {
 			return new \WP_REST_Response([
 				'error' => __('Event not found', 'events')
@@ -198,7 +199,7 @@ class EventRestController
 			global $post;
 			$args = ['post_id' => $post->id];
 		}
-		$data = EM_Events::find($args);
+		$data = EventCollection::find($args);
 		if (!$data) return $result;
 		foreach($data as $event) {
 			$result[] = self::prepare_event($event);

@@ -2,6 +2,7 @@
 
 use Contexis\Events\Tickets\Tickets;
 use Contexis\Events\Tickets\Ticket;
+use Contexis\Events\Models\Event;
 /**
  * Deals with the booking info for an event
  * @author marcus
@@ -47,7 +48,7 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 	protected $pending_spaces;
 	protected $available_spaces;
 
-	public static function from_event(EM_Event $event) : EM_Bookings {
+	public static function from_event(Event $event) : EM_Bookings {
 		$instance = new self();
 		$instance->event_id = $event->event_id;
 		$instance->load();
@@ -167,14 +168,14 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 	/**
 	 * Smart event locator, saves a database read if possible. Note that if an event doesn't exist, a blank object will be created to prevent duplicates.
 	 */
-	public function get_event() : ?EM_Event {
+	public function get_event() : ?Event {
 		if (!empty($this->event_id) && is_numeric($this->event_id)) {
-			return EM_Event::find_by_event_id($this->event_id);
+			return Event::find_by_event_id($this->event_id);
 		}
 		
 		if (!empty($this->bookings) && is_array($this->bookings)) {
 			foreach ($this->bookings as $EM_Booking) {
-				return EM_Event::find_by_event_id($EM_Booking->event_id);
+				return Event::find_by_event_id($EM_Booking->event_id);
 			}
 		}
 		

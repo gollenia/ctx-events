@@ -1,6 +1,7 @@
 <?php
 
 namespace Contexis\Events\Tickets;
+use \Contexis\Events\Models\Event;
 
 /**
  * Class Ticket
@@ -336,11 +337,11 @@ class Ticket extends \EM_Object{
 	function is_available( $ignore_member_restrictions = false, $ignore_guest_restrictions = false ){
 		if( isset($this->is_available) && !$ignore_member_restrictions && !$ignore_guest_restrictions ) return apply_filters('em_ticket_is_available',  $this->is_available, $this); //save extra queries if doing a standard check
 		$is_available = false;
-		$EM_Event = $this->get_event();
+		$event = $this->get_event();
 		$available_spaces = $this->get_available_spaces();
 		$condition_1 = empty($this->ticket_start) || $this->start()->getTimestamp() <= time();
 		$condition_2 = empty($this->ticket_end) || $this->end()->getTimestamp() >= time();
-		$condition_3 = $EM_Event->rsvp_end()->getTimestamp() > time(); //either defined ending rsvp time, or start datetime is used here
+		$condition_3 = $event->rsvp_end()->getTimestamp() > time(); //either defined ending rsvp time, or start datetime is used here
 		$condition_4 = !$this->ticket_members || ($this->ticket_members && is_user_logged_in()) || $ignore_member_restrictions;
 		$condition_5 = true;
 		if( !$ignore_member_restrictions && !\EM_Bookings::$disable_restrictions && $this->ticket_members && !empty($this->ticket_members_roles) ){
@@ -454,10 +455,10 @@ class Ticket extends \EM_Object{
 	
 	/**
 	 * Smart event locator, saves a database read if possible.
-	 * @return EM_Event 
+	 * @return Event 
 	 */
-	function get_event(){
-		return \EM_Event::find_by_event_id($this->event_id);
+	function get_event() : Event {
+		return Event::find_by_event_id($this->event_id);
 	}
 	
 	/**
@@ -525,7 +526,7 @@ class Ticket extends \EM_Object{
 	 * If no start date defined or if date is invalid, false is returned.
 	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
 	 * @return EM_DateTime|false
-	 * @see EM_Event::get_datetime()
+	 * @see Event::get_datetime()
 	 */
 	public function start( $utc_timezone = false ){
 		return apply_filters('em_ticket_start', $this->get_datetime('start', $utc_timezone), $this);
@@ -536,7 +537,7 @@ class Ticket extends \EM_Object{
 	 * If no start date defined or if date is invalid, false is returned.
 	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
 	 * @return EM_DateTime|false
-	 * @see EM_Event::get_datetime()
+	 * @see Event::get_datetime()
 	 */
 	public function end( $utc_timezone = false ){
 		return apply_filters('em_ticket_end', $this->get_datetime('end', $utc_timezone), $this);

@@ -1,5 +1,7 @@
 <?php
 
+use \Contexis\Events\Models\Event;
+
 class BookingExport
 {
 	
@@ -15,9 +17,9 @@ class BookingExport
 			wp_die(__('No event ID provided.','events-manager'));
 		}
 
-		$EM_Event = EM_Event::find_by_event_id( absint($_REQUEST['event_id']) );
+		$event = Event::find_by_event_id( absint($_REQUEST['event_id']) );
 
-		if( !$EM_Event ){
+		if( !$event ){
 			wp_die(__('Event not found.','events-manager'));
 		}
 	
@@ -28,7 +30,7 @@ class BookingExport
 		$_REQUEST['limit'] = 0;
 
 		if(isset($_REQUEST['show_attendees']) && $_REQUEST['show_attendees'] == 1) {
-			$this->export_attendees_xls($EM_Event);
+			$this->export_attendees_xls($event);
 			return;
 		}
 
@@ -58,21 +60,21 @@ class BookingExport
 			$EM_Bookings = $EM_Bookings_Table->get_bookings();
 		}
 		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
-		$xlsx->downloadAs($this->get_file_name($EM_Event));
+		$xlsx->downloadAs($this->get_file_name($event));
 		
 		exit();
 		
 	}
 
-	private function get_file_name(EM_Event | NULL $EM_Event = null) : string 
+	private function get_file_name(Event | NULL $event = null) : string 
 	{
-		if($EM_Event){
-			return $EM_Event->event_slug . '-bookings.xlsx';
+		if($event){
+			return $event->event_slug . '-bookings.xlsx';
 		}
 		return 'bookings.xlsx';
 	}
 
-	public function export_attendees_xls($EM_Event){
+	public function export_attendees_xls($event){
 		
 		
 		$EM_Bookings_Table = new EM_Bookings_Table();
@@ -80,7 +82,7 @@ class BookingExport
 		
 		$EM_Bookings_Table->limit = 500; 
 		$EM_Bookings = $EM_Bookings_Table->get_bookings();
-		$form_fields = EM_Attendees_Form::get_form($EM_Event->event_id)->form_fields;
+		$form_fields = EM_Attendees_Form::get_form($event->event_id)->form_fields;
 		
 		$headers = $EM_Bookings_Table->get_headers(true);
 		$registration_length = count($headers);
@@ -125,7 +127,7 @@ class BookingExport
 		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
 		$xlsx->mergeCells('A1:'. $alphabet[$registration_length-1].'1');
 		$xlsx->mergeCells($alphabet[$registration_length].'1:'. $alphabet[count($headers)-1].'1');
-		$xlsx->downloadAs($this->get_file_name($EM_Event));
+		$xlsx->downloadAs($this->get_file_name($event));
 		exit();
 		
 	}

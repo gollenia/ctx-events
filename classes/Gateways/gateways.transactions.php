@@ -1,4 +1,6 @@
 <?php
+
+use Contexis\Events\Models\Event;
 if(!class_exists('EM_Gateways_Transactions')) {
 class EM_Gateways_Transactions{
 	var $limit = 20;
@@ -72,7 +74,7 @@ class EM_Gateways_Transactions{
 				$context = $booking;
 			}
 		} elseif (!empty($_REQUEST['event_id'])) {
-			$event = \EM_Event::find_by_event_id($_REQUEST['event_id']);
+			$event = Event::find_by_event_id($_REQUEST['event_id']);
 			if ($event && $event->can_manage('manage_bookings', 'manage_others_bookings')) {
 				$context = $event;
 			}
@@ -151,7 +153,7 @@ class EM_Gateways_Transactions{
 		?>
 		<div id="em-transactions-table" class="em_obj">
 		<form id="em-transactions-table-form" class="transactions-filter" action="" method="post">
-			<?php if( is_object($context) && get_class($context)=="EM_Event" ): ?>
+			<?php if( is_object($context) && get_class($context)=="Event" ): ?>
 			<input type="hidden" name="event_id" value='<?php echo $context->event_id ?>' />
 			<?php elseif( is_object($context) && (get_class($context)=="EM_Booking" || get_class($context)=="EM_Multiple_Booking") ): ?>
 			<input type="hidden" name="booking_id" value='<?php echo $context->booking_id ?>' />
@@ -184,7 +186,7 @@ class EM_Gateways_Transactions{
 						?>
 					</select>
 					<button id="post-query-submit" class="button-secondary" type="" value="" ><?php esc_attr_e( 'Filter' )?>
-					<?php if( is_object($context) && get_class($context)=="EM_Event" ): ?>
+					<?php if( is_object($context) && get_class($context)=="Event" ): ?>
 					<?php esc_html_e('Displaying Event','events'); ?> : <?php echo $context->event_name; ?>
 					<?php endif; ?>
 				</div>
@@ -338,7 +340,7 @@ class EM_Gateways_Transactions{
 			$booking_condition = "tx.booking_id = ".$context->booking_id;
 			
 			$conditions[] = $booking_condition;
-		}elseif( is_object($context) && get_class($context)=="EM_Event" && $context->can_manage('manage_bookings','manage_others_bookings') ){
+		}elseif( is_object($context) && get_class($context)=="Event" && $context->can_manage('manage_bookings','manage_others_bookings') ){
 			$join = " JOIN $table ON $table.booking_id=tx.booking_id";
 			$booking_condition = "event_id = ".$context->event_id;
 			

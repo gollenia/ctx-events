@@ -5,7 +5,7 @@
  * @param int $event_id
  */
 function em_bookings_cancelled_table(){
-	global $EM_Event;
+	
 
 	$ticket_id = key_exists('ticket_id', $_REQUEST) ? $_REQUEST['ticket_id'] : 0;
 	$ticket = new \Contexis\Events\Tickets\Ticket($ticket_id);
@@ -17,8 +17,8 @@ function em_bookings_cancelled_table(){
 	if( is_object($ticket) ){
 		$EM_Bookings = $ticket->get_bookings()->get_cancelled_bookings();
 	}else{
-		if( is_object($EM_Event) ){
-			$EM_Bookings = $EM_Event->get_bookings()->get_cancelled_bookings();
+		if( is_object($event) ){
+			$EM_Bookings = $event->get_bookings()->get_cancelled_bookings();
 		}else{
 			return false;
 		}
