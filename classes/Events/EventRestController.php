@@ -274,12 +274,9 @@ class EventRestController
 				'title' => $event->event_name,
 				'speaker' => $speaker,
 				'tags' => $tags->terms,
-				'allowDonation' => get_metadata('post', $event->post_id, '_event_rsvp_donation', true) == "1",
-				'bookingStart' => get_post_meta($event->post_id, '_event_rsvp_start', true),
-				'bookingEnd' => $event->rsvp_end()->getTimestamp() * 1000,
-				'bookingEndFormatted' => \Contexis\Events\Intl\Date::get_date($event->rsvp_end()->getTimestamp())
+				'allowDonation' => get_metadata('post', $event->post_id, '_event_rsvp_donation', true) == "1"
 			]
-			];
+		];
 	}
 
 }

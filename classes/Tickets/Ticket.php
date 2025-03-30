@@ -31,7 +31,6 @@ class Ticket extends \EM_Object{
 	public int $ticket_primary = 0;
 	public $ticket_meta = array();
 	public int $ticket_order;
-	public bool $is_available;
     public int $count = 0;
 	public array $fields = array(
 		'ticket_id' => array('name'=>'id','type'=>'%d'),
@@ -160,10 +159,10 @@ class Ticket extends \EM_Object{
 	    	if( $this->end() !== false ) $this->end()->setTimestamp($val);
 		}elseif( $prop == 'start' || $prop == 'end' ){
 			//start and end properties are inefficient to set, and deprecated. Set ticket_start and ticket_end with a valid MySQL DATETIME value instead.
-			$EM_DateTime = new \EM_DateTime( $val, $this->get_event()->get_timezone() );
-			if( !$EM_DateTime->valid ) return false;
+			$date_time = new \DateTime( $val, $this->get_event()->get_timezone() );
+
 			$when_prop = 'ticket_'.$prop;
-			$this->{$when_prop} = $EM_DateTime->getDateTime();
+			$this->{$when_prop} = $date_time->format('Y-m-d H:i:s');
 		}
 		$this->$prop = $val;
 	}
@@ -334,37 +333,23 @@ class Ticket extends \EM_Object{
 		return apply_filters('em_ticket_validate', count($this->errors) == 0, $this );
 	}
 	
-	function is_available( $ignore_member_restrictions = false, $ignore_guest_restrictions = false ){
-		if( isset($this->is_available) && !$ignore_member_restrictions && !$ignore_guest_restrictions ) return apply_filters('em_ticket_is_available',  $this->is_available, $this); //save extra queries if doing a standard check
-		$is_available = false;
-		$event = $this->get_event();
+	function is_available() : bool
+	{
+		$now = time();
+		if (!empty($this->ticket_start) && $this->start()->getTimestamp() > $now) return false;
+		if (!empty($this->ticket_end) && $this->end()->getTimestamp() < $now) return false;
+
+		$event = Event::find_by_event_id($this->event_id);
+
+		if ($event->get_rsvp_end()->getTimestamp() < $now) return false;
+		if ($event->get_rsvp_start()->getTimestamp() > $now) return false;
+
 		$available_spaces = $this->get_available_spaces();
-		$condition_1 = empty($this->ticket_start) || $this->start()->getTimestamp() <= time();
-		$condition_2 = empty($this->ticket_end) || $this->end()->getTimestamp() >= time();
-		$condition_3 = $event->rsvp_end()->getTimestamp() > time(); //either defined ending rsvp time, or start datetime is used here
-		$condition_4 = !$this->ticket_members || ($this->ticket_members && is_user_logged_in()) || $ignore_member_restrictions;
-		$condition_5 = true;
-		if( !$ignore_member_restrictions && !\EM_Bookings::$disable_restrictions && $this->ticket_members && !empty($this->ticket_members_roles) ){
-			//check if user has the right role to use this ticket
-			$condition_5 = false;
-			if( is_user_logged_in() ){
-				$user = wp_get_current_user();
-				if( count(array_intersect($user->roles, $this->ticket_members_roles)) > 0 ){
-					$condition_5 = true;
-				}
-			}
-		}
-		$condition_6 = !$this->ticket_guests || ($this->ticket_guests && !is_user_logged_in()) || $ignore_guest_restrictions;
-		if( $condition_1 && $condition_2 && $condition_3 && $condition_4 && $condition_5 && $condition_6 ){
-			//Time Constraints met, now quantities
-			if( $available_spaces > 0 && ($available_spaces >= $this->ticket_min || empty($this->ticket_min)) ){
-				$is_available = true;
-			}
-		}
-		if( !$ignore_member_restrictions && !$ignore_guest_restrictions ){ //$this->is_available is only stored for the viewing user
-			$this->is_available = $is_available;
-		}
-		return apply_filters('em_ticket_is_available', $is_available, $this, $ignore_guest_restrictions, $ignore_member_restrictions);
+
+		if ($available_spaces <= 0) return false;
+		if (!empty($this->ticket_min) && $available_spaces < $this->ticket_min) return false;
+		
+		return true;
 	}
 	
 	/**
@@ -488,9 +473,9 @@ class Ticket extends \EM_Object{
 
 		return [
 			
-                "id" => $this->id,
+                "id" => $this->ticket_id,
                 "event_id" => $this->event_id,
-                "is_available" => $this->is_available,
+                "is_available" => $this->is_available(),
                 "max" => intval($this->ticket_max ? min( $this->ticket_spaces, $this->ticket_max ) : $this->ticket_spaces),
                 "price" => floatval($this->ticket_price),
                 "min" => $this->ticket_min ?: 0,
@@ -522,45 +507,42 @@ class Ticket extends \EM_Object{
 	}
 
 	/**
-	 * Returns an EM_DateTime object of the ticket start date/time in local timezone of event.
+	 * Returns an DateTime object of the ticket start date/time in local timezone of event.
 	 * If no start date defined or if date is invalid, false is returned.
-	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
-	 * @return EM_DateTime|false
-	 * @see Event::get_datetime()
+	 * @param bool $utc_timezone Returns DateTime with UTC timezone if set to true, returns local timezone by default.
+	 * @return DateTime|false
 	 */
-	public function start( $utc_timezone = false ){
-		return apply_filters('em_ticket_start', $this->get_datetime('start', $utc_timezone), $this);
+	public function start(){
+		return apply_filters('em_ticket_start', $this->get_datetime('start'), $this);
 	}
 	
 	/**
-	 * Returns an EM_DateTime object of the ticket end date/time in local timezone of event.
+	 * Returns an DateTime object of the ticket end date/time in local timezone of event.
 	 * If no start date defined or if date is invalid, false is returned.
-	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default.
-	 * @return EM_DateTime|false
-	 * @see Event::get_datetime()
+	 * @param bool $utc_timezone Returns DateTime with UTC timezone if set to true, returns local timezone by default.
+	 * @return DateTime|false
 	 */
-	public function end( $utc_timezone = false ){
-		return apply_filters('em_ticket_end', $this->get_datetime('end', $utc_timezone), $this);
+	public function end( ){
+		return apply_filters('em_ticket_end', $this->get_datetime('end'), $this);
 	}
 	
 	/**
-	 * Generates an EM_DateTime for the the start/end date/times of the ticket in local timezone.
+	 * Generates an DateTime for the the start/end date/times of the ticket in local timezone.
 	 * If ticket has no start/end date, or an invalid format, false is returned.
 	 * @param string $when 'start' or 'end' date/time
-	 * @param bool $utc_timezone Returns EM_DateTime with UTC timezone if set to true, returns local timezone by default. Do not use if EM_DateTime->valid is false. 
-	 * @return EM_DateTime|false
+	 * @param bool $utc_timezone Returns DateTime with UTC timezone if set to true, returns local timezone by default. Do not use if DateTime->valid is false. 
+	 * @return DateTime|false
 	 */
 	public function get_datetime( $when = 'start', $utc_timezone = false ){
-		if( $when != 'start' && $when != 'end') return new \EM_DateTime(); //currently only start/end dates are relevant
-		//Initialize EM_DateTime if not already initialized, or if previously initialized object is invalid (e.g. draft event with invalid dates being resubmitted)
+		if( $when != 'start' && $when != 'end') return new \DateTime(); //currently only start/end dates are relevant
 		$when_date = 'ticket_'.$when;
 		//we take a pass at creating a new datetime object if it's empty, invalid or a different time to the current start date
 		if( !empty($this->$when_date) ){
 			if( empty($this->$when) || !$this->$when->valid ){
-				$this->$when = new \EM_DateTime( $this->$when_date, $this->get_event()->get_timezone() );
+				$this->$when = new \DateTime( $this->$when_date, $this->get_event()->get_timezone() );
 			}
 		}else{
-			$this->$when = new \EM_DateTime();
+			$this->$when = new \DateTime();
 			$this->$when->valid = false;
 		}
 		//Set to UTC timezone if requested, local by default

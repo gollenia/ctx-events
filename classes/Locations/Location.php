@@ -74,7 +74,6 @@ class EM_Location extends EM_Object {
 	 * @access protected
 	 * @var mixed
 	 */
-	var $previous_status = false;
 	
 	/* Post Variables - copied out of post object for easy IDE reference */
 	var $post_status;
@@ -250,6 +249,10 @@ class EM_Location extends EM_Object {
 	
 	function output($format, $target="html") {
 		LocationView::render($this, $format, $target);
+	}
+
+	public function get_owner() {
+		return $this->location_owner;
 	}
 	
 }

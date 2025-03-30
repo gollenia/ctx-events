@@ -50,7 +50,6 @@ class EM_Object {
 			'tag' => 0,
 			'location' => false,
 			'event' => false,
-			'event_status' => false, //automatically set to 'status' value if in EventCollection, useful only for EM_Locations
 			'location_status' => false,  //automatically set to 'status' value if in EM_Locations, useful only for EventCollection
 			'offset'=>0,
 			'page'=>1,//basically, if greater than 0, calculates offset at end
@@ -235,14 +234,14 @@ class EM_Object {
 		// if we define the alternative status such as location_status in event context, if set to true it matches the event 'status'
 		// if a specific status search value is given i.e. not true and not false then that's used to generate the right condition for that specific field
 		// e.g. if in events, search for 'publish' events and 0 location_status, it'll find events with a location pending review.
-		foreach( array('event_status', 'location_status') as $status_type ){
+		foreach( array('location_status') as $status_type ){
 			//find out whether the main status context we're after is an event or location i.e. are we running an events or location query
 			$is_location_status = $status_type == "location_status" && static::$context == 'location';
-			$is_event_status = $status_type == "event_status" && static::$context == 'event';
+			
 			//$is_joined_status decides whether this status we're dealing with is part of a joined table or the main table
-			$is_joined_status = (!$is_location_status || !$is_event_status) && $args[$status_type] !== false;
+			$is_joined_status = (!$is_location_status) && $args[$status_type] !== false;
 			//we add a status condition if this is the main status context or if joining a table and joined status arg is not exactly false
-			if( $is_location_status || $is_event_status || $args[$status_type] !== false ){
+			if( $is_location_status || $args[$status_type] !== false ){
 				$condition_status = $is_joined_status ? $status_type : 'status'; //the key for this condition type
 				//if this is the status belonging to the joined table, if set to true we match the main context status otherwise we check the specific status
 				$status_arg = $is_joined_status && $args[$status_type] !== true ? $args[$status_type] : $args['status'];
@@ -352,52 +351,52 @@ class EM_Object {
 				$conditions['scope'] = " ( event_start_date = CAST('$scope' AS DATE) OR ( event_start_date <= CAST('$scope' AS DATE) AND event_end_date >= CAST('$scope' AS DATE) ) )";
 			}
 		} else {
-			$EM_DateTime = new EM_DateTime(); //the time, now, in blog/site timezone
+			$date_time = new DateTime(); //the time, now, in blog/site timezone
 			if ($scope == "past"){
 				if( get_option('dbem_events_current_are_past') ){
-					$conditions['scope'] = " event_start < '".$EM_DateTime->getDateTime(true)."'";
+					$conditions['scope'] = " event_start < '".$date_time->format('Y-m-d H:i:s')."'";
 				}else{
-					$conditions['scope'] = " event_end < '".$EM_DateTime->getDateTime(true)."'";
+					$conditions['scope'] = " event_end < '".$date_time->format('Y-m-d H:i:s')."'";
 				}  
 			}elseif ($scope == "today"){
-				$conditions['scope'] = " (event_start_date = CAST('".$EM_DateTime->getDate()."' AS DATE))";
+				$conditions['scope'] = " (event_start_date = CAST('".$date_time->format('Y-m-d')."' AS DATE))";
 				if( !get_option('dbem_events_current_are_past') ){
-					$conditions['scope'] .= " OR (event_start_date <= CAST('".$EM_DateTime->getDate()."' AS DATE) AND event_end_date >= CAST('$EM_DateTime' AS DATE))";
+					$conditions['scope'] .= " OR (event_start_date <= CAST('".$date_time->format('Y-m-d')."' AS DATE) AND event_end_date >= CAST('$date_time' AS DATE))";
 				}
 			}elseif ($scope == "tomorrow"){
-				$EM_DateTime->modify('+1 day');
-				$conditions['scope'] = "(event_start_date = CAST('".$EM_DateTime->getDate()."' AS DATE))";
+				$date_time->modify('+1 day');
+				$conditions['scope'] = "(event_start_date = CAST('".$date_time->format('Y-m-d')."' AS DATE))";
 				if( !get_option('dbem_events_current_are_past') ){
-					$conditions['scope'] .= " OR (event_start_date <= CAST('".$EM_DateTime->getDate()."' AS DATE) AND event_end_date >= CAST('".$EM_DateTime->getDate()."' AS DATE))";
+					$conditions['scope'] .= " OR (event_start_date <= CAST('".$date_time->format('Y-m-d')."' AS DATE) AND event_end_date >= CAST('".$date_time->format('Y-m-d')."' AS DATE))";
 				}
 			}elseif ($scope == "month" || $scope == "next-month"){
-				if( $scope == 'next-month' ) $EM_DateTime->add(new DateInterval('P1M'));
-				$start_month = $EM_DateTime->modify('first day of this month')->getDate();
-				$end_month = $EM_DateTime->modify('last day of this month')->getDate();
+				if( $scope == 'next-month' ) $date_time->add(new DateInterval('P1M'));
+				$start_month = $date_time->modify('first day of this month')->format('Y-m-d');
+				$end_month = $date_time->modify('last day of this month')->format('Y-m-d');
 				$conditions['scope'] = " (event_start_date BETWEEN CAST('$start_month' AS DATE) AND CAST('$end_month' AS DATE))";
 				if( !get_option('dbem_events_current_are_past') ){
 					$conditions['scope'] .= " OR (event_start_date < CAST('$start_month' AS DATE) AND event_end_date >= CAST('$start_month' AS DATE))";
 				}
 			}elseif ($scope == "week" || $scope == "next-week"){
-				if( $scope == 'next-week' ) $EM_DateTime->add(new DateInterval('P7D'));
-				$start_week = $EM_DateTime->modify('this week')->getDate();
-				$end_week = $EM_DateTime->modify('this week + 7 days')->getDate();
+				if( $scope == 'next-week' ) $date_time->add(new DateInterval('P7D'));
+				$start_week = $date_time->modify('this week')->format('Y-m-d');
+				$end_week = $date_time->modify('this week + 7 days')->format('Y-m-d');
 				$conditions['scope'] = " (event_start_date BETWEEN CAST('$start_week' AS DATE) AND CAST('$end_week' AS DATE))";
 				if( !get_option('dbem_events_current_are_past') ){
 					$conditions['scope'] .= " OR (event_start_date < CAST('$start_week' AS DATE) AND event_end_date >= CAST('$start_week' AS DATE))";
 				}
 			}elseif( preg_match('/([0-9]+)\-months/',$scope,$matches) ){ // next x months means this month (what's left of it), plus the following x months until the end of that month.
 				$months_to_add = $matches[1];
-				$start_month = $EM_DateTime->getDate();
-				$end_month = $EM_DateTime->add(new DateInterval('P'.$months_to_add.'M'))->format('Y-m-t');
+				$start_month = $date_time->format('Y-m-d');
+				$end_month = $date_time->add(new DateInterval('P'.$months_to_add.'M'))->format('Y-m-t');
 				$conditions['scope'] = " (event_start_date BETWEEN CAST('$start_month' AS DATE) AND CAST('$end_month' AS DATE))";
 				if( !get_option('dbem_events_current_are_past') ){
 					$conditions['scope'] .= " OR (event_start_date < CAST('$start_month' AS DATE) AND event_end_date >= CAST('$start_month' AS DATE))";
 				}
 			}elseif ($scope == "future"){
-				$conditions['scope'] = " event_start >= '".$EM_DateTime->getDateTime(true)."'";
+				$conditions['scope'] = " event_start >= '".$date_time->format('Y-m-d H:i:s')."'";
 				if( !get_option('dbem_events_current_are_past') ){
-					$conditions['scope'] .= " OR (event_end >= '".$EM_DateTime->getDateTime(true)."')";
+					$conditions['scope'] .= " OR (event_end >= '".$date_time->format('Y-m-d H:i:s')."')";
 				}
 			}
 			if( !empty($conditions['scope']) ){
@@ -839,8 +838,6 @@ class EM_Object {
 	function get_owner(){
 		if( !empty($this->owner) ) return $this->owner;
 	    switch( get_class($this) ){
-	        case 'Event':
-	            return $this->event_owner;
 	        case 'EM_Location':
 	            return $this->location_owner;
 	    }

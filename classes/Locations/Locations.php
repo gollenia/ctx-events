@@ -100,7 +100,6 @@ class EM_Locations extends EM_Object {
 			//location-specific attributes
 			'eventful' => false, //Locations that have an event (scope will also play a part here
 			'eventless' => false, //Locations WITHOUT events, eventful takes precedence
-			'event_status' => false //search locations with events of a specific publish status
 		);
 		//sort out whether defaults were supplied or just the array of search values
 		if( empty($array) ){

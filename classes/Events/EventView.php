@@ -89,7 +89,6 @@ class EventView {
 					'fully_booked' => $this->event->event_rsvp && $this->event->get_bookings()->get_available_spaces() <= 0,
 					'is_free' => !$this->event->event_rsvp || $this->event->is_free( $condition == 'is_free_now' ),
 					'is_recurrence' => $this->event->is_recurrence(),
-					'is_private' => $this->event->event_private == 1,
 					default => false
 				};
 

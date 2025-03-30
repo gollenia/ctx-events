@@ -25,7 +25,7 @@
 			$args = array();
 			//single event
 			if( $wp_query->get(EM_POST_TYPE_EVENT) ){
-				$event_id = $wpdb->get_var('SELECT event_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get(EM_POST_TYPE_EVENT)."' AND event_status=1 LIMIT 1");
+				$event_id = $wpdb->get_var('SELECT event_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get(EM_POST_TYPE_EVENT)."' LIMIT 1");
 				if( !empty($event_id) ){
 					$filename = $wp_query->get(EM_POST_TYPE_EVENT);
 					$args['event'] = $event_id;

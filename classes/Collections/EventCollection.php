@@ -21,17 +21,15 @@ class EventCollection implements Countable, IteratorAggregate {
 		$queryArgs = self::get_query_args($args);
     
 		if (!$query) {
-			var_dump("Having a new query");
 			$query = new WP_Query($queryArgs);
 		} else {
 			foreach ($queryArgs as $key => $value) {
 				$query->set($key, $value);
-				var_dump($key, $value);
 			}
 			$query->query($query->query_vars); // Query erneut ausführen
     	}
 		
-		$ret = array_map(fn($post) => Event::find_by_post($post), $query->posts);
+		$ret = \array_map(fn($post) => Event::find_by_post($post), $query->posts);
 
 		$instance = new self();
 		$instance->events = $ret;
@@ -54,8 +52,8 @@ class EventCollection implements Countable, IteratorAggregate {
 		$queryArgs = [
             'meta_query'     => ['relation' => 'AND'],
             'tax_query'      => [],
-			'posts_per_page' => $args['limit'] ?: 100,
-			'paged'		 => $args['paged'] ?: 0,
+			'posts_per_page' => $args['limit'] ?? 100,
+			'paged'		 => $args['paged'] ?? 0,
         ];
 
 		if(empty($args['post_type'])) {

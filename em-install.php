@@ -132,7 +132,6 @@ function em_create_events_table() {
 		post_id bigint(20) unsigned NOT NULL,
 		event_slug VARCHAR( 200 ) NULL DEFAULT NULL,
 		event_owner bigint(20) unsigned DEFAULT NULL,
-		event_status tinyint(1) NULL DEFAULT NULL,
 		event_name text NULL DEFAULT NULL,
 		event_start_date date NULL DEFAULT NULL,
 		event_end_date date NULL DEFAULT NULL,
@@ -150,7 +149,6 @@ function em_create_events_table() {
 		event_audience text NULL DEFAULT NULL,
 		event_rsvp_spaces int(5) NULL DEFAULT NULL,
 		event_spaces int(5) NULL DEFAULT 0,
-		event_private tinyint(1) unsigned NOT NULL DEFAULT 0,
 		location_id bigint(20) unsigned NULL DEFAULT NULL,
 		recurrence_id bigint(20) unsigned NULL DEFAULT NULL,
   		event_date_created datetime NULL DEFAULT NULL,
@@ -169,7 +167,7 @@ function em_create_events_table() {
 
 	dbDelta($sql);
 
-	em_sort_out_table_nu_keys($table_name, array('event_status','post_id','location_id','event_start', 'event_end', 'event_start_date', 'event_end_date'));
+	em_sort_out_table_nu_keys($table_name, array('post_id','location_id','event_start', 'event_end', 'event_start_date', 'event_end_date'));
 }
 
 function em_create_events_meta_table(){
@@ -642,6 +640,8 @@ function em_upgrade_current_installation(){
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_parent');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN group_id');
 		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN blog_id');
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_private');
+		$wpdb->query('ALTER TABLE '.EM_EVENTS_TABLE.' DROP COLUMN event_status');
 		$wpdb->query('ALTER TABLE '.EM_COUPONS_TABLE.' DROP COLUMN blog_id');
 		//\Contexis\Events\Utilities::set_installed_version('6.9.1');
 	}

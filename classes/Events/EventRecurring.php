@@ -180,28 +180,27 @@ class EventRecurring extends Event {
 				unset($event['event_date_modified']);
 				if( count($matching_days) > 0 ){
 					//first save event post data
-					$EM_DateTime = $this->start()->copy();
+					$date_time = $this->start()->copy();
 					foreach( $matching_days as $day ) {
-						//set start date/time to $EM_DateTime for relative use further on
-						$EM_DateTime->setTimestamp($day)->setTimeString($event['event_start_time']);
-						$start_timestamp = $EM_DateTime->getTimestamp(); //for quick access later
+						$date_time->setTimestamp($day)->setTimeString($event['event_start_time']);
+						$start_timestamp = $date_time->getTimestamp(); //for quick access later
 						//rewrite post fields if needed
 						//set post slug, which may need to be sanitized for length as we pre/postfix a date for uniqueness
-						$event_slug_date = $EM_DateTime->format( $recurring_date_format );
+						$event_slug_date = $date_time->format( $recurring_date_format );
 						$event_slug = $this->sanitize_recurrence_slug($post_name, $event_slug_date);
 						$event_slug = apply_filters('em_event_save_events_recurrence_slug', $event_slug.'-'.$event_slug_date, $event_slug, $event_slug_date, $day, $this); //use this instead
 						$post_fields['post_name'] = $event['event_slug'] = apply_filters('em_event_save_events_slug', $event_slug, $post_fields, $day, $matching_days, $this); //deprecated filter
 						//set start date
-						$event['event_start_date'] = $meta_fields['_event_start_date'] = $EM_DateTime->getDate();
-						$event['event_start'] = $meta_fields['_event_start'] = $EM_DateTime->getDateTime(true);
+						$event['event_start_date'] = $meta_fields['_event_start_date'] = $date_time->format('Y-m-d');
+						$event['event_start'] = $meta_fields['_event_start'] = $date_time->format('Y-m-d H:i:s');
 						//add rsvp date/time restrictions
 						if( !empty($this->recurrence_rsvp_days) && is_numeric($this->recurrence_rsvp_days) ){
 							if( $this->recurrence_rsvp_days > 0 ){
-								$event_rsvp_end = $EM_DateTime->copy()->add(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->getDate(); //cloned so original object isn't modified
+								$event_rsvp_end = $date_time->copy()->add(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->format('Y-m-d'); //cloned so original object isn't modified
 							}elseif($this->recurrence_rsvp_days < 0 ){
-								$event_rsvp_end = $EM_DateTime->copy()->sub(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->getDate(); //cloned so original object isn't modified
+								$event_rsvp_end = $date_time->copy()->sub(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->format('Y-m-d'); //cloned so original object isn't modified
 							}else{
-								$event_rsvp_end = $EM_DateTime->getDate();
+								$event_rsvp_end = $date_time->format('Y-m-d');
 							}
 				 			$event['event_rsvp_end'] = $meta_fields['_event_rsvp_end'] = $event_rsvp_end;
 						}else{
@@ -210,15 +209,14 @@ class EventRecurring extends Event {
 						
 
 						//set end date
-						$EM_DateTime->setTimeString($event['event_end_time']);
+						$date_time->setTimeString($event['event_end_time']);
 						if($this->recurrence_days > 0){
-							//$EM_DateTime modified here, and used further down for UTC end date
-							$event['event_end_date'] = $meta_fields['_event_end_date'] = $EM_DateTime->add(new DateInterval('P'.$this->recurrence_days.'D'))->getDate();
+							$event['event_end_date'] = $meta_fields['_event_end_date'] = $date_time->add(new DateInterval('P'.$this->recurrence_days.'D'))->format('Y-m-d');
 						}else{
 							$event['event_end_date'] = $meta_fields['_event_end_date'] = $event['event_start_date'];
 						}
-						$end_timestamp = $EM_DateTime->getTimestamp(); //for quick access later
-						$event['event_end'] = $meta_fields['_event_end'] = $EM_DateTime->getDateTime(true);
+						$end_timestamp = $date_time->getTimestamp(); //for quick access later
+						$event['event_end'] = $meta_fields['_event_end'] = $date_time->format('Y-m-d H:i:s');
 						//add extra date/time post meta
 						$meta_fields['_event_start_local'] = $event['event_start_date'].' '.$event['event_start_time'];
 						$meta_fields['_event_end_local'] = $event['event_end_date'].' '.$event['event_end_time'];
@@ -265,26 +263,26 @@ class EventRecurring extends Event {
 				$events = EventCollection::find( array('recurrence'=>$this->event_id, 'scope'=>'all', 'status'=>'everything', 'array' => true ) );
 			 	foreach($events as $event_array){ /* @var $event Event */
 			 		//set new start/end times to obtain accurate timestamp according to timezone and DST
-			 		$EM_DateTime = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);
-			 		$start_timestamp = $EM_DateTime->getTimestamp();
-			 		$event['event_start'] = $meta_fields['_event_start'] = $EM_DateTime->getDateTime(true);
-			 		$end_timestamp = $EM_DateTime->modify($event_array['event_end_date']. ' ' . $event_array['event_end_time'])->getTimestamp();
-			 		$event['event_end'] = $meta_fields['_event_end'] = $EM_DateTime->getDateTime(true);
+			 		$date_time = $this->start()->copy()->modify($event_array['event_start_date']. ' ' . $event_array['event_start_time']);
+			 		$start_timestamp = $date_time->getTimestamp();
+			 		$event['event_start'] = $meta_fields['_event_start'] = $date_time->format('Y-m-d H:i:s');
+			 		$end_timestamp = $date_time->modify($event_array['event_end_date']. ' ' . $event_array['event_end_time'])->getTimestamp();
+			 		$event['event_end'] = $meta_fields['_event_end'] = $date_time->format('Y-m-d H:i:s');
 			 		//set indexes for reference further down
 			 		$event_ids[$event_array['post_id']] = $event_array['event_id'];
 			 		$event_dates[$event_array['event_id']] = $start_timestamp;
 			 		$post_ids[$start_timestamp] = $event_array['post_id'];
 			 		//do we need to change the slugs?
 				    //(re)set post slug, which may need to be sanitized for length as we pre/postfix a date for uniqueness
-				    $EM_DateTime->setTimestamp($start_timestamp);
-				    $event_slug_date = $EM_DateTime->format( $recurring_date_format );
+				    $date_time->setTimestamp($start_timestamp);
+				    $event_slug_date = $date_time->format( $recurring_date_format );
 				    $event_slug = $this->sanitize_recurrence_slug($post_name, $event_slug_date);
 				    $event_slug = apply_filters('em_event_save_events_recurrence_slug', $event_slug.'-'.$event_slug_date, $event_slug, $event_slug_date, $start_timestamp, $this); //use this instead
 				    $post_fields['post_name'] = $event['event_slug'] = apply_filters('em_event_save_events_slug', $event_slug, $post_fields, $start_timestamp, array(), $this); //deprecated filter
 			 		//adjust certain meta information relative to dates and times
 			 		if( !empty($this->recurrence_rsvp_days) && is_numeric($this->recurrence_rsvp_days) ){
 			 			$event_rsvp_days = $this->recurrence_rsvp_days >= 0 ? '+'. $this->recurrence_rsvp_days: $this->recurrence_rsvp_days;
-			 			$event_rsvp_end = $EM_DateTime->setTimestamp($start_timestamp)->modify($event_rsvp_days.' days')->getDate();
+			 			$event_rsvp_end = $date_time->setTimestamp($start_timestamp)->modify($event_rsvp_days.' days')->format('Y-m-d');
 			 			$event['event_rsvp_end'] = $meta_fields['_event_rsvp_end'] = $event_rsvp_end;
 			 		}else{
 			 			$event['event_rsvp_end'] = $meta_fields['_event_rsvp_end'] = $event_array['event_start_date'];
@@ -369,22 +367,22 @@ class EventRecurring extends Event {
 			 				}
 			 			}
 			 			//prep ticket meta for insertion with relative info for each event date
-			 			$EM_DateTime = $this->start()->copy();
+			 			$date_time = $this->start()->copy();
 			 			foreach($event_ids as $event_id){
 			 				$ticket['event_id'] = $event_id;
 			 				$ticket['ticket_start'] = $ticket['ticket_end'] = 'NULL';
 			 				//sort out cut-of dates
 			 				if( !empty($ticket_meta_recurrences) ){
-			 					$EM_DateTime->setTimestamp($event_dates[$event_id]); //by using EM_DateTime we'll generate timezone aware dates
+			 					$date_time->setTimestamp($event_dates[$event_id]); 
 			 					if( array_key_exists('start_days', $ticket_meta_recurrences) && $ticket_meta_recurrences['start_days'] !== false && $ticket_meta_recurrences['start_days'] !== null  ){
 			 						$ticket_start_days = $ticket_meta_recurrences['start_days'] >= 0 ? '+'. $ticket_meta_recurrences['start_days']: $ticket_meta_recurrences['start_days'];
-			 						$ticket_start_date = $EM_DateTime->modify($ticket_start_days.' days')->getDate();
+			 						$ticket_start_date = $date_time->modify($ticket_start_days.' days')->format('Y-m-d');
 			 						$ticket['ticket_start'] = "'". $ticket_start_date . ' '. $ticket_meta_recurrences['start_time'] ."'";
 			 					}
 			 					if( array_key_exists('end_days', $ticket_meta_recurrences) && $ticket_meta_recurrences['end_days'] !== false && $ticket_meta_recurrences['end_days'] !== null ){
 			 						$ticket_end_days = $ticket_meta_recurrences['end_days'] >= 0 ? '+'. $ticket_meta_recurrences['end_days']: $ticket_meta_recurrences['end_days'];
-			 						$EM_DateTime->setTimestamp($event_dates[$event_id]);
-			 						$ticket_end_date = $EM_DateTime->modify($ticket_end_days.' days')->getDate();
+			 						$date_time->setTimestamp($event_dates[$event_id]);
+			 						$ticket_end_date = $date_time->modify($ticket_end_days.' days')->format('Y-m-d');
 			 						$ticket['ticket_end'] = "'". $ticket_end_date . ' '. $ticket_meta_recurrences['end_time'] . "'";
 			 					}
 			 				}
@@ -521,7 +519,7 @@ class EventRecurring extends Event {
 		$matching_days = array(); //the days we'll be returning in timestamps
 		
 		//generate matching dates based on frequency type
-		switch ( $this->recurrence_freq ){ /* @var EM_DateTime $current_date */
+		switch ( $this->recurrence_freq ){ 
 			case 'daily':
 				//If daily, it's simple. Get start date, add interval timestamps to that and create matching day for each interval until end date.
 				$current_date = $this->start()->copy()->setTime(0,0,0);
@@ -599,11 +597,10 @@ class EventRecurring extends Event {
 				}
 				break;
 			case 'yearly':
-				//Yearly is easy, we get the start date as a cloned EM_DateTime and keep adding a year until it surpasses the end EM_DateTime value. 
-				$EM_DateTime = $this->start()->copy();
-				while( $EM_DateTime <= $this->end() ){
-					$matching_days[] = $EM_DateTime->getTimestamp();
-					$EM_DateTime->add(new DateInterval('P'.absint($this->recurrence_interval).'Y'));
+				$date_time = $this->start()->copy();
+				while( $date_time <= $this->end() ){
+					$matching_days[] = $date_time->getTimestamp();
+					$date_time->add(new DateInterval('P'.absint($this->recurrence_interval).'Y'));
 				}			
 				break;
 		}

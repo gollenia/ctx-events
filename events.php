@@ -13,13 +13,7 @@ Author URI: https://github.com/gollenia/events
 Text Domain: events
 Domain Path: /languages
 */
-xdebug_start_trace("/var/www/vhosts/kids-team.enroute/log/trace.log", XDEBUG_TRACE_COMPUTERIZED);
-register_shutdown_function(function() {
-    $error = error_get_last();
-    if ($error) {
-        error_log("Shutdown wegen: " . print_r($error, true));
-    }
-});
+
 
 class Events {
 	const DIR = __DIR__;
@@ -49,8 +43,6 @@ require_once __DIR__ . '/classes/Utilities.php';
 require_once __DIR__ . '/Assets.php';
 require_once __DIR__ . '/classes/Options.php';
 require_once __DIR__ . '/classes/Object.php';
-require_once __DIR__ . '/classes/DateTime.php';
-require_once __DIR__ . '/classes/DateTimeZone.php';
 require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerm.php';
 require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerms.php';
 

@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Models\Event;
+
 class EM_Custom_Emails_Admin {
     public static $caps = array('custom_emails'=>'manage_bookings');
     

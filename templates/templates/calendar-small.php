@@ -7,13 +7,13 @@
 /* @var array $calendar - contains an array of information regarding the calendar and is used to generate the content */
 /* @var array $args - the arguments passed to EM_Calendar::output() */
 
-$EM_DateTime = new EM_DateTime($calendar['month_start'], 'UTC');
+$date_time = new DateTime($calendar['month_start']);
 ?>
 <table class="em-calendar">
 	<thead>
 		<tr>
 			<td><a class="em-calnav em-calnav-prev" href="<?php echo esc_url($calendar['links']['previous_url']); ?>" rel="nofollow">&lt;&lt;</a></td>
-			<td class="month_name" colspan="5"><?php echo esc_html($EM_DateTime->i18n(get_option('dbem_small_calendar_month_format'))); ?></td>
+			<td class="month_name" colspan="5"><?php echo esc_html($date_time->i18n(get_option('dbem_small_calendar_month_format'))); ?></td>
 			<td><a class="em-calnav em-calnav-next" href="<?php echo esc_url($calendar['links']['next_url']); ?>" rel="nofollow">&gt;&gt;</a></td>
 		</tr>
 	</thead>

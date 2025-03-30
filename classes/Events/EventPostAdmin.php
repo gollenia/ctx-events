@@ -115,7 +115,6 @@ class EM_Event_Post_Admin{
 
 		if( !$get_meta || !$validate_meta || !$save_meta ){
 			//failed somewhere, set to draft, don't publish
-			$event->set_status(null, true);
 			if( $event->is_recurring() ){
 				$EM_Notices->add_error( '<strong>'.__('Your event details are incorrect and recurrences cannot be created, please correct these errors first:','events').'</strong>', true); //Always seems to redirect, so we make it static
 			}else{
@@ -124,13 +123,7 @@ class EM_Event_Post_Admin{
 			$EM_Notices->add_error($event->get_errors(), true); //Always seems to redirect, so we make it static
 			apply_filters('em_event_save', false, $event);
 		}else{
-			//if this is just published, we need to email the user about the publication, or send to pending mode again for review
-			if( (!$event->is_recurring() && !current_user_can('publish_events')) || ($event->is_recurring() && !current_user_can('publish_recurring_events')) ){
-				if( $event->is_published() ){ $event->set_status(0, true); } //no publishing and editing... security threat
-			}
 			apply_filters('em_event_save', true, $event);
-			//flag a cache refresh if we get here
-
 			add_filter('save_post', 'EM_Event_Post_Admin::refresh_cache', 10, 2);
 		}
 		
@@ -173,7 +166,6 @@ class EM_Event_Post_Admin{
 	public static function trashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
 			$event = Event::find_by_post_id($post_id);
-			$event->set_status(-1);
 		}
 	}
 	
@@ -187,7 +179,6 @@ class EM_Event_Post_Admin{
 	public static function untrashed_post($post_id){
 		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
 			$event = Event::find_by_post_id($post_id);
-			$event->set_status( $event->get_status() );
 		}
 	}
 	
@@ -235,14 +226,13 @@ class EM_Event_Recurring_Post_Admin{
 			//Meta Boxes
 			add_action('add_meta_boxes_event-recurring', array('EM_Event_Recurring_Post_Admin','meta_boxes'), 10, 1);
 			//Notices
-			add_action('admin_notices',array('EM_Event_Post_Admin','admin_notices')); //shared with posts
+			
 		}
 		//Save/Edit actions
 		add_action('save_post',array('EM_Event_Recurring_Post_Admin','save_post'),10000,1); //late priority for checking non-EM meta data added later
 		add_action('before_delete_post',array('EM_Event_Recurring_Post_Admin','before_delete_post'),10,1);
 		add_action('trashed_post',array('EM_Event_Recurring_Post_Admin','trashed_post'),10,1);
 		add_action('untrash_post',array('EM_Event_Recurring_Post_Admin','untrash_post'),10,1);
-		add_action('untrashed_post',array('EM_Event_Recurring_Post_Admin','untrashed_post'),10,1);
 		//Notices
 		add_action('post_updated_messages',array('EM_Event_Post_Admin','admin_notices_filter'),1,1); //shared with posts
 	}
@@ -276,10 +266,6 @@ class EM_Event_Recurring_Post_Admin{
 		if(!defined('UNTRASHING_'.$post_id) && $post_type == 'event-recurring' && $saving_status && !empty($EM_EVENT_SAVE_POST) ){
 			$event = Event::find_by_post_id($post_id);
 			$event->post_type = $post_type;
-			//get the list post IDs for recurrences this recurrence
-		 	if( !$event->save_events() && ( $event->is_published() || 'future' == $event->post_status ) ){
-				$event->set_status(null, true);
-		 	}
 		}
 		$EM_EVENT_SAVE_POST = false; //last filter of save_post in EM for events
 	}
@@ -307,7 +293,6 @@ class EM_Event_Recurring_Post_Admin{
 	public static function trashed_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){
 			$event = Event::find_by_post_id($post_id);
-			$event->set_status(null);
 			//only trash other events if this isn't a draft-never-published event
 			if( !empty($event->event_id) ){
     			//now trash recurrences
@@ -339,22 +324,13 @@ class EM_Event_Recurring_Post_Admin{
 			}
 		}
 	}
-	
-	public static function untrashed_post($post_id){
-		if(get_post_type($post_id) == 'event-recurring'){
-			Event::find_by_post_id($post_id)->set_status(1);
-		}
-	}
+
 	
 	public static function meta_boxes( $post ){
 		$event = Event::find_by_post($post) ?? new Event();
-		
-	
 		if( get_option('dbem_rsvp_enabled') && $event->can_manage('manage_bookings','manage_others_bookings') ){
 			add_meta_box('em-event-bookings', __('Bookings/Registration','events'), array('EM_Event_Post_Admin','meta_box_bookings'),'event-recurring', 'normal','high');
 		}
-		
-		
 	}
 	
 

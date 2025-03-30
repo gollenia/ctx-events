@@ -206,7 +206,7 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		
 		foreach ($this->get_tickets() as $ticket){
 			/* @var $ticket Ticket */
-			if( $ticket->is_available($include_member_tickets) ){
+			if( $ticket->is_available() ){
 				//within time range
 				if( $ticket->get_available_spaces() > 0 ){
 					$tickets[] = $ticket;

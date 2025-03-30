@@ -39,7 +39,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 					<title><?php echo $event->event_name; ?></title>
 					<link><?php echo $event_url; ?></link>
 					<guid><?php echo $event_url; ?></guid>
-					<pubDate><?php echo $event->start(true)->format('D, d M Y H:i:s +0000'); ?></pubDate>
+					<pubDate><?php echo $event->start()->format('D, d M Y H:i:s +0000'); ?></pubDate>
 					<description><![CDATA[<?php echo $description; ?>]]></description>
 				</item>
 				<?php

@@ -224,7 +224,6 @@ class EM_Event_Posts_Admin{
 				}else{
 					echo __('All Day','events');
 				}
-				if( $event->get_timezone()->getName() != EM_DateTimeZone::create()->getName() ) echo '<span class="dashicons dashicons-info" style="font-size:16px; color:#ccc; padding-top:2px;" title="'.esc_attr(str_replace('_', ' ', $event->event_timezone)).'"></span>';
 				break;
 			case 'extra':
 				if ( $event->is_recurrence() && current_user_can('edit_recurring_events','edit_others_recurring_events') ) {
@@ -250,8 +249,8 @@ class EM_Event_Posts_Admin{
 				break;
 			
 			case 'bookingdate':
-				$start = $event->rsvp_start();
-				$end = $event->rsvp_end();
+				$start = $event->get_rsvp_start();
+				$end = $event->get_rsvp_end();
 				if(!$start || !$end){
 					echo __('No booking date set','events');
 					break;

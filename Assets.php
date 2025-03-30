@@ -176,7 +176,7 @@ class Assets {
 		//logged in messages that visitors shouldn't need to see
 		if( is_user_logged_in() ){
 		    if( get_option('dbem_recurrence_enabled') ){
-		    	if( !empty($_REQUEST['action']) && ($_REQUEST['action'] == 'edit' || $_REQUEST['action'] == 'event_save') && !empty($_REQUEST['event_id']) ){
+		    	if( !empty($_REQUEST['action']) && ($_REQUEST['action'] == 'edit' || $_REQUEST['action'] == 'event_save') ){
 					$em_localized_js['event_reschedule_warning'] = __('Are you sure you want to continue?', 'events') .PHP_EOL;
 					$em_localized_js['event_reschedule_warning'] .= __('Modifications to event times will cause all recurrences of this event to be deleted and recreated, previous bookings will be deleted.', 'events');
 					$em_localized_js['event_recurrence_overwrite'] = __('Are you sure you want to continue?', 'events') .PHP_EOL;

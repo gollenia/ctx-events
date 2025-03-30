@@ -29,7 +29,7 @@ PRODID:-//kids-team//events//EN";
 //if timezone is supported, we output the blog timezone here
 if( $timezone_support ){
 	//get default blog timezone and output only if we're not in UTC or with manual offsets
-	$blog_timezone = EM_DateTimeZone::create()->getName();
+	$blog_timezone = wp_timezone()->getName();
 	if( !preg_match('/^UTC/', $blog_timezone) ){
 		$output_header .= "
 TZID:{$blog_timezone}
@@ -173,8 +173,8 @@ if( $timezone_support && !empty($timezones) ){
 		$vtimezones[$timezone] = array();
 		$previous_offset = false;
 		//get the range of transitions, with a year's cushion so we can calculate the TZOFFSETFROM value
-		$EM_DateTimeZone = EM_DateTimeZone::create($timezone);
-		$timezone_transitions = $EM_DateTimeZone->getTransitions($timezone_range[0] - YEAR_IN_SECONDS, $timezone_range[1] + YEAR_IN_SECONDS);
+		$date_time_zone = wp_timezone();
+		$timezone_transitions = $date_time_zone->getTransitions($timezone_range[0] - YEAR_IN_SECONDS, $timezone_range[1] + YEAR_IN_SECONDS);
 		do{
 			$current_transition = current($timezone_transitions);
 			$transition_key = key($timezone_transitions);
@@ -195,8 +195,8 @@ if( $timezone_support && !empty($timezones) ){
 			//modify the transition array directly and add it to vtimezones array
 			unset( $current_transition['time'] );
 			$current_transition['isdst'] = $current_transition['isdst'] ? 'DAYLIGHT':'STANDARD';
-			$EM_DateTime = new EM_DateTime($current_transition['ts'], $EM_DateTimeZone);
-			$current_transition['ts'] = $EM_DateTime->format('Ymd\THis');
+			$date_time = new DateTime($current_transition['ts']);
+			$current_transition['ts'] = $date_time->format('Ymd\THis');
 			$current_transition['offsetfrom'] = $previous_offset === false ? $current_transition['offset'] : $previous_offset;
 			$vtimezones[$timezone][] = $current_transition;
 			//remember previous offset

@@ -280,30 +280,7 @@ class EM_Attendees_Form {
 		<?php
 		
 	}
-	
-	
-	
-	
-	/**
-	 * Saves the custom attendee form as post meta. This is done on em_event_save_meta_pre since at that point we know the post id and this will get passed onto recurrences as well.
-	 * @param Event $event
-	 */
-	public static function em_event_save_meta_pre($event){
-		global $wpdb;
-		if( !empty($event->duplicated) ) return; //if just duplicated, we ignore this and let EM carry over duplicate event data
-		if( $event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && is_numeric($_REQUEST['custom_attendee_form']) ){
-			//Make sure form id exists
-			$id = $wpdb->get_var('SELECT meta_id FROM '.EM_META_TABLE." WHERE meta_id='{$_REQUEST['custom_attendee_form']}'");
-			if( $id == $_REQUEST['custom_attendee_form'] ){
-				//add or modify custom booking form id in post data
-				update_post_meta($event->post_id, '_custom_attendee_form', $id);
-			}
-		}elseif( $event->event_rsvp && !empty($_REQUEST['custom_attendee_form']) && $_REQUEST['custom_attendee_form'] == 'none' ){
-			update_post_meta($event->post_id, '_custom_attendee_form', 'none');
-		}else{
-			delete_post_meta($event->post_id, '_custom_attendee_form');
-		}
-	}
+
 
 	
 

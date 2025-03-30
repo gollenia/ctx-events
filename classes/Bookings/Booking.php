@@ -44,7 +44,7 @@ class EM_Booking extends EM_Object{
 	var $notes;
 
 	public string $booking_date;
-	protected EM_DateTime $date;
+	protected DateTime $date;
 	protected $person;
 
 	public array $required_fields = [ 'booking_id', 'event_id', 'booking_spaces' ];
@@ -427,7 +427,7 @@ class EM_Booking extends EM_Object{
 		}
 		if( !$override_availability ){
 			// are bookings even available due to event and ticket cut-offs/restrictions? This is checked earlier in booking processes, but is relevant in checkout/cart situations where a previously-made booking is validated just before checkout
-			if( $this->get_event()->rsvp_end()->getTimestamp() < time() ){
+			if( $this->get_event()->get_rsvp_end()->getTimestamp() < time() ){
 				$result = false;
 				$this->errors[] = __( 'Bookings have closed (e.g. event has started).', 'events');
 			}else{
@@ -1003,34 +1003,7 @@ class EM_Booking extends EM_Object{
 	    return apply_filters('em_booking_email_messages', $msg, $this);
 	}
 	
-	/**
-	 * Returns an EM_DateTime representation of when booking was made in UTC timezone. If no valid date defined, false will be returned
-	 * @param boolean $utc_timezone
-	 * @return EM_DateTime
-	 * @throws Exception
-	 */
-	public function date( bool $utc_timezone = false ) : EM_DateTime 
-	{
-		if( empty($this->date) || !$this->date->valid ){
-			if( !empty($this->booking_date ) ){
-			    $this->date = new EM_DateTime($this->booking_date, 'UTC');
-			}else{
-				//we retrn a date regardless but it's not based on a 'valid' booking date
-				$this->date = new EM_DateTime();
-				$this->date->valid = false;
-			}
-		}
-		//Set to UTC timezone if requested, local blog time by default
-		if( $utc_timezone ){
-			$timezone = 'UTC';
-		}else{
-			//we could set this to false but this way we might avoid creating a new timezone if it's already in this one
-			$timezone = get_option( 'timezone_string' );
-			if( !$timezone ) $timezone = get_option('gmt_offset');
-		}
-		$this->date->setTimezone($timezone);
-		return $this->date;
-	}
+
 	
 	/**
 	 * Can the user manage this event? 
