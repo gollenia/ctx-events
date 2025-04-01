@@ -1,6 +1,11 @@
 <?php
 
+namespace Contexis\Events\Models;
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Views\LocationView;
+use WP_Query;
+use WP_Post;
+
 
 /**
  * Object that holds location info and related functions
@@ -14,7 +19,7 @@ use Contexis\Events\Collections\EventCollection;
  * @property int $owner              ID of author/owner, shorthand for location_owner
  * @property int $status             ID of post status, shorthand for location_status
  */
-class EM_Location extends EM_Object {
+class Location extends \EM_Object {
 
 	const POST_TYPE = EM_POST_TYPE_LOCATION;
 
@@ -80,7 +85,7 @@ class EM_Location extends EM_Object {
 	var $post_type;
 	
 
-	static public function find_by_post_id($post_id) {
+	static public function get_by_id($post_id) {
 		$post = get_post($post_id);
 		if (!$post) return new self();
 		return self::find_by_post($post);

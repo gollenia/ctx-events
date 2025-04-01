@@ -82,20 +82,14 @@ class EventPost {
 			$event_data = array_intersect_key($event_data, array_flip($requested_fields));
 		}
 	
-		// Beide Arrays zusammenführen (Post + Event-spezifische Daten)
 		$data = array_merge($post_data, $event_data);
 	
-		// Zusätzliche Verknüpfungen laden, falls angefordert
 		if (in_array('location', $requested_fields)) {
 			$data['location'] = $event->get_location()->get_rest_fields();
 		}
 	
 		if (in_array('speaker', $requested_fields)) {
 			$data['speaker'] = \Contexis\Events\Speaker::get($event->speaker_id)->get_rest_fields();
-		}
-	
-		if (in_array('tags', $requested_fields)) {
-			$data['tags'] = $event->get_taxonomies()->get_rest_fields();
 		}
 	
 		if (in_array('tickets', $requested_fields)) {

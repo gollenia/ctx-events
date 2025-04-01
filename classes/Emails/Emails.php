@@ -61,22 +61,22 @@ class EM_Emails {
 	    wp_clear_scheduled_hook('emp_cron_emails_ical_cleanup');
 	}
 	
-	public static function booking_email_ical_attachments( $msg, $EM_Booking ){
+	public static function booking_email_ical_attachments( $msg, $booking ){
 		//add email ical attachment
 		$event_ids = array();
 		
 		if( !get_option('dbem_bookings_ical_attachments') ){
 			return $msg;
 		}
-		$event_ids[] = $EM_Booking->event_id;
+		$event_ids[] = $booking->event_id;
 		
 		ob_start();
 		em_locate_template('templates/ical.php', true, array('args'=>array('event'=>$event_ids, 'scope'=>'all')));
 		$icalcontent = preg_replace("/([^\r])\n/", "$1\r\n", ob_get_clean());
 		try{
-			$ical_filename = 'ical_'.md5($EM_Booking->booking_id . $EM_Booking->date()->getTimestamp()).'.ics';
+			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->date()->getTimestamp()).'.ics';
 		}catch( Exception $e ){
-			$ical_filename = 'ical_'.md5($EM_Booking->booking_id . $EM_Booking->booking_date).'.ics';
+			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date).'.ics';
 		}
 		$ical_attachment = EM_Mailer::add_email_attachment($ical_filename, $icalcontent);
 		$ical_file_array = array('name'=>'invite.ics', 'type'=>'text/calendar','path'=>$ical_attachment, 'delete'=>true);
@@ -99,19 +99,19 @@ class EM_Emails {
 	        /* @var $event Event */
 	        $emails = array();
 	    	//get ppl attending
-	    	foreach( $event->get_bookings()->get_bookings()->bookings as $EM_Booking ){ //get confirmed bookings
-	    	    /* @var $EM_Booking EM_Booking */
-	    	    if( is_email($EM_Booking->booking_mail) ){
-	    	    	do_action('em_booking_email_before_send', $EM_Booking);
+	    	foreach( $event->get_bookings()->get_bookings()->bookings as $booking ){ //get confirmed bookings
+	    	    
+	    	    if( is_email($booking->booking_mail) ){
+	    	    	do_action('em_booking_email_before_send', $booking);
 	    	    	
 	    	    	if( empty($subject_format) ){
 		    	    	$subject_format = get_option('dbem_emp_emails_reminder_subject');
 		    	    	$message_format = get_option('dbem_emp_emails_reminder_body');
 	    	    	}
-	    	    	$subject = $EM_Booking->output($subject_format,'raw');
-	    	    	$message = $EM_Booking->output($message_format,$output_type);
-		    	    $emails[] = array($EM_Booking->booking_mail, $subject, $message, $EM_Booking->booking_id);
-		    	    do_action('em_booking_email_after_send', $EM_Booking);
+	    	    	$subject = $booking->output($subject_format,'raw');
+	    	    	$message = $booking->output($message_format,$output_type);
+		    	    $emails[] = array($booking->booking_mail, $subject, $message, $booking->booking_id);
+		    	    do_action('em_booking_email_after_send', $booking);
 	    	    }
 	    	}
 	    	if(count($emails) > 0){

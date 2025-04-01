@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Model\Booking;
 
 /**
  * Generates a "widget" table of confirmed bookings for a specific event.
@@ -23,8 +24,8 @@ function em_bookings_person_table(){
 	$bookings_count = count($bookings);
 	if($bookings_count > 0){
 		//Get events here in one query to speed things up
-		foreach($bookings as $EM_Booking){
-			$event_ids[] = $EM_Booking->event_id;
+		foreach($bookings as $booking){
+			$event_ids[] = $booking->event_id;
 		}
 		$events = EventCollection::find($event_ids);
 	}
@@ -75,37 +76,37 @@ function em_bookings_person_table(){
 						<?php 
 						$rowno = 0;
 						$event_count = 0;
-						foreach ($bookings as $EM_Booking) {
-							$event = $events[$EM_Booking->event_id];							
+						foreach ($bookings as $booking) {
+							$event = $events[$booking->event_id];							
 							if( $event->can_manage('edit_events','edit_others_events') && ($rowno < $limit || empty($limit)) && ($event_count >= $offset || $offset === 0) ) {
 								$rowno++;
 								?>
 								<tr>
-									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $EM_Booking->booking_id ?>' name='bookings[]'/></th>
+									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
 									<td><a class="row-title" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $event->event_id ?>"><?php echo ($event->event_name); ?></a></td>
-									<td><?php echo $EM_Booking->get_spaces() ?></td>
-									<td><?php echo $EM_Booking->status_array[$EM_Booking->booking_status]; ?>
+									<td><?php echo $booking->get_spaces() ?></td>
+									<td><?php echo $booking->status_array[$booking->booking_status]; ?>
 									</td>
 									<td>
 										<?php
-										$unapprove_url = add_query_arg(['action'=>'bookings_unapprove', 'booking_id'=>$EM_Booking->booking_id], $_SERVER['REQUEST_URI']);
-										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$EM_Booking->booking_id], $_SERVER['REQUEST_URI']);
-										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$EM_Booking->booking_id], $_SERVER['REQUEST_URI']);
-										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$EM_Booking->booking_id], $_SERVER['REQUEST_URI']);
+										$unapprove_url = add_query_arg(['action'=>'bookings_unapprove', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
+										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
+										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
+										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
 										?>
-										<?php if( get_option('dbem_bookings_approval') && ($EM_Booking->booking_status == EM_Booking::PENDING ) ): ?>
+										<?php if( get_option('dbem_bookings_approval') && ($booking->booking_status == booking::PENDING ) ): ?>
 										<a class="em-bookings-approve" href="<?php echo $approve_url ?>"><?php _e('Approve','events'); ?></a> |
 										<?php endif; ?>
-										<?php if( get_option('dbem_bookings_approval') && $EM_Booking->booking_status == EM_Booking::APPROVED ): ?>
+										<?php if( get_option('dbem_bookings_approval') && $booking->booking_status == Booking::APPROVED ): ?>
 										<a class="em-bookings-unapprove" href="<?php echo $unapprove_url ?>"><?php _e('Unapprove','events'); ?></a> |
 										<?php endif; ?>
-										<?php if( $EM_Booking->booking_status == EM_Booking::REJECTED ): ?>
+										<?php if( $booking->booking_status == Booking::REJECTED ): ?>
 										<a class="em-bookings-approve" href="<?php echo $approve_url ?>"><?php _e('Restore','events'); ?></a> |
 										<?php endif; ?>
-										<?php if( $EM_Booking->booking_status == EM_Booking::PENDING || $EM_Booking->booking_status == EM_Booking::APPROVED ): ?>
+										<?php if( $booking->booking_status == booking::PENDING || $booking->booking_status == booking::APPROVED ): ?>
 										<a class="em-bookings-reject" href="<?php echo $reject_url ?>"><?php _e('Reject','events'); ?></a> |
 										<?php endif; ?>
-										<a class="em-bookings-edit" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_id=<?php echo $EM_Booking->booking_id; ?>"><?php _e('Edit/View','events'); ?></a> |
+										<a class="em-bookings-edit" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_id=<?php echo $booking->booking_id; ?>"><?php _e('Edit/View','events'); ?></a> |
 										<span class="trash"><a class="em-bookings-delete" href="<?php echo $delete_url ?>"><?php _e('Delete','events'); ?></a></span>
 									</td>
 								</tr>

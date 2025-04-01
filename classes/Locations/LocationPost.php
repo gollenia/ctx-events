@@ -49,19 +49,6 @@ class EM_Location_Post {
 	}
 
 
-
-	public static function refresh_cache(){
-		global $EM_Location;
-		//if this is a published event, and the refresh_cache flag was added to this event during save_post, refresh the meta and update the cache
-		if( !empty($EM_Location->refresh_cache) && !empty($EM_Location->post_id) && $EM_Location->is_published() ){
-			$post = get_post($EM_Location->post_id);
-			$EM_Location->load_postdata($post);
-			unset($EM_Location->refresh_cache);
-			wp_cache_set($EM_Location->location_id, $EM_Location, 'em_locations');
-			wp_cache_set($EM_Location->post_id, $EM_Location->location_id, 'em_locations_ids');
-		}
-	}
-
 	public static function register_meta() {
 
 		

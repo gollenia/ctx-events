@@ -2,7 +2,6 @@
 /**
  * Outputs a checkbox that can be used to obtain consent.
  * Complete nonsense, change!
- * @param Event|EM_Location|EM_Booking|bool $EM_Object
  */
 function em_data_privacy_consent_checkbox( $EM_Object = false ){
 	if( !empty($EM_Object) && (!empty($EM_Object->booking_id) || !empty($EM_Object->post_id)) ) return; //already saved so consent was given at one point
@@ -47,20 +46,7 @@ function em_data_privacy_consent_hooks(){
 		add_action('em_event_validate', 'em_data_privacy_cpt_validate', 10, 2);
 	}
 	//LOCATIONS
-	if( get_option('dbem_data_privacy_consent_locations') == 1 || ( get_option('dbem_data_privacy_consent_events') == 2 && !is_user_logged_in() ) ){
-		add_action('em_front_location_form_footer', 'em_data_privacy_consent_location_checkbox', 9, 1);	/**
-		 * Wrapper function in case old overriden templates didn't pass the EM_Location object and depended on global value
-		 * @param EM_Location $location
-		 */
-		function em_data_privacy_consent_location_checkbox( $location ){
-			if( empty($location) ){ global $EM_Location; }
-			else{ $EM_Location = $location ; }
-			em_data_privacy_consent_checkbox($EM_Location);
-		}
-		add_action('em_location_get_post_meta', 'em_data_privacy_cpt_get_post', 10, 2);
-		add_action('em_location_validate', 'em_data_privacy_cpt_validate', 10, 2);
-		
-	}
+	
 }
 if( !is_admin() || ( defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['action']) && !in_array($_REQUEST['action'], array('booking_add_one')) ) ){
 	add_action('init', 'em_data_privacy_consent_hooks');
@@ -69,13 +55,12 @@ if( !is_admin() || ( defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['ac
 /**
  * Validates a bookng to ensure consent is/was given.
  * @param bool $result
- * @param EM_Booking $EM_Booking
  * @return bool
  */
-function em_data_privacy_consent_booking_validate( $result, $EM_Booking ){
+function em_data_privacy_consent_booking_validate( $result, $booking ){
 	
-    if( empty($EM_Booking->booking_meta['consent']) ){
-	    $EM_Booking->add_error( sprintf(__('You must allow us to collect and store your data in order for us to process your booking.', 'events')) );
+    if( empty($booking->booking_meta['consent']) ){
+	    $booking->add_error( sprintf(__('You must allow us to collect and store your data in order for us to process your booking.', 'events')) );
 	    $result = false;
     }
     return $result;
@@ -86,7 +71,6 @@ function em_data_privacy_consent_booking_validate( $result, $EM_Booking ){
 /**
  * Save consent to event or location object
  * @param bool $result
- * @param Event|EM_Location $EM_Object
  * @return bool
  */
 function em_data_privacy_cpt_get_post($result, $EM_Object ){

@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Options;
 use Contexis\Events\Models\Event;
 
@@ -25,7 +28,7 @@ class EM_Gateway_Offline extends EM_Gateway {
 		add_filter('em_booking_set_status',array(&$this,'em_booking_set_status'),1,2);
 		add_filter('em_bookings_pending_count', array(&$this, 'em_bookings_pending_count'),1,1);
 		add_filter('em_wp_localize_script', array(&$this,'em_wp_localize_script'),1,1);
-		add_filter('em_booking_validate', array(&$this,'em_booking_validate'),9,2); //before EM_Bookings_Form hooks in
+		add_filter('em_booking_validate', array(&$this,'em_booking_validate'),9,2); //before Bookings_Form hooks in
 	}
 	
 	/**
@@ -50,10 +53,10 @@ class EM_Gateway_Offline extends EM_Gateway {
 	/**
 	 * Intercepts return JSON and adjust feedback messages when booking with this gateway.
 	 * @param array $return
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return array
 	 */
-	function booking_form_feedback( $result, EM_Booking $booking ){
+	function booking_form_feedback( $result, Booking $booking ){
 		if(!get_option("em_offline_iban", true)) return [
 			'success' => false,
 			'error' => "No IBAN available. Please add an IBAN in the offline payment gateway"
@@ -80,18 +83,18 @@ class EM_Gateway_Offline extends EM_Gateway {
 	/**
 	 * Sets booking status and records a full payment transaction if new status is from pending payment to completed. 
 	 * @param int $status
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 */
-	function em_booking_set_status($result, $EM_Booking){
-		if($EM_Booking->booking_status == 1 && $EM_Booking->previous_status == $this->status && $this->uses_gateway($EM_Booking) && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'gateway_add_payment') ){
-			$this->record_transaction($EM_Booking, $EM_Booking->get_price(false,false,true), get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', '');								
+	function em_booking_set_status($result, $booking){
+		if($booking->booking_status == 1 && $booking->previous_status == $this->status && $this->uses_gateway($booking) && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'gateway_add_payment') ){
+			$this->record_transaction($booking, $booking->get_price(false,false,true), get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', '');								
 		}
 		return $result;
 	}
 	
 	function em_bookings_pending_count($count){
-		$EM_Bookings = EM_Bookings::get(array('status'=>5));
-		return $count + $EM_Bookings->count();
+		$booking_collection = BookingCollection::get(array('status'=>5));
+		return $count + $booking_collection->count();
 	}
 	
 
@@ -100,38 +103,38 @@ class EM_Gateway_Offline extends EM_Gateway {
 	 * Modifies the booking status if the event isn't free and also adds a filter to modify user feedback returned.
 	 * Triggered by the em_booking_add_yourgateway action.
 	 * @param Event $event
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @param boolean $post_validation
 	 */
-	function booking_add($EM_Booking, $post_validation = false){
+	function booking_add($booking, $post_validation = false){
 		//validate post
 		if( !empty($_REQUEST['payment_amount']) && !is_numeric($_REQUEST['payment_amount'])){
-			$EM_Booking->add_error( 'Invalid payment amount, please provide a number only.', 'events' );
+			$booking->add_error( 'Invalid payment amount, please provide a number only.', 'events' );
 		}
 		//add em_event_save filter to log transactions etc.
 		add_filter('em_booking_save', array(&$this, 'em_booking_save'), 10, 2);
 		//set flag that we're manually booking here, and set gateway to offline
 	
 		
-		parent::booking_add($EM_Booking, $post_validation);
+		parent::booking_add($booking, $post_validation);
 	}
 	
 	/**
 	 * Hooks into the em_booking_save filter and checks whether a partial or full payment has been submitted
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 */
-	function em_booking_save( $result, $EM_Booking ){
+	function em_booking_save( $result, $booking ){
 		if( $result && !empty($_REQUEST['manual_booking']) && wp_verify_nonce($_REQUEST['manual_booking'], 'em_manual_booking_'.$_REQUEST['event_id']) ){
 			remove_filter('em_booking_set_status',array(&$this,'em_booking_set_status'),1,2);
 			if( !empty($_REQUEST['payment_full']) ){
-				$price = ( !empty($_REQUEST['payment_amount']) && is_numeric($_REQUEST['payment_amount']) ) ? $_REQUEST['payment_amount']:$EM_Booking->get_price(false, false, true);
-				$this->record_transaction($EM_Booking, $price, get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', __('Manual booking.','events'));
-				$EM_Booking->set_status(1,false);
+				$price = ( !empty($_REQUEST['payment_amount']) && is_numeric($_REQUEST['payment_amount']) ) ? $_REQUEST['payment_amount']:$booking->get_price(false, false, true);
+				$this->record_transaction($booking, $price, get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', __('Manual booking.','events'));
+				$booking->set_status(1,false);
 			}elseif( !empty($_REQUEST['payment_amount']) && is_numeric($_REQUEST['payment_amount']) ){
-				$this->record_transaction($EM_Booking, $_REQUEST['payment_amount'], get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', __('Manual booking.','events'));
-				if( $_REQUEST['payment_amount'] >= $EM_Booking->get_price(false, false, true) ){
-					$EM_Booking->set_status(1,false);
+				$this->record_transaction($booking, $_REQUEST['payment_amount'], get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', __('Manual booking.','events'));
+				if( $_REQUEST['payment_amount'] >= $booking->get_price(false, false, true) ){
+					$booking->set_status(1,false);
 				}
 			}
 			add_filter('em_booking_set_status',array(&$this,'em_booking_set_status'),1,2);
@@ -142,7 +145,7 @@ class EM_Gateway_Offline extends EM_Gateway {
 	
 	
 	
-	function em_booking_validate($result, $EM_Booking){
+	function em_booking_validate($result, $booking){
 		if( !empty($_REQUEST['manual_booking']) && wp_verify_nonce($_REQUEST['manual_booking'], 'em_manual_booking_'.$_REQUEST['event_id']) ){
 			
 		}
@@ -217,13 +220,13 @@ class EM_Gateway_Offline extends EM_Gateway {
 	}	
 	
 	/**
-	 * Checks an EM_Booking object and returns whether or not this gateway is/was used in the booking.
-	 * @param EM_Booking $EM_Booking
+	 * Checks an booking object and returns whether or not this gateway is/was used in the booking.
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	function uses_gateway($EM_Booking){
+	function uses_gateway($booking){
 	    //for all intents and purposes, if there's no gateway assigned but this booking status matches, we assume it's offline
-		return parent::uses_gateway($EM_Booking) || ( empty($EM_Booking->booking_meta['gateway']) && $EM_Booking->booking_status == $this->status );
+		return parent::uses_gateway($booking) || ( empty($booking->booking_meta['gateway']) && $booking->booking_status == $this->status );
 	}
 
 
@@ -239,15 +242,15 @@ class EM_Gateway_Offline extends EM_Gateway {
 
 
 	function add_payment($request) {
-		$EM_Booking = EM_Booking::find($request['booking_id']);
+		$booking = Booking::get_by_id($request['booking_id']);
 
 		if( !empty($request['transaction_total_amount']) && is_numeric($request['transaction_total_amount']) ){
-			$this->record_transaction($EM_Booking, $_REQUEST['transaction_total_amount'], get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', $_REQUEST['transaction_note']);
-			$total = $EM_Booking->get_total_paid();
-			if( $total >= $EM_Booking->get_price() ){
-				$EM_Booking->approve();
+			$this->record_transaction($booking, $_REQUEST['transaction_total_amount'], get_option('dbem_bookings_currency'), current_time('mysql'), '', 'Completed', $_REQUEST['transaction_note']);
+			$total = $booking->get_total_paid();
+			if( $total >= $booking->get_price() ){
+				$booking->approve();
 			}
-			do_action('em_payment_processed', $EM_Booking, $this);
+			do_action('em_payment_processed', $booking, $this);
 		}
 	}
 

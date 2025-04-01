@@ -1,5 +1,6 @@
 <?php
 
+use Contexis\Events\Export\BookingsTable;
 use \Contexis\Events\Models\Event;
 
 class BookingExport
@@ -34,30 +35,28 @@ class BookingExport
 			return;
 		}
 
-		
-		$EM_Bookings_Table = new EM_Bookings_Table();
+		$show_tickets = isset($_REQUEST['show_tickets']) && $_REQUEST['show_tickets'] == 1 ? true : false;
+		$bookings_table = new BookingsTable();
 	
-		$EM_Bookings_Table->limit = 500;
-		$EM_Bookings = $EM_Bookings_Table->get_bookings();
+		$bookings_table->limit = 500;
+		$booking_collection = $bookings_table->get_bookings();
 		
-		$excel_sheet = [$EM_Bookings_Table->get_headers(true)];
+		$excel_sheet = [$bookings_table->get_headers(true)];
 		
-		while( !empty($EM_Bookings->bookings) ){
-			foreach( $EM_Bookings->bookings as $EM_Booking ) { /* @var EM_Booking $EM_Booking */
-				//Display all values
+		while( !empty($booking_collection->bookings) ){
+			foreach( $booking_collection->bookings as $booking ) { 
 				if( $show_tickets ){
-					foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){ 
-						$row = $EM_Bookings_Table->get_row_csv($ticket_booking);
+					foreach($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){ 
+						$row = $bookings_table->get_row_csv($ticket_booking);
 						array_push($excel_sheet, $row);
 					}
 				}else{
-					$row = $EM_Bookings_Table->get_row_csv($EM_Booking);
+					$row = $bookings_table->get_row_csv($booking);
 					array_push($excel_sheet, $row);
 				}
 			}
 			//reiterate loop
-			$EM_Bookings_Table->offset += $EM_Bookings_Table->limit;
-			$EM_Bookings = $EM_Bookings_Table->get_bookings();
+			$bookings_table->offset += $bookings_table->limit;
 		}
 		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
 		$xlsx->downloadAs($this->get_file_name($event));
@@ -77,14 +76,14 @@ class BookingExport
 	public function export_attendees_xls($event){
 		
 		
-		$EM_Bookings_Table = new EM_Bookings_Table();
+		$bookings_table = new BookingsTable();
 		$alphabet = range('A', 'Z');
 		
-		$EM_Bookings_Table->limit = 500; 
-		$EM_Bookings = $EM_Bookings_Table->get_bookings();
+		$bookings_table->limit = 500; 
+		$bookings = $bookings_table->get_bookings();
 		$form_fields = EM_Attendees_Form::get_form($event->event_id)->form_fields;
 		
-		$headers = $EM_Bookings_Table->get_headers(true);
+		$headers = $bookings_table->get_headers(true);
 		$registration_length = count($headers);
 		$titles = array_fill(0, count($headers), '<b><middle><style height="50" bgcolor="#f2f2f2" color="#000000"></style></middle></b>');
 		$titles[0] = '<b><middle><style height="25" bgcolor="#f2f2f2" color="#000000">' . __('Registration Fields','events') . '</style></middle></b>';
@@ -96,7 +95,7 @@ class BookingExport
 
 		foreach($form_fields as $field ){
 			if( $field['type'] == 'html' ) continue;
-			$headers[] = EM_Bookings_Table::sanitize_spreadsheet_cell('<b><middle><style height="25" bgcolor="#e2efda" color="#375623">' . $field['label'] . '</style></middle></b>');
+			$headers[] = BookingsTable::sanitize_spreadsheet_cell('<b><middle><style height="25" bgcolor="#e2efda" color="#375623">' . $field['label'] . '</style></middle></b>');
 			$titles[] = $i == 0 ? '<b><middle><style height="25" bgcolor="#e2efda" color="#375623">' . __('Attendee','events') . '</style></middle></b>' : '<b><middle><style height="25" bgcolor="#e2efda" color="#375623"></style></middle></b>';
 			$i++;
 		}
@@ -104,16 +103,16 @@ class BookingExport
 		$excel_sheet = [$titles];
 		$excel_sheet[] = $headers;
 		
-		while(!empty($EM_Bookings->bookings)){
-			foreach( $EM_Bookings->bookings as $EM_Booking ) {
-				$attendees_data = EM_Attendees_Form::get_booking_attendees($EM_Booking);
-				foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
-					$orig_row = $EM_Bookings_Table->get_row_csv($ticket_booking);
+		while(!empty($booking_collection->bookings)){
+			foreach( $booking_collection->bookings as $booking ) {
+				$attendees_data = EM_Attendees_Form::get_booking_attendees($booking);
+				foreach($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
+					$orig_row = $bookings_table->get_row_csv($ticket_booking);
 					if( !empty($attendees_data[$ticket_booking->ticket_id]) ){ 
 						foreach($attendees_data[$ticket_booking->ticket_id] as $attendee_title => $attendee_data){
 							$row = $orig_row;
 							foreach( $attendee_data as $field_value){
-								$row[] = EM_Bookings_Table::sanitize_spreadsheet_cell($field_value);
+								$row[] = BookingsTable::sanitize_spreadsheet_cell($field_value);
 							}
 							array_push($excel_sheet, $row);
 						}
@@ -121,8 +120,8 @@ class BookingExport
 				}
 			}
 			//reiterate loop
-			$EM_Bookings_Table->offset += $EM_Bookings_Table->limit;
-			$EM_Bookings = $EM_Bookings_Table->get_bookings();
+			$bookings_table->offset += $bookings_table->limit;
+			
 		}
 		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
 		$xlsx->mergeCells('A1:'. $alphabet[$registration_length-1].'1');

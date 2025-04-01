@@ -201,16 +201,16 @@ class EM_Event_Posts_Admin{
 				break;
 			case 'location':
 				//get meta value to see if post has location, otherwise
-				$EM_Location = $event->get_location();
+				$location = $event->get_location();
 				if( $event->has_location() ){
 					$actions = array();
-					$actions[] = "<a href='". esc_url($EM_Location->get_permalink())."'>". esc_html__('View') ."</a>";
-					if( $EM_Location->can_manage('edit_locations', 'edit_others_locations') ) {
-						$actions[] = "<a href='". esc_url($EM_Location->get_edit_url())."'>". esc_html__('Edit') ."</a>";
+					$actions[] = "<a href='". esc_url($location->get_permalink())."'>". esc_html__('View') ."</a>";
+					if( $location->can_manage('edit_locations', 'edit_others_locations') ) {
+						$actions[] = "<a href='". esc_url($location->get_edit_url())."'>". esc_html__('Edit') ."</a>";
 					}
-					echo "<strong><a href='". $EM_Location->get_permalink()."'>" . $EM_Location->location_name . "</a></strong>";
+					echo "<strong><a href='". $location->get_permalink()."'>" . $location->location_name . "</a></strong>";
 					echo "<span class='row-actions'> - ". implode(' | ', $actions) . "</span>";
-					echo "<br/>" . $EM_Location->location_address . " - " . $EM_Location->location_town;
+					echo "<br/>" . $location->location_address . " - " . $location->location_town;
 				}else{
 					echo __('None','events');
 				}
@@ -421,10 +421,10 @@ class EM_Event_Recurring_Posts_Admin{
 					break;
 				case 'location':
 					//get meta value to see if post has location, otherwise
-					$EM_Location = $event->get_location();
-					if( !empty($EM_Location->location_id) ){
-						echo "<strong><a href='". esc_url($EM_Location->get_edit_url())."'>" . $EM_Location->location_name . "</a></strong>";
-						echo "<br/>" . $EM_Location->location_address . " - " . $EM_Location->location_town;
+					$location = $event->get_location();
+					if( !empty($location->location_id) ){
+						echo "<strong><a href='". esc_url($location->get_edit_url())."'>" . $location->location_name . "</a></strong>";
+						echo "<br/>" . $location->location_address . " - " . $location->location_town;
 					}else{
 						echo __('None','events');
 					}

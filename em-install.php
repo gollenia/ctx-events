@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Models\Location;
 
 function em_uninstall() {
 	global $wpdb;
@@ -609,13 +610,13 @@ function em_upgrade_current_installation(){
 		$batch_size = 100;
 		$offset = 0;
 		
-		while($events = Events::find(['limit' => $batch_size, 'paged' => $offset])) {
+		while($events = EventCollection::find(['limit' => $batch_size, 'paged' => $offset])) {
 			if($offset == 100) break;
 			error_log("offset: " . $offset);
 
 			foreach($events as $event) {
 				if($event->location_id == 0) continue;
-				$location = EM_Location::find_by_location_id($event->location_id);
+				$location = Location::find_by_location_id($event->location_id);
 				if(!$location) {
 					error_log("Location für Event {$event->event_id} nicht gefunden!");
 					continue;

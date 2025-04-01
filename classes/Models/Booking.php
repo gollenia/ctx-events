@@ -1,16 +1,20 @@
 <?php
 
-use Contexis\Events\Intl\Date;
-use Contexis\Events\Tickets\Tickets;
+namespace Contexis\Events\Model;
+
+use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Tickets\TicketsBookings;
 use Contexis\Events\Models\Event;
+use DateTime;
+use WP_REST_Request;
+use DateInterval;
 
 /**
  * Contains all information and relevant functions surrounding a single booking made with Events Manager
  * @property int|false $booking_status
  * @property string $language
  */
-class EM_Booking extends EM_Object{
+class Booking extends \EM_Object{
 
 	const PENDING = 0;
 	const APPROVED = 1;
@@ -53,17 +57,7 @@ class EM_Booking extends EM_Object{
 	
 	public int $mails_sent = 0;
 	
-	/**
-	 * Contains an array of custom fields for a booking. This is loaded from em_meta, where the booking_custom name contains arrays of data.
-	 * @var array
-	 */
-	//var $custom = array();
-	/**
-	 * If saved in this instance, you can see what previous approval status was.
-	 * @TODO make this either a boolean or an integer, not both.
-	 * @var int
-	 */
-	var $previous_status = false;
+	public int $previous_status = 0;
 
 	public array $status_array = [];
 
@@ -257,26 +251,15 @@ class EM_Booking extends EM_Object{
 		return $return;
 	}
 
-
-	/**
-	 * Find a booking by ID, or return a new booking object if no ID is passed.
-	 * 
-	 * @param mixed $id
-	 * @return EM_Booking
-	 */
-	public static function find(mixed $id = false) : EM_Booking 
+	public static function get_by_id(int $id): Booking 
 	{
-		global $EM_Booking;
-	
-		if (is_object($EM_Booking) && get_class($EM_Booking) == 'EM_Booking' && (
-			(is_object($id) && $EM_Booking->booking_id == $id->booking_id) ||
-			(is_numeric($id) && $EM_Booking->booking_id == $id) ||
-			(is_array($id) && !empty($id['booking_id']) && $EM_Booking->booking_id == $id['booking_id'])
-		)) {
-			return $EM_Booking;
+		global $wpdb;
+		$sql = $wpdb->prepare("SELECT * FROM ". EM_BOOKINGS_TABLE ." WHERE booking_id =%d", $id);
+		$booking = $wpdb->get_row($sql, ARRAY_A);
+		if ($booking) {
+			return new Booking($booking);
 		}
-	
-		return (is_object($id) && get_class($id) == 'EM_Booking') ? $id : new EM_Booking($id);
+		return new Booking();
 	}
 	
 	/**
@@ -455,7 +438,7 @@ class EM_Booking extends EM_Object{
 
 	function get_payment_info() 
 	{
-		return EM_Gateways::get_gateway($this->booking_meta['gateway'])->get_payment_info($this);
+		return \EM_Gateways::get_gateway($this->booking_meta['gateway'])->get_payment_info($this);
 	}
 
 	function get_rest_fields() {
@@ -596,14 +579,11 @@ class EM_Booking extends EM_Object{
 	 * @param boolean $format If set to true a currency-formatted string value is returned
 	 * @return string|float
 	 */
-	function get_total_paid( $format = false ){
+	function get_total_paid( ) : float {
 		$status = ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1:$this->booking_status;
 		$total = $status ? $this->get_price() : 0;
 		$total = apply_filters('em_booking_get_total_paid', $total, $this);
-		if( $format ){
-			return $this->format_price($total);
-		}
-		return $total;
+		return floatval($total);
 	}
 	
 	
@@ -628,7 +608,7 @@ class EM_Booking extends EM_Object{
 		if( is_object($this->tickets) && get_class($this->tickets)=='Tickets' ){
 			return apply_filters('em_booking_get_tickets', $this->tickets, $this);
 		}else{
-			$this->tickets = \Contexis\Events\Tickets\Tickets::find_by_booking($this);
+			$this->tickets = TicketCollection::find_by_booking($this);
 		}
 		return apply_filters('em_booking_get_tickets', $this->tickets, $this);
 	}
@@ -791,7 +771,7 @@ class EM_Booking extends EM_Object{
 					break;
 				case '#_BOOKINGFIELDS': 
 					ob_start();
-					em_locate_template('emails/bookingfields.php', true, array('EM_Booking'=>$this));
+					em_locate_template('emails/bookingfields.php', true, array('booking'=>$this));
 					$replace = ob_get_clean();
 					break;
 				case '#_BOOKINGFIELD':
@@ -829,12 +809,12 @@ class EM_Booking extends EM_Object{
 					break;
 				case '#_BOOKINGTICKETS':
 					ob_start();
-					em_locate_template('emails/bookingtickets.php', true, array('EM_Booking'=>$this));
+					em_locate_template('emails/bookingtickets.php', true, array('booking'=>$this));
 					$replace = ob_get_clean();
 					break;
 				case '#_BOOKINGSUMMARY':
 					ob_start();
-					em_locate_template('emails/bookingsummary.php', true, array('EM_Booking'=>$this));
+					em_locate_template('emails/bookingsummary.php', true, array('booking'=>$this));
 					$replace = ob_get_clean();
 					break;
 				case '#_BOOKINGADMINURL':
@@ -872,7 +852,7 @@ class EM_Booking extends EM_Object{
 					break;
 				case '#_BOOKINGATTENDEES':
 					ob_start();
-					em_locate_template('emails/attendees.php', true, array('EM_Booking'=>$this));
+					em_locate_template('emails/attendees.php', true, array('booking'=>$this));
 					$replace = ob_get_clean();
 					break;
 				default:
@@ -892,12 +872,7 @@ class EM_Booking extends EM_Object{
 		return apply_filters('em_booking_output', $output_string, $this, $format, $target);	
 	}
 	
-	/**
-	 * @param boolean $email_admin
-	 * @param boolean $force_resend
-	 * @param boolean $email_attendee
-	 * @return boolean
-	 */
+
 	function email( bool $email_admin = true, bool $force_resend = false, bool $email_attendee = true ) : bool
 	{
 		$result = true;
@@ -906,8 +881,7 @@ class EM_Booking extends EM_Object{
 		
 		//Make sure event matches booking, and that booking used to be approved.
 		if( $this->booking_status !== $this->previous_status || $force_resend ){
-			// before we format dates or any other language-specific placeholders, make sure we're translating the site language, not the user profile language in the admin area (e.g. if an admin is sending a booking confirmation email), assuming this isn't a ML-enabled site.
-			
+
 			do_action('em_booking_email_before_send', $this);
 			//get event info and refresh all bookings
 			$event = $this->get_event(); //We NEED event details here.
@@ -1020,7 +994,7 @@ class EM_Booking extends EM_Object{
 			
 		];
 
-		$active_gateways = EM_Gateways::active_gateways();
+		$active_gateways = \EM_Gateways::active_gateways();
 
 		if( count($active_gateways) == 0 ){
 			$enabled['is_enabled'] = false;

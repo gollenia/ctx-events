@@ -1,4 +1,9 @@
-<?php 
+<?php
+
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Export\BookingsTable;
+use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Ticket;
 
 /**
  * Decide what content to show in the bookings section. 
@@ -36,8 +41,8 @@ function em_bookings_dashboard(){
   		<div class="em-bookings-recent">
 			<h2><?php esc_html_e('Recent Bookings','events'); ?></h2>	
 	  		<?php
-			$EM_Bookings_Table = new EM_Bookings_Table();
-			$EM_Bookings_Table->output();
+			$bookings_table = new BookingsTable();
+			$bookings_table->output();
 	  		?>
   		</div>
   		<br class="clear" />
@@ -102,9 +107,9 @@ function em_bookings_event(){
 		</div>
 		<h2><?php esc_html_e('Bookings','events'); ?></h2>
 		<?php
-		$EM_Bookings_Table = new EM_Bookings_Table();
-		$EM_Bookings_Table->status = 'all';
-		$EM_Bookings_Table->output();
+		$bookings_table = new BookingsTable();
+		$bookings_table->status = 'all';
+		$bookings_table->output();
   		?>
 		<?php do_action('em_bookings_event_footer', $event); ?>
 	</div>
@@ -117,9 +122,9 @@ function em_bookings_event(){
 function em_bookings_ticket(){
 
 	if (!empty($_REQUEST['ticket_id'])) {
-		$ticket = new \Contexis\Events\Tickets\Ticket($_REQUEST['ticket_id']);
+		$ticket = new Ticket($_REQUEST['ticket_id']);
 	} else {
-		$ticket = new \Contexis\Events\Tickets\Ticket();
+		$ticket = new Ticket();
 	}
 	global $EM_Notices;
 	$event = $ticket->get_event();
@@ -156,9 +161,9 @@ function em_bookings_ticket(){
 		</div>
 		<h2><?php esc_html_e('Bookings','events'); ?></h2>
 		<?php
-		$EM_Bookings_Table = new EM_Bookings_Table();
-		//$EM_Bookings_Table->status = get_option('dbem_bookings_approval') ? 'needs-attention':'confirmed';
-		$EM_Bookings_Table->output();
+		$bookings_table = new BookingsTable();
+		//$bookings_table->status = get_option('dbem_bookings_approval') ? 'needs-attention':'confirmed';
+		$bookings_table->output();
   		?>
 		<?php do_action('em_bookings_ticket_footer', $ticket); ?>
 	</div>
@@ -174,8 +179,8 @@ function em_bookings_person(){
 	global $EM_Notices;
 	
 	$has_booking = false;
-	foreach(EM_Bookings->find(array('booking_mail' => $_REQUEST['booking_mail'])) as $EM_Booking){
-		if($EM_Booking->can_manage('manage_bookings','manage_others_bookings')){
+	foreach(BookingCollection::find(array('booking_mail' => $_REQUEST['booking_mail'])) as $booking){
+		if($booking->can_manage('manage_bookings','manage_others_bookings')){
 			$has_booking = true;
 		}
 	}
@@ -204,7 +209,7 @@ function em_bookings_person(){
 							<?php esc_html_e( 'Personal Details', 'events'); ?>
 						</h3>
 						<div class="">
-							<h1><?php echo $EM_Booking->full_name; ?></h1>
+							<h1><?php echo $booking->full_name; ?></h1>
 						</div>
 					</div> 
 				</div>
@@ -214,10 +219,10 @@ function em_bookings_person(){
 		<?php do_action('em_bookings_person_body_1'); ?>
 		<h2><?php esc_html_e('Past And Present Bookings','events'); ?></h2>
 		<?php
-		$EM_Bookings_Table = new EM_Bookings_Table();
-		//$EM_Bookings_Table->status = 'all';
-		$EM_Bookings_Table->scope = 'all';
-		$EM_Bookings_Table->output();
+		$bookings_table = new BookingsTable();
+		//$bookings_table->status = 'all';
+		$bookings_table->scope = 'all';
+		$bookings_table->output();
   		?>
 		<?php do_action('em_bookings_person_footer'); ?>
 	</div>
@@ -225,7 +230,7 @@ function em_bookings_person(){
 }
 
 function em_bookings_single() {
-	$EM_Booking = new EM_Booking($_REQUEST['booking_id']);
+	$booking = Booking::get_by_id($_REQUEST['booking_id']);
 	
 	?>
 	<div class='wrap' id="em-bookings-admin-booking">
@@ -236,17 +241,17 @@ function em_bookings_single() {
 	  		<div class="postbox-container" style="width:99.5%">
 						<?php
 						
-						$event = $EM_Booking->get_event();
+						$event = $booking->get_event();
 						?>
-						<div id="booking-admin" data-id="<?php echo $EM_Booking->booking_id ?>"></div>
+						<div id="booking-admin" data-id="<?php echo $booking->booking_id ?>"></div>
 						<?php do_action('em_bookings_admin_booking_event', $event); ?>
 				
 				
-				<?php do_action('em_bookings_single_metabox_footer', $EM_Booking); ?>
+				<?php do_action('em_bookings_single_metabox_footer', $booking); ?>
 			</div>
 		</div>
 		<br style="clear:both;" />
-		<?php do_action('em_bookings_single_footer', $EM_Booking); ?>
+		<?php do_action('em_bookings_single_footer', $booking); ?>
 	</div>
 	<?php
 }

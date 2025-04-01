@@ -2,6 +2,8 @@
 
 namespace Contexis\Events;
 
+use Contexis\Events\Collections\BookingCollection;
+
 class Dashboard {
 
 	public static function init() {
@@ -17,7 +19,7 @@ class Dashboard {
 	}
 
 	public static function bookings_box() {
-		$bookings = \EM_Bookings::get(['limit' => 5, 'orderby' => 'booking_id', 'order' => 'DESC']);
+		$bookings = BookingCollection::get(['limit' => 5, 'orderby' => 'booking_id', 'order' => 'DESC']);
 		
 		?>
 		<table style="width:100%">

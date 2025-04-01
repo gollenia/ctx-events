@@ -5,12 +5,12 @@ namespace Contexis\Events\Models;
 use Contexis\Events\Collections\EventCollection;
 use \Contexis\Events\Events\EventPost;
 use Contexis\Events\Intl\Price;
+use Contexis\Events\Models\Location;
 use DateInterval;
 use DateTime;
-use DateTimeZone;
-use EM_Bookings;
-use EM_Categories;
-use EM_Location;
+use Bookings;
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Collections\TicketCollection;
 use EventView;
 use Exception;
 use WP_Post;
@@ -672,12 +672,6 @@ class Event extends \EM_Object{
 		if( !$event->save() ) return;
 		
 		$event->feedback_message = sprintf(__("%s successfully duplicated.", 'events'), __('Event','events'));
-		//save tags here - eventually will be moved into part of $this->save();
-		
-		$EM_Tags = new \EM_Tags($this);
-		$EM_Tags->event_id = $event->event_id;
-		$EM_Tags->post_id = $event->post_id;
-		$EM_Tags->save();
 	
 		//other non-EM post meta inc. featured image
 		$event_meta = $this->get_event_meta();
@@ -819,28 +813,14 @@ class Event extends \EM_Object{
 		return $this->event_rsvp_start;
 	}
 	
-	/**
-	 * Returns an EM_Categories object of the Event instance.
-	 * @return EM_Categories
-	 */
 	function get_categories() {
-		if( empty($this->categories) ){
-			$this->categories = new EM_Categories($this);
-		}elseif(empty($this->categories->event_id)){
-			$this->categories->event_id = $this->event_id;
-			$this->categories->post_id = $this->post_id;			
-		}
-		return apply_filters('em_event_get_categories', $this->categories, $this);
+		$this->categories = get_the_terms($this->post_id, "event-category");
 	}
 	
-	
-	/**
-	 * Returns the physical location object this event belongs to.
-	 * @return EM_Location
-	 */
 	function get_location() {
 		if( !is_object($this->location) || $this->location->location_id != $this->location_id ){
-			$this->location = apply_filters('em_event_get_location', EM_Location::find_by_post_id($this->location_id), $this);
+			$this->location = apply_filters('em_event_get_location', 
+			Location::get_by_id($this->location_id));
 		}
 		return $this->location;
 	}
@@ -913,22 +893,18 @@ class Event extends \EM_Object{
 		return $this->contact ?: new WP_User(); // Falls der User nicht existiert
 	}
 	
-	/**
-	 * Retrieve and save the bookings belonging to instance. If called again will return cached version, set $force_reload to true to create a new EM_Bookings object.
-	 * @param boolean $force_reload
-	 * @return EM_Bookings
-	 */
-	function get_bookings( $force_reload = false ) : EM_Bookings {
+
+	function get_bookings( $force_reload = false ) : BookingCollection {
 		if( get_option('dbem_rsvp_enabled') ){
 			if( (!$this->bookings || $force_reload) ){
-				$this->bookings = EM_Bookings::from_event($this);
+				$this->bookings = BookingCollection::from_event($this);
 			}
-			$this->bookings->event_id = $this->event_id; //always refresh event_id
-			$this->bookings = apply_filters('em_event_get_bookings', $this->bookings, $this);
+			$this->bookings->event_id = $this->event_id;
 		}else{
-			return new EM_Bookings;
+			return new BookingCollection;
 		}
-		//TODO for some reason this returned instance doesn't modify the original, e.g. try $this->get_bookings()->add($EM_Booking) and see how $this->bookings->feedback_message doesn't change
+		
+		
 		return $this->bookings;
 	}
 	
@@ -1291,14 +1267,13 @@ class Event extends \EM_Object{
 		 	if( ($this->recurring_reschedule || $this->recurring_recreate_bookings) && $this->recurring_recreate_bookings !== false ){ //if set specifically to false, we skip bookings entirely (ML translations for example)
 			 	//first, delete all bookings & tickets if we haven't done so during the reschedule above - something we'll want to change later if possible so bookings can be modified without losing all data
 			 	if( !$this->recurring_reschedule ){
-				 	//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-			 		$EM_Bookings = new EM_Bookings;
-			 		$tickets = new \Contexis\Events\Tickets\Tickets();
+				 	//create empty BookingCollection and Tickets objects to circumvent extra loading of data and SQL queries
+			 		$bookings = new BookingCollection;
+			 		$tickets = new TicketCollection();
 			 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 			 			if($event['recurrence_id'] == $this->event_id){
-			 				//trick EM_Bookings and Tickets to think it was loaded, and make use of optimized delete functions since 5.7.3.4
-			 				$EM_Bookings->event_id = $tickets->event_id = $event['event_id'];
-			 				$EM_Bookings->delete();
+			 				$bookings->event_id = $tickets->event_id = $event['event_id'];
+			 				$bookings->delete();
 			 				$tickets->delete();
 			 			}
 			 		}
@@ -1358,45 +1333,18 @@ class Event extends \EM_Object{
 			 		$result = $wpdb->query($sql);
 			 	}
 		 	}elseif( $this->recurring_delete_bookings ){
-		 		//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-		 		$EM_Bookings = new EM_Bookings;
-		 		$tickets = new \Contexis\Events\Tickets\Tickets();
+		 		$bookings = new BookingCollection;
+		 		$tickets = new TicketCollection();
 		 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
 		 			if($event['recurrence_id'] == $this->event_id){
-		 				//trick EM_Bookings and Tickets to think it was loaded, and make use of optimized delete functions since 5.7.3.4
-		 				$EM_Bookings->event_id = $tickets->event_id = $event['event_id'];
-		 				$EM_Bookings->delete();
+		 				//trick bookings and Tickets to think it was loaded, and make use of optimized delete functions since 5.7.3.4
+		 				$bookings->event_id = $tickets->event_id = $event['event_id'];
+		 				$bookings->delete();
 		 				$tickets->delete();
 		 			}
 		 		}
 		 	}
-		 	//copy the event tags and categories, which are automatically deleted/recreated by WP and EM_Categories
-		 	foreach( self::get_taxonomies() as $tax_name => $tax_data ){
-		 		//In MS Global mode, we also save category meta information for global lookups so we use our objects
-				if( $tax_name == 'category' ){
-					//we save index data for each category in in MS Global mode
-					foreach($event_ids as $post_id => $event_id){
-						//set and trick category event and post ids so it saves to the right place
-						$this->get_categories()->event_id = $event_id;
-						$this->get_categories()->post_id = $post_id;
-						$this->get_categories()->save();
-					}
-				 	$this->get_categories()->event_id = $this->event_id;
-				 	$this->get_categories()->post_id = $this->post_id;
-				}else{
-					//general taxonomies including event tags
-				 	$terms = get_the_terms( $this->post_id, $tax_data['name']);
-			 		$term_slugs = array();
-			 		if( is_array($terms) ){
-						foreach($terms as $term){
-							if( !empty($term->slug) ) $term_slugs[] = $term->slug; //save of category will soft-fail if slug is empty
-						}
-			 		}
-				 	foreach($post_ids as $post_id){
-						wp_set_object_terms($post_id, $term_slugs, $tax_data['name']);
-				 	}
-				}
-		 	}
+		
 			if( 'future' == $this->post_status ){
 				$time = strtotime( $this->post_date_gmt . ' GMT' );
 				foreach( $post_ids as $post_id ){

@@ -30,18 +30,6 @@
 					$filename = $wp_query->get(EM_POST_TYPE_EVENT);
 					$args['event'] = $event_id;
 				}
-			//single location
-			
-			//taxonomies
-			}else{
-				$taxonomies = EM_Object::get_taxonomies();
-				foreach($taxonomies as $tax_arg => $taxonomy_info){
-					$taxonomy_term = $wp_query->get($taxonomy_info['query_var']); 
-					if( $taxonomy_term ){
-						$filename = $taxonomy_term;
-						$args[$tax_arg] = $taxonomy_term;
-					}
-				}
 			}
 			//only output the ical if we have a match from above
 			if( count($args) > 0 ){

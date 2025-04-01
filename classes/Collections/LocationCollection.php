@@ -1,10 +1,9 @@
 <?php
-/**
- * Static class which will help bulk add/edit/retrieve/manipulate arrays of EM_Location objects. 
- * Optimized for specifically retreiving locations (whether eventful or not). If you want event data AND location information for each event, use Events
- * 
- */
-class EM_Locations extends EM_Object {
+
+namespace Contexis\Events\Collections;
+
+
+class LocationCollection extends \EM_Object {
 	
 	public static $num_rows;
 	public static $num_rows_found;

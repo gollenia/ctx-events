@@ -1,8 +1,11 @@
 <?php
 
+namespace Contexis\Events\Views;
+use Contexis\Events\Models\Location;
+
 class LocationView {
 
-	private EM_Location $location;
+	private Location $location;
 
 	public function __construct($location) {
 		$this->location = $location;

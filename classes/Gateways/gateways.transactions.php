@@ -1,6 +1,11 @@
 <?php
 
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Intl\Price;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
+use Contexis\Events\Models\Ticket;
+
 if(!class_exists('EM_Gateways_Transactions')) {
 class EM_Gateways_Transactions{
 	var $limit = 20;
@@ -50,15 +55,10 @@ class EM_Gateways_Transactions{
 		return $result;
 	}
 	
-	/**
-	 * Returns the total paid for a specific booking. Hooks into em_booking_get_total_paid.
-	 * @param EM_Booking $EM_Booking
-	 * @return string|float
-	 */
-	public static function get_total_paid( $total, $EM_Booking ){
+	public static function get_total_paid( $total, Booking $booking ) : float {
 		global $wpdb;
-		$total = $wpdb->get_var('SELECT SUM(transaction_total_amount) FROM '.EM_TRANSACTIONS_TABLE." WHERE booking_id={$EM_Booking->booking_id}");
-		return $total;
+		$total = $wpdb->get_var('SELECT SUM(transaction_total_amount) FROM '.EM_TRANSACTIONS_TABLE." WHERE booking_id={$booking->booking_id}");
+		return floatval($total);
 	}
 	
 	function ajax(){
@@ -69,7 +69,7 @@ class EM_Gateways_Transactions{
 		$context = false;
 	
 		if (!empty($_REQUEST['booking_id'])) {
-			$booking = \EM_Booking::find($_REQUEST['booking_id']);
+			$booking = Booking::get_by_id($_REQUEST['booking_id']);
 			if ($booking && $booking->can_manage('manage_bookings', 'manage_others_bookings')) {
 				$context = $booking;
 			}
@@ -79,7 +79,7 @@ class EM_Gateways_Transactions{
 				$context = $event;
 			}
 		} elseif (!empty($_REQUEST['ticket_id'])) {
-			$ticket = new \Contexis\Events\Tickets\Ticket($_REQUEST['ticket_id']);
+			$ticket = new Ticket($_REQUEST['ticket_id']);
 			if ($ticket->can_manage('manage_bookings', 'manage_others_bookings')) {
 				$context = $ticket;
 			}
@@ -155,7 +155,7 @@ class EM_Gateways_Transactions{
 		<form id="em-transactions-table-form" class="transactions-filter" action="" method="post">
 			<?php if( is_object($context) && get_class($context)=="Event" ): ?>
 			<input type="hidden" name="event_id" value='<?php echo $context->event_id ?>' />
-			<?php elseif( is_object($context) && (get_class($context)=="EM_Booking" || get_class($context)=="EM_Multiple_Booking") ): ?>
+			<?php elseif( is_object($context) && (get_class($context)=="Booking" || get_class($context)=="EM_Multiple_Booking") ): ?>
 			<input type="hidden" name="booking_id" value='<?php echo $context->booking_id ?>' />
 			<?php elseif( is_object($context) && get_class($context)=="Ticket" ): ?>
 			<input type="hidden" name="ticket_id" value='<?php echo $context->ticket_id ?>' />
@@ -241,19 +241,19 @@ class EM_Gateways_Transactions{
 		ob_start();
 		if($transactions) {
 			foreach($transactions as $key => $transaction) {
-				$EM_Booking = EM_Booking::find($transaction->booking_id);
+				$booking = Booking::get_by_id($transaction->booking_id);
 				?>
 				<tr valign="middle" class="alternate">
 					<td>
 						<?php
 							
-							echo '<a href="'.$EM_Booking->get_booking_url().'">'.$EM_Booking->full_name.'</a>';
+							echo '<a href="'.$booking->get_booking_url().'">'.$booking->full_name.'</a>';
 							
 						?>
 					</td>
 					<td>
 						<?php
-							echo '<a href="'.$EM_Booking->get_event()->get_bookings_url().'">'. $EM_Booking->get_event()->event_name .'</a>';
+							echo '<a href="'.$booking->get_event()->get_bookings_url().'">'. $booking->get_event()->event_name .'</a>';
 						?>
 					</td>
 					<td class="column-date">
@@ -270,9 +270,9 @@ class EM_Gateways_Transactions{
 					<td class="column-gateway-trans-id">
 						<?php
 							if(!empty($transaction->transaction_gateway_id)) {
-								$transaction_gateway_id = apply_filters('em_gateways_transactions_table_gateway_id', $transaction->transaction_gateway_id, $transaction, $EM_Booking);
+								$transaction_gateway_id = apply_filters('em_gateways_transactions_table_gateway_id', $transaction->transaction_gateway_id, $transaction, $booking);
 								//use the below filter to override specific gateways, the above for modifying the field for all gateways
-								echo apply_filters('em_gateways_transactions_table_gateway_id_'.$transaction->transaction_gateway, $transaction_gateway_id, $transaction, $EM_Booking);
+								echo apply_filters('em_gateways_transactions_table_gateway_id_'.$transaction->transaction_gateway, $transaction_gateway_id, $transaction, $booking);
 							} else {
 								echo __('None yet','events');
 							}
@@ -309,7 +309,7 @@ class EM_Gateways_Transactions{
 						?>
 					</td>
 					<td class="column-trans-note-id">
-						<?php if( $EM_Booking->can_manage() ): ?>
+						<?php if( $booking->can_manage() ): ?>
 						<span class="trash"><a class="em-transaction-delete" href="<?php echo add_query_arg(['action'=>'transaction_delete', 'txn_id'=>$transaction->transaction_id, '_wpnonce'=>wp_create_nonce('transaction_delete_'.$transaction->transaction_id.'_'.get_current_user_id())], $_SERVER['REQUEST_URI']); ?>"><?php esc_html_e('Delete','events'); ?></a></span>
 						<?php endif; ?>
 					</td>
@@ -336,7 +336,7 @@ class EM_Gateways_Transactions{
 		$conditions = array();
 		$table = EM_BOOKINGS_TABLE;
 		//we can determine what to search for, based on if certain variables are set.
-		if( is_object($context) && (get_class($context)=="EM_Booking" || get_class($context)=="EM_Multiple_Booking" ) && $context->can_manage('manage_bookings','manage_others_bookings') ){
+		if( is_object($context) && (get_class($context)=="Booking" || get_class($context)=="EM_Multiple_Booking" ) && $context->can_manage('manage_bookings','manage_others_bookings') ){
 			$booking_condition = "tx.booking_id = ".$context->booking_id;
 			
 			$conditions[] = $booking_condition;
@@ -349,7 +349,7 @@ class EM_Gateways_Transactions{
 		elseif( is_object($context) && get_class($context)=="EM_Ticket" && $context->can_manage('manage_bookings','manage_others_bookings') ){
 			$booking_ids = array();
 			$ticket = $context;
-			foreach( EM_Bookings::get( array('ticket_id' => $ticket->ticket_id, 'array' => 'booking_id') ) as $booking ){
+			foreach( BookingCollection::get( array('ticket_id' => $ticket->ticket_id, 'array' => 'booking_id') ) as $booking ){
 				$booking_ids[] = $booking['booking_id'];
 			}
 			if( count($booking_ids) > 0 ){
@@ -379,16 +379,16 @@ class EM_Gateways_Transactions{
 	 * ----------------------------------------------------------
 	 */
 	
-	function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	function em_bookings_table_rows_col($column, $booking, $format) : string
 	{
 		return match ($column) {
-			'gateway_txn_id' => $this->get_latest_transaction_id($EM_Booking),
-			'payment_total' => $EM_Booking->get_total_paid(true),
+			'gateway_txn_id' => $this->get_latest_transaction_id($booking),
+			'payment_total' => Price::format($booking->get_total_paid()),
 			default => '',
 		};
 	}
 
-	private function get_latest_transaction_id($EM_Booking): string
+	private function get_latest_transaction_id($booking): string
 	{
 		$old_limit = $this->limit;
 		$old_orderby = $this->orderby;
@@ -396,14 +396,14 @@ class EM_Gateways_Transactions{
 
 		$this->limit = $this->page = 1;
 		$this->orderby = 'booking_date';
-		$transactions = $this->get_transactions($EM_Booking);
+		$transactions = $this->get_transactions($booking);
 
 		[$this->limit, $this->orderby, $this->page] = [$old_limit, $old_orderby, $old_page];
 
 		return !empty($transactions) ? $transactions[0]->transaction_gateway_id : '';
 	}
 	
-	function em_bookings_table_cols_template($template, $EM_Bookings_Table){
+	function em_bookings_table_cols_template($template, $bookings_table){
 		$template['gateway_txn_id'] = __('Transaction ID','events');
 		$template['payment_total'] = __('Total Paid','events');
 		return $template;
@@ -423,8 +423,8 @@ function emp_transactions_init(){
 		global $wpdb;
 		$booking_id = $wpdb->get_var('SELECT booking_id FROM '.EM_TRANSACTIONS_TABLE." WHERE transaction_id='".$_REQUEST['txn_id']."'");
 		if( !empty($booking_id) ){
-			$EM_Booking = EM_Booking::find($booking_id);
-			if( (!empty($EM_Booking->booking_id) && $EM_Booking->can_manage()) || is_super_admin() ){
+			$booking = Booking::get_by_id($booking_id);
+			if( (!empty($booking->booking_id) && $booking->can_manage()) || is_super_admin() ){
 				//all good, delete it
 				$wpdb->query('DELETE FROM '.EM_TRANSACTIONS_TABLE." WHERE transaction_id='".$_REQUEST['txn_id']."'");
 				_e('Transaction deleted','events');

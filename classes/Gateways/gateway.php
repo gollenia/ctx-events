@@ -1,5 +1,6 @@
 <?php
 
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Options;
 
 /**
@@ -129,25 +130,25 @@ class EM_Gateway {
 	/**
 	 * Triggered by the em_booking_add_yourgateway action, modifies the booking status if the event isn't free and also adds a filter to modify user feedback returned.
 	 * @param Event $event
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @param boolean $post_validation
 	 */
-	function booking_add($EM_Booking, $post_validation = false){
+	function booking_add($booking, $post_validation = false){
 		
 		
 
-		if( $EM_Booking->get_price() > 0 ){
-			$EM_Booking->booking_status = $this->status; //status 4 = awaiting online payment
+		if( $booking->get_price() > 0 ){
+			$booking->booking_status = $this->status; //status 4 = awaiting online payment
 		}
 	}
 
 	/**
 	 * Intercepts return JSON and adjust feedback messages when booking with this gateway. This filter is added only when the em_booking_add function is triggered by the em_booking_add filter.
 	 * @param array $return
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return array
 	 */
-	function booking_form_feedback( $return, EM_Booking $booking ){
+	function booking_form_feedback( $return, Booking $booking ){
 		return $return; //remember this, it's a filter!	
 	}
 
@@ -214,24 +215,24 @@ class EM_Gateway {
 	 * $result = parent::em_booking_output_placeholder($result);
 	 * 
 	 * @param string $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @param string $placeholder
 	 * @param string $target
 	 * @return string
 	 */
-	function em_booking_output_placeholder($result,$EM_Booking,$placeholder,$target='html'){	
+	function em_booking_output_placeholder($result,$booking,$placeholder,$target='html'){	
 		global $wpdb;
-		if( ($placeholder == "#_BOOKINGTXNID" && !empty($EM_Booking->booking_meta['gateway'])) && $EM_Booking->booking_meta['gateway'] == $this->gateway ){
-			if(empty($EM_Booking->BOOKINGTXNID)){
-				$sql = $wpdb->prepare( "SELECT transaction_gateway_id FROM ".EM_TRANSACTIONS_TABLE." WHERE booking_id=%d AND transaction_gateway = %s", $EM_Booking->booking_id, $this->gateway );
+		if( ($placeholder == "#_BOOKINGTXNID" && !empty($booking->booking_meta['gateway'])) && $booking->booking_meta['gateway'] == $this->gateway ){
+			if(empty($booking->BOOKINGTXNID)){
+				$sql = $wpdb->prepare( "SELECT transaction_gateway_id FROM ".EM_TRANSACTIONS_TABLE." WHERE booking_id=%d AND transaction_gateway = %s", $booking->booking_id, $this->gateway );
 				$txn_id = $wpdb->get_var($sql);
 				if(!empty($txn_id)){
-					$result = $EM_Booking->BOOKINGTXNID = $txn_id;
+					$result = $booking->BOOKINGTXNID = $txn_id;
 				}else{
 				    $result = '';
 				}
 			}else{
-				$result = $EM_Booking->BOOKINGTXNID;
+				$result = $booking->BOOKINGTXNID;
 			}
 		}
 		return $result;
@@ -261,11 +262,11 @@ class EM_Gateway {
 	 * This function is triggered if set $this->status_text to something and this will be called automatically. You can also override this function.
 	 * 
 	 * @param string $message
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return string
 	 */
-	function em_booking_get_status($message, $EM_Booking){
-		if( !empty($this->status_txt) && $EM_Booking->booking_status == $this->status && $this->uses_gateway($EM_Booking) ){ 
+	function em_booking_get_status($message, $booking){
+		if( !empty($this->status_txt) && $booking->booking_status == $this->status && $this->uses_gateway($booking) ){ 
 			return $this->status_txt; 
 		}
 		return $message;
@@ -286,38 +287,32 @@ class EM_Gateway {
 	 * --------------------------------------------------
 	 */
 	
-	/**
-	 * Modifies pending spaces calculations to include paypal bookings, but only if PayPal bookings are set to time-out (i.e. they'll get deleted after x minutes), therefore can be considered as 'pending' and can be reserved temporarily.
-	 * @param integer $count
-	 * @param EM_Bookings $EM_Bookings
-	 * @return integer
-	 */
-	function em_bookings_get_pending_spaces($count, $EM_Bookings, $force_refresh = false){
+	function em_bookings_get_pending_spaces($count, $booking_collection, $force_refresh = false){
 		global $wpdb;
-		if( !array_key_exists($EM_Bookings->event_id, $this->event_pending_spaces) || $force_refresh ){
+		if( !array_key_exists($booking_collection->event_id, $this->event_pending_spaces) || $force_refresh ){
 			$sql = 'SELECT SUM(booking_spaces) FROM '.EM_BOOKINGS_TABLE. ' WHERE booking_status=%d AND event_id=%d AND booking_meta LIKE %s';
 			$gateway_filter = '%s:7:"gateway";s:'.strlen($this->gateway).':"'.$this->gateway.'";%';
-			$pending_spaces = $wpdb->get_var( $wpdb->prepare($sql, array($this->status, $EM_Bookings->event_id, $gateway_filter)) );
-			$this->event_pending_spaces[$EM_Bookings->event_id] = $pending_spaces > 0 ? $pending_spaces : 0;
+			$pending_spaces = $wpdb->get_var( $wpdb->prepare($sql, array($this->status, $booking_collection->event_id, $gateway_filter)) );
+			$this->event_pending_spaces[$booking_collection->event_id] = $pending_spaces > 0 ? $pending_spaces : 0;
 		}
-		return $count + $this->event_pending_spaces[$EM_Bookings->event_id];
+		return $count + $this->event_pending_spaces[$booking_collection->event_id];
 	}
 	
 	/**
-	 * Changes EM_Booking::is_reserved() return value to true. Only called if $this->count_pending_spaces is set to true.
+	 * Changes Booking::is_reserved() return value to true. Only called if $this->count_pending_spaces is set to true.
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	function em_booking_is_reserved( $result, $EM_Booking ){
-		if($EM_Booking->booking_status == $this->status && $this->uses_gateway($EM_Booking) && get_option('dbem_bookings_approval_reserved')){
+	function em_booking_is_reserved( $result, $booking ){
+		if($booking->booking_status == $this->status && $this->uses_gateway($booking) && get_option('dbem_bookings_approval_reserved')){
 			return true;
 		}
 		return $result;
 	}
 	
-	function em_booking_is_pending( $result, $EM_Booking ){
-		if( $EM_Booking->booking_status == $this->status  && $this->uses_gateway($EM_Booking) && $this->count_pending_spaces ){
+	function em_booking_is_pending( $result, $booking ){
+		if( $booking->booking_status == $this->status  && $this->uses_gateway($booking) && $this->count_pending_spaces ){
 			return true;
 		}
 		return $result;
@@ -399,17 +394,17 @@ class EM_Gateway {
 	
 	/**
 	 * Gets a return url where a thank you message can be displayed. If no return URL can be determined, the home page will be used even though a thank you message will not show by default.
-	 * @param EM_Booking $EM_Booking If provided, and there is no other page to redirect to, the event page of this booking will be used.
+	 * @param Booking $booking If provided, and there is no other page to redirect to, the event page of this booking will be used.
 	 * @return string
 	 */
-	function get_return_url( $EM_Booking = null ){
+	function get_return_url( $booking = null ){
 		if( get_option('em_'. $this->gateway . "_return" ) ){
 			return get_option('em_'. $this->gateway . "_return" );
 		}
 		
-		if( $EM_Booking ){
+		if( $booking ){
 			//otherwise, send back to original event page when booking is provided
-			$my_bookings_url = $EM_Booking->get_event()->get_permalink();
+			$my_bookings_url = $booking->get_event()->get_permalink();
 		}else{
 			//no thank you message, but we redirect anyway
 			$my_bookings_url = get_home_url();
@@ -421,14 +416,14 @@ class EM_Gateway {
 	
 	/**
 	 * Gets a cancellation url where a relevant you message can be displayed. If no cancellation URL has been set, the event page the booking was attempted for will be used.
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return string
 	 */
-	function get_cancel_url( $EM_Booking ){
+	function get_cancel_url( $booking ){
 		if( get_option('em_'. $this->gateway . "_cancel" ) ){
 			return get_option('em_'. $this->gateway . "_cancel" );
 		}else{
-			$my_bookings_url = $EM_Booking->get_event()->get_permalink();
+			$my_bookings_url = $booking->get_event()->get_permalink();
 			return add_query_arg('payment_cancelled', $this->gateway, $my_bookings_url);
 		}
 	}
@@ -457,12 +452,12 @@ class EM_Gateway {
 	}
 	
 	/**
-	 * Checks an EM_Booking object and returns whether or not this gateway is/was used in the booking.
-	 * @param EM_Booking $EM_Booking
+	 * Checks a Booking object and returns whether or not this gateway is/was used in the booking.
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	function uses_gateway($EM_Booking){
-		return (!empty($EM_Booking->booking_meta['gateway']) && $EM_Booking->booking_meta['gateway'] == $this->gateway);
+	function uses_gateway(Booking $booking){
+		return (!empty($booking->booking_meta['gateway']) && $booking->booking_meta['gateway'] == $this->gateway);
 	}
 
 
@@ -488,7 +483,7 @@ class EM_Gateway {
 
 	/**
 	 * Records a transaction according to this booking and gateway type.
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @param float $amount
 	 * @param string $currency
 	 * @param int $timestamp
@@ -496,10 +491,10 @@ class EM_Gateway {
 	 * @param int $payment_status
 	 * @param string $note
 	 */
-	function record_transaction($EM_Booking, $amount, $currency, $timestamp, $txn_id, $payment_status, $note) {
+	function record_transaction($booking, $amount, $currency, $timestamp, $txn_id, $payment_status, $note) {
 		global $wpdb;
 		$data = array();
-		$data['booking_id'] = $EM_Booking->booking_id;
+		$data['booking_id'] = $booking->booking_id;
 		$data['transaction_gateway_id'] = $txn_id;
 		$data['transaction_timestamp'] = $timestamp;
 		$data['transaction_currency'] = $currency;

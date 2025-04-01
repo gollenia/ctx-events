@@ -1,6 +1,8 @@
 <?php
 
+use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Models\Event;
 
 class EventRecurring extends Event {
@@ -326,19 +328,15 @@ class EventRecurring extends Event {
 			 	}
 			}
 		 	//Next - Bookings. If we're completely rescheduling or just recreating bookings, we're deleting them and starting again
-		 	if( ($this->recurring_reschedule || $this->recurring_recreate_bookings) && $this->recurring_recreate_bookings !== false ){ //if set specifically to false, we skip bookings entirely (ML translations for example)
-			 	//first, delete all bookings & tickets if we haven't done so during the reschedule above - something we'll want to change later if possible so bookings can be modified without losing all data
-			 	if( !$this->recurring_reschedule ){
-				 	//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-			 		$EM_Bookings = new EM_Bookings;
+		 	if( ($this->recurring_reschedule || $this->recurring_recreate_bookings) && $this->recurring_recreate_bookings !== false ) { 
+			 	if( !$this->recurring_reschedule ) {
+			 		$booking_collection = new BookingCollection;
 			 		$tickets = new \Contexis\Events\Tickets\Tickets();
-			 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
-			 			if($event['recurrence_id'] == $this->event_id){
-			 				//trick EM_Bookings and Tickets to think it was loaded, and make use of optimized delete functions since 5.7.3.4
-			 				$EM_Bookings->event_id = $tickets->event_id = $event['event_id'];
-			 				$EM_Bookings->delete();
-			 				$tickets->delete();
-			 			}
+			 		foreach($events as $event){ 
+						if($event['recurrence_id'] != $this->event_id) continue;
+						$booking_collection->event_id = $tickets->event_id = $event['event_id'];
+						$booking_collection->delete();
+						$tickets->delete();
 			 		}
 			 	}
 			 	//if bookings hasn't been disabled, delete it all
@@ -396,45 +394,17 @@ class EventRecurring extends Event {
 			 		$result = $wpdb->query($sql);
 			 	}
 		 	}elseif( $this->recurring_delete_bookings ){
-		 		//create empty EM_Bookings and Tickets objects to circumvent extra loading of data and SQL queries
-		 		$EM_Bookings = new EM_Bookings;
-		 		$tickets = new \Contexis\Events\Tickets\Tickets();
-		 		foreach($events as $event){ //$events was defined in the else statement above so we reuse it
-		 			if($event['recurrence_id'] == $this->event_id){
-		 				//trick EM_Bookings and Tickets to think it was loaded, and make use of optimized delete functions since 5.7.3.4
-		 				$EM_Bookings->event_id = $tickets->event_id = $event['event_id'];
-		 				$EM_Bookings->delete();
-		 				$tickets->delete();
-		 			}
+		 		
+		 		$booking_collection = new BookingCollection;
+		 		$tickets = new TicketCollection();
+		 		foreach($events as $event){
+					if($event['recurrence_id'] != $this->event_id) continue;
+					$booking_collection->event_id = $tickets->event_id = $event['event_id'];
+					$booking_collection->delete();
+					$tickets->delete();
 		 		}
 		 	}
-		 	//copy the event tags and categories, which are automatically deleted/recreated by WP and EM_Categories
-		 	foreach( self::get_taxonomies() as $tax_name => $tax_data ){
-		 		//In MS Global mode, we also save category meta information for global lookups so we use our objects
-				if( $tax_name == 'category' ){
-					//we save index data for each category in in MS Global mode
-					foreach($event_ids as $post_id => $event_id){
-						//set and trick category event and post ids so it saves to the right place
-						$this->get_categories()->event_id = $event_id;
-						$this->get_categories()->post_id = $post_id;
-						$this->get_categories()->save();
-					}
-				 	$this->get_categories()->event_id = $this->event_id;
-				 	$this->get_categories()->post_id = $this->post_id;
-				}else{
-					//general taxonomies including event tags
-				 	$terms = get_the_terms( $this->post_id, $tax_data['name']);
-			 		$term_slugs = array();
-			 		if( is_array($terms) ){
-						foreach($terms as $term){
-							if( !empty($term->slug) ) $term_slugs[] = $term->slug; //save of category will soft-fail if slug is empty
-						}
-			 		}
-				 	foreach($post_ids as $post_id){
-						wp_set_object_terms($post_id, $term_slugs, $tax_data['name']);
-				 	}
-				}
-		 	}
+
 			if( 'future' == $this->post_status ){
 				$time = strtotime( $this->post_date_gmt . ' GMT' );
 				foreach( $post_ids as $post_id ){

@@ -1,6 +1,7 @@
 <?php
 // Exit if accessed directly
 
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Options;
 
 if (!defined('ABSPATH')) exit;
@@ -75,18 +76,18 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 	 * Hook into booking validation and check validate payment type if present.
 	 *
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	function booking_validate($result, $EM_Booking) {
+	function booking_validate($result, $booking) {
 		if (isset( $_POST['paymentType'] ) && empty( $_POST['paymentType'] )) {
-			$EM_Booking->add_error( __('Please select a payment method.', 'events') );
+			$booking->add_error( __('Please select a payment method.', 'events') );
 			$result = false;
 		}
 
 		$api_key = get_option('em_mollie_api_key');
 		if( !isset($api_key) || empty($api_key) ) {
-			$EM_Booking->add_error( __('Mollie API Key is not found.', 'events') );
+			$booking->add_error( __('Mollie API Key is not found.', 'events') );
 			$result = false;
 		}
 
@@ -96,10 +97,10 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 	 * After form submission by user, add Mollie vars and show feedback message.
 	 *
 	 * @param string $return
-	 * @param EM_Booking $booking
+	 * @param Booking $booking
 	 * @return array
 	 */
-	function booking_form_feedback( $response, EM_Booking $booking ) {
+	function booking_form_feedback( $response, Booking $booking ) {
 		if( !empty($response['errors']) || !is_object($booking) || !$this->uses_gateway($booking) ) return $response;
 	
 		if ($booking->get_price() == 0 ) {
@@ -175,8 +176,8 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 			$feedback 		= null;
 			$result 		= null;
 			$booking_id 	= $_REQUEST['em_mollie_return'];
-			$EM_Booking 	= EM_Booking::find($booking_id);
-			$status 		= (int) $EM_Booking->status;
+			$booking 	= Booking::get_by_id($booking_id);
+			$status 		= (int) $booking->status;
 
 			$payment_status = array(
 				0 => __("Pending", 'events'),
@@ -245,44 +246,44 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 		$payment 	= $mollie->payments->get($mollie_id);
 		$timestamp  = date('Y-m-d H:i:s', strtotime($payment->createdAt));
 		$booking_id = $payment->metadata->booking_id;
-		$EM_Booking	= EM_Booking::find($booking_id);
+		$booking	= Booking::get_by_id($booking_id);
 		$note 		= ' ';
 
-		if (empty( $EM_Booking->booking_id )) return
-		$EM_Booking->manage_override = true;
+		if (empty( $booking->booking_id )) return
+		$booking->manage_override = true;
 
 		if ($payment->isPaid() && !$payment->hasRefunds() && !$payment->hasChargebacks()) {
-			$this->record_transaction( $EM_Booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Completed', $note );
-			$EM_Booking->approve(true, true);
+			$this->record_transaction( $booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Completed', $note );
+			$booking->approve(true, true);
 		}
 
 		elseif ($payment->isOpen() || $payment->isPending()) {
-			$EM_Booking->set_status(4);
+			$booking->set_status(4);
 		}
 
 		elseif ($payment->isCanceled() || $payment->isFailed() || $payment->isExpired()) {
 			// Mollie uses US spelling.
 			$payment->status = ($payment->status != 'canceled') ? $payment->status : 'cancelled';
-			$this->record_transaction( $EM_Booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Canceled', $note );
+			$this->record_transaction( $booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Canceled', $note );
 			$send_mail = get_option('em_mollie_send_cancel_mail') != 'yes' ? false : true;
-			$EM_Booking->set_status(3, $send_mail);
+			$booking->set_status(3, $send_mail);
 		}
 
 		elseif ($payment->hasChargebacks()) {
 			$note = __('Charged back', 'events');
-			$this->record_transaction( $EM_Booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Charded back', $note);
-			$EM_Booking->set_status(3);
+			$this->record_transaction( $booking, $payment->amount->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Charded back', $note);
+			$booking->set_status(3);
 		}
 		elseif ($payment->hasRefunds()) {
 			// Fetch detailed info for refund from Mollie.
 			foreach( $payment->refunds() as $refund ) {
 				$date 		= $this->get_localized_time($refund->createdAt);
 				$note 		= sprintf( __('Refunded on %s', 'events'), $date );
-				$this->record_transaction( $EM_Booking, $payment->amountRefunded->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Refunded', $note);
+				$this->record_transaction( $booking, $payment->amountRefunded->value, strtoupper($payment->amount->currency), $timestamp, $mollie_id, 'Refunded', $note);
 			}
 		}
 
-		do_action('em_payment_processed', $EM_Booking, $this);
+		do_action('em_payment_processed', $booking, $this);
 		
 		return;
 	}

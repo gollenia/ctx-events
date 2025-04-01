@@ -1,9 +1,15 @@
 <?php
 
+namespace Contexis\Events\Export;
+
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
+use Contexis\Events\Models\Ticket;
+
 //Builds a table of bookings, still work in progress...
 // May be replaced by JS App in future
-class EM_Bookings_Table {
+class BookingsTable {
 	
 	public array $cols = ['user_name','event_name','booking_spaces','booking_status','booking_price','donation'];
 	public array $cols_template = [];
@@ -22,15 +28,15 @@ class EM_Bookings_Table {
 	public int $offset = 0;
 	public string $scope = 'future';
 	public bool $show_tickets = false;
-	public ?EM_Bookings $bookings;
+	public ?BookingCollection $bookings;
 	public string $status = '';
 	public array $cols_tickets_template = [];
-	public ?\Contexis\Events\Tickets\Ticket $ticket;
+	public ?Ticket $ticket;
 	public ?Event $event = null;
 	
 	
 	function __construct(){
-		$this->states = \EM_Booking::get_available_states();
+		$this->states = Booking::get_available_states();
 		//Set basic var
 		
 		//build template of possible columns
@@ -157,7 +163,7 @@ class EM_Bookings_Table {
 	function get_ticket(){
 		if(!isset($_REQUEST['ticket_id'])) return false;
 		$ticket_id = is_numeric($_REQUEST['ticket_id']) ? $_REQUEST['ticket_id'] : 0;
-		$ticket = new \Contexis\Events\Tickets\Ticket($ticket_id);
+		$ticket = new Ticket($ticket_id);
 		
 		if( !empty($this->ticket) && is_object($this->ticket) ){
 			return $this->ticket;
@@ -170,9 +176,8 @@ class EM_Bookings_Table {
 	/**
 	 * Gets the bookings for this object instance according to its settings
 	 * @param boolean $force_refresh
-	 * @return EM_Bookings
 	 */
-	function get_bookings($force_refresh = true){
+	function get_bookings($force_refresh = true) : BookingCollection {
 		if(!empty($this->bookings) && !$force_refresh) return $this->bookings;
 		
 		$args = [
@@ -186,7 +191,7 @@ class EM_Bookings_Table {
 
 		if( $this->event !== null ) $args['event'] = $this->event->event_id;
 		$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
-		$this->bookings = EM_Bookings::get($args);
+		$this->bookings = BookingCollection::get($args);
 		return $this->bookings;
 	}
 	
@@ -377,23 +382,20 @@ class EM_Bookings_Table {
 						<?php 
 						
 						$event_count = (!empty($event_count)) ? $event_count:0;
-						foreach ($this->bookings->bookings as $EM_Booking) {
+						foreach ($this->bookings->bookings as $booking) {
 							?>
 							<tr>
-								<?php  /*
-								<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $EM_Booking->booking_id ?>' name='bookings[]'/></th>
-								*/ 
-								/* @var $EM_Booking EM_Booking */
-								/* @var $ticket_Booking ticket_booking */
+								<?php 
+								
 								if( $this->show_tickets ){
-									foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
+									foreach($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
 										$row = $this->get_row($ticket_booking);
 										foreach( $row as $row_cell ){
 										?><td><?php echo $row_cell; ?></td><?php
 										}
 									}
 								} else {
-									$row = $this->get_row($EM_Booking);
+									$row = $this->get_row($booking);
 									foreach( $row as $row_cell ){
 									?><td class="<?php echo $row_cell['class']; ?>"><?php echo $row_cell['content']; ?></td><?php
 									}
@@ -458,50 +460,49 @@ class EM_Bookings_Table {
 	 * @return array()
 	 */
 	function get_row( $object, $format = 'html' ){
-		get_class($object);
 		if( get_class($object) == 'Contexis\Events\Tickets\TicketBooking' ){
 			$ticket_booking = $object;
-			$EM_Booking = $ticket_booking->get_booking();
+			$booking = $ticket_booking->get_booking();
 		}else{
-			$EM_Booking = $object;
+			$booking = $object;
 		}
 		$cols = array();
 		foreach($this->cols as $col){
 			if( $col == 'actions' && $format == 'csv' ) continue; 
-			$cols[] = ['content' => $this->get_cell($EM_Booking, $col, $format), 'class' => 'em-bookings-col-'.$col];
+			$cols[] = ['content' => $this->get_cell($booking, $col, $format), 'class' => 'em-bookings-col-'.$col];
 		}
 		return $cols;
 	}
 
-	function get_cell($EM_Booking, $column, $format = 'html'){
+	function get_cell($booking, $column, $format = 'html'){
 		
-		$price_array = $EM_Booking->get_price_summary_array();
+		$price_array = $booking->get_price_summary_array();
 		switch ($column) {
 			case 'user_email':
-				return $EM_Booking->booking_mail;
+				return $booking->booking_mail;
 				break;
 			case 'user_name':
-				if( $format == 'csv' ) return $EM_Booking->full_name;
-				$url = $EM_Booking->get_event()->get_bookings_url();
-				$url = add_query_arg(['booking_id'=>$EM_Booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null, 'booking_email'=>$EM_Booking->user_email], $url);
-				$ret = "<strong><a class='row-title' href='$url'>" . $EM_Booking->full_name . '</a></strong>';
-				$ret .= "<div class='row-actions'>" . implode(' | ', $this->get_booking_actions($EM_Booking)) . "</div>";
+				if( $format == 'csv' ) return $booking->full_name;
+				$url = $booking->get_event()->get_bookings_url();
+				$url = add_query_arg(['booking_id'=>$booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null, 'booking_email'=>$booking->user_email], $url);
+				$ret = "<strong><a class='row-title' href='$url'>" . $booking->full_name . '</a></strong>';
+				$ret .= "<div class='row-actions'>" . implode(' | ', $this->get_booking_actions($booking)) . "</div>";
 				return $ret;
 				break;
 			case 'first_name':
-				return $EM_Booking->first_name;
+				return $booking->first_name;
 				break;
 			case 'last_name':
-				return $EM_Booking->last_name;
+				return $booking->last_name;
 				break;
 			case 'event_name':
-				return $format == 'csv' ? $EM_Booking->get_event()->event_name : '<a href="'.$EM_Booking->get_event()->get_bookings_url().'">'. esc_html($EM_Booking->get_event()->event_name) .'</a>';
+				return $format == 'csv' ? $booking->get_event()->event_name : '<a href="'.$booking->get_event()->get_bookings_url().'">'. esc_html($booking->get_event()->event_name) .'</a>';
 				break;
 			case 'event_date':
-				return $EM_Booking->get_event()->output('#_EVENTDATES');
+				return $booking->get_event()->output('#_EVENTDATES');
 				break;
 			case 'event_time':
-				return $EM_Booking->get_event()->output('#_EVENTTIMES');
+				return $booking->get_event()->output('#_EVENTTIMES');
 				break;
 			case 'booking_price':
 				return \Contexis\Events\Intl\Price::format( $price_array['total'] );
@@ -510,52 +511,52 @@ class EM_Bookings_Table {
 				return \Contexis\Events\Intl\Price::format( $price_array['donation'] );
 				break;
 			case 'booking_status':
-				if( $format == 'csv' ) return $EM_Booking->get_status();
-				$status = array_search($EM_Booking->booking_status, array_column($this->states, 'search'));
-				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$EM_Booking->get_status_icon().'</i>'.ucwords($EM_Booking->get_status()).'</span>';
+				if( $format == 'csv' ) return $booking->get_status();
+				$status = array_search($booking->booking_status, array_column($this->states, 'search'));
+				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$booking->get_status_icon().'</i>'.ucwords($booking->get_status()).'</span>';
 				break;
 			case 'booking_date':
-				return \Contexis\Events\Intl\Date::get_date($EM_Booking->date()->getTimestamp()) . " " . \Contexis\Events\Intl\Date::get_time($EM_Booking->date()->getTimestamp());
+				return \Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()) . " " . \Contexis\Events\Intl\Date::get_time($booking->date()->getTimestamp());
 				break;
 			case 'booking_id':
-				return $EM_Booking->booking_id;
+				return $booking->booking_id;
 				break;
 			case 'actions':
 				return '';
 				break;
 			case 'booking_spaces':
-				return $EM_Booking->get_spaces();
+				return $booking->get_spaces();
 				break;
 			case 'booking_comment':
-				return $EM_Booking->booking_comment;
+				return $booking->booking_comment;
 				break;
 			case 'ticket_name':
-				return $EM_Booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_name;
+				return $booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_name;
 				break;
 			case 'ticket_description':
-				return $EM_Booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_description;
+				return $booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_description;
 				break;
 			case 'ticket_price':
-				return \Contexis\Events\Intl\Price::format( $EM_Booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->get_price() );
+				return \Contexis\Events\Intl\Price::format( $booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->get_price() );
 				break;
 			case 'ticket_total':
-				return $EM_Booking->get_tickets_bookings()->tickets_bookings[0]->get_price(false);
+				return $booking->get_tickets_bookings()->tickets_bookings[0]->get_price(false);
 				break;
 			
 			case 'ticket_id':
-				return $EM_Booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_id;
+				return $booking->get_tickets_bookings()->tickets_bookings[0]->get_ticket()->ticket_id;
 				break;
 			case 'dbem_phone':
-				return $EM_Booking->booking_meta['booking']['phone'] ?? '';
+				return $booking->booking_meta['booking']['phone'] ?? '';
 				break;
 			case 'coupons':
-				return implode(', ', $EM_Booking->get_coupons());
-				if( !EM_Coupons::booking_has_coupons($EM_Booking) ) {
+				return implode(', ', $booking->get_coupons());
+				if( !EM_Coupons::booking_has_coupons($booking) ) {
 					return '';
 					break;
 				}
 				$coupon_codes = array();
-				$coupons = EM_Coupons::booking_get_coupons($EM_Booking);
+				$coupons = EM_Coupons::booking_get_coupons($booking);
 				foreach( $coupons as $EM_Coupon ){
 					$coupon_codes[] = $EM_Coupon->coupon_code;
 				}
@@ -564,8 +565,8 @@ class EM_Bookings_Table {
 				return $coupon_codes;
 				break;
 			case 'gateway':
-				if( !empty($EM_Booking->booking_meta['gateway']) ){
-					$gateway = EM_Gateways::get_gateway($EM_Booking->booking_meta['gateway']);
+				if( !empty($booking->booking_meta['gateway']) ){
+					$gateway = EM_Gateways::get_gateway($booking->booking_meta['gateway']);
 					$value = $gateway->title;
 				}else{
 					$value = __('None','events');
@@ -573,7 +574,7 @@ class EM_Bookings_Table {
 				return $value;
 				break;
 			default:
-				return apply_filters('em_bookings_table_rows_col', $column, $EM_Booking, $format);
+				return apply_filters('em_bookings_table_rows_col', $column, $booking, $format);
 				break;
 		}
 	}
@@ -593,8 +594,8 @@ class EM_Bookings_Table {
 		return $icons[$status];
 	}
 	
-	function get_row_csv($EM_Booking){
-	    $row = $this->get_row($EM_Booking, 'csv');
+	function get_row_csv($booking){
+	    $row = $this->get_row($booking, 'csv');
 	    foreach($row as $k=>$v){
 			
 	    	$row[$k] = html_entity_decode($v['content']);
@@ -606,20 +607,17 @@ class EM_Bookings_Table {
 		return preg_replace('/^([;=@\+\-])/', "'$1", $cell);
 	}
 	
-	/**
-	 * @param EM_Booking $EM_Booking
-	 * @return mixed
-	 */
-	function get_booking_actions($EM_Booking){
+
+	function get_booking_actions(Booking $booking){
 		$booking_actions = array();
 
-		switch($EM_Booking->booking_status){
-			case EM_Booking::PENDING: 
+		switch($booking->booking_status){
+			case Booking::PENDING: 
 				if( !get_option('dbem_bookings_approval') ) break;
 				$actions = ['approve', 'reject'];
 				break;
 				
-			case EM_Booking::APPROVED:
+			case Booking::APPROVED:
 				$actions = ['unapprove', 'cancel'];
 				break;
 			default:
@@ -627,19 +625,19 @@ class EM_Bookings_Table {
 				break;	
 		}
 
-		$actions = apply_filters('em_bookings_table_booking_actions_'.$EM_Booking->booking_status, $actions, $EM_Booking);
+		$actions = apply_filters('em_bookings_table_booking_actions_'.$booking->booking_status, $actions, $booking);
 		$actions[] = 'delete';
-		$booking_actions = $this->generate_action_links($actions, $EM_Booking);
+		$booking_actions = $this->generate_action_links($actions, $booking);
 		
-		return apply_filters('em_bookings_table_cols_col_action', $booking_actions, $EM_Booking);
+		return apply_filters('em_bookings_table_cols_col_action', $booking_actions, $booking);
 	}
 
-	private function generate_action_links(array $actions, $EM_Booking) : array {
+	private function generate_action_links(array $actions, $booking) : array {
 		$links = [];
 
 		foreach($actions as $action) {
 			$class = $action== 'delete' ? 'trash' : '';
-			$links[] =  "<span class='$class'><a class='em-bookings-action' data-action='$action' data-booking-id='$EM_Booking->booking_id'>" . __(ucfirst($action), 'events') . "</a></span>";
+			$links[] =  "<span class='$class'><a class='em-bookings-action' data-action='$action' data-booking-id='$booking->booking_id'>" . __(ucfirst($action), 'events') . "</a></span>";
 		}
 		
 		return $links;

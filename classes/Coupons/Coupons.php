@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
 //TODO make coupons stackable
 //TODO add logging of coupon useage in seperate log table
@@ -45,9 +47,9 @@ class EM_Coupons extends EM_Object {
 		
 	}
 	
-	public static function em_booking_get_price_adjustments( $adjustments, $type, $EM_Booking ){
+	public static function em_booking_get_price_adjustments( $adjustments, $type, $booking ){
 		if( $type != 'discounts' ) return $adjustments;
-		$coupons = self::booking_get_coupons($EM_Booking);
+		$coupons = self::booking_get_coupons($booking);
 		if( is_array($coupons) && count($coupons) > 0 ){
 			//merge coupons into discounts array in new discounts format
 			foreach($coupons as $EM_Coupon){ /* @var $EM_Coupon EM_Coupon */
@@ -134,20 +136,16 @@ class EM_Coupons extends EM_Object {
 	}
 	
 	/* Booking Helpers */
-	public static function booking_has_coupons($EM_Booking){
-	    return !empty($EM_Booking->booking_meta['coupon']) || !empty($EM_Booking->booking_meta['coupons']);
+	public static function booking_has_coupons($booking){
+	    return !empty($booking->booking_meta['coupon']) || !empty($booking->booking_meta['coupons']);
 	}
 	
-	/**
-	 * 
-	 * @param EM_Booking $EM_Booking
-	 * @return array
-	 */
-	public static function booking_get_coupons($EM_Booking){
+
+	public static function booking_get_coupons(Booking $booking){
 	    $coupons = array();
-	    if( empty($EM_Booking->booking_meta['coupon']) ) return $coupons;
+	    if( empty($booking->booking_meta['coupon']) ) return $coupons;
 	
-	    $EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+	    $EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 	    $coupons[$EM_Coupon->coupon_id] = $EM_Coupon;
 	    
 	    return $coupons;
@@ -199,20 +197,20 @@ class EM_Coupons extends EM_Object {
 	
 	
 	
-	public static function em_booking_validate($result, $EM_Booking){
-		if(!isset($EM_Booking->booking_meta['coupon_code'])) return $result;
+	public static function em_booking_validate($result, $booking){
+		if(!isset($booking->booking_meta['coupon_code'])) return $result;
 		
-		$EM_Coupon = self::event_get_coupon($EM_Booking->booking_meta['coupon_code'], $EM_Booking->get_event());
-		unset($EM_Booking->booking_meta['coupon_code']);
+		$EM_Coupon = self::event_get_coupon($booking->booking_meta['coupon_code'], $booking->get_event());
+		unset($booking->booking_meta['coupon_code']);
 
 		if( $EM_Coupon === false || !$EM_Coupon->is_valid() ){
-			$EM_Booking->add_error(__('Invalid coupon code provided','events'));
+			$booking->add_error(__('Invalid coupon code provided','events'));
 			return false;
 		}
 
-		$EM_Booking->booking_meta['coupon'] = $EM_Coupon->coupon_id;
+		$booking->booking_meta['coupon'] = $EM_Coupon->coupon_id;
 		
-		return apply_filters('em_coupons_em_booking_validate', $result, $EM_Booking);
+		return apply_filters('em_coupons_em_booking_validate', $result, $booking);
 	}
 
 	public static function register_rest_routes() {
@@ -317,7 +315,7 @@ class EM_Coupons extends EM_Object {
 		//FIXME : coupon count not syncing correctly, using this as a fallback
 		$coupons_count = $EM_Coupon->recount();
 		$bookings_count = 0;
-		$EM_Bookings = array(
+		$result = array(
 			[
 				"<b>" . __("ID", "events") . "</b>",
 				"<b>" . __("Event", "events") . "</b>",
@@ -334,79 +332,74 @@ class EM_Coupons extends EM_Object {
 			]
 		);
 		foreach($bookings as $booking_id){ 
-			$EM_Booking = EM_Booking::find($booking_id);
+			$booking = Booking::get_by_id($booking_id);
 
-			if( empty($EM_Booking->booking_meta['coupon']) ) continue;
+			if( empty($booking->booking_meta['coupon']) ) continue;
 			
-			$coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+			$coupon = new EM_Coupon($booking->booking_meta['coupon']);
 			if($EM_Coupon->coupon_code == $coupon->coupon_code && $EM_Coupon->coupon_id == $coupon->coupon_id){
-				$base_price = $EM_Booking->get_price();
+				$base_price = $booking->get_price();
 				$bookings_count++;
-				$EM_Bookings[] = [
-					$EM_Booking->booking_id,
-					$EM_Booking->get_event()->event_name,
-					\Contexis\Events\Intl\Date::get_date($EM_Booking->date()->getTimestamp()),
-					$EM_Booking->get_price(),
-					$EM_Booking->full_name,
-					$EM_Booking->booking_mail,
-					$EM_Booking->get_spaces(),
+				$result[] = [
+					$booking->booking_id,
+					$booking->get_event()->event_name,
+					\Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()),
+					$booking->get_price(),
+					$booking->full_name,
+					$booking->booking_mail,
+					$booking->get_spaces(),
 					$coupon->coupon_name,
-					\Contexis\Events\Intl\Price::format( $EM_Booking->get_price()),
+					\Contexis\Events\Intl\Price::format( $booking->get_price()),
 					\Contexis\Events\Intl\Price::format($EM_Coupon->get_discount($base_price)),
-					\Contexis\Events\Intl\Price::format($EM_Booking->get_price()),
+					\Contexis\Events\Intl\Price::format($booking->get_price()),
 				];
 			}
 			
 		}
 
-		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $EM_Bookings );
+		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $result );
 		$xlsx->downloadAs('coupons.xlsx');
 	}
 
 	
-	public static function em_booking_save($result, $EM_Booking){
+	public static function em_booking_save($result, $booking){
 		if( $result ){
-			self::refresh_counts($EM_Booking);
+			self::refresh_counts($booking);
 		}
-		return apply_filters('em_coupons_em_booking_save', $result, $EM_Booking);
+		return apply_filters('em_coupons_em_booking_save', $result, $booking);
 	}
 
-	/**
-	 * @param string $replace
-	 * @param EM_Booking $EM_Booking
-	 * @param string $full_result
-	 * @return string
-	 */
-	public static function placeholders($replace, $EM_Booking, $full_result){
+
+	public static function placeholders($replace, $booking, $full_result){
 		if( empty($replace) || $replace == $full_result ){
 			if( $full_result == '#_BOOKINGCOUPON' ){
 				$replace = '';
-				if( !empty($EM_Booking->booking_meta['coupon']) ){
-					$EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+				if( !empty($booking->booking_meta['coupon']) ){
+					$EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 					$replace = $EM_Coupon->coupon_code.' - '.$EM_Coupon->get_discount_text();					
 				}
 			}elseif( $full_result == '#_BOOKINGCOUPONCODE' ){
 				$replace = '';
-				if( !empty($EM_Booking->booking_meta['coupon']) ){
-					$EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+				if( !empty($booking->booking_meta['coupon']) ){
+					$EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 					$replace = $EM_Coupon->coupon_code;					
 				}
 			}elseif( $full_result == '#_BOOKINGCOUPONDISCOUNT' ){
 				$replace = '';
-				if( !empty($EM_Booking->booking_meta['coupon']) ){
-					$EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+				if( !empty($booking->booking_meta['coupon']) ){
+					$EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 					$replace = $EM_Coupon->get_discount_text();					
 				}
 			}elseif( $full_result == '#_BOOKINGCOUPONNAME' ){
 				$replace = '';
-				if( !empty($EM_Booking->booking_meta['coupon']) ){
-					$EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+				if( !empty($booking->booking_meta['coupon']) ){
+					$EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 					$replace = $EM_Coupon->coupon_name;					
 				}
 			}elseif( $full_result == '#_BOOKINGCOUPONDESCRIPTION' ){
 				$replace = '';
-				if( !empty($EM_Booking->booking_meta['coupon']) ){
-					$EM_Coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+				if( !empty($booking->booking_meta['coupon']) ){
+					$EM_Coupon = new EM_Coupon($booking->booking_meta['coupon']);
 					$replace = $EM_Coupon->coupon_description;					
 				}
 			}
@@ -471,67 +464,47 @@ class EM_Coupons extends EM_Object {
 		return $result && $result_coupons !== false;
 	}
 	
-	/**
-	 * Removes coupon associations and update the count once booking is deleted.
-	 * @param bool $result
-	 * @param EM_Booking $EM_Booking
-	 * @return bool
-	 */
-	public static function em_booking_delete($result, $EM_Booking){
+
+	public static function em_booking_delete($result, $booking) : bool 
+	{
 		if( $result ){
-			self::refresh_counts($EM_Booking);
+			self::refresh_counts($booking);
 		}
 		return $result;
 	}
 	
-	/**
-	 * Remove coupon associations and update the counts with these deleted bookings.
-	 * @param bool $result
-	 * @param array $booking_ids
-	 * @param EM_Bookings $EM_Bookings
-	 * @return bool
-	 */
-	public static function em_bookings_delete($result, $booking_ids, $EM_Bookings){
+	public static function em_bookings_delete(bool $result, array $booking_ids, BookingCollection $booking_collection){
 		/* @todo when coupon-booking relations are stored, use $booking_ids instead. */
 		if( $result ){
-			foreach( $EM_Bookings->bookings as $EM_Booking ){
-				self::em_booking_delete($result, $EM_Booking);
+			foreach( $booking_collection->bookings as $booking ){
+				self::em_booking_delete($result, $booking);
 			}
 		}
 		return $result;
 	}
 	
-	/**
-	 * When the booking status is changed, if the booking has a coupon and is cancelled or rejected, we remove the coupon from this event.
-	 * @param bool $result
-	 * @param EM_Booking $EM_Booking
-	 * @return bool
-	 */
-	public static function em_booking_set_status($result, $EM_Booking){
-		self::refresh_counts($EM_Booking); //refresh the counts in case booking was cancelled or rejected
+	
+	public static function em_booking_set_status($result, $booking){
+		self::refresh_counts($booking); //refresh the counts in case booking was cancelled or rejected
 		return $result;
 	}
 	
 	/**
 	 * Deprecated, use EM_Coupons::refresh_counts instead
 	 */
-	public static function lower_booking_count( $EM_Booking ){
-		return apply_filters('em_coupons_lower_booking_count', self::refresh_counts($EM_Booking), $EM_Booking);
+	public static function lower_booking_count( $booking ){
+		return apply_filters('em_coupons_lower_booking_count', self::refresh_counts($booking), $booking);
 	}
 	
-	/**
-	 * Recounts all coupon usages for a specific booking. Returns true if successful, false if not.
-	 * @param EM_Booking $EM_Booking
-	 * @return bool
-	 */
-	public static function refresh_counts( $EM_Booking ){
+
+	public static function refresh_counts( $booking ){
 		$result = true;
-		$coupons = self::booking_get_coupons($EM_Booking);
+		$coupons = self::booking_get_coupons($booking);
 		foreach( $coupons as $EM_Coupon ){ /* @var EM_Coupon $EM_Coupon */
 
 			$result = $EM_Coupon->recount() !== false && $result;
 		}
-		return apply_filters('em_coupons_refresh_counts', $result, $EM_Booking);
+		return apply_filters('em_coupons_refresh_counts', $result, $booking);
 	}
 	
 	
@@ -642,10 +615,10 @@ class EM_Coupons extends EM_Object {
 		return $template;
 	}
 	
-	public static function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	public static function em_bookings_table_rows_col($column, $booking, $format) : string
 	{
-		if ($column != 'coupon' || !self::booking_has_coupons($EM_Booking)) return '';
-		return implode(' ', array_map(fn($c) => $c->coupon_code, self::booking_get_coupons($EM_Booking)));
+		if ($column != 'coupon' || !self::booking_has_coupons($booking)) return '';
+		return implode(' ', array_map(fn($c) => $c->coupon_code, self::booking_get_coupons($booking)));
 	}
 
 	/* Overrides EM_Object method to apply a filter to result

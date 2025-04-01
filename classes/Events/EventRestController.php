@@ -2,6 +2,7 @@
 
 namespace Contexis\Events\Events;
 
+use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
 use \Contexis\Events\Models\Event;
 
@@ -116,10 +117,6 @@ class EventRestController
 		if(in_array('speaker', $requested_fields)) {
 			$data['speaker'] = \Contexis\Events\Speaker::get($event->speaker_id)->get_rest_fields();
 		}
-		
-		if(in_array('tags', $requested_fields)) {
-			$data['tags'] = $event->get_taxonomies()->get_rest_fields();
-		}
 
 		if(in_array('tickets', $requested_fields)) {
 			$data['tickets_available'] = $event->get_bookings()->get_available_tickets()->get_rest_fields();
@@ -229,7 +226,7 @@ class EventRestController
 		$tags = new \EM_Tags($event);
 		$speaker = \Contexis\Events\Speaker::get($event->speaker_id);
 		$price = 0;
-		$booking = \EM_Bookings::from_event($event);
+		$booking = BookingCollection::from_event($event);
 		$tickets = $booking->get_tickets()->tickets;
 		if(!empty($tickets)) {
 			$first_ticket = key($tickets);

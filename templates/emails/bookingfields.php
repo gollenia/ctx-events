@@ -1,8 +1,8 @@
 <table >
 <?php
 
-$form_fields = EM_Booking_Form::get_form($EM_Booking->event_id)->form_fields;
-$form_values = $EM_Booking->booking_meta['booking'] ? array_merge($EM_Booking->booking_meta['registration'], $EM_Booking->booking_meta['booking']) : $EM_Booking->booking_meta['registration'];
+$form_fields = EM_Booking_Form::get_form($booking->event_id)->form_fields;
+$form_values = $booking->booking_meta['booking'] ? array_merge($booking->booking_meta['registration'], $booking->booking_meta['booking']) : $booking->booking_meta['registration'];
 
 foreach($form_fields as $name => $field) {
 	if($field['type'] == "html") {

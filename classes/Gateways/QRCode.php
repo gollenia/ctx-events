@@ -10,6 +10,7 @@ use \chillerlan\QRCode\Output\QROutputInterface;
 use \chillerlan\QRCode\Common\EccLevel;
 use \chillerlan\QRCode\Output\QRMarkupSVG;
 use chillerlan\QRCode\Output\QRGdImagePNG;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
 
 
@@ -44,7 +45,7 @@ class EM_QRCode {
 		$format = $_REQUEST['format'] ?? 'svg';
 		if($format != 'png' && $format != 'svg') $format = 'svg';
 		
-		$booking = \EM_Booking::find(absint($_REQUEST['booking_id']));
+		$booking = Booking::get_by_id(absint($_REQUEST['booking_id']));
 		$event = Event::find_by_event_id($booking->event_id); 
 
 		$data = Data::create()

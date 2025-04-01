@@ -1,6 +1,8 @@
 <?php
 
-namespace Contexis\Events\Tickets;
+namespace Contexis\Events\Models;
+
+use Contexis\Events\Collections\BookingCollection;
 use \Contexis\Events\Models\Event;
 
 /**
@@ -53,7 +55,6 @@ class Ticket extends \EM_Object{
 	//Other Vars
 	/**
 	 * Contains only bookings belonging to this ticket.
-	 * @var EM_Booking
 	 */
 	public $bookings;
 	public array $required_fields = array('ticket_name');
@@ -446,20 +447,16 @@ class Ticket extends \EM_Object{
 		return Event::find_by_event_id($this->event_id);
 	}
 	
-	/**
-	 * returns array of EM_Booking objects that have this ticket
-	 * @return EM_Bookings
-	 */
-	function get_bookings(){
+	function get_bookings() : BookingCollection {
 		$bookings = array();
-		foreach( $this->get_event()->get_bookings()->bookings as $EM_Booking ){
-			foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
+		foreach( $this->get_event()->get_bookings()->bookings as $booking ){
+			foreach($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking){
 				if( $ticket_booking->ticket_id == $this->ticket_id ){
-					$bookings[$EM_Booking->booking_id] = $EM_Booking;
+					$bookings[$booking->booking_id] = $booking;
 				}
 			}
 		}
-		$this->bookings = \EM_Bookings::from_bookings($bookings);
+		$this->bookings = BookingCollection::from_bookings($bookings);
 		return $this->bookings;
 	}
 	

@@ -2,10 +2,12 @@
 
 namespace Contexis\Events\Tickets;
 
+use Contexis\Events\Collections\TicketCollection;
 use WP_REST_Response;
 use WP_REST_Server;
 
 use \Contexis\Events\Models\Event;
+use Contexis\Events\Models\Ticket;
 
 class TicketsController {
 
@@ -96,7 +98,7 @@ class TicketsController {
 	 */
 	public function update_ticket(\WP_REST_Request $request) {
 		$id = $request->get_param('ticket_id');
-		$ticket = new \Contexis\Events\Tickets\Ticket($id);
+		$ticket = new Ticket($id);
 		$data = $request->get_params();
 		
 		foreach($data as $key => $value) {
@@ -140,7 +142,7 @@ class TicketsController {
 		
 		$event = Event::find_by_post_id($request->get_param('post_id'), 'post_id');
 		
-		$ticket_data = \Contexis\Events\Tickets\Tickets::find_by_event_id($event->event_id);
+		$ticket_data = TicketCollection::find_by_event_id($event->event_id);
 		
 		
 		$tickets = [];

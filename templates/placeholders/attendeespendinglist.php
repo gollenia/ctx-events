@@ -1,17 +1,17 @@
 <?php
 /* @var $event Event */
 $people = array();
-$EM_Bookings = $event->get_bookings();
+$bookings = $event->get_bookings();
 
-if (count($EM_Bookings->bookings) > 0) {
+if (count($bookings->bookings) > 0) {
     ?>
     <ul class="event-attendees">
     <?php
-    foreach ($EM_Bookings as $EM_Booking) { /* @var $EM_Booking EM_Booking */
-        if ($EM_Booking->is_pending()) {
+    foreach ($bookings as $booking) { /* @var $booking booking */
+        if ($booking->is_pending()) {
             // Holt die gespeicherten Namen aus den Buchungsdaten
-            $email = $EM_Booking->booking_mail ?? null;
-            $name = trim(($EM_Booking->first_name ?? '') . ' ' . ($EM_Booking->last_name ?? ''));
+            $email = $booking->booking_mail ?? null;
+            $name = trim(($booking->first_name ?? '') . ' ' . ($booking->last_name ?? ''));
 
             // Falls der Name leer ist, alternative Darstellung
             if (empty($name)) {

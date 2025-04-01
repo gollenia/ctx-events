@@ -1,6 +1,7 @@
 <?php
 //Admin functions
 
+use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
 
 function em_admin_menu(){
@@ -10,8 +11,8 @@ function em_admin_menu(){
 		$bookings_num = '';
 		$bookings_pending_count = apply_filters('em_bookings_pending_count',0);
 		if( get_option('dbem_bookings_approval') == 1){ 
-			$EM_Bookings = EM_Bookings::get(array('status'=>0));
-			$bookings_pending_count += count($EM_Bookings);
+			$booking_collection = BookingCollection::get(array('status'=>0));
+			$bookings_pending_count += count($booking_collection);
 		}
 		if($bookings_pending_count > 0){
 			$bookings_num = '<span class="update-plugins count-'.$bookings_pending_count.'"><span class="plugin-count">'.$bookings_pending_count.'</span></span>';

@@ -93,21 +93,7 @@ if( !class_exists('EM_Permalinks') ){
 				}
 			}
 			
-			//Check the event category and tags pages, because if we're overriding the pages and they're not within the Events page hierarchy it may 404
-			//if taxonomy base permalink is same as page permalink
-			foreach( array('tags','categories') as $taxonomy_name ){
-				if( get_option('dbem_'.$taxonomy_name.'_enabled') ){
-					$taxonomy_page_id = get_option ( 'dbem_'.$taxonomy_name.'_page' );
-					$taxonomy_page = get_post($taxonomy_page_id);
-					if( is_object($taxonomy_page) ){
-					
-							$taxonomy_slug = urldecode(preg_replace('/\/$/', '', str_replace( trailingslashit(home_url()), '', get_permalink($taxonomy_page_id)) ));
-							$taxonomy_slug = ( !empty($taxonomy_slug) ) ? trailingslashit($taxonomy_slug) : $taxonomy_slug;
-							$em_rules[trim($taxonomy_slug,'/').'/?$'] = 'index.php?pagename='.trim($taxonomy_slug,'/') ;
-					}
-					
-				}
-			}
+		
 			$em_rules = apply_filters('em_rewrite_rules_array_events', $em_rules, $events_slug);
 			//make sure there's no page with same name as archives, that should take precedence as it can easily be deleted wp admin side
 			$em_query = new WP_Query(array('pagename'=>EM_POST_TYPE_EVENT_SLUG));
@@ -127,11 +113,8 @@ if( !class_exists('EM_Permalinks') ){
 				$em_rules[EM_POST_TYPE_LOCATION_SLUG."/([^/]+)/ical/?$"] = 'index.php?'.EM_POST_TYPE_LOCATION.'=$matches[1]&ical=1';
 			}
 			//add ical taxonomy endpoints
-			$taxonomies = EM_Object::get_taxonomies();
-			foreach($taxonomies as $tax_arg => $taxonomy_info){
-				//set the dynamic rule for this taxonomy
-				$em_rules[$taxonomy_info['slug']."/(.+)/ical/?$"] = 'index.php?'.$taxonomy_info['query_var'].'=$matches[1]&ical=1';
-			}
+			
+		
 			//add RSS location CPT endpoint
 			if( get_option('dbem_locations_enabled') ){
 				$em_rules[EM_POST_TYPE_LOCATION_SLUG."/([^/]+)/rss/?$"] = 'index.php?'.EM_POST_TYPE_LOCATION.'=$matches[1]&rss=1';

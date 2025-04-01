@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Model\Booking;
 use Contexis\Events\Options;
 
 class EM_Coupons_Admin {
@@ -294,18 +297,16 @@ class EM_Coupons_Admin {
 		/* @todo change how coupon-booking relations are stored */
 		$coupon_search = str_replace('a:1:{', '', serialize(array('coupon_code'=>$EM_Coupon->coupon_code)));
 		$coupon_search = substr($coupon_search, 0, strlen($coupon_search)-1 );
-		$bookings = $wpdb->get_col('SELECT booking_id FROM '.EM_BOOKINGS_TABLE." WHERE booking_meta LIKE '%{$coupon_search}%' LIMIT {$limit} OFFSET {$offset}");
+		$query = $wpdb->get_col('SELECT booking_id FROM '.EM_BOOKINGS_TABLE." WHERE booking_meta LIKE '%{$coupon_search}%' LIMIT {$limit} OFFSET {$offset}");
 		//FIXME : coupon count not syncing correctly, using this as a fallback
 		$coupons_count = $EM_Coupon->recount();
-		$bookings_count = 0;
-		$EM_Bookings = array();
-		foreach($bookings as $booking_id){ 
-			$EM_Booking = EM_Booking::find($booking_id);
-			if( !empty($EM_Booking->booking_meta['coupon']) ){
-				$coupon = new EM_Coupon($EM_Booking->booking_meta['coupon']);
+		$booking_collection = new BookingCollection;
+		foreach($query as $booking_id){ 
+			$booking = Booking::get_by_id($booking_id);
+			if( !empty($booking->booking_meta['coupon']) ){
+				$coupon = new EM_Coupon($booking->booking_meta['coupon']);
 				if($EM_Coupon->coupon_code == $coupon->coupon_code && $EM_Coupon->coupon_id == $coupon->coupon_id){
-					$bookings_count++;
-					$EM_Bookings[] = $EM_Booking;
+					$booking_collection->add($booking);
 				}
 			}
 		}
@@ -334,7 +335,7 @@ class EM_Coupons_Admin {
 			</div>
 			<?php endif; ?>
 			<div class="clear"></div>
-			<?php if ( $bookings_count > 0 ) : ?>
+			<?php if ( $booking_collection->count() > 0 ) : ?>
 			<div class='table-wrap'>
 				<table id='dbem-bookings-table' class='widefat post coupons'>
 					<thead>
@@ -361,24 +362,24 @@ class EM_Coupons_Admin {
 					</tfoot>
 					<tbody>
 						<?php
-						foreach($EM_Bookings as $EM_Booking){ /* @var EM_Booking $EM_Booking */
-							$base_price = $EM_Booking->get_price();
+						foreach($booking_collection as $booking){ 
+							$base_price = $booking->get_price();
 							?>
 							<tr>
 								<td>
-									<?php echo $EM_Booking->output('#_BOOKINGSLINK') ?>
-									<?php if( in_array($EM_Booking->booking_status, array(2,3)) ) echo '<p class="description">('. $EM_Booking->get_status() . ')</p> '; ?>
+									<?php echo $booking->output('#_BOOKINGSLINK') ?>
+									<?php if( in_array($booking->booking_status, array(2,3)) ) echo '<p class="description">('. $booking->get_status() . ')</p> '; ?>
 								</td>
-								<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $EM_Booking->booking_mail; ?>"><?php echo $EM_Booking->full_name ?></a></td>
-								<td><?php echo $EM_Booking->get_spaces() ?></td>
-								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Booking->get_price()); ?></td>
+								<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $booking->booking_mail; ?>"><?php echo $booking->full_name ?></a></td>
+								<td><?php echo $booking->get_spaces() ?></td>
+								<td><?php echo \Contexis\Events\Intl\Price::format($booking->get_price()); ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Coupon->get_discount($base_price)); ?> <p class="description">(<?php echo $EM_Coupon->get_discount_text(); ?>)</p></td>
-								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Booking->get_price()); ?></td>
+								<td><?php echo \Contexis\Events\Intl\Price::format($booking->get_price()); ?></td>
 								<td>										
 									<?php
-									$edit_url = $EM_Booking->get_admin_url();
+									$edit_url = $booking->get_admin_url();
 									?>
-									<?php if( $EM_Booking->can_manage() ): ?>
+									<?php if( $booking->can_manage() ): ?>
 									<a class="em-bookings-edit" href="<?php echo $edit_url; ?>"><?php esc_html_e('Edit/View','events'); ?></a>
 									<?php endif; ?>
 								</td>

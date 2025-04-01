@@ -2,6 +2,7 @@
 //define and clean up formats for display
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Views\EventView;
 
 $summary_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", "#_EVENTNAME" ) );
 $description_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", "#_EVENTEXCERPT" ) );
@@ -103,8 +104,8 @@ while ( count($events) > 0 ){
 			$apple_structured_location = em_mb_ical_wordwrap($apple_structured_location);
 		}
 		$categories = array();
-		foreach( $event->get_categories() as $EM_Category ){ /* @var EM_Category $EM_Category */
-			$categories[] = $EM_Category->name;
+		foreach( $event->get_categories() as $category ){ 
+			$categories[] = $category->name;
 		}
 		$image = $event->get_image_url();
 		

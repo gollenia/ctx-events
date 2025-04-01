@@ -14,6 +14,7 @@ Text Domain: events
 Domain Path: /languages
 */
 
+use Contexis\Events\Model\Booking;
 
 class Events {
 	const DIR = __DIR__;
@@ -43,33 +44,33 @@ require_once __DIR__ . '/classes/Utilities.php';
 require_once __DIR__ . '/Assets.php';
 require_once __DIR__ . '/classes/Options.php';
 require_once __DIR__ . '/classes/Object.php';
-require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerm.php';
-require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerms.php';
+//require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerm.php';
+//require_once __DIR__ . '/classes/Taxonomies/TaxonomyTerms.php';
 
 require_once __DIR__ . '/classes/Forms/FormPost.php';
 require_once __DIR__ . '/em-posts.php';
 require_once __DIR__ . '/em-actions.php';
 require_once __DIR__ . '/em-ical.php';
 
-require_once __DIR__ . '/classes/Bookings/Booking.php';
+require_once __DIR__ . '/classes/Models/Booking.php';
 
-require_once __DIR__ . '/classes/Bookings/Bookings.php';
+require_once __DIR__ . '/classes/Collections/BookingCollection.php';
 require_once __DIR__ . '/classes/Bookings/BookingsTable.php';
 require_once __DIR__ . '/classes/Bookings/BookingsRest.php';
 require_once __DIR__ . '/classes/Bookings/BookingExport.php';
-require_once __DIR__ . '/classes/Categories/Category.php';
-require_once __DIR__ . '/classes/Categories/Categories.php';
+//require_once __DIR__ . '/classes/Categories/Category.php';
+//require_once __DIR__ . '/classes/Categories/Categories.php';
 
 require_once __DIR__ . '/classes/Models/Event.php';
 require_once __DIR__ . '/classes/Events/EventRestController.php';
 require_once __DIR__ . '/classes/Events/EventPost.php';
 require_once __DIR__ . '/classes/Collections/EventCollection.php';
-require_once __DIR__ . '/classes/Events/EventView.php';
-require_once __DIR__ . '/classes/Locations/Location.php';
+require_once __DIR__ . '/classes/Views/EventView.php';
+require_once __DIR__ . '/classes/Models/Location.php';
 
 require_once __DIR__ . '/classes/Locations/LocationPost.php';
-require_once __DIR__ . '/classes/Locations/Locations.php';
-require_once __DIR__ . '/classes/Locations/LocationView.php';
+require_once __DIR__ . '/classes/Collections/LocationCollection.php';
+require_once __DIR__ . '/classes/Views/LocationView.php';
 require_once __DIR__ . '/classes/Emails/Mailer.php';
 require_once __DIR__ . '/classes/Notices.php';
 //require_once __DIR__ . '/classes/People/People.php';
@@ -77,12 +78,12 @@ require_once __DIR__ . '/classes/Notices.php';
 require_once __DIR__ . '/classes/Permalinks.php';
 require_once __DIR__ . '/classes/Speaker/Speakers.php';
 
-require_once __DIR__ . '/classes/Tags/Tag.php';
-require_once __DIR__ . '/classes/Tags/Tags.php';
+//require_once __DIR__ . '/classes/Tags/Tag.php';
+//require_once __DIR__ . '/classes/Tags/Tags.php';
 require_once __DIR__ . '/classes/Tickets/TicketBooking.php';
-require_once __DIR__ . '/classes/Tickets/Ticket.php';
+require_once __DIR__ . '/classes/Models/Ticket.php';
 require_once __DIR__ . '/classes/Tickets/TicketsBookings.php';
-require_once __DIR__ . '/classes/Tickets/Tickets.php';
+require_once __DIR__ . '/classes/Collections/TicketCollection.php';
 require_once __DIR__ . '/classes/Tickets/TicketsController.php';
 //Admin Files
 if( is_admin() ){
@@ -99,9 +100,9 @@ if( is_admin() ){
 	require_once __DIR__ . '/classes/Events/EventPostsAdmin.php';
 	require_once __DIR__ . '/classes/Locations/LocationPostAdmin.php';
 	require_once __DIR__ . '/classes/Locations/LocationPostsAdmin.php';
-	require_once __DIR__ . '/classes/Taxonomies/TaxonomyAdmin.php';
-	require_once __DIR__ . '/classes/Categories/CategoriesAdmin.php';
-	require_once __DIR__ . '/classes/Tags/TagsAdmin.php';
+	//require_once __DIR__ . '/classes/Taxonomies/TaxonomyAdmin.php';
+	//require_once __DIR__ . '/classes/Categories/CategoriesAdmin.php';
+	//require_once __DIR__ . '/classes/Tags/TagsAdmin.php';
 	require_once __DIR__ . '/admin/bookings/em-events.php';
 	/*
 	require_once __DIR__ . '/admin/bookings/em-cancelled.php';
@@ -178,19 +179,13 @@ add_filter('init','em_init',1);
  * @return null
  */
 function em_load_event(){
-	global $EM_Recurrences, $EM_Location, $EM_Booking, $EM_Category;
+	global $EM_Recurrences, $booking;
 	if (defined('EM_LOADED')) return;
 	
 	$EM_Recurrences = array();
 
 	if( isset($_REQUEST['booking_id']) && is_numeric($_REQUEST['booking_id']) && !is_object($_REQUEST['booking_id']) ){
-		$EM_Booking = \EM_Booking::find( absint($_REQUEST['booking_id']) );
-	}
-
-	if( isset($_REQUEST['category_id']) && is_numeric($_REQUEST['category_id']) && !is_object($_REQUEST['category_id']) ){
-		$EM_Category = new \EM_Category( absint($_REQUEST['category_id']) );
-	}elseif( isset($_REQUEST['category_slug']) && !is_object($EM_Category) ){
-		$EM_Category = new \EM_Category( $_REQUEST['category_slug'] );
+		$booking = Booking::get_by_id( absint($_REQUEST['booking_id']) );
 	}
 
 	define('EM_LOADED',true);

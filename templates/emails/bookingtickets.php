@@ -1,4 +1,4 @@
-<?php foreach($EM_Booking->get_tickets_bookings() as $ticket_booking): ?>
+<?php foreach($booking->get_tickets_bookings() as $ticket_booking): ?>
 <?php
 
 echo $ticket_booking->get_ticket()->name; 

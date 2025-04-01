@@ -1,105 +1,69 @@
 <?php
 
-use Contexis\Events\Tickets\Tickets;
-use Contexis\Events\Tickets\Ticket;
+namespace Contexis\Events\Collections;
+
+use Contexis\Events\Model\Booking;
+use Contexis\Events\Collections\TicketCollection;
+use Contexis\Events\Models\Ticket;
 use Contexis\Events\Models\Event;
-/**
- * Deals with the booking info for an event
- * @author marcus
- * @property EM_Booking[] $bookings
- */
-class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
+use Contexis\Events\EM_Object;
+use IteratorAggregate;
+use Countable;
+
+class BookingCollection extends \EM_Object implements IteratorAggregate, Countable {
 	
-	/**
-	 * Array of EM_Booking objects for a specific event
-	 * @var EM_Booking[]
-	 */
 	public array $bookings = [];
-	private int $position = 0;
-	/**
-	 * @var Tickets
-	 */
+
 	var $tickets;
-	/**
-	 * @var int
-	 */
+	
 	public int $event_id = 0;
-	/**
-	 * How many spaces this event has
-	 * @var int
-	 */
+	
 	var $spaces;
-	/**
-	 * @var boolena Flag for Multilingual functionality, to help prevent unnecessary reloading of this object if already 'translated'
-	 */
+	
 	var $translated;
-	/**
-	 * If flag is true, a registration will be attempted when booking whether the user is logged in or not. Used in cases such as manual bookings (a Pro feature) and should only be enabled during manipulation by an event admin.
-	 * @var unknown
-	 */
+
+	public string $feedback_message = '';
+	
 	public static $force_registration;
-	/**
-	 * If flag is true, bookings and forms will not impose restrictions for roles. Future iterations will remove restrictions on dates, space capacity, etc. This is mainly for use by event admins such as for a manual booking (a Pro feature). 
-	 * @var bool
-	 */
+	
 	public static $disable_restrictions = false;
+
+	public array $errors = array();
 	
 	protected $booked_spaces;
 	protected $pending_spaces;
 	protected $available_spaces;
 
-	public static function from_event(Event $event) : EM_Bookings {
+	public static function from_event(Event $event) : BookingCollection {
 		$instance = new self();
 		$instance->event_id = $event->event_id;
 		$instance->load();
 		return $instance;
 	}
 
-	public static function from_bookings(array $bookings) : EM_Bookings {
+	public static function from_bookings(array $bookings) : BookingCollection {
 		$instance = new self();
-		foreach( $bookings as $EM_Booking ){
-			if( get_class($EM_Booking) == 'EM_Booking') $instance->bookings[] = $EM_Booking;
+		foreach( $bookings as $booking ){
+			if( get_class($booking) == 'Booking') $instance->bookings[] = $booking;
 		}
 		return $instance;
 	}
 
-	public static function from_booking_ids(array $booking_ids) : EM_Bookings {
+	public static function from_booking_ids(array $booking_ids) : BookingCollection {
 		$instance = new self();
 		foreach( $booking_ids as $booking_id ){
-			$instance->bookings[] = EM_Booking::find($booking_id);
+			$instance->bookings[] = Booking::get_by_id($booking_id);
 		}
 		return $instance;
 	}
 
 	public static function find() {
 		return new self();
-	}
+	}	
 	
-
-	
-	public function __set( $var, $val ){
-		if( $var == 'bookings' ){
-			if( is_array($val) ){
-				$this->bookings = $val;
-			}else{
-				$this->bookings = null;
-			}
-		}
-		$this->$var = $val;
-	}
-	
-	/**
-	 * Counter-intuitive but __isset works against isset() but for our purpose it's mainly aimed at empty() calls, which also references this function.
-	 * We don't expect nor do we want people using isset on things like the bookings property.
-	 * Assume every property in EM_Bookings isset() == true and avoid it, only use empty() calls to check if there's anything in that property.
-	 * Therefore, we'd return !empty($this->bookings) because if there's bookings, isset() should return true 
-	 * @param string $var
-	 * @return boolean
-	 */
 	public function __isset( $prop ){
-		//if isset is invoked on $EM_Bookings->bookings then we'll assume it's only set if the bookings property is empty, not if null.
 		if( $prop == 'bookings' ){
-			return $this->bookings !== null;
+			return !empty($this->bookings);
 		}
 		return isset($this->$prop);
 	}
@@ -113,54 +77,49 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 				$bookings = $wpdb->get_results($sql, ARRAY_A);
 			}
 			foreach ($bookings as $booking){
-				$this->bookings[] = EM_Booking::find($booking);
+				$this->bookings[] = Booking::get_by_id($booking);
 			}
 		}
 		return apply_filters('em_bookings_load', $this->bookings);
 	}
 	
-	/**
-	 * Add a booking into this event (or add spaces if person already booked this). We assume at this point that the booking has already been validated usin $EM_Booking->validate()
-	 * @param EM_Booking $EM_Booking
-	 * @return boolean
-	 */
-	function add( $EM_Booking ){
+	function add( Booking $booking ){
 		
 		//Save the booking
 		$emailSent = false;
 		//set status depending on approval settings
-		if( empty($EM_Booking->booking_status) ){ //if status is not set, give 1 or 0 depending on approval settings
-			$EM_Booking->booking_status = get_option('dbem_bookings_approval') ? EM_Booking::PENDING : EM_Booking::APPROVED;
+		if( empty($booking->booking_status) ){ //if status is not set, give 1 or 0 depending on approval settings
+			$booking->booking_status = get_option('dbem_bookings_approval') ? Booking::PENDING : Booking::APPROVED;
 		}
-		$result = $EM_Booking->save(false);
+		$result = $booking->save(false);
 		if($result){ 
 			//Success
-		    do_action('em_bookings_added', $EM_Booking);
+		    do_action('em_bookings_added', $booking);
 			if( $this->bookings === null ) $this->bookings = array();
-			$this->bookings[] = $EM_Booking;
-			$emailSent = $EM_Booking->email();
-			if( get_option('dbem_bookings_approval') == 1 && $EM_Booking->booking_status == EM_Booking::PENDING){
+			$this->bookings[] = $booking;
+			$emailSent = $booking->email();
+			if( get_option('dbem_bookings_approval') == 1 && $booking->booking_status == Booking::PENDING){
 				$this->feedback_message = get_option('dbem_booking_feedback_pending');
 			}else{
 				$this->feedback_message = get_option('dbem_booking_feedback');
 			}
 			if(!$emailSent){
-				$EM_Booking->email_not_sent = true;
+				$booking->email_not_sent = true;
 				$this->feedback_message .= ' '.__('However, there were some problems whilst sending confirmation emails to you and/or the event contact person. You may want to contact them directly and letting them know of this error.', 'events');
 				if( current_user_can('activate_plugins') ){
-					if( count($EM_Booking->get_errors()) > 0 ){
-						$this->feedback_message .= '<br/><strong>Errors:</strong> (only admins see this message)<br/><ul><li>'. implode('</li><li>', $EM_Booking->get_errors()).'</li></ul>';
+					if( count($booking->get_errors()) > 0 ){
+						$this->feedback_message .= '<br/><strong>Errors:</strong> (only admins see this message)<br/><ul><li>'. implode('</li><li>', $booking->get_errors()).'</li></ul>';
 					}else{
 						$this->feedback_message .= '<br/><strong>No errors returned by mailer</strong> (only admins see this message)';
 					}
 				}
 			}
-			return apply_filters('em_bookings_add', true, $EM_Booking);
+			return apply_filters('em_bookings_add', true, $booking);
 		}else{
 			//Failure
-			$this->errors[] = "<strong>".__('Booking could not be created','events')."</strong><br />". implode('<br />', $EM_Booking->errors);
+			$this->errors[] = "<strong>".__('Booking could not be created','events')."</strong><br />". implode('<br />', $booking->errors);
 		}
-		return apply_filters('em_bookings_add', false, $EM_Booking);
+		return apply_filters('em_bookings_add', false, $booking);
 	}
 
 
@@ -174,12 +133,12 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		}
 		
 		if (!empty($this->bookings) && is_array($this->bookings)) {
-			foreach ($this->bookings as $EM_Booking) {
-				return Event::find_by_event_id($EM_Booking->event_id);
+			foreach ($this->bookings as $booking) {
+				return Event::find_by_event_id($booking->event_id);
 			}
 		}
 		
-		return null; // Stattdessen null zurückgeben, wenn nix gefunden wurde.
+		return null;
 	}
 	
 	/**
@@ -189,7 +148,7 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 	 */
 	function get_tickets( $force_reload = false ){
 		if( !is_object($this->tickets) || $force_reload ){
-			$this->tickets = \Contexis\Events\Tickets\Tickets::find_by_event_id($this->event_id);
+			$this->tickets = TicketCollection::find_by_event_id($this->event_id);
 		}else{
 			$this->tickets->event_id = $this->event_id;
 		}
@@ -254,8 +213,8 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		$booking_ids = array();
 		if( !empty($this->bookings) ){
 			//get the booking ids tied to this event or preloaded into this object
-			foreach( $this->bookings as $EM_Booking ){
-				$booking_ids[] = $EM_Booking->booking_id;
+			foreach( $this->bookings as $booking ){
+				$booking_ids[] = $booking->booking_id;
 			}
 			$result_tickets = true;
 			$result = true;
@@ -321,12 +280,12 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 			$results = array();
 			$mails = array();
 			foreach( $booking_ids as $booking_id ){
-				$EM_Booking = EM_Booking::find($booking_id);
-				if( !$EM_Booking->can_manage() ){
+				$booking = Booking::get_by_id($booking_id);
+				if( !$booking->can_manage() ){
 					$this->feedback_message = __('Bookings %s. Mails Sent.', 'events');
 					return false;
 				}
-				$results[] = $EM_Booking->set_status($status, $send_email, $ignore_spaces);
+				$results[] = $booking->set_status($status, $send_email, $ignore_spaces);
 			}
 			if( !in_array('false',$results) ){
 				$this->feedback_message = __('Bookings %s. Mails Sent.', 'events');
@@ -337,9 +296,9 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 				return false;
 			}
 		}elseif( is_numeric($booking_ids) || is_object($booking_ids) ){
-			$EM_Booking = ( is_object($booking_ids) && get_class($booking_ids) == 'EM_Booking') ? $booking_ids : EM_Booking::find($booking_ids);
-			$result = $EM_Booking->set_status($status);
-			$this->feedback_message = $EM_Booking->feedback_message;
+			$booking = ( is_object($booking_ids) && get_class($booking_ids) == 'Booking') ? $booking_ids : Booking::get_by_id($booking_ids);
+			$result = $booking->set_status($status);
+			$this->feedback_message = $booking->feedback_message;
 			return $result;
 		}
 		return false;	
@@ -415,69 +374,45 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 	/**
 	 * Gets booking objects (not spaces). If booking approval is enabled, only the number of approved bookings will be shown.
 	 * @param boolean $all_bookings If set to true, then all bookings with any status is returned
-	 * @return EM_Bookings
+	 * @return BookingCollection
 	 */
-	function get_bookings( $all_bookings = false ){
+	function get_bookings( $all_bookings = false ) : BookingCollection {
 		$confirmed = array();
-		foreach ( $this->load() as $EM_Booking ){
-			if( $EM_Booking->booking_status == EM_Booking::APPROVED || (get_option('dbem_bookings_approval') == 0 && $EM_Booking->booking_status == EM_Booking::PENDING) || $all_bookings ){
-				$confirmed[] = $EM_Booking;
+		foreach ( $this->load() as $booking ){
+			if( $booking->booking_status == Booking::APPROVED || (get_option('dbem_bookings_approval') == 0 && $booking->booking_status == Booking::PENDING) || $all_bookings ){
+				$confirmed[] = $booking;
 			}
 		}
-		$EM_Bookings = EM_Bookings::from_bookings($confirmed);
-		return $EM_Bookings;		
+		$bookings = BookingCollection::from_bookings($confirmed);
+		return $bookings;		
 	}
 	
-	/**
-	 * Get pending bookings. If booking approval is disabled, will return no bookings. 
-	 * @return EM_Bookings
-	 */
-	function get_pending_bookings(){
-		if( get_option('dbem_bookings_approval') == 0 ){
-			return new EM_Bookings;
-		}
-		$pending = array();
-		foreach ( $this->load() as $EM_Booking ){
-			if($EM_Booking->booking_status == EM_Booking::PENDING){
-				$pending[] = $EM_Booking;
-			}
-		}
-		$EM_Bookings = EM_Bookings::from_bookings($pending);
-		return $EM_Bookings;	
-	}	
 	
-	/**
-	 * Get rejected bookings. If booking approval is disabled, will return no bookings. 
-	 * @return array EM_Bookings
-	 */
-	function get_rejected_bookings(){
-		$rejected = array();
-		foreach ( $this->load() as $EM_Booking ){
-			if($EM_Booking->booking_status == EM_Booking::REJECTED){
-				$rejected[] = $EM_Booking;
-			}
-		}
-		$EM_Bookings = EM_Bookings::from_bookings($rejected);
-		return $EM_Bookings;
-	}	
 	
-	/**
-	 * Get cancelled bookings. 
-	 * @return array EM_Booking
-	 */
+	public function get_approved_bookings(){
+		return $this->get_by_status(Booking::APPROVED);
+	}
+
+	public function get_rejected_bookings(){
+		return $this->get_by_status(Booking::REJECTED);
+	}
+	
 	function get_cancelled_bookings(){
-		$cancelled = array();
-		foreach ( $this->load() as $EM_Booking ){
-			if($EM_Booking->booking_status == EM_Booking::CANCELLED){
-				$cancelled[] = $EM_Booking;
+		return $this->get_by_status(Booking::CANCELLED);
+	}
+
+	public function get_by_status( int $status ) : BookingCollection {
+		$bookings = array();
+		foreach ( $this->load() as $booking ){
+			if($booking->booking_status == $status){
+				$bookings[] = $booking;
 			}
 		}
-		$EM_Bookings = EM_Bookings::from_bookings($cancelled);
-		return $EM_Bookings;
+		return BookingCollection::from_bookings($bookings);
 	}
 	
 
-	public static function get( $args = array() ) : EM_Bookings {
+	public static function get( $args = array() ) : BookingCollection {
 		global $wpdb;
 		$bookings_table = EM_BOOKINGS_TABLE;
 		$events_table = EM_EVENTS_TABLE;
@@ -493,8 +428,8 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		$where = ( count($conditions) > 0 ) ? " WHERE " . implode ( " AND ", $conditions ):'';
 		
 		//Get ordering instructions
-		$EM_Booking = new EM_Booking();
-		$accepted_fields = $EM_Booking->get_fields(true);
+		$booking = new Booking();
+		$accepted_fields = $booking->get_fields(true);
 		$accepted_fields['date'] = 'booking_date';
 		$orderby = self::build_sql_orderby($args, $accepted_fields);
 		//Now, build orderby sql
@@ -519,41 +454,10 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		$results = (is_array($results)) ? $results:array();
 		$bookings = array();
 		foreach ( $results as $booking ){
-			$bookings[] = EM_Booking::find($booking);
+			$bookings[] = Booking::get_by_id($booking);
 		}
-		$EM_Bookings = EM_Bookings::from_bookings($bookings);
-		return $EM_Bookings;
-	}
-	
-
-	
-	// TODO:DELETE
-	static function enqueue_js(){
-        if( !defined('EM_BOOKING_JS_LOADED') ){ //request loading of JS file in footer of page load
-        	add_action('wp_footer','EM_Bookings::em_booking_js_footer', 20);
-        	add_action('admin_footer','EM_Bookings::em_booking_js_footer', 20);
-        	define('EM_BOOKING_JS_LOADED',true);
-        }
-	}
-	
-	// TODO:DELETE
-	static function em_booking_js_footer(){
-		?>		
-		<script type="text/javascript">
-			jQuery(document).ready( function($){	
-				<?php
-					//we call the segmented JS files and include them here
-					$include_path = dirname(dirname(__FILE__)); //get path to parent directory
-					include($include_path.'/build/js/bookingsform.js'); 
-					do_action('em_gateway_js'); //deprecated use em_booking_js below instead
-					do_action('em_booking_js'); //use this instead
-				?>							
-			});
-			<?php
-			do_action('em_booking_js_footer');
-			?>
-		</script>
-		<?php
+		$bookings = BookingCollection::from_bookings($bookings);
+		return $bookings;
 	}
 	
 	/**
@@ -617,16 +521,16 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		}
 		//clean up array value
 		if( !empty($array['array']) ){
-			$EM_Booking = new EM_Booking();
+			$booking = new Booking();
 			if( is_array($array['array']) ){
 				$clean_arg = array();
 				foreach( $array['array'] as $k => $field ){
-					if( array_key_exists($field, $EM_Booking->fields) ){
+					if( array_key_exists($field, $booking->fields) ){
 						$clean_arg[] = $field;
 					}
 				}
 				$search_defaults['array'] = !empty($clean_arg) ? $clean_arg : true; //if invalid args given, just return all fields
-			}elseif( is_string($array['array']) && array_key_exists($array['array'], $EM_Booking->fields) ){
+			}elseif( is_string($array['array']) && array_key_exists($array['array'], $booking->fields) ){
 				$search_defaults['array'] = array($array['array']);
 			}else{
 				$search_defaults['array'] = true;
@@ -644,9 +548,9 @@ class EM_Bookings extends EM_Object implements IteratorAggregate, Countable {
 		return apply_filters('em_bookings_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
 	}
 
-   public function getIterator() : ArrayIterator {
-		return new ArrayIterator($this->bookings);
-	}
+	public function getIterator(): \Traversable {
+        return new \ArrayIterator($this->bookings);
+    }
 
 	public function count(): int {
         return count($this->bookings);

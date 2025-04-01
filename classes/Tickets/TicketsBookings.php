@@ -1,6 +1,9 @@
 <?php
 
 namespace Contexis\Events\Tickets;
+
+use Contexis\Events\Model\Booking;
+
 /**
  * Deals with the each ticket booked in a single booking
  * @author marcus
@@ -18,11 +21,8 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 	 * @var array[TicketBooking]
 	 */
 	var $tickets_bookings_deleted = array();
-	/**
-	 * This object belongs to this booking object
-	 * @var EM_Booking
-	 */
-	var $booking;
+
+	public Booking $booking;
 	var $booking_id;
 	/**
 	 * This object belongs to this booking object
@@ -39,7 +39,7 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 	function __construct( $object = false ){
 		global $wpdb;
 		if($object){
-			if( is_object($object) && get_class($object) == "EM_Booking"){
+			if( is_object($object) && get_class($object) == "Booking"){
 				$this->booking = $object;
 				$sql = "SELECT * FROM ". EM_TICKETS_BOOKINGS_TABLE ." WHERE booking_id ='{$this->booking->booking_id}'";
 			}elseif( is_object($object) && get_class($object) == "EM_Ticket"){
@@ -143,29 +143,27 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 	 * Smart event locator, saves a database read if possible. 
 	 */
 	function get_booking(){
-		global $EM_Booking;
+
 		$booking_id = $this->get_booking_id();
-		if( is_object($this->booking) && get_class($this->booking)=='EM_Booking' && $this->booking->booking_id == $booking_id ){
+		if( is_object($this->booking) && get_class($this->booking)=='Booking' && $this->booking->booking_id == $booking_id ){
 			return $this->booking;
-		}elseif( is_object($EM_Booking) && $EM_Booking->booking_id == $booking_id ){
-			$this->booking = $EM_Booking;
-		}else{
-			if(is_numeric($booking_id)){
-				$this->booking = \EM_Booking::find($booking_id);
-			}else{
-				$this->booking = \EM_Booking::find();
-			}
 		}
+		
+		if(is_numeric($booking_id)){
+			$this->booking = Booking::get_by_id($booking_id);
+		}
+
+		$this->booking = new Booking;
+		
 		return apply_filters('em_tickets_bookings_get_booking', $this->booking, $this);;
 	}
 	
 	function get_booking_id(){
-		if( empty($this->booking_id) && count($this->tickets_bookings) > 0 ){
-			foreach($this->tickets_bookings as $ticket_booking){ break; } //get first array item
-			$this->booking_id = $ticket_booking->get_booking()->booking_id;
-			return apply_filters('em_tickets_bookings_get_booking_id', $this->booking_id, $this);
-		}
-		return apply_filters('em_tickets_bookings_get_booking_id', $this->booking_id, $this);
+		if( !empty($this->booking_id) || count($this->tickets_bookings) > 0 ) return $this->booking_id;
+		
+		$ticket_booking = $this->tickets_bookings[0];
+		$this->booking_id = $ticket_booking->get_booking()->booking_id;
+		return $this->booking_id;
 	}
 	
 	/**

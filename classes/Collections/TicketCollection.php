@@ -1,20 +1,21 @@
 <?php
 
-namespace Contexis\Events\Tickets;
+namespace Contexis\Events\Collections;
 
+use Contexis\Events\Model\Booking;
 use \Contexis\Events\Models\Event;
 /**
  * Deals with the ticket info for an event
  * @author marcus
  *
  */
-class Tickets extends \EM_Object implements \Iterator, \Countable {
+class TicketCollection extends \EM_Object implements \Iterator, \Countable {
 	
 
 	public array $tickets = [];
 	public int $index = 0;
 	public int $event_id = 0;
-	public \EM_Booking $booking;
+	public Booking $booking;
 	private int $spaces = 0;
 	
 
@@ -49,7 +50,7 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 		return $instance;
 	}
 
-	public static function find_by_booking(\EM_Booking $booking) {
+	public static function find_by_booking(Booking $booking) {
 		global $wpdb;
 		$instance = new self();
 		$instance->booking = $booking->booking;
@@ -62,7 +63,7 @@ class Tickets extends \EM_Object implements \Iterator, \Countable {
 	}
 
 	public static function find_by_booking_id(int $booking_id) {
-		$booking = new \EM_Booking($booking_id);
+		$booking = Booking::get_by_id($booking_id);
 		return self::find_by_booking($booking);
 	}
 

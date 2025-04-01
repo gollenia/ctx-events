@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+use Contexis\Events\Collections\LocationCollection;
 use \Contexis\Events\Options;
 ?>
 
@@ -25,23 +27,7 @@ use \Contexis\Events\Options;
 		<?php
 			if( get_option('dbem_locations_enabled') ){
 					
-				$location_options = array();
-				$location_options[0] = __('no default location','events');
-				$query = new WP_Query(array('post_type'=>EM_POST_TYPE_LOCATION, 'posts_per_page'=>-1));
 				
-				if( $query->have_posts() ){
-					while ( $query->have_posts() ) {
-						$query->the_post();
-						$location_options[get_the_ID()] = get_the_title();
-					}
-				}
-				wp_reset_postdata();
-
-				foreach($EM_Locations as $EM_Location){
-					$location_options[$EM_Location->location_id] = $EM_Location->location_name;
-				}
-
-				Options::select( __( 'Default Location', 'events'), 'dbem_default_location', $location_options, __( 'This option allows you to select the default location when adding an event.','events') );
 				Options::select( __( 'Default Location Country', 'events'), 'dbem_location_default_country', \Contexis\Events\Intl\Countries::get(__('no default country', 'events')), __('If you select a default country, that will be pre-selected when creating a new location.','events') );
 			}
 

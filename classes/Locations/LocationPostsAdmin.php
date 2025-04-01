@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Models\Location;
+
 class EM_Location_Posts_Admin{
 	public static function init(){
 		global $pagenow;
@@ -62,7 +65,7 @@ class EM_Location_Posts_Admin{
 	}
 	
 	public static function columns_output( $column ) {
-		$location = EM_Location::find_by_post(get_post()); 
+		$location = Location::find_by_post(get_post()); 
 		switch ( $column ) {
 			case 'location-id':
 				echo $location->location_id;

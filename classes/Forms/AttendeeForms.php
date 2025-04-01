@@ -108,14 +108,14 @@ class EM_Attendees_Form {
 	/**
 	 * Returns a formatted multi-dimensional associative array of attendee information for a specific booking, split by ticket > attendee > attendee data.
 	 * example : array('ticket_id' => array('Attendee 1' => array('Label'=>'Value', 'Label 2'=>'Value 2'), 'Attendee 2' => array(...)...)...);
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 */
-	public static function get_booking_attendees( $EM_Booking ){
+	public static function get_booking_attendees( $booking ){
 		$attendee_data = array();
-		foreach( $EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){ 
+		foreach( $booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){ 
 			//Display ticket info
-			if( !empty($EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id]) && is_array($EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id]) ){
-			    $ticket_booking->booking = $EM_Booking; //avoid extra loading in sub-function
+			if( !empty($booking->booking_meta['attendees'][$ticket_booking->ticket_id]) && is_array($booking->booking_meta['attendees'][$ticket_booking->ticket_id]) ){
+			    $ticket_booking->booking = $booking; //avoid extra loading in sub-function
 			    $attendee_data[$ticket_booking->ticket_id] = self::get_ticket_attendees($ticket_booking);
 			}else{
 				$attendee_data[$ticket_booking->ticket_id] = array();
@@ -175,25 +175,25 @@ class EM_Attendees_Form {
 	/**
 	 * Hooks into em_booking_get_post and validates the 
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return bool
 	 */
-	public static function em_booking_get_post($result, $EM_Booking){
+	public static function em_booking_get_post($result, $booking){
 		//get, store and validate post data 
-		$EM_Form = self::get_form($EM_Booking->event_id);
+		$EM_Form = self::get_form($booking->event_id);
 		if( self::$form_id > 0 ){
-			if( (empty($EM_Booking->booking_id) || (!empty($EM_Booking->booking_id) && $EM_Booking->can_manage())) ){
-			    $EM_Booking->booking_meta['attendees'] = array();
-				foreach ($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){
+			if( (empty($booking->booking_id) || (!empty($booking->booking_id) && $booking->can_manage())) ){
+			    $booking->booking_meta['attendees'] = array();
+				foreach ($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){
 				    for( $i = 0; $i < $ticket_booking->ticket_booking_spaces; $i++ ){
-						$EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i] = array();
+						$booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i] = array();
 						foreach($EM_Form->fields as $field){
 							$field['label'] = str_replace('#NUM#', $i+1, $field['label']);
 						}
 					    if( $EM_Form->get_post(false, $ticket_booking->ticket_id, $i) ){ //passing false for $validate, since it'll be done in em_booking_validate hook
 							foreach($EM_Form->get_values() as $fieldid => $value){
 								//get results and put them into booking meta
-								$EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i][$fieldid] = $value;
+								$booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i][$fieldid] = $value;
 							}			
 					    }
 				    }
@@ -201,7 +201,7 @@ class EM_Attendees_Form {
 			}
 			if( count($EM_Form->get_errors()) > 0 ){
 				$result = false;
-				$EM_Booking->add_error($EM_Form->get_errors());
+				$booking->add_error($EM_Form->get_errors());
 			}
 		}
 		return $result;
@@ -210,14 +210,14 @@ class EM_Attendees_Form {
 	/**
 	 * Validates a booking against the attendee fields provided
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	public static function em_booking_validate($result, $EM_Booking){
+	public static function em_booking_validate($result, $booking){
 		//going through each ticket type booked
-		$EM_Form = self::get_form($EM_Booking->event_id);
+		$EM_Form = self::get_form($booking->event_id);
 		if( self::$form_id > 0 ){
-			foreach ($EM_Booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){
+			foreach ($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){
 				//get original field labels for replacement of #NUM#
 				$original_fields = array();
 				foreach($EM_Form->form_fields as $key => $field){
@@ -225,8 +225,8 @@ class EM_Attendees_Form {
 				}
 				//validate a form for each space booked
 				for( $i = 0; $i < $ticket_booking->ticket_booking_spaces; $i++ ){
-					if( isset($EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i]) ){ //unlike post values each attendee has an array within the array of a ticket attendee info
-						$EM_Form->field_values = $EM_Booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i];
+					if( isset($booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i]) ){ //unlike post values each attendee has an array within the array of a ticket attendee info
+						$EM_Form->field_values = $booking->booking_meta['attendees'][$ticket_booking->ticket_id][$i];
 						$EM_Form->errors = array();
 						//change the field labels in case of #NUM#
 						foreach($EM_Form->form_fields as $key => $field){
@@ -236,7 +236,7 @@ class EM_Attendees_Form {
 						if( !$EM_Form->validate($EM_Form->field_values['name']) ){
 							$title = $ticket_booking->get_ticket()->ticket_name . " - " . sprintf(__('Attendee %s','events'), $i+1);
 							$error = array( $title => $EM_Form->get_errors());
-						    $EM_Booking->add_error($EM_Form->get_errors());
+						    $booking->add_error($EM_Form->get_errors());
 						    $result = false;
 						}
 					}
@@ -284,10 +284,10 @@ class EM_Attendees_Form {
 
 	
 
-	public static function data_privacy_export( $export_item, $EM_Booking ){
-	    if( get_class($EM_Booking) == 'EM_Multiple_Booking' ) return $export_item; //skip multiple bookings
-		$tickets_bookings = $EM_Booking->get_tickets_bookings();
-		$attendee_datas = EM_Attendees_Form::get_booking_attendees($EM_Booking);
+	public static function data_privacy_export( $export_item, $booking ){
+	    if( get_class($booking) == 'EM_Multiple_Booking' ) return $export_item; //skip multiple bookings
+		$tickets_bookings = $booking->get_tickets_bookings();
+		$attendee_datas = EM_Attendees_Form::get_booking_attendees($booking);
 		$attendee_string = array();
 		foreach( $tickets_bookings->tickets_bookings as $ticket_booking ){
 			//Display ticket info

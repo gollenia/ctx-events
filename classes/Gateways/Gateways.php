@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\Views\EventView;
+
 if(!class_exists('EM_Gateways')) {
 class EM_Gateways {
 
@@ -57,16 +60,16 @@ class EM_Gateways {
 	    return $vars;
 	}
 	
-	static function em_bookings_table($EM_Bookings_Table){
-		$EM_Bookings_Table->states['awaiting-online'] = array('label'=>__('Awaiting Online Payment','events'), 'search'=>4);
-		$EM_Bookings_Table->states['awaiting-payment'] = array('label'=>__('Awaiting Offline Payment','events'), 'search'=>5);
-		$EM_Bookings_Table->states['needs-attention']['search'] = array(0,4,5);
+	static function em_bookings_table($bookings_table){
+		$bookings_table->states['awaiting-online'] = array('label'=>__('Awaiting Online Payment','events'), 'search'=>4);
+		$bookings_table->states['awaiting-payment'] = array('label'=>__('Awaiting Offline Payment','events'), 'search'=>5);
+		$bookings_table->states['needs-attention']['search'] = array(0,4,5);
 		if( !get_option('dbem_bookings_approval') ){
-			$EM_Bookings_Table->states['needs-attention']['search'] = array(5);
+			$bookings_table->states['needs-attention']['search'] = array(5);
 		}else{
-			$EM_Bookings_Table->states['needs-attention']['search'] = array(0,5);
+			$bookings_table->states['needs-attention']['search'] = array(0,5);
 		}
-		$EM_Bookings_Table->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $EM_Bookings_Table->states) ) ? $_REQUEST['status']:get_option('dbem_default_bookings_search','needs-attention');
+		$bookings_table->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $bookings_table->states) ) ? $_REQUEST['status']:get_option('dbem_default_bookings_search','needs-attention');
 	}
 
 	static function register_gateway($gateway, $class) {
@@ -150,7 +153,7 @@ class EM_Gateways {
 	/**
 	 * Intercepted when a booking is about to be added and saved, calls the relevant booking gateway action provided gateway is provided in submitted request variables.
 	 * @param Event $event the event the booking is being added to
-	 * @param EM_Booking $EM_Booking the new booking to be added
+	 * @param Booking $booking the new booking to be added
 	 * @param boolean $post_validation
 	 */
 	static function em_booking_add($booking, $post_validation = false){
@@ -226,14 +229,14 @@ class EM_Gateways {
 	 * Deprecated, uses em_bookings_deleted hook instead within the transactions object.
 	 * Cleans up Pro-added features in the database, such as deleting transactions for this booking.
 	 * @param boolean $result
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return boolean
 	 */
-	static function em_booking_delete($result, $EM_Booking){
+	static function em_booking_delete($result, $booking){
 		if($result){
 			//TODO decouple transaction logic from gateways
 			global $wpdb;
-			$wpdb->query('DELETE FROM '.EM_TRANSACTIONS_TABLE." WHERE booking_id = '".$EM_Booking->booking_id."'");
+			$wpdb->query('DELETE FROM '.EM_TRANSACTIONS_TABLE." WHERE booking_id = '".$booking->booking_id."'");
 		}
 		return $result;
 	}
@@ -275,15 +278,15 @@ class EM_Gateways {
 	 * ----------------------------------------------------------
 	 */
 	
-	public static function em_bookings_table_rows_col($column, $EM_Booking, $format) : string
+	public static function em_bookings_table_rows_col($column, $booking, $format) : string
 	{
 		if ($column != 'gateway') return '';
-		if( empty($EM_Booking->booking_meta['gateway']) ) return __('None','events');
-		$gateway = EM_Gateways::get_gateway($EM_Booking->booking_meta['gateway']);
+		if( empty($booking->booking_meta['gateway']) ) return __('None','events');
+		$gateway = EM_Gateways::get_gateway($booking->booking_meta['gateway']);
 		return $gateway->title;
 	}
 	
-	public static function em_bookings_table_cols_template($template, $EM_Bookings_Table){
+	public static function em_bookings_table_cols_template($template, $bookings_table){
 		$template['gateway'] = __('Gateway Used','events');
 		return $template;
 	}
@@ -391,14 +394,14 @@ class EM_Gateways {
 	/**
 	 * Modifies exported multiple booking items
 	 * @param array $export_item
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return array
 	 */
-	public static function data_privacy_export($export_items, $export_item, $EM_Booking ){
+	public static function data_privacy_export($export_items, $export_item, $booking ){
 		
         //get the transaction
 		global $EM_Gateways_Transactions; /* @var EM_Gateways_Transactions $EM_Gateways_Transactions */
-		$transactions = $EM_Gateways_Transactions->get_transactions( $EM_Booking );
+		$transactions = $EM_Gateways_Transactions->get_transactions( $booking );
         if( $EM_Gateways_Transactions->total_transactions > 0 ){
 		    foreach( $transactions as $transaction ){
 			    $transactions_item = array(
@@ -408,7 +411,7 @@ class EM_Gateways {
 				    'data' => array() // replace this with assoc array of name/value key arrays
 			    );
 			    
-				$event = $EM_Booking->get_event(); //handle potentially deleted events in a MB booking
+				$event = $booking->get_event(); //handle potentially deleted events in a MB booking
 				$event_string = !empty($event->post_id) ? EventView::render($event, '#_EVENTLINK - #_EVENTDATES @ #_EVENTTIMES') : __('Deleted Event', 'events');
 				$transactions_item['data'][] = array('name' => __('Event','events'), 'value' => $event_string );
                 

@@ -1,5 +1,6 @@
 <?php
 
+use Contexis\Events\Collections\BookingCollection;
 
 class EM_Form extends EM_Object {
 	
@@ -428,7 +429,7 @@ class EM_Form extends EM_Object {
 			default:
 				if( array_key_exists($field['type'], $this->user_fields) && self::show_reg_fields() ){
 					//registration fields
-				    if( $field['type'] != 'user_login' || EM_Bookings::$force_registration || !is_user_logged_in() ){
+				    if( $field['type'] != 'user_login' || BookingCollection::$force_registration || !is_user_logged_in() ){
 						if ($field['name'] == "user_email") {
 							echo '<input type="email" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '"' . ($required ? " required " : " ") . ' />';							
 						} else {					

@@ -13,14 +13,6 @@ class EM_Object {
 	public string $feedback_message = "";
 	var array $errors = array();
 	
-	private static $taxonomies_array; //see self::get_taxonomies()
-	
-	/**
-	 * Provides context in searches where ambiguous field names may coincide between event and location database searches requiring a specific field name for each type.
-	 * For example, status, location, taxonomy and language arguments are used interchangeably in event and location searches but both have different field names.
-	 * Child classes such as EventCollection and EM_Locations will override this field with 'event' or 'location' respectively to determine context.
-	 * @var string
-	 */
 	protected static $context = 'object_type';
 	
 	/**
@@ -50,7 +42,7 @@ class EM_Object {
 			'tag' => 0,
 			'location' => false,
 			'event' => false,
-			'location_status' => false,  //automatically set to 'status' value if in EM_Locations, useful only for EventCollection
+			'location_status' => false,
 			'offset'=>0,
 			'page'=>1,//basically, if greater than 0, calculates offset at end
 			'page_queryvar'=>null,
@@ -72,8 +64,6 @@ class EM_Object {
 			'ajax'=> true, //considered during pagination
 			'language' => null, //for language searches in ML mode
 		);
-		//auto-add taxonomies to defaults
-		foreach( self::get_taxonomies() as $item => $item_data ){ $super_defaults[$item] = false; }
 		
 		//Return default if nothing passed
 		if( empty($defaults) && empty($array) ){
@@ -93,14 +83,6 @@ class EM_Object {
 			if( !empty($array['owner']) && $array['owner'] != 'me') $clean_ids_array[] = 'owner'; //clean owner attribute if not 'me'
 			$array = self::clean_id_atts($array, $clean_ids_array);
 
-			//Clean taxonomies
-			$taxonomies = self::get_taxonomies();
-			foreach( $taxonomies as $item => $item_data ){ //tags and cats turned into an array regardless
-			    if( !empty($array[$item]) && !is_array($array[$item]) ){
-			    	$array[$item] = str_replace(array('&amp;','&#038;'), '&', $array[$item]); //clean & modifiers
-					$array[$item] = preg_replace(array('/^[&,]/','/[&,]$/'),'', $array[$item]); //trim , and & from ends
-			    }
-			}
 					    
 			//Near
 			if( !empty($array['near']) ){
@@ -109,7 +91,6 @@ class EM_Object {
 				}elseif( is_string($array['near']) && preg_match('/^( ?[\-0-9\.]+ ?,?)+$/', $array['near']) ){
 					$array['near'] = explode(',',$array['near']);
 				}else{
-					//assume it's a string to geocode, not supported yet
 					unset($array['near']);
 				}
 				$array['near_unit'] = !empty($array['near_unit']) && in_array($array['near_unit'], array('km','mi')) ? $array['near_unit']:$defaults['near_unit']; //default is 'mi'
@@ -119,19 +100,7 @@ class EM_Object {
 			if( !empty($array['country']) && is_string($array['country']) && preg_match('/^( ?.+ ?,?)+$/', $array['country']) ){
 			    $array['country'] = explode(',',$array['country']);
 			}
-			//TODO validate search query array
-			//Clean the supplied array, so we only have allowed keys
-			foreach( array_keys($array) as $key){
-				if( !array_key_exists($key, $defaults) && !array_key_exists($key, $taxonomies) ) unset($array[$key]);		
-			}
-			//Timezone
-			if( !empty($array['timezone']) ){
-				if( !is_array($array['timezone']) ) {
-					$array['timezone'] = str_replace(' ', '', $array['timezone']);
-					$array['timezone'] = explode(',', $array['timezone']);
-				}
-			}
-
+			
 			//return clean array
 			$defaults = array_merge ( $defaults, $array ); //No point using WP's cleaning function, we're doing it already.
 		}
@@ -412,9 +381,9 @@ class EM_Object {
 			$conditions['location'] = " {$events_table}.location_id = $location OR {$events_table}.location_id IS NULL";
 		}elseif ( is_array($location) && !empty($location) && array_is_list($location) ){
 			$conditions['location'] = "{$location_id_table}.location_id IN (" . implode(',', $location) .')';
-		}elseif ( is_object($location) && get_class($location)=='EM_Location' ){ //Now we deal with objects
+		}elseif ( is_object($location) && get_class($location)=='Location' ){ //Now we deal with objects
 			$conditions['location'] = " {$location_id_table}.location_id = $location->location_id";
-		}elseif ( is_array($location) && @get_class(current($location))=='EM_Location') { //we can accept array of ids or EM_Location objects
+		}elseif ( is_array($location) && @get_class(current($location))=='Location') { 
 			foreach($location as $EM_Location){
 				$location_ids[] = $EM_Location->location_id;
 			}
@@ -484,88 +453,6 @@ class EM_Object {
 			}
 		}
 		
-		//START TAXONOMY FILTERS - can be id, slug, name or comma separated ids/slugs/names, if negative or prepended with a - then considered a negative filter
-		//convert taxonomies to arrays
-		$taxonomies = self::get_taxonomies();
-		foreach( $taxonomies as $item => $item_data ){ //tags and cats turned into an array regardless
-		    if( !empty($args[$item]) && !is_array($args[$item]) ){
-				if( preg_match('/[,&]/', $args[$item]) !== false ){ //accepts numbers or words
-					$args[$item] = explode('&', $args[$item]);
-					foreach($args[$item] as $k=>$v){
-						$args[$item][$k] = trim($v);
-						$args[$item][$k] = explode(',', $v);
-						foreach($args[$item][$k] as $k_x=>$v_x) $args[$item][$k][$k_x] = trim($v_x);
-					}
-				}else{
-				    $args[$item] = array(trim($args[$item]));
-				}
-		    }
-		}
-		foreach($taxonomies as $tax_name => $tax_data){
-			if( !empty($args[$tax_name]) && is_array($args[$tax_name]) ){
-			    
-			    $tax_conds = array();
-			    //if a single array is supplied then we treat it as an OR type of query, if an array of arrays is supplied we condsider it to be many ANDs of ORs
-			    //so here we wrap a single array into another array and there is only one 'AND' condition (therefore no AND within this tax search) 
-			    foreach($args[$tax_name] as $k=>$v) if( is_array($v) ) $contains_array = true;
-			    if( empty($contains_array) ) $args[$tax_name] = array($args[$tax_name]);
-			    //go through taxonomy arg and generate relevant SQL
-			    foreach($args[$tax_name] as $tax_id_set){
-					//build array of term ids and negative ids from supplied argument
-					$term_tax_ids = $term_ids = array();
-					$term_tax_not_ids = $term_not_ids = array();
-					foreach($tax_id_set as $tax_id){
-					    $tax_id_clean = preg_replace('/^-/', '', $tax_id);
-						if( !is_numeric($tax_id_clean) ){
-							$term = get_term_by('slug', $tax_id_clean, $tax_data['query_var']);
-							if( empty($term) ){
-								$term = get_term_by('name', $tax_id_clean, $tax_data['query_var']);
-							}
-						}else{
-							$term = get_term_by('id', $tax_id_clean, $tax_data['query_var']);
-						}
-						if( !empty($term->term_taxonomy_id) ){
-							if( !preg_match('/^-/', $tax_id) ){
-								$term_tax_ids[] = $term->term_taxonomy_id;
-							}else{
-								$term_tax_not_ids[] = $term->term_taxonomy_id;
-							}
-						}elseif( preg_match('/^-/', $tax_id) ){
-						    //if they supply a negative term for a nonexistent custom taxonomy e.g. -1, we should still  
-						    $ignore_cancel_cond = true;
-						}
-					}
-					//create sql conditions
-					if( count($term_tax_ids) > 0 || count($term_tax_not_ids) > 0 ){
-					    //figure out context - what table/field to search
-					    $post_context = EM_EVENTS_TABLE.".post_id";
-					    $ms_context = EM_EVENTS_TABLE.".event_id";
-					    if( !empty($tax_data['context']) && static::$context == 'location' && in_array( static::$context, $tax_data['context']) ){
-					        //context can be either locations or events, since those are the only two CPTs we deal with
-						    $post_context = EM_LOCATIONS_TABLE.".post_id";
-					    }
-					    //build conditions
-						
-						//normal taxonomy filtering
-						if( count($term_tax_ids) > 0 ){
-							$tax_conds[] = "$post_context IN ( SELECT object_id FROM ".$wpdb->term_relationships." WHERE term_taxonomy_id IN (".implode(',',$term_tax_ids).") )";
-						}
-						if( count($term_tax_not_ids) > 0 ){
-							$tax_conds[] = "$post_context NOT IN ( SELECT object_id FROM ".$wpdb->term_relationships." WHERE term_taxonomy_id IN (".implode(',',$term_tax_not_ids).") )";			
-						}
-						
-					}elseif( empty($ignore_cancel_cond) ){
-					    $tax_conds[] = '2=1'; //force a false, supplied taxonomies don't exist
-					    break; //no point continuing this loop
-					}
-			    }
-				if( count($tax_conds) > 0 ){
-					$conditions[$tax_name] = '('. implode(' AND ', $tax_conds) .')';
-				}
-			}
-		}
-		//END TAXONOMY FILTERS
-	
 		//If we want rsvped items, we usually check the event
 			if( $bookings == 1 ){
 				$conditions['bookings'] = 'event_rsvp=1';
@@ -590,41 +477,6 @@ class EM_Object {
 		
 		//return values
 		return apply_filters('em_object_build_sql_conditions', $conditions);
-	}
-	
-	public static function get_taxonomies(){
-	    if( empty(self::$taxonomies_array) ){
-	        //default taxonomies
-	        $taxonomies_array = array(
-        		'category' => array( 'name' => EM_TAXONOMY_CATEGORY, 'slug'=>EM_TAXONOMY_CATEGORY_SLUG, 'ms' => 'event-category', 'context'=> array(), 'query_var'=>EM_TAXONOMY_CATEGORY ),
-        		'tag' => array( 'name'=> EM_TAXONOMY_TAG, 'slug'=>EM_TAXONOMY_TAG_SLUG, 'context'=> array(), 'query_var'=>EM_TAXONOMY_TAG )
-	        );
-	        //get additional taxonomies associated with locations and events and set context for default taxonomies
-	        foreach( get_taxonomies(array(),'objects') as $tax_name => $tax){
-                $event_tax = in_array(EM_POST_TYPE_EVENT, $tax->object_type);
-                $loc_tax = in_array(EM_POST_TYPE_LOCATION, $tax->object_type);
-	            if( $tax_name == EM_TAXONOMY_CATEGORY || $tax_name == EM_TAXONOMY_TAG ){
-	            	//set the context for the default taxonomies, as they're already in the array
-	                $tax_name = $tax_name == EM_TAXONOMY_CATEGORY ? 'category':'tag';
-                    if( $event_tax ) $taxonomies_array[$tax_name]['context'][] = EM_POST_TYPE_EVENT;
-                    if( $loc_tax ) $taxonomies_array[$tax_name]['context'][] = EM_POST_TYPE_LOCATION;
-	            }else{
-	            	//non default taxonomy, so create new item for the taxonomies array
-	                $tax_name = str_replace('-','_',$tax_name);
-					$prefix = !array_key_exists($tax_name, $taxonomies_array) ? '':'post_';
-	                if( is_array($tax->object_type) && !empty($tax->rewrite) ){
-	                    if( $event_tax || $loc_tax ){
-		                    $taxonomies_array[$prefix.$tax_name] = array('name'=>$tax_name, 'context'=>array(), 'slug'=> $tax->rewrite['slug'], 'query_var'=> $tax->query_var );
-	                    }
-	                    if( $event_tax ) $taxonomies_array[$prefix.$tax_name]['context'][] = EM_POST_TYPE_EVENT;
-	                    if( $loc_tax ) $taxonomies_array[$prefix.$tax_name]['context'][] = EM_POST_TYPE_LOCATION;
-	                }	                
-	            }
-	        }
-	        //users can add even more to this if needed, e.g. MS compatability
-	        self::$taxonomies_array = apply_filters('em_object_taxonomies', $taxonomies_array);
-	    }
-	    return self::$taxonomies_array;
 	}
 	
 	/**
@@ -777,57 +629,7 @@ class EM_Object {
 		return apply_filters('em_get_post_search', $args);
 	}
 	
-
-	/*
-	public function __get( $shortname ){
-		if( !empty($this->shortnames[$shortname]) ){
-			$property = $this->shortnames[$shortname];
-			return $this->{$property};
-		}
-		return null;
-	}
 	
-	public function __set($prop, $val ){
-		if( !empty($this->shortnames[$prop]) ){
-			$property = $this->shortnames[$prop];
-			if( !empty($this->fields[$property]['type']) && $this->fields[$property]['type'] == '%d' ){
-				$val = absint($val);
-			}
-			$this->{$property} = $val;
-		}else{
-			$this->{$prop} = $val;
-		}
-	}
-	
-	public function __isset( $prop ){
-		if( !empty($this->shortnames[$prop]) ){
-			$property = $this->shortnames[$prop];
-			return !empty($this->{$property});
-		}
-		return !empty($this->{$prop});
-	}
-	*/
-	
-	/**
-	 * Returns the id of a particular object in the table it is stored, be it Event (event_id), Location (location_id), Tag, Booking etc.
-	 * @return int 
-	 * @since 5.5.0
-	 * @deprecated version 5.5.0
-	 */
-	/*
-	function get_id(){
-	    switch( get_class($this) ) 		{
-	        case 'EM_Category':
-	            return $this->term_id;
-	        case 'EM_Tag':
-	            return $this->term_id;
-	        case 'Ticket':
-	            return $this->ticket_id;
-	        case 'TicketBooking':
-	            return $this->ticket_booking_id;
-	    }
-	    return 0;
-	} */
 	
 	/**
 	 * Returns the user id for the owner (author) of a particular object in the table it is stored, be it Event (event_owner) or Location (location_owner).
@@ -838,7 +640,7 @@ class EM_Object {
 	function get_owner(){
 		if( !empty($this->owner) ) return $this->owner;
 	    switch( get_class($this) ){
-	        case 'EM_Location':
+	        case 'Location':
 	            return $this->location_owner;
 	    }
 	    return 0;
@@ -848,7 +650,7 @@ class EM_Object {
 		switch( get_class($this) ){
 	        case 'Event':
 	            return $this->event_id;
-	        case 'EM_Location':
+	        case 'Location':
 	            return $this->location_id;
 	    }
 		return $this->id;

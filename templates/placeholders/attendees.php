@@ -1,16 +1,19 @@
 <?php
 /* @var $event Event */
-$people = array();
-$EM_Bookings = $event->get_bookings();
 
-if (count($EM_Bookings->bookings) > 0) {
+use Contexis\Events\Model\Booking;
+
+$people = array();
+$bookings = $event->get_bookings();
+
+if (count($bookings->bookings) > 0) {
     ?>
     <ul class="event-attendees">
     <?php
-    foreach ($EM_Bookings as $EM_Booking) { /* @var $EM_Booking EM_Booking */
-        if ($EM_Booking->booking_status == EM_Booking::APPROVED) {
+    foreach ($bookings as $booking) { /* @var $booking booking */
+        if ($booking->booking_status == Booking::APPROVED) {
             // E-Mail-Adresse aus den Buchungsdaten holen
-            $email = $EM_Booking->booking_meta['registration']['user_email'] ?? null;
+            $email = $booking->booking_meta['registration']['user_email'] ?? null;
 
             // Falls keine E-Mail vorhanden ist, Avatar von einem leeren String generieren
             if (empty($email)) {

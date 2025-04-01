@@ -2,11 +2,11 @@
 
 namespace Contexis\Events\Bookings;
 
-
+use Contexis\Events\Model\Booking;
 use EM_Gateway;
 use WP_REST_Response;
 use WP_REST_Server;
-use Contexis\Events\Tickets\Tickets;
+
 use Contexis\Events\Models\Event;
 use WP;
 use WP_REST_Request;
@@ -44,7 +44,7 @@ class BookingsRest {
 
 	public function create_booking(\WP_REST_Request $request) : WP_REST_Response 
 	{
-		$booking = \EM_Booking::find();
+		$booking = new Booking;
 		$booking->get_request($request);
 
 		if(!$booking->validate() || !$booking->save()) {
@@ -73,7 +73,7 @@ class BookingsRest {
 			], 400);
 		}
 
-		$booking = new \EM_Booking($id);
+		$booking = Booking::get_by_id($id);
 
 		if(!$booking->can_manage('edit')) {
 			$response = [
@@ -109,7 +109,7 @@ class BookingsRest {
 		return current_user_can('manage_others_bookings');
 	}
 
-	private function set_action(string $action, \EM_Booking $booking) : array
+	private function set_action(string $action, Booking $booking) : array
 	{
 		
 		if(!in_array($action, $this->allowed_actions)) {
@@ -127,7 +127,7 @@ class BookingsRest {
 
 	public function read_booking(\WP_REST_Request $request) : \WP_REST_Response 
 	{
-		$booking = $request->has_param('id') ? \EM_Booking::find($request->get_param('id')) : false;
+		$booking = $request->has_param('id') ? Booking::get_by_id($request->get_param('id')) : false;
 		$event_id = $booking ? $booking->event_id : intval($request->get_param('event_id'));
 		
 		$event = $booking ? Event::find_by_event_id($event_id) : Event::find_by_post_id($event_id);
@@ -178,7 +178,7 @@ class BookingsRest {
 	public function delete_booking(\WP_REST_Request $request) : \WP_REST_Response 
 	{
 		$id = $request->get_param('id');
-		$booking = new \EM_Booking($id);
+		$booking = Booking::get_by_id($id);
 		$success = $booking->delete();
 
 		return new WP_REST_Response(['success' => $success, 'errors' => $booking->errors], $success ? 200 : 400);

@@ -124,33 +124,16 @@ class EM_Event_Post_Admin{
 			apply_filters('em_event_save', false, $event);
 		}else{
 			apply_filters('em_event_save', true, $event);
-			add_filter('save_post', 'EM_Event_Post_Admin::refresh_cache', 10, 2);
 		}
 		
 		self::maybe_publish_location($event);
 		
 	}
 	
-	public static function refresh_cache(int $post_id = 0) { 
-		error_log($post_id);
-		$event = Event::find_by_post_id($post_id);
-		if (!$event || empty($event->refresh_cache) || empty($event->post_id) || !$event->is_published()) {
-			return;
-		}
-	
-		$post = get_post($event->post_id);
-		$event->load_postdata($post);
-		unset($event->refresh_cache);
-	
-		wp_cache_set($event->event_id, $event, 'em_events');
-		wp_cache_set($event->post_id, $event->event_id, 'em_events_ids');
-	}
-	
 
 	public static function maybe_publish_location($event){
 		//do a dirty update for location too if it's not published
 		if( $event->is_published() && !empty($event->location_id) ){
-			$EM_Location = $event->get_location();
 			
 		}
 	}

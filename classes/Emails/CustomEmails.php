@@ -1,5 +1,6 @@
 <?php
 
+use Contexis\Events\Model\Booking;
 use \Contexis\Events\Models\Event;
 class EM_Custom_Emails{
 	
@@ -105,20 +106,20 @@ class EM_Custom_Emails{
 	 * Filter out the right email to be sent. Takes an array of custom email possibilities, types of email groups to check for and a booking object to checks against.
 	 * @param array $custom_emails array of custom email groups to override
 	 * @param array $groups_to_check array of custom email group keys corresponding to user types e.g. array('offline-admin'=>'admin','user'=>'user')
-	 * @param EM_Booking $EM_Booking contains event information used to retrieve custom email templates
+	 * @param Booking $booking contains event information used to retrieve custom email templates
 	 * @return array
 	 */
-	public static function get_booking_messages( $custom_emails, $groups_to_check, $EM_Booking ){
+	public static function get_booking_messages( $custom_emails, $groups_to_check, $booking ){
 	    $msg = array(); //emails that could be used to override
 		//set both admin and user email messages according to settings in custom emails defined above
 		foreach( $groups_to_check as $user => $email_type ){
-			$booking_status = $EM_Booking->booking_status;
+			$booking_status = $booking->booking_status;
 		    if( !empty($custom_emails[$user][$booking_status]) ){
-    			if( $custom_emails[$user][$booking_status]['status'] == EM_Booking::APPROVED ){
+    			if( $custom_emails[$user][$booking_status]['status'] == Booking::APPROVED ){
     				//override default email with custom email
     		    	$msg[$email_type]['subject'] = $custom_emails[$user][$booking_status]['subject'];
     		    	$msg[$email_type]['body'] = $custom_emails[$user][$booking_status]['message'];
-    			}elseif( !empty($custom_emails[$user][$booking_status]) && $custom_emails[$user][$booking_status]['status'] == EM_Booking::REJECTED ){
+    			}elseif( !empty($custom_emails[$user][$booking_status]) && $custom_emails[$user][$booking_status]['status'] == Booking::REJECTED ){
     				//disable the email entirely
     				$msg[$email_type]['subject'] = $msg[$email_type]['body'] = '';		
     			}
@@ -130,24 +131,24 @@ class EM_Custom_Emails{
 	/**
 	 * Hooks into the em_booking_email_messages filter to modify email templates with event-specific ones if defined.
 	 * @param array $msg array of admin and users messages
-	 * @param EM_Booking $EM_Booking contains event information used to retrieve custom email templates
+	 * @param Booking $booking contains event information used to retrieve custom email templates
 	 * @return array modified $msg array
 	 * @uses EM_Custom_Emails::get_event_emails()
 	 * @uses EM_Custom_Emails::get_booking_messages()
 	 */
-	public static function event_email_messages( $msg, $EM_Booking ){
-	    if( get_class($EM_Booking) == 'EM_Multiple_Booking') return; //ignore MB bookings
+	public static function event_email_messages( $msg, $booking ){
+	    if( get_class($booking) == 'EM_Multiple_Booking') return; //ignore MB bookings
 		//create set of users to check against $custom_emails
 		$groups_to_check = array('admin'=>'admin','user'=>'user'); //by default, we check admin and user email keys in $custom_emails
 		//add gateway checks if booking used one, event gateway emails will override the default ones since added to end of array
-		if( !empty($EM_Booking->booking_meta['gateway']) ){
-		    $gateway_groups_to_check = array($EM_Booking->booking_meta['gateway'].'-admin' => 'admin', $EM_Booking->booking_meta['gateway'].'-user' => 'user');
+		if( !empty($booking->booking_meta['gateway']) ){
+		    $gateway_groups_to_check = array($booking->booking_meta['gateway'].'-admin' => 'admin', $booking->booking_meta['gateway'].'-user' => 'user');
 		    $groups_to_check = array_merge($groups_to_check, $gateway_groups_to_check);
 		}
 		//get custom event emails and determine which should be used
-		$custom_emails = apply_filters('em_custom_emails_event_messages', self::get_event_emails($EM_Booking->get_event()), $EM_Booking);
+		$custom_emails = apply_filters('em_custom_emails_event_messages', self::get_event_emails($booking->get_event()), $booking);
 		
-		$event_emails = self::get_booking_messages($custom_emails, $groups_to_check, $EM_Booking);
+		$event_emails = self::get_booking_messages($custom_emails, $groups_to_check, $booking);
 		//merge in custom event emails into default $msg
 		
 		return array_merge($msg, $event_emails);
@@ -157,25 +158,25 @@ class EM_Custom_Emails{
 	/**
 	 * Takes current emails passed by the em_booking_email_messages filter and adds/replaces with gateway-specific emails.
 	 * @param array $custom_emails default emails
-	 * @param EM_Booking $EM_Booking booking object generating this email
+	 * @param Booking $booking booking object generating this email
 	 * @return array emails with gateway-specific content merged in
 	 */
-	public static function gateway_email_messages( $msg, $EM_Booking ){
+	public static function gateway_email_messages( $msg, $booking ){
 		//firstly, check if we're using a gateway at all for this booking
-		if( empty($EM_Booking->booking_meta['gateway']) || $EM_Booking->get_price() == 0 ) return $msg;
-		$EM_Gateway = EM_Gateways::get_gateway($EM_Booking->booking_meta['gateway']);
+		if( empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ) return $msg;
+		$EM_Gateway = EM_Gateways::get_gateway($booking->booking_meta['gateway']);
 		//create set of groups to check against $custom_emails
-		$groups_to_check = apply_filters('em_custom_emails_gateway_groups', array($EM_Gateway->gateway.'-admin' => 'admin', $EM_Gateway->gateway.'-user' => 'user'), $EM_Booking, $EM_Gateway);
+		$groups_to_check = apply_filters('em_custom_emails_gateway_groups', array($EM_Gateway->gateway.'-admin' => 'admin', $EM_Gateway->gateway.'-user' => 'user'), $booking, $EM_Gateway);
 		//get custom gateway email messages
-		$custom_emails = apply_filters('em_custom_emails_gateway_messages', maybe_unserialize($EM_Gateway->get_option('emails')), $EM_Booking, $EM_Gateway);
+		$custom_emails = apply_filters('em_custom_emails_gateway_messages', maybe_unserialize($EM_Gateway->get_option('emails')), $booking, $EM_Gateway);
 		//if we have an 'awaiting payment' status and only a 'pending' status template, default to 'pending' so we don't skip to the general default pending template
 		foreach( $groups_to_check as $key => $val ){
-			if( $EM_Booking->booking_status == 5 && empty($custom_emails[$key][5]) && !empty($custom_emails[$key][0]) ){
+			if( $booking->booking_status == 5 && empty($custom_emails[$key][5]) && !empty($custom_emails[$key][0]) ){
 				$custom_emails[$key][5] = $custom_emails[$key][0];
 			}
 		}
 		//determine which will be used
-		$gateway_emails = self::get_booking_messages($custom_emails, $groups_to_check, $EM_Booking);
+		$gateway_emails = self::get_booking_messages($custom_emails, $groups_to_check, $booking);
 		//merge into default $msg and return
 		return array_merge($msg, $gateway_emails);
 	}
@@ -183,15 +184,15 @@ class EM_Custom_Emails{
 	/**
 	 * Hooks into em_booking_admin_emails filter and adds additional admin email addresses specific for this event
 	 * @param array $emails array of current email addresses that will be sent to
-	 * @param EM_Booking $EM_Booking contains event information, used to retrieve the relevant emails
+	 * @param Booking $booking contains event information, used to retrieve the relevant emails
 	 * @return array
 	 * @uses EM_Custom_Emails::get_event_admin_emails()
 	 */
-	public static function event_admin_emails( $emails, $EM_Booking ){
+	public static function event_admin_emails( $emails, $booking ){
 		$admin_emails = array();
-		if( get_class($EM_Booking) == 'EM_Booking' ){ //prevent MB bookings from possibly sending individual event emails
-		    $admin_emails_array = apply_filters('em_custom_emails_event_admin', self::get_event_admin_emails($EM_Booking->get_event()), $EM_Booking);
-		    $group = empty($EM_Booking->booking_meta['gateway']) || $EM_Booking->get_price() == 0 ? 'default':$EM_Booking->booking_meta['gateway'];
+		if( get_class($booking) == 'Booking' ){ //prevent MB bookings from possibly sending individual event emails
+		    $admin_emails_array = apply_filters('em_custom_emails_event_admin', self::get_event_admin_emails($booking->get_event()), $booking);
+		    $group = empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ? 'default':$booking->booking_meta['gateway'];
 		    if( !empty($admin_emails_array[$group]) ){
 		        $admin_emails = $admin_emails_array[$group];
 		    }
@@ -222,35 +223,35 @@ class EM_Custom_Emails{
 	/**
 	 * Hooks into em_multiple_booking_email_messages and checks for gateway-specific emails for multiple booking objects.
 	 * @param array $groups_to_check groups of email types => user type to check for gateway emails
-	 * @param EM_Booking $EM_Booking The booking in question
+	 * @param Booking $booking The booking in question
 	 * @param EM_Gateway $EM_Gateway The gateway used by this booking
 	 * @return array modified $groups_to_check if this is an EM_Multiple_Booking object
 	 */
-	public static function em_custom_emails_gateway_groups( $groups_to_check, $EM_Booking, $EM_Gateway ){
+	public static function em_custom_emails_gateway_groups( $groups_to_check, $booking, $EM_Gateway ){
 		//MB Mode bookings has normal gateway checks
-		if( get_class($EM_Booking) == 'EM_Multiple_Booking'){
+		if( get_class($booking) == 'EM_Multiple_Booking'){
 		    $groups_to_check = array($EM_Gateway->gateway.'-mb-admin' => 'admin', $EM_Gateway->gateway.'-mb-user' => 'user');
 		}
 		return $groups_to_check;
 	}
 	
 	/**
-	 * Hook for em_booking_admin_emails which adds to a list of admin emails being notified of the passed EM_Booking object.
+	 * Hook for em_booking_admin_emails which adds to a list of admin emails being notified of the passed Booking object.
 	 * @param array $emails array of admin emails
-	 * @param EM_Booking $EM_Booking
+	 * @param Booking $booking
 	 * @return array:
 	 */
-	public static function gateway_admin_emails( $emails, $EM_Booking ){
-		if( empty($EM_Booking->booking_meta['gateway']) || $EM_Booking->get_price() == 0 ) return $emails;
-		$gateway = $EM_Booking->booking_meta['gateway'];
+	public static function gateway_admin_emails( $emails, $booking ){
+		if( empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ) return $emails;
+		$gateway = $booking->booking_meta['gateway'];
 		$EM_Gateway = EM_Gateways::get_gateway($gateway);
-		$admin_emails_array = apply_filters('em_custom_emails_gateway_admin', self::get_gateway_admin_emails($EM_Gateway), $EM_Booking, $EM_Gateway);
+		$admin_emails_array = apply_filters('em_custom_emails_gateway_admin', self::get_gateway_admin_emails($EM_Gateway), $booking, $EM_Gateway);
 		$admin_emails = array();
-		if( get_class($EM_Booking) == 'EM_Booking' ){
+		if( get_class($booking) == 'Booking' ){
 			if( !empty($admin_emails_array[$gateway]) ){
 				$admin_emails = $admin_emails_array[$gateway];
 			}
-		}elseif( get_class($EM_Booking) == 'EM_Multiple_Booking' ){
+		}elseif( get_class($booking) == 'EM_Multiple_Booking' ){
 			//if MB mode is on, we check the mb email templates instead
 			if( !empty($admin_emails_array[$gateway.'-mb']) ){
 				$admin_emails = $admin_emails_array[$gateway.'-mb'];
@@ -277,12 +278,12 @@ class EM_Custom_Emails{
 			unset($admin_emails_export, $admin_emails);
 		}
 		if( !empty($event_emails) ){
-			$EM_Booking = new EM_Booking();
+			$booking = new Booking;
 			$event_emails_export = array();
 			foreach( $event_emails as $event_email_type => $event_email_type_emails ){
 				$event_emails_string = $event_email_type . '<br>------';
 				foreach( $event_email_type_emails as $status => $email_data ){
-					$event_emails_string .= '<br>'. __('Status') . ' : ' . $EM_Booking->status_array[$status] ;
+					$event_emails_string .= '<br>'. __('Status') . ' : ' . $booking->status_array[$status] ;
 					foreach( $email_data as $email_data_key => $email_data_item ){
 						$event_emails_string .= '<br>'. $email_data_key . ' : ';
 						$event_emails_string .= $email_data_key == 'message' ? '<br>'.$email_data_item : $email_data_item;

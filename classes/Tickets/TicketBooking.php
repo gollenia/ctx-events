@@ -1,10 +1,14 @@
 <?php
 
 namespace Contexis\Events\Tickets;
+
+use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Ticket;
+
 class TicketBooking extends \EM_Object{
 	//DB Fields
 	public $ticket_booking_id;
-	public $booking_id;
+	public int $booking_id = 0;
 	public $ticket_id;
 	public $ticket_booking_price;
 	public $ticket_booking_spaces;
@@ -15,29 +19,12 @@ class TicketBooking extends \EM_Object{
 		'ticket_booking_price' => array('name'=>'price','type'=>'%f'),
 		'ticket_booking_spaces' => array('name'=>'spaces','type'=>'%d')
 	);
-	/*
-	var $shortnames = array(
-		'id' => 'ticket_booking_id',
-		'price' => 'ticket_booking_price',
-		'spaces' => 'ticket_booking_spaces',
-	); */
-	//Other Vars
-	/**
-	 * Contains ticket object
-	 * @var Ticket
-	 */
+	
 	var $ticket;
-	/**
-	 * Contains the booking object of this
-	 * @var EM_Booking
-	 */
-	var $booking;
+	
+	public Booking $booking;
 	public array $required_fields = array( 'ticket_id', 'ticket_booking_spaces');
 	
-	/**
-	 * Creates ticket object and retreives ticket data (default is a blank ticket object). Accepts either array of ticket data (from db) or a ticket id.
-	 * @param mixed $ticket_data
-	 */
 	function __construct( $ticket_data = false ){
 		if( $ticket_data !== false ){
 			//Load ticket data
@@ -56,10 +43,7 @@ class TicketBooking extends \EM_Object{
 		}
 	}
 	
-	/**
-	 * Cleans up serialization of this object and returns only relevant fields. For EM_Bookings that get serialized but aren't saved yet with an ID, they should populate the booking object upon wakeup.
-	 * @return string[]
-	 */
+	
 	function __sleep(){
 		return array( 'ticket_booking_id','booking_id','ticket_id','ticket_booking_price','ticket_booking_spaces' );
 	}
@@ -131,13 +115,8 @@ class TicketBooking extends \EM_Object{
 	function get_spaces(){
 		return apply_filters('em_booking_get_spaces',$this->ticket_booking_spaces,$this);
 	}
-	
-	/**
-	 * Gets the total price for these tickets. If $format is set to true, the value returned is a price string with currency formatting.
-	 * @param boolean $format
-	 * @return double|string
-	 */
-	function get_price( ){
+
+	function get_price(){
 		if( $this->ticket_booking_price == 0 ){
 			$this->ticket_booking_price = $this->get_ticket()->get_price() * $this->ticket_booking_spaces;
 			$this->ticket_booking_price = apply_filters('em_ticket_booking_get_price', $this->ticket_booking_price, $this);
@@ -146,25 +125,14 @@ class TicketBooking extends \EM_Object{
 
 	}
 
-	
-	/**
-	 * Smart booking locator, saves a database read if possible.
-	 * @return EM_Booking 
-	 */
-	function get_booking(){
-		global $EM_Booking;
-		if( is_object($this->booking) && get_class($this->booking)=='EM_Booking' && ($this->booking->booking_id == $this->booking_id || (empty($this->ticket_booking_id) && empty($this->booking_id))) ){
+
+	function get_booking() : Booking {
+		if( is_object($this->booking) && get_class($this->booking)=='Booking' && ($this->booking->booking_id == $this->booking_id || (empty($this->ticket_booking_id) && empty($this->booking_id))) ){
 			return $this->booking;
-		}elseif( is_object($EM_Booking) && $EM_Booking->booking_id == $this->booking_id ){
-			$this->booking = $EM_Booking;
-		}else{
-			if(is_numeric($this->booking_id)){
-				$this->booking = \EM_Booking::find($this->booking_id);
-			}else{
-				$this->booking = \EM_Booking::find();
-			}
 		}
-		return apply_filters('em_ticket_booking_get_booking', $this->booking, $this);;
+
+		$this->booking = Booking::get_by_id($this->booking_id);
+		return $this->booking;
 	}
 	
 	/**
@@ -173,13 +141,13 @@ class TicketBooking extends \EM_Object{
 	 */
 	function get_ticket(){
 		$ticket_id = key_exists('ticket_id', $_REQUEST) ? $_REQUEST['ticket_id'] : 0;
-		$ticket = new \Contexis\Events\Tickets\Ticket($ticket_id);
+		$ticket = new Ticket($ticket_id);
 		if( is_object($this->ticket) && get_class($this->ticket)=='Ticket' && $this->ticket->ticket_id == $this->ticket_id ){
 			return $this->ticket;
 		}elseif( is_object($ticket) && $ticket->ticket_id == $this->ticket_id ){
 			$this->ticket = $ticket;
 		}else{
-			$this->ticket = new \Contexis\Events\Tickets\Ticket($this->ticket_id);
+			$this->ticket = new Ticket($this->ticket_id);
 		}
 		return apply_filters('em_ticket_booking_get_ticket', $this->ticket, $this);
 	}

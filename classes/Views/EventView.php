@@ -1,5 +1,8 @@
 <?php
+namespace Contexis\Events\Views;
 use \Contexis\Events\Models\Event;
+use Contexis\Events\Models\Location;
+
 class EventView {
 
 	private Event $event;
@@ -323,13 +326,11 @@ class EventView {
 		foreach($placeholders[1] as $result) {
 			// matches all PHP START date and time placeholders
 			if (preg_match('/^#[dDjlNSwzWFmMntLoYyaABgGhHisueIOPTZcrU]$/', $result)) {
-				$replace = $this->event->start()->i18n(ltrim($result, "#"));
 				$replace = apply_filters('em_event_output_placeholder', $replace, $this->event, $result, $target, array($result));
 				$event_string = str_replace($result, $replace, $event_string );
 			}
 			// matches all PHP END time placeholders for endtime
 			if (preg_match('/^#@[dDjlNSwzWFmMntLoYyaABgGhHisueIOPTZcrU]$/', $result)) {
-				$replace = $this->event->end()->i18n(ltrim($result, "#@"));
 				$replace = apply_filters('em_event_output_placeholder', $replace, $this->event, $result, $target, array($result));
 				$event_string = str_replace($result, $replace, $event_string ); 
 		 	}
@@ -339,28 +340,14 @@ class EventView {
 			if( !empty($this->event->location_id) && $this->event->get_location()->location_status ){
 				$event_string = $this->event->get_location()->output($event_string, $target);
 			}else{
-				$EM_Location = new EM_Location();
-				$event_string = LocationView::render($EM_Location, $event_string, $target);
+				$location = new Location;
+				$event_string = LocationView::render($location, $event_string, $target);
 			}
 		}
 		
 	
 		//for backwards compat and easy use, take over the individual category placeholders with the frirst cat in th elist.
-		if( count($this->event->get_categories()) > 0 ){
-			$EM_Category = $this->event->get_categories()->get_first();
-		}
-		if( empty($EM_Category) ) $EM_Category = new EM_Category();
-		$event_string = $EM_Category->output($event_string, $target);
 		
-		
-		
-		$EM_Tags = new EM_Tags($this->event);
-		if( count($EM_Tags) > 0 ){
-			$EM_Tag = $EM_Tags->get_first();
-		}
-		if( empty($EM_Tag) ) $EM_Tag = new EM_Tag();
-		$event_string = $EM_Tag->output($event_string, $target);
-	
 		
 		//Finally, do the event notes, so that previous placeholders don't get replaced within the content, which may use shortcodes
 		if( !empty($desc_replace) ){

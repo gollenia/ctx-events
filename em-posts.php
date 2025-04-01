@@ -1,5 +1,7 @@
 <?php
 
+use Contexis\Events\Models\Location;
+
 define('EM_POST_TYPE_EVENT','event'); 
 define('EM_POST_TYPE_FORM','bookingform');
 define('EM_POST_TYPE_LOCATION','location');
@@ -298,28 +300,28 @@ function em_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if( !empty($post->post_type) && $post->post_type == 'revision' ) $post = get_post($post->post_parent);
 			if( empty($post->post_type) || $post->post_type != EM_POST_TYPE_LOCATION ) return $caps;
 			//continue with getting post type and assigning caps
-			$EM_Location = EM_Location::find_by_post($post);
-			$post_type = get_post_type_object( $EM_Location->post_type );
+			$location = Location::find_by_post($post);
+			$post_type = get_post_type_object( $location->post_type );
 			/* Set an empty array for the caps. */
 			$caps = [];
 			//Filter according to location caps
 			switch( $cap ){
 				case 'read_location':
-					if ( 'private' != $EM_Location->post_status )
+					if ( 'private' != $location->post_status )
 						$caps[] = 'read';
-					elseif ( $user_id == $EM_Location->location_owner )
+					elseif ( $user_id == $location->location_owner )
 						$caps[] = 'read';
 					else
 						$caps[] = $post_type->cap->read_private_posts;
 					break;
 				case 'edit_location':
-					if ( $user_id == $EM_Location->location_owner )
+					if ( $user_id == $location->location_owner )
 						$caps[] = $post_type->cap->edit_posts;
 					else
 						$caps[] = $post_type->cap->edit_others_posts;
 					break;
 				case 'delete_location':
-					if ( $user_id == $EM_Location->location_owner )
+					if ( $user_id == $location->location_owner )
 						$caps[] = $post_type->cap->delete_posts;
 					else
 						$caps[] = $post_type->cap->delete_others_posts;
