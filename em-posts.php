@@ -23,74 +23,7 @@ add_action('init','wp_events_plugin_init',1);
 function wp_events_plugin_init(){
 	define('EM_ADMIN_URL',admin_url().'edit.php?post_type='.EM_POST_TYPE_EVENT); //we assume the admin url is absolute with at least one querystring
 	
-	register_taxonomy(EM_TAXONOMY_TAG,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_tags', [
-		'hierarchical' => false,
-		'public' => true,
-		'show_ui' => true,
-		'show_in_rest' => true,
-		'query_var' => true, 
-		'rewrite' => ['slug' => EM_TAXONOMY_TAG_SLUG,'with_front'=>false],
-		'label' => __('Event Tags'),
-		'show_admin_column' => true,
-		'singular_label' => __('Event Tag'),
-		'labels' => [
-			'name'=>__('Event Tags','events'),
-			'singular_name'=>__('Event Tag','events'),
-			'search_items'=>__('Search Event Tags','events'),
-			'popular_items'=>__('Popular Event Tags','events'),
-			'all_items'=>__('All Event Tags','events'),
-			'parent_items'=>__('Parent Event Tags','events'),
-			'parent_item_colon'=>__('Parent Event Tag:','events'),
-			'edit_item'=>__('Edit Event Tag','events'),
-			'update_item'=>__('Update Event Tag','events'),
-			'add_new_item'=>__('Add New Event Tag','events'),
-			'new_item_name'=>__('New Event Tag Name','events'),
-			'separate_items_with_commas'=>__('Separate event tags with commas','events'),
-			'add_or_remove_items'=>__('Add or remove events','events'),
-			'choose_from_the_most_used'=>__('Choose from most used event tags','events'),
-		],
-		'capabilities' => [
-			'manage_terms' => 'edit_event_categories',
-			'edit_terms' => 'edit_event_categories',
-			'delete_terms' => 'delete_event_categories',
-			'assign_terms' => 'edit_events',
-		]
-	]));
-
-	register_taxonomy(EM_TAXONOMY_CATEGORY,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_categories', [
-		'hierarchical' => true,
-		'public' => true,
-		'show_ui' => true,
-		'show_in_rest' => true,
-		'show_admin_column' => true,
-		'query_var' => true,
-		'rewrite' => ['slug' => EM_TAXONOMY_CATEGORY_SLUG, 'hierarchical' => true,'with_front'=>false],
-		'show_in_nav_menus' => true,
-		'label' => __('Event Categories','events'),
-		'singular_label' => __('Event Category','events'),
-		'labels' => [
-			'name'=>__('Event Categories','events'),
-			'singular_name'=>__('Event Category','events'),
-			'search_items'=>__('Search Event Categories','events'),
-			'popular_items'=>__('Popular Event Categories','events'),
-			'all_items'=>__('All Event Categories','events'),
-			'parent_items'=>__('Parent Event Categories','events'),
-			'parent_item_colon'=>__('Parent Event Category:','events'),
-			'edit_item'=>__('Edit Event Category','events'),
-			'update_item'=>__('Update Event Category','events'),
-			'add_new_item'=>__('Add New Event Category','events'),
-			'new_item_name'=>__('New Event Category Name','events'),
-			'separate_items_with_commas'=>__('Separate event categories with commas','events'),
-			'add_or_remove_items'=>__('Add or remove events','events'),
-			'choose_from_the_most_used'=>__('Choose from most used event categories','events'),
-		],
-		'capabilities' => [
-			'manage_terms' => 'edit_event_categories',
-			'edit_terms' => 'edit_event_categories',
-			'delete_terms' => 'delete_event_categories',
-			'assign_terms' => 'edit_events',
-		]
-	]));
+	
 	
 	$event_post_type_supports = apply_filters('em_cp_event_supports', ['title','editor','excerpt','thumbnail','author','custom-fields']);
 	

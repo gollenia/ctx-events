@@ -3,11 +3,6 @@ class EM_Location_Post {
 
 	const POST_TYPE = EM_POST_TYPE_LOCATION;
 	public static function init(){ 
-		//Front Side Modifiers
-		if( !is_admin() ){
-			
-		}
-
 		add_action( 'init', ['EM_Location_Post', "register_meta"] );
 		add_action('init', array('EM_Location_Post', 'meta_query_filter'));
 	}	

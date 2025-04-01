@@ -1,17 +1,10 @@
 <?php
 
-namespace Contexis\Events\Events;
+namespace Contexis\Events\PostTypes;
 
 use Contexis\Events\Collections\EventCollection;
-use \Contexis\Events\Models\Event;
-use Events;
 use WP_Query;
 
-/**
- * Controls how events are queried and displayed via the WordPress Custom Post APIs
- * @author marcus
- *
- */
 class EventPost {
 
 	const POST_TYPE = "event";
@@ -20,83 +13,80 @@ class EventPost {
 
 		$instance = new self;
 		add_action('init', array($instance, 'register_post_type'));
+		add_action('init', array($instance, 'register_taxonomies'));
 		add_action('parse_query', array($instance,'parse_query'));
-		add_action('rest_api_init', array($instance, 'register_meta') );
-		//add_filter('rest_prepare_event', array('EventRestController', 'prepare_event'), 10, 3);		
+		add_action('rest_api_init', array($instance, 'register_meta'));	
 	}	
 
-
-	/**
-	 * Returns price and free spaces for a given event
-	 *
-	 * @param [type] $request
-	 * @return void
-	 */
-	public function get_rest_bookinginfo($request) {
-		$result = [
-			'success' => false,
-		];
-
-		$id = $request->get_param('id');
-		if(!$id) return $result;
-		
-		$event = Event::find_by_post_id($id);
-		
-		$result['success'] = true;
-
-		$data = [
-			'price_float' => $event->get_price(),
-			'formatted_price' => $event->get_formatted_price(),
-			'available_spaces' => $event->get_bookings()->get_available_spaces(),
-			'booked_spaces' => $event->get_bookings()->get_booked_spaces(),
-		];
-
-		$result['data'] = $data;
-
-		return $result;
-	}
-
-	function prepare_event($response, $post, $request) {
-		$event = Event::find_by_post($post);
-		
-		if (!$event->event_exists()) {
-			return new \WP_REST_Response([
-				'error' => __('Event not found', 'events')
-			], 404);
-		}
+	public function register_taxonomies() {
+		register_taxonomy(EM_TAXONOMY_TAG,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_tags', [
+			'hierarchical' => false,
+			'public' => true,
+			'show_ui' => true,
+			'show_in_rest' => true,
+			'query_var' => true, 
+			'rewrite' => ['slug' => EM_TAXONOMY_TAG_SLUG,'with_front'=>false],
+			'label' => __('Event Tags'),
+			'show_admin_column' => true,
+			'singular_label' => __('Event Tag'),
+			'labels' => [
+				'name'=>__('Event Tags','events'),
+				'singular_name'=>__('Event Tag','events'),
+				'search_items'=>__('Search Event Tags','events'),
+				'popular_items'=>__('Popular Event Tags','events'),
+				'all_items'=>__('All Event Tags','events'),
+				'parent_items'=>__('Parent Event Tags','events'),
+				'parent_item_colon'=>__('Parent Event Tag:','events'),
+				'edit_item'=>__('Edit Event Tag','events'),
+				'update_item'=>__('Update Event Tag','events'),
+				'add_new_item'=>__('Add New Event Tag','events'),
+				'new_item_name'=>__('New Event Tag Name','events'),
+				'separate_items_with_commas'=>__('Separate event tags with commas','events'),
+				'add_or_remove_items'=>__('Add or remove events','events'),
+				'choose_from_the_most_used'=>__('Choose from most used event tags','events'),
+			],
+			'capabilities' => [
+				'manage_terms' => 'edit_event_categories',
+				'edit_terms' => 'edit_event_categories',
+				'delete_terms' => 'delete_event_categories',
+				'assign_terms' => 'edit_events',
+			]
+		]));
 	
-		// Basisdaten des WordPress-Posts holen
-		$post_data = $response->get_data();
-	
-		// Custom-Felder aus dem Event-Objekt holen
-		$event_data = $event->get_rest_fields();
-	
-		// Angeforderte Felder ermitteln
-		$requested_fields = $request->get_param('_fields');
-		$requested_fields = is_array($requested_fields) ? $requested_fields : explode(',', (string) $requested_fields);
-		$requested_fields = array_filter($requested_fields);
-	
-		// Falls _fields gesetzt wurde, nur diese Felder zurückgeben
-		if (!empty($requested_fields)) {
-			$post_data = array_intersect_key($post_data, array_flip($requested_fields));
-			$event_data = array_intersect_key($event_data, array_flip($requested_fields));
-		}
-	
-		$data = array_merge($post_data, $event_data);
-	
-		if (in_array('location', $requested_fields)) {
-			$data['location'] = $event->get_location()->get_rest_fields();
-		}
-	
-		if (in_array('speaker', $requested_fields)) {
-			$data['speaker'] = \Contexis\Events\Speaker::get($event->speaker_id)->get_rest_fields();
-		}
-	
-		if (in_array('tickets', $requested_fields)) {
-			$data['tickets'] = $event->get_bookings()->get_available_tickets()->get_rest_fields();
-		}
-	
-		return rest_ensure_response($data);
+		register_taxonomy(EM_TAXONOMY_CATEGORY,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_categories', [
+			'hierarchical' => true,
+			'public' => true,
+			'show_ui' => true,
+			'show_in_rest' => true,
+			'show_admin_column' => true,
+			'query_var' => true,
+			'rewrite' => ['slug' => EM_TAXONOMY_CATEGORY_SLUG, 'hierarchical' => true,'with_front'=>false],
+			'show_in_nav_menus' => true,
+			'label' => __('Event Categories','events'),
+			'singular_label' => __('Event Category','events'),
+			'labels' => [
+				'name'=>__('Event Categories','events'),
+				'singular_name'=>__('Event Category','events'),
+				'search_items'=>__('Search Event Categories','events'),
+				'popular_items'=>__('Popular Event Categories','events'),
+				'all_items'=>__('All Event Categories','events'),
+				'parent_items'=>__('Parent Event Categories','events'),
+				'parent_item_colon'=>__('Parent Event Category:','events'),
+				'edit_item'=>__('Edit Event Category','events'),
+				'update_item'=>__('Update Event Category','events'),
+				'add_new_item'=>__('Add New Event Category','events'),
+				'new_item_name'=>__('New Event Category Name','events'),
+				'separate_items_with_commas'=>__('Separate event categories with commas','events'),
+				'add_or_remove_items'=>__('Add or remove events','events'),
+				'choose_from_the_most_used'=>__('Choose from most used event categories','events'),
+			],
+			'capabilities' => [
+				'manage_terms' => 'edit_event_categories',
+				'edit_terms' => 'edit_event_categories',
+				'delete_terms' => 'delete_event_categories',
+				'assign_terms' => 'edit_events',
+			]
+		]));
 	}
 
 	public function register_post_type() {
@@ -229,17 +219,6 @@ class EventPost {
 		\Contexis\Events\Utilities::object_to_js_console($query->query_vars);
 		return $query;
 		
-	}
-
-	public function get_attendees($booking) {
-		$result = [];
-		$tickets = $booking->booking_meta['attendees'];
-		foreach($tickets as $key => $ticket) {
-			foreach ($ticket as $attendee) {
-				$result[] = [ 'id' => $key, 'fields' => $attendee ];
-			}
-		}
-		return $result;
 	}
 
 }
