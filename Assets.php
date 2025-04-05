@@ -3,6 +3,9 @@
 namespace Contexis\Events;
 
 use Contexis\Events\Model\Booking;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\LocationPost;
+
 
 class Assets {
 
@@ -193,8 +196,8 @@ class Assets {
 		}
 		//load admin/public only vars
 		if( is_admin() ){
-			$em_localized_js['event_post_type'] = EM_POST_TYPE_EVENT;
-			$em_localized_js['location_post_type'] = EM_POST_TYPE_LOCATION;
+			$em_localized_js['event_post_type'] = EventPost::POST_TYPE;
+			$em_localized_js['location_post_type'] = LocationPost::POST_TYPE;
 			if( !empty($_GET['page']) && $_GET['page'] == 'events-options' ){
 			    $em_localized_js['close_text'] = __('Collapse All','events');
 			    $em_localized_js['open_text'] = __('Expand All','events');

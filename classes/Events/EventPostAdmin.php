@@ -2,6 +2,8 @@
 
 use Contexis\Events\Collections\EventCollection;
 use Contexis\Events\Models\Event;
+use Contexis\Events\PostTypes\EventPost;
+
 /*
  * Events Edit Page
  */
@@ -11,7 +13,7 @@ class EM_Event_Post_Admin{
 		if($pagenow == 'post.php' || $pagenow == 'post-new.php' ){ //only needed if editing post
 			//add_action('admin_head', array('EM_Event_Post_Admin','admin_head')); //I don't think we need this anymore?
 			//Meta Boxes
-			add_action('add_meta_boxes_'.EM_POST_TYPE_EVENT, array('EM_Event_Post_Admin','meta_boxes'), 10, 1);
+			add_action('add_meta_boxes_'.EventPost::POST_TYPE, array('EM_Event_Post_Admin','meta_boxes'), 10, 1);
 			//Notices
 			//add_action('admin_notices',array('EM_Event_Post_Admin','admin_notices'));
 		}
@@ -26,38 +28,10 @@ class EM_Event_Post_Admin{
 		add_action('post_updated_messages',array('EM_Event_Post_Admin','admin_notices_filter'),1,1);
 	}
 
-	/*
-	public static function admin_head(){
-		global $post, $event;
-		if( empty($event) && !empty($post) && $post->post_type == EM_POST_TYPE_EVENT ){
-			$event = Event::find_by_post($post);
-		}
-	}
-	
-	public static function admin_notices(){
-		//When editing
-		global $post, $event, $pagenow;
-		if( $pagenow == 'post.php' && ($post->post_type == EM_POST_TYPE_EVENT || $post->post_type == 'event-recurring') ){
-			if ( $event->is_recurring() ) {
-				$warning = "<p><strong>".__( 'WARNING: This is a recurring event.', 'events')."</strong></p>";
-				$warning .= "<p>". __( 'Modifications to recurring events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events') . '</p>';
-				$warning .= "<p>". __( 'Bookings to individual event recurrences will be preserved if event times and ticket settings are not modified.', 'events') . '</p>';
-				$warning .= '<p><a href="'. esc_url( add_query_arg(array('scope'=>'all', 'recurrence_id'=>$event->event_id), admin_url('edit.php?post_type=event')) ).'">'. esc_html__('You can edit individual recurrences and disassociate them with this recurring event.','events') . '</a></p>';
-				?><div class="notice notice-warning is-dismissible"><?php echo $warning; ?></div><?php
-			} elseif ( $event->is_recurrence() ) {
-				$warning = "<p><strong>".__('WARNING: This is a recurrence in a set of recurring events.', 'events')."</strong></p>";
-				$warning .= "<p>". sprintf(__('If you update this event data and save, it could get overwritten if you edit the recurring event template. To make it an independent, <a href="%s">detach it</a>.', 'events'), $event->get_detach_url())."</p>";
-				$warning .= "<p>".sprintf(__('To manage the whole set, <a href="%s">edit the recurring event template</a>.', 'events'),admin_url('post.php?action=edit&amp;post='.$event->get_event_recurrence()->post_id))."</p>";
-				?><div class="notice notice-warning is-dismissible"><?php echo $warning; ?></div><?php
-			}
-			
-		}
-	}
-	*/
 	public static function admin_notices_filter($messages){
 		//When editing
 		global $post, $EM_Notices; /* @var EM_Notices $EM_Notices */
-		if( $post->post_type == EM_POST_TYPE_EVENT || $post->post_type == 'event-recurring' ){
+		if( $post->post_type == EventPost::POST_TYPE || $post->post_type == 'event-recurring' ){
 			if ( $EM_Notices->count_errors() > 0 ) {
 				unset($_GET['message']);
 			}
@@ -78,7 +52,7 @@ class EM_Event_Post_Admin{
 		if( !empty($EM_SAVING_EVENT) ) return $data; //never proceed with this if using Event::save();
 		$post_type = $data['post_type'];
 		$post_ID = !empty($postarr['ID']) ? $postarr['ID'] : false;
-		$is_post_type = $post_type == EM_POST_TYPE_EVENT || $post_type == 'event-recurring';
+		$is_post_type = $post_type == EventPost::POST_TYPE || $post_type == 'event-recurring';
 		$doing_add_meta_ajax = defined('DOING_AJAX') && DOING_AJAX && !empty($_REQUEST['action']) && $_REQUEST['action'] == 'add-meta' && check_ajax_referer( 'add-meta', '_ajax_nonce-add-meta', false );  //we don't need to save anything here, we don't use this action
 		$saving_status = !in_array($data['post_status'], array('trash','auto-draft')) && !defined('DOING_AUTOSAVE') && !$doing_add_meta_ajax;
 		$untrashing = $post_ID && defined('UNTRASHING_'.$post_ID);
@@ -102,7 +76,7 @@ class EM_Event_Post_Admin{
 		if ( isset($_GET['preview_id']) && isset($_GET['preview_nonce']) && wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $post_id ) ) return; 
 
 		$post_type = get_post_type($post);
-		$is_post_type = $post_type == \Contexis\Events\Events\EventPost::POST_TYPE || $post_type == 'event-recurring';
+		$is_post_type = $post_type == EventPost::POST_TYPE || $post_type == 'event-recurring';
 		$saving_status = !in_array(get_post_status($post_id), array('trash','auto-draft')) && !defined('DOING_AUTOSAVE');
 		if(defined('UNTRASHING_'.$post_id) || !$is_post_type || !$saving_status) return;
 		
@@ -111,7 +85,7 @@ class EM_Event_Post_Admin{
 		$get_meta = $event->get_post_meta();
 		$validate_meta = $event->validate_meta(); //Handle Errors by making post draft
 		$save_meta = $event->save_meta();
-		$event->get_categories()->save();
+		
 
 		if( !$get_meta || !$validate_meta || !$save_meta ){
 			//failed somewhere, set to draft, don't publish
@@ -139,7 +113,7 @@ class EM_Event_Post_Admin{
 	}
 
 	public static function before_delete_post($post_id){
-		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
+		if(get_post_type($post_id) == EventPost::POST_TYPE){
 			$event = Event::find_by_post_id($post_id);
 			do_action('em_event_delete_pre ',$event);
 			$event->delete_meta();
@@ -147,20 +121,20 @@ class EM_Event_Post_Admin{
 	}
 	
 	public static function trashed_post($post_id){
-		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
+		if(get_post_type($post_id) == EventPost::POST_TYPE){
 			$event = Event::find_by_post_id($post_id);
 		}
 	}
 	
 	public static function untrash_post($post_id){
-		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
+		if(get_post_type($post_id) == EventPost::POST_TYPE){
 			//set a constant so we know this event doesn't need 'saving'
 			if(!defined('UNTRASHING_'.$post_id)) define('UNTRASHING_'.$post_id, true);
 		}
 	}
 	
 	public static function untrashed_post($post_id){
-		if(get_post_type($post_id) == EM_POST_TYPE_EVENT){
+		if(get_post_type($post_id) == EventPost::POST_TYPE){
 			$event = Event::find_by_post_id($post_id);
 		}
 	}
@@ -173,7 +147,7 @@ class EM_Event_Post_Admin{
 				'em-event-bookings',
 				__('Bookings/Registration', 'events'),
 				array('EM_Event_Post_Admin', 'meta_box_bookings'),
-				EM_POST_TYPE_EVENT,
+				EventPost::POST_TYPE,
 				'normal',
 				'high'
 			);
@@ -268,7 +242,7 @@ class EM_Event_Recurring_Post_Admin{
     				}
     			}
 			}
-			$event->post_type = EM_POST_TYPE_EVENT; //trick it into thinking it's one event.
+			$event->post_type = EventPost::POST_TYPE; //trick it into thinking it's one event.
 			$event->delete_meta();
 		}
 	}

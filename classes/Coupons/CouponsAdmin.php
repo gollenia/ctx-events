@@ -2,7 +2,7 @@
 
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Model\Booking;
-use Contexis\Events\Options;
+use Contexis\Events\PostTypes\EventPost;
 
 class EM_Coupons_Admin {
     static function init(){
@@ -109,7 +109,7 @@ class EM_Coupons_Admin {
 				<td><?php echo $EM_Coupon->get_discount_text(); ?></td>
 				<td><?php echo $EM_Coupon->coupon_description; ?></td>
 				<td>
-									<a href='<?php echo admin_url('edit.php?post_type='.EM_POST_TYPE_EVENT.'&amp;page=events-coupons&amp;action=view&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'>
+									<a href='<?php echo admin_url('edit.php?post_type='.EventPost::POST_TYPE.'&amp;page=events-coupons&amp;action=view&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'>
 									<?php 
 									if( !empty($EM_Coupon->coupon_max) ){
 										echo esc_html($EM_Coupon->get_count() .' / '. $EM_Coupon->coupon_max);
@@ -133,7 +133,7 @@ class EM_Coupons_Admin {
 	}
     
     static function admin_menu($plugin_pages){
-    	$plugin_pages[] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Coupons','events'),__('Coupons Manager','events'),'manage_others_bookings','events-coupons','EM_Coupons_Admin::admin_page');
+    	$plugin_pages[] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Coupons','events'),__('Coupons Manager','events'),'manage_others_bookings','events-coupons','EM_Coupons_Admin::admin_page');
     	return $plugin_pages; //use wp action/filters to mess with the menus
     }
     
@@ -242,7 +242,7 @@ class EM_Coupons_Admin {
 						<?php foreach ($coupons as $EM_Coupon) : ?>	
 							<tr>
 								<td>
-									<a href='<?php echo admin_url('edit.php?post_type='.EM_POST_TYPE_EVENT.'&amp;page=events-coupons&amp;action=edit&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'><?php echo $EM_Coupon->coupon_name ?></a>
+									<a href='<?php echo admin_url('edit.php?post_type='.EventPost::POST_TYPE.'&amp;page=events-coupons&amp;action=edit&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'><?php echo $EM_Coupon->coupon_name ?></a>
 									<div class="row-actions">
 										<span class="trash"><a class="submitdelete" href="<?php echo add_query_arg(array('coupon_id'=>$EM_Coupon->coupon_id,'action'=>'coupon_delete','_wpnonce'=>wp_create_nonce('coupon_delete_'.$EM_Coupon->coupon_id))) ?>"><?php _e('Delete','events')?></a></span>
 									</div>
@@ -254,7 +254,7 @@ class EM_Coupons_Admin {
 								<td><?php echo esc_html($EM_Coupon->coupon_description); ?></td>  
 								<td><?php echo $EM_Coupon->get_discount_text(); ?></td>            
 								<td>
-									<a href='<?php echo admin_url('edit.php?post_type='.EM_POST_TYPE_EVENT.'&amp;page=events-coupons&amp;action=view&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'>
+									<a href='<?php echo admin_url('edit.php?post_type='.EventPost::POST_TYPE.'&amp;page=events-coupons&amp;action=view&amp;coupon_id='.$EM_Coupon->coupon_id); ?>'>
 									<?php 
 									if( !empty($EM_Coupon->coupon_max) ){
 										echo esc_html($EM_Coupon->get_count() .' / '. $EM_Coupon->coupon_max);
@@ -370,7 +370,7 @@ class EM_Coupons_Admin {
 									<?php echo $booking->output('#_BOOKINGSLINK') ?>
 									<?php if( in_array($booking->booking_status, array(2,3)) ) echo '<p class="description">('. $booking->get_status() . ')</p> '; ?>
 								</td>
-								<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $booking->booking_mail; ?>"><?php echo $booking->full_name ?></a></td>
+								<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $booking->booking_mail; ?>"><?php echo $booking->full_name ?></a></td>
 								<td><?php echo $booking->get_spaces() ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($booking->get_price()); ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Coupon->get_discount($base_price)); ?> <p class="description">(<?php echo $EM_Coupon->get_discount_text(); ?>)</p></td>

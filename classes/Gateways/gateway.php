@@ -2,6 +2,7 @@
 
 use Contexis\Events\Model\Booking;
 use Contexis\Events\Options;
+use Contexis\Events\PostTypes\EventPost;
 
 /**
  * This class is a parent class which gateways should extend. There are various variables and functions that are automatically taken care of by
@@ -583,8 +584,6 @@ class EM_Gateway {
 	 * @uses EM_Gateway::mysettings()
 	 */
 	function settings() {
-		global $page, $action, $EM_Notices;
-		$gateway_link = admin_url('edit.php?post_type='.EM_POST_TYPE_EVENT.'&page=events-options#bookings');
 		$messages['updated'] = esc_html__('Gateway updated.', 'events');
 		$messages['error'] = esc_html__('Gateway not updated.', 'events');
 		?>

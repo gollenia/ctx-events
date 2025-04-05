@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events;
+namespace Contexis\Events\Models;
 
 class Speaker {
 

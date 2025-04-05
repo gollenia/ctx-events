@@ -1,23 +1,25 @@
 <?php
 
 use Contexis\Events\Models\Location;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\LocationPost;
 
-class EM_Location_Posts_Admin{
+class LocationAdmin{
 	public static function init(){
 		global $pagenow;
-		if($pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == EM_POST_TYPE_LOCATION ){ //only needed if editing post
+		if($pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == LocationPost::POST_TYPE ){ //only needed if editing post
 			//hide some cols by default:
-			$screen = 'edit-'.EM_POST_TYPE_LOCATION;
+			$screen = 'edit-'.LocationPost::POST_TYPE;
 			$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
 			if( $hidden === false ){
 				$hidden = array('location-id');
 				update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
 			}
-			add_action('admin_head', array('EM_Location_Posts_Admin','admin_head'));
+			add_action('admin_head', array('LocationAdmin','admin_head'));
 		}
-		add_filter('manage_'.EM_POST_TYPE_LOCATION.'_posts_columns' , array('EM_Location_Posts_Admin','columns_add'));
-		add_filter('manage_'.EM_POST_TYPE_LOCATION.'_posts_custom_column' , array('EM_Location_Posts_Admin','columns_output'),10,2 );
-		add_filter('manage_edit-'.EM_POST_TYPE_LOCATION.'_sortable_columns', array('EM_Location_Posts_Admin','columns_sortable'));
+		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_columns' , array('LocationAdmin','columns_add'));
+		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_custom_column' , array('LocationAdmin','columns_output'),10,2 );
+		add_filter('manage_edit-'.LocationPost::POST_TYPE.'_sortable_columns', array('LocationAdmin','columns_sortable'));
 			
 	}
 	
@@ -40,7 +42,7 @@ class EM_Location_Posts_Admin{
 		global $menu, $submenu;
 	  	// Add a submenu to the custom top-level menu:
    		$plugin_pages = array(); 
-		$plugin_pages[] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Locations', 'events'), __('Locations', 'events'), 'edit_locations', 'events-locations', "edit.php?post_type=event");
+		$plugin_pages[] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Locations', 'events'), __('Locations', 'events'), 'edit_locations', 'events-locations', "edit.php?post_type=event");
 		$plugin_pages = apply_filters('em_create_locationss_submenu',$plugin_pages);
 	}
 	
@@ -94,4 +96,4 @@ class EM_Location_Posts_Admin{
 	}
  
 }
-add_action('admin_init', array('EM_Location_Posts_Admin','init'));
+add_action('admin_init', array('LocationAdmin','init'));

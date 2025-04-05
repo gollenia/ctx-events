@@ -1,32 +1,25 @@
 <?php
-class EM_Location_Post {
 
-	const POST_TYPE = EM_POST_TYPE_LOCATION;
-	public static function init(){ 
-		add_action( 'init', ['EM_Location_Post', "register_meta"] );
-		add_action('init', array('EM_Location_Post', 'meta_query_filter'));
+namespace Contexis\Events\PostTypes;
+
+use Contexis\Events\Interfaces\PostType;
+use Contexis\Events\PostTypes\EventPost;
+
+class LocationPost implements PostType {
+
+	const POST_TYPE = 'location';
+
+	public static function init() : self { 
+		$instance = new self;
+		add_action( 'init', array($instance, 'register_post_type') );
+		add_action( 'init', array($instance, 'meta_query_filter') );
+		add_action( 'init', array($instance, 'register_meta') );
+		return $instance;
 	}	
-	
-	/**
-	 * Overrides the default post format of a location and can display a location as a page, which uses the page.php template.
-	 * @param string $template
-	 * @return string
-	 */
-	public static function single_template($template){
-		global $post;
-		if( !locate_template('single-'.EM_POST_TYPE_LOCATION.'.php') && $post->post_type == EM_POST_TYPE_LOCATION ){
-			
-			$post_templates = array('page.php','index.php');
-			
-			if( !empty($post_templates) ){
-			    $post_template = locate_template($post_templates,false);
-			    if( !empty($post_template) ) $template = $post_template;
-			}
-		}
-		return $template;
-	}
 
-	
+	public static function get_slug(): string {
+		return self::POST_TYPE;
+	}
 
 	public static function meta_query_filter() {
 		add_filter(
@@ -43,10 +36,53 @@ class EM_Location_Post {
 		  );
 	}
 
-
-	public static function register_meta() {
-
+	public function register_post_type(): void
+	{
+		$labels = [
+			'name' => __('Locations','events'),
+			'singular_name' => __('Location','events'),
+			'menu_name' => __('Locations','events'),
+			'add_new' => __('Add Location','events'),
+			'add_new_item' => __('Add New Location','events'),
+			'edit' => __('Edit','events'),
+			'edit_item' => __('Edit Location','events'),
+			'new_item' => __('New Location','events'),
+			'view' => __('View','events'),
+			'view_item' => __('View Location','events'),
+			'search_items' => __('Search Locations','events'),
+			'not_found' => __('No Locations Found','events'),
+			'not_found_in_trash' => __('No Locations Found in Trash','events'),
+			'parent' => __('Parent Location','events'),
+		];
 		
+		$post_type = [	 
+			'public' => true,
+			'hierarchical' => false,
+			'show_in_rest' => true,
+			'show_in_admin_bar' => true,
+			'show_ui' => true,
+			'show_in_menu' => 'edit.php?post_type='.EventPost::POST_TYPE,
+			'show_in_nav_menus'=>true,
+			'can_export' => true,
+			'exclude_from_search' => true,
+			'publicly_queryable' => true,
+			'rewrite' => ['slug' => EventPost::get_slug(), 'with_front'=>false],
+			'query_var' => true,
+			'has_archive' => false,
+			'template' => [
+				['events-manager/locationeditor']
+			],
+			'supports' => apply_filters('em_cp_location_supports', ['title','excerpt','thumbnail','editor','custom-fields']),
+			'label' => __('Locations','events'),
+			'description' => __('Display locations on your blog.','events'),
+			'labels' => $labels
+		];
+
+		register_post_type( self::POST_TYPE, $post_type );
+	}
+
+
+	public function register_meta() : void {
 		$meta_array = [
 			["_location_address", 'string', ''],
 			["_location_town", 'string', ''],
@@ -58,8 +94,6 @@ class EM_Location_Post {
 			["_location_latitude", "number", 0],
 			["_location_longitude", "number", 0]
 		];
-
-		
 
 		foreach($meta_array as $meta) {
 			register_post_meta( 'location', $meta[0], [
@@ -80,4 +114,6 @@ class EM_Location_Post {
 		}
 	}
 }
-EM_Location_Post::init();
+if( get_option('dbem_locations_enabled', true) ){
+	LocationPost::init();
+}

@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\PostTypes\EventPost;
+
 	/**
 	 * generates an ical feed on init if url is correct
 	 */
@@ -24,10 +27,10 @@
 			$filename = 'events';
 			$args = array();
 			//single event
-			if( $wp_query->get(EM_POST_TYPE_EVENT) ){
-				$event_id = $wpdb->get_var('SELECT event_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get(EM_POST_TYPE_EVENT)."' LIMIT 1");
+			if( $wp_query->get(EventPost::POST_TYPE) ){
+				$event_id = $wpdb->get_var('SELECT event_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get(EventPost::POST_TYPE)."' LIMIT 1");
 				if( !empty($event_id) ){
-					$filename = $wp_query->get(EM_POST_TYPE_EVENT);
+					$filename = $wp_query->get(EventPost::POST_TYPE);
 					$args['event'] = $event_id;
 				}
 			}

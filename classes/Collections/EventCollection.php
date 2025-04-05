@@ -6,7 +6,7 @@ use WP_Post;
 use Countable;
 use IteratorAggregate;
 use Contexis\Events\Models\Event;
-
+use Contexis\Events\PostTypes\EventPost;
 
 class EventCollection implements Countable, IteratorAggregate {
 	
@@ -57,7 +57,7 @@ class EventCollection implements Countable, IteratorAggregate {
         ];
 
 		if(empty($args['post_type'])) {
-			$queryArgs['post_type'] = 'event';
+			$queryArgs['post_type'] = EventPost::POST_TYPE;
 		}
 		
 		

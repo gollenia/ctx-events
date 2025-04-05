@@ -2,6 +2,7 @@
 
 use Contexis\Events\Collections\LocationCollection;
 use \Contexis\Events\Options;
+use Contexis\Events\PostTypes\EventPost;
 ?>
 
 <?php if( !function_exists('current_user_can') || !current_user_can('manage_options') ) return; ?>
@@ -19,7 +20,7 @@ use \Contexis\Events\Options;
 			Options::checkbox( __( 'Locations', 'events'), 'dbem_locations_enabled', __( 'Activate possibility to add locations to events','events'), '', '.em-location-type-option' );
 			Options::checkbox( __( 'Current Events', 'events'), 'dbem_events_current_are_past', __( "Currently running events should be treated as already passed", 'events') );
 			Options::checkbox( __( 'WordPress Search', 'events'), 'dbem_cp_events_search_results', sprintf(__( "Allow %s to appear in the built-in search results.", 'events'),__('events','events')) );
-			Options::input( __( 'Permalink', 'events'), 'dbem_cp_events_slug', sprintf(__('e.g. %s - you can use / Separators too', 'events'), '<strong>'.home_url().'/<code>'.esc_html(get_option('dbem_cp_events_slug',EM_POST_TYPE_EVENT_SLUG)).'</code>/summercamp/</strong>'), ['default' => EM_POST_TYPE_EVENT_SLUG, 'class' => 'regular-text code'] ) ;
+			Options::input( __( 'Permalink', 'events'), 'dbem_cp_events_slug', sprintf(__('e.g. %s - you can use / Separators too', 'events'), '<strong>'.home_url().'/<code>'.esc_html(get_option('dbem_cp_events_slug',EventPost::get_slug())).'</code>/summercamp/</strong>'), ['default' => EventPost::get_slug(), 'class' => 'regular-text code'] ) ;
 		?>
 		</table>
 		<h2><?php _e("Locations", "events") ?></h2>

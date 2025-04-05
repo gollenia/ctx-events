@@ -3,7 +3,10 @@
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Export\BookingsTable;
 use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Ticket;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\Views\EventView;
 
 /**
  * Decide what content to show in the bookings section. 
@@ -78,7 +81,7 @@ function em_bookings_event(){
   			<a href="<?php echo $event->get_permalink(); ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('View %s','events'), __('Event', 'events')) ?></a>
   			<a href="<?php echo $event->get_edit_url(); ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('Edit %s','events'), __('Event', 'events')) ?></a>
   			<?php if( locate_template('plugins/events/templates/csv-event-bookings.php', false) ): //support for legacy template ?>
-  			<a href='<?php echo EM_ADMIN_URL ."&amp;page=events-bookings&amp;action=bookings_export_csv&amp;_wpnonce=".wp_create_nonce('bookings_export_csv')."&amp;event_id=".$event->event_id ?>' class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Export CSV','events')?></a>
+  			<a href='<?php echo EventPost::get_admin_url() ."&amp;page=events-bookings&amp;action=bookings_export_csv&amp;_wpnonce=".wp_create_nonce('bookings_export_csv')."&amp;event_id=".$event->event_id ?>' class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Export CSV','events')?></a>
   			<?php endif; ?>
   			<?php do_action('em_admin_event_booking_options_buttons'); ?>
 		<?php if( !is_admin() ): ?></h2><?php else: ?><hr class="wp-header-end" /><?php endif; ?>
@@ -94,7 +97,7 @@ function em_bookings_event(){
 			</p>
 			<p>
 				<strong><?php esc_html_e('Date','events'); ?></strong> : 
-				<?php echo $event->output_dates(). ' @ ' . $event->output_times(); ?>						
+				<?php echo EventView::render($event, "EVENT_DATES") ?>						
 			</p>
 			<p>
 				<strong><?php esc_html_e('Location','events'); ?></strong> :

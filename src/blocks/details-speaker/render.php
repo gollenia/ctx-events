@@ -1,9 +1,13 @@
-<?php 
-$event = \Contexis\Events\Models\Event::find_by_post(get_post());
+<?php
+
+use Contexis\Events\Models\Event;
+use Contexis\Events\Models\Speaker;
+
+$event = Event::find_by_post(get_post());
 if(!$event) return;
 $speakerId = $attributes['customSpeakerId'] ?: $event->speaker_id;
 if(!$speakerId) { return; }
-$speaker = \Contexis\Events\Speaker::get($speakerId);
+$speaker = Speaker::get($speakerId);
 
 switch($attributes['linkTo']) {
 	case "mail":

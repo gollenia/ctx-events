@@ -4,6 +4,8 @@ namespace Contexis\Events\Collections;
 
 use Contexis\Events\Model\Booking;
 use \Contexis\Events\Models\Event;
+use Contexis\Events\Models\Ticket;
+
 /**
  * Deals with the ticket info for an event
  * @author marcus

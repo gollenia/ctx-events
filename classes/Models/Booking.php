@@ -5,6 +5,8 @@ namespace Contexis\Events\Model;
 use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Tickets\TicketsBookings;
 use Contexis\Events\Models\Event;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\Views\EventView;
 use DateTime;
 use WP_REST_Request;
 use DateInterval;
@@ -47,8 +49,7 @@ class Booking extends \EM_Object{
 
 	var $notes;
 
-	public string $booking_date;
-	protected DateTime $date;
+	public ?DateTime $booking_date = null;
 	protected $person;
 
 	public array $required_fields = [ 'booking_id', 'event_id', 'booking_spaces' ];
@@ -82,7 +83,7 @@ class Booking extends \EM_Object{
 			$booking['booking_meta'] = (!empty($booking['booking_meta'])) ? maybe_unserialize($booking['booking_meta']):array();
 			$this->from_array($booking);
 			$this->previous_status = $this->booking_status;
-			$this->booking_date = !empty($booking['booking_date']) ? $booking['booking_date']:false;
+			$this->booking_date = !empty($booking['booking_date']) ? new DateTime($booking['booking_date']) : null;
 			$this->booking_mail = $booking['booking_meta']['registration']['user_email'];
 		}
 		do_action('em_booking', $this, $booking_data);
@@ -182,11 +183,9 @@ class Booking extends \EM_Object{
 		return $attendee;
 	} */
 
-	function get_booking_date() : string
+	public function get_booking_date($time = true) : string
 	{
-		$booking_date_int = strtotime($this->booking_date);
-		$booking_time = date("H:i", $booking_date_int);
-		return \Contexis\Events\Intl\Date::get_date($booking_date_int) . " " . __('at', 'events') . ' ' . $booking_time;
+		return \Contexis\Events\Intl\Date::get_date($this->booking_date->getTimestamp()) . ($time ? ' ' . \Contexis\Events\Intl\Date::get_time($this->booking_date->getTimestamp()) : '');
 	}
 	
 	
@@ -223,7 +222,7 @@ class Booking extends \EM_Object{
 			$this->feedback_message = __('Changes saved', 'events');
 			if(!$result) $this->feedback_message = __('There was a problem UPDATING the booking.', 'events');
 		} else {
-			$data['booking_date'] = $this->booking_date = gmdate('Y-m-d H:i:s');
+			$data['booking_date'] = $this->booking_date->format('Y-m-d H:i:s');
 			$data_types[] = '%s';
 			$result = $wpdb->insert($table, $data, $data_types);
 			$this->booking_id = $wpdb->insert_id;
@@ -751,7 +750,7 @@ class Booking extends \EM_Object{
 
 	function get_admin_url() : string
 	{
-		return is_admin() ? EM_ADMIN_URL. "&page=events-bookings&event_id=".$this->event_id."&booking_id=".$this->booking_id : "";
+		return is_admin() ? EventPost::get_admin_url(). "&page=events-bookings&event_id=".$this->event_id."&booking_id=".$this->booking_id : "";
 	}
 	
 	function output($format, $target="html") : string {
@@ -976,8 +975,6 @@ class Booking extends \EM_Object{
 	    }
 	    return apply_filters('em_booking_email_messages', $msg, $this);
 	}
-	
-
 	
 	/**
 	 * Can the user manage this event? 

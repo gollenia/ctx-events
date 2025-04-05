@@ -3,29 +3,41 @@
 namespace Contexis\Events\PostTypes;
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Interfaces\PostType;
+use RecurringEventPost;
 use WP_Query;
 
-class EventPost {
+class EventPost implements PostType {
 
 	const POST_TYPE = "event";
+	const CATEGORIES = 'event-categories';
+	const TAGS = 'event-tags';
 	
-	public static function init(){
-
+	public static function init() : self {
 		$instance = new self;
 		add_action('init', array($instance, 'register_post_type'));
 		add_action('init', array($instance, 'register_taxonomies'));
+		add_action('init', array($instance, 'register_meta'));	
 		add_action('parse_query', array($instance,'parse_query'));
-		add_action('rest_api_init', array($instance, 'register_meta'));	
+		return $instance;
 	}	
 
-	public function register_taxonomies() {
-		register_taxonomy(EM_TAXONOMY_TAG,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_tags', [
+	public static function get_slug(): string {
+        return get_option('dbem_cp_events_slug', 'events');
+    }
+
+	public static function get_admin_url(): string {
+        return admin_url('edit.php?post_type=' . self::POST_TYPE);
+    }
+
+	public function register_taxonomies() : void {
+		register_taxonomy(self::POST_TYPE.'-tags',[self::POST_TYPE, RecurringEventPost::POST_TYPE], [
 			'hierarchical' => false,
 			'public' => true,
 			'show_ui' => true,
 			'show_in_rest' => true,
 			'query_var' => true, 
-			'rewrite' => ['slug' => EM_TAXONOMY_TAG_SLUG,'with_front'=>false],
+			'rewrite' => ['slug' => self::get_slug(),'with_front'=>false],
 			'label' => __('Event Tags'),
 			'show_admin_column' => true,
 			'singular_label' => __('Event Tag'),
@@ -44,23 +56,17 @@ class EventPost {
 				'separate_items_with_commas'=>__('Separate event tags with commas','events'),
 				'add_or_remove_items'=>__('Add or remove events','events'),
 				'choose_from_the_most_used'=>__('Choose from most used event tags','events'),
-			],
-			'capabilities' => [
-				'manage_terms' => 'edit_event_categories',
-				'edit_terms' => 'edit_event_categories',
-				'delete_terms' => 'delete_event_categories',
-				'assign_terms' => 'edit_events',
 			]
-		]));
+		]);
 	
-		register_taxonomy(EM_TAXONOMY_CATEGORY,[EM_POST_TYPE_EVENT,'event-recurring'], apply_filters('em_ct_categories', [
+		register_taxonomy(self::POST_TYPE.'-categories',[self::POST_TYPE, RecurringEventPost::POST_TYPE], [
 			'hierarchical' => true,
 			'public' => true,
 			'show_ui' => true,
 			'show_in_rest' => true,
 			'show_admin_column' => true,
 			'query_var' => true,
-			'rewrite' => ['slug' => EM_TAXONOMY_CATEGORY_SLUG, 'hierarchical' => true,'with_front'=>false],
+			'rewrite' => ['slug' => self::POST_TYPE.'/categories', 'hierarchical' => true,'with_front'=>false],
 			'show_in_nav_menus' => true,
 			'label' => __('Event Categories','events'),
 			'singular_label' => __('Event Category','events'),
@@ -79,17 +85,11 @@ class EventPost {
 				'separate_items_with_commas'=>__('Separate event categories with commas','events'),
 				'add_or_remove_items'=>__('Add or remove events','events'),
 				'choose_from_the_most_used'=>__('Choose from most used event categories','events'),
-			],
-			'capabilities' => [
-				'manage_terms' => 'edit_event_categories',
-				'edit_terms' => 'edit_event_categories',
-				'delete_terms' => 'delete_event_categories',
-				'assign_terms' => 'edit_events',
 			]
-		]));
+		]);
 	}
 
-	public function register_post_type() {
+	public function register_post_type() : void {
 		$labels = [
 			'name' => __('Events','events'),
 			'singular_name' => __('Event','events'),
@@ -105,7 +105,7 @@ class EventPost {
 			'parent' => __('Parent Event','events'),
 		];
 
-		$event_post_type = [	
+		$post_type = [	
 			'public' => true,
 			'hierarchical' => false,
 			'show_ui' => true,
@@ -115,7 +115,7 @@ class EventPost {
 			'can_export' => true,
 			'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
 			'publicly_queryable' => true,
-			'rewrite' => ['slug' => EM_POST_TYPE_EVENT_SLUG,'with_front'=>false],
+			'rewrite' => ['slug' => self::get_slug(),'with_front'=>false],
 			'has_archive' => false,
 			'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
 			'template' => [
@@ -128,37 +128,36 @@ class EventPost {
 					['core/separator'],
 					['core/group', ['layout' => ['type' => 'flex', 'flexWrap' => 'nowrap', 'justifyContent' => 'right']], [['events-manager/booking', ['title' => 'Anmeldung']]]]
 			],
-			'capability_type' => 'event',
-			'capabilities' => [
-				'publish_posts' => 'publish_events',
-				'edit_posts' => 'edit_events',
-				'edit_others_posts' => 'edit_others_events',
-				'delete_posts' => 'delete_events',
-				'delete_others_posts' => 'delete_others_events',
-				'read_private_posts' => 'read_private_events',
-				'edit_post' => 'edit_event',
-				'delete_post' => 'delete_event',
-				'read_post' => 'read_event',		
-			],
 			'label' => __('Events','events'),
 			'description' => __('Display events on your blog.','events'),
 			'labels' => $labels,
-			//'rest_controller_class' => '\Contexis\Events\Events\EventRestController',
 			'menu_icon' => 'dashicons-calendar-alt'
 		];
 		
-		register_post_type( 'event', $event_post_type );
+		register_post_type( self::POST_TYPE, $post_type );
 	}
 
-	public function register_meta() {
+	public function register_meta() : void {
 
-		$metadata = json_decode(file_get_contents(__DIR__ . '/metadata.json'), true);
+		$metadata = [
+			[ "name" => "_booking_form","type" => "number"],
+			[ "name" => "_attendee_form","type" => "number"],
+			[ "name" => "_speaker_id","type" => "number"],
+			[ "name" => "_location_id","type" => "number"],
+			[ "name" => "_event_audience","type" => "string"],
+			[ "name" => "_event_start","type" => "string"],
+			[ "name" => "_event_end","type" => "string"],
+			[ "name" => "_event_all_day","type" => "boolean"],
+			[ "name" => "_event_rsvp_end","type" => "string"],
+			[ "name" => "_event_rsvp_start","type" => "string"],
+			[ "name" => "_event_rsvp","type" => "boolean"],
+			[ "name" => "_event_spaces","type" => "number"],
+			[ "name" => "_event_rsvp_spaces","type" => "number"],
+			[ "name" => "_event_rsvp_donation","type" => "boolean"]
+		];
 
 		foreach($metadata as $meta){
-			if(!in_array('event', $meta['post_type'])){
-				continue;
-			}
-			register_post_meta( 'event', $meta['name'], [
+			register_post_meta( self::POST_TYPE, $meta['name'], [
 				'type' => $meta['type'],
 				'single'       => true,
 				
@@ -173,34 +172,13 @@ class EventPost {
 				]
 			]);
 		}
-
-		foreach($metadata as $meta){
-			if(!in_array('event-recurring', $meta['post_type'])){
-				continue;
-			}
-			register_post_meta( 'event-recurring', $meta['name'], [
-				'type' => $meta['type'],
-				'single'       => true,
-				'sanitize_callback' => '',
-				'auth_callback' => function() {
-					return current_user_can( 'edit_posts' );
-				},
-				'show_in_rest' => [
-					'schema' => [
-						'style' => $meta['type']
-					]
-				]
-			]);
-		}
-	
-
 	}
 	
 	public static function parse_query(WP_Query $query) : WP_Query{
 		if(!isset($query->query_vars['post_type'])){
 			return $query;
 		}
-		if( $query->query_vars['post_type'] != 'event' && $query->query_vars['post_type'] != 'event-recurring' ){
+		if( $query->query_vars['post_type'] != EventPost::POST_TYPE && $query->query_vars['post_type'] != RecurringEventPost::POST_TYPE ){
 			return $query;
 		}
 		
@@ -220,6 +198,6 @@ class EventPost {
 		return $query;
 		
 	}
-
 }
+
 EventPost::init();

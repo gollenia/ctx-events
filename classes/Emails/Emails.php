@@ -74,9 +74,9 @@ class EM_Emails {
 		em_locate_template('templates/ical.php', true, array('args'=>array('event'=>$event_ids, 'scope'=>'all')));
 		$icalcontent = preg_replace("/([^\r])\n/", "$1\r\n", ob_get_clean());
 		try{
-			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->date()->getTimestamp()).'.ics';
+			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date->getTimestamp()).'.ics';
 		}catch( Exception $e ){
-			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date).'.ics';
+			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date->format('Y-d-m')).'.ics';
 		}
 		$ical_attachment = EM_Mailer::add_email_attachment($ical_filename, $icalcontent);
 		$ical_file_array = array('name'=>'invite.ics', 'type'=>'text/calendar','path'=>$ical_attachment, 'delete'=>true);

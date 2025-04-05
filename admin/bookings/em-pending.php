@@ -3,6 +3,7 @@
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Ticket;
+use Contexis\Events\PostTypes\EventPost;
 
 /**
  * Generates a "widget" table of pending bookings with some quick admin operation options. 
@@ -100,9 +101,9 @@ function em_bookings_pending_table($event_id = false){
 								?>
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
-									<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
+									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									<?php if( !is_object($event) && !is_object($ticket) ): ?>
-									<td><a href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $booking->event_id; ?>"><?php echo $events[$booking->event_id]->name ?></a></td>
+									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;event_id=<?php echo $booking->event_id; ?>"><?php echo $events[$booking->event_id]->name ?></a></td>
 									<?php endif; ?>
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>

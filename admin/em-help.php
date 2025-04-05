@@ -1,4 +1,7 @@
-<?php 
+<?php
+
+use Contexis\Events\PostTypes\EventPost;
+
 /**
  * Display function for the support page. here we can give links to forums and special upgrade instructions e.g. migration features 
  */
@@ -18,7 +21,7 @@ function em_admin_help_page(){
 			</ol>
 			
 			<h2><?php _e('Placeholders for customizing event pages','events'); ?></h2>
-			<p><?php echo sprintf( __("In the <a href='%s'>settings page</a>, you'll find various textboxes where you can edit how event information looks, such as for event and location lists. Using the placeholders below, you can choose what information should be displayed.",'events'), EM_ADMIN_URL .'&amp;events-options'); ?></p>
+			<p><?php echo sprintf( __("In the <a href='%s'>settings page</a>, you'll find various textboxes where you can edit how event information looks, such as for event and location lists. Using the placeholders below, you can choose what information should be displayed.",'events'), EventPost::get_admin_url() .'&amp;events-options'); ?></p>
 			<a name="event-placeholders"></a>
 			<h3 style="margin-top:20px;"><?php _e('Event Related Placeholders','events'); ?></h3>
 			<?php echo em_docs_placeholders( array('type'=>'events') ); ?>

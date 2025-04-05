@@ -2,6 +2,8 @@
 
 use Contexis\Events\Collections\EventCollection;
 use Contexis\Events\Models\Location;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\LocationPost;
 
 function em_uninstall() {
 	global $wpdb;
@@ -9,19 +11,19 @@ function em_uninstall() {
 	remove_action('before_delete_post',array('EM_Location_Post_Admin','before_delete_post'),10,1);
 	remove_action('before_delete_post',array('EM_Event_Post_Admin','before_delete_post'),10,1);
 	remove_action('before_delete_post',array('EM_Event_Recurring_Post_Admin','before_delete_post'),10,1);
-	$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".\Contexis\Events\Events\EventPost::POST_TYPE."','".EM_POST_TYPE_LOCATION."','event-recurring')");
+	$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".EventPost::POST_TYPE."','".LocationPost::POST_TYPE."','event-recurring')");
 
 	foreach($post_ids as $post_id){
 		wp_delete_post($post_id);
 	}
 
-	$cat_terms = get_terms(EM_TAXONOMY_CATEGORY, array('hide_empty'=>false));
+	$cat_terms = get_terms(EventPost::CATEGORIES, array('hide_empty'=>false));
 	foreach($cat_terms as $cat_term){
-		wp_delete_term($cat_term->term_id, EM_TAXONOMY_CATEGORY);
+		wp_delete_term($cat_term->term_id, EventPost::CATEGORIES);
 	}
-	$tag_terms = get_terms(EM_TAXONOMY_TAG, array('hide_empty'=>false));
+	$tag_terms = get_terms(EventPost::TAGS, array('hide_empty'=>false));
 	foreach($tag_terms as $tag_term){
-		wp_delete_term($tag_term->term_id, EM_TAXONOMY_TAG);
+		wp_delete_term($tag_term->term_id, EventPost::TAGS);
 	}
 	//delete EM tables
 	$wpdb->query('DROP TABLE '.EM_EVENTS_TABLE);
@@ -51,7 +53,7 @@ function em_install() {
     if (version_compare($installed_version, $plugin_version, '>=')) {
         return;
     }
-   	var_dump($installed_version);
+   	
 	if( $installed_version === '0.0.0' ){
 		if (get_option('dbem_upgrade_throttle', 0) <= time()) {
 			update_option('dbem_upgrade_throttle', time() + 60);

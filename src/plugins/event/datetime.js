@@ -22,30 +22,16 @@ const datetimeSelector = () => {
 
 	const [ meta, setMeta ] = useEntityProp( 'postType', postType, 'meta' );
 
-	if ( ! meta._event_start_date || ! meta._event_end_date ) {
-		wp.data.dispatch( 'core/notices' ).createNotice(
-			'warning',
-			'Do not forget about a date your post!',
-			{ 
-				id: 'rudr-featured-img', 
-				isDismissible: false 
-			}
-		);
-        dispatch( 'core/editor' ).lockPostSaving( 'requiredValueLock' );
-    } else {
+	if ( ! meta._event_start || ! meta._event_end ) {
+		wp.data.dispatch( 'core/notices' ).createNotice( 'warning', 'Do not forget about a date your post!', {
+			id: 'rudr-featured-img',
+			isDismissible: false,
+		} );
+		dispatch( 'core/editor' ).lockPostSaving( 'requiredValueLock' );
+	} else {
 		dispatch( 'core/notices' ).removeNotice( 'rudr-featured-img' );
-        unlockPostSaving( 'requiredValueLock' );
-    }
-
-	const getNextHour = ( offset = 0, time = false ) => {
-		let nextHourDate = time ? new Date( '01/01/1970 ' + time ) : new Date();
-		nextHourDate.setHours( nextHourDate.getHours() + offset );
-		nextHourDate.setMinutes( 0 );
-		nextHourDate.setSeconds( 0 );
-		nextHourDate.setMilliseconds( 0 );
-		nextHourDate.setMinutes( nextHourDate.getMinutes() - nextHourDate.getTimezoneOffset() );
-		return nextHourDate.toISOString().split( 'T' )[ 1 ].split( '.' )[ 0 ];
-	};
+		unlockPostSaving( 'requiredValueLock' );
+	}
 
 	const compareTime = ( start, end ) => {
 		const startDate = new Date( '01/01/1970 ' + start );
@@ -53,19 +39,22 @@ const datetimeSelector = () => {
 		return startDate > endDate;
 	};
 
-	const getNow = () => {
+	const getNow = ( hourOffset = 0 ) => {
 		let endDate = new Date();
-		return endDate.toISOString().split( 'T' )[ 0 ];
+		const hoursToAdd = hourOffset * 60 * 60 * 1000;
+		endDate.setTime( endDate.getTime() + hoursToAdd );
+		return endDate.toISOString();
 	};
 
-	if ( ! meta._event_start_date ) {
-		setMeta( { _event_start_date: getNow(), _event_start_time: getNextHour() } );
+	if ( ! meta._event_start ) {
+		setMeta( { _event_start: getNow( 1 ) } );
 	}
 
-	if ( ! meta._event_end_date ) {
-		setMeta( { _event_end_date: getNow(), _event_end_time: getNextHour( 1 ) } );
+	if ( ! meta._event_end ) {
+		setMeta( { _event_end: getNow( 2 ) } );
 	}
-	
+
+	console.log( 'meta', meta );
 
 	return (
 		<PluginDocumentSettingPanel
@@ -73,44 +62,36 @@ const datetimeSelector = () => {
 			title={ __( 'Time and Date', 'events' ) }
 			className="events-datetime-settings"
 		>
-		
-					
-					
 			<TextControl
 				label={ __( 'Starts at', 'events' ) }
-				value={ meta._event_start_date + 'T' + meta._event_start_time }
+				value={ meta._event_start }
 				onChange={ ( value ) => {
-					const date = value.split( 'T' )[ 0 ];
-					const time = value.split( 'T' )[ 1 ];
-					setMeta( { _event_start_date: date, _event_start_time: time } );
-					if( ! meta._event_end_date || compareTime( time, meta._event_end_time ) ) {
-						setMeta( { _event_end_date: date, _event_end_time: getNextHour( 1, time ) } );
+					setMeta( { _event_start: value } );
+					if ( compareTime( value, meta._event_end ) ) {
+						endDate = new Date( value );
+						endDate.addHours( 1 );
+						setMeta( { _event_end: endDate.toISOString() } );
 					}
 				} }
-				min={ getNow() + 'T' + getNextHour() }
-				step={300}
+				min={ getNow( 1 ) }
+				max={ meta._event_end }
+				step={ 300 }
 				name="em-from-date"
 				type="datetime-local"
-				
 			/>
-					
-				
-		
+
 			<TextControl
 				label={ __( 'Ends at', 'events' ) }
-				value={ meta._event_end_date + 'T' + meta._event_end_time }
+				value={ meta._event_end }
 				onChange={ ( value ) => {
-					const date = value.split( 'T' )[ 0 ];
-					const time = value.split( 'T' )[ 1 ];
-					setMeta( { _event_end_date: date, _event_end_time: time } );
+					setMeta( { _event_end: value } );
 				} }
-				step={300}
-				min={ meta._event_start_date + 'T' + meta._event_start_time }
+				step={ 300 }
+				min={ meta._event_start }
 				name="em-to-date"
 				type="datetime-local"
-				
 			/>
-			
+
 			<CheckboxControl
 				checked={ meta._event_all_day == 1 }
 				onChange={ ( value ) => {

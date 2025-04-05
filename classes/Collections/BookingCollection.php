@@ -41,10 +41,15 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 		return $instance;
 	}
 
+	/**
+	 * Creates a BookingCollection from an array of Booking objects
+	 * @param array $bookings
+	 * @return BookingCollection
+	 */
 	public static function from_bookings(array $bookings) : BookingCollection {
 		$instance = new self();
 		foreach( $bookings as $booking ){
-			if( get_class($booking) == 'Booking') $instance->bookings[] = $booking;
+			$instance->bookings[] = $booking;
 		}
 		return $instance;
 	}
@@ -440,6 +445,8 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 		}else{
 			$selectors = '*';
 		}
+
+		
 		//Create the SQL statement and execute
 		$sql = apply_filters('em_bookings_get_sql',"
 			SELECT $selectors FROM $bookings_table 
@@ -450,13 +457,14 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 		", $args);
 		
 		$results = $wpdb->get_results($sql, ARRAY_A);
-
 		$results = (is_array($results)) ? $results:array();
 		$bookings = array();
 		foreach ( $results as $booking ){
-			$bookings[] = Booking::get_by_id($booking);
+			$bookings[] = Booking::get_by_id($booking["booking_id"]);
 		}
+
 		$bookings = BookingCollection::from_bookings($bookings);
+
 		return $bookings;
 	}
 	

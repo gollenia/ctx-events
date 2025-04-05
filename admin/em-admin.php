@@ -3,6 +3,8 @@
 
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\LocationPost;
 
 function em_admin_menu(){
 	global $menu, $submenu, $pagenow;
@@ -40,12 +42,12 @@ function em_admin_menu(){
   	// Add a submenu to the custom top-level menu:
    	$plugin_pages = array();
    	if( get_option('dbem_rsvp_enabled') ){
-		$plugin_pages['bookings'] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Bookings', 'events'), __('Bookings', 'events').$bookings_num, 'manage_bookings', 'events-bookings', "em_bookings_page");
+		$plugin_pages['bookings'] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Bookings', 'events'), __('Bookings', 'events').$bookings_num, 'manage_bookings', 'events-bookings', "em_bookings_page");
    	}
-	$plugin_pages['options'] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Events Manager Settings','events'),__('Settings','events'), 'manage_options', "events-options", 'em_admin_options_page');
-	$plugin_pages['help'] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Getting Help for Events Manager','events'),__('Help','events'), 'manage_options', "events-help", 'em_admin_help_page');
+	$plugin_pages['options'] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Events Manager Settings','events'),__('Settings','events'), 'manage_options', "events-options", 'em_admin_options_page');
+	$plugin_pages['help'] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Getting Help for Events Manager','events'),__('Help','events'), 'manage_options', "events-help", 'em_admin_help_page');
 
-	$plugin_pages['bookingforms'] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Edit booking and attendee forms','events'),__('Forms','events'), 'manage_options', "events-forms", ["\\Contexis\\Events\\Forms\\Admin", "option_page"]);
+	$plugin_pages['bookingforms'] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Edit booking and attendee forms','events'),__('Forms','events'), 'manage_options', "events-forms", ["\\Contexis\\Events\\Forms\\Admin", "option_page"]);
 	//If multisite global with locations set to be saved in main blogs we can force locations to be created on the main blog only
 	
 	$plugin_pages = apply_filters('em_create_events_submenu',$plugin_pages);
@@ -53,26 +55,26 @@ function em_admin_menu(){
 	if( !empty($both_num) ){ //Main Event Menu
 		//go through the menu array and modify the events menu if found
 		foreach ( (array)$menu as $key => $parent_menu ) {
-			if ( $parent_menu[2] == 'edit.php?post_type='.EM_POST_TYPE_EVENT ){
+			if ( $parent_menu[2] == 'edit.php?post_type='.EventPost::POST_TYPE ){
 				$menu[$key][0] = $menu[$key][0]. $both_num;
 				break;
 			}
 		}
 	}
-	if( !empty($events_num) && !empty($submenu['edit.php?post_type='.EM_POST_TYPE_EVENT]) ){ //Submenu Event Item
+	if( !empty($events_num) && !empty($submenu['edit.php?post_type='.EventPost::POST_TYPE]) ){ //Submenu Event Item
 		//go through the menu array and modify the events menu if found
-		foreach ( (array)$submenu['edit.php?post_type='.EM_POST_TYPE_EVENT] as $key => $submenu_item ) {
-			if ( $submenu_item[2] == 'edit.php?post_type='.EM_POST_TYPE_EVENT ){
-				$submenu['edit.php?post_type='.EM_POST_TYPE_EVENT][$key][0] = $submenu['edit.php?post_type='.EM_POST_TYPE_EVENT][$key][0]. $events_num;
+		foreach ( (array)$submenu['edit.php?post_type='.EventPost::POST_TYPE] as $key => $submenu_item ) {
+			if ( $submenu_item[2] == 'edit.php?post_type='.EventPost::POST_TYPE ){
+				$submenu['edit.php?post_type='.EventPost::POST_TYPE][$key][0] = $submenu['edit.php?post_type='.EventPost::POST_TYPE][$key][0]. $events_num;
 				break;
 			}
 		}
 	}
-	if( !empty($events_recurring_num) && !empty($submenu['edit.php?post_type='.EM_POST_TYPE_EVENT]) ){ //Submenu Recurring Event Item
+	if( !empty($events_recurring_num) && !empty($submenu['edit.php?post_type='.EventPost::POST_TYPE]) ){ //Submenu Recurring Event Item
 		//go through the menu array and modify the events menu if found
-		foreach ( (array)$submenu['edit.php?post_type='.EM_POST_TYPE_EVENT] as $key => $submenu_item ) {
+		foreach ( (array)$submenu['edit.php?post_type='.EventPost::POST_TYPE] as $key => $submenu_item ) {
 			if ( $submenu_item[2] == 'edit.php?post_type=event-recurring' ){
-				$submenu['edit.php?post_type='.EM_POST_TYPE_EVENT][$key][0] = $submenu['edit.php?post_type='.EM_POST_TYPE_EVENT][$key][0]. $events_recurring_num;
+				$submenu['edit.php?post_type='.EventPost::POST_TYPE][$key][0] = $submenu['edit.php?post_type='.EventPost::POST_TYPE][$key][0]. $events_recurring_num;
 				break;
 			}
 		}
@@ -80,7 +82,7 @@ function em_admin_menu(){
 	/* Hack! Add location/recurrence isn't possible atm so this is a workaround */
 	global $_wp_submenu_nopriv;
 	if( $pagenow == 'post-new.php' && !empty($_REQUEST['post_type']) ){
-		if( $_REQUEST['post_type'] == EM_POST_TYPE_LOCATION && !empty($_wp_submenu_nopriv['edit.php']['post-new.php']) && current_user_can('edit_locations') ){
+		if( $_REQUEST['post_type'] == LocationPost::POST_TYPE && !empty($_wp_submenu_nopriv['edit.php']['post-new.php']) && current_user_can('edit_locations') ){
 			unset($_wp_submenu_nopriv['edit.php']['post-new.php']);
 		}
 		if( $_REQUEST['post_type'] == 'event-recurring' && !empty($_wp_submenu_nopriv['edit.php']['post-new.php']) && current_user_can('edit_recurring_events') ){
@@ -98,7 +100,7 @@ add_action('admin_menu','em_admin_menu');
  * @return array
  */
 function em_plugin_action_links($actions, $file, $plugin_data) {
-	array_unshift($actions, sprintf( '<a href="'.EM_ADMIN_URL.'&amp;page=events-options">%s</a>', __('Settings', 'events') ));
+	array_unshift($actions, sprintf( '<a href="'.EventPost::get_admin_url().'&amp;page=events-options">%s</a>', __('Settings', 'events') ));
 	return $actions;
 }
 

@@ -5,6 +5,7 @@ namespace Contexis\Events\Events;
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
 use \Contexis\Events\Models\Event;
+use Contexis\Events\Models\Speaker;
 
 class EventRestController 
 {
@@ -42,24 +43,7 @@ class EventRestController
 	}
 
 	public function get_items( $request ) {
-        $args = array(
-            'post_type'      => 'event',
-			'posts_per_page' => -1
-        );
-
-		$allowed_params = [
-			'category',
-			'location',
-			'speaker',
-			'tag',
-			'price',
-			'audience',
-			'orderby',
-			'order',
-			'scope',
-			'limit',
-			'offset',
-		];
+      
       
 		$posts = EventCollection::find_posts($request->get_params());
 
@@ -115,7 +99,7 @@ class EventRestController
 		}
 		
 		if(in_array('speaker', $requested_fields)) {
-			$data['speaker'] = \Contexis\Events\Speaker::get($event->speaker_id)->get_rest_fields();
+			$data['speaker'] = Speaker::get($event->speaker_id)->get_rest_fields();
 		}
 
 		if(in_array('tickets', $requested_fields)) {
@@ -223,8 +207,8 @@ class EventRestController
 		$location = $event->get_location();
 		$audience = get_post_meta($event->post_id, '_event_audience', true);
 		$category = $event->get_categories()->get_first();
-		$tags = new \EM_Tags($event);
-		$speaker = \Contexis\Events\Speaker::get($event->speaker_id);
+		
+		$speaker = Speaker::get($event->speaker_id);
 		$price = 0;
 		$booking = BookingCollection::from_event($event);
 		$tickets = $booking->get_tickets()->tickets;
@@ -270,7 +254,7 @@ class EventRestController
 				'excerpt' => $event->post_excerpt,
 				'title' => $event->event_name,
 				'speaker' => $speaker,
-				'tags' => $tags->terms,
+				
 				'allowDonation' => get_metadata('post', $event->post_id, '_event_rsvp_donation', true) == "1"
 			]
 		];

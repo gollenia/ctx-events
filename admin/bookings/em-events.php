@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Views\EventView;
 
 /**
  * Determines whether to show event page or events page, and saves any updates to the event or events
@@ -107,8 +108,6 @@ function em_bookings_events_table() {
 					<?php 
 					$rowno = 0;
 					foreach ( $events as $event ) {
-						/* @var $event Event */
-						//var_dump( get_post_meta( $event->post_id, '_event_rsvp', true ) );
 						$rowno++;
 						$class = ($rowno % 2) ? ' class="alternate"' : '';
 						$style = "";
@@ -151,7 +150,7 @@ function em_bookings_events_table() {
 								</div>
 							</td>
 							<td>
-								<?php echo $event->output_dates() ?>
+								<?php echo EventView::render($event, "EVENT_DATES" )?>
 							</td>
 						</tr>
 						<?php

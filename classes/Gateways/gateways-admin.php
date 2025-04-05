@@ -1,4 +1,7 @@
 <?php
+
+use Contexis\Events\PostTypes\EventPost;
+
 class EM_Gateways_Admin{
 	
 	public static function init(){
@@ -11,7 +14,7 @@ class EM_Gateways_Admin{
 	
 	
 	public static function admin_menu($plugin_pages){
-		$plugin_pages[] = add_submenu_page('edit.php?post_type='.EM_POST_TYPE_EVENT, __('Payment Gateways','events'),__('Payment Gateways','events'),'list_users','events-gateways', 'EM_Gateways_Admin::handle_gateways_panel');
+		$plugin_pages[] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Payment Gateways','events'),__('Payment Gateways','events'),'list_users','events-gateways', 'EM_Gateways_Admin::handle_gateways_panel');
 		return $plugin_pages;
 	}
 
@@ -107,17 +110,17 @@ class EM_Gateways_Admin{
 								<tr valign="middle">
 									<th class="check-column" scope="row"><input type="checkbox" value="<?php echo esc_attr($key); ?>" name="gateways[]"></th>
 									<td class="column-name">
-										<strong><a title="Edit <?php echo esc_attr($gateway); ?>" href="<?php echo EM_ADMIN_URL; ?>&amp;page=<?php echo $page; ?>&amp;action=edit&amp;gateway=<?php echo $key; ?>" class="row-title"><?php echo esc_html($gateway); ?></a></strong>
+										<strong><a title="Edit <?php echo esc_attr($gateway); ?>" href="<?php echo EventPost::get_admin_url(); ?>&amp;page=<?php echo $page; ?>&amp;action=edit&amp;gateway=<?php echo $key; ?>" class="row-title"><?php echo esc_html($gateway); ?></a></strong>
 										<?php
 											//Check if Multi-Booking Ready
 											
 											$actions = array();
-											$actions['edit'] = "<span class='edit'><a href='".EM_ADMIN_URL."&amp;page=" . $page . "&amp;action=edit&amp;gateway=" . $key . "'>" . __('Settings') . "</a></span>";
+											$actions['edit'] = "<span class='edit'><a href='".EventPost::get_admin_url()."&amp;page=" . $page . "&amp;action=edit&amp;gateway=" . $key . "'>" . __('Settings') . "</a></span>";
 
 											if(array_key_exists($key, $active)) {
-												$actions['toggle'] = "<span class='edit activate'><a href='" . wp_nonce_url(EM_ADMIN_URL."&amp;page=" . $page. "&amp;action=deactivate&amp;gateway=" . $key . "", 'toggle-gateway_' . $key) . "'>" . __('Deactivate') . "</a></span>";
+												$actions['toggle'] = "<span class='edit activate'><a href='" . wp_nonce_url(EventPost::get_admin_url()."&amp;page=" . $page. "&amp;action=deactivate&amp;gateway=" . $key . "", 'toggle-gateway_' . $key) . "'>" . __('Deactivate') . "</a></span>";
 											} else {
-												$actions['toggle'] = "<span class='edit activate'><a href='" . wp_nonce_url(EM_ADMIN_URL."&amp;page=" . $page. "&amp;action=activate&amp;gateway=" . $key . "", 'toggle-gateway_' . $key) . "'>" . __('Activate') . "</a></span>";
+												$actions['toggle'] = "<span class='edit activate'><a href='" . wp_nonce_url(EventPost::get_admin_url()."&amp;page=" . $page. "&amp;action=activate&amp;gateway=" . $key . "", 'toggle-gateway_' . $key) . "'>" . __('Activate') . "</a></span>";
 											}
 										?>
 										<br><div class="row-actions"><?php echo implode(" | ", $actions); ?></div>
@@ -132,7 +135,7 @@ class EM_Gateways_Admin{
 										?>
 									</td>
 									<td class="column-transactions">
-										<a href='<?php echo EM_ADMIN_URL; ?>&amp;page=<?php echo $page; ?>&amp;action=transactions&amp;gateway=<?php echo $key; ?>'><?php _e('View transactions','events'); ?></a>
+										<a href='<?php echo EventPost::get_admin_url(); ?>&amp;page=<?php echo $page; ?>&amp;action=transactions&amp;gateway=<?php echo $key; ?>'><?php _e('View transactions','events'); ?></a>
 									</td>
 							    </tr>
 								<?php

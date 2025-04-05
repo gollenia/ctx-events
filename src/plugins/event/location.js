@@ -16,7 +16,9 @@ import icons from './icons';
 const locationSelector = () => {
 	const postType = select( 'core/editor' ).getCurrentPostType();
 
-	if ( postType !== 'event' ) return <></>;
+	if ( [ 'event', 'event-recurring' ].indexOf( postType ) === -1 ) {
+		return null;
+	}
 
 	const [ meta, setMeta ] = useEntityProp( 'postType', postType, 'meta' );
 

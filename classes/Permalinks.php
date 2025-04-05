@@ -1,6 +1,8 @@
 <?php
 
 use Contexis\Events\Models\Event;
+use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\LocationPost;
 
 if( !class_exists('EM_Permalinks') ){
 	class EM_Permalinks {
@@ -55,7 +57,7 @@ if( !class_exists('EM_Permalinks') ){
 						$url = get_permalink($event->post_id);
 					}
 				}elseif( $wp_query->get('category_slug') ){
-					$url = get_term_link($wp_query->get('category_slug'), EM_TAXONOMY_CATEGORY);
+					$url = get_term_link($wp_query->get('category_slug'), EventPost::CATEGORIES);
 				}
 				if(!empty($url)){
 					wp_safe_redirect($url,301);
@@ -70,18 +72,18 @@ if( !class_exists('EM_Permalinks') ){
 			//get the slug of the event page
 			$em_rules = array();
 		
-			$events_slug = EM_POST_TYPE_EVENT_SLUG;
-			$em_rules[$events_slug.'/(\d{4}-\d{2}-\d{2})$'] = 'index.php?post_type='.EM_POST_TYPE_EVENT.'&calendar_day=$matches[1]'; //event calendar date search
-			$em_rules[$events_slug.'/(\d{4}-\d{2}-\d{2})/page/?([0-9]{1,})/?$'] = 'index.php?post_type='.EM_POST_TYPE_EVENT.'&calendar_day=$matches[1]&paged=$matches[2]'; //event calendar date search paged
+			$events_slug = EventPost::get_slug();
+			$em_rules[$events_slug.'/(\d{4}-\d{2}-\d{2})$'] = 'index.php?post_type='.EventPost::POST_TYPE.'&calendar_day=$matches[1]'; //event calendar date search
+			$em_rules[$events_slug.'/(\d{4}-\d{2}-\d{2})/page/?([0-9]{1,})/?$'] = 'index.php?post_type='.EventPost::POST_TYPE.'&calendar_day=$matches[1]&paged=$matches[2]'; //event calendar date search paged
 			
 			//check for potentially conflicting posts with the same slug as events
-			$conflicting_posts = get_posts(array('name'=>EM_POST_TYPE_EVENT_SLUG, 'post_type'=>'any', 'numberposts'=>0));
+			$conflicting_posts = get_posts(array('name'=>EventPost::get_slug(), 'post_type'=>'any', 'numberposts'=>0));
 			if( count($conflicting_posts) > 0 ){ //won't apply on homepage
 				foreach($conflicting_posts as $conflicting_post){
 					//make sure we hard-code rewrites for child pages of events
 					$child_posts = get_posts(array('post_type'=>'any', 'post_parent'=>$conflicting_post->ID, 'numberposts'=>0));
 					foreach($child_posts as $child_post){
-						$em_rules[EM_POST_TYPE_EVENT_SLUG.'/'.urldecode($child_post->post_name).'/?$'] = 'index.php?page_id='.$child_post->ID; //single event booking form with slug
+						$em_rules[EventPost::get_slug().'/'.urldecode($child_post->post_name).'/?$'] = 'index.php?page_id='.$child_post->ID; //single event booking form with slug
 						//check if child page has children
 						$grandchildren = get_pages('child_of='.$child_post->ID);
 						if( count( $grandchildren ) != 0 ) {
@@ -96,28 +98,28 @@ if( !class_exists('EM_Permalinks') ){
 		
 			$em_rules = apply_filters('em_rewrite_rules_array_events', $em_rules, $events_slug);
 			//make sure there's no page with same name as archives, that should take precedence as it can easily be deleted wp admin side
-			$em_query = new WP_Query(array('pagename'=>EM_POST_TYPE_EVENT_SLUG));
+			$em_query = new WP_Query(array('pagename'=>EventPost::get_slug()));
 			if( $em_query->have_posts() ){
-				$em_rules[trim(EM_POST_TYPE_EVENT_SLUG,'/').'/?$'] = 'index.php?pagename='.trim(EM_POST_TYPE_EVENT_SLUG,'/') ;
+				$em_rules[trim(EventPost::get_slug(),'/').'/?$'] = 'index.php?pagename='.trim(EventPost::get_slug(),'/') ;
 				wp_reset_postdata();
 			}
 			//make sure there's no page with same name as archives, that should take precedence as it can easily be deleted wp admin side
-			$em_query = new WP_Query(array('pagename'=>EM_POST_TYPE_LOCATION_SLUG));
+			$em_query = new WP_Query(array('pagename'=>LocationPost::get_slug()));
 			if( $em_query->have_posts() ){
-				$em_rules[trim(EM_POST_TYPE_LOCATION_SLUG,'/').'/?$'] = 'index.php?pagename='.trim(EM_POST_TYPE_LOCATION_SLUG,'/') ;
+				$em_rules[trim(EventPost::get_slug(),'/').'/?$'] = 'index.php?pagename='.trim(EventPost::get_slug(),'/') ;
 				wp_reset_postdata();
 			}
 			//add ical CPT endpoints
-			$em_rules[EM_POST_TYPE_EVENT_SLUG."/([^/]+)/ical/?$"] = 'index.php?'.EM_POST_TYPE_EVENT.'=$matches[1]&ical=1';
+			$em_rules[EventPost::get_slug()."/([^/]+)/ical/?$"] = 'index.php?'.EventPost::POST_TYPE.'=$matches[1]&ical=1';
 			if( get_option('dbem_locations_enabled') ){
-				$em_rules[EM_POST_TYPE_LOCATION_SLUG."/([^/]+)/ical/?$"] = 'index.php?'.EM_POST_TYPE_LOCATION.'=$matches[1]&ical=1';
+				$em_rules[EventPost::get_slug()."/([^/]+)/ical/?$"] = 'index.php?'.EventPost::POST_TYPE.'=$matches[1]&ical=1';
 			}
 			//add ical taxonomy endpoints
 			
 		
 			//add RSS location CPT endpoint
 			if( get_option('dbem_locations_enabled') ){
-				$em_rules[EM_POST_TYPE_LOCATION_SLUG."/([^/]+)/rss/?$"] = 'index.php?'.EM_POST_TYPE_LOCATION.'=$matches[1]&rss=1';
+				$em_rules[EventPost::get_slug()."/([^/]+)/rss/?$"] = 'index.php?'.EventPost::POST_TYPE.'=$matches[1]&rss=1';
 			}
 			$em_rules = apply_filters('em_rewrite_rules_array', $em_rules);
 			return $em_rules + $rules;

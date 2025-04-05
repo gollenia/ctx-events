@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Models\Event;
+use Contexis\Events\PostTypes\EventPost;
 
 class EM_Custom_Emails_Admin {
     public static $caps = array('custom_emails'=>'manage_bookings');
@@ -452,7 +453,7 @@ class EM_Custom_Emails_Admin {
 	
 	public static function meta_boxes(){
 		if( current_user_can(self::$caps['custom_emails']) ){
-			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array('EM_Custom_Emails_Admin','event_meta_box'),EM_POST_TYPE_EVENT, 'normal','low');
+			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array('EM_Custom_Emails_Admin','event_meta_box'),EventPost::POST_TYPE, 'normal','low');
 			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array('EM_Custom_Emails_Admin','event_meta_box'), 'event-recurring', 'normal','low');
 		}
 	}

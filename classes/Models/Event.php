@@ -3,20 +3,20 @@
 namespace Contexis\Events\Models;
 
 use Contexis\Events\Collections\EventCollection;
-use \Contexis\Events\Events\EventPost;
+use \Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\Intl\Price;
 use Contexis\Events\Models\Location;
 use DateInterval;
 use DateTime;
-use Bookings;
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\TicketCollection;
-use EventView;
+use Contexis\Events\Views\EventView;
 use Exception;
+use RecurringEventPost;
 use WP_Post;
 use WP_User;
 
-class Event extends \EM_Object{ 
+class Event extends \EM_Object { 
 
 	public int $event_id = 0;
 	public string $event_slug;
@@ -28,12 +28,8 @@ class Event extends \EM_Object{
 	public array $coupons = [];
 	public int $coupons_count = 0;
 	
-	protected $event_start_time = '00:00:00';
-	protected $event_end_time = '00:00:00';
-	protected $event_start_date;
-	protected $event_end_date;
-	protected $event_start;
-	protected $event_end;
+	protected ?DateTime $event_start = null;
+	protected ?DateTime $event_end = null;
 	public bool $event_all_day = false;
 	protected $event_timezone;
 	
@@ -72,13 +68,7 @@ class Event extends \EM_Object{
 		'event_owner' => array( 'name'=>'owner', 'type'=>'%d', 'null'=>true ),
 		'event_name' => array( 'name'=>'name', 'type'=>'%s', 'null'=>true ),
 		'event_timezone' => array('type'=>'%s', 'null'=>true ),
-		'event_start_time' => array( 'name'=>'start_time', 'type'=>'%s', 'null'=>true ),
-		'event_end_time' => array( 'name'=>'end_time', 'type'=>'%s', 'null'=>true ),
-		'event_start' => array('type'=>'%s', 'null'=>true ),
-		'event_end' => array('type'=>'%s', 'null'=>true ),
 		'event_all_day' => array( 'name'=>'all_day', 'type'=>'%d', 'null'=>true ),
-		'event_start_date' => array( 'name'=>'start_date', 'type'=>'%s', 'null'=>true ),
-		'event_end_date' => array( 'name'=>'end_date', 'type'=>'%s', 'null'=>true ),
 		'post_content' => array( 'name'=>'notes', 'type'=>'%s', 'null'=>true ),
 		'event_rsvp' => array( 'name'=>'rsvp', 'type'=>'%d' ),
 		'event_rsvp_end' => array( 'name'=>'rsvp_time', 'type'=>'%s', 'null'=>true ),
@@ -110,7 +100,7 @@ class Event extends \EM_Object{
 	var array $errors = array();
 	public string $feedback_message;
 	var $warnings;
-	public array $required_fields = array('event_name', 'event_start_date');
+	public array $required_fields = array('event_name', 'event_start', 'event_end');
 	var $recurring_reschedule = false;
 	var $recurring_recreate_bookings;
 	var $recurring_delete_bookings = false;
@@ -148,17 +138,7 @@ class Event extends \EM_Object{
 	    
 	    return $this->$var;
 	}
-	
-	public function __isset( $prop ){
-		if( in_array($prop, array('event_start_date', 'event_end_date', 'event_start_time', 'event_end_time', 'event_rsvp_start', 'event_rsvp_end', 'event_start', 'event_end')) ){
-			return !empty($this->$prop);
-		}elseif( $prop == 'event_timezone' ){
-			return true;
-		}elseif( $prop == 'start' || $prop == 'end' || $prop == 'rsvp_end' ){
-			return $this->$prop()->valid;
-		}
-		return isset($this->$prop);
-	}
+
 	
 	/**
 	 * When cloning this event, we get rid of the bookings and location objects, since they can be retrieved again from the cache instead. 
@@ -198,13 +178,11 @@ class Event extends \EM_Object{
 			'image' => $this->get_image(),
 			'titel' => $this->event_name,
 			'has_coupons' => \EM_Coupons::event_has_coupons($this),
-			'date' => \Contexis\Events\Intl\Date::get_date($this->start()->getTimestamp(), $this->end()->getTimestamp()),
-			'time' => \Contexis\Events\Intl\Date::get_time($this->start()->getTimestamp(), $this->end()->getTimestamp()),
-			'price' => new \Contexis\Events\Intl\Price($this),
+			'price' => new \Contexis\Events\Intl\Price($this->get_price()),
 			'is_free' => $this->is_free(),
-			'start' => $this->start()->getTimestamp(),
-			'end' => $this->end()->getTimestamp(),
-			'is_single_day' => $this->event_start_date == $this->event_end_date,
+			'start' => $this->event_start->getTimestamp(),
+			'end' => $this->event_end->getTimestamp(),
+			'is_single_day' => $this->event_start == $this->event_end,
 			'audience' => $this->event_audience,
 			'excerpt' => $this->post_excerpt,
 			'allow_donation' => get_metadata('post', $this->post_id, '_event_rsvp_donation', true) == "1",
@@ -229,53 +207,62 @@ class Event extends \EM_Object{
 		
 	}
 	
+	public function start(): DateTime {
+		return $this->event_start ??= new DateTime();
+	}
+
+	public function end(): DateTime {
+		return $this->event_end ??= new DateTime();
+	}
+
 	function load_postdata(WP_Post $event_post)
 	{
+		if( $event_post->post_type != RecurringEventPost::POST_TYPE && $event_post->post_type != EventPost::POST_TYPE ){
+			return false;
+		}
+
+		$this->post_id = absint($event_post->ID);
+		$this->post_type = $event_post->post_type;
+		$this->event_name = $event_post->post_title;
+		$this->event_owner = $event_post->post_author;
+		$this->post_content = $event_post->post_content;
+		$this->post_excerpt = $event_post->post_excerpt;
+		$this->event_slug = $event_post->post_name;
 		
-		if( is_object($event_post) && ($event_post->post_type == 'event-recurring' || $event_post->post_type == EventPost::POST_TYPE) ){
-			//load post data - regardless
-			$this->post_id = absint($event_post->ID);
-			$this->post_type = $event_post->post_type;
-			$this->event_name = $event_post->post_title;
-			$this->event_owner = $event_post->post_author;
-			$this->post_content = $event_post->post_content;
-			$this->post_excerpt = $event_post->post_excerpt;
-			$this->event_slug = $event_post->post_name;
-			
-			$this->event_date_created = $event_post->post_date;
-			$this->event_date_modified = $event_post->post_modified;
+		$this->event_date_created = $event_post->post_date;
+		$this->event_date_modified = $event_post->post_modified;
 
-			foreach( $event_post as $key => $value ){ //merge post object into this object
-				$this->$key = $value;
-			}
+		foreach( $event_post as $key => $value ) {
+			$this->$key = $value;
+		}
 
-			$this->recurrence = $this->is_recurring() ? 1:0;
-			//load meta data and other related information
-			if( $event_post->post_status != 'auto-draft' ){
-			    $event_meta = $this->get_event_meta();				
-				foreach($event_meta as $event_meta_key => $event_meta_val){
-					
-					$field_name = substr($event_meta_key, 1);
-					if($event_meta_key[0] != '_'){
-						$this->event_attributes[$event_meta_key] = ( is_array($event_meta_val) ) ? $event_meta_val[0]:$event_meta_val;
-					}elseif( is_string($field_name) && !in_array($field_name, $this->post_fields) ){
-						if( array_key_exists($field_name, $this->fields) ){
-							$this->$field_name = $event_meta_val[0];
-						}
+		$this->recurrence = $this->is_recurring() ? 1:0;
+		//load meta data and other related information
+		if( $event_post->post_status != 'auto-draft' ){
+			$event_meta = $this->get_event_meta();				
+			foreach($event_meta as $event_meta_key => $event_meta_val){
+				
+				$field_name = substr($event_meta_key, 1);
+				if($event_meta_key[0] != '_'){
+					$this->event_attributes[$event_meta_key] = ( is_array($event_meta_val) ) ? $event_meta_val[0]:$event_meta_val;
+				}elseif( is_string($field_name) && !in_array($field_name, $this->post_fields) ){
+					if( array_key_exists($field_name, $this->fields) ){
+						$this->$field_name = $event_meta_val[0];
 					}
 				}
-
-				$this->event_rsvp_donation = get_post_meta($this->post_id, '_event_rsvp_donation', true) == 1 ? true : false;
-				$this->speaker_id = array_key_exists('_speaker_id', $event_meta) ? intval($event_meta['_speaker_id'][0]) : 0;
-				
-				
-				if( empty($this->event_id) && !$this->is_recurring() ){
-					error_log("Event ID missing for post ID {$this->post_id} – expected meta not found. Post-type: {$this->post_type}");
-				}
-
 			}
+
+			$this->event_rsvp_donation = get_post_meta($this->post_id, '_event_rsvp_donation', true) == 1 ? true : false;
+			$this->speaker_id = array_key_exists('_speaker_id', $event_meta) ? intval($event_meta['_speaker_id'][0]) : 0;
 			
+			
+			if( empty($this->event_id) && !$this->is_recurring() ){
+				error_log("Event ID missing for post ID {$this->post_id} – expected meta not found. Post-type: {$this->post_type}");
+			}
+
 		}
+			
+		$this->get_post_meta();
 
 		if( empty($this->location_id) && !empty($this->event_id) ) $this->location_id = 0; //just set location_id to 0 and avoid any doubt
 	}
@@ -300,12 +287,8 @@ class Event extends \EM_Object{
 		$this->post_type = $this->recurrence ? 'event-recurring':EventPost::POST_TYPE;
 		
 		$this->event_timezone = wp_timezone()->getName();
-		
-		$this->event_start = $this->event_end = null;
 
 		$this->event_rsvp = get_post_meta($this->post_id, '_event_rsvp', true) == 1;
-		$this->event_start_date = get_post_meta($this->post_id, '_event_start_date', true) ?? date('Y-m-d')	;
-		$this->event_end_date = get_post_meta($this->post_id, '_event_end_date', true) ?? date('Y-m-d')	;
 		
 		$this->event_rsvp_end = get_post_meta($this->post_id, '_event_rsvp_end', true);
 		$this->event_rsvp_start = get_post_meta($this->post_id, '_event_rsvp_start', true);
@@ -314,13 +297,10 @@ class Event extends \EM_Object{
 		
 		$this->event_all_day = get_post_meta($this->post_id, '_event_all_day', true);
 		
-		$this->event_start_time = $this->event_all_day ? "00:00:00" : get_post_meta($this->post_id, '_event_start_time', true);
-		$this->event_end_time = $this->event_all_day ? "23:59:59" : get_post_meta($this->post_id, '_event_end_time', true);
-		$this->event_start = $this->start()->getTimestamp();
-		$this->event_end = $this->end()->getTimestamp();
+		$this->event_start = new DateTime(get_post_meta($this->post_id, '_event_end', true));
+		$this->event_end = new DateTime(get_post_meta($this->post_id, '_event_start', true));
 		
-		//Get Location Info
-		$this->location_id = get_option('dbem_locations_enabled') ? get_post_meta($this->post_id, '_location_id', true) : 0;
+		$this->location_id = get_option('dbem_locations_enabled') ? intval(get_post_meta($this->post_id, '_location_id', true)) : 0;
 		
 		//Recurrence data
 		if( $this->is_recurring() ){
@@ -383,14 +363,6 @@ class Event extends \EM_Object{
 				}else{ //by default the start date is the point of reference
 					$this->recurrence_rsvp_days = absint($_POST['recurrence_rsvp_days']) * -1;
 				}
-			}
-			
-			//create timestamps and set rsvp date/time for a normal event
-			if( !is_numeric($this->recurrence_rsvp_days) ){
-				//falback in case nothing gets set for rsvp cut-off
-				$this->event_rsvp_start = $this->event_rsvp_end = $this->rsvp_end = null;
-			}else{
-				$this->event_rsvp_start = $this->start()->copy()->modify($this->recurrence_rsvp_days.' days')->format('Y-m-d');
 			}
 		}else{
 			foreach( $this->recurrence_fields as $recurrence_field ){
@@ -507,7 +479,7 @@ class Event extends \EM_Object{
 		if( !empty($this->post_id) ) $post_array = (array) get_post($this->post_id);
 
 		//Overwrite new post info
-		$post_array['post_type'] = ($this->recurrence && get_option('dbem_recurrence_enabled')) ? 'event-recurring':EM_POST_TYPE_EVENT;
+		$post_array['post_type'] = ($this->recurrence && get_option('dbem_recurrence_enabled')) ? RecurringEventPost::POST_TYPE:EventPost::POST_TYPE;
 		$post_array['post_title'] = $this->event_name;
 		$post_array['post_content'] = !empty($this->post_content) ? $this->post_content : '';
 		$post_array['post_excerpt'] = $this->post_excerpt;
@@ -536,8 +508,6 @@ class Event extends \EM_Object{
 			$this->event_slug = $post_data->post_name;
 			$this->event_owner = $post_data->post_author;
 			$this->post_status = $post_data->post_status;
-			
-			$this->get_categories()->event_id = $this->event_id;
 			$this->categories->post_id = $this->post_id;
 			$this->categories->save();
 		
@@ -560,9 +530,6 @@ class Event extends \EM_Object{
 	
 	function save_meta(){
 		global $wpdb;
-		
-		$this->start();
-		$this->end();
 
 		$current_meta_values = $this->get_event_meta();
 		foreach( $this->fields as $key => $field_info ){
@@ -767,14 +734,6 @@ class Event extends \EM_Object{
 		return apply_filters('em_event_is_published', ($this->post_status == 'publish' || $this->post_status == 'private'), $this);
 	}
 	
-	public function start( ){
-		return new DateTime(($this->event_start_date ?: date('Y-m-d')) . " " . ($this->event_start_time ?: '00:00:00'));
-	}
-	
-	public function end(){
-		return new DateTime(($this->event_end_date ?: date('Y-m-d')) . " " . ($this->event_end_time ?: '00:00:00'));
-	}
-	
 	/**
 	 * Returns a DateTime representation of when bookings close in local event timezone. If no valid date defined, event start date/time will be used.
 	 * @return DateTime
@@ -815,6 +774,7 @@ class Event extends \EM_Object{
 	
 	function get_categories() {
 		$this->categories = get_the_terms($this->post_id, "event-category");
+		return $this->categories;
 	}
 	
 	function get_location() {
@@ -932,7 +892,7 @@ class Event extends \EM_Object{
 	}
 	
 	function get_bookings_url(){
-		return is_admin() ? EM_ADMIN_URL. "&page=events-bookings&event_id=".$this->event_id : '';
+		return is_admin() ? EventPost::get_admin_url(). "&page=events-bookings&event_id=".$this->event_id : '';
 	}
 	
 	function get_permalink(){
@@ -969,14 +929,6 @@ class Event extends \EM_Object{
 	
 	function output ( $format = '', $target = 'html' ){
 		return EventView::render($this, $format, $target);
-	}
-	
-	function output_times() {
-		return \Contexis\Events\Intl\Date::get_time($this->start()->getTimestamp(), $this->end()->getTimestamp());
-	}
-	
-	function output_dates() {
-		return \Contexis\Events\Intl\Date::get_date($this->start()->getTimestamp(), $this->end()->getTimestamp());
 	}
 	
 	
@@ -1080,7 +1032,7 @@ class Event extends \EM_Object{
 			$event = $this->to_array(true); //event template - for index
 			if( !empty($event['event_attributes']) ) $event['event_attributes'] = serialize($event['event_attributes']);
 			$post_fields = $wpdb->get_row('SELECT * FROM '.$wpdb->posts.' WHERE ID='.$this->post_id, ARRAY_A); //post to copy
-			$post_fields['post_type'] = 'event'; //make sure we'll save events, not recurrence templates
+			$post_fields['post_type'] = EventPost::POST_TYPE; //make sure we'll save events, not recurrence templates
 			$meta_fields_map = $wpdb->get_results('SELECT meta_key,meta_value FROM '.$wpdb->postmeta.' WHERE post_id='.$this->post_id, ARRAY_A);
 			$meta_fields = array();
 			//convert meta_fields into a cleaner array
@@ -1118,7 +1070,7 @@ class Event extends \EM_Object{
 				unset($event['event_date_modified']);
 				if( count($matching_days) > 0 ){
 					//first save event post data
-					$date_time = $this->start()->copy();
+					$date_time = clone $this->start();
 					foreach( $matching_days as $day ) {
 						$date_time->setTimestamp($day)->setTimeString($event['event_start_time']);
 						$start_timestamp = $date_time->getTimestamp(); //for quick access later
@@ -1132,22 +1084,11 @@ class Event extends \EM_Object{
 						$event['event_start_date'] = $meta_fields['_event_start_date'] = $date_time->format('Y-m-d');
 						$event['event_start'] = $meta_fields['_event_start'] = $date_time->format('Y-m-d H:i:s');
 						//add rsvp date/time restrictions
-						if( !empty($this->recurrence_rsvp_days) && is_numeric($this->recurrence_rsvp_days) ){
-							if( $this->recurrence_rsvp_days > 0 ){
-								$event_rsvp_end = $date_time->copy()->add(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->format('Y-m-d'); //cloned so original object isn't modified
-							}elseif($this->recurrence_rsvp_days < 0 ){
-								$event_rsvp_end = $date_time->copy()->sub(new DateInterval('P'.absint($this->recurrence_rsvp_days).'D'))->format('Y-m-d'); //cloned so original object isn't modified
-							}else{
-								$event_rsvp_end = $date_time->format('Y-m-d');
-							}
-				 			$event['event_rsvp_end'] = $meta_fields['_event_rsvp_end'] = $event_rsvp_end;
-						}else{
-							$event['event_rsvp_end'] = $meta_fields['_event_rsvp_end'] = $event['event_start_date'];
-						}
+						
 						
 
 						//set end date
-						$date_time->setTimeString($event['event_end_time']);
+						$date_time->setTime($event['event_end_time']);
 						if($this->recurrence_days > 0){
 							$event['event_end_date'] = $meta_fields['_event_end_date'] = $date_time->add(new DateInterval('P'.$this->recurrence_days.'D'))->format('Y-m-d');
 						}else{

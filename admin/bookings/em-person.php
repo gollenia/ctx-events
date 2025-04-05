@@ -83,7 +83,7 @@ function em_bookings_person_table(){
 								?>
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
-									<td><a class="row-title" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;event_id=<?php echo $event->event_id ?>"><?php echo ($event->event_name); ?></a></td>
+									<td><a class="row-title" href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;event_id=<?php echo $event->event_id ?>"><?php echo ($event->event_name); ?></a></td>
 									<td><?php echo $booking->get_spaces() ?></td>
 									<td><?php echo $booking->status_array[$booking->booking_status]; ?>
 									</td>
@@ -106,7 +106,7 @@ function em_bookings_person_table(){
 										<?php if( $booking->booking_status == booking::PENDING || $booking->booking_status == booking::APPROVED ): ?>
 										<a class="em-bookings-reject" href="<?php echo $reject_url ?>"><?php _e('Reject','events'); ?></a> |
 										<?php endif; ?>
-										<a class="em-bookings-edit" href="<?php echo EM_ADMIN_URL; ?>&amp;page=events-bookings&amp;booking_id=<?php echo $booking->booking_id; ?>"><?php _e('Edit/View','events'); ?></a> |
+										<a class="em-bookings-edit" href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;booking_id=<?php echo $booking->booking_id; ?>"><?php _e('Edit/View','events'); ?></a> |
 										<span class="trash"><a class="em-bookings-delete" href="<?php echo $delete_url ?>"><?php _e('Delete','events'); ?></a></span>
 									</td>
 								</tr>

@@ -2,6 +2,7 @@
 
 namespace Contexis\Events\Export;
 
+use Contexis\Events\Admin\Pagination;
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
@@ -191,6 +192,7 @@ class BookingsTable {
 
 		if( $this->event !== null ) $args['event'] = $this->event->event_id;
 		$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
+		
 		$this->bookings = BookingCollection::get($args);
 		return $this->bookings;
 	}
@@ -324,7 +326,7 @@ class BookingsTable {
 						<?php if( $this->event === null ): ?>
 						<select name="scope">
 							<?php
-							foreach ( EM_Object::get_scopes() as $key => $value ) {
+							foreach ( \EM_Object::get_scopes() as $key => $value ) {
 								$selected = "";
 								if ($key == $this->scope)
 									$selected = "selected='selected'";
@@ -359,7 +361,7 @@ class BookingsTable {
 					</div>
 					<?php 
 					if ( count($this->bookings) >= $this->limit ) {
-						$bookings_nav = Contexis\Events\Admin\Pagination::paginate( count($this->bookings), $this->limit, $this->page, array(),'#%#%','#');
+						$bookings_nav = Pagination::paginate( count($this->bookings), $this->limit, $this->page, array(),'#%#%','#');
 						echo $bookings_nav;
 					}
 					?>
@@ -516,7 +518,7 @@ class BookingsTable {
 				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$booking->get_status_icon().'</i>'.ucwords($booking->get_status()).'</span>';
 				break;
 			case 'booking_date':
-				return \Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()) . " " . \Contexis\Events\Intl\Date::get_time($booking->date()->getTimestamp());
+				return $booking->get_booking_date();
 				break;
 			case 'booking_id':
 				return $booking->booking_id;
@@ -551,12 +553,12 @@ class BookingsTable {
 				break;
 			case 'coupons':
 				return implode(', ', $booking->get_coupons());
-				if( !EM_Coupons::booking_has_coupons($booking) ) {
+				if( !\EM_Coupons::booking_has_coupons($booking) ) {
 					return '';
 					break;
 				}
 				$coupon_codes = array();
-				$coupons = EM_Coupons::booking_get_coupons($booking);
+				$coupons = \EM_Coupons::booking_get_coupons($booking);
 				foreach( $coupons as $EM_Coupon ){
 					$coupon_codes[] = $EM_Coupon->coupon_code;
 				}
@@ -566,7 +568,7 @@ class BookingsTable {
 				break;
 			case 'gateway':
 				if( !empty($booking->booking_meta['gateway']) ){
-					$gateway = EM_Gateways::get_gateway($booking->booking_meta['gateway']);
+					$gateway = \EM_Gateways::get_gateway($booking->booking_meta['gateway']);
 					$value = $gateway->title;
 				}else{
 					$value = __('None','events');

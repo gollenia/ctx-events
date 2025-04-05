@@ -21,8 +21,6 @@ use WP_Post;
  */
 class Location extends \EM_Object {
 
-	const POST_TYPE = EM_POST_TYPE_LOCATION;
-
 	var $location_id = 0;
 	var $post_id = 0;
 	var $location_parent;

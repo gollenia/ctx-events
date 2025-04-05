@@ -1,18 +1,22 @@
 <?php
 
-class EM_Speakers {
+use Contexis\Events\Interfaces\PostType;
 
-    public static function register() {
-        $instance = new self;
-        
-        add_action( 'init', array($instance, 'register_post_type') );
-		add_action( 'rest_api_init', array($instance, 'register_metadata'));
-        add_filter( 'manage_event-speaker_posts_columns', array($instance, 'set_custom_columns') );
-        add_action( 'manage_event-speaker_posts_custom_column' , array($instance, 'custom_column'), 10, 2 );
-        add_action( 'edit_form_advanced', [$instance, 'add_back_button'] );
-    }
+class SpeakerPost implements PostType {
 
-	public function register_post_type(){
+	const POST_TYPE = 'event-speaker';
+
+	public static function init() : self {
+		$instance = new self;
+		add_action('init', array($instance, 'register_post_type'));
+		add_action('init', array($instance, 'register_metadata'));
+		return $instance;
+	}
+	public static function get_slug(): string {
+		return self::POST_TYPE;
+	}
+
+	public function register_post_type() : void {
 		$args = apply_filters('em_cpt_speaker', [	
             'public' => false,
             'hierarchical' => false,
@@ -50,7 +54,7 @@ class EM_Speakers {
 		register_post_type( 'event-speaker', $args );     
     }
 
-	public function register_metadata() {
+	public function register_meta() :void {
 		
 		register_post_meta( 'event-speaker', '_email', [
 			'type' => 'string',
@@ -122,45 +126,6 @@ class EM_Speakers {
 		]);
 
 	}
-
-    public function register_custom_fields() {
-		
-	}
-    
-    public function set_custom_columns($columns) {
-        $columns['email'] = __( 'E-Mail', 'ctx-theme' );
-
-        return $columns;
-    }
-
-    public function custom_column( $column, $post_id ) {
-        if($column == "email") {
-            $email = get_post_meta( $post_id , 'email' , true );
-            
-            echo $email;
-        }
-    }
-
-	public static function get($id) {
-		if($id == 0) return false;
-		$args = array(
-			'p'         => $id, // ID of a page, post, or custom type
-			'post_type' => 'event-speaker'
-		  );
-		$query = new WP_Query($args);
-		$result = $query->get_posts();
-		if(empty($result)) return false;
-		$speaker = $result[0];
-		
-		return $speaker;
-	}
-
-    public function add_back_button( $post ) {
-        if( $post->post_type == 'event-speaker' )
-            echo "<a class='button button-primary button-large' href='edit.php?post_type=event-speaker' id='my-custom-header-link'>" . __('Back', 'ctx-theme') . "</a>";
-    }
-
-    
 }
-    
-EM_Speakers::register();
+
+SpeakerPost::init();

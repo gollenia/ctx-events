@@ -2,14 +2,15 @@
 
 use Contexis\Events\Collections\EventCollection;
 use Contexis\Events\Models\Event;
+use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\Utilities;
 
 class EM_Event_Posts_Admin{
 	public static function init(){
 		global $pagenow;
-		if( $pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == EM_POST_TYPE_EVENT ){ //only needed for events list
+		if( $pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == EventPost::POST_TYPE ){ //only needed for events list
 			if( !empty($_REQUEST['category_id']) && is_numeric($_REQUEST['category_id']) ){
-				$term = get_term_by('id', absint($_REQUEST['category_id']), EM_TAXONOMY_CATEGORY);
+				$term = get_term_by('id', absint($_REQUEST['category_id']), EventPost::CATEGORIES);
 				if( !empty($term->slug) ){
 					$_REQUEST['category_id'] = $term->slug;
 				}
@@ -17,23 +18,23 @@ class EM_Event_Posts_Admin{
 			//admin warnings
             add_action('admin_notices', 'EM_Event_Posts_Admin::admin_notices');
 			//hide some cols by default:
-			$screen = 'edit-'.EM_POST_TYPE_EVENT;
+			$screen = 'edit-'.EventPost::POST_TYPE;
 			$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
 			if( $hidden === false ){
 				$hidden = array('event-id');
 				update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
 			}
 			//deal with actions
-			$row_action_type = is_post_type_hierarchical( EM_POST_TYPE_EVENT ) ? 'page_row_actions' : 'post_row_actions';
+			$row_action_type = is_post_type_hierarchical( EventPost::POST_TYPE ) ? 'page_row_actions' : 'post_row_actions';
 			add_filter($row_action_type, array('EM_Event_Posts_Admin','row_actions'),10,2);
 			add_action('admin_head', array('EM_Event_Posts_Admin','admin_head'));
 		}
 		//collumns
-		add_filter('manage_'.EM_POST_TYPE_EVENT.'_posts_columns' , array('EM_Event_Posts_Admin','columns_add'));
-		add_action('manage_'.EM_POST_TYPE_EVENT.'_posts_custom_column' , array('EM_Event_Posts_Admin','columns_output'),10,2 );
-		add_filter('manage_edit-'.EM_POST_TYPE_EVENT.'_sortable_columns', array('EM_Event_Posts_Admin','sortable_columns') );
+		add_filter('manage_'.EventPost::POST_TYPE.'_posts_columns' , array('EM_Event_Posts_Admin','columns_add'));
+		add_action('manage_'.EventPost::POST_TYPE.'_posts_custom_column' , array('EM_Event_Posts_Admin','columns_output'),10,2 );
+		add_filter('manage_edit-'.EventPost::POST_TYPE.'_sortable_columns', array('EM_Event_Posts_Admin','sortable_columns') );
 		//clean up the views in the admin selection area - WIP
-		//add_filter('views_edit-'.EM_POST_TYPE_EVENT, array('EM_Event_Posts_Admin','restrict_views'),10,2);
+		//add_filter('views_edit-'.EventPost::POST_TYPE, array('EM_Event_Posts_Admin','restrict_views'),10,2);
 		//add_filter('views_edit-event-recurring', array('EM_Event_Posts_Admin','restrict_views'),10,2);
 		//add filters to event post list tables
 		add_action('restrict_manage_posts', array('EM_Event_Posts_Admin','restrict_manage_posts'));
@@ -89,7 +90,7 @@ class EM_Event_Posts_Admin{
 		global $wp_query;
 		//TODO alter views of locations, events and recurrences, specifically find a good way to alter the wp_count_posts method to force user owned posts only
 		$post_type = get_current_screen()->post_type;
-		if( in_array($post_type, array(EM_POST_TYPE_EVENT, 'event-recurring')) ){
+		if( in_array($post_type, array(EventPost::POST_TYPE, 'event-recurring')) ){
 			//get counts for future events
 			$num_posts = wp_count_posts( $post_type, 'readable' );
 			//prepare to alter cache if neccessary
@@ -144,9 +145,9 @@ class EM_Event_Posts_Admin{
 			
 			//Categories
 			$selected = !empty($_GET['event-categories']) ? $_GET['event-categories'] : 0;
-			wp_dropdown_categories(array( 'hide_empty' => 1, 'name' => EM_TAXONOMY_CATEGORY,
-							'hierarchical' => true, 'orderby'=>'name', 'id' => EM_TAXONOMY_CATEGORY,
-							'taxonomy' => EM_TAXONOMY_CATEGORY, 'selected' => $selected,
+			wp_dropdown_categories(array( 'hide_empty' => 1, 'name' => EventPost::CATEGORIES,
+							'hierarchical' => true, 'orderby'=>'name', 'id' => EventPost::CATEGORIES,
+							'taxonomy' => EventPost::CATEGORIES, 'selected' => $selected,
 							'show_option_all' => __('View all categories', 'events')));
 		
             if( !empty($_REQUEST['author']) ){
@@ -216,7 +217,6 @@ class EM_Event_Posts_Admin{
 				}
 				break;
 			case 'date-time':
-				
 				echo \Contexis\Events\Intl\Date::get_date($event->start()->getTimestamp(), $event->end()->getTimestamp());;
 				echo "<br />";
 				if(!$event->event_all_day){
@@ -249,6 +249,7 @@ class EM_Event_Posts_Admin{
 				break;
 			
 			case 'bookingdate':
+				if(!$event->event_rsvp) break;
 				$start = $event->get_rsvp_start();
 				$end = $event->get_rsvp_end();
 				if(!$start || !$end){
@@ -309,7 +310,7 @@ class EM_Event_Posts_Admin{
 	}
 	
 	public static function row_actions($actions, $post){
-		if($post->post_type == EM_POST_TYPE_EVENT){
+		if($post->post_type == EventPost::POST_TYPE){
 			$event = Event::find_by_post($post);
 			unset($actions['inline hide-if-no-js']);
 			unset($actions['edit']);
@@ -345,7 +346,7 @@ class EM_Event_Recurring_Posts_Admin{
 			add_action('admin_notices',array('EM_Event_Recurring_Posts_Admin','admin_notices'));
 			add_action('admin_head', array('EM_Event_Recurring_Posts_Admin','admin_head'));
 			//actions
-			$row_action_type = is_post_type_hierarchical( EM_POST_TYPE_EVENT ) ? 'page_row_actions' : 'post_row_actions';
+			$row_action_type = is_post_type_hierarchical( EventPost::POST_TYPE ) ? 'page_row_actions' : 'post_row_actions';
 			add_filter($row_action_type, array('EM_Event_Recurring_Posts_Admin','row_actions'),10,2);
 		}
 		//collumns
