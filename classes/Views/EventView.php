@@ -205,14 +205,12 @@ class EventView {
 					break;
 				case '#_EDITEVENTURL':
 				case '#_EDITEVENTLINK':
-					if( $this->event->can_manage('edit_events','edit_others_events') ){
-						$link = esc_url($this->event->get_edit_url());
-						if( $result == '#_EDITEVENTLINK'){
-							$replace = '<a href="'.$link.'">'.esc_html(sprintf(__('Edit Event','events'))).'</a>';
-						}else{
-							$replace = $link;
-						}
-					}	 
+					$link = esc_url($this->event->get_edit_url());
+					if( $result == '#_EDITEVENTLINK'){
+						$replace = '<a href="'.$link.'">'.esc_html(sprintf(__('Edit Event','events'))).'</a>';
+					}else{
+						$replace = $link;
+					}
 					break;
 				case '#_AVAILABLESPACES':
 					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_bookings()->get_available_spaces() : "0";
@@ -236,13 +234,11 @@ class EventView {
 					break;
 				case '#_BOOKINGSURL':
 				case '#_BOOKINGSLINK':
-					if( $this->event->can_manage('manage_bookings','manage_others_bookings') ){
-						$bookings_link = esc_url($this->event->get_bookings_url());
-						if($result == '#_BOOKINGSLINK'){
-							$replace = '<a href="'.$bookings_link.'" title="'.esc_attr($this->event->event_name).'">'.esc_html($this->event->event_name).'</a>';
-						}else{
-							$replace = $bookings_link;	
-						}
+					$bookings_link = esc_url($this->event->get_bookings_url());
+					if($result == '#_BOOKINGSLINK'){
+						$replace = '<a href="'.$bookings_link.'" title="'.esc_attr($this->event->event_name).'">'.esc_html($this->event->event_name).'</a>';
+					}else{
+						$replace = $bookings_link;	
 					}
 					break;
 				case '#_BOOKINGSCUTOFF':

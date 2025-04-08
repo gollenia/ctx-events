@@ -4,7 +4,11 @@
 * You can override the default display settings pages by copying this file to yourthemefolder/plugins/events-manage/placeholders/ and modifying it however you need.
 * For more information, see http://wp-events-plugin.com/documentation/using-template-files/
 */
-/* @var $booking booking */ ?>
+/* @var $booking booking */
+
+use Contexis\Events\Intl\Price;
+
+ ?>
 <?php foreach($booking->get_tickets_bookings() as $ticket_booking):  ?>
 
 <?php echo $ticket_booking->get_ticket()->ticket_name; ?>
@@ -12,7 +16,7 @@
 --------------------------------------
 <?php _e('Quantity','events'); ?>: <?php echo $ticket_booking->get_spaces(); ?>
 
-<?php _e('Price','events'); ?>: <?php echo $ticket_booking->format_price($ticket_booking->get_price()); ?>
+<?php _e('Price','events'); ?>: <?php echo Price::format($ticket_booking->get_price()); ?>
 
 <?php endforeach; ?>
 

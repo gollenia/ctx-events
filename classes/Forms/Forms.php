@@ -50,7 +50,7 @@ class EM_Form extends EM_Object {
 		foreach($this->form_fields as $field){
 			
 		    $fieldid = $field['fieldid'];
-			$value = '';
+		
 			if( !isset($_REQUEST[$fieldid]) ){ //for things like checkboxes when editing
 			    $_REQUEST[$fieldid] = '';
 			    if($field['type'] == 'checkbox') $_REQUEST[$fieldid] = '0'; //force save a 0 rather than a blank so we can check it
@@ -332,117 +332,6 @@ class EM_Form extends EM_Object {
 		return apply_filters('emp_form_validate_field',$result, $field, $value, $this);
 	}
 
-	function output_field_input($field, $post=true){
-		
-		ob_start();
-		$default = '';
-		$default_html = '';
-		if($post === true && !empty($_REQUEST[$field['fieldid']])) {
-			$default = is_array($_REQUEST[$field['fieldid']]) ? $_REQUEST[$field['fieldid']]:esc_attr($_REQUEST[$field['fieldid']]);
-			$default_html = is_array($_REQUEST[$field['fieldid']]) ? $_REQUEST[$field['fieldid']] : esc_attr($_REQUEST[$field['fieldid']]);
-		}elseif( $post !== true && !empty($post) ){
-			$default = is_array($post) ? $post:esc_attr($post);
-			$default_html = is_array($post) ? $post : esc_attr($post);
-		}
-		
-		$field['name'] = !empty($field['name']) ? $field['name'] : $field['fieldid'];
-		$required = array_key_exists('required', $field) && $field['required'];
-		switch($field['type']){
-			case 'html':
-			    echo $field['options_html_content'];
-			    break;			
-			case 'text':
-				
-				if ($required) {
-					$error = $field['options_text_error'] ?? "";
-					$pattern = $field['options_text_regex'] ?? "";
-					echo "<input type='text' class='regular-text' data-text-error='{$error}' name='{$field['name']}' id='{$field['fieldid']}'  value='{$default}' ";
-					echo (' required ');
-					echo $pattern ? "pattern='{$pattern}'" : "";
-					echo " />";
-				} else {
-					echo '<input type="text" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '" ' . ' />';
-				}
-				break;	
-			case 'email':
-				echo '<input type="email" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '" ' . ($required ? "required " : "") . ' />';
-				break;	
-			case 'phone': 
-				echo '<input type="tel" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '" ' . ($required ? "required " : "") . ' />';
-				break;
-			case 'textarea':
-				$size = 'rows="2" cols="20"';				
-				echo '<textarea name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text code" ' . $size . ' ' . ($required ? " required" : "") . '>' . $default_html . '</textarea>';
-				break;
-			case 'checkbox':
-				$checked = ($default && $default != 'n/a');
-				echo '<label><input type="checkbox" name="' . $field['name'] . '" id="' . uniqid() . '" value="1" ' . ($checked ? 'checked="checked"' : '') . ($required ? "required " : "") . '/>' . $field['help'] . '</label>';
-				break;
-			case 'radio':
-				echo "<fieldset><legend class='screen-reader-text'></legend>";
-				$values = explode("\r\n",$field['options_selection_values']);
-				foreach($field['options'] as $options){
-					echo '<label class="radio-inline">';
-					echo '<input type="radio" name="' . $field['name'] . '" class="' . $field['fieldid'] . '" value="' . esc_attr($options) . '"' . (($options == $default) ? 'checked="checked"' : '') . '/>';
-					echo  '<span>' . $options . '</span></label><br>';
-				}
-				echo "</fieldset>";
-				break;
-			case 'select':
-			
-				$values = $field['options'];
-				$multi = $field['type'] == 'multiselect';
-				if($multi && !is_array($default)) $default = (empty($default)) ? []:array($default);
-				
-				echo '<select name="' . $field['name'] . (($multi) ? '[]':'') . '" class="' . $field['fieldid'] . '" ' . ($required ? "required " : "") . '>';
-
-				if( !$field['options_select_default'] ){
-					
-					echo '<option value="">' . esc_html($field['options_select_default_text']) . '</option>';
-					
-				}
-					
-				foreach($values as $key => $value) {
-					$value = trim($value);
-					echo '<option ' . (( ($key == 1 && $field['options_select_default']) || ($multi && in_array($value, $default)) || ($value == $default) ) ? 'selected="selected"' : '' ) . '>' . esc_html($value) . '</option>';
-				}
-				
-				echo '</select>';
-				break;
-			case 'country':
-				$countries = [
-					"de_DE" => "DE",
-					"de_AT" => "AT",
-					"de_CH" => "CH",
-					"fr_FR" => "CH"
-				];
-				echo '<select name="' . $field['name'] . '" class="' . $field['fieldid'] . '" ' . ($required ? "required " : "") . '>';
-				foreach(\Contexis\Events\Intl\Countries::get(__('none selected','events')) as $country_key => $country_name) {
-						echo '<option text="' . '" value="' . $country_key .'" ' . (($country_key == $countries[get_locale()]) ? 'selected="selected"':'') . '>' . $country_name . '</option>';
-				}
-				echo '</select>';
-				
-				break;
-			case 'date':
-				echo '<input type="date" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '" ' . ($required ? "required " : "") . ($field['max'] ? " max='" . $field['max'] . "'" : "") . ($field['min'] ? " min='" . $field['min'] . "'" : "") . ' />';
-    			break;				
-			default:
-				if( array_key_exists($field['type'], $this->user_fields) && self::show_reg_fields() ){
-					//registration fields
-				    if( $field['type'] != 'user_login' || BookingCollection::$force_registration || !is_user_logged_in() ){
-						if ($field['name'] == "user_email") {
-							echo '<input type="email" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '"' . ($required ? " required " : " ") . ' />';							
-						} else {					
-							echo '<input type="text" name="' . $field['name'] . '" id="' . $field['fieldid'] . '" class="regular-text" value="' . $default . '" ' . ($required ? ' required ' : "") . ' />';
-						}
-					}else{
-						echo $default;
-					}
-				}
-				break;
-		}	
-		return apply_filters('emp_forms_output_field_input', ob_get_clean(), $this, $field, $post);	
-	}
 	
 	/*
 	 * --------------------------------------------------------

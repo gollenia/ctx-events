@@ -1,6 +1,5 @@
 <?php
 
-use Contexis\Events\Collections\LocationCollection;
 use \Contexis\Events\Options;
 use Contexis\Events\PostTypes\EventPost;
 ?>

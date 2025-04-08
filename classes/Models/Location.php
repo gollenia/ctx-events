@@ -163,7 +163,7 @@ class Location extends \EM_Object {
 		do_action('em_location_get_post_pre', $this);
 		$this->location_name = ( !empty($_POST['location_name']) ) ? sanitize_post_field('post_title', $_POST['location_name'], $this->post_id, 'db'):'';
 		$this->post_content = "";
-		$this->get_post_meta(false);
+		$this->get_post_meta();
 		
 		$result = $validate ? $this->validate():true; //validate both post and meta, otherwise return true
 		//$this->compat_keys();
@@ -207,10 +207,7 @@ class Location extends \EM_Object {
 	 * @return boolean
 	 */
 	function location_exists() : bool {
-		global $wpdb;
-		if(empty($this->location_id)) return false;
-		if( !empty($this->orphaned_location) && !empty($this->post_id) ) return true;
-		return $wpdb->get_var('SELECT post_id FROM '.EM_LOCATIONS_TABLE." WHERE location_id={$this->location_id}") == $this->post_id;
+		return true;
 	}
 	
 	function is_published(){
@@ -220,12 +217,6 @@ class Location extends \EM_Object {
 	function has_events( $status = 1 ){	
 		$events_count = EventCollection::find(array('location_id' => $this->location_id, 'status' => $status))->count();
 		return apply_filters('em_location_has_events', $events_count > 0, $this);
-	}
-	
-	
-	function can_manage( $owner_capability = false, $admin_capability = false, $user_to_check = false ){
-		$return = parent::can_manage($owner_capability, $admin_capability, $user_to_check);
-		return apply_filters('em_location_can_manage', $return, $this, $owner_capability, $admin_capability, $user_to_check);
 	}
 	
 	function get_permalink(){	
@@ -246,16 +237,12 @@ class Location extends \EM_Object {
 	}
 	
 	function get_edit_url(){
-		if( !$this->can_manage('edit_locations','edit_others_locations') ) return "";
+		if( current_user_can('edit_posts') ) return "";
 		return apply_filters('em_location_get_edit_url', admin_url()."post.php?post={$this->post_id}&action=edit", $this);
 	}
 	
 	function output($format, $target="html") {
 		LocationView::render($this, $format, $target);
-	}
-
-	public function get_owner() {
-		return $this->location_owner;
 	}
 	
 }

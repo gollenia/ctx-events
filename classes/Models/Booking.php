@@ -3,6 +3,7 @@
 namespace Contexis\Events\Model;
 
 use Contexis\Events\Collections\TicketCollection;
+use Contexis\Events\Intl\Price;
 use Contexis\Events\Tickets\TicketsBookings;
 use Contexis\Events\Models\Event;
 use Contexis\Events\PostTypes\EventPost;
@@ -24,14 +25,15 @@ class Booking extends \EM_Object{
 	const CANCELLED = 3;
 	const AWAITING_ONLINE_PAYMENT = 4;
 	const AWAITING_PAYMENT = 5;
+	const DELETED = 9;
 	
-	public $booking_id;
-	public $event_id = 0;
-	public ?float $booking_price = null;
-	public float $booking_donation = 0;
-	public int $booking_spaces;
+	public int $booking_id = 0;
+	public int $event_id = 0;
+	public float $booking_price = 0.0;
+	public float $booking_donation = 0.0;
+	public int $booking_spaces = 0;
 	public string $booking_comment = "";
-	public $booking_status = false;
+	public int $booking_status = self::PENDING;
 	public array $booking_meta = []; 
 	public string $booking_mail;
 
@@ -47,9 +49,9 @@ class Booking extends \EM_Object{
 		'booking_meta' => array('name'=>'meta','type'=>'%s')
 	);
 
-	var $notes;
-
+	public array $notes;
 	public ?DateTime $booking_date = null;
+	
 	protected $person;
 
 	public array $required_fields = [ 'booking_id', 'event_id', 'booking_spaces' ];
@@ -70,7 +72,6 @@ class Booking extends \EM_Object{
 
 	function __construct( $booking_data = false ) 
 	{
-		$this->set_status_array();
 		global $wpdb;
 		if($booking_data !== false) {
 			$booking = array();
@@ -89,40 +90,56 @@ class Booking extends \EM_Object{
 		do_action('em_booking', $this, $booking_data);
 	}
 
-	private function set_status_array() : void 
+	public static function get_status_array() : array 
 	{
-		$this->status_array = array(
+		return array(
 			self::PENDING => __('Pending','events'),
 			self::APPROVED => __('Approved','events'),
 			self::REJECTED => __('Rejected','events'),
 			self::CANCELLED => __('Cancelled','events'),
 			self::AWAITING_ONLINE_PAYMENT => __('Awaiting Online Payment','events'),
-			self::AWAITING_PAYMENT => __('Awaiting Payment','events')
+			self::AWAITING_PAYMENT => __('Awaiting Payment','events'),
+			self::DELETED => __('Deleted','events'),
 		);
+	}
+
+	public static function get_status_label( int $status ) : string 
+	{
+		$statuses = self::get_status_array();
+		return isset($statuses[$status]) ? $statuses[$status] : '';
 	}
 
 	//@TODO: user_mail, booking_mail, email...!?
 	function __get( string $var ) : mixed
 	{
 		switch ($var) {
-			case 'timestamp':
-				return $this->date() === false ? 0 : $this->date()->getTimestampWithOffset();
-			case 'language':
-				return !empty($this->booking_meta['lang']) ? $this->booking_meta['lang'] : null;
+		
 			case 'booking_status':
 				return ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1 : $this->booking_status;
-			case 'first_name':
-				return $this->booking_meta['registration']['first_name'] ?? "";
-			case 'last_name':
-				return $this->booking_meta['registration']['last_name'] ?? "";
-			case 'email':
-				return $this->booking_meta['registration']['user_email'] ?? "";
-			case 'full_name':
-				return $this->first_name . ' ' . $this->last_name;
 			default:
 				return null;
 		}
 	    
+	}
+
+	public function get_first_name() : string 
+	{
+		return $this->booking_meta['registration']['first_name'] ?? "";
+	}
+
+	public function get_last_name() : string 
+	{
+		return $this->booking_meta['registration']['last_name'] ?? "";
+	}
+
+	public function get_email() : string 
+	{
+		return $this->booking_meta['registration']['user_email'] ?? "";
+	}
+
+	public function get_full_name() : string 
+	{
+		return $this->get_first_name() . ' ' . $this->get_last_name();
 	}
 	
 	public function __set( string $property, mixed $value ) : void 
@@ -201,7 +218,7 @@ class Booking extends \EM_Object{
 		$table = EM_BOOKINGS_TABLE;
 		do_action('em_booking_save_pre', $this);
 		
-		if (!$this->can_manage()) {
+		if (current_user_can('edit_published_posts')) {
 			$this->feedback_message = __('Forbidden!', 'events');
 			$this->errors[] = sprintf(__('You cannot manage this %s.', 'events'), __('Booking', 'events'));
 			return apply_filters('em_booking_save', false, $this, false);
@@ -427,7 +444,7 @@ class Booking extends \EM_Object{
 				$this->errors[] = get_option('dbem_booking_feedback_full');
 			}
 		}
-		//can we book this amount of spaces at once?
+
 		if( $this->get_event()->event_rsvp_spaces > 0 && $this->get_spaces() > $this->get_event()->event_rsvp_spaces ){
 			$result = false;
 			$this->errors[] = __('You cannot book more spaces than are available.','events');
@@ -444,8 +461,8 @@ class Booking extends \EM_Object{
 		return [
 			'date' => $this->get_booking_date(),
 			'id' => $this->booking_id,
-			'status' => $this->status,
-			'status_array' => $this->status_array,
+			'status' => $this->booking_status,
+			'status_array' => self::get_status_array(),
 			'price' => $this->get_price(),
 			'donation' => $this->booking_donation,
 			'paid' => $this->get_price_summary_array(),
@@ -553,8 +570,8 @@ class Booking extends \EM_Object{
 			$description = !empty($adjustment['desc']) ? $adjustment['desc'] : '';
 			$adjustment_summary_item = array('name' => $adjustment['name'], 'desc' => $description, 'adjustment'=>'0', 'amount_adjusted'=>0);
 			$adjustment_summary_item['amount_adjusted'] = $adjustment['type'] == '%' ? round($price * ($adjustment['amount']/100),2) : round($adjustment['amount'],2);
-			$adjustment_summary_item['adjustment'] = $adjustment['type'] == '%' ? number_format($adjustment['amount'],2).'%' : $this->format_price($adjustment['amount']);
-			$adjustment_summary_item['amount'] = $this->format_price($adjustment_summary_item['amount_adjusted']);	
+			$adjustment_summary_item['adjustment'] = $adjustment['type'] == '%' ? number_format($adjustment['amount'],2).'%' : Price::format($adjustment['amount']);
+			$adjustment_summary_item['amount'] = Price::format($adjustment_summary_item['amount_adjusted']);	
 			$adjustment_summary[] = $adjustment_summary_item;
 		}
 		
@@ -594,7 +611,7 @@ class Booking extends \EM_Object{
 	 */
 	function get_event() : Event {
 		if (!isset($this->event) || !($this->event instanceof Event) || $this->event->event_id !== $this->event_id) {
-			$this->event = Event::find_by_event_id($this->event_id);
+			$this->event = Event::find_by_id($this->event_id);
 		}
 		return apply_filters('em_booking_get_event', $this->event, $this);
 	}
@@ -627,29 +644,33 @@ class Booking extends \EM_Object{
 	function get_status() : string 
 	{
 		$status = ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1:$this->booking_status;
-		return apply_filters('em_booking_get_status', $this->status_array[$status], $this);
+		return apply_filters('em_booking_get_status', self::get_status_label($status), $this);
 	}
 	
 	function delete() : bool 
 	{
 		global $wpdb;
 		$result = false;
-		if( $this->can_manage('manage_bookings','manage_others_bookings') ){
-			$sql = $wpdb->prepare("DELETE FROM ". EM_BOOKINGS_TABLE . " WHERE booking_id=%d", $this->booking_id);
-			$result = $wpdb->query( $sql );
-			if( $result !== false ){
-				//delete the tickets too
-				$this->get_tickets_bookings()->delete();
-				$this->previous_status = $this->booking_status;
-				$this->booking_status = false;
-				$this->feedback_message = sprintf(__('%s deleted', 'events'), __('Booking','events'));
-				do_action('em_booking_deleted', $this);
-			}else{
-				$this->errors[] = sprintf(__('%s could not be deleted', 'events'), __('Booking','events'));
-			}
+		if(!current_user_can('editor')) {
+			$this->errors[] = __('You don\'t have the necessary rights to delete bookings', 'events');
+			return false;
 		}
+			
+		$sql = $wpdb->prepare("DELETE FROM ". EM_BOOKINGS_TABLE . " WHERE booking_id=%d", $this->booking_id);
+		
+		$result = $wpdb->query( $sql );
+
+		if(!$result){
+			$this->errors[] = sprintf(__('Booking could not be deleted', 'events'), __('Booking','events'));
+			return false;
+		}
+		
+		$this->get_tickets_bookings()->delete();
+		$this->booking_status = self::DELETED;
+		$this->feedback_message = sprintf(__('Booking deleted', 'events'));
+		
 		do_action('em_bookings_deleted', $result, array($this->booking_id), $this);
-		return apply_filters('em_booking_delete',( $result !== false ), $this);
+		return apply_filters('em_booking_delete', ( $result !== false ), $this);
 	}
 	
 	function cancel($email = true) : bool 
@@ -679,8 +700,8 @@ class Booking extends \EM_Object{
 	function set_status(int $status, bool $email = true, $ignore_spaces = false) : bool 
 	{
 		global $wpdb;
-		$action_string = strtolower($this->status_array[$status]); 
-		//if we're approving we can't approve a booking if spaces are full, so check before it's approved.
+		$action_string = strtolower(self::get_status_label($status)); 
+		
 		if(!$ignore_spaces && $status == 1){
 			if( !$this->is_reserved() && $this->get_event()->get_bookings()->get_available_spaces() < $this->get_spaces() && !get_option('dbem_bookings_approval_overbooking') ){
 				$this->feedback_message = sprintf(__('Not approved, spaces full.','events'), $action_string);
@@ -787,7 +808,7 @@ class Booking extends \EM_Object{
 					$replace = $this->booking_id;
 					break;
 				case '#_BOOKINGNAME':
-					$replace = $this->full_name;
+					$replace = $this->get_full_name;
 					break;
 				case '#_BOOKINGEMAIL':
 					$replace = $this->booking_meta['registration']['user_email'];
@@ -804,7 +825,7 @@ class Booking extends \EM_Object{
 				case '#_BOOKINGCOMMENT':
 					$replace = $this->booking_comment;
 				case '#_BOOKINGPRICE':
-					$replace = $this->format_price($this->get_price());
+					$replace = Price::format($this->get_price());
 					break;
 				case '#_BOOKINGTICKETS':
 					ob_start();
@@ -871,6 +892,26 @@ class Booking extends \EM_Object{
 		return apply_filters('em_booking_output', $output_string, $this, $format, $target);	
 	}
 	
+	function email_send($subject, $body, $email, $attachments = array()){
+		
+		global $EM_Mailer;
+		if( !empty($subject) ){
+			if( !is_object($EM_Mailer) ){
+				$EM_Mailer = new \EM_Mailer();
+			}
+			if( !$EM_Mailer->send($subject,$body,$email, $attachments) ){
+				if( is_array($EM_Mailer->errors) ){
+					foreach($EM_Mailer->errors as $error){
+						$this->errors[] = $error;
+					}
+				}else{
+					$this->errors[] = $EM_Mailer->errors;
+				}
+				return false;
+			}
+		}
+		return true;
+	}
 
 	function email( bool $email_admin = true, bool $force_resend = false, bool $email_attendee = true ) : bool
 	{
@@ -974,13 +1015,6 @@ class Booking extends \EM_Object{
 	    		break;
 	    }
 	    return apply_filters('em_booking_email_messages', $msg, $this);
-	}
-	
-	/**
-	 * Can the user manage this event? 
-	 */
-	function can_manage( $owner_capability = false, $admin_capability = false, $user_to_check = false ){
-		return $this->get_event()->can_manage('manage_bookings','manage_others_bookings') || empty($this->booking_id) || !empty($this->manage_override);
 	}
 
 	static function booking_enabled() : array

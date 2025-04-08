@@ -48,7 +48,7 @@ class EM_Attendees_Form {
 	public static function get_form($event = false){
 		if( empty(self::$form) || (!empty($event) && (empty(self::$form->event_id) || $event->event_id != self::$form->event_id)) ){
 
-			if(is_numeric($event)){ $event = Event::find_by_event_id($event); }
+			if(is_numeric($event)){ $event = Event::find_by_id($event); }
 			
 			self::$form_id = get_post_meta($event->post_id, '_attendee_form', true);
 
@@ -182,7 +182,7 @@ class EM_Attendees_Form {
 		//get, store and validate post data 
 		$EM_Form = self::get_form($booking->event_id);
 		if( self::$form_id > 0 ){
-			if( (empty($booking->booking_id) || (!empty($booking->booking_id) && $booking->can_manage())) ){
+			if( (empty($booking->booking_id) || (!empty($booking->booking_id))) ){
 			    $booking->booking_meta['attendees'] = array();
 				foreach ($booking->get_tickets_bookings()->tickets_bookings as $ticket_booking ){
 				    for( $i = 0; $i < $ticket_booking->ticket_booking_spaces; $i++ ){

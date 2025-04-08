@@ -4,7 +4,7 @@ use Contexis\Events\Models\Location;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
 
-class LocationAdmin{
+class LocationAdmin {
 	public static function init(){
 		global $pagenow;
 		if($pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == LocationPost::POST_TYPE ){ //only needed if editing post

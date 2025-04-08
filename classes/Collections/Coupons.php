@@ -10,9 +10,7 @@ if( is_admin() ){
 	require_once('CouponsAdmin.php');
 }
 class EM_Coupons extends EM_Object {
-    
-    static public $can_manage = 'manage_others_bookings';
-    
+     
 	public static function init(){
 	    
 		//add field to booking form and ajax
@@ -251,7 +249,7 @@ class EM_Coupons extends EM_Object {
 
 		if(!$event_id) return array_merge($result, ["message" => __('No event given','events')]);
 	
-		$event = Event::find_by_event_id($event_id);
+		$event = Event::find_by_id($event_id);
 		$EM_Coupon = self::event_get_coupon($request->get_param('code'), $event);
 
 		if (empty($event->event_id) || !is_object($EM_Coupon)) return array_merge($result, ["message" => __('Coupon Invalid','events')]);
@@ -345,7 +343,7 @@ class EM_Coupons extends EM_Object {
 					$booking->get_event()->event_name,
 					\Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()),
 					$booking->get_price(),
-					$booking->full_name,
+					$booking->get_full_name,
 					$booking->booking_mail,
 					$booking->get_spaces(),
 					$coupon->coupon_name,
@@ -513,7 +511,7 @@ class EM_Coupons extends EM_Object {
 	public static function coupon_check_ajax(){
 		$result = array('result'=>false, 'message'=> __('Coupon Not Found', 'events'));
 		if(!empty($_REQUEST['event_id'])){
-			$event = Event::find_by_event_id($_REQUEST['event_id']);
+			$event = Event::find_by_id($_REQUEST['event_id']);
 			$EM_Coupon = self::event_get_coupon($_REQUEST['coupon_code'], $event);
 			if( !empty($event->event_id) && is_object($EM_Coupon) ){
 				if( $EM_Coupon->is_valid() ){
@@ -621,83 +619,96 @@ class EM_Coupons extends EM_Object {
 		return implode(' ', array_map(fn($c) => $c->coupon_code, self::booking_get_coupons($booking)));
 	}
 
-	/* Overrides EM_Object method to apply a filter to result
-	 * @see wp-content/plugins/events/classes/EM_Object#build_sql_conditions()
-	 */
-	public static function build_sql_conditions( $args = array() ){
-		$conditions = array();
-		//search specific event
-		if( !empty($args['code']) ){
-            global $wpdb;
-            $conditions['code'] = $wpdb->prepare("coupon_code = '%s'", array($args['code']));
-        }
-		if( !empty($args['event']) && is_numeric($args['event']) ){ //if in MB mode, there are not event-specific coupons atm
-			$conditions['event'] = "coupon_id IN (SELECT meta_value FROM ".EM_META_TABLE." WHERE object_id='{$args['event']}' AND meta_key='event-coupon')";
-			//search event-wide coupons by default
-			if( !empty($args['eventwide']) ){
-				$event = Event::find_by_event_id($args['event']);
-				if( !empty($event->event_id) ){
-					if( $args['eventwide'] === 1 || $args['eventwide'] === true ){
-						//in this case, we explicitly want eventwide coupons
-						$conditions['eventwide'] = "coupon_eventwide=1 AND coupon_owner='{$event->event_owner}'";
-					}else{
-						//if not explicitly requested in args, then we just search for eventwide according to event owner
-						$conditions['event'] .= " OR (coupon_eventwide=1 AND coupon_owner='{$event->event_owner}')";
+	public static function build_sql_conditions(array $args): array {
+		global $wpdb;
+		$conditions = [];
+	
+		// 1. Code
+		if (!empty($args['code'])) {
+			$conditions['code'] = $wpdb->prepare("coupon_code = %s", $args['code']);
+		}
+	
+		// 2. Event (direkt oder über Metatabelle)
+		if (!empty($args['event']) && is_numeric($args['event'])) {
+			$event_id = (int) $args['event'];
+			$conditions['event'] = "coupon_id IN (
+				SELECT meta_value FROM " . EM_META_TABLE . "
+				WHERE object_id = $event_id AND meta_key = 'event-coupon'
+			)";
+	
+			if (!empty($args['eventwide'])) {
+				$event = Event::find_by_id($event_id);
+				if (!empty($event->event_id)) {
+					$event_owner = (int) $event->event_owner;
+					if ($args['eventwide'] === true || $args['eventwide'] === 1) {
+						$conditions['eventwide'] = "coupon_eventwide = 1 AND coupon_owner = $event_owner";
+					} else {
+						$conditions['event'] .= " OR (coupon_eventwide = 1 AND coupon_owner = $event_owner)";
 					}
 				}
 			}
-			
-			$conditions['event'] = '('.$conditions['event'].')';
-		}else{
-			//blog ownership
-
-    			//owner lookup
-    			if( !empty($args['owner']) && is_numeric($args['owner'])){
-    				$conditions['owner'] = "coupon_owner=".$args['owner'];
-	    			//when an owner is set, event-wide and sitewide must be explicitly set to filter in/out only these types of coupons
-	    			if( $args['eventwide'] === 1 || $args['eventwide'] === true ){
-						//we explicitly want to check eventwide coupons, not along with owners because by default it'd include eventwide coupons in simple owner searches
-						$conditions['owner'] = '('.$conditions['owner']." AND coupon_eventwide=1)";
-	    			}elseif( !$args['eventwide'] ){
-						//only need to include eventwide searches if 0, since event-wide searches would also appear if owner is set to 1
-						$conditions['eventwide'] = "coupon_eventwide=0";
-					}
-	    			
-    			}else{
-	    			//no owner, so we're looking for either event/site wide coupons
-	    			if( $args['eventwide'] === 1 || $args['eventwide'] === true ){
-						$conditions['eventwide'] = "coupon_eventwide=1";
-	    			}elseif( !$args['eventwide'] ){
-						//only need to include eventwide searches if 0, since event-wide searches would also appear if owner is set to 1
-						$conditions['eventwide'] = "coupon_eventwide=0";
-					}
+	
+			$conditions['event'] = '(' . $conditions['event'] . ')';
+	
+		} else {
+			// 3. Owner ohne Event
+			if (!empty($args['owner']) && is_numeric($args['owner'])) {
+				$owner = (int) $args['owner'];
+				$conditions['owner'] = "coupon_owner = $owner";
+	
+				if ($args['eventwide'] === true || $args['eventwide'] === 1) {
+					$conditions['owner'] = "($conditions[owner] AND coupon_eventwide = 1)";
+				} elseif ($args['eventwide'] === false || $args['eventwide'] === 0) {
+					$conditions['eventwide'] = "coupon_eventwide = 0";
 				}
-			
+	
+			} else {
+				// 4. Keine owner-Angabe → nur eventwide true/false
+				if ($args['eventwide'] === true || $args['eventwide'] === 1) {
+					$conditions['eventwide'] = "coupon_eventwide = 1";
+				} elseif ($args['eventwide'] === false || $args['eventwide'] === 0) {
+					$conditions['eventwide'] = "coupon_eventwide = 0";
+				}
+			}
 		}
-		return apply_filters( 'em_coupons_build_sql_conditions', $conditions, $args );
+	
+		return $conditions;
 	}
 	
-	/* 
-	 * Adds custom Events search defaults
-	 * @param array $array
-	 * @return array
-	 * @uses EM_Object#get_default_search()
-	 */
-	public static function get_default_search($array_or_defaults=array(), $array = array()){
-		$defaults = array(
-			//site/event-wide lookups - a little special compared to other object condition functions on EM
-			'sitewide' => 'enabled', //can be set to true (1) or false (0) whether to exclusively search for this or not
-			'eventwide' => 'enabled', //can be set to true (1) or false (0) whether to exclusively search for this or not
-            'code' => false,
-			'ids'=>false
-		); //also accepts event, blog, array
-		//sort out whether defaults were supplied or just the array of search values
-		if( empty($array) ){
-			$array = $array_or_defaults;
-		}else{
-			$defaults = array_merge($defaults, $array_or_defaults);
+	
+	public static function get_default_search($input = []) {
+		$defaults = [
+			'sitewide' => 'enabled',   // oder bool, wenn du's klarer willst
+			'eventwide' => 'enabled',
+			'code' => false,
+			'ids' => false,
+			'limit' => 10,
+			'offset' => 0,
+			'page' => 1,
+			'orderby' => ['event_start'],
+			'order' => 'ASC',
+		];
+	
+		$search = array_merge($defaults, $input);
+	
+		// Aufräumen: limit/offset/page
+		$search['limit'] = is_numeric($search['limit']) ? (int) $search['limit'] : $defaults['limit'];
+		$search['page'] = is_numeric($search['page']) ? max(1, (int) $search['page']) : 1;
+		if ($search['page'] > 1 && $search['limit'] > 0) {
+			$search['offset'] = $search['limit'] * ($search['page'] - 1);
+		} else {
+			$search['offset'] = is_numeric($search['offset']) ? (int) $search['offset'] : 0;
 		}
-		return apply_filters('em_events_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
+	
+		// order/orderby absichern
+		$search['order'] = in_array(strtoupper($search['order']), ['ASC', 'DESC']) ? strtoupper($search['order']) : 'ASC';
+		if (is_string($search['orderby'])) {
+			$search['orderby'] = array_map('trim', explode(',', $search['orderby']));
+		} elseif (!is_array($search['orderby'])) {
+			$search['orderby'] = ['event_start'];
+		}
+	
+		return $search;
 	}
 
 

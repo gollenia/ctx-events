@@ -7,6 +7,7 @@ use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Model\Booking;
 use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Ticket;
+use Contexis\Events\Utilities\EventScope;
 
 //Builds a table of bookings, still work in progress...
 // May be replaced by JS App in future
@@ -95,7 +96,7 @@ class BookingsTable {
 		$this->limit = ( !empty($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? $_REQUEST['limit'] : 20;//Default limit
 		$this->page = ( !empty($_REQUEST['pno']) && is_numeric($_REQUEST['pno']) ) ? $_REQUEST['pno']:1;
 		$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;
-		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], \EM_Object::get_scopes()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
+		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], EventScope::get_all()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
 		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->states) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
 		
 		if(empty($_REQUEST['no_save'])) {
@@ -103,7 +104,7 @@ class BookingsTable {
 		}
 
 		if( !empty($_REQUEST['event_id']) && $_REQUEST['event_id'] != 0 ){
-			$this->event = Event::find_by_event_id($_REQUEST['event_id']);
+			$this->event = Event::find_by_id($_REQUEST['event_id']);
 		}
 
 		if(empty($_REQUEST['cols'])) {
@@ -326,7 +327,7 @@ class BookingsTable {
 						<?php if( $this->event === null ): ?>
 						<select name="scope">
 							<?php
-							foreach ( \EM_Object::get_scopes() as $key => $value ) {
+							foreach ( EventScope::get_all() as $key => $value ) {
 								$selected = "";
 								if ($key == $this->scope)
 									$selected = "selected='selected'";
@@ -484,18 +485,18 @@ class BookingsTable {
 				return $booking->booking_mail;
 				break;
 			case 'user_name':
-				if( $format == 'csv' ) return $booking->full_name;
+				if( $format == 'csv' ) return $booking->get_full_name;
 				$url = $booking->get_event()->get_bookings_url();
 				$url = add_query_arg(['booking_id'=>$booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null, 'booking_email'=>$booking->user_email], $url);
-				$ret = "<strong><a class='row-title' href='$url'>" . $booking->full_name . '</a></strong>';
+				$ret = "<strong><a class='row-title' href='$url'>" . $booking->get_full_name . '</a></strong>';
 				$ret .= "<div class='row-actions'>" . implode(' | ', $this->get_booking_actions($booking)) . "</div>";
 				return $ret;
 				break;
 			case 'first_name':
-				return $booking->first_name;
+				return $booking->get_first_name();
 				break;
 			case 'last_name':
-				return $booking->last_name;
+				return $booking->get_last_name();
 				break;
 			case 'event_name':
 				return $format == 'csv' ? $booking->get_event()->event_name : '<a href="'.$booking->get_event()->get_bookings_url().'">'. esc_html($booking->get_event()->event_name) .'</a>';

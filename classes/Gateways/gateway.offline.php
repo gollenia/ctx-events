@@ -62,7 +62,7 @@ class EM_Gateway_Offline extends EM_Gateway {
 			'error' => "No IBAN available. Please add an IBAN in the offline payment gateway"
 		];
 		
-		$event = Event::find_by_event_id($booking->event_id);
+		$event = Event::find_by_id($booking->event_id);
 
 		$result['gateway'] = [
 			"purpose" => $booking->booking_id . "-" . $event->post_name . "-" . $booking->booking_meta['registration']['last_name'],
@@ -160,19 +160,19 @@ class EM_Gateway_Offline extends EM_Gateway {
 	 * @param Event $event
 	 */
 	function em_booking_form_footer($event){
-		if( $event->can_manage('manage_bookings','manage_others_bookings') ){
-			//Admin is adding a booking here, so let's show a different form here.
-			?>
-			<input type="hidden" name="gateway" value="<?php echo $this->gateway; ?>" />
-			<input type="hidden" name="manual_booking" value="<?php echo wp_create_nonce('em_manual_booking_'.$event->event_id); ?>" />
-			<p class="em-booking-gateway" id="em-booking-gateway">
-				<label><?php _e('Amount Paid','events'); ?></label>
-				<input type="text" name="payment_amount" id="em-payment-amount" value="<?php if(!empty($_REQUEST['payment_amount'])) echo esc_attr($_REQUEST['payment_amount']); ?>">
-				<?php _e('Fully Paid','events'); ?> <input type="checkbox" name="payment_full" id="em-payment-full" value="1"><br />
-				<em><?php _e('If you check this as fully paid, and leave the amount paid blank, it will be assumed the full payment has been made.' ,'events'); ?></em>
-			</p>
-			<?php
-		}
+		if(!current_user_can('edit_published_posts')) return;
+		
+		?>
+		<input type="hidden" name="gateway" value="<?php echo $this->gateway; ?>" />
+		<input type="hidden" name="manual_booking" value="<?php echo wp_create_nonce('em_manual_booking_'.$event->event_id); ?>" />
+		<p class="em-booking-gateway" id="em-booking-gateway">
+			<label><?php _e('Amount Paid','events'); ?></label>
+			<input type="text" name="payment_amount" id="em-payment-amount" value="<?php if(!empty($_REQUEST['payment_amount'])) echo esc_attr($_REQUEST['payment_amount']); ?>">
+			<?php _e('Fully Paid','events'); ?> <input type="checkbox" name="payment_full" id="em-payment-full" value="1"><br />
+			<em><?php _e('If you check this as fully paid, and leave the amount paid blank, it will be assumed the full payment has been made.' ,'events'); ?></em>
+		</p>
+		<?php
+		
 		return;
 	}
 	

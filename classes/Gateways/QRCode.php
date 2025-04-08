@@ -46,7 +46,7 @@ class EM_QRCode {
 		if($format != 'png' && $format != 'svg') $format = 'svg';
 		
 		$booking = Booking::get_by_id(absint($_REQUEST['booking_id']));
-		$event = Event::find_by_event_id($booking->event_id); 
+		$event = Event::find_by_id($booking->event_id); 
 
 		$data = Data::create()
 			->setName(get_option("em_offline_beneficiary", true))

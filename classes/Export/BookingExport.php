@@ -18,7 +18,7 @@ class BookingExport
 			wp_die(__('No event ID provided.','events-manager'));
 		}
 
-		$event = Event::find_by_event_id( absint($_REQUEST['event_id']) );
+		$event = Event::find_by_id( absint($_REQUEST['event_id']) );
 
 		if( !$event ){
 			wp_die(__('Event not found.','events-manager'));

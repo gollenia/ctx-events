@@ -67,22 +67,22 @@ class EM_Gateways_Transactions{
 		}
 	
 		$context = false;
+
+		if(!current_user_can('edit_published_posts'))
 	
 		if (!empty($_REQUEST['booking_id'])) {
 			$booking = Booking::get_by_id($_REQUEST['booking_id']);
-			if ($booking && $booking->can_manage('manage_bookings', 'manage_others_bookings')) {
+			if ($booking) {
 				$context = $booking;
 			}
 		} elseif (!empty($_REQUEST['event_id'])) {
-			$event = Event::find_by_event_id($_REQUEST['event_id']);
-			if ($event && $event->can_manage('manage_bookings', 'manage_others_bookings')) {
+			$event = Event::find_by_id($_REQUEST['event_id']);
+			if ($event) {
 				$context = $event;
 			}
 		} elseif (!empty($_REQUEST['ticket_id'])) {
 			$ticket = new Ticket($_REQUEST['ticket_id']);
-			if ($ticket->can_manage('manage_bookings', 'manage_others_bookings')) {
-				$context = $ticket;
-			}
+			$context = $ticket;
 		}
 	
 		echo $this->mytransactions($context);
@@ -247,7 +247,7 @@ class EM_Gateways_Transactions{
 					<td>
 						<?php
 							
-							echo '<a href="'.$booking->get_booking_url().'">'.$booking->full_name.'</a>';
+							echo '<a href="'.$booking->get_booking_url().'">'.$booking->get_full_name.'</a>';
 							
 						?>
 					</td>
@@ -309,7 +309,7 @@ class EM_Gateways_Transactions{
 						?>
 					</td>
 					<td class="column-trans-note-id">
-						<?php if( $booking->can_manage() ): ?>
+						<?php if( current_user_can('edit_others_events') ): ?>
 						<span class="trash"><a class="em-transaction-delete" href="<?php echo add_query_arg(['action'=>'transaction_delete', 'txn_id'=>$transaction->transaction_id, '_wpnonce'=>wp_create_nonce('transaction_delete_'.$transaction->transaction_id.'_'.get_current_user_id())], $_SERVER['REQUEST_URI']); ?>"><?php esc_html_e('Delete','events'); ?></a></span>
 						<?php endif; ?>
 					</td>
@@ -340,13 +340,12 @@ class EM_Gateways_Transactions{
 			$booking_condition = "tx.booking_id = ".$context->booking_id;
 			
 			$conditions[] = $booking_condition;
-		}elseif( is_object($context) && get_class($context)=="Event" && $context->can_manage('manage_bookings','manage_others_bookings') ){
+		}elseif( is_object($context) && get_class($context)=="Event" && current_user_can('edit_posts') ){
 			$join = " JOIN $table ON $table.booking_id=tx.booking_id";
-			$booking_condition = "event_id = ".$context->event_id;
-			
+			$booking_condition = "event_id = " . $context->event_id;
 			$conditions[] = $booking_condition;		
 		}
-		elseif( is_object($context) && get_class($context)=="EM_Ticket" && $context->can_manage('manage_bookings','manage_others_bookings') ){
+		elseif( is_object($context) && current_user_can('edit_posts') ){
 			$booking_ids = array();
 			$ticket = $context;
 			foreach( BookingCollection::get( array('ticket_id' => $ticket->ticket_id, 'array' => 'booking_id') ) as $booking ){
@@ -414,7 +413,7 @@ class EM_Gateways_Transactions{
 /**
  * Checks for any deletions requested 
  */
-function emp_transactions_init(){
+function em_transactions_init(){
 	global $EM_Gateways_Transactions;
 	$EM_Gateways_Transactions = new EM_Gateways_Transactions();
 	
@@ -424,7 +423,7 @@ function emp_transactions_init(){
 		$booking_id = $wpdb->get_var('SELECT booking_id FROM '.EM_TRANSACTIONS_TABLE." WHERE transaction_id='".$_REQUEST['txn_id']."'");
 		if( !empty($booking_id) ){
 			$booking = Booking::get_by_id($booking_id);
-			if( (!empty($booking->booking_id) && $booking->can_manage()) || is_super_admin() ){
+			if( (!empty($booking->booking_id) && current_user_can('edit_posts')) || is_super_admin() ){
 				//all good, delete it
 				$wpdb->query('DELETE FROM '.EM_TRANSACTIONS_TABLE." WHERE transaction_id='".$_REQUEST['txn_id']."'");
 				_e('Transaction deleted','events');
@@ -435,4 +434,4 @@ function emp_transactions_init(){
 		exit();
 	}
 }
-add_action('init','emp_transactions_init');
+add_action('init','em_transactions_init');

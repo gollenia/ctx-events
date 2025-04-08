@@ -283,7 +283,7 @@ class EM_Custom_Emails{
 			foreach( $event_emails as $event_email_type => $event_email_type_emails ){
 				$event_emails_string = $event_email_type . '<br>------';
 				foreach( $event_email_type_emails as $status => $email_data ){
-					$event_emails_string .= '<br>'. __('Status') . ' : ' . $booking->status_array[$status] ;
+					$event_emails_string .= '<br>'. __('Status') . ' : ' . Booking::get_status_label($status) ;
 					foreach( $email_data as $email_data_key => $email_data_item ){
 						$event_emails_string .= '<br>'. $email_data_key . ' : ';
 						$event_emails_string .= $email_data_key == 'message' ? '<br>'.$email_data_item : $email_data_item;

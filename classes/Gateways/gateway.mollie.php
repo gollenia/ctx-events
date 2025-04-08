@@ -128,7 +128,7 @@ Class EM_Gateway_Mollie extends EM_Gateway {
 			'sequenceType'  => 'oneoff',  			// Default for single payment.
 			'metadata'  	=> [
 				'booking_id' 	=> $booking->booking_id,
-				'name'    		=> $booking->full_name,
+				'name'    		=> $booking->get_full_name,
 				'email'   		=> $booking->booking_mail,
 			],
 		];

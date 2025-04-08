@@ -2,7 +2,6 @@
 
 namespace Contexis\Events\Collections;
 use WP_Query;
-use WP_Post;
 use Countable;
 use IteratorAggregate;
 use Contexis\Events\Models\Event;
@@ -63,9 +62,9 @@ class EventCollection implements Countable, IteratorAggregate {
 		
 		if(!empty($args['event-categories'])) {
 			$queryArgs['tax_query'][] = [
-				'taxonomy' => 'event-categories',
-				'field'    => 'term_id',
-				'terms'    => intval($args['event-categories'])
+				'taxonomy' => EventPost::CATEGORIES,
+				'field'    => 'slug',
+				'terms'    => $args['event-categories']
 			];
 		}
 
@@ -106,8 +105,6 @@ class EventCollection implements Countable, IteratorAggregate {
 				'compare' => "="
 			];
 		}
-		
-
 
 		if (!empty($args['search'])) {
 			$queryArgs['s'] = $args['search'];
@@ -129,7 +126,7 @@ class EventCollection implements Countable, IteratorAggregate {
 			$queryArgs['orderby'] = 'meta_value';
 			switch ($args['orderby']) {
 				case 'date-time':
-					$queryArgs['meta_key'] = '_event_start_date';
+					$queryArgs['meta_key'] = '_event_start';
 					break;
 				case 'booking-date':
 					$queryArgs['meta_key'] = '_event_rsvp_end';
@@ -156,8 +153,6 @@ class EventCollection implements Countable, IteratorAggregate {
 		if(!empty($args['offset'])) {
 			$queryArgs['offset'] = $args['offset'];
 		}
-
-		
 		
 		return $queryArgs;
 	
@@ -167,7 +162,7 @@ class EventCollection implements Countable, IteratorAggregate {
 	private static function get_date_scope_query(string $scope) : array {
 		$now = new \DateTime('now', wp_timezone());
 		$dateFormat = 'Y-m-d H:i:s';
-		$field = get_option('dbem_events_current_are_past') ? '_event_end_date' : '_event_start_date';
+		$field = get_option('dbem_events_current_are_past') ? '_event_end' : '_event_start';
 
 		switch ($scope) {
 			case 'past':
@@ -184,42 +179,42 @@ class EventCollection implements Countable, IteratorAggregate {
 			case 'today':
 				return [
 	
-					['key' => '_event_start_date', 'value' => $now->format('Y-m-d'), 'compare' => '<=', 'type' => 'DATE'],
-					['key' => '_event_end_date', 'value' => $now->format('Y-m-d'), 'compare' => '>=', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => $now->format('Y-m-d'), 'compare' => '<=', 'type' => 'DATE'],
+					['key' => '_event_end', 'value' => $now->format('Y-m-d'), 'compare' => '>=', 'type' => 'DATE']
 				];
 
 			case 'tomorrow':
 				return [
 				
-					['key' => '_event_start_date', 'value' => (clone $now)->modify('+1 day')->format('Y-m-d'), 'compare' => '=', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => (clone $now)->modify('+1 day')->format('Y-m-d'), 'compare' => '=', 'type' => 'DATE']
 				];
 
 			case 'week':
 				return [
 	
-					['key' => '_event_start_date', 'value' => [$now->format('Y-m-d'), (clone $now)->modify('+7 days')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => [$now->format('Y-m-d'), (clone $now)->modify('+7 days')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
 				];
 
 			case 'month':
 				return [
-					['key' => '_event_start_date', 'value' => [(clone $now)->modify('first day of this month')->format('Y-m-d'), (clone $now)->modify('last day of this month')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => [(clone $now)->modify('first day of this month')->format('Y-m-d'), (clone $now)->modify('last day of this month')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
 				];
 
 			case 'next-month':
 				return [
-					['key' => '_event_start_date', 'value' => [(clone $now)->modify('first day of next month')->format('Y-m-d'), (clone $now)->modify('last day of next month')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => [(clone $now)->modify('first day of next month')->format('Y-m-d'), (clone $now)->modify('last day of next month')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
 				];
 
 			case 'year':
 				return [
-					['key' => '_event_start_date', 'value' => [(clone $now)->modify('first day of January')->format('Y-m-d'), (clone $now)->modify('last day of December')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
+					['key' => '_event_start', 'value' => [(clone $now)->modify('first day of January')->format('Y-m-d'), (clone $now)->modify('last day of December')->format('Y-m-d')], 'compare' => 'BETWEEN', 'type' => 'DATE']
 				];
 
 			default:
 				if (preg_match('/^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$/', $scope)) {
 					$dates = explode(',', $scope);
 					return [
-						['key' => '_event_start_date', 'value' => $dates, 'compare' => 'BETWEEN', 'type' => 'DATE']
+						['key' => '_event_start', 'value' => $dates, 'compare' => 'BETWEEN', 'type' => 'DATE']
 					];
 				} 
 				return [];

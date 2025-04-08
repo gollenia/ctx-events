@@ -104,7 +104,7 @@ class TicketCollection extends \EM_Object implements \Iterator, \Countable {
 	 * @return Event
 	 */
 	function get_event() : Event {
-		return Event::find_by_event_id($this->event_id);
+		return Event::find_by_id($this->event_id);
 	}
 
 	/**

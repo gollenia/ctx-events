@@ -24,7 +24,7 @@ if( !class_exists('EM_Permalinks') ){
 			//add_filter('rewrite_rules_array',array('EM_Permalinks','rewrite_rules_array'));
 			add_filter('query_vars',array('EM_Permalinks','query_vars'));
 			//add_action('parse_query',array('EM_Permalinks','init_objects'), 1);
-			//add_action('parse_query',array('EM_Permalinks','redirection'), 1);
+			
 			if( !defined('EM_EVENT_SLUG') ){ define('EM_EVENT_SLUG','event'); }
 			if( !defined('EM_LOCATION_SLUG') ){ define('EM_LOCATION_SLUG','location'); }
 			if( !defined('EM_LOCATIONS_SLUG') ){ define('EM_LOCATIONS_SLUG','locations'); }
@@ -41,29 +41,6 @@ if( !class_exists('EM_Permalinks') ){
 		
 		public static function post_type_archive_link($link, $post_type){
 			return "";
-		}
-		
-		/**
-		 * will redirect old links to new link structures.
-		 */
-		public static function redirection(){
-			global $wpdb, $wp_query;
-			if( is_object($wp_query) && $wp_query->get('em_redirect') ){
-				//is this a querystring url?
-				if( $wp_query->get('event_slug') ){
-					$event = $wpdb->get_row('SELECT event_id, post_id FROM '.EM_EVENTS_TABLE." WHERE event_slug='".$wp_query->get('event_slug')."'", ARRAY_A);
-					if( !empty($event) ){
-						$event = Event::find_by_event_id($event['event_id']);
-						$url = get_permalink($event->post_id);
-					}
-				}elseif( $wp_query->get('category_slug') ){
-					$url = get_term_link($wp_query->get('category_slug'), EventPost::CATEGORIES);
-				}
-				if(!empty($url)){
-					wp_safe_redirect($url,301);
-					exit();
-				}
-			}
 		}
 
 		// Adding a new rule

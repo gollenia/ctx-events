@@ -32,7 +32,7 @@ class EventPost implements PostType {
 
 	public function register_taxonomies() : void {
 		register_taxonomy(self::POST_TYPE.'-tags',[self::POST_TYPE, RecurringEventPost::POST_TYPE], [
-			'hierarchical' => false,
+			'hierachical' => false,
 			'public' => true,
 			'show_ui' => true,
 			'show_in_rest' => true,
@@ -153,7 +153,9 @@ class EventPost implements PostType {
 			[ "name" => "_event_rsvp","type" => "boolean"],
 			[ "name" => "_event_spaces","type" => "number"],
 			[ "name" => "_event_rsvp_spaces","type" => "number"],
-			[ "name" => "_event_rsvp_donation","type" => "boolean"]
+			[ "name" => "_event_rsvp_donation","type" => "boolean"],
+			[ "name" => "_event_recurrence_id", "type" => "number"],
+			[ "name" => "_is_detatched", "type" => "boolean"]
 		];
 
 		foreach($metadata as $meta){

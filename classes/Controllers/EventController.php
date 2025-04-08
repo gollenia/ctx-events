@@ -7,7 +7,7 @@ use Contexis\Events\Collections\EventCollection;
 use \Contexis\Events\Models\Event;
 use Contexis\Events\Models\Speaker;
 
-class EventRestController 
+class EventController 
 {
 
 	public static function init() {
@@ -79,7 +79,7 @@ class EventRestController
 
 	public function prepare_item_for_response( $post, $request ) {
         $event = Event::find_by_post($post);
-		if(!$event->event_exists()) {
+		if(!$event->event_id) {
 			return new \WP_REST_Response([
 				'error' => __('Event not found', 'events')
 			], 404);
@@ -262,4 +262,4 @@ class EventRestController
 
 }
 
-EventRestController::init();
+EventController::init();

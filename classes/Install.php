@@ -24,10 +24,7 @@ class Install {
 
 	public static function uninstall() {
 		global $wpdb;
-		
-		remove_action('before_delete_post',array('EM_Location_Post_Admin','before_delete_post'),10,1);
-		remove_action('before_delete_post',array('EM_Event_Post_Admin','before_delete_post'),10,1);
-		remove_action('before_delete_post',array('EM_Event_Recurring_Post_Admin','before_delete_post'),10,1);
+	
 		$post_ids = $wpdb->get_col('SELECT ID FROM '.$wpdb->posts." WHERE post_type IN ('".EventPost::POST_TYPE."','".LocationPost::POST_TYPE."','event-recurring')");
 		foreach($post_ids as $post_id){
 			wp_delete_post($post_id);
@@ -44,7 +41,6 @@ class Install {
 		
 		$wpdb->query('DROP TABLE '.EM_EVENTS_TABLE);
 		$wpdb->query('DROP TABLE '.EM_BOOKINGS_TABLE);
-		$wpdb->query('DROP TABLE '.EM_LOCATIONS_TABLE);
 		$wpdb->query('DROP TABLE '.EM_TICKETS_TABLE);
 		$wpdb->query('DROP TABLE '.EM_TICKETS_BOOKINGS_TABLE);
 		$wpdb->query('DROP TABLE '.EM_RECURRENCE_TABLE);

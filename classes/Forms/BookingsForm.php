@@ -55,7 +55,7 @@ class EM_Booking_Form {
 	    //make sure we don't need to get another form rather than the one already stored in this object
 		if(!empty(self::$form)) return self::$form;
 
-		if(is_numeric($event)){ $event = Event::find_by_event_id($event); }
+		if(is_numeric($event)){ $event = Event::find_by_id($event); }
 
 		self::$form_id = $event ? get_post_meta($event->post_id, '_booking_form', true) : 0;
 
@@ -116,7 +116,7 @@ class EM_Booking_Form {
 				}else{
 					//get results and put them into booking meta
 					if( !$manual_assigned_booking && (array_key_exists($fieldid, $EM_Form->user_fields) || in_array($fieldid, array('user_email','user_name'))) ){
-					    if( !(!empty($booking->booking_id) && $booking->can_manage()) || empty($booking->booking_id) ){ //only save reg fields on first go
+					    if( !(!empty($booking->booking_id)) || empty($booking->booking_id) ){ //only save reg fields on first go
 							//registration fields
 							
 							$booking->booking_meta['registration'][$fieldid] = $value;

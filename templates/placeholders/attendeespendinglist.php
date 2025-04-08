@@ -11,7 +11,7 @@ if (count($bookings->bookings) > 0) {
         if ($booking->is_pending()) {
             // Holt die gespeicherten Namen aus den Buchungsdaten
             $email = $booking->booking_mail ?? null;
-            $name = trim(($booking->first_name ?? '') . ' ' . ($booking->last_name ?? ''));
+            $name = $booking->get_full_name() ?? null;
 
             // Falls der Name leer ist, alternative Darstellung
             if (empty($name)) {

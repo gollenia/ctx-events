@@ -38,7 +38,7 @@ function em_bookings_pending_table($event_id = false){
 			foreach($bookings->bookings as $booking){
 				//create event
 				if( !array_key_exists($booking->event_id,$events) ){
-					$events[$booking->event_id] = Event::find_by_event_id($booking->event_id);
+					$events[$booking->event_id] = Event::find_by_id($booking->event_id);
 				}
 			}
 		}

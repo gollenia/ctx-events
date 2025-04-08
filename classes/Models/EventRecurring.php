@@ -1,4 +1,107 @@
-<?php
+if( $this->is_recurring() ){
+			$this->recurrence = 1; //just in case
+			
+			$this->recurrence_freq = get_post_meta($this->post_id, '_recurrence_freq', true) ?? 'daily';
+			$this->recurrence_interval = get_post_meta($this->post_id, '_recurrence_interval', true) ?? 1;
+			if($this->recurrence_interval == 0) $this->recurrence_interval = 1; // prevent loop
+			$this->recurrence_byweekno = get_post_meta($this->post_id, '_recurrence_byweekno', true) ?? '';
+			$this->recurrence_days = get_post_meta($this->post_id, '_recurrence_days', true) ?? 0;
+			$this->recurrence_byday = get_post_meta($this->post_id, '_recurrence_byday', true) ?? null;
+		
+			
+			//here we do a comparison between new and old event data to see if we are to reschedule events or recreate bookings
+			if( $this->event_id ){ //only needed if this is an existing event needing rescheduling/recreation
+				//Get original recurring event so we can tell whether event recurrences or bookings will be recreated or just modified
+				
+				$this->recurring_reschedule = $this->check_reschedule();
+				
+				
+				//now check tickets if we don't already have to reschedule
+				if( !$this->recurring_reschedule && $this->event_rsvp ){
+					//@TODO - ideally tickets could be independent of events, it'd make life easier here for comparison and editing without rescheduling
+					$tickets = $this->get_bookings()->get_tickets();
+					//we compare tickets
+					foreach( $this->get_bookings()->get_tickets()->tickets as $ticket ){
+						if( !empty($ticket->ticket_id) && !empty($tickets->tickets[$ticket->ticket_id]) ){
+							$new_ticket = $ticket->to_array(true);
+							foreach( $tickets->tickets[$ticket->ticket_id]->to_array() as $k => $v ){
+								if( !(empty($new_ticket[$k]) && empty($v)) && ((empty($new_ticket[$k]) && $v) || $new_ticket[$k] != $v) ){
+									if( $k == 'ticket_meta' && is_array($v) && is_array($new_ticket['ticket_meta']) ){
+										foreach( $v as $k_meta => $v_meta ){
+											if( (empty($new_ticket['ticket_meta'][$k_meta]) && !empty($v_meta)) || $new_ticket['ticket_meta'][$k_meta] != $v_meta ){
+												$this->recurring_recreate_bookings = true; //something changed, so we reschedule
+											}
+										}
+									}else{
+										$this->recurring_recreate_bookings = true; //something changed, so we reschedule
+									}
+								}
+							}
+						}else{
+							$this->recurring_recreate_bookings = true; //we have a new ticket
+						}
+					}
+				}elseif( !empty($deleting_bookings) ){
+					$this->recurring_delete_bookings = true;
+				}
+				unset($event);
+			}else{
+				//new event so we create everything from scratch
+				$this->recurring_reschedule = $this->recurring_recreate_bookings = true;
+			}
+			//recurring events may have a cut-off date x days before or after the recurrence start dates
+			$this->recurrence_rsvp_days = null;
+			
+			if( array_key_exists('recurrence_rsvp_days', $_POST) ){
+				if( !empty($_POST['recurrence_rsvp_days_when']) && $_POST['recurrence_rsvp_days_when'] == 'after' ){
+					$this->recurrence_rsvp_days = absint($_POST['recurrence_rsvp_days']);
+				}else{ //by default the start date is the point of reference
+					$this->recurrence_rsvp_days = absint($_POST['recurrence_rsvp_days']) * -1;
+				}
+			}
+		}else{
+			foreach( $this->recurrence_fields as $recurrence_field ){
+				$this->$recurrence_field = null;
+			}
+			$this->recurrence = 0; // to avoid any doubt
+		}
+
+
+
+
+
+		function check_reschedule() {
+		global $wpdb;
+		$result = $wpdb->get_row( $wpdb->prepare("SELECT * FROM ". EM_EVENTS_TABLE ." WHERE event_id=%d", $this->event_id) );
+		if(!$result) return true;
+
+	//first check event times
+		$recurring_event_dates = array(
+				'event_start_date' => $result->event_start_date,
+				'event_end_date' => $result->event_end_date,
+				'event_start_time' => $result->event_start_time,
+				'event_end_time' => $result->event_end_time,
+				'recurrence_byday' => $result->recurrence_byday,
+				'recurrence_byweekno' => $result->recurrence_byweekno,
+				'recurrence_days' => $result->recurrence_days,
+				'recurrence_freq' => $result->recurrence_freq,
+				'recurrence_interval' => $result->recurrence_interval
+		);
+		
+		$reschedule = false;
+		//check previously saved event info compared to current recurrence info to see if we need to reschedule
+		foreach($recurring_event_dates as $k => $v){
+			if( $this->$k != $v ){
+				$reschedule = true; //something changed, so we reschedule
+			}
+		}
+
+		return $reschedule;
+	}
+
+
+
+	<?php
 
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\EventCollection;
@@ -58,7 +161,7 @@ class EventRecurring extends Event {
 	 */
 	function get_event_recurrence(){
 		if(!$this->is_recurring()){
-			return Event::find_by_event_id($this->recurrence_id);
+			return Event::find_by_id($this->recurrence_id);
 		}else{
 			return $this;
 		}
@@ -92,7 +195,7 @@ class EventRecurring extends Event {
 	 */
 	function detach(){
 		global $wpdb;
-		if( $this->is_recurrence() && !$this->is_recurring() && $this->can_manage('edit_recurring_events','edit_others_recurring_events') ){
+		if( $this->is_recurrence() && !$this->is_recurring() && current_user_can('edit_others_events') ){
 			//remove recurrence id from post meta and index table
 			$url = $this->get_attach_url($this->recurrence_id);
 			$wpdb->update(EM_EVENTS_TABLE, array('recurrence_id'=>null), array('event_id' => $this->event_id));
@@ -111,8 +214,7 @@ class EventRecurring extends Event {
 	 */
 	function attach($recurrence_id){
 		global $wpdb;
-		if( !$this->is_recurrence() && !$this->is_recurring() && is_numeric($recurrence_id) && $this->can_manage('edit_recurring_events','edit_others_recurring_events') ){
-			//add recurrence id to post meta and index table
+		if( !$this->is_recurrence() && !$this->is_recurring() && is_numeric($recurrence_id) && current_user_can('edit_posts') ){
 			$wpdb->update(EM_EVENTS_TABLE, array('recurrence_id'=>$recurrence_id), array('event_id' => $this->event_id));
 			update_post_meta($this->post_id, '_recurrence_id', $recurrence_id);
 			$this->feedback_message = __('Event re-attached to recurrence.','events');
@@ -131,7 +233,7 @@ class EventRecurring extends Event {
 	function save_events() {
 		global $wpdb;
 		
-		if( !$this->can_manage('edit_events','edit_others_events') ) return apply_filters('em_event_save_events', false, $this, array(), array());
+		if( !current_user_can('edit_post') ) return apply_filters('em_event_save_events', false, $this, array(), array());
 		$event_ids = $post_ids = $event_dates = $events = array();
 		if( $this->is_published() || 'future' == $this->post_status ){
 			$result = false;
@@ -457,20 +559,21 @@ class EventRecurring extends Event {
 		//So we don't do something we'll regret later, we could just supply the get directly into the delete, but this is safer
 		$result = false;
 		$events_array = array();
-		if( $this->can_manage('delete_events', 'delete_others_events') ){
-			//delete events from em_events table
-			$sql = $wpdb->prepare('SELECT event_id FROM '.EM_EVENTS_TABLE.' WHERE (recurrence!=1 OR recurrence IS NULL)  AND recurrence_id=%d', $this->event_id);
-			$event_ids = $wpdb->get_col( $sql );
-			// go through each event and delete individually so individual hooks are fired appropriately
-			foreach($event_ids as $event_id){
-				$event = Event::find_by_event_id( $event_id );
-				if($event->recurrence_id == $this->event_id){
-					$event->delete(true);
-					$events_array[] = $event;
-				}
+		if( !current_user_can('delete_posts') ) return;
+		
+		//delete events from em_events table
+		$sql = $wpdb->prepare('SELECT event_id FROM '.EM_EVENTS_TABLE.' WHERE (recurrence!=1 OR recurrence IS NULL)  AND recurrence_id=%d', $this->event_id);
+		$event_ids = $wpdb->get_col( $sql );
+		// go through each event and delete individually so individual hooks are fired appropriately
+		foreach($event_ids as $event_id){
+			$event = Event::find_by_id( $event_id );
+			if($event->recurrence_id == $this->event_id){
+				$event->delete(true);
+				$events_array[] = $event;
 			}
-			$result = !empty($events_array) || (is_array($event_ids) && empty($event_ids)); // success if we deleted something, or if there was nothing to delete in the first place
 		}
+		$result = !empty($events_array) || (is_array($event_ids) && empty($event_ids)); // success if we deleted something, or if there was nothing to delete in the first place
+	
 		$result = apply_filters('delete_events', $result, $this, $events_array); //Deprecated, use em_event_delete_events
 		return apply_filters('em_event_delete_events', $result, $this, $events_array);
 	}

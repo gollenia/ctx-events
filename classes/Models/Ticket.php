@@ -189,47 +189,48 @@ class Ticket extends \EM_Object{
 	function save(){
 		global $wpdb;
 		$table = EM_TICKETS_TABLE;
+		if(!current_user_can('edit_posts') ) return false;
+		if(!$this->validate()) {
+			$this->errors[] = __('Validation for Ticket failed.', 'events');
+			return false;
+		}
 		do_action('em_ticket_save_pre',$this);
 		//First the person
-		if($this->validate() && $this->can_manage() ){			
-			//Now we save the ticket
-			$data = $this->to_array(true); //add the true to remove the nulls
-			if( !empty($data['ticket_meta']) ) $data['ticket_meta'] = serialize($data['ticket_meta']);
-			if( !empty($data['ticket_members_roles']) ) $data['ticket_members_roles'] = serialize($data['ticket_members_roles']);
-			if( !empty($this->ticket_meta['recurrences']) ){
-				$data['ticket_start'] = $data['ticket_end'] = null;
-			}
-			if($this->ticket_id != ''){
-				//since currently wpdb calls don't accept null, let's build the sql ourselves.
-				$set_array = array();
-				foreach( $this->fields as $field_name => $field ){
-					if( empty( $data[$field_name]) && $field['null'] ){
-						$set_array[] = "{$field_name}=NULL";
-					}else{
-						$set_array[] = "{$field_name}='".esc_sql($data[$field_name])."'";						
-					}
+			
+		//Now we save the ticket
+		$data = $this->to_array(true); //add the true to remove the nulls
+		if( !empty($data['ticket_meta']) ) $data['ticket_meta'] = serialize($data['ticket_meta']);
+		if( !empty($data['ticket_members_roles']) ) $data['ticket_members_roles'] = serialize($data['ticket_members_roles']);
+		if( !empty($this->ticket_meta['recurrences']) ){
+			$data['ticket_start'] = $data['ticket_end'] = null;
+		}
+		if($this->ticket_id != ''){
+			//since currently wpdb calls don't accept null, let's build the sql ourselves.
+			$set_array = array();
+			foreach( $this->fields as $field_name => $field ){
+				if( empty( $data[$field_name]) && $field['null'] ){
+					$set_array[] = "{$field_name}=NULL";
+				}else{
+					$set_array[] = "{$field_name}='".esc_sql($data[$field_name])."'";						
 				}
-				$sql = "UPDATE $table SET ".implode(', ', $set_array)." WHERE ticket_id={$this->ticket_id}";
-				$result = $wpdb->query($sql);
-				$this->feedback_message = __('Changes saved','events');
-			}else{
-				if( isset($data['ticket_id']) && empty($data['ticket_id']) ) unset($data['ticket_id']);
-				$result = $wpdb->insert($table, $data, $this->get_types($data));
-			    $this->ticket_id = $wpdb->insert_id;
-				$this->feedback_message = __('Ticket created','events'); 
 			}
-			if( $result === false ){
-				$this->feedback_message = __('There was a problem saving the ticket.', 'events');
-				$this->errors[] = __('There was a problem saving the ticket.', 'events');
-			}
-			//$this->compat_keys();
-			return apply_filters('em_ticket_save', ( count($this->errors) == 0 ), $this);
+			$sql = "UPDATE $table SET ".implode(', ', $set_array)." WHERE ticket_id={$this->ticket_id}";
+			$result = $wpdb->query($sql);
+			$this->feedback_message = __('Changes saved','events');
 		}else{
+			if( isset($data['ticket_id']) && empty($data['ticket_id']) ) unset($data['ticket_id']);
+			$result = $wpdb->insert($table, $data, $this->get_types($data));
+			$this->ticket_id = $wpdb->insert_id;
+			$this->feedback_message = __('Ticket created','events'); 
+		}
+		if( $result === false ){
 			$this->feedback_message = __('There was a problem saving the ticket.', 'events');
 			$this->errors[] = __('There was a problem saving the ticket.', 'events');
-			return apply_filters('em_ticket_save', false, $this);
 		}
-		return true;
+		//$this->compat_keys();
+		return apply_filters('em_ticket_save', ( count($this->errors) == 0 ), $this);
+		
+	
 	}
 
 	
@@ -265,9 +266,9 @@ class Ticket extends \EM_Object{
 		$this->ticket_start = ( !empty($post['ticket_start']) ) ? wp_kses_data($post['ticket_start']):'';
 		$this->ticket_end = ( !empty($post['ticket_end']) ) ? wp_kses_data($post['ticket_end']):'';
 		$start_time = !empty($post['ticket_start_time']) ? $post['ticket_start_time'] : $this->get_event()->start()->format('H:i');
-		if( !empty($this->ticket_start) ) $this->ticket_start .= ' '. $this->sanitize_time($start_time);
+		if( !empty($this->ticket_start) ) $this->ticket_start .= ' '. $start_time;
 		$end_time = !empty($post['ticket_end_time']) ? $post['ticket_end_time'] : $this->get_event()->start()->format('H:i');
-		if( !empty($this->ticket_end) ) $this->ticket_end .= ' '. $this->sanitize_time($end_time);
+		if( !empty($this->ticket_end) ) $this->ticket_end .= ' '. $end_time;
 		//sort out user availability restrictions
 		$this->ticket_members = ( !empty($post['ticket_type']) && $post['ticket_type'] == 'members' ) ? 1:0;
 		$this->ticket_guests = ( !empty($post['ticket_type']) && $post['ticket_type'] == 'guests' ) ? 1:0;
@@ -295,7 +296,7 @@ class Ticket extends \EM_Object{
 					}else{ //by default the start/end date is the point of reference
 						$this->ticket_meta['recurrences'][$start_or_end.'_days'] = absint($post['ticket_'.$start_or_end.'_recurring_days']) * -1;
 					}
-					$this->ticket_meta['recurrences'][$start_or_end.'_time'] = ( !empty($post['ticket_'.$start_or_end.'_time']) ) ? $this->sanitize_time($post['ticket_'.$start_or_end.'_time']) : $this->get_event()->$start_or_end()->format('H:i');
+					$this->ticket_meta['recurrences'][$start_or_end.'_time'] = ( !empty($post['ticket_'.$start_or_end.'_time']) ) ? $post['ticket_'.$start_or_end.'_time'] : $this->get_event()->$start_or_end()->format('H:i');
 				}else{
 					unset($this->ticket_meta['recurrences'][$start_or_end.'_days']);
 					unset($this->ticket_meta['recurrences'][$start_or_end.'_time']);
@@ -340,7 +341,7 @@ class Ticket extends \EM_Object{
 		if (!empty($this->ticket_start) && $this->start()->getTimestamp() > $now) return false;
 		if (!empty($this->ticket_end) && $this->end()->getTimestamp() < $now) return false;
 
-		$event = Event::find_by_event_id($this->event_id);
+		$event = Event::find_by_id($this->event_id);
 
 		if ($event->get_rsvp_end()->getTimestamp() < $now) return false;
 		if ($event->get_rsvp_start()->getTimestamp() > $now) return false;
@@ -444,7 +445,7 @@ class Ticket extends \EM_Object{
 	 * @return Event 
 	 */
 	function get_event() : Event {
-		return Event::find_by_event_id($this->event_id);
+		return Event::find_by_id($this->event_id);
 	}
 	
 	function get_bookings() : BookingCollection {
@@ -489,7 +490,7 @@ class Ticket extends \EM_Object{
 	function delete(){
 		global $wpdb;
 		$result = false;
-		if(!$this->can_manage()) return false;
+		if(current_user_can('delete_posts')) return false;
 		
 		if( count($this->get_bookings()->bookings) == 0 ){
 			$sql = $wpdb->prepare("DELETE FROM ". EM_TICKETS_TABLE . " WHERE ticket_id=%d", $this->ticket_id);
@@ -547,13 +548,7 @@ class Ticket extends \EM_Object{
 		$this->$when->setTimezone($tz);
 		return $this->$when;
 	}
-	
-	/**
-	 * Can the user manage this event? 
-	 */
-	function can_manage( $owner_capability = false, $admin_capability = false, $user_to_check = false ){
-		return $this->get_event()->can_manage('manage_bookings','manage_others_bookings', $user_to_check);
-	}
+
 
 	function get_rest_data() {
 		return [

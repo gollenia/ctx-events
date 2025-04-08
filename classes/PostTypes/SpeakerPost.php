@@ -9,7 +9,7 @@ class SpeakerPost implements PostType {
 	public static function init() : self {
 		$instance = new self;
 		add_action('init', array($instance, 'register_post_type'));
-		add_action('init', array($instance, 'register_metadata'));
+		add_action('init', array($instance, 'register_meta'));
 		return $instance;
 	}
 	public static function get_slug(): string {

@@ -21,8 +21,6 @@ function em_bookings_page(){
 		em_bookings_single();
 	}elseif( !empty($_REQUEST['user_email']) ){
 		em_bookings_person();
-	}elseif( !empty($_REQUEST['ticket_id']) ){
-		em_bookings_ticket();
 	}elseif( !empty($_REQUEST['event_id']) ){
 		em_bookings_event();
 	}else{
@@ -63,10 +61,10 @@ function em_bookings_dashboard(){
  */
 function em_bookings_event(){
 	global $EM_Notices;
-	$event = \Contexis\Events\Models\Event::find_by_event_id($_REQUEST['event_id']);
+	$event = Event::find_by_id($_REQUEST['event_id']);
 	
 	//check that user can access this page
-	if( is_object($event) && !$event->can_manage('manage_bookings','manage_others_bookings') ){
+	if( is_object($event) && current_user_can('publish_posts') ){
 		?>
 		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
 		<?php
@@ -119,61 +117,6 @@ function em_bookings_event(){
 	<?php
 }
 
-/**
- * Shows a ticket view
- */
-function em_bookings_ticket(){
-
-	if (!empty($_REQUEST['ticket_id'])) {
-		$ticket = new Ticket($_REQUEST['ticket_id']);
-	} else {
-		$ticket = new Ticket();
-	}
-	global $EM_Notices;
-	$event = $ticket->get_event();
-	//check that user can access this page
-	if( is_object($ticket) && !$ticket->can_manage() ){
-		?>
-		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this ticket.','events'); ?></p></div>
-		<?php
-		return false;
-	}
-	$header_button_classes = is_admin() ? 'page-title-action':'button add-new-h2';
-	?>
-	<div class='wrap'>
-		<?php if( is_admin() ): ?><h1 class="wp-heading-inline"><?php else: ?><h2><?php endif; ?>
-  			<?php echo sprintf(__('Ticket for %s', 'events'), "'{$event->event_name}'"); ?>
-  		<?php if( is_admin() ): ?></h1><?php endif; ?>
-  			<a href="<?php echo $event->get_edit_url(); ?>" class="<?php echo $header_button_classes; ?>"><?php esc_html_e('View/Edit Event','events') ?></a>
-  			<a href="<?php echo $event->get_bookings_url(); ?>" class="<?php echo $header_button_classes; ?>"><?php esc_html_e('View Event Bookings','events') ?></a>
-  		
-		<?php if( !is_admin() ): ?></h2><?php else: ?><hr class="wp-header-end" /><?php endif; ?>
-  		<?php if( !is_admin() ) echo $EM_Notices; ?>
-		<div>
-			<table>
-				<tr><td><?php echo __('Name','events'); ?></td><td></td><td><?php echo $ticket->ticket_name; ?></td></tr>
-				<tr><td><?php echo __('Description','events'); ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td></td><td><?php echo ($ticket->ticket_description) ? $ticket->ticket_description : '-'; ?></td></tr>
-				<tr><td><?php echo __('Price','events'); ?></td><td></td><td><?php echo ($ticket->ticket_price) ? $ticket->ticket_price : '-'; ?></td></tr>
-				<tr><td><?php echo __('Spaces','events'); ?></td><td></td><td><?php echo ($ticket->ticket_spaces) ? $ticket->ticket_spaces : '-'; ?></td></tr>
-				<tr><td><?php echo __('Min','events'); ?></td><td></td><td><?php echo ($ticket->ticket_min) ? $ticket->ticket_min : '-'; ?></td></tr>
-				<tr><td><?php echo __('Max','events'); ?></td><td></td><td><?php echo ($ticket->ticket_max) ? $ticket->ticket_max : '-'; ?></td></tr>
-				<tr><td><?php echo __('Start','events'); ?></td><td></td><td><?php echo ($ticket->ticket_start) ? $ticket->start()->formatDefault() : '-'; ?></td></tr>
-				<tr><td><?php echo __('End','events'); ?></td><td></td><td><?php echo ($ticket->ticket_end) ? $ticket->end()->formatDefault() : '-'; ?></td></tr>
-				<?php do_action('em_booking_admin_ticket_row', $ticket); ?>
-			</table>
-		</div>
-		<h2><?php esc_html_e('Bookings','events'); ?></h2>
-		<?php
-		$bookings_table = new BookingsTable();
-		//$bookings_table->status = get_option('dbem_bookings_approval') ? 'needs-attention':'confirmed';
-		$bookings_table->output();
-  		?>
-		<?php do_action('em_bookings_ticket_footer', $ticket); ?>
-	</div>
-	<?php	
-}
-
-
 
 /**
  * Shows all bookings made by one person.
@@ -182,18 +125,14 @@ function em_bookings_person(){
 	global $EM_Notices;
 	
 	$has_booking = false;
-	foreach(BookingCollection::find(array('booking_mail' => $_REQUEST['booking_mail'])) as $booking){
-		if($booking->can_manage('manage_bookings','manage_others_bookings')){
-			$has_booking = true;
-		}
-	}
+	$bookings = BookingCollection::find(array('booking_mail' => $_REQUEST['booking_mail']));
 	if( !$has_booking && !current_user_can('manage_others_bookings') ){
 		?>
 		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
 		<?php
 		return false;
 	}
-	$header_button_classes = is_admin() ? 'page-title-action':'button add-new-h2';
+
 	?>
 	<div class='wrap'>
 		<?php if( is_admin() ): ?><h1 class="wp-heading-inline"><?php else: ?><h2><?php endif; ?>
@@ -212,7 +151,7 @@ function em_bookings_person(){
 							<?php esc_html_e( 'Personal Details', 'events'); ?>
 						</h3>
 						<div class="">
-							<h1><?php echo $booking->full_name; ?></h1>
+							<h1><?php echo $bookings->next()->get_full_name(); ?></h1>
 						</div>
 					</div> 
 				</div>
@@ -223,7 +162,7 @@ function em_bookings_person(){
 		<h2><?php esc_html_e('Past And Present Bookings','events'); ?></h2>
 		<?php
 		$bookings_table = new BookingsTable();
-		//$bookings_table->status = 'all';
+		$bookings_table->bookings = $bookings;
 		$bookings_table->scope = 'all';
 		$bookings_table->output();
   		?>

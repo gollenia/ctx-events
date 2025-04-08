@@ -181,11 +181,5 @@ class EM_Coupon extends EM_Object {
 	 	$affected_events = $wpdb->get_row($sql);
 		return apply_filters('em_coupon_has_events', (count($affected_events) > 0), $this);
 	}
-	
-	/**
-	 * Can the user manage this coupon? 
-	 */
-	function can_manage( $owner_capability = false, $admin_capability = false, $user_to_check = false ){
-		return apply_filters('em_coupon_can_manage', parent::can_manage($owner_capability, $admin_capability, $user_to_check), $this, $owner_capability, $admin_capability, $user_to_check);
-	}
+
 }

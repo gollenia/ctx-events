@@ -31,7 +31,7 @@ class Dashboard {
 				?>
 				<tr>
 					<td><span class="em-label em-label-<?php echo $status ?>"><i class="material-symbols-outlined"><?php echo $booking->get_status_icon() ?></i></span></td>
-					<td><a href="#"> <?php echo $booking->full_name; ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
+					<td><a href="#"> <?php echo $booking->get_full_name; ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
 					<td><span class="em-date"><?php echo $booking->get_booking_date(); ?></span></td>
 			</tr>
 			<?php endforeach; ?>

@@ -2,6 +2,7 @@
 
 namespace Contexis\Events\Views;
 
+use Contexis\Events\Intl\Price;
 use DateInterval;
 use DateTime;
 
@@ -41,7 +42,7 @@ class BookingView
 					$replace = $booking->booking_id;
 					break;
 				case '#_BOOKINGNAME':
-					$replace = $booking->full_name;
+					$replace = $booking->get_full_name;
 					break;
 				case '#_BOOKINGEMAIL':
 					$replace = $booking->booking_meta['registration']['user_email'];
@@ -58,7 +59,7 @@ class BookingView
 				case '#_BOOKINGCOMMENT':
 					$replace = $booking->booking_comment;
 				case '#_BOOKINGPRICE':
-					$replace = $booking->format_price($booking->get_price());
+					$replace = Price::format($booking->get_price());
 					break;
 				case '#_BOOKINGTICKETS':
 					ob_start();

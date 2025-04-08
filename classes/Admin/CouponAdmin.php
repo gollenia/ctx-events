@@ -61,7 +61,7 @@ class EM_Coupon_Admin extends EM_Coupon {
 	 */
 	function save(){
 		global $wpdb;
-		if( !$this->can_manage('manage_bookings', 'manage_others_bookings') ){
+		if( !current_user_can('edit_posts') ){
 			return apply_filters('em_coupon_save', false, $this);
 		}
 
@@ -99,7 +99,7 @@ class EM_Coupon_Admin extends EM_Coupon {
 	function delete($force_delete = true){ //atm wp seems to force cp deletions anyway
 		global $wpdb;
 		$result = false;
-		if( $this->can_manage('manage_bookings','manage_others_bookings') ){
+		if( current_user_can('edit_posts') ){
 			do_action('em_coupon_delete_pre', $this);
 			$result = $wpdb->query("DELETE FROM ".EM_COUPONS_TABLE." WHERE coupon_id=".$this->coupon_id);
 			$total = $wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='coupon-count' AND object_id={$this->coupon_id} LIMIT 1");

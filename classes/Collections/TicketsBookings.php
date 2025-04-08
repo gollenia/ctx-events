@@ -3,7 +3,8 @@
 namespace Contexis\Events\Tickets;
 
 use Contexis\Events\Model\Booking;
-
+use Contexis\Events\Models\Ticket;
+use Contexis\Events\Utilities\SQLHelper;
 /**
  * Deals with the each ticket booked in a single booking
  * @author marcus
@@ -170,27 +171,20 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 	 * Delete all ticket bookings
 	 * @return boolean
 	 */
-	function delete(){
+	public function delete(): bool {
 		global $wpdb;
-		$result = false;
-		if( $this->get_booking()->can_manage() ){
-			$result = $wpdb->query("DELETE FROM ".EM_TICKETS_BOOKINGS_TABLE." WHERE booking_id='{$this->get_booking_id()}'");
-			//echo "<pre>";print_r($this->get_booking());echo "</pre>";
-		}else{
-			//FIXME ticket bookings
-			$ticket_ids = array();
-			foreach( $this->tickets_bookings as $ticket_booking ){
-				if( $ticket_booking->can_manage() ){
-					$tickets_bookings_ids[] = $ticket_booking->booking_id;
-				}else{
-					$this->errors[] = sprintf(__('You do not have the rights to manage this %s.','events'),__('Booking','events'));					
-				}
-			}
-			if(count($ticket_ids) > 0){
-				$result = $wpdb->query("DELETE FROM ".EM_TICKETS_BOOKINGS_TABLE." WHERE ticket_booking_id IN (".implode(',',$ticket_ids).")");
-			}
+	
+		// Sicherheitscheck: Nur wer Events verwalten darf, darf löschen
+		if (!current_user_can('delets_posts')) {
+			$this->errors[] = __('You do not have permission to delete ticket bookings.', 'events');
+			return false;
 		}
-		return apply_filters('em_tickets_bookings_get_booking_id', ($result == true), $this);
+	
+		// Alle ticket_bookings zu dieser Buchung löschen
+		$booking_id = (int) $this->get_booking_id();
+		$result = $wpdb->delete(EM_TICKETS_BOOKINGS_TABLE, ['booking_id' => $booking_id]);
+	
+		return (bool) $result;
 	}
 	
 	/**
@@ -247,22 +241,23 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 		}
 	}	
 	
-	/* Overrides EM_Object method to apply a filter to result
-	 * @see wp-content/plugins/events/classes/EM_Object#build_sql_conditions()
-	 */
-	public static function build_sql_conditions( $args = array() ){
-		$conditions = apply_filters( 'em_tickets_build_sql_conditions', parent::build_sql_conditions($args), $args );
-		if( is_numeric($args['status']) ){
-			$conditions['status'] = 'ticket_status='.$args['status'];
+	public static function build_sql_conditions(array $args): array {
+		$conditions = [];
+	
+		// Nur ticket_status berücksichtigen
+		if (isset($args['status']) && is_numeric($args['status'])) {
+			$conditions['status'] = 'ticket_status = ' . (int) $args['status'];
 		}
+	
 		return apply_filters('em_tickets_bookings_build_sql_conditions', $conditions, $args);
 	}
+	
 	
 	/* Overrides EM_Object method to apply a filter to result
 	 * @see wp-content/plugins/events/classes/EM_Object#build_sql_orderby()
 	 */
 	public static function build_sql_orderby( $args, $accepted_fields, $default_order = 'ASC' ){
-		return apply_filters( 'em_tickets_bookings_build_sql_orderby', parent::build_sql_orderby($args, $accepted_fields, get_option('dbem_events_default_order')), $args, $accepted_fields, $default_order );
+		return apply_filters( 'em_tickets_bookings_build_sql_orderby', SQLHelper::build_sql_orderby($args, $accepted_fields, get_option('dbem_events_default_order')), $args, $accepted_fields, $default_order );
 	}
 	
 	/* 
@@ -272,20 +267,29 @@ class TicketsBookings extends \EM_Object implements \Iterator, \Countable {
 	 * @return array
 	 * @uses EM_Object#get_default_search()
 	 */
-	public static function get_default_search( $array_or_defaults = array(), $array = array() ){
-		$defaults = array(
+	public static function get_default_search($input = []) {
+		$defaults = [
 			'status' => false,
-			'person' => true //to add later, search by person's tickets...
-		);	
-		//sort out whether defaults were supplied or just the array of search values
-		if( empty($array) ){
-			$array = $array_or_defaults;
-		}else{
-			$defaults = array_merge($defaults, $array_or_defaults);
+			'person' => true,
+			'limit' => 10,
+			'page' => 1,
+			'offset' => 0,
+			'orderby' => ['event_start'],
+			'order' => 'ASC',
+		];
+	
+		$search = array_merge($defaults, $input);
+	
+		if (!current_user_can('manage_others_bookings')) {
+			$search['owner'] = get_current_user_id();
 		}
-		//specific functionality
-		$defaults['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id():false;
-		return apply_filters('em_tickets_bookings_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
+	
+		// Clean up pagination logic
+		if ($search['page'] > 1 && $search['limit'] > 0) {
+			$search['offset'] = $search['limit'] * ($search['page'] - 1);
+		}
+	
+		return $search;
 	}
 
 	//Iterator Implementation

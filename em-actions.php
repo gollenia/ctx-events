@@ -15,7 +15,7 @@ function em_init_actions() {
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,5) == 'event' ){
 		//Load the event object, with saved event if requested
 		if( !empty($_REQUEST['event_id']) ){
-			$event = \Contexis\Events\Models\Event::find_by_event_id($_REQUEST['event_id']);
+			$event = \Contexis\Events\Models\Event::find_by_id($_REQUEST['event_id']);
 		}else{
 			$event = new \Contexis\Events\Models\Event;
 		}
@@ -55,20 +55,21 @@ function em_init_actions() {
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,7) == 'booking' && (is_user_logged_in() || ($_REQUEST['action'] == 'booking_add')) ){
 		
 		$event_id = !empty($_REQUEST['event_id']) ? $_REQUEST['event_id'] : 0;
-		$event = \Contexis\Events\Models\Event::find_by_event_id($event_id);
+		$event = \Contexis\Events\Models\Event::find_by_id($event_id);
 		
 		$booking = ( !empty($_REQUEST['booking_id']) ) ? Booking::get_by_id($_REQUEST['booking_id']) : new Booking;
 		if( !empty($booking->event_id) ){
 			//Load the event object, with saved event if requested
 			$event = $booking->get_event();
 		}elseif( !empty($_REQUEST['event_id']) ){
-			$event = \Contexis\Events\Models\Event::find_by_event_id($_REQUEST['event_id']);
+			$event = \Contexis\Events\Models\Event::find_by_id($_REQUEST['event_id']);
 		}
 		$result = false;
 		$feedback = '';
 		
 		if( $_REQUEST['action'] == 'booking_resend_email' ){
-			if( $booking->can_manage('manage_bookings','manage_others_bookings') ){
+			if(!current_user_can('edit_pages')) return;
+			
 				if( $booking->email(false, true) ){
 				    if( $booking->mails_sent > 0 ) {
 				        $EM_Notices->add_confirm( __('Email Sent.','events'), true );
@@ -83,7 +84,7 @@ function em_init_actions() {
 					$EM_Notices->add_error( __('ERROR : Email Not Sent.','events') );			
 					$feedback = $booking->feedback_message;
 				}	
-			}
+			
 		}
 
 		$return = array('result'=>$result, 'message'=>$feedback, 'error'=>$booking->get_errors());

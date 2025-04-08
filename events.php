@@ -43,6 +43,8 @@ require_once( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
 //Base classes
 require_once __DIR__ . '/polyfill.php';
 require_once __DIR__ . '/classes/Utilities.php';
+require_once __DIR__ . '/classes/Utilities/SQLHelper.php';
+require_once __DIR__ . '/classes/Utilities/EventScope.php';
 require_once __DIR__ . '/Assets.php';
 require_once __DIR__ . '/classes/Options.php';
 require_once __DIR__ . '/classes/Object.php';
@@ -56,13 +58,11 @@ require_once __DIR__ . '/em-actions.php';
 require_once __DIR__ . '/em-ical.php';
 
 require_once __DIR__ . '/classes/Models/Booking.php';
-
+require_once __DIR__ . '/classes/PostTypes/SpeakerPost.php';
 require_once __DIR__ . '/classes/Collections/BookingCollection.php';
 require_once __DIR__ . '/classes/Bookings/BookingsTable.php';
 require_once __DIR__ . '/classes/Bookings/BookingsRest.php';
 require_once __DIR__ . '/classes/Bookings/BookingExport.php';
-//require_once __DIR__ . '/classes/Categories/Category.php';
-//require_once __DIR__ . '/classes/Categories/Categories.php';
 
 require_once __DIR__ . '/classes/Models/Event.php';
 require_once __DIR__ . '/classes/Events/EventRestController.php';
@@ -73,17 +73,13 @@ require_once __DIR__ . '/classes/Views/EventView.php';
 require_once __DIR__ . '/classes/Models/Location.php';
 
 require_once __DIR__ . '/classes/PostTypes/LocationPost.php';
-require_once __DIR__ . '/classes/Collections/LocationCollection.php';
+
 require_once __DIR__ . '/classes/Views/LocationView.php';
 require_once __DIR__ . '/classes/Emails/Mailer.php';
 require_once __DIR__ . '/classes/Notices.php';
-//require_once __DIR__ . '/classes/People/People.php';
-//require_once __DIR__ . '/classes/People/Person.php';
 require_once __DIR__ . '/classes/Permalinks.php';
 require_once __DIR__ . '/classes/Admin/SpeakerAdmin.php';
 
-//require_once __DIR__ . '/classes/Tags/Tag.php';
-//require_once __DIR__ . '/classes/Tags/Tags.php';
 require_once __DIR__ . '/classes/Tickets/TicketBooking.php';
 require_once __DIR__ . '/classes/Models/Ticket.php';
 require_once __DIR__ . '/classes/Tickets/TicketsBookings.php';
@@ -97,24 +93,11 @@ if( is_admin() ){
 	require_once __DIR__ . '/admin/em-docs.php';
 	require_once __DIR__ . '/admin/em-help.php';
 	require_once __DIR__ . '/admin/em-options.php';
-	//require_once __DIR__ . '/admin/em-data-privacy.php';
 	require_once __DIR__ . '/admin/em-dashboard.php';
-
-	require_once __DIR__ . '/classes/Events/EventPostAdmin.php';
-	require_once __DIR__ . '/classes/Events/EventPostsAdmin.php';
+	require_once __DIR__ . '/classes/Admin/EventAdmin.php';
+	require_once __DIR__ . '/classes/Admin/RecurringEventAdmin.php';
 	require_once __DIR__ . '/classes/Admin/LocationAdmin.php';
-	//require_once __DIR__ . '/classes/Locations/LocationPostsAdmin.php';
-	//require_once __DIR__ . '/classes/Taxonomies/TaxonomyAdmin.php';
-	//require_once __DIR__ . '/classes/Categories/CategoriesAdmin.php';
-	//require_once __DIR__ . '/classes/Tags/TagsAdmin.php';
 	require_once __DIR__ . '/admin/bookings/em-events.php';
-	/*
-	require_once __DIR__ . '/admin/bookings/em-cancelled.php';
-	require_once __DIR__ . '/admin/bookings/em-confirmed.php';
-	require_once __DIR__ . '/admin/bookings/em-rejected.php';
-	require_once __DIR__ . '/admin/bookings/em-pending.php';
-	require_once __DIR__ . '/admin/bookings/em-person.php';
-	*/
 }
 
 require_once __DIR__ . '/classes/Models/Speaker.php';
@@ -130,12 +113,11 @@ require_once __DIR__ . '/classes/Forms/UserFields.php';
 
 global $wpdb;
 $prefix = $wpdb->prefix;
-define('EM_EVENTS_TABLE',$prefix.'em_events'); //TABLE NAME
+
 define('EM_TICKETS_TABLE', $prefix.'em_tickets'); //TABLE NAME
 define('EM_TICKETS_BOOKINGS_TABLE', $prefix.'em_tickets_bookings'); //TABLE NAME
 define('EM_META_TABLE',$prefix.'em_meta'); //TABLE NAME
 define('EM_RECURRENCE_TABLE',$prefix.'dbem_recurrence'); //TABLE NAME
-define('EM_LOCATIONS_TABLE',$prefix.'em_locations'); //TABLE NAME
 define('EM_BOOKINGS_TABLE',$prefix.'em_bookings'); //TABLE NAME
 define('EM_TRANSACTIONS_TABLE', $wpdb->prefix.'em_transactions'); //TABLE NAME
 define('EM_EMAIL_QUEUE_TABLE', $wpdb->prefix.'em_email_queue'); //TABLE NAME

@@ -46,7 +46,7 @@ class EM_Coupons_Admin {
 		
 		<?php
 		//show coupons that aren't event-wide or site-wide, if not in MB mode
-		if( current_user_can(EM_Coupons::$can_manage) ){ 
+		if( current_user_can('edit_posts') ){ 
         //not in multiple bookings mode and can create their own coupons 
         ?>
 		
@@ -283,7 +283,7 @@ class EM_Coupons_Admin {
 	static function view_page(){
 		global $EM_Notices, $EM_Coupon, $wpdb;
 		//check that user can access this page
-		if( is_object($EM_Coupon) && !$EM_Coupon->can_manage('manage_bookings','manage_others_bookings') ){
+		if( is_object($EM_Coupon) && !current_user_can('edit_posts') ){
 			?>
 			<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php echo sprintf(esc_html('You do not have the rights to manage this %s.','events'),__('coupon','events')); ?></p></div>
 			<?php
@@ -370,7 +370,7 @@ class EM_Coupons_Admin {
 									<?php echo $booking->output('#_BOOKINGSLINK') ?>
 									<?php if( in_array($booking->booking_status, array(2,3)) ) echo '<p class="description">('. $booking->get_status() . ')</p> '; ?>
 								</td>
-								<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $booking->booking_mail; ?>"><?php echo $booking->full_name ?></a></td>
+								<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;booking_mail=<?php echo $booking->booking_mail; ?>"><?php echo $booking->get_full_name ?></a></td>
 								<td><?php echo $booking->get_spaces() ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($booking->get_price()); ?></td>
 								<td><?php echo \Contexis\Events\Intl\Price::format($EM_Coupon->get_discount($base_price)); ?> <p class="description">(<?php echo $EM_Coupon->get_discount_text(); ?>)</p></td>
@@ -379,7 +379,7 @@ class EM_Coupons_Admin {
 									<?php
 									$edit_url = $booking->get_admin_url();
 									?>
-									<?php if( $booking->can_manage() ): ?>
+									<?php if( current_user_can('edit_posts') ): ?>
 									<a class="em-bookings-edit" href="<?php echo $edit_url; ?>"><?php esc_html_e('Edit/View','events'); ?></a>
 									<?php endif; ?>
 								</td>
@@ -400,7 +400,7 @@ class EM_Coupons_Admin {
 	static function edit_form(){
 		global $EM_Notices, $EM_Coupon;
 		//check that user can access this page
-		if( is_object($EM_Coupon) && !$EM_Coupon->can_manage('manage_bookings','manage_others_bookings') ){
+		if( is_object($EM_Coupon) && !current_user_can('edit_posts') ){
 			?>
 			<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php echo sprintf(esc_html('You do not have the rights to manage this %s.','events'),__('coupon','events')); ?></p></div>
 			<?php

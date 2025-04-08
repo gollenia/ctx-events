@@ -7,6 +7,7 @@ use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Models\Ticket;
 use Contexis\Events\Models\Event;
 use Contexis\Events\EM_Object;
+use Contexis\Events\Utilities\SQLHelper;
 use IteratorAggregate;
 use Countable;
 
@@ -134,24 +135,19 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 	 */
 	public function get_event() : ?Event {
 		if (!empty($this->event_id) && is_numeric($this->event_id)) {
-			return Event::find_by_event_id($this->event_id);
+			return Event::find_by_id($this->event_id);
 		}
 		
 		if (!empty($this->bookings) && is_array($this->bookings)) {
 			foreach ($this->bookings as $booking) {
-				return Event::find_by_event_id($booking->event_id);
+				return Event::find_by_id($booking->event_id);
 			}
 		}
 		
 		return null;
 	}
 	
-	/**
-	 * Retrieve and save the bookings belonging to instance. If called again will return cached version, set $force_reload to true to create a new Tickets object.
-	 * @param boolean $force_reload
-	 * @return Tickets
-	 */
-	function get_tickets( $force_reload = false ){
+	function get_tickets( $force_reload = false ) : TicketCollection {
 		if( !is_object($this->tickets) || $force_reload ){
 			$this->tickets = TicketCollection::find_by_event_id($this->event_id);
 		}else{
@@ -286,7 +282,7 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 			$mails = array();
 			foreach( $booking_ids as $booking_id ){
 				$booking = Booking::get_by_id($booking_id);
-				if( !$booking->can_manage() ){
+				if( current_user_can('edit_others_events')	 ){
 					$this->feedback_message = __('Bookings %s. Mails Sent.', 'events');
 					return false;
 				}
@@ -420,7 +416,6 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 	public static function get( $args = array() ) : BookingCollection {
 		global $wpdb;
 		$bookings_table = EM_BOOKINGS_TABLE;
-		$events_table = EM_EVENTS_TABLE;
 		
 		//We assume it's either an empty array or array of search arguments to merge with defaults			
 		$args = self::get_default_search($args);
@@ -445,12 +440,10 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 		}else{
 			$selectors = '*';
 		}
-
 		
 		//Create the SQL statement and execute
 		$sql = apply_filters('em_bookings_get_sql',"
-			SELECT $selectors FROM $bookings_table 
-			LEFT JOIN $events_table ON {$events_table}.event_id={$bookings_table}.event_id 
+			SELECT $selectors FROM $bookings_table
 			$where
 			$orderby_sql
 			$limit $offset
@@ -476,85 +469,93 @@ class BookingCollection extends \EM_Object implements IteratorAggregate, Countab
 		return ( defined('EM_FORCE_REGISTRATION') || self::$force_registration );
 	}
 	
-	/* Overrides EM_Object method to apply a filter to result
-	 * @see wp-content/plugins/events/classes/EM_Object#build_sql_conditions()
-	 */
-	public static function build_sql_conditions( $args = array() ){
-		$conditions = apply_filters( 'em_bookings_build_sql_conditions', parent::build_sql_conditions($args), $args );
-		if( is_numeric($args['status']) ){
-			$conditions['status'] = 'booking_status='.$args['status'];
-		}elseif( is_array($args['status']) && array_is_list($args['status']) && count($args['status']) > 0 ){
-			$conditions['status'] = 'booking_status IN ('.implode(',',$args['status']).')';
-		}elseif( !is_array($args['status']) && preg_match('/^([0-9],?)+$/', $args['status']) ){
-			$conditions['status'] = 'booking_status IN ('.$args['status'].')';
+	public static function build_sql_conditions(array $args): array {
+		$conditions = [];
+	
+		// Booking status
+		if (isset($args['status'])) {
+			if (is_numeric($args['status'])) {
+				$conditions['status'] = 'booking_status = ' . (int) $args['status'];
+			} elseif (is_array($args['status']) && array_is_list($args['status']) && count($args['status']) > 0) {
+				$safe = array_map('intval', $args['status']);
+				$conditions['status'] = 'booking_status IN (' . implode(',', $safe) . ')';
+			} elseif (preg_match('/^([0-9],?)+$/', $args['status'])) {
+				$conditions['status'] = 'booking_status IN (' . $args['status'] . ')';
+			}
 		}
-		if( empty($conditions['event']) && $args['event'] === false ){
-		    $conditions['event'] = EM_BOOKINGS_TABLE.'.event_id != 0';
+	
+		// Event = false → alles mit event_id != 0
+		if (!isset($conditions['event']) && array_key_exists('event', $args) && $args['event'] === false) {
+			$conditions['event'] = EM_BOOKINGS_TABLE . '.event_id != 0';
 		}
-		if( is_numeric($args['ticket_id']) ){
-		    $ticket = new Ticket($args['ticket_id']);
-		    if( $ticket->can_manage() ){
-				$conditions['ticket'] = EM_BOOKINGS_TABLE.'.booking_id IN (SELECT booking_id FROM '.EM_TICKETS_BOOKINGS_TABLE." WHERE ticket_id='{$args['ticket_id']}')";
-		    }
+	
+		// Ticket filter
+		if (isset($args['ticket_id']) && is_numeric($args['ticket_id'])) {
+			$ticket = new Ticket($args['ticket_id']);
+			if(!current_user_can('edit_posts')) return $conditions;
+			
+			$ticket_id = (int) $args['ticket_id'];
+			$conditions['ticket'] = EM_BOOKINGS_TABLE . ".booking_id IN (
+				SELECT booking_id FROM " . EM_TICKETS_BOOKINGS_TABLE . " WHERE ticket_id = $ticket_id
+			)";
+			
 		}
-		return apply_filters('em_bookings_build_sql_conditions', $conditions, $args);
+	
+		return $conditions;
 	}
 	
 	/* Overrides EM_Object method to apply a filter to result
-	 * @see wp-content/plugins/events/classes/EM_Object#build_sql_orderby()
 	 */
 	public static function build_sql_orderby( $args, $accepted_fields, $default_order = 'ASC' ){
-		return apply_filters( 'em_bookings_build_sql_orderby', parent::build_sql_orderby($args, $accepted_fields, get_option('dbem_bookings_default_order','booking_date')), $args, $accepted_fields, $default_order );
+		return apply_filters( 'em_bookings_build_sql_orderby', SQLHelper::build_sql_orderby($args, $accepted_fields, get_option('dbem_bookings_default_order','booking_date')), $args, $accepted_fields, $default_order );
 	}
 	
-	/* 
-	 * Adds custom Events search defaults
-	 * @param array $array_or_defaults may be the array to override defaults
-	 * @param array $array
-	 * @return array
-	 * @uses EM_Object#get_default_search()
-	 */
-	public static function get_default_search( $array_or_defaults = array(), $array = array() ){
-		$defaults = array(
+	public static function get_default_search(array $input = []): array {
+		$defaults = [
 			'status' => false,
-			'person' => true, //to add later, search by person's bookings...
+			'person' => true,
 			'ticket_id' => false,
-			'array' => false //returns an array of results if true, if an array or text it's assumed an array of specific table fields or single field name requested 
-		);
-		//sort out whether defaults were supplied or just the array of search values
-		if( empty($array) ){
-			$array = $array_or_defaults;
-		}else{
-			$defaults = array_merge($defaults, $array_or_defaults);
-		}
-		//clean up array value
-		if( !empty($array['array']) ){
+			'array' => false,
+			'limit' => 10,
+			'page' => 1,
+			'offset' => 0,
+			'orderby' => ['booking_date'],
+			'order' => 'ASC',
+			'owner' => current_user_can('edit_others_events') ? false : get_current_user_id(),
+		];
+	
+		$search = array_merge($defaults, $input);
+	
+		// 🧼 Clean array parameter
+		if (!empty($search['array'])) {
 			$booking = new Booking();
-			if( is_array($array['array']) ){
-				$clean_arg = array();
-				foreach( $array['array'] as $k => $field ){
-					if( array_key_exists($field, $booking->fields) ){
-						$clean_arg[] = $field;
-					}
-				}
-				$search_defaults['array'] = !empty($clean_arg) ? $clean_arg : true; //if invalid args given, just return all fields
-			}elseif( is_string($array['array']) && array_key_exists($array['array'], $booking->fields) ){
-				$search_defaults['array'] = array($array['array']);
-			}else{
-				$search_defaults['array'] = true;
+			if (is_array($search['array'])) {
+				$valid_fields = array_filter($search['array'], fn($field) => array_key_exists($field, $booking->fields));
+				$search['array'] = !empty($valid_fields) ? array_values($valid_fields) : true;
+			} elseif (is_string($search['array']) && array_key_exists($search['array'], $booking->fields)) {
+				$search['array'] = [$search['array']];
+			} else {
+				$search['array'] = true;
 			}
-		}else{
-			$search_defaults['array'] = false;
 		}
-		//figure out default owning permissions
-		if( !current_user_can('edit_others_events') ){
-			$defaults['owner'] = get_current_user_id();
-		}else{
-			$defaults['owner'] = false;
+	
+		// 🧼 Clean limit, offset, page
+		$search['limit'] = is_numeric($search['limit']) ? (int) $search['limit'] : $defaults['limit'];
+		$search['page'] = is_numeric($search['page']) ? max(1, (int) $search['page']) : 1;
+		$search['offset'] = ($search['page'] > 1 && $search['limit'] > 0) ? $search['limit'] * ($search['page'] - 1) : 0;
+	
+		// 🧼 Clean order/orderby
+		$search['order'] = in_array(strtoupper($search['order']), ['ASC', 'DESC']) ? strtoupper($search['order']) : 'ASC';
+		if (is_string($search['orderby'])) {
+			$search['orderby'] = array_map('trim', explode(',', $search['orderby']));
+		} elseif (!is_array($search['orderby'])) {
+			$search['orderby'] = ['booking_date'];
 		}
-		
-		return apply_filters('em_bookings_get_default_search', parent::get_default_search($defaults,$array), $array, $defaults);
+	
+		return apply_filters('em_bookings_get_default_search', $search, $input, $defaults);
 	}
+	
+	
 
 	public function getIterator(): \Traversable {
         return new \ArrayIterator($this->bookings);

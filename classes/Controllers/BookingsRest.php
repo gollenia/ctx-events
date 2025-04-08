@@ -75,7 +75,7 @@ class BookingsRest {
 
 		$booking = Booking::get_by_id($id);
 
-		if(!$booking->can_manage('edit')) {
+		if(!current_user_can('edit_published_posts')) {
 			$response = [
 				'success' => false,
 				'error' => __('You do not have permission to edit this booking', 'events')
@@ -130,7 +130,7 @@ class BookingsRest {
 		$booking = $request->has_param('id') ? Booking::get_by_id($request->get_param('id')) : false;
 		$event_id = $booking ? $booking->event_id : intval($request->get_param('event_id'));
 		
-		$event = $booking ? Event::find_by_event_id($event_id) : Event::find_by_post_id($event_id);
+		$event = $booking ? Event::find_by_id($event_id) : Event::find_by_post_id($event_id);
 		if(!$event || ($request->get_param('id') && !$booking)) {
 			return new WP_REST_Response(['error' => __('Booking not found', 'events')], 404);
 		}
@@ -161,8 +161,8 @@ class BookingsRest {
 			'booking' => $booking ? [
 				'date' => $booking->get_booking_date(),
 				'id' => $booking->booking_id,
-				'status' => $booking->status,
-				'status_array' => $booking->status_array,
+				'status' => $booking->booking_status,
+				'status_array' => Booking::get_status_array(),
 				'price' => $booking->get_price(),
 				'donation' => $booking->booking_donation,
 				'paid' => $booking->get_price_summary_array(),
