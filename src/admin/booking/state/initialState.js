@@ -1,5 +1,5 @@
 const initialState = {
-	data: false,
+	event: false,
 	state: 'loading',
 	modal: {
 		selectedTicketIndex: 999,

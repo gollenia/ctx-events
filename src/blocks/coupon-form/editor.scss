@@ -1,0 +1,21 @@
+.post-type-coupon .wp-block,
+.post-type-coupon .wp-block-post-content {
+	width: 60%;
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.coupon-edit {
+	&__code {
+		display: flex;
+		align-items: end;
+		gap: 1rem;
+	}
+	&__code-input {
+		flex: 1;
+	}
+	&__code-generate {
+		margin-bottom: ( 8px );
+	}
+}

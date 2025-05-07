@@ -4,14 +4,14 @@ import { React, useState } from 'react';
 import { STATES } from './modules/constants';
 
 function Coupon( { state, dispatch } ) {
-	const { data } = state;
+	const { event } = state;
 
 	const [ status, setStatus ] = useState( STATES.IDLE );
 
 	const checkCouponCode = async () => {
 		setStatus( STATES.LOADING );
 		const params = {
-			event_id: data.event.event_id,
+			event_id: event.id,
 			code: state.request.coupon,
 		};
 

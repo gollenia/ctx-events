@@ -1,7 +1,6 @@
 import React from 'react';
 
 const WizardProgress = ( { index, count, valid, currentStep, label } ) => {
-	console.log( { index, count, valid, currentStep, label } );
 	const lastStep = count - 1 === currentStep;
 	const classes = [
 		'wizard__progress',

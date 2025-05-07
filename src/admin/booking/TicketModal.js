@@ -6,23 +6,20 @@ import AdminField from './AdminField';
 const TicketModal = ( { store, onCancel, onSave } ) => {
 	const [ state, dispatch ] = store;
 	const ticket = state.currentTicket != 999 ? state.data.attendees[ state.currentTicket ] : null;
-	const { attendee_fields, available_tickets } = state.data;
+	const { attendee_fields, tickets_available } = state.data;
 
 	const [ shadowTicket, setShadowTicket ] = React.useState( ticket );
-	console.log( 'uuihd', state.currentTicket );
 	useEffect( () => {
 		setShadowTicket( ticket );
 	}, [ ticket ] );
 
 	const ticketOptions = () => {
-		const options = Object.keys( available_tickets ).map( ( key ) => {
-			return { label: available_tickets[ key ].name, value: available_tickets[ key ].id };
+		const options = Object.keys( tickets_available ).map( ( key ) => {
+			return { label: tickets_available[ key ].name, value: tickets_available[ key ].id };
 		} );
 
 		return options;
 	};
-
-	console.log( 'shadowTicket', shadowTicket );
 
 	return (
 		<>

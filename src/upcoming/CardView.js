@@ -32,11 +32,10 @@ function EventCards( props ) {
 		animationType ? `ctx-${ animationType }` : '',
 	].join( ' ' );
 
-	console.log( events );
-
 	return (
 		<ul className={ className }>
 			{ events.map( ( item, index ) => {
+				console.log( item );
 				const location =
 					item.location && [ 'city', 'name' ].includes( showLocation ) ? item.location[ showLocation ] : '';
 
@@ -68,9 +67,9 @@ function EventCards( props ) {
 								</div>
 							</div>
 						) }
-						{ showImages && (
+						{ showImages && item.image.attachment_id !== 0 && (
 							<a href={ item.link } className="event-card-image">
-								<img src={ item.image?.sizes?.large?.url } />
+								<img src={ item.image.sizes?.large?.url } alt={ item.image.alt || item.title } />
 							</a>
 						) }
 						<div className="event-card-content">
@@ -86,7 +85,7 @@ function EventCards( props ) {
 								<div class="event-card-footer">
 									<div class="event-card-footer-details">
 										<div className="event-card-footer-details-text">
-											{ showLocation && item.location?.ID && (
+											{ showLocation && item.location?.id && (
 												<div className="event-card-detail">
 													<i className="material-icons">place</i> <span>{ location }</span>
 												</div>

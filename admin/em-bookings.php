@@ -1,8 +1,8 @@
 <?php
 
 use Contexis\Events\Collections\BookingCollection;
-use Contexis\Events\Export\BookingsTable;
-use Contexis\Events\Model\Booking;
+use Contexis\Events\Admin\BookingsTable;
+use Contexis\Events\Models\Booking;
 use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Ticket;
 use Contexis\Events\PostTypes\EventPost;
@@ -61,7 +61,7 @@ function em_bookings_dashboard(){
  */
 function em_bookings_event(){
 	global $EM_Notices;
-	$event = Event::find_by_id($_REQUEST['event_id']);
+	$event = Event::get_by_id($_REQUEST['event_id']);
 	
 	//check that user can access this page
 	if( is_object($event) && current_user_can('publish_posts') ){
@@ -76,7 +76,7 @@ function em_bookings_event(){
 		<?php if( is_admin() ): ?><h1 class="wp-heading-inline"><?php else: ?><h2><?php endif; ?>		
   			<?php echo sprintf(__('Manage %s Bookings', 'events'), "'{$event->event_name}'"); ?>
   		<?php if( is_admin() ): ?></h1><?php endif; ?>
-  			<a href="<?php echo $event->get_permalink(); ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('View %s','events'), __('Event', 'events')) ?></a>
+  			<a href="<?php echo get_post_permalink($event->event_id);; ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('View %s','events'), __('Event', 'events')) ?></a>
   			<a href="<?php echo $event->get_edit_url(); ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('Edit %s','events'), __('Event', 'events')) ?></a>
   			<?php if( locate_template('plugins/events/templates/csv-event-bookings.php', false) ): //support for legacy template ?>
   			<a href='<?php echo EventPost::get_admin_url() ."&amp;page=events-bookings&amp;action=bookings_export_csv&amp;_wpnonce=".wp_create_nonce('bookings_export_csv')."&amp;event_id=".$event->event_id ?>' class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Export CSV','events')?></a>
@@ -88,9 +88,9 @@ function em_bookings_event(){
 			<p><strong><?php esc_html_e('Event Name','events'); ?></strong> : <?php echo esc_html($event->event_name); ?></p>
 			<p>
 				<strong><?php esc_html_e('Availability','events'); ?></strong> : 
-				<?php echo $event->get_bookings()->get_booked_spaces() . '/'. $event->get_bookings()->get_spaces() ." ". __('Spaces confirmed','events'); ?>
+				<?php echo $event->get_booked_spaces() . '/'. $event->get_spaces() ." ". __('Spaces confirmed','events'); ?>
 				<?php if( get_option('dbem_bookings_approval_reserved') ): ?>
-				, <?php echo $event->get_bookings()->get_available_spaces() . '/'. $event->get_bookings()->get_spaces() ." ". __('Available spaces','events'); ?>
+				, <?php echo $event->get_available_spaces() . '/'. $event->get_spaces() ." ". __('Available spaces','events'); ?>
 				<?php endif; ?>
 			</p>
 			<p>
@@ -172,7 +172,10 @@ function em_bookings_person(){
 }
 
 function em_bookings_single() {
-	$booking = Booking::get_by_id($_REQUEST['booking_id']);
+	if(!isset($_REQUEST['booking_id'])) {
+		return;
+	}
+	$booking = Booking::get_by_id(absint($_REQUEST['booking_id']));
 	
 	?>
 	<div class='wrap' id="em-bookings-admin-booking">

@@ -19,7 +19,7 @@ const FullPrice = ( { store } ) => {
 		if ( ! attendees ) return;
 		let price = 0;
 		attendees.forEach( ( attendee ) => {
-			price += parseInt( state.data.available_tickets[ attendee.ticket_id ].price );
+			price += parseInt( state.data.tickets_available[ attendee.ticket_id ].price );
 		} );
 
 		if ( couponId ) {

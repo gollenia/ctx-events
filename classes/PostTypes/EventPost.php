@@ -4,10 +4,12 @@ namespace Contexis\Events\PostTypes;
 
 use Contexis\Events\Collections\EventCollection;
 use Contexis\Events\Interfaces\PostType;
+use Contexis\Events\Interfaces\HasTaxonomy;
+use Contexis\Events\Models\Event;
 use RecurringEventPost;
 use WP_Query;
 
-class EventPost implements PostType {
+class EventPost implements PostType, HasTaxonomy {
 
 	const POST_TYPE = "event";
 	const CATEGORIES = 'event-categories';
@@ -15,9 +17,12 @@ class EventPost implements PostType {
 	
 	public static function init() : self {
 		$instance = new self;
+	
+		
 		add_action('init', array($instance, 'register_post_type'));
 		add_action('init', array($instance, 'register_taxonomies'));
 		add_action('init', array($instance, 'register_meta'));	
+		add_action('rest_api_init', [$instance, 'add_rest_fields']);
 		add_action('parse_query', array($instance,'parse_query'));
 		return $instance;
 	}	
@@ -37,7 +42,6 @@ class EventPost implements PostType {
 			'show_ui' => true,
 			'show_in_rest' => true,
 			'query_var' => true, 
-			'rewrite' => ['slug' => self::get_slug(),'with_front'=>false],
 			'label' => __('Event Tags'),
 			'show_admin_column' => true,
 			'singular_label' => __('Event Tag'),
@@ -88,7 +92,7 @@ class EventPost implements PostType {
 			]
 		]);
 	}
-
+	
 	public function register_post_type() : void {
 		$labels = [
 			'name' => __('Events','events'),
@@ -104,8 +108,8 @@ class EventPost implements PostType {
 			'not_found_in_trash' => __('No Events Found in Trash','events'),
 			'parent' => __('Parent Event','events'),
 		];
-
-		$post_type = [	
+		
+		$event_post_type = [	
 			'public' => true,
 			'hierarchical' => false,
 			'show_ui' => true,
@@ -116,7 +120,7 @@ class EventPost implements PostType {
 			'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
 			'publicly_queryable' => true,
 			'rewrite' => ['slug' => self::get_slug(),'with_front'=>false],
-			'has_archive' => false,
+			'has_archive' => true,
 			'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
 			'template' => [
 					['ctx-blocks/grid-row', [], [
@@ -134,11 +138,10 @@ class EventPost implements PostType {
 			'menu_icon' => 'dashicons-calendar-alt'
 		];
 		
-		register_post_type( self::POST_TYPE, $post_type );
+		register_post_type( self::POST_TYPE, $event_post_type );
 	}
 
 	public function register_meta() : void {
-
 		$metadata = [
 			[ "name" => "_booking_form","type" => "number"],
 			[ "name" => "_attendee_form","type" => "number"],
@@ -155,7 +158,8 @@ class EventPost implements PostType {
 			[ "name" => "_event_rsvp_spaces","type" => "number"],
 			[ "name" => "_event_rsvp_donation","type" => "boolean"],
 			[ "name" => "_event_recurrence_id", "type" => "number"],
-			[ "name" => "_is_detatched", "type" => "boolean"]
+			[ "name" => "_is_detatched", "type" => "boolean"],	
+			
 		];
 
 		foreach($metadata as $meta){
@@ -163,17 +167,116 @@ class EventPost implements PostType {
 				'type' => $meta['type'],
 				'single'       => true,
 				
-				'sanitize_callback' => '',
+				'sanitize_callback' => null,
 				'auth_callback' => function() {
 					return current_user_can( 'edit_posts' );
 				},
 				'show_in_rest' => [
 					'schema' => [	
-						'style' => $meta['type']
+						'type' => $meta['type']
 					]
 				]
 			]);
 		}
+
+		register_post_meta( 'event', '_event_coupons', [
+			'type' => 'array',
+			'single' => true,
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'integer'
+					],
+				]
+			],
+			'auth_callback' => function() {
+				return current_user_can( 'edit_posts' );
+			}
+		]);
+
+		register_post_meta( 'event', '_event_tickets', [
+			'type' => 'array',
+			'single' => true,
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'object',
+						'properties' => [
+							'ticket_id' => [
+								'type' => 'number'
+							],
+							'ticket_name' => [
+								'type' => 'string'
+							],
+							'ticket_description' => [
+								'type' => 'string'
+							],
+							'ticket_price' => [
+								'type' => 'number'
+							],
+							'ticket_max' => [
+								'type' => 'integer'
+							],
+							'ticket_min' => [
+								'type' => 'integer'
+							],
+							'ticket_spaces' => [
+								'type' => 'integer'
+							],
+							'ticket_start' => [
+								'type' => 'string'
+							],
+							'ticket_end' => [
+								'type' => 'string'
+							],
+							'ticket_active' => [
+								'type' => 'boolean',
+								'default' => true
+							],
+							'ticket_order' => [
+								'type' => 'number'
+							],
+							'ticket_form' => [
+								'type' => 'integer'
+							],
+							'ticket_enabled' => [
+								'type' => 'integer'
+							],
+
+						]
+					],
+				]
+			],
+			'auth_callback' => function() {
+				return current_user_can( 'edit_posts' );
+			}
+		]);
+
+		register_meta('event', '_event_mails', [
+			'type' => 'array',
+			'single' => true,
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'object',
+						'properties' => [
+							'gateway'   => [ 'type' => 'string' ],
+							'status'    => [ 'type' => 'string' ],
+							'recipient' => [ 'type' => 'string' ],
+							'subject'   => [ 'type' => 'string' ],
+							'message'   => [ 'type' => 'string' ],
+							'enabled'   => [ 'type' => 'boolean' ],
+							'locale'    => [ 'type' => 'string' ]
+						]
+					],
+				],
+			],
+			'sanitize_callback' => null,
+			'auth_callback' => fn() => current_user_can('edit_posts'),
+		]);
 	}
 	
 	public static function parse_query(WP_Query $query) : WP_Query{
@@ -196,10 +299,24 @@ class EventPost implements PostType {
 
 		$args = EventCollection::get_query_args($args);
 		$query->query_vars = array_merge($query->query_vars, $args);
-		\Contexis\Events\Utilities::object_to_js_console($query->query_vars);
+		\Contexis\Events\Utilities\Debug::object_to_js_console($query->query_vars);
 		return $query;
 		
 	}
-}
 
-EventPost::init();
+	public function add_rest_fields() : void {
+		
+		register_rest_field( self::POST_TYPE, 'extras', [
+			'get_callback' => function($object) {
+				$event = Event::get_by_id($object['id']);
+				return [
+					'spaces' => $event->get_available_spaces()
+				];
+			},
+			'schema' => [
+				'type' => 'object',
+				'context' => ['view', 'edit'],
+			],
+		]);
+	}
+}

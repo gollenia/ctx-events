@@ -87,7 +87,7 @@ while ( count($events) > 0 ){
 		//formats
 		$summary = em_mb_ical_wordwrap('SUMMARY:' . EventView::render($event, $summary_format,'ical'));
 		$description = em_mb_ical_wordwrap('DESCRIPTION:' . EventView::render($event, $description_format,'ical'));
-		$url = 'URL:'.$event->get_permalink();
+		$url = 'URL:'.get_permalink($event->event_id);
 		$url = wordwrap($url, 74, "\n ", true);
 		$location = $geo = $apple_geo = $apple_location = $apple_location_title = $apple_structured_location = $categories = false;
 		if( $event->location_id ){

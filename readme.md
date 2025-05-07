@@ -12,12 +12,7 @@ As the WP Events Manager seems to stagnate in development, we started to moderni
 -   cleaning up code (greetings to you, uncle Bob!)
 -   offline payment now supports QR-Codes
 -   generate a PDF with a monthly event list
-
-Also, we plan these features:
-
--   Rearrange the classes into namespaces
--   remove jQuery completely
--   recode the form editor (with Gutenberg blocks)
+-   Cool new feature: Multibookings removed. If you're looking to book multiple events at once, consider implementing SAP. Or just use a different plugin. But please — don’t come crying here.
 
 ### Installation
 

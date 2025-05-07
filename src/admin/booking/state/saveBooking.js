@@ -14,7 +14,7 @@ const saveBooking = ( bookingId, state, dispatch ) => {
 		coupon: data.booking.coupon,
 	};
 
-	for ( const id of Object.keys( data.available_tickets ) ) {
+	for ( const id of Object.keys( data.tickets_available ) ) {
 		fetchRequest[ 'attendees' ][ id ] = [];
 	}
 
@@ -23,18 +23,16 @@ const saveBooking = ( bookingId, state, dispatch ) => {
 	} );
 
 	dispatch( { type: 'SET_SEND_STATE', payload: 'saving' } );
-	console.log( 'fetchRequest', fetchRequest );
+
 	apiFetch( {
 		path: `/events/v2/booking/${ bookingId }`,
 		method: 'PUT',
 		data: fetchRequest,
 	} )
 		.then( ( apiResponse ) => {
-			console.log( apiResponse );
 			dispatch( { type: 'SET_SEND_STATE', payload: 'saved' } );
 		} )
 		.catch( ( error ) => {
-			console.log( error );
 			dispatch( { type: 'SET_SEND_STATE', payload: 'failed' } );
 		} );
 };

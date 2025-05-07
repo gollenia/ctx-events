@@ -1,7 +1,7 @@
 <?php
 /* @var $event Event */
 
-use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Booking;
 
 $people = array();
 $bookings = $event->get_bookings();

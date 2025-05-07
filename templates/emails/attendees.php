@@ -1,10 +1,11 @@
 <?php
 
+use Contexis\Events\Forms\AttendeesForm;
 use Contexis\Events\Models\Ticket;
 
 $tickets = $booking->booking_meta['attendees'];
 $ticket_array = [];
-$form_fields = EM_Attendees_Form::get_form($booking->event_id)->form_fields;
+$form_fields = AttendeesForm::get_form($booking->event_id)->form_fields;
 
 $data = $booking->get_attendees();
 
@@ -23,7 +24,7 @@ $data = $booking->get_attendees();
 	</tr><?php
 	foreach($data as $ticket) {
 
-		$ticket_data = new Ticket($ticket["ticket_id"]);
+		$ticket_data = Ticket::get_by_id($booking->event_id, $ticket["ticket_id"]);
 		echo "<tr>" ;
 		echo "<td>" . $ticket_data->ticket_name . "</td>";
 		

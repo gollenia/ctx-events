@@ -41,8 +41,16 @@
 	"autoload": {
 		"psr-4": {
 			"Contexis\\Events\\Blocks\\": "classes/Blocks/",
+			"Contexis\\Events\\Collections\\": "classes/Collections/",
+			"Contexis\\Events\\Controllers\\": "classes/Controllers/",
+			"Contexis\\Events\\PostTypes\\": "classes/PostTypes/",
+			"Contexis\\Events\\Interfaces\\": "classes/Interfaces/",
+			"Contexis\\Events\\Models\\": "classes/Models/",
+			"Contexis\\Events\\Utilities\\": "classes/Utilities/",
+			"Contexis\\Events\\Views\\": "classes/Views/",
 			"Contexis\\Events\\Intl\\": "classes/Intl/",
-			"Contexis\\Events\\Admin\\": "classes/Admin/"
+			"Contexis\\Events\\Admin\\": "classes/Admin/",
+			"Contexis\\Events\\Payment\\": "classes/Payment/"
 		}
 	},
 	"require-dev": {

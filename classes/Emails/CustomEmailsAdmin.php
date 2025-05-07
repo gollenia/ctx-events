@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Models\Event;
+use Contexis\Events\Payment\GatewayService;
 use Contexis\Events\PostTypes\EventPost;
 
 class EM_Custom_Emails_Admin {
@@ -233,7 +234,7 @@ class EM_Custom_Emails_Admin {
 				$email_values = array();
 				$gateways = array($EM_Gateway->gateway => $EM_Gateway->title);
 			}else{
-				$gateways = EM_Gateways::active_gateways();
+				$gateways = GatewayService::active_gateways();
 			}
     		foreach($gateways as $gateway => $gateway_name ){
     			//default values are - by default - the general settings values, overriden further down by $possible_email_values
@@ -346,8 +347,7 @@ class EM_Custom_Emails_Admin {
 		if( get_option('dbem_custom_emails_gateways_admins') ){
 	        $custom_admin_emails = self::update_gateway_admin_emails($EM_Gateway, $default_emails);
 	        if( $custom_admin_emails === false ){
-    			global $EM_Notices;
-    			$EM_Notices->add_error(__('An invalid admin email was supplied for your custom emails and was not saved in your settings.','events'),true);
+    
     		}else{
     			$EM_Gateway->update_option('emails_admins', serialize($custom_admin_emails));
     		}
@@ -383,7 +383,7 @@ class EM_Custom_Emails_Admin {
 
 	public static function get_gateway_default_emails( $EM_Gateway = false ){
 		$emails = array();
-		$gateways = is_object($EM_Gateway) ? array($EM_Gateway->gateway => $EM_Gateway->title) : EM_Gateways::active_gateways();		
+		$gateways = is_object($EM_Gateway) ? array($EM_Gateway->gateway => $EM_Gateway->title) : GatewayService::active_gateways();		
 		foreach($gateways as $gateway => $gateway_name ){
 			$emails[$gateway] = array(
 				'title' => sprintf(__('%s Gateway','events'), $gateway_name),

@@ -31,7 +31,7 @@ const BookingsTable = () => {
 			return;
 		}
 		const tableBody = table.querySelector( 'tbody' );
-		console.log( 'Brunsbüttel' );
+
 		document.addEventListener( 'click', ( event ) => {
 			if ( event.target.classList.contains( 'em-bookings-action' ) ) {
 				const data = event.target.dataset;
@@ -39,13 +39,12 @@ const BookingsTable = () => {
 					return;
 				}
 				const id = data.bookingId;
-				console.log( id );
+
 				apiFetch( {
 					path: `/events/v2/booking/${ id }`,
 					method: 'PUT',
 					data: { action: data.action },
 				} ).then( ( response ) => {
-					console.log( response );
 					const row = event.target.closest( 'tr' );
 					if ( data.action === 'delete' ) {
 						row.remove();

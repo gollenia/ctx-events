@@ -78,14 +78,13 @@ class RecurringEventPost implements PostType {
 			register_post_meta( self::POST_TYPE, $meta['name'], [
 				'type' => $meta['type'],
 				'single'       => true,
-				
-				'sanitize_callback' => '',
+				'sanitize_callback' => null,
 				'auth_callback' => function() {
 					return current_user_can( 'edit_posts' );
 				},
 				'show_in_rest' => [
 					'schema' => [	
-						'style' => $meta['type']
+						'type' => $meta['type']
 					]
 				]
 			]);

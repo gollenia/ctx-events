@@ -1,5 +1,7 @@
 <?php
 
+namespace Contexis\Events\PostTypes;
+
 use Contexis\Events\Interfaces\PostType;
 
 class SpeakerPost implements PostType {
@@ -51,7 +53,7 @@ class SpeakerPost implements PostType {
             ],
         ]);
 
-		register_post_type( 'event-speaker', $args );     
+		register_post_type( SELF::POST_TYPE, $args );     
     }
 
 	public function register_meta() :void {
@@ -61,7 +63,7 @@ class SpeakerPost implements PostType {
 			'show_in_rest' => [
 				'schema' => [
 					'default' => '',
-					'style' => "string"
+					'type' => "string"
 				]
 				],
 			'single'       => true,
@@ -76,7 +78,7 @@ class SpeakerPost implements PostType {
 			'show_in_rest' => [
 				'schema' => [
 					'default' => '',
-					'style' => "string"
+					'type' => "string"
 				]
 				],
 			'single'       => true,
@@ -91,7 +93,7 @@ class SpeakerPost implements PostType {
 			'show_in_rest' => [
 				'schema' => [
 					'default' => '',
-					'style' => "string"
+					'type' => "string"
 				]
 				],
 			'single'       => true,
@@ -106,7 +108,7 @@ class SpeakerPost implements PostType {
 			'show_in_rest' => [
 				'schema' => [
 					'default' => '',
-					'style' => "string"
+					'type' => "string"
 				]
 				],
 			'single'       => true,
@@ -127,5 +129,3 @@ class SpeakerPost implements PostType {
 
 	}
 }
-
-SpeakerPost::init();

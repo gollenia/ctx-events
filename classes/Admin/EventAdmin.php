@@ -13,13 +13,8 @@ class EventAdmin {
 	public static function init(){
 		if(!is_admin()) return;
 		$instance = new self;
-		$screen = 'edit-'.EventPost::POST_TYPE;
-		$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
-		if( $hidden === false ){
-			$hidden = array('event-id');
-			update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
-		}
-
+		
+		add_action('init', [$instance,'load_user_options'], 10, 0);
 		add_action('admin_notices', [$instance,'admin_notices'], 10, 0);
 		add_action('add_meta_boxes_'.EventPost::POST_TYPE, [$instance,'meta_boxes'], 10, 1);
 		add_filter('post_row_actions', array($instance,'row_actions'),10,2);
@@ -52,11 +47,20 @@ class EventAdmin {
 		echo "</div>";
 	}
 
+	public function load_user_options(){
+		$screen = 'edit-'.EventPost::POST_TYPE;
+		$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
+		if( $hidden === false ){
+			$hidden = array('event-id');
+			update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
+		}
+	}
+
 	public static function admin_notices(){
 
         if( empty($_REQUEST['recurrence_id']) || !is_numeric($_REQUEST['recurrence_id']) ) return;
 		
-		$event = Event::find_by_id( absint($_REQUEST['recurrence_id']) );
+		$event = Event::get_by_id( absint($_REQUEST['recurrence_id']) );
 		?>
 		<div class="notice notice-info">
 			<p><?php echo sprintf(esc_html__('You are viewing individual recurrences of recurring event %s.', 'events'), '<a href="'.$event->get_edit_url().'">'.$event->event_name.'</a>'); ?></p>
@@ -208,11 +212,11 @@ class EventAdmin {
 				$location = $event->get_location();
 				if( $event->has_location() ){
 					$actions = array();
-					$actions[] = "<a href='". esc_url($location->get_permalink())."'>". esc_html__('View') ."</a>";
+					$actions[] = "<a href='". esc_url(get_post_permalink($location->location_id))."'>". esc_html__('View') ."</a>";
 					if( current_user_can('edit_posts') ){
 						$actions[] = "<a href='". esc_url($location->get_edit_url())."'>". esc_html__('Edit') ."</a>";
 					}
-					echo "<strong><a href='". $location->get_permalink()."'>" . $location->location_name . "</a></strong>";
+					echo "<strong><a href='". get_post_permalink($location->location_id)."'>" . $location->location_name . "</a></strong>";
 					echo "<span class='row-actions'> - ". implode(' | ', $actions) . "</span>";
 					echo "<br/>" . $location->location_address . " - " . $location->location_town;
 				}else{
@@ -279,7 +283,7 @@ class EventAdmin {
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($event->event_rsvp)){
 					?>
 					
-					<b><?php echo $event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_bookings()->get_spaces(); ?>
+					<b><?php echo $event->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_spaces(); ?>
 					
 				
 					<?php
@@ -287,13 +291,13 @@ class EventAdmin {
 				}
 				break;
 			case 'booked':
-				if( get_option('dbem_rsvp_enabled') == 1 && !empty($event->event_rsvp) && $event->get_bookings()->get_spaces()){
-					$booked_percent = $event->get_bookings()->get_booked_spaces() / ($event->get_bookings()->get_spaces() / 100);
-					$pending_percent = $event->get_bookings()->get_pending_spaces() / ($event->get_bookings()->get_spaces() / 100);
+				if( get_option('dbem_rsvp_enabled') == 1 && !empty($event->event_rsvp) && $event->get_spaces()){
+					$booked_percent = $event->get_booked_spaces() / ($event->get_spaces() / 100);
+					$pending_percent = $event->get_pending_spaces() / ($event->get_spaces() / 100);
 					?>
 					
-					<b style="white-space: nowrap;"><?php echo $event->get_bookings()->get_booked_spaces(); echo " ";  ?> /
-					<?php echo $event->get_bookings()->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
+					<b style="white-space: nowrap;"><?php echo $event->get_booked_spaces(); echo " ";  ?> /
+					<?php echo $event->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
 					<div class="em-booking-graph">
 									<?php if($booked_percent < 100) { ?>
 										<div class="em-booking-graph-booked <?php if($pending_percent) echo "cut" ?>" style="width:<?php echo $booked_percent ?>%;"></div>

@@ -72,7 +72,7 @@ function em_bookings_confirmed_table(){
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person_id; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>
-									<td><?php echo $booking->get_spaces() ?></td>
+									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>										
 										<?php
 										$unapprove_url = add_query_arg(['action'=>'bookings_unapprove', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);

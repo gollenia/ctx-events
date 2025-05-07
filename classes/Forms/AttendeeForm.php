@@ -1,17 +1,8 @@
 <?php
-/**
- * Extends the EM_Form to take into consideration the fact that many attendee sub-forms are submitted in one booking, unlike EM_Form which is geared to dealing with a single simple form submission.
- * @author marcus
- *
- */
-class EM_Attendee_Form extends EM_Form {
+namespace Contexis\Events\Forms;
+class AttendeeForm extends Form {
 	public $event_id;
 	
-    /*
-     * Extends the default function to search within a request variable which contains an array of attendee forms. The $ticket_id and $attendee_index is needed to locate the right form to process. 
-     * @see EM_Form::get_post()
-	 * Changed from original: [$fieldid][$attendee_index] => [$attendee_index][$fieldid]
-     */
     function get_post( $validate = false, $ticket_id = 0, $attendee_index = 0 ){
         $this->field_values = [];
     	foreach($this->form_fields as $field){

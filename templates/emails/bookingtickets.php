@@ -4,7 +4,7 @@
 echo $ticket_booking->get_ticket()->name; 
 ?>
 
-<?php _e('Quantity','events'); ?>: <?php echo $ticket_booking->get_spaces(); ?>
+<?php _e('Quantity','events'); ?>: <?php echo $ticket_booking->get_booked_spaces(); ?>
 
 
 <?php endforeach; ?>

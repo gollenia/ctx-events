@@ -14,7 +14,7 @@ use Contexis\Events\Intl\Price;
 <?php echo $ticket_booking->get_ticket()->ticket_name; ?>
 
 --------------------------------------
-<?php _e('Quantity','events'); ?>: <?php echo $ticket_booking->get_spaces(); ?>
+<?php _e('Quantity','events'); ?>: <?php echo $ticket_booking->get_booked_spaces(); ?>
 
 <?php _e('Price','events'); ?>: <?php echo Price::format($ticket_booking->get_price()); ?>
 

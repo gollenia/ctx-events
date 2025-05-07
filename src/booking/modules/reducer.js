@@ -8,7 +8,7 @@ const reducer = ( state = {}, action ) => {
 	switch ( type ) {
 		case 'SET_EVENT':
 			state.event = payload;
-			state.wizard.step = payload?.attendee_fields?.length === 0 ? 1 : 0;
+			state.wizard.step = payload?.forms?.attendee_fields?.length === 0 ? 1 : 0;
 			return { ...state };
 
 		case 'SET_WIZARD':
@@ -38,7 +38,7 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'ADD_TICKET':
-			state.request.tickets.push( JSON.parse( JSON.stringify( state.data.available_tickets[ payload ] ) ) );
+			state.request.tickets.push( JSON.parse( JSON.stringify( state.event.tickets_available[ payload ] ) ) );
 			state.wizard.checkValidity = true;
 			return { ...state };
 
@@ -77,7 +77,6 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'BOOKING_RESPONSE':
-			console.log( 'BOOKING_RESPONSE', payload );
 			state.response.booking = payload.response;
 			state.modal.orderState = payload.state;
 			state.wizard.step = state.wizard.step + 1;

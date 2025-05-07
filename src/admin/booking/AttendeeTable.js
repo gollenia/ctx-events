@@ -36,7 +36,7 @@ const AttendeeTable = ( { store } ) => {
 						return (
 							<tr className="alternate">
 								<td>
-									{ data.available_tickets[ attendee.ticket_id ]?.name }
+									{ data.tickets_available[ attendee.ticket_id ]?.name }
 									<div class="row-actions">
 										<span class="edit">
 											<a
@@ -73,23 +73,19 @@ const AttendeeTable = ( { store } ) => {
 								) ) }
 								<td>
 									{ formatPrice(
-										data.available_tickets[ attendee.ticket_id ]?.price,
+										data.tickets_available[ attendee.ticket_id ]?.price,
 										state.data.l10n.currency
 									) }
 								</td>
 							</tr>
 						);
 					} ) }
-				<tr>
-					<td>
-						{ __( 'Donation', 'events' ) }
-					</td>
-					<td colSpan={4}></td>
-					
-					<td>
-						{ formatPrice( state.data.booking.donation, state.data.l10n.currency ) }
-					</td>
-				</tr>
+					<tr>
+						<td>{ __( 'Donation', 'events' ) }</td>
+						<td colSpan={ 4 }></td>
+
+						<td>{ formatPrice( state.data.booking.donation, state.data.l10n.currency ) }</td>
+					</tr>
 				</tbody>
 				<tfoot>
 					<FullPrice store={ store } />

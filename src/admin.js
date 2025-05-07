@@ -56,6 +56,6 @@ const bookingEditRoot = document.getElementById( 'booking-edit' );
 
 import { BookingAdmin } from './admin/booking/booking-admin';
 import { BookingsTable } from './admin/bookings/index.js';
-console.log( 'bookingEditRoot', BookingsTable );
+
 BookingsTable();
 BookingAdmin();

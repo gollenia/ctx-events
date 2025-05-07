@@ -19,9 +19,9 @@ const Payment = ( props ) => {
 
 	const gatewayOptions = () => {
 		const result = {};
-		if ( event?.available_gateways == undefined ) return result;
-		Object.keys( event?.available_gateways ).forEach( ( id ) => {
-			result[ id ] = event.available_gateways[ id ].title;
+		if ( event?.gateways_available == undefined ) return result;
+		Object.keys( event?.gateways_available ).forEach( ( id ) => {
+			result[ id ] = event.gateways_available[ id ].title;
 		} );
 		return result;
 	};
@@ -34,7 +34,7 @@ const Payment = ( props ) => {
 			<div>
 				<form className="form--trap form grid xl:grid--columns-6 grid--gap-8">
 					{ event?.has_coupons && <Coupon state={ state } dispatch={ dispatch } /> }
-					{ Object.keys( event.available_gateways ).length > 1 && (
+					{ Object.keys( event.gateways_available ).length > 1 && (
 						<InputField
 							label={ __( 'Payment Method', 'events' ) }
 							options={ gatewayOptions() }
@@ -44,7 +44,7 @@ const Payment = ( props ) => {
 							} }
 							type={ 'select' }
 							value={ request.gateway }
-							locale={ event.l10n.locale }
+							locale={ window.eventBookingLocalization.locale }
 						/>
 					) }
 					{ event.allow_donation && window.eventBookingLocalization.donation != '' && (

@@ -161,7 +161,7 @@ class EventRecurring extends Event {
 	 */
 	function get_event_recurrence(){
 		if(!$this->is_recurring()){
-			return Event::find_by_id($this->recurrence_id);
+			return Event::get_by_id($this->recurrence_id);
 		}else{
 			return $this;
 		}
@@ -195,7 +195,7 @@ class EventRecurring extends Event {
 	 */
 	function detach(){
 		global $wpdb;
-		if( $this->is_recurrence() && !$this->is_recurring() && current_user_can('edit_others_events') ){
+		if( $this->is_recurrence() && !$this->is_recurring() && current_user_can('edit_posts') ){
 			//remove recurrence id from post meta and index table
 			$url = $this->get_attach_url($this->recurrence_id);
 			$wpdb->update(EM_EVENTS_TABLE, array('recurrence_id'=>null), array('event_id' => $this->event_id));
@@ -433,12 +433,12 @@ class EventRecurring extends Event {
 		 	if( ($this->recurring_reschedule || $this->recurring_recreate_bookings) && $this->recurring_recreate_bookings !== false ) { 
 			 	if( !$this->recurring_reschedule ) {
 			 		$booking_collection = new BookingCollection;
-			 		$tickets = new \Contexis\Events\Tickets\Tickets();
+			 		$tickets = new TicketCollection();
 			 		foreach($events as $event){ 
 						if($event['recurrence_id'] != $this->event_id) continue;
 						$booking_collection->event_id = $tickets->event_id = $event['event_id'];
 						$booking_collection->delete();
-						$tickets->delete();
+			
 			 		}
 			 	}
 			 	//if bookings hasn't been disabled, delete it all
@@ -503,7 +503,7 @@ class EventRecurring extends Event {
 					if($event['recurrence_id'] != $this->event_id) continue;
 					$booking_collection->event_id = $tickets->event_id = $event['event_id'];
 					$booking_collection->delete();
-					$tickets->delete();
+				
 		 		}
 		 	}
 
@@ -566,7 +566,7 @@ class EventRecurring extends Event {
 		$event_ids = $wpdb->get_col( $sql );
 		// go through each event and delete individually so individual hooks are fired appropriately
 		foreach($event_ids as $event_id){
-			$event = Event::find_by_id( $event_id );
+			$event = Event::get_by_id( $event_id );
 			if($event->recurrence_id == $this->event_id){
 				$event->delete(true);
 				$events_array[] = $event;

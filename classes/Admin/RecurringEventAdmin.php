@@ -10,27 +10,29 @@ class RecurringEventAdmin {
 	public static function init(){
 		if(!is_admin()) return;
 		$instance = new self;
-		global $pagenow;
-		$screen = 'edit-event-recurring';
-		$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
-		if( $hidden === false ){
-			$hidden = array('event-id');
-			update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
-		}
 		
+		
+		add_action('init', array($instance,'load_user_options'), 10, 1);
 		add_action('admin_head', array($instance,'admin_head'));
 		//Save/Edit actions
 		
 		add_filter('manage_event-recurring_posts_columns' , array($instance,'columns_add'));
 		add_filter('manage_event-recurring_posts_custom_column' , array($instance,'columns_output'),10,1 );
-		add_action('restrict_manage_posts', array($instance,'restrict_manage_posts'));
+		//add_action('restrict_manage_posts', array($instance,'restrict_manage_posts'));
 		add_filter( 'manage_edit-event-recurring_sortable_columns', array($instance,'sortable_columns') );
 
 		//Notices
 		add_action('post_updated_messages',array('EM_Event_Post_Admin','admin_notices_filter'),1,1); //shared with posts
 	}
 	
-	
+	public static function load_user_options($post_type){
+		$screen = 'edit-event-recurring';
+		$hidden = get_user_option( 'manage' . $screen . 'columnshidden' );
+		if( $hidden === false ){
+			$hidden = array('event-id');
+			update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
+		}
+	}
 
 	public static 	function before_delete_post($post_id){
 		if(get_post_type($post_id) == 'event-recurring'){

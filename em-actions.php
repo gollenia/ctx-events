@@ -1,6 +1,6 @@
 <?php
 
-use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Booking;
 
 /**
  * Performs actions on init. This works for both ajax and normal requests, the return results depends if an em_ajax flag is passed via POST or GET.
@@ -15,7 +15,7 @@ function em_init_actions() {
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,5) == 'event' ){
 		//Load the event object, with saved event if requested
 		if( !empty($_REQUEST['event_id']) ){
-			$event = \Contexis\Events\Models\Event::find_by_id($_REQUEST['event_id']);
+			$event = \Contexis\Events\Models\Event::get_by_id($_REQUEST['event_id']);
 		}else{
 			$event = new \Contexis\Events\Models\Event;
 		}
@@ -55,14 +55,14 @@ function em_init_actions() {
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,7) == 'booking' && (is_user_logged_in() || ($_REQUEST['action'] == 'booking_add')) ){
 		
 		$event_id = !empty($_REQUEST['event_id']) ? $_REQUEST['event_id'] : 0;
-		$event = \Contexis\Events\Models\Event::find_by_id($event_id);
+		$event = \Contexis\Events\Models\Event::get_by_id($event_id);
 		
-		$booking = ( !empty($_REQUEST['booking_id']) ) ? Booking::get_by_id($_REQUEST['booking_id']) : new Booking;
+		$booking = ( !empty($_REQUEST['booking_id']) ) ? Booking::get_by_id(absint($_REQUEST['booking_id'])) : new Booking;
 		if( !empty($booking->event_id) ){
 			//Load the event object, with saved event if requested
 			$event = $booking->get_event();
 		}elseif( !empty($_REQUEST['event_id']) ){
-			$event = \Contexis\Events\Models\Event::find_by_id($_REQUEST['event_id']);
+			$event = \Contexis\Events\Models\Event::get_by_id($_REQUEST['event_id']);
 		}
 		$result = false;
 		$feedback = '';

@@ -1,15 +1,15 @@
 /**
  * Wordpress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
-import { useState } from '@wordpress/element';
+import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 
+import { formatPrice } from '../../common/formatPrice.js';
 import Inspector from './inspector.js';
 
 /**
@@ -20,15 +20,25 @@ const edit = ( props ) => {
 	const { roundImage, format, description, overwritePrice } = props.attributes;
 	const { postType, postId } = props.context;
 	const setAttributes = props.setAttributes;
-	const [ price, setPrice ] = useState( '' );
 
 	if ( postType !== 'event' ) return <></>;
 
 	const blockProps = useBlockProps( { className: 'event-details-item' } );
 
-	apiFetch( { path: `/events/v2/bookinginfo/${ postId }` } ).then( ( data ) => {
-		setPrice( data.data?.formatted_price.format );
-	} );
+	const [ meta, setMeta ] = useEntityProp( 'postType', postType, 'meta' );
+	const tickets = meta._event_tickets;
+
+	const getPrice = () => {
+		if ( tickets && tickets.length > 0 ) {
+			const ticket = tickets[ 0 ];
+
+			if ( ticket.ticket_price ) {
+				return formatPrice( ticket.ticket_price, window.eventBlocksLocalization.currency );
+			}
+			return __( 'Free', 'events' );
+		}
+		return __( 'Free', 'events' );
+	};
 
 	return (
 		<div { ...blockProps }>
@@ -51,7 +61,7 @@ const edit = ( props ) => {
 					<RichText
 						tagName="span"
 						className="event-details_audience description-editable"
-						placeholder={ price ?? __( 'Free', 'events' ) }
+						placeholder={ getPrice() }
 						value={ overwritePrice }
 						onChange={ ( value ) => {
 							setAttributes( { overwritePrice: value } );

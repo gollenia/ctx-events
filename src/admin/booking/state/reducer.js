@@ -19,7 +19,7 @@ const reducer = ( state = {}, action ) => {
 	const { data } = state;
 
 	const getCouponData = ( couponId ) => {
-		const coupon = state.data.available_coupons.find( ( coupon ) => coupon.value === couponId );
+		const coupon = state.event.coupons.find( ( coupon ) => coupon.value === couponId );
 
 		return {
 			discount: coupon ? coupon.discount : 0,
@@ -38,23 +38,21 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'ADD_TICKET':
-			const ticket = createTicket( data.attendee_fields, data.available_tickets );
+			const ticket = createTicket( data.forms.attendee_fields, data.tickets_available );
 			state.data.attendees.push( ticket );
 			state.currentTicket = state.data.attendees.length - 1;
 			state.sendState = 'unsaved';
 			return { ...state };
 
 		case 'SET_FIELD':
-			console.log( 'payload', payload );
 			if ( payload.form === 'ticket' ) {
-				console.log( 'payload', payload );
 				state.data.attendees[ payload.index ].fields[ payload.field ] = payload.value;
 			}
 			if ( payload.form === 'registration' ) {
-				state.data.registration[ payload.field ] = payload.value;
+				state.event.forms.registration[ payload.field ] = payload.value;
 			}
 			if ( payload.form === 'donation' ) {
-				state.data.booking.donation = payload.value;
+				state.event.forms.booking.donation = payload.value;
 			}
 			state.sendState = 'unsaved';
 			return { ...state };
@@ -73,7 +71,6 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'SET_TICKET':
-			console.log( 'payload', payload );
 			state.data.attendees[ payload.index ] = payload.ticket;
 			state.sendState = 'unsaved';
 			return { ...state };

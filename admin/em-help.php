@@ -6,7 +6,7 @@ use Contexis\Events\PostTypes\EventPost;
  * Display function for the support page. here we can give links to forums and special upgrade instructions e.g. migration features 
  */
 function em_admin_help_page(){
-	global $wpdb;
+
 	?>
 	<div class="wrap">
 		<h1><?php _e('Getting Help for Events Manager','events'); ?></h1>

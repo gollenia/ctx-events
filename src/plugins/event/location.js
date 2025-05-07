@@ -31,9 +31,7 @@ const locationSelector = () => {
 		if ( ! result ) {
 			return locations;
 		}
-
-		console.log( 'locationList', result );
-
+		
 		result.map( ( location ) => {
 			locations.push( {
 				value: location.id,

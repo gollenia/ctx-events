@@ -62,49 +62,51 @@ function Upcoming( props ) {
 		tagFilter.push( tag );
 		changeFilter( 'tags', tagFilter );
 	};
-	
+
 	useEffect( () => {
 		let queryParams = {
 			limit,
 			order,
 			category: selectedCategory,
 			tag: selectedTags,
-			scope
+			scope,
+			fields: 'event,location,speaker,category,tags',
 		};
-		
-		Object.entries(queryParams).forEach(([key, value]) => {
-			if (value === 0) delete queryParams[key];
-		});
 
-		console.log( queryParams );
-		
-		apiFetch( { path: addQueryArgs( 'events/v2/events', queryParams ) } ).then( ( posts ) => {
-			setEvents( posts );
-			
-			
-			let categories = {};
-			let tags = {};
-			
-			posts.map( ( event ) => {
-				if ( ! event.category ) return;
-				if ( categories[ event.category.id ] == undefined ) categories[ event.category.id ] = event.category;
-
-				for ( let tag in event.tags ) {
-					if ( tags[ tag ] == undefined ) {
-						tags[ tag ] = event.tags[ tag ];
-					}
-				}
-			} );
-
-			setTags( tags );
-			setCategories( categories );
-			setStatus( 'LOADED' );
-		} ).catch( ( error ) => {
-			console.log( error );
-			setStatus( 'ERROR' );
-			setError( error.message );
+		Object.entries( queryParams ).forEach( ( [ key, value ] ) => {
+			if ( value === 0 ) delete queryParams[ key ];
 		} );
+
+		apiFetch( { path: addQueryArgs( 'events/v2/events', queryParams ) } )
+			.then( ( posts ) => {
+				setEvents( posts );
+
+				let categories = {};
+				let tags = {};
+
+				posts.map( ( event ) => {
+					if ( ! event.category ) return;
+					if ( categories[ event.category.id ] == undefined )
+						categories[ event.category.id ] = event.category;
+
+					for ( let tag in event.tags ) {
+						if ( tags[ tag ] == undefined ) {
+							tags[ tag ] = event.tags[ tag ];
+						}
+					}
+				} );
+
+				setTags( tags );
+				setCategories( categories );
+				setStatus( 'LOADED' );
+			} )
+			.catch( ( error ) => {
+				setStatus( 'ERROR' );
+				setError( error.message );
+			} );
 	}, [] );
+
+	console.log( events );
 
 	const getFilteredEvents = ( sort = '' ) => {
 		let filtered = events;
@@ -145,8 +147,13 @@ function Upcoming( props ) {
 
 	const showFilters = showCategoryFilter || showTagFilter || showSearch;
 
-	if( status == 'ERROR' ) {
-		return <div className='error'><h4>{ __('An Error occurred', 'events') }</h4>{ error }</div>;
+	if ( status == 'ERROR' ) {
+		return (
+			<div className="error">
+				<h4>{ __( 'An Error occurred', 'events' ) }</h4>
+				{ error }
+			</div>
+		);
 	}
 
 	if ( events.length == 0 && status == 'LOADED' ) {

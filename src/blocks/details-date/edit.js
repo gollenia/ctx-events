@@ -32,10 +32,10 @@ const edit = ( props ) => {
 	const blockProps = useBlockProps( { className: 'event-details-item' } );
 
 	const startFormatted = () => {
-		if ( ! meta._event_start_date ) return '';
-		const start = meta._event_start_date + ' ' + '00:00:00';
-		const end = meta._event_end_date + ' ' + '00:00:00';
-		return meta?._event_start_date && meta?._event_end_date ? formatDateRange( start, end ) : '';
+		if ( ! meta._event_start ) return '';
+		const start = meta._event_start;
+		const end = meta._event_end;
+		return meta?._event_start && meta?._event_end ? formatDateRange( start, end ) : '';
 	};
 
 	return (

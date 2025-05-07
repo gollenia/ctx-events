@@ -15,7 +15,7 @@ function em_options_save(){
 			
 			//TODO some more validation/reporting
 			
-			if( in_array($postKey, array('dbem_bookings_notify_admin','dbem_event_submitted_email_admin','dbem_js_limit_events_form','dbem_js_limit_search','dbem_js_limit_general','dbem_search_form_geo_distance_options')) ){ $postValue = str_replace(' ', '', $postValue); } //clean up comma separated emails, no spaces needed
+			if( in_array($postKey, array('dbem_bookings_notify_admin','dbem_event_submitted_email_admin','dbem_js_limit_events_form','dbem_js_limit_search','dbem_js_limit_general')) ){ $postValue = str_replace(' ', '', $postValue); } //clean up comma separated emails, no spaces needed
 			
 			//TODO slashes being added?
 			if( is_array($postValue) ){
@@ -48,8 +48,7 @@ add_action('admin_init', 'em_options_save');
 
 
 function em_admin_options_page() {
-	global $wpdb;
-	
+
 	
 	if( defined('EM_SETTINGS_TABS') && EM_SETTINGS_TABS ){
 	    $tabs_enabled = true;

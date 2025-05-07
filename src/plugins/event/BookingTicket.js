@@ -6,7 +6,6 @@ const BookingTicket = ( props ) => {
 	const [ editing, setEditing ] = useState( false );
 	const [ data, setData ] = useState( ticket );
 
-	console.log( data );
 	return (
 		<>
 			{ editing || data.is_new ? (

@@ -14,8 +14,9 @@
 		"html": false,
 		"reusable": false,
 		"multiple": false,
-		"injector": false,
+		"inserter": false,
 		"customClass": false,
 		"selector": false
-	}
+	},
+	"postTypes": [ "location" ]
 }

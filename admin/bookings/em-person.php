@@ -1,7 +1,8 @@
 <?php
 
 use Contexis\Events\Collections\EventCollection;
-use Contexis\Events\Model\Booking;
+use Contexis\Events\Models\Booking;
+use Contexis\Events\PostTypes\EventPost;
 
 /**
  * Generates a "widget" table of confirmed bookings for a specific event.
@@ -84,7 +85,7 @@ function em_bookings_person_table(){
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
 									<td><a class="row-title" href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;event_id=<?php echo $event->event_id ?>"><?php echo ($event->event_name); ?></a></td>
-									<td><?php echo $booking->get_spaces() ?></td>
+									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td><?php echo Booking::get_status_label($booking->booking_status); ?>
 									</td>
 									<td>

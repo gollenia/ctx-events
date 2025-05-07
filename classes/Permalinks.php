@@ -21,9 +21,9 @@ if( !class_exists('EM_Permalinks') ){
 			if( get_option('dbem_flush_needed') ){
 				add_filter('wp_loaded', array('EM_Permalinks','flush')); //flush after init, in case there are themes adding cpts etc.
 			}
-			//add_filter('rewrite_rules_array',array('EM_Permalinks','rewrite_rules_array'));
+			add_filter('rewrite_rules_array',array('EM_Permalinks','rewrite_rules_array'));
 			add_filter('query_vars',array('EM_Permalinks','query_vars'));
-			//add_action('parse_query',array('EM_Permalinks','init_objects'), 1);
+			add_action('parse_query',array('EM_Permalinks','init_objects'), 1);
 			
 			if( !defined('EM_EVENT_SLUG') ){ define('EM_EVENT_SLUG','event'); }
 			if( !defined('EM_LOCATION_SLUG') ){ define('EM_LOCATION_SLUG','location'); }
@@ -45,7 +45,7 @@ if( !class_exists('EM_Permalinks') ){
 
 		// Adding a new rule
 		public static function rewrite_rules_array($rules){
-			global $wpdb;
+		
 			//get the slug of the event page
 			$em_rules = array();
 		
@@ -139,7 +139,7 @@ if( !class_exists('EM_Permalinks') ){
 		
 		}
 	}
-	EM_Permalinks::init();
+	//EM_Permalinks::init();
 	
 }
 

@@ -65,13 +65,14 @@ class LocationPost implements PostType {
 			'show_in_nav_menus'=>true,
 			'can_export' => true,
 			'exclude_from_search' => true,
-			'publicly_queryable' => true,
-			'rewrite' => ['slug' => EventPost::get_slug(), 'with_front'=>false],
+			'publicly_queryable' => false,
+			'rewrite' => ['slug' => self::get_slug(), 'with_front'=>false],
 			'query_var' => true,
 			'has_archive' => false,
 			'template' => [
 				['events-manager/locationeditor']
 			],
+			'template_lock' => 'all',
 			'supports' => apply_filters('em_cp_location_supports', ['title','excerpt','thumbnail','editor','custom-fields']),
 			'label' => __('Locations','events'),
 			'description' => __('Display locations on your blog.','events'),
@@ -100,20 +101,17 @@ class LocationPost implements PostType {
 				'type' => $meta[1],
 				'single'       => true,
 				'default' => $meta[2],
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => null,
 				'auth_callback' => function() {
 					return current_user_can( 'edit_posts' );
 				},
 				'show_in_rest' => [
 					'schema' => [
 						'default' => $meta[2],
-						'style' => $meta[1]
+						'type' => $meta[1]
 					]
 				]
 			]);
 		}
 	}
-}
-if( get_option('dbem_locations_enabled', true) ){
-	LocationPost::init();
 }

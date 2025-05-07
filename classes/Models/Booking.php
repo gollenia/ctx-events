@@ -1,12 +1,14 @@
 <?php
 
-namespace Contexis\Events\Model;
+namespace Contexis\Events\Models;
 
 use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Intl\Price;
-use Contexis\Events\Tickets\TicketsBookings;
+use Contexis\Events\Collections\TicketsBookings;
 use Contexis\Events\Models\Event;
+use Contexis\Events\Payment\GatewayService;
 use Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\Views\BookingView;
 use Contexis\Events\Views\EventView;
 use DateTime;
 use WP_REST_Request;
@@ -17,14 +19,15 @@ use DateInterval;
  * @property int|false $booking_status
  * @property string $language
  */
-class Booking extends \EM_Object{
+class Booking {
 
 	const PENDING = 0;
 	const APPROVED = 1;
 	const REJECTED = 2;
-	const CANCELLED = 3;
+	const CANCELED = 3;
 	const AWAITING_ONLINE_PAYMENT = 4;
 	const AWAITING_PAYMENT = 5;
+	const PAYMENT_FAILED = 6;
 	const DELETED = 9;
 	
 	public int $booking_id = 0;
@@ -46,48 +49,81 @@ class Booking extends \EM_Object{
 		'booking_comment' => array('name'=>'comment','type'=>'%s'),
 		'booking_status' => array('name'=>'status','type'=>'%d'),
 		'booking_donation' => array('name'=>'donation','type'=>'%f'),
-		'booking_meta' => array('name'=>'meta','type'=>'%s')
+		'booking_meta' => array('name'=>'meta','type'=>'%s'),
 	);
 
 	public array $notes;
 	public ?DateTime $booking_date = null;
-	
-	protected $person;
-
 	public array $required_fields = [ 'booking_id', 'event_id', 'booking_spaces' ];
 	public string $feedback_message = "";
 	public array $errors = [];
 	
 	public int $mails_sent = 0;
 	
-	public int $previous_status = 0;
-
+	public int $previous_status = self::PENDING;
 	public array $status_array = [];
 
-	public $tickets;
-	public $event;
-	public $tickets_bookings;
 	public bool $manage_override;
-	
 
-	function __construct( $booking_data = false ) 
+	public static function from_booking_id(int $booking_id) : Booking 
 	{
 		global $wpdb;
-		if($booking_data !== false) {
-			$booking = array();
-			if( is_array($booking_data) ){
-				$booking = $booking_data;
-			}elseif( is_numeric($booking_data) ){
-				$sql = $wpdb->prepare("SELECT * FROM ". EM_BOOKINGS_TABLE ." WHERE booking_id =%d", $booking_data);
-				$booking = $wpdb->get_row($sql, ARRAY_A);
+		$sql = $wpdb->prepare("SELECT * FROM ". EM_BOOKINGS_TABLE ." WHERE booking_id =%d", $booking_id);
+		$booking = $wpdb->get_row($sql, ARRAY_A);
+		return self::from_array($booking);
+	}
+
+	public static function from_array( array $array = array() ) : Booking 
+	{	
+		if(!is_array($array)) return new Booking();	
+		$instance = new self();
+		
+		$instance->booking_meta = json_decode($array['booking_meta'], true);
+		$instance->booking_date = new DateTime($array['booking_date']);
+		$instance->booking_mail = $instance->booking_meta['registration']['user_email'] ?? "";
+		foreach($array as $key => $value){
+			if( in_array($key, ['booking_meta', 'booking_date']) ) continue;
+			if( property_exists($instance, $key) ){
+				$instance->$key = $value;
 			}
-			$booking['booking_meta'] = (!empty($booking['booking_meta'])) ? maybe_unserialize($booking['booking_meta']):array();
-			$this->from_array($booking);
-			$this->previous_status = $this->booking_status;
-			$this->booking_date = !empty($booking['booking_date']) ? new DateTime($booking['booking_date']) : null;
-			$this->booking_mail = $booking['booking_meta']['registration']['user_email'];
 		}
-		do_action('em_booking', $this, $booking_data);
+		
+		$instance->previous_status = $instance->booking_status;
+		return $instance;
+	}
+
+	public function get_fields( $inverted_array=false ){
+		if( is_array($this->fields) ){
+			$return = array();
+			foreach($this->fields as $fieldName => $fieldArray){
+				if($inverted_array){
+					if( !empty($fieldArray['name']) ){
+						$return[$fieldArray['name']] = $fieldName;
+					}else{
+						$return[$fieldName] = $fieldName;
+					}
+				}else{
+					$return[$fieldName] = $fieldArray['name'];
+				}
+			}
+			return apply_filters('em_object_get_fields', $return, $this, $inverted_array);
+		}
+		return apply_filters('em_object_get_fields', array(), $this, $inverted_array);
+	}
+
+	
+
+
+	public static function get_by_id(int $id): Booking 
+	{
+		global $wpdb;
+		$sql = $wpdb->prepare("SELECT * FROM ". EM_BOOKINGS_TABLE ." WHERE booking_id =%d", $id);
+		
+		$booking = $wpdb->get_row($sql, ARRAY_A);
+		if ($booking) {
+			return new Booking($booking);
+		}
+		return new Booking();
 	}
 
 	public static function get_status_array() : array 
@@ -115,11 +151,47 @@ class Booking extends \EM_Object{
 		switch ($var) {
 		
 			case 'booking_status':
-				return ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1 : $this->booking_status;
+				return ($this->booking_status == self::PENDING && !get_option('dbem_bookings_approval') ) ? 1 : $this->booking_status;
 			default:
 				return null;
 		}
 	    
+	}
+
+	function load_request(\WP_REST_Request $request) : bool 
+	{
+		if(!$this->event_id) {
+			$this->event_id = isset($request['event_id']) ? absint($request['event_id']) : 0;
+		}
+
+		$registration = $request['registration'];
+
+		foreach([ 'first_name', 'last_name', 'user_email' ] as $key) {
+			$this->booking_meta['registration'][$key] = $registration[$key];
+			unset($registration[$key]);
+		}
+
+		$this->booking_mail = $this->booking_meta['registration']['user_email'];
+		$this->booking_meta['booking'] = $registration;
+		$this->booking_meta['attendees'] = $request['attendees'];
+		$this->booking_meta['gateway'] = $request['gateway'];
+		if( !empty($request['coupon']) ) {
+			$this->booking_meta['coupon_code'] = $request['coupon'];
+		}
+
+		if( isset($request['donation']) && floatval($request['donation'] > 0) ){
+			$this->booking_donation = floatval($request['donation']);
+		}
+		
+
+		if( !empty($request['data_privacy_consent']) ){
+			$this->booking_meta['consent'] = true;
+		}
+
+		$this->booking_date = new DateTime();
+		$this->booking_spaces = count($request['attendees']);
+		$this->get_status($request);
+		return true;
 	}
 
 	public function get_first_name() : string 
@@ -162,17 +234,11 @@ class Booking extends \EM_Object{
 	
 	public function __sleep() : array 
 	{
-		$array = array('booking_id','event_id','booking_mail','booking_price','booking_spaces','booking_comment','booking_status','booking_donation','booking_meta','notes','booking_date','feedback_message','errors','mails_sent','custom','previous_status','status_array','manage_override','tickets_bookings');
+		$array = array('booking_id','event_id','booking_mail','booking_price','booking_spaces','booking_comment','booking_status','booking_donation','booking_meta','notes','booking_date','feedback_message','errors','mails_sent','custom','previous_status','status_array','manage_override');
 		if( !empty($this->bookings) ) $array[] = 'bookings'; // EM Pro backwards compatibility
 		return apply_filters('em_booking_sleep', $array, $this);
 	}
-	
-	public function __wakeup() : void 
-	{
-		foreach($this->get_tickets_bookings()->tickets_bookings as $ticket_booking){
-			$ticket_booking->booking = $this;
-		}
-	}
+
 
 	public function get_attendees() : array 
 	{
@@ -186,23 +252,15 @@ class Booking extends \EM_Object{
 		return $result;
 	}
 
-	/*
-	public function get_attendee_data(array $attendee_data) : array 
-	{
-		$form = EM_Attendees_Form::get_form($this->event_id)->form_fields;
-		$attendee = [];
-		foreach($attendee_data as $key => $value) {
-			$attendee[$key] = [
-				"value" => $value,
-				"label" => $form[$key]['label']
-			];
-		}
-		return $attendee;
-	} */
 
-	public function get_booking_date($time = true) : string
+
+	public function date() : DateTime
 	{
-		return \Contexis\Events\Intl\Date::get_date($this->booking_date->getTimestamp()) . ($time ? ' ' . \Contexis\Events\Intl\Date::get_time($this->booking_date->getTimestamp()) : '');
+		if ($this->booking_date instanceof \DateTime) {
+			return $this->booking_date;
+		}
+		
+		return new DateTime("1st January 1970");
 	}
 	
 	
@@ -225,12 +283,12 @@ class Booking extends \EM_Object{
 		}
 
 		// Update prices, spaces
-		$this->get_spaces(true);
+		$this->get_booked_spaces(true);
 		$this->booking_price = $this->get_price();
 		
 		// Prepare data for saving
 		$data = $this->to_array();
-		$data['booking_meta'] = serialize($data['booking_meta']);
+		$data['booking_meta'] = json_encode($this->booking_meta);
 		$data_types = $this->get_types($data);
 		
 		// Save or update booking
@@ -247,16 +305,9 @@ class Booking extends \EM_Object{
 			if(!$result) $this->feedback_message = __('There was a problem SAVING the booking.', 'events');
 		}
 
-		if ($result) {
-			$tickets_bookings_result = $this->get_tickets_bookings()->save();
-			if (!$tickets_bookings_result) {
-				if (!$this->booking_id) $this->delete();
-				$this->errors[] = __('There was a problem saving the booking.', 'events');
-				$this->errors[] = $this->get_tickets_bookings()->get_errors();
-			}
-		}
+		
 
-		// Apply filters and possibly send email
+			// Apply filters and possibly send email
 		//$this->compat_keys();
 		$return = apply_filters('em_booking_save', count($this->errors) === 0, $this, (bool)$this->booking_id);
 		
@@ -265,19 +316,53 @@ class Booking extends \EM_Object{
 		}
 		
 		return $return;
+
 	}
 
-	public static function get_by_id(int $id): Booking 
-	{
-		global $wpdb;
-		$sql = $wpdb->prepare("SELECT * FROM ". EM_BOOKINGS_TABLE ." WHERE booking_id =%d", $id);
-		$booking = $wpdb->get_row($sql, ARRAY_A);
-		if ($booking) {
-			return new Booking($booking);
+	function to_array(bool $sql_compatible = false) : array {
+		$array = [];
+		foreach ( $this->fields as $key => $val ) {
+			if(!$sql_compatible) {
+				$array[$key] = $this->$key;
+				continue;
+			}
+
+			if ( !empty($this->$key) || $this->$key === 0 || $this->$key === '0' || empty($val['null']) ) {
+				$array[$key] = $this->$key;
+			} elseif ( $this->$key === null && !empty($val['null']) ) {
+				$array[$key] = null;
+			}
 		}
-		return new Booking();
+		return $array;
 	}
+		
 	
+		/**
+		 * Function to retreive wpdb types for all fields, or if you supply an assoc array with field names as keys it'll return an equivalent array of wpdb types
+		 * @param array $array
+		 * @return array:
+		 */
+		function get_types($array = array()){
+			$types = array();
+			if( count($array)>0 ){
+				//So we look at assoc array and find equivalents
+				foreach ($array as $key => $val){
+					$types[] = $this->fields[$key]['type'];
+				}
+			}else{
+				//Blank array, let's assume we're getting a standard list of types
+				foreach ($this->fields as $field){
+					$types[] = $field['type'];
+				}
+			}
+			return apply_filters('em_object_get_types', $types, $this, $array);
+		}	
+		
+
+	
+	
+
+
 	/**
 	 * Load a record into this object by passing an associative array of table criteria to search for.
 	 * Returns boolean depending on whether a record is found or not. 
@@ -304,52 +389,6 @@ class Booking extends \EM_Object{
 		return false;
 	}
 
-	function get_request(\WP_REST_Request $request) : bool 
-	{
-		if(!$this->event_id) {
-			$this->event_id = isset($request['event_id']) ? absint($request['event_id']) : 0;
-		}
-
-		$registration = $request['registration'];
-
-		foreach([ 'first_name', 'last_name', 'user_email' ] as $key) {
-			$this->booking_meta['registration'][$key] = $registration[$key];
-			unset($registration[$key]);
-		}
-
-		$this->booking_mail = $this->booking_meta['registration']['user_email'];
-		$this->booking_meta['booking'] = $registration;
-		$this->booking_meta['attendees'] = $request['attendees'];
-		$this->booking_meta['gateway'] = $request['gateway'];
-		if( !empty($request['coupon']) ) {
-			$this->booking_meta['coupon_code'] = $request['coupon'];
-		}
-
-		if( isset($request['donation']) && floatval($request['donation'] > 0) ){
-			$this->booking_donation = floatval($request['donation']);
-		}
-		
-		$this->tickets_bookings = new \Contexis\Events\Tickets\TicketsBookings($this->booking_id);
-
-		foreach( $request['attendees'] as $ticket_id => $tickets){
-			if(!is_array($tickets)) continue;
-			$ticket_id = absint($ticket_id);
-			if(!$this->get_event()->get_bookings()->ticket_exists($ticket_id)) continue;
-			$args = array('ticket_id'=>$ticket_id, 'ticket_booking_spaces'=> count($tickets), 'booking_id'=>$this->booking_id);
-
-			$ticket_booking = new \Contexis\Events\Tickets\TicketBooking($args);
-			$ticket_booking->booking = $this;
-			$this->tickets_bookings->add( $ticket_booking );
-		}
-
-		if( !empty($request['data_privacy_consent']) ){
-			$this->booking_meta['consent'] = true;
-		}
-
-		$this->booking_spaces = count($request['attendees']);
-		$this->retrieve_status($request);
-		return true;
-	}
 
 	public static function get_available_states() : array {
 		$statuses = array(
@@ -369,14 +408,6 @@ class Booking extends \EM_Object{
 		}
 		
 		return apply_filters('em_booking_statuses', $statuses);
-	}
-
-	function retrieve_status($request) 
-	{
-		if( $request->has_param('status') )	return $request->get_param('status');
-		if( !$request->has_param('gateway') ) return self::PENDING;
-		global $EM_Gateways;
-		$EM_Gateways[$request['gateway']]->booking_add($this);
 	}
 
 	function get_status_icon () {
@@ -399,67 +430,70 @@ class Booking extends \EM_Object{
 		if( $this->booking_id == 0 ) return $this->get_admin_url();
 		return add_query_arg(['booking_id'=>$this->booking_id, 'em_ajax'=>null, 'em_obj'=>null], $this->get_admin_url());
 	}
+
+	private function validate_ticket_availability() : bool {
+		$attendees = $this->booking_meta['attendees'] ?? [];
+		$valid = true;
+	
+		foreach( $attendees as $ticket_id => $group ) {
+			$ticket = \Contexis\Events\Models\Ticket::get_by_id($this->event_id, $ticket_id);
+	
+			if( !$ticket ) {
+				$this->errors[] = sprintf(__('Ticket with ID %s does not exist.', 'events'), $ticket_id);
+				$valid = false;
+				continue;
+			}
+	
+			if( !$ticket->is_available() ) {
+				$message = get_option(
+					'dbem_booking_feedback_ticket_unavailable',
+					sprintf(__('The ticket "%s" is no longer available.', 'events'), $ticket->ticket_name)
+				);
+				$this->errors[] = $message;
+				$valid = false;
+			}
+		}
+	
+		return $valid;
+	}
 	
 	function validate( bool $override_availability = false ) : bool
 	{
-		//step 1, basic info
-		$basic = ( 
-			(empty($this->event_id) || is_numeric($this->event_id)) && 
-			is_numeric($this->booking_spaces) && $this->booking_spaces > 0
-		);
-		//give some errors in step 1
 		if( $this->booking_spaces == 0 ){
 			$this->errors[] = __('You must request at least one space to book an event.','events');
 		}
-		//step 2, tickets bookings info
-		if( $this->get_tickets_bookings()->count() > 0 ){
-			$ticket_validation = array();
-			foreach($this->get_tickets_bookings()->tickets_bookings as $ticket_booking){ 
-				if ( !$ticket_booking->validate() ){
-					$ticket_validation[] = false;
-					$this->errors[] = array_merge($this->errors, $ticket_booking->get_errors());
-				}
-			}
-			$result = $basic && !in_array(false,$ticket_validation);
-		}else{
-			$result = false;
-		}
+
+		$result = true;
+
 		if( !$override_availability ){
 			// are bookings even available due to event and ticket cut-offs/restrictions? This is checked earlier in booking processes, but is relevant in checkout/cart situations where a previously-made booking is validated just before checkout
 			if( $this->get_event()->get_rsvp_end()->getTimestamp() < time() ){
 				$result = false;
 				$this->errors[] = __( 'Bookings have closed (e.g. event has started).', 'events');
-			}else{
-				foreach( $this->get_tickets_bookings() as $ticket_booking ){
-					if( !$ticket_booking->get_ticket()->is_available() ){
-						$result = false;
-						$message = __('The ticket %s is no longer available.', 'events');
-						$this->errors = get_option('dbem_booking_feedback_ticket_unavailable', sprintf($message, "'".$ticket_booking->get_ticket()->name."'"));
-					}
-				}
 			}
+			if( !$this->validate_ticket_availability() ) return false;
 			//is there enough space overall?
-			if( $this->get_event()->get_bookings()->get_available_spaces() < $this->get_spaces() ){
+			if( $this->get_event()->get_available_spaces() < $this->get_booked_spaces() ){
 				$result = false;
 				$this->errors[] = get_option('dbem_booking_feedback_full');
 			}
 		}
 
-		if( $this->get_event()->event_rsvp_spaces > 0 && $this->get_spaces() > $this->get_event()->event_rsvp_spaces ){
+		if( $this->get_event()->get_available_spaces() < $this->get_booked_spaces() ){
 			$result = false;
 			$this->errors[] = __('You cannot book more spaces than are available.','events');
 		}
-		return apply_filters('em_booking_validate',$result,$this);
+		return apply_filters('em_booking_validate',$result, $this);
 	}
 
 	function get_payment_info() 
 	{
-		return \EM_Gateways::get_gateway($this->booking_meta['gateway'])->get_payment_info($this);
+		return GatewayService::get_gateway($this->booking_meta['gateway'])->get_payment_info($this);
 	}
 
 	function get_rest_fields() {
 		return [
-			'date' => $this->get_booking_date(),
+			'date' => $this->booking_date,
 			'id' => $this->booking_id,
 			'status' => $this->booking_status,
 			'status_array' => self::get_status_array(),
@@ -477,13 +511,24 @@ class Booking extends \EM_Object{
 	 * @param boolean $force_refresh
 	 * @return int
 	 */
-	function get_spaces( bool $force_refresh=false ) : int
-	{
-		if($this->booking_spaces == 0 || $force_refresh == true ){
-			$this->booking_spaces = $this->get_tickets_bookings()->get_spaces($force_refresh);
+	function get_booked_spaces( bool $force_refresh = false ) : int {
+		if ( $this->booking_spaces == 0 || $force_refresh ) {
+			$spaces = 0;
+	
+			if ( !empty($this->booking_meta['attendees']) && is_array($this->booking_meta['attendees']) ) {
+				foreach ( $this->booking_meta['attendees'] as $attendee_group ) {
+					if ( is_array($attendee_group) ) {
+						$spaces += count($attendee_group);
+					}
+				}
+			}
+	
+			$this->booking_spaces = $spaces;
 		}
-		return apply_filters('em_booking_get_spaces',$this->booking_spaces,$this);
+	
+		return apply_filters('em_booking_get_spaces', $this->booking_spaces, $this);
 	}
+	
 	
 	/* Price Calculations */
 	
@@ -503,14 +548,15 @@ class Booking extends \EM_Object{
 		return round($this->booking_price,2);
 	}
 	
-	/**
-	 * Total of tickets without discounts or any other modification. No filter given here for that very reason!
-	 * @param boolean $format
-	 * @return double|string
-	 */
-	function get_price_base( )
-	{
-	    return $this->get_tickets_bookings()->get_price();
+	public function get_price_base(): float {
+		$total = 0.0;
+		foreach ( $this->booking_meta['attendees'] as $ticket_id => $attendees ) {
+			$ticket = \Contexis\Events\Models\Ticket::get_by_id( $this->event_id, $ticket_id );
+			if ( $ticket ) {
+				$total += count( $attendees ) * floatval( $ticket->ticket_price );
+			}
+		}
+		return $total;
 	}
 
 	/**
@@ -610,40 +656,22 @@ class Booking extends \EM_Object{
 	 * @return Event
 	 */
 	function get_event() : Event {
-		if (!isset($this->event) || !($this->event instanceof Event) || $this->event->event_id !== $this->event_id) {
-			$this->event = Event::find_by_id($this->event_id);
-		}
-		return apply_filters('em_booking_get_event', $this->event, $this);
+		if($this->event_id == 0) return new Event();
+		return Event::get_by_id($this->event_id);
 	}
 	
 	/**
 	 * Gets the ticket object this booking belongs to, saves a reference in ticket property
 	 * @return Tickets
 	 */
-	function get_tickets(){
-		if( is_object($this->tickets) && get_class($this->tickets)=='Tickets' ){
-			return apply_filters('em_booking_get_tickets', $this->tickets, $this);
-		}else{
-			$this->tickets = TicketCollection::find_by_booking($this);
-		}
-		return apply_filters('em_booking_get_tickets', $this->tickets, $this);
-	}
-	
-	/**
-	 * Gets the ticket object this booking belongs to, saves a reference in ticket property
-	 * @return TicketsBookings TicketsBookings
-	 */
-	function get_tickets_bookings(){
-		if( !is_object($this->tickets_bookings) ){
-			$this->tickets_bookings = new \Contexis\Events\Tickets\TicketsBookings($this);
-		} 
-		return apply_filters('em_booking_get_tickets_bookings', $this->tickets_bookings, $this);
+	function get_tickets() : TicketCollection {
+		return TicketCollection::find_by_booking($this);
 	}
 
 	
 	function get_status() : string 
 	{
-		$status = ($this->booking_status == 0 && !get_option('dbem_bookings_approval') ) ? 1:$this->booking_status;
+		$status = ($this->booking_status == self::PENDING && !get_option('dbem_bookings_approval') ) ? self::APPROVED : $this->booking_status;
 		return apply_filters('em_booking_get_status', self::get_status_label($status), $this);
 	}
 	
@@ -665,7 +693,6 @@ class Booking extends \EM_Object{
 			return false;
 		}
 		
-		$this->get_tickets_bookings()->delete();
 		$this->booking_status = self::DELETED;
 		$this->feedback_message = sprintf(__('Booking deleted', 'events'));
 		
@@ -675,21 +702,21 @@ class Booking extends \EM_Object{
 	
 	function cancel($email = true) : bool 
 	{
-		return $this->set_status(3, $email);
+		return $this->set_status(self::CANCELLED, $email);
 	}
 	
 	function approve($email = true, $ignore_spaces = false) : bool {
-		return $this->set_status(1, $email, $ignore_spaces);
+		return $this->set_status(self::APPROVED, $email, $ignore_spaces);
 	}	
 
 	function reject($email = true) : bool 
 	{
-		return $this->set_status(2, $email);
+		return $this->set_status(self::REJECTED, $email);
 	}	
 	
 	function unapprove($email = true) : bool 
 	{
-		return $this->set_status(0, $email);
+		return $this->set_status(self::PENDING, $email);
 	}
 	
 	/**
@@ -703,7 +730,7 @@ class Booking extends \EM_Object{
 		$action_string = strtolower(self::get_status_label($status)); 
 		
 		if(!$ignore_spaces && $status == 1){
-			if( !$this->is_reserved() && $this->get_event()->get_bookings()->get_available_spaces() < $this->get_spaces() && !get_option('dbem_bookings_approval_overbooking') ){
+			if( !$this->is_reserved() && $this->get_event()->get_available_spaces() < $this->get_booked_spaces() && !get_option('dbem_bookings_approval_overbooking') ){
 				$this->feedback_message = sprintf(__('Not approved, spaces full.','events'), $action_string);
 				$this->errors[] = $this->feedback_message;
 				return apply_filters('em_booking_set_status', false, $this);
@@ -774,124 +801,6 @@ class Booking extends \EM_Object{
 		return is_admin() ? EventPost::get_admin_url(). "&page=events-bookings&event_id=".$this->event_id."&booking_id=".$this->booking_id : "";
 	}
 	
-	function output($format, $target="html") : string {
-		do_action('em_booking_output_pre', $this, $format, $target);
-	 	preg_match_all("/(#@?_?[A-Za-z0-9]+)({([^}]+)})?/", $format, $placeholders);
-		$output_string = $format;
-		$replaces = array();
-		foreach($placeholders[1] as $key => $result) {
-			$replace = '';
-			$full_result = $placeholders[0][$key];
-			$placeholder_atts = array($result);
-			if( !empty($placeholders[3][$key]) ) $placeholder_atts[] = $placeholders[3][$key];
-			switch( $result ){
-				case '#_BOOKINGFORMCUSTOM':
-					if(!$placeholder_atts[1]) break; 
-					$replace = $this->meta['booking'][$placeholder_atts[1]];
-					break;
-				case '#_BOOKINGFIELDS': 
-					ob_start();
-					em_locate_template('emails/bookingfields.php', true, array('booking'=>$this));
-					$replace = ob_get_clean();
-					break;
-				case '#_BOOKINGFIELD':
-					if(!$placeholder_atts[1]) break;
-					if(key_exists($placeholder_atts[1], $this->meta['booking'])) {
-						$replace = $this->booking_meta['booking'][$placeholder_atts[1]];
-						break;
-					}
-					if(key_exists($placeholder_atts[1], $this->meta['registration'])) {
-						$replace = $this->booking_meta['registration'][$placeholder_atts[1]];
-					}
-					break;
-				case '#_BOOKINGID':
-					$replace = $this->booking_id;
-					break;
-				case '#_BOOKINGNAME':
-					$replace = $this->get_full_name;
-					break;
-				case '#_BOOKINGEMAIL':
-					$replace = $this->booking_meta['registration']['user_email'];
-					break;
-				case '#_BOOKINGSPACES':
-					$replace = $this->get_spaces();
-					break;
-				case '#_BOOKINGDATE':
-					$replace = ( $this->date() !== false ) ? \Contexis\Events\Intl\Date::get_date($this->date()->getTimestamp()) :'n/a';
-					break;
-				case '#_BOOKINGTIME':
-					$replace = ( $this->date() !== false ) ?  \Contexis\Events\Intl\Date::get_time($this->date()->getTimestamp()) :'n/a';
-					break;
-				case '#_BOOKINGCOMMENT':
-					$replace = $this->booking_comment;
-				case '#_BOOKINGPRICE':
-					$replace = Price::format($this->get_price());
-					break;
-				case '#_BOOKINGTICKETS':
-					ob_start();
-					em_locate_template('emails/bookingtickets.php', true, array('booking'=>$this));
-					$replace = ob_get_clean();
-					break;
-				case '#_BOOKINGSUMMARY':
-					ob_start();
-					em_locate_template('emails/bookingsummary.php', true, array('booking'=>$this));
-					$replace = ob_get_clean();
-					break;
-				case '#_BOOKINGADMINURL':
-				case '#_BOOKINGADMINLINK':
-					$bookings_link = esc_url( add_query_arg('booking_id', $this->booking_id, $this->get_event()->get_bookings_url()) );
-					if($result == '#_BOOKINGADMINLINK'){
-						$replace = '<a href="'.$bookings_link.'">'.esc_html__('Edit Booking', 'events'). '</a>';
-					}else{
-						$replace = $bookings_link;
-					}
-					break;
-				case '#_IBAN':
-					$replace = get_option("em_offline_iban", true);
-					break;
-				case '#_BENEFICIARY':
-					$replace = get_option("em_offline_beneficiary", true);
-					break;
-				case '#_REFERENCE':
-					$replace = $this->booking_id . "-" . $this->event->post_name . "-" . $this->booking_meta['registration']['last_name'];
-					break;
-				case '#_PRICE': 
-					$replace = \Contexis\Events\Intl\Price::format($this->booking_price);
-					break;
-				case '#_BANK':
-					$replace = get_option("em_offline_bank", true);
-					break;
-				case '#_PAYMENTDEADLINE':
-					$date = new DateTime();
-					$interval = new DateInterval('P' . get_option("em_offline_deadline", 10) . 'D');
-					$date->add($interval);
-					$replace = \Contexis\Events\Intl\Date::get_date($date->getTimestamp());
-					break;
-				case '#_COUPON':
-					$replace = $this->get_price_adjustments_summary('discounts', 'pre');
-					break;
-				case '#_BOOKINGATTENDEES':
-					ob_start();
-					em_locate_template('emails/attendees.php', true, array('booking'=>$this));
-					$replace = ob_get_clean();
-					break;
-				default:
-					$replace = $full_result;
-					break;
-			}
-			$replaces[$full_result] = apply_filters('em_booking_output_placeholder', $replace, $this, $full_result, $target, $placeholder_atts);
-		}
-		//sort out replacements so that during replacements shorter placeholders don't overwrite longer varieties.
-		krsort($replaces);
-		foreach($replaces as $full_result => $replacement){
-			$output_string = str_replace($full_result, $replacement , $output_string );
-		}
-		//run event output too, since this is never run from within events and will not infinitely loop
-		$event = apply_filters('em_booking_output_event', $this->get_event(), $this); //allows us to override the booking event info if it belongs to a parent or translation
-		$output_string = EventView::render($event, $output_string, $target);
-		return apply_filters('em_booking_output', $output_string, $this, $format, $target);	
-	}
-	
 	function email_send($subject, $body, $email, $attachments = array()){
 		
 		global $EM_Mailer;
@@ -931,13 +840,13 @@ class Booking extends \EM_Object{
 
 			//Send user (booker) emails
 			if( !empty($msg['user']['subject']) && $email_attendee ){
-				$msg['user']['subject'] = $this->output($msg['user']['subject'], 'raw');
-				$msg['user']['body'] = $this->output($msg['user']['body'], 'email');
+				$msg['user']['subject'] = BookingView::render($this, $msg['user']['subject'], 'raw');
+				$msg['user']['body'] = BookingView::render($this, $msg['user']['body'], 'email');
 				$attachments = array();
 				if( !empty($msg['user']['attachments']) && is_array($msg['user']['attachments']) ){
 					$attachments = $msg['user']['attachments'];
 				}
-				//Send to the person booking
+				
 				if( !$this->email_send( $msg['user']['subject'], $msg['user']['body'], $this->booking_mail, $attachments) ){
 					$result = false;
 				}else{
@@ -958,8 +867,8 @@ class Booking extends \EM_Object{
 				//proceed to email admins if need be
 				if( !empty($admin_emails) ){
 					//Only gets sent if this is a pending booking, unless approvals are disabled.
-					$msg['admin']['subject'] = $this->output($msg['admin']['subject'],'raw');
-					$msg['admin']['body'] = $this->output($msg['admin']['body'], 'email');
+					$msg['admin']['subject'] = BookingView::render($this, $msg['admin']['subject'],'raw');
+					$msg['admin']['body'] = BookingView::render($this, $msg['admin']['body'], 'email');
 					$attachments = array();
 					if( !empty($msg['admin']['attachments']) && is_array($msg['admin']['attachments']) ){
 						$attachments = $msg['admin']['attachments'];
@@ -1025,7 +934,7 @@ class Booking extends \EM_Object{
 			
 		];
 
-		$active_gateways = \EM_Gateways::active_gateways();
+		$active_gateways = GatewayService::active_gateways();
 
 		if( count($active_gateways) == 0 ){
 			$enabled['is_enabled'] = false;

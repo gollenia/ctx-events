@@ -38,7 +38,7 @@ function em_bookings_pending_table($event_id = false){
 			foreach($bookings->bookings as $booking){
 				//create event
 				if( !array_key_exists($booking->event_id,$events) ){
-					$events[$booking->event_id] = Event::find_by_id($booking->event_id);
+					$events[$booking->event_id] = Event::get_by_id($booking->event_id);
 				}
 			}
 		}
@@ -102,12 +102,10 @@ function em_bookings_pending_table($event_id = false){
 								<tr>
 									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
-									<?php if( !is_object($event) && !is_object($ticket) ): ?>
-									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;event_id=<?php echo $booking->event_id; ?>"><?php echo $events[$booking->event_id]->name ?></a></td>
-									<?php endif; ?>
+									
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>
-									<td><?php echo $booking->get_spaces() ?></td>
+									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>
 										<?php
 										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);

@@ -3,12 +3,12 @@
 namespace Contexis\Events\Views;
 
 use Contexis\Events\Intl\Price;
+use Contexis\Events\Models\Coupon;
 use DateInterval;
 use DateTime;
 
 class BookingView
 {
-	private Booking $booking;
 	static function render($booking, $format, $target="html") : string {
 	 	preg_match_all("/(#@?_?[A-Za-z0-9]+)({([^}]+)})?/", $format, $placeholders);
 		$output_string = $format;
@@ -47,9 +47,6 @@ class BookingView
 				case '#_BOOKINGEMAIL':
 					$replace = $booking->booking_meta['registration']['user_email'];
 					break;
-				case '#_BOOKINGSPACES':
-					$replace = $booking->get_spaces();
-					break;
 				case '#_BOOKINGDATE':
 					$replace = ( $booking->date() !== false ) ? \Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()) :'n/a';
 					break;
@@ -87,7 +84,7 @@ class BookingView
 					$replace = get_option("em_offline_beneficiary", true);
 					break;
 				case '#_REFERENCE':
-					$replace = $booking->booking_id . "-" . $booking->event->post_name . "-" . $booking->booking_meta['registration']['last_name'];
+					$replace = $booking->booking_id . "-" . $booking->get_event()->post_name . "-" . $booking->booking_meta['registration']['last_name'];
 					break;
 				case '#_PRICE': 
 					$replace = \Contexis\Events\Intl\Price::format($booking->booking_price);
@@ -109,6 +106,41 @@ class BookingView
 					em_locate_template('emails/attendees.php', true, array('booking'=>$booking));
 					$replace = ob_get_clean();
 					break;
+				case '#_BOOKINGCOUPON':
+					$replace = '';
+					if( !empty($booking->booking_meta['coupon']) ){
+						$coupon = new Coupon($booking->booking_meta['coupon']);
+						$replace = $coupon->coupon_code.' - '.$coupon->get_discount_text();					
+					}
+					break;
+				case '#_BOOKINGCOUPONCODE':
+					$replace = '';
+					if( !empty($booking->booking_meta['coupon']) ){
+						$coupon = new Coupon($booking->booking_meta['coupon']);
+						$replace = $coupon->coupon_code;					
+					}
+					break;
+				case '#_BOOKINGCOUPONDISCOUNT':
+					$replace = '';
+					if( !empty($booking->booking_meta['coupon']) ){
+						$coupon = new Coupon($booking->booking_meta['coupon']);
+						$replace = $coupon->get_discount_text();					
+					}
+					break;
+				case '#_BOOKINGCOUPONNAME':
+					$replace = '';
+					if( !empty($booking->booking_meta['coupon']) ){
+						$coupon = new Coupon($booking->booking_meta['coupon']);
+						$replace = $coupon->coupon_name;					
+					}
+					break;
+				case '#_BOOKINGCOUPONDESCRIPTION':
+					$replace = '';
+					if( !empty($booking->booking_meta['coupon']) ){
+						$coupon = new Coupon($booking->booking_meta['coupon']);
+						$replace = $coupon->coupon_description;					
+					}
+					break;
 				default:
 					$replace = $full_result;
 					break;
@@ -126,3 +158,4 @@ class BookingView
 		return apply_filters('em_booking_output', $output_string, $booking, $format, $target);	
 	}
 }
+

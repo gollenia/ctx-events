@@ -186,7 +186,7 @@ function em_docs_init($force_init = false){
 					'Gateway-Specific Information' => array(
 						'desc' => 'Information pertaining to speicifc gateways.',
 						'placeholders' => array(
-							'#_BOOKINGTXNID' => array( 'desc' => '<em>Online Payments Only</em> - Prints the transaction ID of this booking if available.' ),
+							
 							'#_IBAN' => array( 'desc' => __('Shows the IBAN number for Offline Payments.', 'events') ),
 							'#_BENEFICIARY' => array( 'desc' => __('Displays the beneficiary name.', 'events') ),
 							'#_REFERENCE' => array( 'desc' => __('Payment reference (auto generated)', 'events') ),

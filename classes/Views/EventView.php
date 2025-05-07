@@ -1,7 +1,10 @@
 <?php
 namespace Contexis\Events\Views;
+
+use Contexis\Events\Intl\Date;
 use \Contexis\Events\Models\Event;
 use Contexis\Events\Models\Location;
+use Contexis\Events\Utilities\Image;
 
 class EventView {
 
@@ -36,7 +39,7 @@ class EventView {
 					$offset = 3;
 				}
 			}
-			if( $date == 'end' && $this->event->event_start_date == $this->event->event_end_date ){
+			if( $date == 'end' && $this->event->start() == $this->event->end() ){
 				$replace = apply_filters('em_event_output_placeholder', '', $this->event, $result, $target, array($result));
 			}else{
 				$date_format = substr( $result, $offset, (strlen($result)-($offset+1)) );
@@ -62,9 +65,7 @@ class EventView {
 			$attRef = substr( substr($result, 0, strpos($result, '}')), 6 );
 			$attString = '';
 			$placeholder_atts = array('#_ATT', $results[1][$resultKey]);
-			if( is_array($this->event->event_attributes) && array_key_exists($attRef, $this->event->event_attributes) ){
-				$attString = $this->event->event_attributes[$attRef];
-			}elseif( !empty($results[3][$resultKey]) ){
+			if( !empty($results[3][$resultKey]) ){
 				//Check to see if we have a second set of braces;
 				$placeholder_atts[] = $results[3][$resultKey];
 				$attStringArray = explode('|', $results[3][$resultKey]);
@@ -85,11 +86,10 @@ class EventView {
 					'no_bookings' => (!$this->event->event_rsvp && get_option('dbem_rsvp_enabled')),
 					'no_location' => !$this->event->has_location(),
 					'has_location' => ( $this->event->has_location() && $this->event->get_location()->location_status ),
-					'has_image' => $this->event->get_image_url() != '',
-					'has_time' => ( $this->event->event_start_time != $this->event->event_end_time && !$this->event->event_all_day ),
+					'has_time' => ( $this->event->start()->getTimestamp() != $this->event->end()->getTimestamp() && !$this->event->event_all_day ),
 					'all_day' => ($condition == 'all_day'),
-					'has_spaces' => $this->event->event_rsvp && $this->event->get_bookings()->get_available_spaces() > 0,
-					'fully_booked' => $this->event->event_rsvp && $this->event->get_bookings()->get_available_spaces() <= 0,
+					'has_spaces' => $this->event->event_rsvp && $this->event->get_available_spaces() > 0,
+					'fully_booked' => $this->event->event_rsvp && $this->event->get_available_spaces() <= 0,
 					'is_free' => !$this->event->event_rsvp || $this->event->is_free( $condition == 'is_free_now' ),
 					'is_recurrence' => $this->event->is_recurrence(),
 					default => false
@@ -132,62 +132,24 @@ class EventView {
 					$replace = $this->event->post_content;
 					break;				
 				case '#_EVENTIMAGEURL':
-					$replace =  esc_url($this->event->image_url);
+					$replace =  Image::from_post_id($this->event->event_id)->url_for('large');
 					break;
-				case '#_EVENTIMAGE':
-	        		if($this->event->get_image_url() == '') break;
-
-					$replace = "<img src='".esc_url($this->event->image_url)."' alt='".esc_attr($this->event->event_name)."'/>";
-
-					if( empty($placeholders[3][$key])) break;
-
-					$image_size = explode(',', $placeholders[3][$key]);
-					
-					if( is_array($image_size) && !(array_is_list($image_size) && count($image_size) > 1) ) break;
-
-					
-					$replace = get_the_post_thumbnail($this->event->post_id, $image_size, array('alt' => esc_attr($this->event->event_name)) );
-					
-					$image_attr = '';
-					$image_args = array();
-					if( empty($image_size[1]) && !empty($image_size[0]) ){    
-						$image_attr = 'width="'.$image_size[0].'"';
-						$image_args['w'] = $image_size[0];
-					}elseif( empty($image_size[0]) && !empty($image_size[1]) ){
-						$image_attr = 'height="'.$image_size[1].'"';
-						$image_args['h'] = $image_size[1];
-					}elseif( !empty($image_size[0]) && !empty($image_size[1]) ){
-						$image_attr = 'width="'.$image_size[0].'" height="'.$image_size[1].'"';
-						$image_args = array('w'=>$image_size[0], 'h'=>$image_size[1]);
-					}
-					$replace = "<img src='".esc_url(add_query_arg($image_args, $this->event->image_url))."' alt='".esc_attr($this->event->event_name)."' $image_attr />";
-				
-					break;
-				//Times & Dates
 				case '#_STARTTIME':
 				case '#_ENDTIME':
 					$replace = ($result == '#_24HSTARTTIME') ? $this->event->start()->format('H:i'):$this->event->end()->format('H:i');
 					break;
 				case '#_EVENTTIMES':
 					//get format of time to show
-					$replace = $this->event->output_times();
+					$replace = $this->output_times();
 					break;
 				case '#_EVENTPRICE':
 					$replace = $this->event->get_formatted_price();
 					break;
 				case '#_EVENTDATES':
 					//get format of time to show
-					$replace = $this->event->output_dates();
+					$replace = $this->output_dates();
 					break;
-				case '#_RECURRINGDATERANGE': //Outputs the #_EVENTDATES equivalent of the recurring event template pattern.
-					$replace = $this->event->get_event_recurrence()->output_dates(); //if not a recurrence, we're running output_dates on $this->event
-					break;
-				case '#_RECURRINGPATTERN':
-					$replace = '';
-					if( $this->event->is_recurrence() || $this->event->is_recurring() ){
-						$replace = $this->event->get_event_recurrence()->get_recurrence_description();
-					}
-					break;
+				
 				case '#_RECURRINGID':
 					$replace = $this->event->recurrence_id;
 					break;
@@ -196,7 +158,7 @@ class EventView {
 				case '#_LINKEDNAME': //deprecated
 				case '#_EVENTURL': //Just the URL
 				case '#_EVENTLINK': //HTML Link
-					$event_link = esc_url($this->event->get_permalink());
+					$event_link = esc_url(get_permalink($this->event->event_id));
 					if($result == '#_LINKEDNAME' || $result == '#_EVENTLINK'){
 						$replace = '<a href="'.$event_link.'">'.esc_attr($this->event->event_name).'</a>';
 					}else{
@@ -213,24 +175,24 @@ class EventView {
 					}
 					break;
 				case '#_AVAILABLESPACES':
-					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_bookings()->get_available_spaces() : "0";
+					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_available_spaces() : 0;
 					break;
 				case '#_BOOKEDSPACES':
 					//This placeholder is actually a little misleading, as it'll consider reserved (i.e. pending) bookings as 'booked'
 					if ($this->event->event_rsvp && get_option('dbem_rsvp_enabled')) {
-						$replace = $this->event->get_bookings()->get_booked_spaces();
+						$replace = $this->event->get_booked_spaces();
 						if( get_option('dbem_bookings_approval_reserved') ){
-							$replace += $this->event->get_bookings()->get_pending_spaces();
+							$replace += $this->event->get_pending_spaces();
 						}
 					} else {
 						$replace = "0";
 					}
 					break;
 				case '#_PENDINGSPACES':
-					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_bookings()->get_pending_spaces() : "0";
+					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_pending_spaces() : "0";
 					break;
 				case '#_SPACES':
-					$replace = $this->event->get_bookings()->get_spaces();
+					$replace = $this->event->get_spaces();
 					break;
 				case '#_BOOKINGSURL':
 				case '#_BOOKINGSLINK':
@@ -370,11 +332,22 @@ class EventView {
 	private function get_ical_url(){
 		global $wp_rewrite;
 		if( !empty($wp_rewrite) && $wp_rewrite->using_permalinks() ){
-			$return = trailingslashit($this->event->get_permalink()).'ical/';
+			$return = trailingslashit(get_permalink($this->event->event_id)).'ical/';
 		}else{
-			$return = add_query_arg(['ical'=>1], $this->event->get_permalink());
+			$return = add_query_arg(['ical'=>1], get_permalink($this->event->event_id));
 		}
 		return apply_filters('em_event_get_ical_url', $return);
+	}
+
+	private function output_dates() {
+		return Date::get_date($this->event->start()->getTimestamp(), $this->event->end()->getTimestamp());
+	}
+	private function output_times() {
+		if( $this->event->start()->getTimestamp() == $this->event->end()->getTimestamp() ){
+			return Date::get_time($this->event->start()->getTimestamp());
+		}else{
+			return Date::get_time($this->event->start()->getTimestamp(), $this->event->end()->getTimestamp());
+		}
 	}
 
 	

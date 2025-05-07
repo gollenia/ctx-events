@@ -39,16 +39,12 @@ const edit = ( props ) => {
 		select( 'core' ).getEntityRecord( 'postType', 'location', meta._location_id )
 	);
 
-	console.log( 'location', location );
-
 	const blockProps = useBlockProps( { className: 'event-details-item' } );
 
 	const hasPhoto =
 		blockProps.className.includes( 'is-style-photo' ) &&
 		location?._embedded?.[ 'wp:featuredmedia' ]?.length &&
 		location?._embedded?.[ 'wp:featuredmedia' ][ 0 ].media_details.sizes?.thumbnail?.source_url;
-
-	console.log( 'location in det', meta._location_id );
 
 	return (
 		<div { ...blockProps }>

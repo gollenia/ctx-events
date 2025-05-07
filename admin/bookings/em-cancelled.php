@@ -12,7 +12,7 @@ function em_bookings_cancelled_table(){
 	
 
 	$ticket_id = key_exists('ticket_id', $_REQUEST) ? $_REQUEST['ticket_id'] : 0;
-	$ticket = new Ticket($ticket_id);
+	$ticket = Ticket::get_by_id($_REQUEST['event_id'], $ticket_id);
 	$action_scope = ( !empty($_REQUEST['em_obj']) && $_REQUEST['em_obj'] == 'em_bookings_cancelled_table' );
 	$limit = ( $action_scope && !empty($_GET['limit']) ) ? $_GET['limit'] : 20;//Default limit
 	$page = ( $action_scope && !empty($_GET['pno']) ) ? $_GET['pno']:1;
@@ -85,7 +85,7 @@ function em_bookings_cancelled_table(){
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>
-									<td><?php echo $booking->get_spaces() ?></td>
+									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>
 										<?php
 										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);

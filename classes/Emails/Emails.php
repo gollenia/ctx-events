@@ -1,6 +1,7 @@
 <?php
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Views\BookingView;
 
 class EM_Emails {
 	/**
@@ -108,8 +109,8 @@ class EM_Emails {
 		    	    	$subject_format = get_option('dbem_emp_emails_reminder_subject');
 		    	    	$message_format = get_option('dbem_emp_emails_reminder_body');
 	    	    	}
-	    	    	$subject = $booking->output($subject_format,'raw');
-	    	    	$message = $booking->output($message_format,$output_type);
+	    	    	$subject = BookingView::render($booking, $subject_format, 'raw');
+	    	    	$message = BookingView::render($booking, $message_format, $output_type);
 		    	    $emails[] = array($booking->booking_mail, $subject, $message, $booking->booking_id);
 		    	    do_action('em_booking_email_after_send', $booking);
 	    	    }

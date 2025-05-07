@@ -8,16 +8,16 @@ const UserRegistration = ( props ) => {
 	const { error } = state.response;
 	const { registration } = state.request;
 
-	const { data, request, response } = state;
+	const { event, request, response } = state;
 
-	if ( ! data || ! data.registration_fields ) return <></>;
+	if ( ! event || ! event.forms.registration_fields ) return <></>;
 
 	return (
 		<div className="grid xl:grid--columns-2 grid--gap-12">
 			<Summary { ...props } />
 			<div>
 				<form className="form--trap form grid xl:grid--columns-6 grid--gap-8" id="user-registration-form">
-					{ data.registration_fields.map( ( field, index ) => (
+					{ event.forms.registration_fields.map( ( field, index ) => (
 						<InputField
 							{ ...field }
 							name={ field.fieldid }
@@ -35,7 +35,7 @@ const UserRegistration = ( props ) => {
 							locale={ window.eventBookingLocalization.locale }
 						/>
 					) ) }
-					{ data.event?.is_free && window.eventBookingLocalization.consent && (
+					{ event?.is_free && window.eventBookingLocalization.consent && (
 						<InputField
 							type="checkbox"
 							onChange={ ( event ) => {
@@ -48,7 +48,7 @@ const UserRegistration = ( props ) => {
 							value={ request.registration.data_privacy_consent }
 							settings={ {
 								name: 'data_privacy_consent',
-								help: data?.l10n?.consent,
+								help: window.eventBookingLocalization.consent,
 								type: 'checkbox',
 							} }
 						/>
@@ -56,11 +56,10 @@ const UserRegistration = ( props ) => {
 					<div
 						tabIndex={ 99 }
 						onFocus={ () => {
-							console.log( 'focus' );
 							document.getElementById( 'focusButton' ).focus();
 						} }
 					></div>
-					{ data.event.is_free && error != '' && (
+					{ event.is_free && error != '' && (
 						<div class="alert bg-error text-white" dangerouslySetInnerHTML={ { __html: error } }></div>
 					) }
 				</form>

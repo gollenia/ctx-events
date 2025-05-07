@@ -2,6 +2,8 @@
 
 namespace Contexis\Events\Models;
 
+use Contexis\Events\Utilities\Image;
+
 class Speaker {
 
 	var int $id = 0;
@@ -9,7 +11,7 @@ class Speaker {
 	var $email = "";
 	var $gender = "";
 	var $phone = "";
-	var $image = [];
+	var ?Image $image = null;
 	var $slug = "";
 	var $role = "";
 	var $description = "";
@@ -41,7 +43,7 @@ class Speaker {
 		if(empty($result)) return $speaker;
 
 		$data = $result[0];
-		$speaker->image = self::get_image($speaker->id);
+		$speaker->image = Image::from_post_id($speaker->id);
 		$speaker->name = $data->post_title;
 		$speaker->email = get_post_meta($speaker->id,'_email', true);
 		$speaker->phone = get_post_meta($speaker->id,'_phone', true);
@@ -51,23 +53,7 @@ class Speaker {
 		return $speaker;
 	}
 
-	private static function get_image($id) {
-
-		$thumbnail = get_post_thumbnail_id($id);
-
-		if(!$thumbnail) return false;
-
-		$attachment = [
-			'attachment_id' => $thumbnail,
-			'sizes' => []
-		];
-		
-		foreach(get_intermediate_image_sizes($thumbnail) as $size) {
-			$attachment['sizes'][$size] = array_combine(['url', 'width',  'height', 'resized'], wp_get_attachment_image_src( $thumbnail, $size) );
-		}
-		
-		return $attachment;
-	}
+	
 
 	public function get_rest_fields() {
 		return [

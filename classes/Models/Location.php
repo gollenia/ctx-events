@@ -19,7 +19,7 @@ use WP_Post;
  * @property int $owner              ID of author/owner, shorthand for location_owner
  * @property int $status             ID of post status, shorthand for location_status
  */
-class Location extends \EM_Object {
+class Location {
 
 	var $location_id = 0;
 	var $post_id = 0;
@@ -196,7 +196,7 @@ class Location extends \EM_Object {
 		$validate_post = true;
 		if( empty($this->location_name) ){
 			$validate_post = false;
-			$this->add_error( __('Location name','events').__(" is required.", 'events') );
+			
 		}
 
 		return apply_filters('em_location_validate', $validate_post, $this );		
@@ -217,23 +217,6 @@ class Location extends \EM_Object {
 	function has_events( $status = 1 ){	
 		$events_count = EventCollection::find(array('location_id' => $this->location_id, 'status' => $status))->count();
 		return apply_filters('em_location_has_events', $events_count > 0, $this);
-	}
-	
-	function get_permalink(){	
-
-		$link = get_post_permalink($this->post_id);
-		
-		return apply_filters('em_location_get_permalink', $link, $this);	;
-	}
-	
-	function get_ical_url(){
-		global $wp_rewrite;
-		if( !empty($wp_rewrite) && $wp_rewrite->using_permalinks() ){
-			$return = trailingslashit($this->get_permalink()).'ical/';
-		}else{
-			$return = add_query_arg(['ical'=>1], $this->get_permalink());
-		}
-		return apply_filters('em_location_get_ical_url', $return);
 	}
 	
 	function get_edit_url(){

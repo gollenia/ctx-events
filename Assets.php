@@ -2,10 +2,11 @@
 
 namespace Contexis\Events;
 
-use Contexis\Events\Model\Booking;
+use Contexis\Events\Intl\Price;
+use Contexis\Events\Models\Booking;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
-
+use Contexis\Events\Utilities\Plugin;
 
 class Assets {
 
@@ -23,8 +24,8 @@ class Assets {
 	 */
 	public function frontend_script() {
 
-		$script_asset_path = \Events::DIR . "/build/frontend.asset.php";
-		$booking_asset_path = \Events::DIR . "/build/booking.asset.php";
+		$script_asset_path = Plugin::get_plugin_dir() . "/build/frontend.asset.php";
+		$booking_asset_path = Plugin::get_plugin_dir() . "/build/booking.asset.php";
 		if ( ! file_exists( $script_asset_path ) || ! file_exists( $booking_asset_path ) ) {
 			return;
 		}
@@ -61,7 +62,7 @@ class Assets {
 	 */
 	public function booking_script() {
 
-		$script_asset_path = \Events::DIR . "/build/booking.asset.php";
+		$script_asset_path =Plugin::get_plugin_dir() . "/build/booking.asset.php";
 		
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
@@ -75,7 +76,7 @@ class Assets {
 			true
 		);
 
-		wp_set_script_translations('booking-view', 'events', \Events::DIR  . '/languages');
+		wp_set_script_translations('booking-view', 'events', Plugin::get_plugin_dir()  . '/languages');
 
 		wp_register_style(
 			'booking-style',
@@ -99,7 +100,7 @@ class Assets {
 	 */
 	public function editor_script() {
 		
-		$script_asset_path = \Events::DIR . "/build/index.asset.php";
+		$script_asset_path = Plugin::get_plugin_dir() . "/build/index.asset.php";
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
 		$script_asset = require( $script_asset_path );
@@ -141,10 +142,11 @@ class Assets {
 	
 	
 	public function admin_enqueue( ){
-		wp_enqueue_script('events-manager', plugins_url('/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), \Contexis\Events\Utilities::get_plugin_version());		
-		wp_enqueue_script('events-admin-script', plugins_url('/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), \Contexis\Events\Utilities::get_plugin_version());		
-		wp_enqueue_style('events-admin', plugins_url('/build/admin.css',__FILE__), array('wp-components'), \Contexis\Events\Utilities::get_plugin_version());
-		wp_enqueue_style('events-admin-booking', plugins_url('/build/style-admin.css',__FILE__), array(), \Contexis\Events\Utilities::get_plugin_version());
+		$version = Plugin::get_plugin_version();
+		wp_enqueue_script('events-manager', plugins_url('/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), $version);		
+		wp_enqueue_script('events-admin-script', plugins_url('/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), $version);		
+		wp_enqueue_style('events-admin', plugins_url('/build/admin.css',__FILE__), array('wp-components'), $version);
+		wp_enqueue_style('events-admin-booking', plugins_url('/build/style-admin.css',__FILE__), array(), $version);
 		$this->localize_admin_script();
 		wp_set_script_translations( 'events-admin-script', 'events', plugin_dir_path( __FILE__ ) . '/languages' );
 	}
@@ -173,9 +175,6 @@ class Assets {
 			));		
 		}
 		$em_localized_js['cache'] = defined('WP_CACHE') && WP_CACHE;
-		$em_localized_js['txt_search'] = get_option('dbem_search_form_text_label',__('Search','events'));
-		$em_localized_js['txt_searching'] = __('Searching...','events');
-		$em_localized_js['txt_loading'] = __('Loading...','events');
 		
 		//logged in messages that visitors shouldn't need to see
 		if( is_user_logged_in() ){
@@ -202,7 +201,7 @@ class Assets {
 			    $em_localized_js['close_text'] = __('Collapse All','events');
 			    $em_localized_js['open_text'] = __('Expand All','events');
 			}
-			$em_localized_js["currency"] = new \Contexis\Events\Intl\Price(0)->get_currency_code();
+			$em_localized_js["currency"] = new Price(0)->get_currency_code();
 			$em_localized_js["locale"] = str_replace('_', '-', get_locale());
 		}		
 		

@@ -4,6 +4,7 @@ namespace Contexis\Events;
 
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Intl\Date;
+use Contexis\Events\Models\Booking;
 
 class Dashboard {
 
@@ -25,14 +26,13 @@ class Dashboard {
 		?>
 		<table style="width:100%">
 			<?php foreach($bookings as $booking) : ?>
-				
 				<?php 
 					$status = array_search($booking->booking_status, array_column($booking->get_available_states(), 'search'));
 				?>
 				<tr>
 					<td><span class="em-label em-label-<?php echo $status ?>"><i class="material-symbols-outlined"><?php echo $booking->get_status_icon() ?></i></span></td>
-					<td><a href="#"> <?php echo $booking->get_full_name; ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
-					<td><span class="em-date"><?php echo $booking->get_booking_date(); ?></span></td>
+					<td><a href="#"> <?php echo $booking->get_full_name(); ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
+					<td><span class="em-date"><?php echo Date::get_date($booking->booking_date->getTimestamp()); ?></span></td>
 			</tr>
 			<?php endforeach; ?>
 			</table>

@@ -9,7 +9,7 @@ import {
 	RadioControl,
 	RangeControl,
 	SelectControl,
-	TextControl
+	TextControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useMemo, useState } from 'react';
@@ -50,7 +50,7 @@ const Inspector = ( props ) => {
 		setAttributes,
 	} = props;
 
-	const [categoryQuery, setCategoryQuery] = useState( '' );
+	const [ categoryQuery, setCategoryQuery ] = useState( '' );
 
 	const postType = window.eventBlocksLocalization?.post_type;
 
@@ -82,42 +82,46 @@ const Inspector = ( props ) => {
 		{ value: 'DESC', label: __( 'Descending', 'events' ) },
 	];
 
-	console.log(availableCategories)
-
 	const filteredCategories = useMemo( () => {
-		
-			if ( ! categoryQuery || categoryQuery.length < 3 ) {
-				return availableCategories;
-			}
-	
-			return availableCategories.filter( ( category ) => {
-				return category.name.toLowerCase().includes( categoryQuery.toLowerCase() );
-			} );
+		if ( ! categoryQuery || categoryQuery.length < 3 ) {
+			return availableCategories;
 		}
-	, [ categoryQuery, availableCategories ] );
+
+		return availableCategories.filter( ( category ) => {
+			return category.name.toLowerCase().includes( categoryQuery.toLowerCase() );
+		} );
+	}, [ categoryQuery, availableCategories ] );
 
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'Data', 'events' ) } initialOpen={ true }>
-				{ filteredCategories.length > 0 && ( <>
-				{ filteredCategories.length > 10 && (
-				<TextControl 
-					label={ __( 'Category', 'events' ) }
-					value={ categoryQuery }
-					onChange={ ( value ) => setCategoryQuery( value ) }
-				/> ) }
-				{ filteredCategories.map( ( category ) => {
-					return (
-						<CheckboxControl
-							key={ category.id }
-							label={ category.name }
-							checked={ selectedCategory.includes( category.id ) }
-							onChange={ ( value ) => {
-								setAttributes( { selectedCategory: value ? [ ...selectedCategory, category.id ] : selectedCategory.filter( ( id ) => id !== category.id ) } );
-							} }
-						/>
-					);
-				} ) } </> ) }
+				{ filteredCategories.length > 0 && (
+					<>
+						{ filteredCategories.length > 10 && (
+							<TextControl
+								label={ __( 'Category', 'events' ) }
+								value={ categoryQuery }
+								onChange={ ( value ) => setCategoryQuery( value ) }
+							/>
+						) }
+						{ filteredCategories.map( ( category ) => {
+							return (
+								<CheckboxControl
+									key={ category.id }
+									label={ category.name }
+									checked={ selectedCategory.includes( category.id ) }
+									onChange={ ( value ) => {
+										setAttributes( {
+											selectedCategory: value
+												? [ ...selectedCategory, category.id ]
+												: selectedCategory.filter( ( id ) => id !== category.id ),
+										} );
+									} }
+								/>
+							);
+						} ) }{ ' ' }
+					</>
+				) }
 				<FormTokenField
 					label={ __( 'Tags', 'events' ) }
 					value={ tagsFieldValue }

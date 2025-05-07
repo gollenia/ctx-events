@@ -1,11 +1,15 @@
 <?php
 
-namespace Contexis\Events\Events;
+namespace Contexis\Events\Controllers;
 
 use Contexis\Events\Collections\BookingCollection;
+use Contexis\Events\Collections\CouponCollection;
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Forms\AttendeesForm;
+use Contexis\Events\Forms\BookingForm;
 use \Contexis\Events\Models\Event;
 use Contexis\Events\Models\Speaker;
+use Contexis\Events\Payment\GatewayService;
 
 class EventController 
 {
@@ -85,7 +89,6 @@ class EventController
 			], 404);
 		}
 		
-		
 		$requested_fields = $request->get_param('fields');
 		$requested_fields = is_array($requested_fields) ? $requested_fields : explode(',', (string) $requested_fields);
 		$requested_fields = array_filter($requested_fields);
@@ -97,13 +100,17 @@ class EventController
 		if (in_array('location', $requested_fields)) {
 			$data['location'] = $event->get_location($event)->get_rest_fields();
 		}
+
+		if(in_array('bookings', $requested_fields)) {
+			//$data['bookings'] = $event->get_bookings()->get_rest_fields();
+		}
 		
 		if(in_array('speaker', $requested_fields)) {
 			$data['speaker'] = Speaker::get($event->speaker_id)->get_rest_fields();
 		}
 
 		if(in_array('tickets', $requested_fields)) {
-			$data['tickets_available'] = $event->get_bookings()->get_available_tickets()->get_rest_fields();
+			$data['tickets_available'] = $event->get_available_tickets()->get_rest_fields();
 		}
 
 		if(in_array('categories', $requested_fields)) {
@@ -111,14 +118,18 @@ class EventController
 		}
 
 		if(in_array('gateways', $requested_fields)) {
-			$data['gateways_available'] = \EM_Gateways::active_gateways();
+			$data['gateways_available'] = GatewayService::get_rest_fields();
 		}
 
 		if(in_array('forms', $requested_fields)) {
 			$data['forms'] = [
-				'registration_fields' => \EM_Booking_Form::get_booking_form($event->post_id),
-		    	'attendee_fields' => \EM_Attendees_Form::get_attendee_form($event->post_id),
+				'registration_fields' => BookingForm::get_booking_form($event->post_id),
+		    	'attendee_fields' => AttendeesForm::get_attendee_form($event->post_id),
 			];
+		}
+
+		if($request->get_param('nonce')) {
+			$data['_nonce'] = wp_create_nonce($request->get_param('nonce'));
 		}
 
         return $data ;
@@ -210,7 +221,7 @@ class EventController
 		
 		$speaker = Speaker::get($event->speaker_id);
 		$price = 0;
-		$booking = BookingCollection::from_event($event);
+		$booking = BookingCollection::from_event_id($event->event_id);
 		$tickets = $booking->get_tickets()->tickets;
 		if(!empty($tickets)) {
 			$first_ticket = key($tickets);
@@ -220,11 +231,11 @@ class EventController
 			[
 				'bookings' => [
 					'has_bookings' => $event->event_rsvp,
-					'spaces' => $booking->get_available_spaces()
+					'spaces' => $event->get_available_spaces()
 				],
 				'ID' => $event->post_id,
 				'event_id' => $event->event_id,
-				'link' => get_permalink($event->post_id),
+				'link' => get_post_permalink($event->post_id),
 				'image' => $event->get_image(),
 				'category' => $category ? [ 
 					'id' => $category->id,
@@ -242,7 +253,7 @@ class EventController
 					'country' => $location->location_country,
 					'state' => $location->location_state,
 				],
-				'has_coupons' => \EM_Coupons::event_has_coupons($event),
+				'has_coupons' => CouponCollection::event_has_coupons($event),
 				'date' => \Contexis\Events\Intl\Date::get_date($event->start()->getTimestamp(), $event->end()->getTimestamp()),
 				'time' => \Contexis\Events\Intl\Date::get_time($event->start()->getTimestamp(), $event->end()->getTimestamp()),
 				'price' => new \Contexis\Events\Intl\Price($price),

@@ -1,9 +1,8 @@
 /**
  * Wordpress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
-import { useState } from '@wordpress/element';
+import { useEntityRecord } from '@wordpress/core-data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -17,8 +16,6 @@ import Inspector from './inspector.js';
  * @return {JSX.Element} Element
  */
 const edit = ( props ) => {
-	const [ spaces, setSpaces ] = useState( 0 );
-
 	const {
 		attributes: {
 			roundImage,
@@ -31,17 +28,14 @@ const edit = ( props ) => {
 			bookedUpText,
 		},
 		setAttributes,
-		context: { postType },
+		context: { postType, postId },
 	} = props;
 
 	if ( postType !== 'event' ) return <></>;
 
-	apiFetch( {
-		path: `/events/v2/bookinginfo/${ props.context.postId }`,
-	} ).then( ( data ) => {
-		if ( ! data.data?.available_spaces ) return;
-		setSpaces( data.data.available_spaces );
-	} );
+	const { record, isResolving } = useEntityRecord( 'postType', postType, postId );
+
+	const spaces = record?.extras?.spaces || 0;
 
 	const blockProps = useBlockProps( { className: 'event-details-item' } );
 

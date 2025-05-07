@@ -36,7 +36,7 @@ const datetimeSelector = () => {
 	const compareTime = ( start, end ) => {
 		const startDate = new Date( '01/01/1970 ' + start );
 		const endDate = new Date( '01/01/1970 ' + end );
-		return startDate > endDate;
+		return startDate < endDate;
 	};
 
 	const getNow = ( hourOffset = 0 ) => {
@@ -54,8 +54,6 @@ const datetimeSelector = () => {
 		setMeta( { _event_end: getNow( 2 ) } );
 	}
 
-	console.log( 'meta', meta );
-
 	return (
 		<PluginDocumentSettingPanel
 			name="events-datetime-settings"
@@ -67,10 +65,13 @@ const datetimeSelector = () => {
 				value={ meta._event_start }
 				onChange={ ( value ) => {
 					setMeta( { _event_start: value } );
-					if ( compareTime( value, meta._event_end ) ) {
-						endDate = new Date( value );
-						endDate.addHours( 1 );
+					if ( ! compareTime( value, meta._event_end ) ) {
+						let endDate = new Date( value );
 						setMeta( { _event_end: endDate.toISOString() } );
+					}
+					if ( ! meta._event_rsvp_start || compareTime( meta._event_rsvp_start, value ) ) {
+						let startDate = new Date( value );
+						setMeta( { _event_rsvp_start: startDate.toISOString() } );
 					}
 				} }
 				min={ getNow( 1 ) }
@@ -85,6 +86,11 @@ const datetimeSelector = () => {
 				value={ meta._event_end }
 				onChange={ ( value ) => {
 					setMeta( { _event_end: value } );
+
+					if ( !! meta._event_rsvp_end || ! compareTime( value, meta._event_rsvp_end ) ) {
+						let endDate = new Date( value );
+						setMeta( { _event_rsvp_end: endDate.toISOString() } );
+					}
 				} }
 				step={ 300 }
 				min={ meta._event_start }

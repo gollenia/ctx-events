@@ -19,9 +19,9 @@ const formatCurrency = ( price, locale, currency ) => {
 
 const ticketPrice = ( key, appState ) => {
 	return (
-		eventData.available_tickets[ key ].price *
+		eventData.tickets_available[ key ].price *
 		appState.request.tickets.reduce( ( n, ticket ) => {
-			return n + ( ticket.id == eventData.available_tickets[ key ].id );
+			return n + ( ticket.id == eventData.tickets_available[ key ].id );
 		}, 0 )
 	);
 };

@@ -102,7 +102,6 @@ class EM_Coupon_Admin extends EM_Coupon {
 		if( current_user_can('edit_posts') ){
 			do_action('em_coupon_delete_pre', $this);
 			$result = $wpdb->query("DELETE FROM ".EM_COUPONS_TABLE." WHERE coupon_id=".$this->coupon_id);
-			$total = $wpdb->query("DELETE FROM ".EM_META_TABLE." WHERE meta_key='coupon-count' AND object_id={$this->coupon_id} LIMIT 1");
 			$this->feedback_message = sprintf(__('Successfully deleted %s','events'),__('Coupon','events'));
 		}
 		return apply_filters('em_coupon_delete', $result !== false, $this);

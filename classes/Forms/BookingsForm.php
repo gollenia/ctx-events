@@ -1,8 +1,13 @@
 <?php
 
+namespace Contexis\Events\Forms;
+
+use Contexis\Events\Forms\Form;
+use Contexis\Events\Models\Booking;
 use Contexis\Events\Models\Event;
 
-class EM_Booking_Form {
+
+class BookingForm {
 	static $validate;
 	/**
 	 * @var EM_Form
@@ -15,19 +20,18 @@ class EM_Booking_Form {
 	
 	public static function init(){	
 				
-		//Booking admin and exports
-		
+		$instance = new self;
 		//Booking Tables UI
-		add_filter('em_bookings_table_rows_col', array('EM_Booking_Form','em_bookings_table_rows_col'),10,5);
-		add_filter('em_bookings_table_cols_template', array('EM_Booking_Form','em_bookings_table_cols_template'),10,2);
+		add_filter('em_bookings_table_rows_col', array($instance,'em_bookings_table_rows_col'),10,5);
+		add_filter('em_bookings_table_cols_template', array($instance,'em_bookings_table_cols_template'),10,2);
 		// Actions and Filters
-		add_filter('em_booking_form_custom', array('EM_Booking_Form','booking_form'),10,1); //handle the booking form template
-        add_filter('em_booking_form_custom_json', array('EM_Booking_Form','booking_form_json'),10,1); //handle the booking form template
+		//add_filter('em_booking_form_custom', array($instance,'booking_form'),10,1); //handle the booking form template
+        //add_filter('em_booking_form_custom_json', array($instance,'booking_form_json'),10,1); //handle the booking form template
 		//Booking interception
 		$booking_button_request = !empty($_REQUEST['action']) && $_REQUEST['action'] == 'booking_add_one' && is_user_logged_in(); //in order to disable the form if booking button is pressed
 		if( !$booking_button_request ){
-			add_filter('em_booking_get_post', array('EM_Booking_Form', 'em_booking_get_post'), 10, 2); //get post data + validate
-			add_filter('em_booking_validate', array('EM_Booking_Form', 'em_booking_validate'), 10, 2); //validate object
+			add_filter('em_booking_get_post', array($instance, 'em_booking_get_post'), 10, 2); //get post data + validate
+			add_filter('em_booking_validate', array($instance, 'em_booking_validate'), 10, 2); //validate object
 		}
 	
 	}
@@ -55,18 +59,18 @@ class EM_Booking_Form {
 	    //make sure we don't need to get another form rather than the one already stored in this object
 		if(!empty(self::$form)) return self::$form;
 
-		if(is_numeric($event)){ $event = Event::find_by_id($event); }
+		if(is_numeric($event)){ $event = Event::get_by_id($event); }
 
 		self::$form_id = $event ? get_post_meta($event->post_id, '_booking_form', true) : 0;
 
-		$form_data = EM_Form::get_form_data(self::$form_id);
+		$form_data = Form::get_form_data(self::$form_id);
 
 		if(empty($form_data)) {
 			$form_data = array('form' => self::get_form_template());
 			self::$form_name = __('Default','events');
 		}
 		self::$form_name = get_the_title(self::$form_id);
-		self::$form = new EM_Form($form_data, 'em_bookings_form');
+		self::$form = new Form($form_data, 'em_bookings_form');
 		self::$form->form_required_error = __('Please fill in the field: %s','events');
 
 		return self::$form;
@@ -76,7 +80,7 @@ class EM_Booking_Form {
 
 	public static function get_booking_form($event_id){
 		$form_id = get_post_meta($event_id, '_booking_form', true);
-		$form_data = EM_Form::get_form_data($form_id, false);
+		$form_data = Form::get_form_data($form_id, false);
 		return $form_data;
 	}
 
@@ -129,7 +133,7 @@ class EM_Booking_Form {
 			}
 		}elseif( count($EM_Form->get_errors()) > 0 ){
 			$result = false;
-			$booking->add_error($EM_Form->get_errors());
+			$booking->errors[] = $EM_Form->get_errors();
 		}
 		return $result;
 	}
@@ -139,7 +143,7 @@ class EM_Booking_Form {
 	 * @param Booking $booking
 	 * @return boolean
 	 */
-	public static function em_booking_validate($result, $booking){
+	public static function em_booking_validate(bool $result, Booking $booking) : bool {
 		$EM_Form = self::get_form($booking->event_id, $booking);
 
 		if( empty($EM_Form->field_values) ){
@@ -155,7 +159,7 @@ class EM_Booking_Form {
 		}
 		if( !empty($booking->mb_validate_bookings) ) $EM_Form->ignore_captcha = true; //MB Mode doing a final validation, so no need to re-check captcha
 		if( !$EM_Form->validate() ){
-		    $booking->add_error($EM_Form->get_errors());
+		    $booking->errors[] = $EM_Form->get_errors();
 			return false;
 		}
 		if( !empty($booking->mb_validate_bookings) ) unset($EM_Form->ignore_captcha);  //MB Mode doing a final validation, so no need to re-check captcha
@@ -164,7 +168,7 @@ class EM_Booking_Form {
 	
 	
 
-	public static function em_bookings_table_rows_col($column, $booking, $format){
+	public function em_bookings_table_rows_col($column, $booking, $format){
 		$EM_Form = self::get_form($booking->get_event()->event_id ?? null);
 
 		if (!$EM_Form->is_normal_field($column) || !array_key_exists($column, $booking->booking_meta['booking'] ?? [])) {
@@ -176,7 +180,7 @@ class EM_Booking_Form {
     	return ($format == 'html' || empty($format)) ? esc_html($value) : $value;
 	}
 	
-	public static function em_bookings_table_cols_template($template, $bookings_table){
+	public function em_bookings_table_cols_template($template, $bookings_table){
 		$event = $bookings_table->event;
 		$event_id = (!empty($event->event_id)) ? $event->event_id:false;
 		$EM_Form = self::get_form($event_id);
@@ -190,6 +194,6 @@ class EM_Booking_Form {
 	
 }
 
-EM_Booking_Form::init();
-include('AttendeeForms.php');
+BookingForm::init();
+include('AttendeesForm.php');
 

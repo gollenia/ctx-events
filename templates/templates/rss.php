@@ -7,6 +7,7 @@
  */
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Views\EventView;
 
 header ( "Content-type: application/rss+xml; charset=UTF-8" );
 echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
@@ -14,11 +15,11 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title><?php echo esc_html(get_option ( 'dbem_rss_main_title' )); ?></title>
-		<link><?php	echo EM_URI; ?></link>
+		<link><?php	echo ''; ?></link>
 		<description><?php echo esc_html(get_option('dbem_rss_main_description')); ?></description>
 		<docs>http://blogs.law.harvard.edu/tech/rss</docs>
 		<pubDate><?php echo date('D, d M Y H:i:s +0000', get_option('em_last_modified')); ?></pubDate>
-		<atom:link href="<?php echo esc_attr(EM_RSS_URI); ?>" rel="self" type="application/rss+xml" />
+		<atom:link href="<?php echo esc_attr(''); ?>" rel="self" type="application/rss+xml" />
 		<?php
 		$description_format = str_replace ( ">", "&gt;", str_replace ( "<", "&lt;", get_option ( 'dbem_rss_description_format' ) ) );
         $rss_limit = get_option('dbem_rss_limit');
@@ -33,7 +34,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
 				/* @var $event Event */
 				$description = EventView::render($event, get_option ( 'dbem_rss_description_format' ), "rss");
 				$description = ent2ncr(convert_chars($description)); //Some RSS filtering
-				$event_url = $event->get_permalink;
+				$event_url = get_permalink($event->event_id);
 				?>
 				<item>
 					<title><?php echo $event->event_name; ?></title>

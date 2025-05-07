@@ -59,7 +59,7 @@ if($attributes['linkTo'] == 'custom') {
 	<div class="event-details-image">
 		<i class="material-icons material-symbols-outlined">
 			<?php if ($attributes['showPortrait'] && $speaker->image) : ?>
-				<img class="event-details-image" src="<?php echo $speaker->image['sizes']['thumbnail']['url'] ?>" alt="<?php echo $speaker->name ?>">
+				<img class="event-details-image" src="<?php echo $speaker->image->url_for('thumbnail') ?>" alt="<?php echo $speaker->image->alt ?>">
 			<?php else : ?>
 			<?php echo $attributes['icon'] ? $attributes['icon'] : $gender ?>
 			<?php endif; ?>

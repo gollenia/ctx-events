@@ -9,7 +9,7 @@ import { InputField } from '@contexis/wp-react-form';
 const Ticket = ( props ) => {
 	const { state, dispatch, ticket, index } = props;
 
-	const { attendee_fields } = state.data;
+	const { attendee_fields } = state.event.forms;
 
 	return (
 		<div className="booking-ticket">
@@ -26,7 +26,6 @@ const Ticket = ( props ) => {
 			</div>
 			<div className="booking-ticket-form">
 				{ attendee_fields.map( ( field, key ) => {
-					console.log( index, key, state.wizard.step );
 					return (
 						<InputField
 							{ ...field }

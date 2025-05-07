@@ -42,7 +42,7 @@ const BookingEditor = ( { bookingId } ) => {
 	if ( state.state === 'loading' || ! data ) {
 		return <p>{ __( 'Loading Data...', 'events' ) }</p>;
 	}
-	console.log( 'state', state );
+
 	return (
 		<div>
 			<Note store={ store } />

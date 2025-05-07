@@ -46,7 +46,7 @@ function Summary( { state, dispatch } ) {
 
 	const TICKETS_MISSING =
 		( TICKETS && request.tickets.length == 0 ) ||
-		( REGISTRATION && data.attendee_fields.length == 0 && request.tickets.length == 0 );
+		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.tickets.length == 0 );
 
 	const fullPrice = useMemo( () => calculateFullPrice(), [ response.coupon, ticketCount, request.donation ] );
 

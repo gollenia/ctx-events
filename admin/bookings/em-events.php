@@ -9,7 +9,7 @@ use Contexis\Events\Views\EventView;
  */
 function em_bookings_events_table() {
 	//TODO Simplify panel for events, use form flags to detect certain actions (e.g. submitted, etc)
-	global $wpdb;
+
 
 	$scope_names = array (
 		'past' => __ ( 'Past events', 'events'),
@@ -113,9 +113,9 @@ function em_bookings_events_table() {
 						$style = "";
 						$booked_percent = 0;
 						$pending_percent = 0;
-						if($event->get_bookings()->get_spaces()  > 0) {
-							$booked_percent = $event->get_bookings()->get_booked_spaces() / ($event->get_bookings()->get_spaces() / 100);
-							$pending_percent = $event->get_bookings()->get_pending_spaces() / ($event->get_bookings()->get_spaces() / 100);
+						if($event->get_spaces() > 0) {
+							$booked_percent = $event->get_booked_spaces() / ($event->get_spaces() / 100);
+							$pending_percent = $event->get_pending_spaces() / ($event->get_spaces() / 100);
 						}
 						
 						
@@ -133,12 +133,12 @@ function em_bookings_events_table() {
 							</td>
 							<td>
 								
-							<b><?php echo $event->get_bookings()->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_bookings()->get_spaces(); ?>
+							<b><?php echo $event->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_spaces(); ?>
 					
 							</td>
 							<td >
-								<b><?php echo $event->get_bookings()->get_booked_spaces(); echo " ";  ?> /
-								<?php echo $event->get_bookings()->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
+								<b><?php echo $event->get_booked_spaces(); echo " ";  ?> /
+								<?php echo $event->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
 								<div class="em-booking-graph">
 									<?php if($booked_percent < 100) { ?>
 										<div class="em-booking-graph-booked <?php if($pending_percent) echo "cut" ?>" style="width:<?php echo $booked_percent ?>%;"></div>

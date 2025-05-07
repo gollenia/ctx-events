@@ -33,18 +33,16 @@ const Booking = ( { post, open } ) => {
 
 	const { wizard, modal, event, request, response } = state;
 
-	console.log( state );
-
 	useEffect( () => {
 		const abortController = new AbortController();
 		const { signal } = abortController;
 		apiFetch( {
-			path: `/events/v2/event/${ post }?fields=forms,event,tickets,gateways`,
+			path: `/events/v2/event/${ post }?fields=forms,event,tickets,gateways&nonce=booking`,
 		} )
 			.then( ( data ) => {
-				console.log( data );
 				dispatch( { type: 'SET_EVENT', payload: data } );
 				dispatch( { type: 'SET_INIT_STATE', payload: STATES.LOADING } );
+				console.log( data );
 			} )
 			.catch( ( error ) => {
 				dispatch( { type: 'SET_INIT_STATE', payload: STATES.ERROR } );

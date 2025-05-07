@@ -37,12 +37,8 @@ const edit = ( props ) => {
 
 	const timeFormatted = () => {
 		if ( ! meta ) return;
-		const start =
-			meta._event_start_date && meta._event_start_time
-				? meta?._event_start_date + ' ' + meta?._event_start_time
-				: '';
-		const end =
-			meta?._event_end_date && meta?._event_end_time ? meta?._event_end_date + ' ' + meta?._event_end_time : '';
+		const start = meta._event_start;
+		const end = meta._event_end;
 		return formatTimeRange( start, end );
 	};
 

@@ -13,20 +13,7 @@ class EM_Object {
 	protected static $context = 'object_type';
 	
 
-	function from_array( array $array = array(), $addslashes = false ) : void 
-	{
-		if(!is_array($array)) return;	
-		foreach ( array_keys($this->fields) as $key ) {
-			if(!array_key_exists($key, $array)) continue;
-			if( !is_object($array[$key]) && !is_array($array[$key]) ){
-				$array[$key] = ($addslashes) ? wp_unslash($array[$key]):$array[$key];
-			}elseif( is_array($array[$key]) ){
-				$array[$key] = ($addslashes) ? wp_unslash($array[$key]):$array[$key];
-			}
-			if($array[$key] == null) continue;
-			$this->$key = $array[$key];
-		}
-	}
+	
 
 
 	function to_array(bool $sql_compatible = false) : array {
@@ -68,24 +55,7 @@ class EM_Object {
 		return apply_filters('em_object_get_types', $types, $this, $array);
 	}	
 	
-	function get_fields( $inverted_array=false ){
-		if( is_array($this->fields) ){
-			$return = array();
-			foreach($this->fields as $fieldName => $fieldArray){
-				if($inverted_array){
-					if( !empty($fieldArray['name']) ){
-						$return[$fieldArray['name']] = $fieldName;
-					}else{
-						$return[$fieldName] = $fieldName;
-					}
-				}else{
-					$return[$fieldName] = $fieldArray['name'];
-				}
-			}
-			return apply_filters('em_object_get_fields', $return, $this, $inverted_array);
-		}
-		return apply_filters('em_object_get_fields', array(), $this, $inverted_array);
-	}
+	
 	
 	/**
 	 * Returns an array of errors in this object

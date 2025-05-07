@@ -18,8 +18,8 @@ const Payment = ( { store } ) => {
 						<SelectControl
 							label={ __( 'Payment Method', 'events' ) }
 							value={ data.booking.gateway }
-							options={ Object.keys( data.available_gateways ).map( ( key ) => {
-								return { label: data.available_gateways[ key ].title, value: key };
+							options={ Object.keys( data.gateways_available ).map( ( key ) => {
+								return { label: data.gateways_available[ key ].title, value: key };
 							} ) }
 							onChange={ ( value ) =>
 								dispatch( {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events;
+namespace Contexis\Events\Core;
 
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
@@ -39,11 +39,8 @@ class Install {
 			wp_delete_term($tag_term->term_id, EventPost::TAGS);
 		}
 		
-		$wpdb->query('DROP TABLE '.EM_EVENTS_TABLE);
+	
 		$wpdb->query('DROP TABLE '.EM_BOOKINGS_TABLE);
-		$wpdb->query('DROP TABLE '.EM_TICKETS_TABLE);
-		$wpdb->query('DROP TABLE '.EM_TICKETS_BOOKINGS_TABLE);
-		$wpdb->query('DROP TABLE '.EM_RECURRENCE_TABLE);
 		$wpdb->query('DROP TABLE '.EM_META_TABLE);
 		
 		$wpdb->query('DELETE FROM '.$wpdb->options.' WHERE option_name LIKE \'em_%\' OR option_name LIKE \'dbem_%\'');

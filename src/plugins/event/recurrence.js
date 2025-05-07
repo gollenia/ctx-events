@@ -66,7 +66,7 @@ const datetimeSelector = () => {
 	const addOneDay = ( date ) => {
 		let newDate = new Date( date );
 		newDate.setDate( newDate.getDate() + 1 );
-		console.log( newDate.toISOString().split( 'T' )[ 0 ] );
+
 		return newDate.toISOString().split( 'T' )[ 0 ];
 	};
 

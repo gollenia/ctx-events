@@ -24,6 +24,7 @@ import * as featured from './blocks/featured/index.js';
 /**
  * Form dependencies.
  */
+import * as couponForm from './blocks/coupon-form/index.js';
 import * as formCheckbox from './blocks/form/checkbox/index.js';
 import * as formContainer from './blocks/form/container/index.js';
 import * as formCountry from './blocks/form/country/index.js';
@@ -38,6 +39,8 @@ import * as formTextarea from './blocks/form/textarea/index.js';
 import * as locationEditor from './blocks/location-editor/index.js';
 import * as upcoming from './blocks/upcoming/index.js';
 
+import bookingSidebar from './plugins/event/booking.js';
+import BookingStatus from './plugins/event/BookingStatus.js';
 import datetimeSelector from './plugins/event/datetime.js';
 import locationSelector from './plugins/event/location.js';
 import peopleSelector from './plugins/event/people.js';
@@ -67,6 +70,7 @@ let blocks = [
 	formRadio,
 	formHTML,
 	locationEditor,
+	couponForm,
 	details,
 	detailsAudience,
 	detailsDate,
@@ -79,36 +83,44 @@ let blocks = [
 	detailsSpaces,
 ];
 
-let plugins = [];
-
-registerPlugin( 'plugin-select-location', {
+registerPlugin( 'event-select-location', {
 	icon: null,
 	render: locationSelector,
 } );
 
-registerPlugin( 'plugin-select-datetime', {
+registerPlugin( 'event-select-datetime', {
 	icon: null,
 	render: datetimeSelector,
 } );
 
-registerPlugin( 'plugin-select-people', {
+registerPlugin( 'event-select-people', {
 	icon: null,
 	render: peopleSelector,
 } );
 
-registerPlugin( 'plugin-contact-data', {
+registerPlugin( 'event-contact-data', {
 	icon: null,
 	render: contactData,
 } );
 
-registerPlugin( 'plugin-personal-data', {
+registerPlugin( 'event-personal-data', {
 	icon: null,
 	render: personalData,
 } );
 
-registerPlugin( 'plugin-recurrence-settings', {
+registerPlugin( 'event-recurrence-settings', {
 	icon: null,
 	render: recurrenceSettings,
+} );
+
+registerPlugin( 'event-booking-sidebar', {
+	icon: null,
+	render: bookingSidebar,
+} );
+
+registerPlugin( 'event-booking-status', {
+	icon: null,
+	render: BookingStatus,
 } );
 
 const registerBlocks = () => {

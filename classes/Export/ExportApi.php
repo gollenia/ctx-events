@@ -3,6 +3,7 @@
 namespace Contexis\Events\Addons;
 
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Utilities\Plugin;
 use DateTime;
 use DateInterval;
 use Timber\Timber;
@@ -92,7 +93,7 @@ class ExportApi {
 		
 		$templates = [
 			get_stylesheet_directory() . '/plugins/events/pdf/template.twig',
-			\Events::DIR.'/templates/tables/pdf.twig'
+			Plugin::get_plugin_dir().'/templates/tables/pdf.twig'
 		];
 
 		$args = [
