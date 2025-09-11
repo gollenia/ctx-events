@@ -1,3 +1,6 @@
+<?php
+namespace Contexis\Events\Models;
+
 if( $this->is_recurring() ){
 			$this->recurrence = 1; //just in case
 			
@@ -348,11 +351,11 @@ class EventRecurring extends Event {
 				 	if( count($meta_inserts) > 0 ){
 					 	$result = $wpdb->query("INSERT INTO ".$wpdb->postmeta." (post_id,meta_key,meta_value) VALUES ".implode(',',$meta_inserts));
 					 	if($result === false){
-					 		$this->add_error(esc_html__('There was a problem adding custom fields to your recurring events.','events'));
+					 		$this->add_error(__('There was a problem adding custom fields to your recurring events.','events'));
 					 	}
 				 	}
 				}else{
-			 		$this->add_error(esc_html__('You have not defined a date range long enough to create a recurrence.','events'));
+			 		$this->add_error(__('You have not defined a date range long enough to create a recurrence.','events'));
 			 		$result = false;
 			 	}
 			}else{
@@ -425,7 +428,7 @@ class EventRecurring extends Event {
 			 	if( count($meta_inserts) > 0 ){
 				 	$result = $wpdb->query("INSERT INTO ".$wpdb->postmeta." (post_id,meta_key,meta_value) VALUES ".implode(',',$meta_inserts));
 				 	if($result === false){
-				 		$this->add_error(esc_html__('There was a problem adding custom fields to your recurring events.','events'));
+				 		$this->add_error(__('There was a problem adding custom fields to your recurring events.','events'));
 				 	}
 			 	}
 			}

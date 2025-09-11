@@ -9,7 +9,7 @@ use Contexis\Events\Forms\AttendeesForm;
 use Contexis\Events\Forms\BookingForm;
 use \Contexis\Events\Models\Event;
 use Contexis\Events\Models\Speaker;
-use Contexis\Events\Payment\GatewayService;
+use Contexis\Events\Payment\GatewayCollection;
 
 class EventController 
 {
@@ -94,23 +94,23 @@ class EventController
 		$requested_fields = array_filter($requested_fields);
 		
 		if(in_array('event', $requested_fields) || empty($requested_fields)) {
-			$data = $event->get_rest_fields();
+			$data = $event->jsonSerialize();
 		}
 		
 		if (in_array('location', $requested_fields)) {
-			$data['location'] = $event->get_location($event)->get_rest_fields();
+			$data['location'] = $event->get_location($event)->jsonSerialize();
 		}
 
 		if(in_array('bookings', $requested_fields)) {
-			//$data['bookings'] = $event->get_bookings()->get_rest_fields();
+			//$data['bookings'] = $event->get_bookings()->jsonSerialize();
 		}
 		
 		if(in_array('speaker', $requested_fields)) {
-			$data['speaker'] = Speaker::get($event->speaker_id)->get_rest_fields();
+			$data['speaker'] = Speaker::get($event->speaker_id)->jsonSerialize();
 		}
 
 		if(in_array('tickets', $requested_fields)) {
-			$data['tickets_available'] = $event->get_available_tickets()->get_rest_fields();
+			$data['tickets_available'] = $event->get_available_tickets()->jsonSerialize();
 		}
 
 		if(in_array('categories', $requested_fields)) {
@@ -118,7 +118,7 @@ class EventController
 		}
 
 		if(in_array('gateways', $requested_fields)) {
-			$data['gateways_available'] = GatewayService::get_rest_fields();
+			$data['gateways_available'] = GatewayCollection::active()->jsonSerialize();
 		}
 
 		if(in_array('forms', $requested_fields)) {
@@ -221,8 +221,8 @@ class EventController
 		
 		$speaker = Speaker::get($event->speaker_id);
 		$price = 0;
-		$booking = BookingCollection::from_event_id($event->event_id);
-		$tickets = $booking->get_tickets()->tickets;
+		$booking = BookingCollection::from_event($event);
+		$tickets = $booking->get_tickets();
 		if(!empty($tickets)) {
 			$first_ticket = key($tickets);
 			$price = floatval($tickets[$first_ticket]->ticket_price);
@@ -231,7 +231,7 @@ class EventController
 			[
 				'bookings' => [
 					'has_bookings' => $event->event_rsvp,
-					'spaces' => $event->get_available_spaces()
+					'spaces' => $event->spaces->available()
 				],
 				'ID' => $event->post_id,
 				'event_id' => $event->event_id,

@@ -1,19 +1,15 @@
-import { Button, Panel, PanelBody } from '@wordpress/components';
+import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import AdminField from './AdminField';
+import AdminField from '../common/AdminField';
 
 const Registration = ( { store } ) => {
 	const [ state, dispatch ] = store;
 	const data = state.data;
 
 	return (
-		<>
-			<div className="flex-header">
-				<h2>{ __( 'Registration', 'events' ) }</h2>
-				<Button onClick={ () => setShowNotesModal( true ) } variant="secondary">
-					{ data.booking?.note?.text == '' ? __( 'Add Note', 'events' ) : __( 'Edit Note', 'events' ) }
-				</Button>
-			</div>
+		<div className="booking-registration">
+			<h2>{ __( 'Registration', 'events' ) }</h2>
+
 			<Panel>
 				<PanelBody header="Registration">
 					{ data.registration_fields.map( ( field ) => (
@@ -21,7 +17,7 @@ const Registration = ( { store } ) => {
 							{ ...field }
 							key={ field.fieldid }
 							label={ field.label }
-							value={ data.registration[ field.fieldid ] }
+							value={ data.booking.registration[ field.fieldid ] }
 							onChange={ ( value ) =>
 								dispatch( {
 									type: 'SET_FIELD',
@@ -32,7 +28,7 @@ const Registration = ( { store } ) => {
 					) ) }
 				</PanelBody>
 			</Panel>
-		</>
+		</div>
 	);
 };
 

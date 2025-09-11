@@ -63,3 +63,22 @@
 	margin-top: 1rem;
 	margin-bottom: 1rem;
 }
+
+.booking-general {
+	display: flex;
+	gap: 2rem;
+}
+
+@media screen and ( max-width: 768px ) {
+	.booking-general {
+		flex-direction: column;
+	}
+}
+
+.booking-registration {
+	flex: 1;
+}
+
+.booking-history {
+	flex: 1;
+}

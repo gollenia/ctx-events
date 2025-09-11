@@ -68,20 +68,20 @@ function em_bookings_confirmed_table(){
 								$rowno++;
 								?>
 								<tr>
-									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
+									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->id ?>' name='bookings[]'/></th>
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person_id; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>
 									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>										
 										<?php
-										$unapprove_url = add_query_arg(['action'=>'bookings_unapprove', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$cancel_url = add_query_arg(['action'=>'bookings_cancel', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$edit_url = add_query_arg(['booking_id'=>$booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null], $_SERVER['REQUEST_URI']);
+										$unapprove_url = add_query_arg(['action'=>'bookings_unapprove', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$cancel_url = add_query_arg(['action'=>'bookings_cancel', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$edit_url = add_query_arg(['booking_id'=>$booking->id, 'em_ajax'=>null, 'em_obj'=>null], $_SERVER['REQUEST_URI']);
 										?>
-										<?php if( current_user_can('manage_bookings') && get_option('dbem_bookings_approval') ): ?>
+										<?php if( current_user_can('edit_posts') ): ?>
 										<a class="em-bookings-unapprove" href="<?php echo $unapprove_url ?>"><?php _e('Unapprove','events'); ?></a> |
 										<?php else: ?>
 										<a class="em-bookings-cancel" href="<?php echo $cancel_url ?>"><?php _e('Cancel','events'); ?></a> |

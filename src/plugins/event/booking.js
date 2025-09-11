@@ -9,6 +9,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import BookingForms from './booking/BookingForms';
 import BookingSpaces from './booking/BookingSpaces';
 import EnableBooking from './booking/EnableBooking';
+import MailSettings from './booking/MailSettings';
 import PriceAdjustments from './booking/PriceAdjustments';
 
 const BookingSidebar = () => {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Addons;
+namespace Contexis\Events\Export;
 
 use \Contexis\Events\Options;
 

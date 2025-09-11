@@ -1,9 +1,11 @@
 <?php
+
+namespace Contexis\Events\Emails;
 /**
  * phpmailer support
  *
  */
-class EM_Mailer {
+class Mailer {
 	
 	/**
 	 * if any errors crop up, here they are

@@ -3,10 +3,10 @@
 namespace Contexis\Events\PostTypes;
 
 use Contexis\Events\Collections\EventCollection;
-use Contexis\Events\Interfaces\PostType;
-use Contexis\Events\Interfaces\HasTaxonomy;
+use Contexis\Events\Core\Contracts\PostType;
+use Contexis\Events\Core\Contracts\HasTaxonomy;
 use Contexis\Events\Models\Event;
-use RecurringEventPost;
+use Contexis\Events\PostTypes\RecurringEventPost;
 use WP_Query;
 
 class EventPost implements PostType, HasTaxonomy {
@@ -205,7 +205,7 @@ class EventPost implements PostType, HasTaxonomy {
 						'type' => 'object',
 						'properties' => [
 							'ticket_id' => [
-								'type' => 'number'
+								'type' => 'string'
 							],
 							'ticket_name' => [
 								'type' => 'string'
@@ -299,7 +299,7 @@ class EventPost implements PostType, HasTaxonomy {
 
 		$args = EventCollection::get_query_args($args);
 		$query->query_vars = array_merge($query->query_vars, $args);
-		\Contexis\Events\Utilities\Debug::object_to_js_console($query->query_vars);
+		
 		return $query;
 		
 	}
@@ -310,7 +310,7 @@ class EventPost implements PostType, HasTaxonomy {
 			'get_callback' => function($object) {
 				$event = Event::get_by_id($object['id']);
 				return [
-					'spaces' => $event->get_available_spaces()
+					'spaces' => $event->spaces->available()
 				];
 			},
 			'schema' => [

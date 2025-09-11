@@ -1,6 +1,5 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import React from 'react';
 
 import { formatPrice } from '../../common/formatPrice.js';
 import FullPrice from './FullPrice.js';
@@ -36,7 +35,7 @@ const AttendeeTable = ( { store } ) => {
 						return (
 							<tr className="alternate">
 								<td>
-									{ data.tickets_available[ attendee.ticket_id ]?.name }
+									{ data.available_tickets[ attendee.ticket_id ]?.name }
 									<div class="row-actions">
 										<span class="edit">
 											<a
@@ -73,7 +72,7 @@ const AttendeeTable = ( { store } ) => {
 								) ) }
 								<td>
 									{ formatPrice(
-										data.tickets_available[ attendee.ticket_id ]?.price,
+										data.available_tickets[ attendee.ticket_id ]?.price,
 										state.data.l10n.currency
 									) }
 								</td>

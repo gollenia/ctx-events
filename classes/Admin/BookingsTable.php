@@ -5,24 +5,24 @@ namespace Contexis\Events\Admin;
 use Contexis\Events\Admin\Pagination;
 use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\CouponCollection;
+use Contexis\Events\Core\Container;
+use Contexis\Events\Core\Request;
 use Contexis\Events\Intl\Date;
 use Contexis\Events\Models\Booking;
+use Contexis\Events\Models\BookingStatus;
 use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Ticket;
-use Contexis\Events\Payment\GatewayService;
-use Contexis\Events\Utilities\EventScope;
+use Contexis\Events\Payment\GatewayCollection;
+use Contexis\Events\Core\Utilities\EventScope;
 
-//Builds a table of bookings, still work in progress...
-// May be replaced by JS App in future
 class BookingsTable {
-	
+
+	use \Contexis\Events\Core\Contracts\Http;
+
 	public array $cols = ['user_name','event_name','booking_spaces','booking_status','booking_price','donation'];
 	public array $cols_template = [];
 	public array $sortable_cols = ['booking_date'];
-	/**
-	 * Object we're viewing bookings in relation to.
-	 * @var object
-	 */
+
 	public $cols_view;
 	
 	public array $states = [];
@@ -34,17 +34,14 @@ class BookingsTable {
 	public string $scope = 'future';
 	public bool $show_tickets = false;
 	public ?BookingCollection $bookings;
-	public string $status = '';
+	public array $status = [0];
 	public array $cols_tickets_template = [];
 	public ?Ticket $ticket;
 	public ?Event $event = null;
 	
 	
 	function __construct(){
-		$this->states = Booking::get_available_states();
-		//Set basic var
-		
-		//build template of possible columns
+
 		$this->cols_template = apply_filters('em_bookings_table_cols_template', array(
 			'user_name'=>__('Name','events'),
 			'first_name'=>__('First Name','events'),
@@ -84,31 +81,37 @@ class BookingsTable {
 			$this->cols_template = array_merge( $this->cols_template, $this->cols_tickets_template);
 		}
 		
-		//calculate columns if post requests		
-		
-		
-		
-		
 		do_action('em_bookings_table', $this);
 	}
 
+	private function get_available_states() : array {
+		return [
+			[ 'label'=>__('Needs Attention','events'), 'value' => [BookingStatus::PENDING, BookingStatus::AWAITING_ONLINE_PAYMENT] ],
+			[ 'label' => __('All Bookings','events'), 'value' => BookingStatus::cases() ],
+			[ 'label' => __('Pending','events') , 'value' => [BookingStatus::PENDING] ],
+			[ 'label' => __('Confirmed','events'), 'value' => [BookingStatus::APPROVED] ],
+			[ 'label' => __('Canceled','events'), 'value' => [BookingStatus::CANCELED] ],
+			[ 'label' => __('Rejected','events'), 'value' => [BookingStatus::REJECTED] ],
+			[ 'label' => __('Awaiting Online Payment'), 'value' => [BookingStatus::AWAITING_ONLINE_PAYMENT] ],
+		];
+	}
+
 	private function get_request() 
-	{
-		$this->order = ( !empty($_REQUEST ['order']) && $_REQUEST ['order'] == 'DESC' ) ? 'DESC':'ASC';
-		$this->orderby = ( !empty($_REQUEST ['orderby']) ) ? sanitize_sql_orderby($_REQUEST['orderby']):'booking_name';
-		$this->limit = ( !empty($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? $_REQUEST['limit'] : 20;//Default limit
-		$this->page = ( !empty($_REQUEST['pno']) && is_numeric($_REQUEST['pno']) ) ? $_REQUEST['pno']:1;
+	{ 
+		$this->order = $this->http()->string('order', 'ASC');
+		$this->orderby = $this->http()->string('orderby', 'booking_name');
+		$this->limit = $this->http()->int('limit', 20);
+		$this->page = $this->http()->int('pno', 1);
+		$this->scope = $this->http()->string('scope', 'future');
+		$this->status = $this->http()->array('status', [0]);
 		$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;
-		$this->scope = ( !empty($_REQUEST['scope']) && array_key_exists($_REQUEST ['scope'], EventScope::get_all()) ) ? sanitize_text_field($_REQUEST['scope']):'future';
-		$this->status = ( !empty($_REQUEST['status']) && array_key_exists($_REQUEST['status'], $this->states) ) ? sanitize_text_field($_REQUEST['status']):'needs-attention';
-		
+		$this->event = Event::get_by_id($this->http()->int('eventid', 0));
+
+		$columns = $this->http()->array('cols', []);
 		if(empty($_REQUEST['no_save'])) {
 			$this->save_user_preferences();
 		}
 
-		if( !empty($_REQUEST['event_id']) && $_REQUEST['event_id'] != 0 ){
-			$this->event = Event::get_by_id($_REQUEST['event_id']);
-		}
 
 		if(empty($_REQUEST['cols'])) {
 			$this->load_user_preferences();
@@ -127,7 +130,7 @@ class BookingsTable {
 			
 			$this->cols[] = sanitize_text_field($column);
 		}
-
+		
 		
 	}
 
@@ -146,6 +149,7 @@ class BookingsTable {
 				$this->cols[$key] = $column;
 			}
 		}
+		return $this->cols;
 	}
 	
 	/**
@@ -167,9 +171,9 @@ class BookingsTable {
 	 */
 	function get_ticket(){
 		if(!isset($_REQUEST['ticket_id'])) return false;
-		if(!isset($_REQUEST['event_id'])) return false;
+		if(!isset($_REQUEST['eventid'])) return false;
 		$ticket_id = is_numeric($_REQUEST['ticket_id']) ? $_REQUEST['ticket_id'] : 0;
-		$event_id = is_numeric($_REQUEST['event_id']) ? $_REQUEST['event_id'] : 0;
+		$event_id = is_numeric($_REQUEST['eventid']) ? $_REQUEST['eventid'] : 0;
 		$ticket = Ticket::get_by_id($event_id, $ticket_id);
 		
 		if( !empty($this->ticket) && is_object($this->ticket) ){
@@ -184,22 +188,20 @@ class BookingsTable {
 	 * Gets the bookings for this object instance according to its settings
 	 * @param boolean $force_refresh
 	 */
-	function get_bookings($force_refresh = true) : BookingCollection {
-		if(!empty($this->bookings) && !$force_refresh) return $this->bookings;
-		
+	private function get_bookings($force_refresh = true) : BookingCollection {
 		$args = [
 			'limit' => $this->limit,
 			'offset' => $this->offset,
 			'order' => $this->order,
 			'orderby' => $this->orderby,
-			'status' => $this->states[$this->status]['search'],
+			'status' => $this->status,
 			'scope' => $this->event ? false : $this->scope,
 		];
 
 		if( $this->event !== null ) $args['event'] = $this->event->event_id;
-		$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
 		
-		$this->bookings = BookingCollection::get($args);
+		$this->bookings = BookingCollection::find($args);
+		
 		return $this->bookings;
 	}
 	
@@ -250,15 +252,15 @@ class BookingsTable {
 		<?php if ( $this->event ) : ?>
 		<div id="em-bookings-table-export" class="em-bookings-table-overlay" style="display:none;" title="<?php esc_attr_e('Export Bookings','events'); ?>">
 			<form id="em-bookings-table-export-form" class="em-bookings-table-form" action="<?php echo admin_url('admin-ajax.php') ?>" method="post">
-				<p><?php esc_html_e('Select the options below and export all the bookings you have currently filtered (all pages) into a CSV spreadsheet format.','events') ?></p>
+				<p><?php _e('Select the options below and export all the bookings you have currently filtered (all pages) into a CSV spreadsheet format.','events') ?></p>
 				
 				<p>
 				<input type="checkbox" name="show_tickets" value="1" />
-				<label><?php esc_html_e('Split bookings by ticket type','events')?> </label>
+				<label><?php _e('Split bookings by ticket type','events')?> </label>
 				
 				<?php do_action('em_bookings_table_export_options'); ?>
 				<div id="em-bookings-table-settings-form-cols">
-					<p><strong><?php esc_html_e('Columns to export','events')?></strong></p>
+					<p><strong><?php _e('Columns to export','events')?></strong></p>
 					<ul id="em-bookings-export-cols-active" class="em-bookings-cols-sortable">
 						<?php foreach( $this->cols as $col_key ): ?>
 							<li class="ui-state-highlight">
@@ -289,7 +291,7 @@ class BookingsTable {
 					</ul>
 				</div>
 				<?php if( $this->event ): ?>
-				<input type="hidden" name="event_id" value='<?php echo esc_attr($this->event->event_id); ?>' />
+				<input type="hidden" name="eventid" value='<?php echo esc_attr($this->event->event_id); ?>' />
 				<?php endif; ?>
 				<?php if( $ticket !== false ): ?>
 				<input type="hidden" name="ticket_id" value='<?php echo esc_attr($ticket->ticket_id); ?>' />
@@ -312,7 +314,7 @@ class BookingsTable {
 		<div class='em-bookings-table em_obj' id="em-bookings-table">
 			<form class='bookings-filter' method='get' action='<?php echo esc_url(site_url()); ?>/wp-admin/edit.php'>
 				<?php if( $this->event ): ?>
-				<input type="hidden" name="event_id" value='<?php echo esc_attr($this->event->event_id); ?>' />
+				<input type="hidden" name="eventid" value='<?php echo esc_attr($this->event->event_id); ?>' />
 				<?php endif; ?>
 				
 				<input type="hidden" name="is_public" value="<?php echo ( !empty($_REQUEST['is_public']) || !is_admin() ) ? 1:0; ?>" />
@@ -350,15 +352,12 @@ class BookingsTable {
 							<option value="100">100</option>
 						</select>
 						<select name="status">
-							<?php
-							foreach ( $this->states as $key => $value ) {
-								$selected = "";
-								
-								if ($key == $this->status)
-									$selected = "selected='selected'";
-								echo "<option value='".esc_attr($key)."' $selected>".esc_html($value['label'])."</option>  ";
-							}
-							?>
+							<?php foreach ( $this->get_available_states() as $state ) {
+								$selected = in_array($this->status, $state['value'], true) ? "selected='selected'" : '';
+								echo "<option value='" . join(',', array_map(fn($s) => $s->value, $state['value'])) . "' $selected>"
+									. $state['label']
+									. "</option>";
+							} ?>
 						</select>
 						
 						<input name="pno" type="hidden" value="1" />
@@ -390,13 +389,14 @@ class BookingsTable {
 						<?php 
 						
 						$event_count = (!empty($event_count)) ? $event_count:0;
-						foreach ($this->bookings->bookings as $booking) {
+						foreach ($this->bookings as $booking) {
+							var_dump($booking);
 							?>
 							<tr>
 								<?php 
 								
 								if( $this->show_tickets ){
-									$attendees = $booking->booking_meta['attendees'] ?? [];
+									$attendees = $booking->attendees ?? [];
 									foreach ( $attendees as $ticket_id => $entries ) {
 										$ticket = \Contexis\Events\Models\Ticket::get_by_id($booking->event_id, $ticket_id);
 								
@@ -425,7 +425,7 @@ class BookingsTable {
 					</tbody>
 					<?php else: ?>
 						<tbody>
-							<tr><td scope="row" colspan="<?php echo count($this->cols); ?>"><?php esc_html_e('No bookings.', 'events'); ?></td></tr>
+							<tr><td scope="row" colspan="<?php echo count($this->cols); ?>"><?php _e('No bookings.', 'events'); ?></td></tr>
 						</tbody>
 					<?php endif; ?>
 				</table>
@@ -489,7 +489,7 @@ class BookingsTable {
 	}
 
 	function get_cell($booking, $column, $format = 'html'){
-		$ticket_id = array_keys($booking->booking_meta['attendees'])[0];
+		$ticket_id = array_keys($booking->attendees)[0];
 		$ticket = Ticket::get_by_id($booking->event_id, $ticket_id);
 		$price_array = $booking->get_price_summary_array();
 		switch ($column) {
@@ -499,7 +499,7 @@ class BookingsTable {
 			case 'user_name':
 				if( $format == 'csv' ) return $booking->get_full_name;
 				$url = $booking->get_event()->get_bookings_url();
-				$url = add_query_arg(['booking_id'=>$booking->booking_id, 'em_ajax'=>null, 'em_obj'=>null, 'booking_email'=>$booking->user_email], $url);
+				$url = add_query_arg(['booking_id'=>$booking->id, 'em_ajax'=>null, 'em_obj'=>null, 'booking_email'=>$booking->user_email], $url);
 				$ret = "<strong><a class='row-title' href='$url'>" . $booking->get_full_name() . '</a></strong>';
 				$ret .= "<div class='row-actions'>" . implode(' | ', $this->get_booking_actions($booking)) . "</div>";
 				return $ret;
@@ -527,14 +527,14 @@ class BookingsTable {
 				break;
 			case 'booking_status':
 				if( $format == 'csv' ) return $booking->get_status();
-				$status = array_search($booking->booking_status, array_column($this->states, 'search'));
-				return '<span class="em-label em-label-'.$status.'"><i class="material-symbols-outlined">'.$booking->get_status_icon().'</i>'.ucwords($booking->get_status()).'</span>';
+				//$status = array_search($booking->booking_status, array_column($this->states, 'search'));
+				return '<span class="em-label"><i class="material-symbols-outlined">'.$booking->get_status_icon().'</i>'.ucwords($booking->get_status()).'</span>';
 				break;
 			case 'booking_date':
 				return $booking->booking_date ? Date::get_date($booking->booking_date->getTimestamp()) : 'NODATE';
 				break;
 			case 'booking_id':
-				return $booking->booking_id;
+				return $booking->id;
 				break;
 			case 'actions':
 				return '';
@@ -561,7 +561,7 @@ class BookingsTable {
 				return $ticket->ticket_id;
 				break;
 			case 'dbem_phone':
-				return $booking->booking_meta['booking']['phone'] ?? '';
+				return $booking->registration['phone'] ?? '';
 				break;
 			case 'coupons':
 				return implode(', ', $booking->get_coupons());
@@ -572,15 +572,15 @@ class BookingsTable {
 				$coupon_codes = array();
 				$coupons = CouponCollection::booking_get_coupons($booking);
 				foreach( $coupons as $EM_Coupon ){
-					$coupon_codes[] = $EM_Coupon->coupon_code;
+					$coupon_codes[] = $EM_Coupon->code;
 				}
 				$coupon_codes = implode(' ', $coupon_codes);
 				
 				return $coupon_codes;
 				break;
 			case 'gateway':
-				if( !empty($booking->booking_meta['gateway']) ){
-					$gateway = GatewayService::get_gateway($booking->booking_meta['gateway']);
+				if( !empty($booking->gateway) ){
+					$gateway = GatewayCollection::all()->get($booking->gateway);
 					$value = $gateway->title;
 				}else{
 					$value = __('None','events');
@@ -624,13 +624,13 @@ class BookingsTable {
 	function get_booking_actions(Booking $booking){
 		$booking_actions = array();
 
-		switch($booking->booking_status){
-			case Booking::PENDING: 
+		switch($booking->status){
+			case BookingStatus::PENDING: 
 				if( !get_option('dbem_bookings_approval') ) break;
 				$actions = ['approve', 'reject'];
 				break;
-				
-			case Booking::APPROVED:
+
+			case BookingStatus::APPROVED:
 				$actions = ['unapprove', 'cancel'];
 				break;
 			default:
@@ -638,7 +638,7 @@ class BookingsTable {
 				break;	
 		}
 
-		$actions = apply_filters('em_bookings_table_booking_actions_'.$booking->booking_status, $actions, $booking);
+		$actions = apply_filters('em_bookings_table_booking_actions_'.$booking->status->value, $actions, $booking);
 		$actions[] = 'delete';
 		$booking_actions = $this->generate_action_links($actions, $booking);
 		
@@ -650,7 +650,7 @@ class BookingsTable {
 
 		foreach($actions as $action) {
 			$class = $action== 'delete' ? 'trash' : '';
-			$links[] =  "<span class='$class'><a class='em-bookings-action' data-action='$action' data-booking-id='$booking->booking_id'>" . __(ucfirst($action), 'events') . "</a></span>";
+			$links[] =  "<span class='$class'><a class='em-bookings-action' data-action='$action' data-booking-id='$booking->id'>" . __(ucfirst($action), 'events') . "</a></span>";
 		}
 		
 		return $links;

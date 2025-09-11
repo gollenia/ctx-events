@@ -7,8 +7,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import 'leaflet/dist/leaflet.css';
-import { CircleMarker, MapContainer, TileLayer, useMap } from 'react-leaflet';
+
 /**
  * Internal dependencies
  */
@@ -71,41 +70,12 @@ const edit = ( props ) => {
 		}
 	}, [] );
 
-	const position = [ meta._location_latitude, meta._location_longitude ];
-
-	const getGeoPosition = () => {
-		if ( ! meta._location_address || ! meta._location_town ) return;
-
-		const location = fetch(
-			`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${ meta._location_address } ${ meta._location_town } ${ meta._location_postcode } ${ meta._location_country }`
-		)
-			.then( ( response ) => response.json() )
-			.then( ( data ) => {
-				if ( data[ 0 ] ) {
-					setMeta( {
-						...meta,
-						_location_latitude: data[ 0 ].lat,
-						_location_longitude: data[ 0 ].lon,
-					} );
-				}
-			} );
-	};
-
-	function ChangeView( { center, zoom } ) {
-		const map = useMap();
-		map.setView( center, zoom );
-		return null;
-	}
-
 	return (
 		<div>
 			<div className="location-edit__admin">
 				<TextControl
 					label={ __( 'Address', 'events' ) }
 					value={ meta._location_address }
-					onBlur={ ( value ) => {
-						getGeoPosition();
-					} }
 					onChange={ ( value ) => {
 						setMeta( {
 							...meta,
@@ -118,9 +88,6 @@ const edit = ( props ) => {
 						<TextControl
 							label={ __( 'ZIP Code', 'events' ) }
 							value={ meta._location_postcode }
-							onBlur={ ( value ) => {
-								getGeoPosition();
-							} }
 							onChange={ ( value ) => {
 								setMeta( {
 									...meta,
@@ -133,9 +100,6 @@ const edit = ( props ) => {
 						<TextControl
 							label={ __( 'City', 'events' ) }
 							value={ meta._location_town }
-							onBlur={ ( value ) => {
-								getGeoPosition();
-							} }
 							onChange={ ( value ) => {
 								setMeta( {
 									...meta,
@@ -150,9 +114,6 @@ const edit = ( props ) => {
 					label={ __( 'Country', 'events' ) }
 					value={ meta._location_country }
 					options={ countries }
-					onBlur={ ( value ) => {
-						getGeoPosition();
-					} }
 					onChange={ ( value ) => {
 						setMeta( {
 							...meta,
@@ -182,16 +143,6 @@ const edit = ( props ) => {
 						} );
 					} }
 				/>
-			</div>
-			<div className="ctx-map-container">
-				<MapContainer center={ position } zoom={ 16 } scrollWheelZoom={ false }>
-					<ChangeView center={ position } zoom={ 16 } />
-					<TileLayer
-						attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-						url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
-					/>
-					<CircleMarker center={ position } radius={ 10 } color="#992244" />
-				</MapContainer>
 			</div>
 		</div>
 	);

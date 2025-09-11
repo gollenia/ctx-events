@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\PostTypes;
 
-use Contexis\Events\Interfaces\PostType;
+use Contexis\Events\Core\Contracts\PostType;
 
 
 class CouponPost implements PostType {
@@ -17,7 +17,7 @@ class CouponPost implements PostType {
 		[ "name" => "_coupon_limit","type" => "number"],
 		[ "name" => "_coupon_used","type" => "number"],
 		[ "name" => "_coupon_status","type" => "string"],
-		[ "name" => "_coupon_sitewide","type" => "boolean"]
+		[ "name" => "_coupon_global","type" => "boolean"]
 	];
 	
 	public static function init() : self {

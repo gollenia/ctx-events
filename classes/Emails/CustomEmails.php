@@ -1,10 +1,14 @@
 <?php
 
-use Contexis\Events\Models\Booking;
-use \Contexis\Events\Models\Event;
-use Contexis\Events\Payment\GatewayService;
+namespace Contexis\Events\Emails;
 
-class EM_Custom_Emails{
+use Contexis\Events\Core\Container;
+use Contexis\Events\Models\Booking;
+use Contexis\Events\Models\BookingStatus;
+use \Contexis\Events\Models\Event;
+use Contexis\Events\Payment\GatewayCollection;
+
+class CustomEmails{
 	
 	/**
 	 * Initializes custom emails by hooking into booking email filters and modifying the recpipients and message content accordingly 
@@ -115,13 +119,13 @@ class EM_Custom_Emails{
 	    $msg = array(); //emails that could be used to override
 		//set both admin and user email messages according to settings in custom emails defined above
 		foreach( $groups_to_check as $user => $email_type ){
-			$booking_status = $booking->booking_status;
+			$booking_status = $booking->status->value;
 		    if( !empty($custom_emails[$user][$booking_status]) ){
-    			if( $custom_emails[$user][$booking_status]['status'] == Booking::APPROVED ){
+    			if( $custom_emails[$user][$booking_status]['status'] == BookingStatus::APPROVED ){
     				//override default email with custom email
     		    	$msg[$email_type]['subject'] = $custom_emails[$user][$booking_status]['subject'];
     		    	$msg[$email_type]['body'] = $custom_emails[$user][$booking_status]['message'];
-    			}elseif( !empty($custom_emails[$user][$booking_status]) && $custom_emails[$user][$booking_status]['status'] == Booking::REJECTED ){
+    			}elseif( !empty($custom_emails[$user][$booking_status]) && $custom_emails[$user][$booking_status]['status'] == BookingStatus::REJECTED ){
     				//disable the email entirely
     				$msg[$email_type]['subject'] = $msg[$email_type]['body'] = '';		
     			}
@@ -142,8 +146,8 @@ class EM_Custom_Emails{
 		//create set of users to check against $custom_emails
 		$groups_to_check = array('admin'=>'admin','user'=>'user'); //by default, we check admin and user email keys in $custom_emails
 		//add gateway checks if booking used one, event gateway emails will override the default ones since added to end of array
-		if( !empty($booking->booking_meta['gateway']) ){
-		    $gateway_groups_to_check = array($booking->booking_meta['gateway'].'-admin' => 'admin', $booking->booking_meta['gateway'].'-user' => 'user');
+		if( !empty($booking->gateway) ){
+		    $gateway_groups_to_check = array($booking->gateway.'-admin' => 'admin', $booking->gateway.'-user' => 'user');
 		    $groups_to_check = array_merge($groups_to_check, $gateway_groups_to_check);
 		}
 		//get custom event emails and determine which should be used
@@ -164,15 +168,16 @@ class EM_Custom_Emails{
 	 */
 	public static function gateway_email_messages( $msg, $booking ){
 		//firstly, check if we're using a gateway at all for this booking
-		if( empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ) return $msg;
-		$EM_Gateway = GatewayService::get_gateway($booking->booking_meta['gateway']);
+		if( empty($booking->gateway) || $booking->get_price() == 0 ) return $msg;
+		$gateway = GatewayCollection::all()->get($booking->gateway);
+		
 		//create set of groups to check against $custom_emails
-		$groups_to_check = apply_filters('em_custom_emails_gateway_groups', array($EM_Gateway->gateway.'-admin' => 'admin', $EM_Gateway->gateway.'-user' => 'user'), $booking, $EM_Gateway);
+		$groups_to_check = apply_filters('em_custom_emails_gateway_groups', array($gateway->slug.'-admin' => 'admin', $gateway->slug.'-user' => 'user'), $booking, $gateway);
 		//get custom gateway email messages
-		$custom_emails = apply_filters('em_custom_emails_gateway_messages', maybe_unserialize($EM_Gateway->get_option('emails')), $booking, $EM_Gateway);
+		$custom_emails = apply_filters('em_custom_emails_gateway_messages', maybe_unserialize($gateway->get_option('emails')), $booking, $gateway);
 		//if we have an 'awaiting payment' status and only a 'pending' status template, default to 'pending' so we don't skip to the general default pending template
 		foreach( $groups_to_check as $key => $val ){
-			if( $booking->booking_status == 5 && empty($custom_emails[$key][5]) && !empty($custom_emails[$key][0]) ){
+			if( $booking->status == BookingStatus::AWAITING_PAYMENT && empty($custom_emails[$key][5]) && !empty($custom_emails[$key][0]) ){
 				$custom_emails[$key][5] = $custom_emails[$key][0];
 			}
 		}
@@ -193,7 +198,7 @@ class EM_Custom_Emails{
 		$admin_emails = array();
 		if( $booking instanceof Booking ){ //prevent MB bookings from possibly sending individual event emails
 		    $admin_emails_array = apply_filters('em_custom_emails_event_admin', self::get_event_admin_emails($booking->get_event()), $booking);
-		    $group = empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ? 'default':$booking->booking_meta['gateway'];
+		    $group = empty($booking->gateway) || $booking->get_price() == 0 ? 'default':$booking->gateway;
 		    if( !empty($admin_emails_array[$group]) ){
 		        $admin_emails = $admin_emails_array[$group];
 		    }
@@ -240,11 +245,12 @@ class EM_Custom_Emails{
 	 * @param Booking $booking
 	 * @return array:
 	 */
-	public static function gateway_admin_emails( $emails, $booking ){
-		if( empty($booking->booking_meta['gateway']) || $booking->get_price() == 0 ) return $emails;
-		$gateway = $booking->booking_meta['gateway'];
-		$EM_Gateway = GatewayService::get_gateway($gateway);
-		$admin_emails_array = apply_filters('em_custom_emails_gateway_admin', self::get_gateway_admin_emails($EM_Gateway), $booking, $EM_Gateway);
+	public static function gateway_admin_emails( $emails, Booking $booking ){
+		if( empty($booking->gateway) || $booking->get_price() == 0 ) return $emails;
+		$gateway = $booking->gateway;
+		//$gateway = GatewayCollection::all()->get($gateway);
+		
+		$admin_emails_array = apply_filters('em_custom_emails_gateway_admin', self::get_gateway_admin_emails($gateway), $booking, $gateway);
 		$admin_emails = array();
 		if( $booking instanceof Booking ){
 			if( !empty($admin_emails_array[$gateway]) ){
@@ -290,4 +296,4 @@ class EM_Custom_Emails{
 		return $export_item;
 	}
 }
-EM_Custom_Emails::init();
+CustomEmails::init();

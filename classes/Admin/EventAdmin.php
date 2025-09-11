@@ -7,7 +7,7 @@ use Contexis\Events\Intl\Date;
 use Contexis\Events\Models\Event;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\Utilities;
-use Contexis\Events\Utilities\EventScope;
+use Contexis\Events\Core\Utilities\EventScope;
 
 class EventAdmin {
 	public static function init(){
@@ -63,8 +63,8 @@ class EventAdmin {
 		$event = Event::get_by_id( absint($_REQUEST['recurrence_id']) );
 		?>
 		<div class="notice notice-info">
-			<p><?php echo sprintf(esc_html__('You are viewing individual recurrences of recurring event %s.', 'events'), '<a href="'.$event->get_edit_url().'">'.$event->event_name.'</a>'); ?></p>
-			<p><?php esc_html_e('You can edit individual recurrences and disassociate them with this recurring event.', 'events'); ?></p>
+			<p><?php echo sprintf(__('You are viewing individual recurrences of recurring event %s.', 'events'), '<a href="'.$event->get_edit_url().'">'.$event->event_name.'</a>'); ?></p>
+			<p><?php _e('You can edit individual recurrences and disassociate them with this recurring event.', 'events'); ?></p>
 		</div>
 		<?php
     }
@@ -87,7 +87,7 @@ class EventAdmin {
 			if( !isset($num_posts->em_future) ){
 				$cache_key = $post_type;
 				$user = wp_get_current_user();
-				if ( is_user_logged_in() && !current_user_can('read_private_posts') ) {
+				if ( is_user_logged_in() && !current_user_can('read_posts') ) {
 					$cache_key .= '_readable_' . $user->ID;
 				}
 				$args = array('scope'=>'future', 'status'=>'all');
@@ -193,7 +193,7 @@ class EventAdmin {
 			'spaces' => __('Available','events'),
 			'booked' => __('Booked','events'),
 	    ));
-	    if( !get_option('dbem_locations_enabled') ){
+	    if( !get_option('dbem_locations_enabled', 1) ){
 	    	unset($columns['location']);
 	    }
 	    return $columns;
@@ -212,9 +212,9 @@ class EventAdmin {
 				$location = $event->get_location();
 				if( $event->has_location() ){
 					$actions = array();
-					$actions[] = "<a href='". esc_url(get_post_permalink($location->location_id))."'>". esc_html__('View') ."</a>";
+					$actions[] = "<a href='". esc_url(get_post_permalink($location->location_id))."'>". __('View', 'events') ."</a>";
 					if( current_user_can('edit_posts') ){
-						$actions[] = "<a href='". esc_url($location->get_edit_url())."'>". esc_html__('Edit') ."</a>";
+						$actions[] = "<a href='". esc_url($location->get_edit_url())."'>". __('Edit', 'events') ."</a>";
 					}
 					echo "<strong><a href='". get_post_permalink($location->location_id)."'>" . $location->location_name . "</a></strong>";
 					echo "<span class='row-actions'> - ". implode(' | ', $actions) . "</span>";
@@ -230,28 +230,6 @@ class EventAdmin {
 					echo Date::get_time($event->start()->getTimestamp(), $event->end()->getTimestamp());
 				}else{
 					echo __('All Day','events');
-				}
-				break;
-			case 'extra':
-				if ( $event->is_recurrence() && current_user_can('edit_posts') ) {
-					$actions = array();
-					if( current_user_can('edit_posts') ){
-						$actions[] = '<a href="'. admin_url() .'post.php?action=edit&amp;post='. $event->get_event_recurrence()->post_id .'">'. esc_html__( 'Edit Recurring Events', 'events'). '</a>';
-						$actions[] = '<a class="em-detach-link" href="'. esc_url($event->get_detach_url()) .'">'. esc_html__('Detach', 'events') .'</a>';
-					}
-					if( current_user_can('delete_posts') ){
-						$actions[] = '<span class="trash"><a class="em-delete-recurrence-link" href="'. get_delete_post_link($event->get_event_recurrence()->post_id) .'">'. esc_html__('Delete','events') .'</a></span>';
-					}
-					?>
-					<strong>
-					<?php echo $event->get_recurrence_description(); ?>
-					</strong>
-					<?php if( !empty($actions) ): ?>
-					<br >
-					<div class="row-actions">
-						<?php echo implode(' | ', $actions); ?>
-					</div>
-					<?php endif;
 				}
 				break;
 			
@@ -283,7 +261,7 @@ class EventAdmin {
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($event->event_rsvp)){
 					?>
 					
-					<b><?php echo $event->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_spaces(); ?>
+					<b><?php echo $event->spaces->available(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->spaces->capacity(); ?>
 					
 				
 					<?php
@@ -292,12 +270,12 @@ class EventAdmin {
 				break;
 			case 'booked':
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($event->event_rsvp) && $event->get_spaces()){
-					$booked_percent = $event->get_booked_spaces() / ($event->get_spaces() / 100);
-					$pending_percent = $event->get_pending_spaces() / ($event->get_spaces() / 100);
+					$booked_percent = $event->spaces->booked_percent();
+					$pending_percent = $event->spaces->pending_percent();
 					?>
 					
-					<b style="white-space: nowrap;"><?php echo $event->get_booked_spaces(); echo " ";  ?> /
-					<?php echo $event->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
+					<b style="white-space: nowrap;"><?php echo $event->spaces->booked(); echo " ";  ?> /
+					<?php echo $event->spaces->pending(); echo " "; echo __("Pending", "events") ?></b>
 					<div class="em-booking-graph">
 									<?php if($booked_percent < 100) { ?>
 										<div class="em-booking-graph-booked <?php if($pending_percent) echo "cut" ?>" style="width:<?php echo $booked_percent ?>%;"></div>

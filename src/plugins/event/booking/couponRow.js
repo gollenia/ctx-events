@@ -1,4 +1,4 @@
-import { CheckboxControl } from '@wordpress/components';
+import { CheckboxControl, Disabled } from '@wordpress/components';
 import { formatPrice } from '../../../common/formatPrice';
 const CouponRow = ( props ) => {
 	const { coupon, index, onToggle, isSelected } = props;
@@ -8,13 +8,23 @@ const CouponRow = ( props ) => {
 	return (
 		<tr>
 			<td>
-				<CheckboxControl
-					id={ `coupon-${ coupon.id }` }
-					name={ `coupon-${ coupon.id }` }
-					onChange={ ( value ) => onToggle( value, coupon.id ) }
-					checked={ isSelected || coupon.fixed }
-					disabled={ coupon.fixed }
-				/>
+				{ coupon.fixed ? (
+					<Disabled>
+						<CheckboxControl
+							id={ `coupon-${ coupon.id }` }
+							name={ `coupon-${ coupon.id }` }
+							onChange={ ( value ) => onToggle( value, coupon.id ) }
+							checked={ isSelected || coupon.fixed }
+						/>
+					</Disabled>
+				) : (
+					<CheckboxControl
+						id={ `coupon-${ coupon.id }` }
+						name={ `coupon-${ coupon.id }` }
+						onChange={ ( value ) => onToggle( value, coupon.id ) }
+						checked={ isSelected || coupon.fixed }
+					/>
+				) }
 			</td>
 			<td>
 				<b>{ coupon.title }</b>

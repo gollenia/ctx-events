@@ -19,7 +19,7 @@ const reducer = ( state = {}, action ) => {
 	const { data } = state;
 
 	const getCouponData = ( couponId ) => {
-		const coupon = state.event.coupons.find( ( coupon ) => coupon.value === couponId );
+		const coupon = state.available_coupons?.find( ( coupon ) => coupon.value === couponId );
 
 		return {
 			discount: coupon ? coupon.discount : 0,
@@ -49,10 +49,10 @@ const reducer = ( state = {}, action ) => {
 				state.data.attendees[ payload.index ].fields[ payload.field ] = payload.value;
 			}
 			if ( payload.form === 'registration' ) {
-				state.event.forms.registration[ payload.field ] = payload.value;
+				state.data.registration[ payload.field ] = payload.value;
 			}
 			if ( payload.form === 'donation' ) {
-				state.event.forms.booking.donation = payload.value;
+				state.data.booking.donation = payload.value;
 			}
 			state.sendState = 'unsaved';
 			return { ...state };
@@ -61,7 +61,7 @@ const reducer = ( state = {}, action ) => {
 			const index =
 				payload.index !== undefined
 					? payload.index
-					: state.request.tickets.findIndex( ( ticket ) => ticket.ticket_id === payload.ticket_id );
+					: state.request.attendees.findIndex( ( ticket ) => ticket.ticket_id === payload.ticket_id );
 			state.data.attendees.splice( index, 1 );
 			state.sendState = 'unsaved';
 			return { ...state };
@@ -94,8 +94,8 @@ const reducer = ( state = {}, action ) => {
 			state.sendState = payload;
 			return { ...state };
 
-		case 'SET_NOTE':
-			state.data.booking.note = payload;
+		case 'ADD_NOTE':
+			state.data.booking.notes.push( payload );
 			return { ...state };
 
 		case 'RESET':

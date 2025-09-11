@@ -1,11 +1,12 @@
 import { useEffect, useReducer } from 'react';
 
+import useApiFetch from '@contexis/use-api-fetch';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import AttendeeTable from './AttendeeTable.js';
 import BookingDetails from './BookingDetails.js';
-import Note from './Note.js';
-import NotesModal from './NotesModal.js';
+import Log from './Log.js';
+import Notes from './Notes.js';
 import Payment from './Payment.js';
 import Registration from './Registration.js';
 import TicketModal from './TicketModal.js';
@@ -21,14 +22,17 @@ const BookingEditor = ( { bookingId } ) => {
 
 	const { data } = state;
 
+	const { result, error } = useApiFetch( `/events/v2/booking/${ bookingId }` );
+
 	useEffect( () => {
-		fetch( `/wp-json/events/v2/booking/${ bookingId }` )
-			.then( ( response ) => response.json() )
-			.then( ( data ) => {
-				dispatch( { type: 'SET_DATA', payload: data } );
-				dispatch( { type: 'SET_STATE', payload: 'loaded' } );
-			} );
-	}, [] );
+		if ( result ) {
+			console.log( 'Booking data', result );
+			dispatch( { type: 'SET_DATA', payload: result } );
+			dispatch( { type: 'SET_STATE', payload: 'loaded' } );
+		}
+	}, [ result ] );
+
+	console.log( 'BookingEditor state', state );
 
 	useEffect( () => {
 		if ( state.sendState === 'unsaved' ) {
@@ -43,13 +47,20 @@ const BookingEditor = ( { bookingId } ) => {
 		return <p>{ __( 'Loading Data...', 'events' ) }</p>;
 	}
 
+	if ( error ) {
+		return <p __dangerouslySetInnerHTML={ { __html: error.message } }></p>;
+	}
+
 	return (
 		<div>
-			<Note store={ store } />
-
 			<BookingDetails store={ store } />
-
-			<Registration store={ store } />
+			<div className="booking-general">
+				<Registration store={ store } />
+				<div className="booking-history">
+					<Log booking={ data.booking } />
+					<Notes store={ store } />
+				</div>
+			</div>
 
 			<AttendeeTable store={ store } />
 
@@ -77,8 +88,6 @@ const BookingEditor = ( { bookingId } ) => {
 					dispatch( { type: 'SET_CURRENT_TICKET', payload: 999 } );
 				} }
 			/>
-
-			<NotesModal store={ store } showModal={ showNotesModal } setShowModal={ setShowNotesModal } />
 		</div>
 	);
 };

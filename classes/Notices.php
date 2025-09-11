@@ -1,10 +1,15 @@
 <?php
+
+namespace Contexis\Events;
+
+use IteratorAggregate;
+
     /**
      * 
      * @author marcus
      *
      */
-    class EM_Notices implements Iterator {
+    class Notices implements IteratorAggregate, \Countable {
     	/**
     	 * If object has been displayed, this gets set to true, can be checked to avoid duplicates.
     	 * @var boolean
@@ -12,10 +17,9 @@
     	 */
     	public $displayed = false;
     	public $set_cookies = true;
-		public $notices = array('errors'=>array(), 'infos'=>array(), 'alerts'=>array(), 'confirms'=>array());
+		public $notices = [];
         
         function __construct( $set_cookies = true ){
-        	//Grab from cookie, if it exists
         	$this->set_cookies = $set_cookies == true;
         	if( $this->set_cookies ){
 	        	if( !empty($_COOKIE['em_notices']) ) {
@@ -30,20 +34,19 @@
         }
         
         function destruct($redirect = false){
-        	//Flush notices that weren't made to stay cross-requests, we can do this if initialized immediately.
         	foreach($this->notices as $notice_type => $notices){
         		foreach ($notices as $key => $notice){
         			if( empty($notice['static']) ){
         				unset($this->notices[$notice_type][$key]);
         			}else{
-        				unset($this->notices[$notice_type][$key]['static']); //so it gets removed next request
-        				$has_static = true;
+        				unset($this->notices[$notice_type][$key]['static']); 
+
         			}
         		}
         	}
         	if( $this->set_cookies ){
-	            if(count($this->notices['errors']) > 0 || count($this->notices['alerts']) > 0 || count($this->notices['infos']) > 0 || count($this->notices['confirms']) > 0){
-	            	setcookie('em_notices', base64_encode(json_encode($this->notices)), time() + 30, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true); //sets cookie for 30 seconds, which may be too much
+	            if(count($this->notices) > 0){
+	            	setcookie('em_notices', base64_encode(json_encode($this->notices)), time() + 30, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true);
 	            }
         	}
         	return $redirect;
@@ -165,12 +168,7 @@
             return false;
         }
         
-        function count($type){
-       		if( isset($this->notices[$type]) ){
-        		return count($this->notices[$type]);
-            }
-            return 0;
-        }
+        
         
         /* Errors */
         function add_error($string, $static=false){
@@ -228,42 +226,11 @@
             return $this->count('confirms');
         }
         
+		function count() : int {
+			return count($this->notices);
+		}
 
-		//Iterator Implementation
-
-		#[\ReturnTypeWillChange]
-	    function rewind(){
-	        reset($this->bookings);
-	    }  
-
-		#[\ReturnTypeWillChange]
-	    function current(){
-	        $var = current($this->bookings);
-	        return $var;
-	    }  
-
-		#[\ReturnTypeWillChange]
-	    function key(){
-	        $var = key($this->bookings);
-	        return $var;
-	    }  
-
-		#[\ReturnTypeWillChange]
-	    function next(){
-	        $var = next($this->bookings);
-	        return $var;
-	    }  
-
-		#[\ReturnTypeWillChange]
-	    function valid(){
-	        $key = key($this->bookings);
-	        $var = ($key !== NULL && $key !== FALSE);
-	        return $var;
-	    }
-    }
-    function em_notices_init(){
-	    global $EM_Notices;
-	    $EM_Notices = new EM_Notices();	
-    }
-    add_action('plugins_loaded', 'em_notices_init');
-?>
+		function getIterator() : \Traversable {
+			return new \ArrayIterator($this->notices);
+		}
+}

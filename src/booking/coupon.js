@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
-import { React, useState } from 'react';
+import { useState } from 'react';
 import { STATES } from './modules/constants';
 
 function Coupon( { state, dispatch } ) {
@@ -10,17 +10,14 @@ function Coupon( { state, dispatch } ) {
 
 	const checkCouponCode = async () => {
 		setStatus( STATES.LOADING );
-		const params = {
+		const params = new URLSearchParams( {
 			event_id: event.id,
 			code: state.request.coupon,
-		};
+		} );
 
 		apiFetch( {
-			path: 'events/v2/check_coupon',
-			method: 'GET',
-			data: params,
+			path: `events/v2/coupon/check?${ params.toString() }`,
 		} )
-			.then( ( response ) => response.json() )
 			.then( ( response ) => {
 				setStatus( STATES.LOADING );
 				if ( response.success ) {
@@ -32,6 +29,10 @@ function Coupon( { state, dispatch } ) {
 				setTimeout( () => {
 					setStatus( STATES.IDLE );
 				}, 3000 );
+			} )
+			.catch( ( error ) => {
+				console.error( error );
+				setStatus( STATES.ERROR );
 			} );
 	};
 

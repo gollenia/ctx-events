@@ -81,15 +81,15 @@ function em_bookings_cancelled_table(){
 								$rowno++;
 								?>
 								<tr>
-									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
+									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->id ?>' name='bookings[]'/></th>
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									<td><?php echo $booking->person->user_email ?></td>
 									<td><?php echo $booking->person->phone ?></td>
 									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>
 										<?php
-										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
+										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
 										
 										?>
 										<a class="em-bookings-approve" href="<?php echo $approve_url ?>"><?php _e('Restore','events'); ?></a> |

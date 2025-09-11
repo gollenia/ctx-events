@@ -1,8 +1,10 @@
 <?php
 
+namespace Contexis\Events\Emails;
+
 use Contexis\Events\Options;
 
-class EM_Emails_Admin {
+class EmailsAdmin {
     
     public static function init(){
         add_action('em_options_page_footer_emails', 'EM_Emails_Admin::reminder_options');
@@ -11,7 +13,7 @@ class EM_Emails_Admin {
     }
     
     public static function ical_attachment_bookings(){
-	    Options::checkbox ( esc_html__( 'Add iCal invite?', 'events'), 'dbem_bookings_ical_attachments', esc_html__( 'You can choose to add ical attachments to your booking emails, which display event information in email clients such as gmail and outlook allowing for easy adding to calendars.', 'events') );
+	    Options::checkbox ( __( 'Add iCal invite?', 'events'), 'dbem_bookings_ical_attachments', __( 'You can choose to add ical attachments to your booking emails, which display event information in email clients such as gmail and outlook allowing for easy adding to calendars.', 'events') );
     }
 	
     /*
@@ -119,4 +121,4 @@ class EM_Emails_Admin {
 	    <?php
 	}
 }
-EM_Emails_Admin::init();
+EmailsAdmin::init();

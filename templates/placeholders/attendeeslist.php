@@ -2,6 +2,7 @@
 /* @var $event Event */
 
 use Contexis\Events\Models\Booking;
+use Contexis\Events\Models\BookingStatus;
 
 $people = array();
 $bookings = $event->get_bookings();
@@ -11,7 +12,7 @@ if (count($bookings->bookings) > 0) {
     <ul class="event-attendees">
     <?php
     foreach ($bookings as $booking) { /* @var $booking booking */
-        if ($booking->booking_status == Booking::APPROVED) {
+        if ($booking->booking_status == BookingStatus::APPROVED) {
             // Holt die gespeicherten Namen aus den Buchungsdaten
             $email = $booking->booking_mail ?? null;
             $name = $booking->get_full_name;

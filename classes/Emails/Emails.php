@@ -1,22 +1,26 @@
 <?php
 
+namespace Contexis\Events\Emails;
+
 use Contexis\Events\Collections\EventCollection;
 use Contexis\Events\Views\BookingView;
 
-class EM_Emails {
+class Emails {
 	/**
 	 * Sets up email cron and filters/actions
 	 */
 	public static function init() {
+
+		$instance = new self();
 		//enable custom emails
 		if( get_option('dbem_custom_emails') ){
 			include('CustomEmails.php');
 		}
-		//add booking email icals
-		add_filter('em_booking_email_messages', 'EM_Emails::booking_email_ical_attachments', 10, 2);
-		add_filter('em_multiple_booking_email_messages', 'EM_Emails::booking_email_ical_attachments', 10, 2);
-	    //email reminders
-	    add_action('update_option_dbem_emp_emails_reminder_time', array('EM_Emails','clear_crons'));
+
+		add_filter('em_booking_email_messages', [$instance, 'booking_email_ical_attachments'], 10, 2);
+		add_filter('em_multiple_booking_email_messages', [$instance, 'booking_email_ical_attachments'], 10, 2);
+
+		add_action('update_option_dbem_emp_emails_reminder_time', [$instance,'clear_crons']);
 		if( get_option('dbem_cron_emails', 1) ) {
 			//set up cron for addint to email queue
 			if( !wp_next_scheduled('emp_cron_emails_queue') ){
@@ -26,12 +30,12 @@ class EM_Emails {
 			    $time -= ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ); //offset time to run at UTC time for WP Cron
 				$result = wp_schedule_event( $time,'daily','emp_cron_emails_queue');
 			}
-			add_action('emp_cron_emails_queue', array('EM_Emails','queue_emails') );
+			add_action('emp_cron_emails_queue', [$instance, 'queue_emails'] );
 			//set up cron for clearing email queue
 			if( !wp_next_scheduled('emp_cron_emails_process_queue') ){
 				$result = wp_schedule_event( time(),'em_minute','emp_cron_emails_process_queue');
 			}
-			add_action('emp_cron_emails_process_queue', array('EM_Emails','process_queue') );
+			add_action('emp_cron_emails_process_queue',[$instance, 'process_queue'] );
 			if( get_option('dbem_emp_emails_reminder_ical') ){
 				//set up emails for ical cleaning
 				if( !wp_next_scheduled('emp_cron_emails_ical_cleanup') ){
@@ -41,7 +45,7 @@ class EM_Emails {
 				    $time -= ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ); //offset time to run at UTC time for WP Cron
 					$result = wp_schedule_event( $time,'daily','emp_cron_emails_ical_cleanup');
 				}
-				add_action('emp_cron_emails_ical_cleanup', array('EM_Emails','clean_icals') );
+				add_action('emp_cron_emails_ical_cleanup', [$instance, 'clean_icals'] );
 			}else{
 				wp_clear_scheduled_hook('emp_cron_emails_ical_cleanup');
 			}
@@ -75,11 +79,11 @@ class EM_Emails {
 		em_locate_template('templates/ical.php', true, array('args'=>array('event'=>$event_ids, 'scope'=>'all')));
 		$icalcontent = preg_replace("/([^\r])\n/", "$1\r\n", ob_get_clean());
 		try{
-			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date->getTimestamp()).'.ics';
-		}catch( Exception $e ){
-			$ical_filename = 'ical_'.md5($booking->booking_id . $booking->booking_date->format('Y-d-m')).'.ics';
+			$ical_filename = 'ical_'.md5($booking->id . $booking->booking_date->getTimestamp()).'.ics';
+		}catch( \Exception $e ){
+			$ical_filename = 'ical_'.md5($booking->id . $booking->booking_date->format('Y-d-m')).'.ics';
 		}
-		$ical_attachment = EM_Mailer::add_email_attachment($ical_filename, $icalcontent);
+		$ical_attachment = Mailer::add_email_attachment($ical_filename, $icalcontent);
 		$ical_file_array = array('name'=>'invite.ics', 'type'=>'text/calendar','path'=>$ical_attachment, 'delete'=>true);
 		$msg['user']['attachments'] = array($ical_file_array);
 		return $msg;
@@ -111,7 +115,7 @@ class EM_Emails {
 	    	    	}
 	    	    	$subject = BookingView::render($booking, $subject_format, 'raw');
 	    	    	$message = BookingView::render($booking, $message_format, $output_type);
-		    	    $emails[] = array($booking->booking_mail, $subject, $message, $booking->booking_id);
+		    	    $emails[] = array($booking->booking_mail, $subject, $message, $booking->id);
 		    	    do_action('em_booking_email_after_send', $booking);
 	    	    }
 	    	}
@@ -156,7 +160,7 @@ class EM_Emails {
 	    //init phpmailer
 		global $EM_Mailer, $wpdb;
 		if( !is_object($EM_Mailer) ){
-			$EM_Mailer = new EM_Mailer();
+			$EM_Mailer = new Mailer();
 		}
 		//get queue
 		$limit = get_option('dbem_cron_emails_limit', 100);
@@ -207,4 +211,4 @@ class EM_Emails {
 	}
 
 }
-add_action('init',array('EM_Emails','init'), 9);
+add_action('init',array(Emails::class,'init'), 9);

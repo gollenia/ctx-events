@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatPrice } from '../../common/formatPrice.js';
 
 const FullPrice = ( { store } ) => {
@@ -19,7 +19,7 @@ const FullPrice = ( { store } ) => {
 		if ( ! attendees ) return;
 		let price = 0;
 		attendees.forEach( ( attendee ) => {
-			price += parseInt( state.data.tickets_available[ attendee.ticket_id ].price );
+			price += parseInt( state.data.available_tickets[ attendee.ticket_id ].price );
 		} );
 
 		if ( couponId ) {

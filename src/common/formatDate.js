@@ -8,8 +8,9 @@ import { __ } from '@wordpress/i18n';
  */
 function formatDateRange( start, end = false ) {
 	const locale = window.eventBlocksLocalization?.locale;
-	if(start.toString() === 'Invalid Date' || end.toString() === 'Invalid Date') return '';
-	
+	console.log( 'formatDateRange', start, end, locale );
+	if ( start.toString() === 'Invalid Date' || end.toString() === 'Invalid Date' ) return '';
+
 	if ( ! start ) return '';
 	if ( start == end ) end = false;
 	start = new Date( start );
@@ -30,7 +31,7 @@ function formatDateRange( start, end = false ) {
 		dateFormat = {
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric'
+			day: 'numeric',
 		};
 	}
 
@@ -39,7 +40,7 @@ function formatDateRange( start, end = false ) {
 	try {
 		result = dateFormatObject.formatRange( start, end );
 	} catch ( e ) {
-		return __('Invalid Date', 'event-blocks');
+		return __( 'Invalid Date', 'event-blocks' );
 	}
 	return result;
 }
@@ -78,7 +79,7 @@ function formatTime( start, end = false ) {
 	try {
 		result = timeFormatObject.format( startDate );
 	} catch ( e ) {
-		return __('Invalid Time', 'event-blocks');
+		return __( 'Invalid Time', 'event-blocks' );
 	}
 	return timeFormatObject.format( startDate );
 }
@@ -105,7 +106,7 @@ function formatTimeRange( start, end = false ) {
 			result += ' - ' + timeFormatObject.format( endDate );
 		}
 	} catch ( e ) {
-		return __('Invalid Time', 'event-blocks');
+		return __( 'Invalid Time', 'event-blocks' );
 	}
 	return result;
 }

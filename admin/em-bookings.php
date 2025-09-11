@@ -28,6 +28,10 @@ function em_bookings_page(){
 	}
 }
 
+function em_bookings_page_new(){
+	echo "<div id='em-bookings-admin'></div>";
+}
+
 /**
  * Generates the bookings dashboard, showing information on all events 
  */
@@ -35,12 +39,12 @@ function em_bookings_dashboard(){
 	global $EM_Notices;
 	?>
 	<div class='wrap em-bookings-dashboard'>
-		<?php if( is_admin() ): ?>
-  		<h1><?php esc_html_e('Event Bookings Dashboard', 'events'); ?></h1>
-  		<?php else: echo $EM_Notices; ?>
-  		<?php endif; ?>
+		
+  		<h1><?php __('Event Bookings Dashboard', 'events'); ?></h1>
+  	
+		
   		<div class="em-bookings-recent">
-			<h2><?php esc_html_e('Recent Bookings','events'); ?></h2>	
+			<h2><?php __('Recent Bookings','events'); ?></h2>	
 	  		<?php
 			$bookings_table = new BookingsTable();
 			$bookings_table->output();
@@ -48,7 +52,7 @@ function em_bookings_dashboard(){
   		</div>
   		<br class="clear" />
   		<div class="em-bookings-events">
-			<h2><?php esc_html_e('Events With Bookings Enabled','events'); ?></h2>		
+			<h2><?php __('Events With Bookings Enabled','events'); ?></h2>		
 			<?php em_bookings_events_table(); ?>
 			<?php do_action('em_bookings_dashboard'); ?>
 		</div>
@@ -60,13 +64,12 @@ function em_bookings_dashboard(){
  * Shows all booking data for a single event 
  */
 function em_bookings_event(){
-	global $EM_Notices;
+	
 	$event = Event::get_by_id($_REQUEST['event_id']);
 	
-	//check that user can access this page
-	if( is_object($event) && current_user_can('publish_posts') ){
+	if( !is_object($event) || !current_user_can('publish_posts') ){
 		?>
-		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
+		<div class="wrap"><h2><?php _e('Unauthorized Access','events'); ?></h2><p><?php _e('You do not have the rights to manage this event.','events'); ?></p></div>
 		<?php
 		return false;
 	}
@@ -79,37 +82,37 @@ function em_bookings_event(){
   			<a href="<?php echo get_post_permalink($event->event_id);; ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('View %s','events'), __('Event', 'events')) ?></a>
   			<a href="<?php echo $event->get_edit_url(); ?>" class="<?php echo $header_button_classes; ?>"><?php echo sprintf(__('Edit %s','events'), __('Event', 'events')) ?></a>
   			<?php if( locate_template('plugins/events/templates/csv-event-bookings.php', false) ): //support for legacy template ?>
-  			<a href='<?php echo EventPost::get_admin_url() ."&amp;page=events-bookings&amp;action=bookings_export_csv&amp;_wpnonce=".wp_create_nonce('bookings_export_csv')."&amp;event_id=".$event->event_id ?>' class="<?php echo $header_button_classes; ?>"><?php esc_html_e('Export CSV','events')?></a>
+  			<a href='<?php echo EventPost::get_admin_url() ."&amp;page=events-bookings&amp;action=bookings_export_csv&amp;_wpnonce=".wp_create_nonce('bookings_export_csv')."&amp;event_id=".$event->event_id ?>' class="<?php echo $header_button_classes; ?>"><?php _e('Export CSV','events')?></a>
   			<?php endif; ?>
   			<?php do_action('em_admin_event_booking_options_buttons'); ?>
 		<?php if( !is_admin() ): ?></h2><?php else: ?><hr class="wp-header-end" /><?php endif; ?>
-  		<?php if( !is_admin() ) echo $EM_Notices; ?>  
+  		
 		<div>
-			<p><strong><?php esc_html_e('Event Name','events'); ?></strong> : <?php echo esc_html($event->event_name); ?></p>
+			<p><strong><?php _e('Event Name','events'); ?></strong> : <?php esc_html_e($event->event_name); ?></p>
 			<p>
-				<strong><?php esc_html_e('Availability','events'); ?></strong> : 
-				<?php echo $event->get_booked_spaces() . '/'. $event->get_spaces() ." ". __('Spaces confirmed','events'); ?>
+				<strong><?php _e('Availability','events'); ?></strong> : 
+				<?php echo $event->spaces->booked() . '/'. $event->spaces->capacity() ." ". __('Spaces confirmed','events'); ?>
 				<?php if( get_option('dbem_bookings_approval_reserved') ): ?>
-				, <?php echo $event->get_available_spaces() . '/'. $event->get_spaces() ." ". __('Available spaces','events'); ?>
+				, <?php echo $event->spaces->available() . '/'. $event->spaces->capacity() ." ". __('Available spaces','events'); ?>
 				<?php endif; ?>
 			</p>
 			<p>
-				<strong><?php esc_html_e('Date','events'); ?></strong> : 
-				<?php echo EventView::render($event, "EVENT_DATES") ?>						
+				<strong><?php _e('Date','events'); ?></strong> : 
+				<?php echo EventView::render($event, "#_EVENTDATES") ?>						
 			</p>
 			<p>
-				<strong><?php esc_html_e('Location','events'); ?></strong> :
+				<strong><?php _e('Location','events'); ?></strong> :
 				<?php if( $event->location_id == 0 ): ?>
-				<em><?php esc_html_e('No Location', 'events'); ?></em>
+				<em><?php _e('No Location', 'events'); ?></em>
 				<?php else: ?>
 				<a class="row-title" href="<?php echo admin_url(); ?>post.php?action=edit&amp;post=<?php echo $event->get_location()->post_id ?>"><?php echo ($event->get_location()->location_name); ?></a>
 				<?php endif; ?>
 			</p>
 		</div>
-		<h2><?php esc_html_e('Bookings','events'); ?></h2>
+		<h2><?php _e('Bookings','events'); ?></h2>
 		<?php
 		$bookings_table = new BookingsTable();
-		$bookings_table->status = 'all';
+		$bookings_table->status = [0,1,2,3,4,5,6,7,8];
 		$bookings_table->output();
   		?>
 		<?php do_action('em_bookings_event_footer', $event); ?>
@@ -126,9 +129,9 @@ function em_bookings_person(){
 	
 	$has_booking = false;
 	$bookings = BookingCollection::find(array('booking_mail' => $_REQUEST['booking_mail']));
-	if( !$has_booking && !current_user_can('manage_others_bookings') ){
+	if( !$has_booking && !current_user_can('edit_posts') ){
 		?>
-		<div class="wrap"><h2><?php esc_html_e('Unauthorized Access','events'); ?></h2><p><?php esc_html_e('You do not have the rights to manage this event.','events'); ?></p></div>
+		<div class="wrap"><h2><?php _e('Unauthorized Access','events'); ?></h2><p><?php _e('You do not have the rights to manage this event.','events'); ?></p></div>
 		<?php
 		return false;
 	}
@@ -136,7 +139,7 @@ function em_bookings_person(){
 	?>
 	<div class='wrap'>
 		<?php if( is_admin() ): ?><h1 class="wp-heading-inline"><?php else: ?><h2><?php endif; ?>
-  			<?php esc_html_e('Manage Person\'s Booking', 'events'); ?>
+  			<?php _e('Manage Person\'s Booking', 'events'); ?>
   		<?php if( is_admin() ): ?></h1><?php endif; ?>
   			
   			
@@ -148,7 +151,7 @@ function em_bookings_person(){
 				<div id="post-body-content">
 					<div id="event_name" class="stuffbox">
 						<h3>
-							<?php esc_html_e( 'Personal Details', 'events'); ?>
+							<?php _e( 'Personal Details', 'events'); ?>
 						</h3>
 						<div class="">
 							<h1><?php echo $bookings->next()->get_full_name(); ?></h1>
@@ -188,7 +191,7 @@ function em_bookings_single() {
 						
 						$event = $booking->get_event();
 						?>
-						<div id="booking-admin" data-id="<?php echo $booking->booking_id ?>"></div>
+						<div id="booking-admin" data-id="<?php echo $booking->id ?>"></div>
 						<?php do_action('em_bookings_admin_booking_event', $event); ?>
 				
 				

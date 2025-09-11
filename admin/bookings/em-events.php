@@ -37,7 +37,7 @@ function em_bookings_events_table() {
 			$title = __ ( 'Future Events', 'events'); 
 			$scope = "future";
 	}
-	$owner = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
+	
 	$events = EventCollection::find( [
 		'scope'=>$scope, 
 		'limit'=>$limit, 
@@ -45,7 +45,6 @@ function em_bookings_events_table() {
 		'order'=>$order, 
 		'orderby'=>'event_start', 
 		'bookings'=> 1, 
-		'owner' => $owner, 
 		'pagination' => 1 
 		] );
 
@@ -63,10 +62,10 @@ function em_bookings_events_table() {
 				<div class="alignleft actions">
 					<!--
 					<select name="action">
-						<option value="-1" selected="selected"><?php esc_html_e( 'Bulk Actions' ); ?></option>
-						<option value="deleteEvents"><?php esc_html_e( 'Delete selected','events'); ?></option>
+						<option value="-1" selected="selected"><?php _e( 'Bulk Actions' ); ?></option>
+						<option value="deleteEvents"><?php _e( 'Delete selected','events'); ?></option>
 					</select> 
-					<input type="submit" value="<?php esc_html_e( 'Apply' ); ?>" name="doaction2" id="doaction2" class="button-secondary action" />
+					<input type="submit" value="<?php _e( 'Apply' ); ?>" name="doaction2" id="doaction2" class="button-secondary action" />
 					 --> 
 					<select name="scope">
 						<?php
@@ -78,7 +77,7 @@ function em_bookings_events_table() {
 						}
 						?>
 					</select>
-					<button id="post-query-submit" class="button-secondary" type="" value="" ><?php esc_attr_e( 'Filter' )?>
+					<button id="post-query-submit" class="button-secondary" type="" value="" ><?php _e( 'Filter', 'events' )?></button>
 				</div>
 				<?php 
 				if ( $events_count >= $limit ) {
@@ -97,10 +96,10 @@ function em_bookings_events_table() {
 			<table class="widefat">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Event', 'events'); ?></th>
-						<th><?php esc_html_e( 'Available', 'events'); ?></th>
-						<th><?php esc_html_e( 'Booked', 'events'); ?></th>
-						<th><?php esc_html_e( 'Date and time', 'events'); ?></th>
+						<th><?php _e( 'Event', 'events'); ?></th>
+						<th><?php _e( 'Date', 'events'); ?></th>
+						<th><?php _e( 'Booked', 'events'); ?></th>
+						<th><?php _e( 'Available', 'events'); ?></th>
 						
 					</tr>
 				</thead>
@@ -113,9 +112,10 @@ function em_bookings_events_table() {
 						$style = "";
 						$booked_percent = 0;
 						$pending_percent = 0;
-						if($event->get_spaces() > 0) {
-							$booked_percent = $event->get_booked_spaces() / ($event->get_spaces() / 100);
-							$pending_percent = $event->get_pending_spaces() / ($event->get_spaces() / 100);
+						
+						if($event->spaces->available() > 0) {
+							$booked_percent = $event->spaces->booked() / ($event->spaces->capacity() / 100);
+							$pending_percent = $event->spaces->pending() / ($event->spaces->capacity() / 100);
 						}
 						
 						
@@ -132,13 +132,16 @@ function em_bookings_events_table() {
 								
 							</td>
 							<td>
+								<?php echo EventView::render($event, "#_EVENTDATES" )?>
+							</td>
+							<td>
 								
-							<b><?php echo $event->get_available_spaces(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->get_spaces(); ?>
+							<b><?php echo $event->spaces->available(); echo " "; echo __("Free", "events") ?> </b><br> <?php echo __("Off", "events"); echo " "; echo $event->spaces->capacity(); ?>
 					
 							</td>
 							<td >
-								<b><?php echo $event->get_booked_spaces(); echo " ";  ?> /
-								<?php echo $event->get_pending_spaces(); echo " "; echo __("Pending", "events") ?></b>
+								<b><?php echo $event->spaces->booked(); echo " ";  ?> /
+								<?php echo $event->spaces->pending(); echo " "; echo __("Pending", "events") ?></b>
 								<div class="em-booking-graph">
 									<?php if($booked_percent < 100) { ?>
 										<div class="em-booking-graph-booked <?php if($pending_percent) echo "cut" ?>" style="width:<?php echo $booked_percent ?>%;"></div>
@@ -149,9 +152,7 @@ function em_bookings_events_table() {
 									<?php } ?>
 								</div>
 							</td>
-							<td>
-								<?php echo EventView::render($event, "EVENT_DATES" )?>
-							</td>
+							
 						</tr>
 						<?php
 					}

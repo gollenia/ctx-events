@@ -5,7 +5,7 @@ import React from 'react';
 const EnableBooking = ( props ) => {
 	const { meta, setMeta } = props;
 	const [ showTickets, setShowTickets ] = React.useState( false );
-
+	console.log( 'EnableBooking', meta );
 	return (
 		<PanelBody title={ __( 'Booking Settings', 'events' ) } initialOpen={ true }>
 			{ ! window?.eventBlocksLocalization?.bookings_enabled?.is_enabled ? (

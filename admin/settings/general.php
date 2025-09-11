@@ -25,7 +25,7 @@ use Contexis\Events\PostTypes\EventPost;
 		<h2><?php _e("Locations", "events") ?></h2>
 		<table class="form-table">
 		<?php
-			if( get_option('dbem_locations_enabled') ){
+			if( get_option('dbem_locations_enabled', 1) ){
 					
 				
 				Options::select( __( 'Default Location Country', 'events'), 'dbem_location_default_country', \Contexis\Events\Intl\Countries::get(__('no default country', 'events')), __('If you select a default country, that will be pre-selected when creating a new location.','events') );

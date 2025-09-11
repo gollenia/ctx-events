@@ -10,13 +10,15 @@ use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Collections\CouponCollection;
 use Contexis\Events\Collections\TicketCollection;
 use Contexis\Events\Views\EventView;
-use RecurringEventPost;
+use Contexis\Events\PostTypes\RecurringEventPost;
 use WP_Post;
 use WP_User;
-use Contexis\Events\Interfaces\Model;
-use Contexis\Events\Utilities\Image;
+use Contexis\Events\Core\Contracts\Model;
+use Contexis\Events\Repositories\BookingRepository;
+use Contexis\Events\Core\Utilities\Image;
+use JsonSerializable;
 
-class Event implements Model { 
+class Event implements JsonSerializable { 
 
 	public int $event_id = 0;
 	public string $event_slug;
@@ -24,7 +26,6 @@ class Event implements Model {
 	public string $event_name = "";
 	public int $location_id = 0;
 	
-	public array $coupon_ids = [];
 	public array $coupons = [];
 	public int $coupons_count = 0;
 	
@@ -37,10 +38,10 @@ class Event implements Model {
 	protected ?DateTime $event_rsvp_start = null;
 	protected ?DateTime $event_rsvp_end = null;
 	public bool $event_rsvp_donation = false;
-	public int $event_rsvp_spaces = 0;
 	public string $event_date_modified;
 	public string $event_date_created;
 	public int $event_spaces = 0;
+	public ?EventSpaces $spaces = null;
 	var $recurrence_id;
 	
 	/* new attributes */
@@ -67,7 +68,9 @@ class Event implements Model {
 	var $post_type;
 	var $filter;
 
-	
+	public function __construct() {
+		$this->spaces = new EventSpaces($this->event_id);
+	}
 	/**
 	 * When cloning this event, we get rid of the bookings and location objects, since they can be retrieved again from the cache instead. 
 	 */
@@ -97,23 +100,29 @@ class Event implements Model {
 		return $instance;
 	}
 
-	public function get_rest_fields() : array {
+	public function jsonSerialize(): mixed
+	{
+		if( empty($this->post_id) ) {
+			return [];
+		}
 		return [
 			'id' => $this->post_id,
 			'link' => get_permalink($this->post_id),
 			'title' => $this->event_name,
-			'has_coupons' => CouponCollection::event_has_coupons($this),
+			'has_coupons' => CouponCollection::from_event($this)->count() > 0,
 			'price' => new \Contexis\Events\Intl\Price($this->get_price()),
 			'image' => Image::from_post_id($this->post_id),
 			'is_free' => $this->is_free(),
-			'start' => $this->event_start->getTimestamp(),
-			'end' => $this->event_end->getTimestamp(),
+			'start' => $this->event_start->format(DATE_ATOM),
+			'end' => $this->event_end->format(DATE_ATOM),
 			'is_single_day' => $this->event_start == $this->event_end,
 			'audience' => $this->event_audience,
 			'excerpt' => $this->post_excerpt,
 			'allow_donation' => get_metadata('post', $this->post_id, '_event_rsvp_donation', true) == "1",
-			'booking_start' => $this->event_rsvp_start->getTimestamp(),
-			'booking_end' => $this->event_rsvp_end->getTimestamp(),
+			'booking_start' => $this->event_rsvp_start->format(DATE_ATOM),
+			'booking_end' => $this->event_rsvp_end->format(DATE_ATOM),
+			'spaces' => $this->spaces->jsonSerialize(),
+			'location' => $this->get_location()->jsonSerialize(),
 		];
 	}
 	
@@ -123,6 +132,27 @@ class Event implements Model {
 
 	public function end(): DateTime {
 		return $this->event_end ??= new DateTime();
+	}
+
+	public function get_rsvp_end(): DateTime
+	{
+		return $this->event_rsvp_end ??= $this->start();
+	}
+
+	public function get_rsvp_start() : DateTime
+	{ 		
+		return $this->event_rsvp_start ??= $this->post_date;
+	}
+
+	public function get_image() : string {
+		return '';
+	}
+
+	public function get_coupon_ids() : array {
+		$coupons = get_post_meta($this->event_id, '_event_coupons', true);
+		if (!is_array($coupons)) return [];
+		$coupons = array_filter(array_map('intval', $coupons));
+		return $coupons;
 	}
 
 	function load_postdata(WP_Post $event_post) : void
@@ -163,8 +193,8 @@ class Event implements Model {
 	function get_post_meta() : bool {
 		$meta = get_post_meta($this->post_id);
 		$this->event_timezone = wp_timezone()->getName();
-
 		$this->event_timezone = wp_timezone()->getName();
+		$this->spaces = new EventSpaces($this->event_id);
 
 		$mapping = [
 			'event_rsvp' => '_event_rsvp',
@@ -196,9 +226,9 @@ class Event implements Model {
 			}
 		}
 
-		$this->location_id = get_option('dbem_locations_enabled') 
+		$this->location_id = get_option('dbem_locations_enabled', 1) 
 		? intval($meta['_location_id'][0] ?? 0) 
-		: 0;
+		: 0; 
 
 		$this->event_start = isset($meta['_event_start'][0])
 		? new \DateTime($meta['_event_start'][0], new \DateTimeZone($this->event_timezone))
@@ -218,11 +248,12 @@ class Event implements Model {
 
 		if (!empty($meta['_event_rsvp_end'][0])) {
 			$this->event_rsvp_end = new \DateTime($meta['_event_rsvp_end'][0], new \DateTimeZone($this->event_timezone));
-		} elseif ($this->event_start instanceof \DateTime) {
+		} elseif ($this->event_start) {
 			$this->event_rsvp_end = clone $this->event_start;
 		} else {
-			$this->event_rsvp_end = null;
+			$this->event_rsvp_end = new \DateTime('now', new \DateTimeZone($this->event_timezone));
 		}
+
 	
 		return apply_filters('em_event_get_post_meta', count($this->errors) == 0, $this);
 	}
@@ -236,10 +267,6 @@ class Event implements Model {
 		return apply_filters('em_event_save_meta', count($this->errors) == 0, $this);
 	}
 	
-	/**
-	 * Duplicates this event and returns the duplicated event. Will return false if there is a problem with duplication.
-	 * @return Event
-	 */
 	function duplicate() {
 		global $wpdb;
 		//First, duplicate.
@@ -290,11 +317,6 @@ class Event implements Model {
 	    return $url;
 	}
 	
-	/**
-	 * Delete whole event, including bookings, tickets, etc.
-	 * @param boolean $force_delete
-	 * @return boolean
-	 */
 	function delete( $force_delete = false ){
 		if(!current_user_can('delete_posts')) return;
 
@@ -317,19 +339,7 @@ class Event implements Model {
 		return apply_filters('em_event_is_published', ($this->post_status == 'publish' || $this->post_status == 'private'), $this);
 	}
 	
-	/**
-	 * Returns a DateTime representation of when bookings close in local event timezone. If no valid date defined, event start date/time will be used.
-	 * @return DateTime
-	 */
-	public function get_rsvp_end(): DateTime
-	{
-		return $this->event_rsvp_end ??= $this->start();
-	}
-
-	public function get_rsvp_start() : DateTime
-	{ 		
-		return $this->event_rsvp_start ??= $this->post_date;
-	}
+	
 	
 	function get_categories() {
 		$this->categories = get_the_terms($this->post_id, "event-category");
@@ -353,7 +363,7 @@ class Event implements Model {
 		if(!$this->event_rsvp) {
 			return false;
 		}
-		if( $this->get_spaces() <= 0 ) {
+		if( $this->spaces->capacity() <= 0 ) {
 			return false;
 		}
 		if( !$this->booking_has_started()) {
@@ -362,7 +372,7 @@ class Event implements Model {
 		if( $this->booking_has_ended()) {
 			return false;
 		}
-		if( $this->get_available_spaces() == 0 ) return false;
+		if( $this->spaces->available() == 0 ) return false;
 		
 		return apply_filters('em_event_can_book', true, $this);
 	}
@@ -372,7 +382,7 @@ class Event implements Model {
 		if(!$this->event_rsvp) {
 			return __("Booking for this event is disabled", "events");
 		}
-		if( $this->get_spaces() <= 0 ) {
+		if( $this->spaces->capacity() <= 0 ) {
 			return __("No spaces left for this event", "events");
 		}
 		if( !$this->booking_has_started()) {
@@ -381,7 +391,7 @@ class Event implements Model {
 		if( $this->booking_has_ended()) {
 			return __("Booking has ended", "events");
 		}
-		if( $this->get_available_spaces() == 0 ) return __("No spaces left for this event", "events");
+		if( $this->spaces->available() == 0 ) return __("No spaces left for this event", "events");
 		return "";
 	}
 	
@@ -411,7 +421,7 @@ class Event implements Model {
 	function get_bookings( $force_reload = false ) : BookingCollection {
 		if( get_option('dbem_rsvp_enabled') ){
 			if( (!$this->bookings || $force_reload) ){
-				$this->bookings = BookingCollection::from_event_id($this->event_id);
+				$this->bookings = BookingCollection::from_event($this);
 			}
 			$this->bookings->event_id = $this->event_id;
 		}else{
@@ -424,55 +434,12 @@ class Event implements Model {
 
 	function get_spaces() : int {
 		$tickets = TicketCollection::find_by_event_id($this->event_id);
+		if( empty($tickets) ) return 0; //no tickets, no spaces
 		$spaces = 0;
 		foreach($tickets as $ticket){
 			$spaces += $ticket->ticket_spaces;
 		}
 		return apply_filters('em_event_get_spaces', $spaces, $this);
-	}
-
-	function get_available_spaces() : int {
-		$spaces = $this->get_spaces();
-		$booked_spaces = $this->get_booked_spaces();
-		$available_spaces = $spaces - $booked_spaces;
-	
-		if( get_option('dbem_bookings_approval_reserved') ){ //deduct reserved/pending spaces from available spaces 
-			$available_spaces -= $this->get_pending_spaces();
-		}
-
-		return $available_spaces;
-	}
-
-	/**
-	 * Returns number of booked spaces for this event. If approval of bookings is on, will return number of booked confirmed spaces.
-	 * @return int
-	 */
-	function get_booked_spaces($force_refresh = false){
-		global $wpdb;
-
-		$status_cond = !get_option('dbem_bookings_approval') ? 'booking_status IN (0,1)' : 'booking_status = 1';
-		$sql = 'SELECT SUM(booking_spaces) FROM '.EM_BOOKINGS_TABLE. " WHERE $status_cond AND event_id=".absint($this->event_id);
-		$booked_spaces = $wpdb->get_var($sql);
-		$booked_spaces = $booked_spaces > 0 ? $booked_spaces : 0;
-		
-		return apply_filters('em_bookings_get_booked_spaces', $booked_spaces, $this, $force_refresh);
-	}
-	
-	/**
-	 * Gets number of pending spaces awaiting approval. Will return 0 if booking approval is not enabled.
-	 * @return int
-	 */
-	function get_pending_spaces( $force_refresh = false ){
-		if( get_option('dbem_bookings_approval') == 0 ){
-			return apply_filters('em_bookings_get_pending_spaces', 0, $this);
-		}
-		global $wpdb;
-		
-		$sql = 'SELECT SUM(booking_spaces) FROM '.EM_BOOKINGS_TABLE. ' WHERE booking_status=0 AND event_id='.absint($this->event_id);
-		$pending_spaces = $wpdb->get_var($sql);
-		$pending_spaces = $pending_spaces > 0 ? $pending_spaces : 0;
-		
-		return apply_filters('em_bookings_get_pending_spaces', $pending_spaces, $this, $force_refresh);
 	}
 	
 	function get_edit_url(){

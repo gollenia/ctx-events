@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\Forms;
 
-use Contexis\Events\Utilities\Plugin;
+use Contexis\Events\Core\Utilities\Plugin;
 
 class Form {
 	
@@ -10,15 +10,6 @@ class Form {
 	public $form_name = 'Default';
 	public $field_values = [];
 	public $user_fields = [];
-	public $core_user_fields = array(
-		'name' => 'Name',
-		'user_login' => 'Username Login',
-		'user_email' => 'E-mail (required)',
-		'user_password' => 'Password',
-		'first_name' => 'First Name',
-		'last_name' => 'Last Name',
-		'user_url' => 'Website',
-	);
 	protected $custom_user_fields = [];
 	public $form_required_error = '';
 	static $validate;
@@ -42,15 +33,10 @@ class Form {
 		if( !empty($form_name) ){
 			$this->form_name = $form_name;
 		}
-		if( $user_fields ){
-			$this->user_fields = apply_filters('em_form_user_fields',$this->core_user_fields, $this);
-			$this->custom_user_fields = array_diff($this->user_fields, $this->core_user_fields);
-		}
 	}
 	
 	function get_post( ){
-	    $custom_user_fields = UserFields::get_form()->form_fields;
-		
+	    
 		foreach($this->form_fields as $field){
 			
 		    $fieldid = $field['fieldid'];
@@ -68,11 +54,7 @@ class Form {
 			    }
 				$this->field_values[$fieldid] = $array;
 			}
-			//if this is a custom user field, change $filed to the original field so the right date/time info is retreived
-	    	if( array_key_exists($field['type'], $this->custom_user_fields) && array_key_exists($field['fieldid'], $custom_user_fields) ){
-	    	    $field = $custom_user_fields[$field['fieldid']];
-	    	}
-			
+	
 		}
 		return true;
 	}
@@ -137,8 +119,7 @@ class Form {
 	public function is_normal_field( $field_or_id ){
         $field_id = is_array($field_or_id) ? $field_or_id['fieldid'] : $field_or_id;
 	    return array_key_exists($field_id, $this->form_fields) 
-		&& !array_key_exists($field_id, $this->user_fields) 
-		&& !in_array($field_id, array('user_email','user_name'));
+		&& !array_key_exists($field_id, $this->user_fields);
 	}
 	
 	/**
@@ -173,11 +154,6 @@ class Form {
 		return true;
 	}
 	
-	/**
-	 * Validates a field and adds errors to the object it's referring to (can be any extension of EM_Object)
-	 * @param array $field
-	 * @param mixed $value
-	 */
 	function validate_field( $field_id, $value, $attendee = false ){
 		$field = array_key_exists($field_id, $this->form_fields) ? $this->form_fields[$field_id]:false;
 		$value = (is_array($value)) ? $value:trim($value);

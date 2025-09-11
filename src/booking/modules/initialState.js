@@ -55,7 +55,8 @@ const initialState = {
 		},
 	},
 	request: {
-		tickets: [],
+		event_id: 0,
+		attendees: [],
 		registration: {},
 		donation: 0.0,
 		gateway: 'offline',

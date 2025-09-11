@@ -1,4 +1,6 @@
 import './admin.scss';
+import { BookingsAdmin } from './admin/bookings/index.js';
+import { GatewayAdmin } from './admin/gateways/index.js';
 import './jquery-ui.min.scss';
 
 jQuery( document ).ready( function ( $ ) {
@@ -54,8 +56,5 @@ jQuery( document ).ready( function ( $ ) {
 
 const bookingEditRoot = document.getElementById( 'booking-edit' );
 
-import { BookingAdmin } from './admin/booking/booking-admin';
-import { BookingsTable } from './admin/bookings/index.js';
-
-BookingsTable();
-BookingAdmin();
+BookingsAdmin();
+GatewayAdmin();

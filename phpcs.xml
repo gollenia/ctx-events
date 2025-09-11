@@ -1,0 +1,12 @@
+<rule ref="Generic.PHP.ForbiddenGlobalVariables">
+    <properties>
+        <property name="forbiddenGlobals" value="_REQUEST"/>
+		<property name="forbiddenGlobals" value="_GET"/>
+		<property name="forbiddenGlobals" value="_POST"/>
+		<property name="forbiddenGlobals" value="_COOKIE"/>
+		<property name="forbiddenGlobals" value="_SERVER"/>
+		<property name="forbiddenGlobals" value="_FILES"/>
+		<property name="forbiddenGlobals" value="_ENV"/>
+		<property name="forbiddenGlobals" value="_SESSION"/>
+    </properties>
+</rule>

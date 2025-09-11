@@ -3,7 +3,7 @@
 use Contexis\Events\Forms\AttendeesForm;
 use Contexis\Events\Models\Ticket;
 
-$tickets = $booking->booking_meta['attendees'];
+$tickets = $booking->metadata['attendees'];
 $ticket_array = [];
 $form_fields = AttendeesForm::get_form($booking->event_id)->form_fields;
 

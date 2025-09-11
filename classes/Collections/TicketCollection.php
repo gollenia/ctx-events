@@ -11,7 +11,7 @@ use Contexis\Events\Models\Ticket;
  * @author Thomas Gollenia
  *
  */
-class TicketCollection implements \IteratorAggregate, \Countable {
+class TicketCollection implements \IteratorAggregate, \Countable, \JsonSerializable {
 	
 	private array $items = [];
 	public int $event_id = 0;
@@ -29,7 +29,7 @@ class TicketCollection implements \IteratorAggregate, \Countable {
 	}
 
 	public static function find_by_booking(Booking $booking) : self {
-		$used_ticket_ids = array_keys( $booking->booking_meta['attendees'] ?? [] );
+		$used_ticket_ids = array_keys( $booking->attendees ?? [] );
 		$instance = new self();
 		$instance->event_id = $booking->event_id;
 		$instance->booking = $booking;
@@ -44,9 +44,10 @@ class TicketCollection implements \IteratorAggregate, \Countable {
 	}
 
 	private function load_tickets(array $tickets_array) : void {
-		foreach ($tickets_array as $ticket_id){
-			$ticket = Ticket::get_by_id($this->event_id, $ticket_id);
-			if(!$ticket) continue;
+		$tickets = get_post_meta($this->event_id, '_event_tickets', true) ?? [];
+		foreach ($tickets as $data) {
+			if (!in_array($data['ticket_id'], $tickets_array, true)) continue;
+			$ticket = Ticket::from_array($this->event_id, $data);
 			$this->items[] = $ticket;
 		}
 	}
@@ -64,10 +65,11 @@ class TicketCollection implements \IteratorAggregate, \Countable {
 		return Event::get_by_id($this->event_id);
 	}
 
-	public function get_rest_fields() : array {
+	public function jsonSerialize(): mixed
+	{
 		$data = [];
 		foreach($this->items as $ticket) {
-			$data[$ticket->ticket_id] = $ticket->get_rest_fields();
+			$data[$ticket->ticket_id] = $ticket->jsonSerialize();
 		}
 		return $data;
 	}

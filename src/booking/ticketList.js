@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import Summary from './summary';
 import Ticket from './ticket';
 
@@ -15,7 +15,7 @@ const TicketList = ( props ) => {
 			{ event.forms.attendee_fields.length > 0 && (
 				<form className="ticket-grid-form" role="form" ref={ form } id="user-attendee-form">
 					<div id="firstTicket"></div>
-					{ request.tickets.map( ( ticket, index ) => (
+					{ request.attendees.map( ( ticket, index ) => (
 						<Ticket key={ index } ticket={ ticket } index={ index } state={ state } dispatch={ dispatch } />
 					) ) }
 					<div

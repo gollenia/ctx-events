@@ -1,7 +1,6 @@
 /*
  *   External dependecies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useReducer } from 'react';
 import { STATES } from './modules/constants.js';
@@ -11,6 +10,7 @@ import './style.scss';
 /*
  *   Internal dependecies
  */
+import useApiFetch from '@contexis/use-api-fetch';
 import AwaitResponse from './AwaitResponse.js';
 import WizardControls from './WizardControls.js';
 import WizardGuide from './WizardGuide.js';
@@ -33,22 +33,18 @@ const Booking = ( { post, open } ) => {
 
 	const { wizard, modal, event, request, response } = state;
 
+	const { result, error, loading } = useApiFetch( `/events/v2/event/`, {
+		urlParams: { id: post, fields: [ 'forms', 'event', 'date', 'gateways', 'tickets' ] },
+	} );
+	console.log( 'state', state );
 	useEffect( () => {
-		const abortController = new AbortController();
-		const { signal } = abortController;
-		apiFetch( {
-			path: `/events/v2/event/${ post }?fields=forms,event,tickets,gateways&nonce=booking`,
-		} )
-			.then( ( data ) => {
-				dispatch( { type: 'SET_EVENT', payload: data } );
-				dispatch( { type: 'SET_INIT_STATE', payload: STATES.LOADING } );
-				console.log( data );
-			} )
-			.catch( ( error ) => {
-				dispatch( { type: 'SET_INIT_STATE', payload: STATES.ERROR } );
-			} );
-		subscribe( 'showBooking', ( state ) => dispatch( { type: 'SET_MODAL', payload: state } ) );
-	}, [] );
+		if ( result ) {
+			dispatch( { type: 'SET_EVENT', payload: result } );
+			dispatch( { type: 'SET_INIT_STATE', payload: STATES.LOADING } );
+			console.log( 'Event loaded', result );
+			subscribe( 'showBooking', ( state ) => dispatch( { type: 'SET_MODAL', payload: state } ) );
+		}
+	}, [ result ] );
 
 	useEffect( () => {
 		if ( ! event ) return;
@@ -56,9 +52,11 @@ const Booking = ( { post, open } ) => {
 		dispatch( {
 			type: 'VALIDITY',
 			payload: {
-				tickets: document.getElementById( 'user-attendee-form' )?.checkValidity() && request.tickets.length > 0,
+				tickets:
+					document.getElementById( 'user-attendee-form' )?.checkValidity() && request.attendees.length > 0,
 				registration:
-					document.getElementById( 'user-registration-form' )?.checkValidity() && request.tickets.length > 0,
+					document.getElementById( 'user-registration-form' )?.checkValidity() &&
+					request.attendees.length > 0,
 				payment:
 					! event?.l10n?.consent || ( event?.l10n?.consent && request.registration.data_privacy_consent ),
 			},
@@ -108,7 +106,7 @@ const Booking = ( { post, open } ) => {
 										<WizardStep
 											valid={ wizard.steps.tickets.valid }
 											invalidMessage={
-												request.tickets.length == 0
+												request.attendees.length == 0
 													? __( 'Please select at least one ticket', 'events' )
 													: __( 'Please fill out all required fields', 'events' )
 											}

@@ -33,12 +33,11 @@ const Ticket = ( props ) => {
 							key={ key }
 							id={ ( ( index == key ) == state.wizard.step ) == 0 ? 'first-ticket-field' : '' }
 							tabIndex={ `${ index + 1 }${ key }` }
-							type={ field.type }
-							value={ ticket.fields[ field.fieldid ] }
+							value={ ticket.fields[ field.fieldid ] ?? '' }
 							onChange={ ( value ) => {
 								dispatch( {
 									type: 'SET_FIELD',
-									payload: { form: 'ticket', index, field: field.fieldid, value: value },
+									payload: { form: 'attendee', index, field: field.fieldid, value: value },
 								} );
 							} }
 							locale={ window.eventBookingLocalization.locale }

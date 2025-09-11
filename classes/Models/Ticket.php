@@ -6,14 +6,15 @@ use Contexis\Events\Collections\BookingCollection;
 use Contexis\Events\Forms\AttendeesForm;
 use Contexis\Events\Models\Event;
 use DateTime;
+use Contexis\Events\Models\BookingStatus;
 
 /*
  * Handles a single ticket for an event or a booking
  * @author Thomas Gollenia
  *
  */
-class Ticket {
-	public int $ticket_id = 0;
+class Ticket implements \JsonSerializable {
+	public string $ticket_id = '';
 	public int $event_id = 0;
 	public string $ticket_name = '';
 	public string $ticket_description = '';
@@ -26,27 +27,12 @@ class Ticket {
 	public int $ticket_order = 0;
 	public int $ticket_form = 0;
 	public bool $ticket_enabled = true;
-   
-	//Other Vars
-	/**
-	 * Contains only bookings belonging to this ticket. 
-	 */
-	public $bookings;
-	public array $required_fields = array('ticket_name');
-	protected $start;
-	protected $end;
 
-	/**
-	 * An associative array containing event IDs as the keys and pending spaces as values.
-	 * This is in array form for future-proofing since at one point tickets could be used for multiple events.
-	 * @var array
-	 */
 	protected array $pending_spaces = array();
 	protected array $booked_spaces = array();
 	protected array $bookings_count = array();
 	
-	
-	 public static function get_by_id($event_id, $ticket_id) : ?Ticket {
+	public static function get_by_id($event_id, $ticket_id) : ?Ticket {
 		$instance = new self();
 		if(empty($event_id) || empty($ticket_id)) return null;
 		$instance->event_id = $event_id;
@@ -68,6 +54,24 @@ class Ticket {
 		$instance->ticket_order = $ticket['ticket_order'] ?: 0;
 		$instance->ticket_form = $ticket['ticket_form'] ?: 0;
 		$instance->ticket_enabled = $ticket['ticket_enabled'] == 1;
+		return $instance;
+	}
+
+	public static function from_array(int $event_id, array $data) : self {
+		$instance = new self();
+		$instance->event_id = $event_id;
+		$instance->ticket_id = $data['ticket_id'] ?? 0;
+		$instance->ticket_name = $data['ticket_name'] ?? '';
+		$instance->ticket_description = $data['ticket_description'] ?? '';
+		$instance->ticket_price = $data['ticket_price'] ?? 0.0;
+		$instance->ticket_start = !empty($data['ticket_start']) ? new DateTime($data['ticket_start']) : null;
+		$instance->ticket_end = !empty($data['ticket_end']) ? new DateTime($data['ticket_end']) : null;
+		$instance->ticket_min = $data['ticket_min'] ?? 0;
+		$instance->ticket_max = $data['ticket_max'] ?? 0;
+		$instance->ticket_spaces = $data['ticket_spaces'] ?? 0;
+		$instance->ticket_order = $data['ticket_order'] ?? 0;
+		$instance->ticket_form = $data['ticket_form'] ?? 0;
+		$instance->ticket_enabled = !empty($data['ticket_enabled']) && $data['ticket_enabled'] == 1;
 		return $instance;
 	}
 	
@@ -93,44 +97,36 @@ class Ticket {
 	}
 
 	function get_available_spaces() : int {
-		$event_available_spaces = $this->get_event()->get_available_spaces();
+		$event_available_spaces = $this->get_event()->spaces->available();
 		$ticket_available_spaces = $this->ticket_spaces - $this->get_booked_spaces();
 		if( get_option('dbem_bookings_approval_reserved')){
 		    $ticket_available_spaces = $ticket_available_spaces - $this->get_pending_spaces();
 		}
-		$return = ($ticket_available_spaces <= $event_available_spaces) ? $ticket_available_spaces:$event_available_spaces;
+		$return = ($ticket_available_spaces <= $event_available_spaces) ? $ticket_available_spaces : $event_available_spaces;
 		return apply_filters('em_ticket_get_available_spaces', $return, $this);
 	}
 
-	function get_spaces_by_status(int $status) {
-		global $wpdb;
-
-		$sql = $wpdb->prepare(
-			"SELECT booking_meta FROM " . EM_BOOKINGS_TABLE . " 
-			WHERE event_id = %d AND booking_status = %d",
-			$this->event_id, $status
-		);
-
-		$results = $wpdb->get_col($sql);
+	function get_spaces_by_status(BookingStatus $status) {
 		$spaces = 0;
-
-		foreach ($results as $metadata) {
-			$meta = json_decode($metadata, true) ?: [];
-			if (!isset($meta['attendees'][$this->ticket_id])) {
-				continue;
-			}
-			$spaces += count($meta['attendees'][$this->ticket_id]);
+		$bookings = BookingCollection::find([
+			'event_id' => $this->event_id,
+			'status' => $status
+		]);
+		
+		foreach ($bookings as $booking) {
+			if (!isset($booking->attendees[$this->ticket_id])) continue;
+			$spaces += count($booking->attendees[$this->ticket_id]);
 		}
 
 		return $spaces;
 	}
 	
 	function get_pending_spaces(): int {
-		return $this->get_spaces_by_status(Booking::PENDING);
+		return $this->get_spaces_by_status(BookingStatus::PENDING);
 	}
 
 	function get_booked_spaces(): int {
-		return $this->get_spaces_by_status(Booking::APPROVED);
+		return $this->get_spaces_by_status(BookingStatus::APPROVED);
 	}
 
 	function get_event() : Event {
@@ -138,29 +134,22 @@ class Ticket {
 	}
 	
 	function get_bookings(): BookingCollection {
-		global $wpdb;
+		$status_cond = get_option('dbem_bookings_approval') ? [BookingStatus::APPROVED] : [BookingStatus::APPROVED, BookingStatus::PENDING];
+		$bookings = BookingCollection::find([
+			'event_id' => $this->event_id,
+			'status' => $status_cond
+		]);
 	
-		$status_cond = get_option('dbem_bookings_approval') ? 'booking_status = 1' : 'booking_status IN (0,1)';
-		$sql = $wpdb->prepare("
-			SELECT booking_id, booking_meta
-			FROM {$wpdb->prefix}em_bookings
-			WHERE event_id = %d AND $status_cond
-		", $this->event_id);
-	
-		$rows = $wpdb->get_results($sql);
-		$matching_bookings = [];
-	
-		foreach ($rows as $row) {
-			$meta = json_decode($row->booking_meta, true) ?: [];
-			if (!empty($meta['attendees'][$this->ticket_id])) {
-				$matching_bookings[] = Booking::get_by_id((int)$row->booking_id);
+		foreach ($bookings as $booking) {
+			if (empty($booking->attendees[$this->ticket_id])) {
+				$bookings->remove($booking);
 			}
 		}
 	
-		return BookingCollection::from_bookings($matching_bookings);
+		return $bookings;
 	}
 	
-	public function get_rest_fields() {
+	public function jsonSerialize() : array {
 
 		$fields = [];
 		$raw_fields = AttendeesForm::get_attendee_form($this->event_id);

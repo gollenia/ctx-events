@@ -7,8 +7,8 @@
 function formatDateRange( start, end ) {
 	const locale = navigator.language || navigator.userLanguage;
 
-	start = new Date( start * 1000 );
-	end = new Date( end * 1000 );
+	start = new Date( start );
+	end = new Date( end );
 
 	const sameDay =
 		start.getFullYear() === end.getFullYear() &&
@@ -32,7 +32,7 @@ function formatDateRange( start, end ) {
 function formatDate( date, format ) {
 	const locale = window.eventBlocksLocalization.locale;
 	const dateFormatObject = new Intl.DateTimeFormat( locale, format );
-	return dateFormatObject.format( date * 1000 );
+	return dateFormatObject.format( date );
 }
 
 export { formatDate, formatDateRange };

@@ -6,7 +6,7 @@ use Contexis\Events\Intl\Price;
 use Contexis\Events\Models\Booking;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
-use Contexis\Events\Utilities\Plugin;
+use Contexis\Events\Core\Utilities\Plugin;
 
 class Assets {
 
@@ -16,6 +16,8 @@ class Assets {
 		add_action('init', [$instance, 'booking_script']);
 		add_action('init', [$instance, 'editor_script']);
 		add_action('admin_enqueue_scripts', [$instance,'admin_enqueue']);
+		add_action('admin_head', [$instance,'shared_values']);
+		add_action('wp_head', [$instance,'shared_values']);
 		return $instance;
 	}
 
@@ -52,8 +54,20 @@ class Assets {
 			'locale' => str_replace('_', '-', get_locale()),
 			'rest_url' => get_rest_url(null, 'events/v2/events'),
 			'current_id' => get_the_ID(),
+			'event_nonce' => wp_create_nonce('events'),
 		]);
 	
+	}
+
+	/*
+	 * Enqueues script for shared values
+	 */
+	public function shared_values() {
+		echo "<script>window.ContexisEvents = " . json_encode([
+			'nonce' => wp_create_nonce('ctx-events'),
+			'url' => rest_url('events/v2'),
+			'is_admin' => is_admin()
+		]) . ";</script>";
 	}
 
 
@@ -87,8 +101,8 @@ class Assets {
 		);
 
 		wp_localize_script('booking-view', 'eventBookingLocalization', [
-			"consent" => get_option("dbem_privacy_message"),
-			"donation" => get_option("dbem_donation_message"),
+			"consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'events')),
+			"donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'events')),
 			"currency" => new \Contexis\Events\Intl\Price(0)->get_currency_code(),
 			"locale" => str_replace('_', '-', get_locale()),
 		]);
@@ -104,10 +118,18 @@ class Assets {
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
 		$script_asset = require( $script_asset_path );
-
 		wp_enqueue_script(
 			'events-block-editor',
 			plugins_url( '/build/index.js', __FILE__ ),
+			$script_asset['dependencies'],
+			$script_asset['version']
+		);
+
+
+
+		wp_enqueue_script(
+			'events-gateway-admin',
+			plugins_url( '/build/gateways.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);

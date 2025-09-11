@@ -2,29 +2,31 @@
 
 namespace Contexis\Events\Models;
 
+use Contexis\Events\Core\Utilities\ValidationResult;
 use Contexis\Events\PostTypes\CouponPost;
 use Contexis\Events\PostTypes\EventPost;
 use DateTime;
 use WP_Query;
+use WP_User;
 
-class Coupon {
-	
-	public int $coupon_id = 0;
-	public int $coupon_owner = 0;
-	public string $coupon_code = '';
-	public string $coupon_name = '';
-	public string $coupon_description = '';
-	public ?DateTime $coupon_end = null;
-	public int $coupon_limit = 0;
-	public string $coupon_type = '';
-	public float $coupon_discount = 0;
-	public int $coupon_used = 0;
-	public string $coupon_status = '';
+class Coupon implements \JsonSerializable{
 
 	const PERCENT = 'percent';
 	const FIXED = 'fixed';
 	
-	
+	public int $id = 0;
+	public int $owner = 0;
+	public string $code = '';
+	public string $name = '';
+	public string $description = '';
+	public ?DateTime $end = null;
+	public int $limit = 0;
+	public string $type = '';
+	public float $discount = 0;
+	public int $used = 0;
+	public string $status = '';
+	public bool $global = false;
+
 	public static function get_by_id(int $coupon_id) : ?Coupon
 	{
 		$post = get_post($coupon_id);
@@ -35,14 +37,14 @@ class Coupon {
 		return $instance->load_post($post) ? $instance : null;
 	}
 
-	public static function get_by_code(string $coupon_code) : ?Coupon
+	public static function get_by_code(string $code) : ?Coupon
 	{
 		$args = [
 			'post_type' => CouponPost::POST_TYPE,
 			'meta_query' => [
 				[
-					'key' => 'coupon_code',
-					'value' => $coupon_code,
+					'key' => '_coupon_code',
+					'value' => $code,
 					'compare' => '='
 				]
 			],
@@ -77,82 +79,126 @@ class Coupon {
 		$meta = get_post_meta($post->ID);
 		$get = fn($key) => $meta[$key][0] ?? null;
 
-		$this->coupon_id = $post->ID;
-		$this->coupon_owner = $post->post_author;
-		$this->coupon_name = $post->post_title;
-		$this->coupon_code = (string) $get('_coupon_code');
-		$this->coupon_discount = (float) $get('_coupon_value');
-		$this->coupon_type = (string) $get('_coupon_type');
-		$this->coupon_limit = (int) $get('_coupon_limit');
-		$this->coupon_used = (int) $get('_coupon_used');
-		$this->coupon_status = (string) $get('_coupon_status');
-		
-		$this->coupon_description = (string) $get('coupon_description');
+		$this->id = $post->ID;
+		$this->owner = $post->post_author;
+		$this->name = $post->post_title;
+		$this->code = (string) $get('_coupon_code');
+		$this->discount = (float) $get('_coupon_value');
+		$this->limit = (int) $get('_coupon_limit');
+		$this->used = (int) $get('_coupon_used');
+		$this->status = (string) $get('_coupon_status');
+		$this->global = (bool) $get('_coupon_global');
+		$this->description = (string) $get('coupon_description');
 
-		$this->coupon_end = $get('_coupon_expiry') ? new \DateTime($get('_coupon_expiry')) : null;
+		$this->end = $get('_coupon_expiry') ? new \DateTime($get('_coupon_expiry')) : null;
+
+		$type = (string) $get('_coupon_type');
+		$this->type = match($type) {
+			self::FIXED => self::FIXED,
+			default => self::PERCENT
+		};
 		return true;
 	}
 
-	function apply_discount($price){
-		switch($this->coupon_type){
-			case '%':
-				//discount by percent
-				$price -= $price * ($this->coupon_discount / 100);
+	function apply_discount($price) : float {
+		switch($this->type){
+			case self::PERCENT:
+				$price -= $price * ($this->discount / 100);
 				break;
-			case '#' :
-				//discount by price
-				$price -= $this->coupon_discount;
-				if( $price < 0 ) $price = 0; //no negative values
+			case self::FIXED :
+				$price -= $this->discount;
+				if( $price < 0 ) $price = 0;
 				break;
 		}
 		return apply_filters('em_coupon_apply_discount', $price, $this);
 	}
 	
-	function get_discount($price){
+	function get_discount($price) : float
+	{
 		return $price - $this->apply_discount($price);
 	}
-	
-	function get_person() {
-		if (!is_numeric($this->coupon_owner)) {
+
+	public function increment_used(): void
+	{
+		$this->used++;
+		update_post_meta($this->id, '_coupon_used', $this->used);
+	}
+
+	function get_person() : ?WP_User {
+		if (!is_numeric($this->owner)) {
 			return null;
 		}
-		return get_userdata($this->coupon_owner);
+		return get_userdata($this->owner);
 	}
-	
-	/**
-	 * Returns boolean depending whether this coupon is valid right now (i.e. meets time/capacity requirements)
-	 * @return boolean
-	 */
-	function is_valid() : bool
+
+	function jsonSerialize() : array
 	{
-	    $valid = true;
-		if( $this->coupon_end && $this->coupon_end < new DateTime() ) return false;
-		if( !empty($this->coupon_limit) && $this->coupon_used >= $this->coupon_limit ) return false;
-		if( $this->coupon_status == 'disabled' ) return false;
-		return true;
+		return [
+			'label' => $this->name,
+			'code' => $this->code,
+			'discount' => $this->discount,
+			'type' => $this->type,
+			'description' => $this->description,
+			'end' => $this->end ? $this->end->format('Y-m-d') : null,
+			'limit' => $this->limit,
+			'used' => $this->used,
+			'status' => $this->status,
+			'global' => $this->global
+		];
 	}
 	
 
+	function validate( Event | null $event ) : ValidationResult
+	{
+
+		if (empty($this->code)) {
+			return ValidationResult::fail('no_code', __('Coupon code is required.', 'events'));
+		}
+		if ($this->status === 'disabled') {
+			return ValidationResult::fail('coupon_disabled', __('This coupon is disabled.', 'events'));
+		}
+		
+		if ($this->end instanceof DateTime && $this->end < new DateTime()) {
+			return ValidationResult::fail('coupon_expired', __('This coupon has expired.', 'events'));
+		}
+
+		if (!empty($this->limit) && $this->used >= $this->limit) {
+			return ValidationResult::fail('coupon_usage_limit', __('This coupon has reached its usage limit.', 'events'));
+		}
+
+		if ($this->global) {
+        	return ValidationResult::success();
+   	 	}
+		
+		if (!$event instanceof Event) {
+			return ValidationResult::fail('no_event', __('Event is required to validate the coupon.', 'events'));
+    	}
+
+	    if (!in_array($this->id, $event->get_coupon_ids(), true)) {
+	        return ValidationResult::fail('invalid_event', __('This coupon is not valid for the specified event.', 'events'));
+	    }
+
+		return ValidationResult::success();
+	}
 	
-	/**
-	 * Puts the coupon into a text representation in terms of discount
-	 */
+
 	function get_discount_text() : string 
 	{
-		return match($this) {
-			self::PERCENT => sprintf(__('%s off', 'events'), number_format($this->coupon_discount, 2) . '%'),
-			self::FIXED => sprintf(__('%s off', 'events'), \Contexis\Events\Intl\Price::format($this->coupon_discount)),
+		return match($this->type) {
+			self::PERCENT => sprintf(__('%s off', 'events'), number_format($this->discount, 2) . '%'),
+			self::FIXED => sprintf(__('%s off', 'events'), \Contexis\Events\Intl\Price::format($this->discount)),
 		};
 	}
 	
-	function has_events(){
+	function has_events() : bool
+	{
 		$args = [
 			'post_type' => EventPost::POST_TYPE,
 			'meta_query' => [
 				[
-					'key' => 'coupon_id',
-					'value' => $this->coupon_id,
-					'compare' => '='
+					'key' => '_event_coupons',
+					'value' => $this->id,
+					'compare' => 'LIKE'
 				]
 			],
 			'posts_per_page' => 1,
@@ -160,7 +206,6 @@ class Coupon {
 		];
 		
 		$query = new WP_Query($args);
-		
 		return !empty($query->posts);
 	}
 

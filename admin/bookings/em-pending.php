@@ -14,9 +14,7 @@ use Contexis\Events\PostTypes\EventPost;
 function em_bookings_pending_table($event_id = false){
 	
 	$ticket = new Ticket();
-	if( get_option('dbem_bookings_approval') == 0 ){
-		return false;
-	}
+	
 	
 	$action_scope = ( !empty($_REQUEST['em_obj']) && $_REQUEST['em_obj'] == 'em_bookings_pending_table' );
 	$action = ( $action_scope && !empty($_GET ['action']) ) ? $_GET ['action']:'';
@@ -32,7 +30,7 @@ function em_bookings_pending_table($event_id = false){
 			$bookings = $event->get_bookings()->get_pending_bookings();
 		}else{
 			//To optimize performance, we can do one query here for all pending bookings to show.
-			$bookings = BookingCollection::get(array('status'=>0));
+			$bookings = BookingCollection::find(array('status'=>0));
 			$events = array();
 			//Now let's create events and bookings for this:
 			foreach($bookings->bookings as $booking){
@@ -100,7 +98,7 @@ function em_bookings_pending_table($event_id = false){
 								$rowno++;
 								?>
 								<tr>
-									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->booking_id ?>' name='bookings[]'/></th>
+									<th scope="row" class="check-column" style="padding:7px 0px 7px;"><input type='checkbox' value='<?php echo $booking->id ?>' name='bookings[]'/></th>
 									<td><a href="<?php echo EventPost::get_admin_url(); ?>&amp;page=events-bookings&amp;person_id=<?php echo $booking->person->ID; ?>"><?php echo $booking->person->get_name() ?></a></td>
 									
 									<td><?php echo $booking->person->user_email ?></td>
@@ -108,9 +106,9 @@ function em_bookings_pending_table($event_id = false){
 									<td><?php echo $booking->get_booked_spaces() ?></td>
 									<td>
 										<?php
-										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
-										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->booking_id], $_SERVER['REQUEST_URI']);
+										$approve_url = add_query_arg(['action'=>'bookings_approve', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$reject_url = add_query_arg(['action'=>'bookings_reject', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
+										$delete_url = add_query_arg(['action'=>'bookings_delete', 'booking_id'=>$booking->id], $_SERVER['REQUEST_URI']);
 										?>
 										<a class="em-bookings-approve" href="<?php echo $approve_url ?>"><?php _e('Approve','events'); ?></a> |
 										<a class="em-bookings-reject" href="<?php echo $reject_url ?>"><?php _e('Reject','events'); ?></a> |

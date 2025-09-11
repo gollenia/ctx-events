@@ -26,7 +26,7 @@ const CouponModal = ( props ) => {
 				code: coupon._coupon_code,
 				expiry: coupon._coupon_expiry,
 				amount: coupon._coupon_value,
-				fixed: coupon._coupon_sitewide,
+				fixed: coupon._coupon_global,
 			};
 		} );
 	}, [] );

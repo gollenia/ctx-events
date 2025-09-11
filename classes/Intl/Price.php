@@ -29,26 +29,19 @@ class Price {
 		$this->currency = get_option('dbem_bookings_currency') ?: 'EUR';
 	}
 	
-	/**
-	 * Returns a Intl formatted date range or single date
-	 *
-	 * @param integer $start TimeStamp
-	 * @param integer $end TimeStamp
-	 * @return string
-	 */
-	public function get_format() {
+	public function get_format() : string {
 		return $this->number_formatter->format($this->price);
 	}
 
-	public function get_currency() {
+	public function get_currency() : string {
 		return $this->number_formatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
 	}
 
-	public function get_currency_code() {
+	public function get_currency_code() : string {
 		return $this->number_formatter->getTextAttribute(NumberFormatter::CURRENCY_CODE);
 	}
 
-	public function is_free() {
+	public function is_free() : bool {
 		return $this->price === 0.0;
 	}
 
@@ -67,13 +60,5 @@ class Price {
 			$formatter->number_formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currency);
 		}
 		return $formatter->get_currency();
-	}
-
-	public static function currency_list() : stdClass {
-		$currencies = new \stdClass();
-		$currencies->names = array('EUR' => 'EUR - Euros','USD' => 'USD - U.S. Dollars','GBP' => 'GBP - British Pounds','CAD' => 'CAD - Canadian Dollars','AUD' => 'AUD - Australian Dollars','BRL' => 'BRL - Brazilian Reais','CZK' => 'CZK - Czech koruna','DKK' => 'DKK - Danish Kroner','HKD' => 'HKD - Hong Kong Dollars','HUF' => 'HUF - Hungarian Forints','ILS' => 'ILS - Israeli New Shekels','JPY' => 'JPY - Japanese Yen','MYR' => 'MYR - Malaysian Ringgit','MXN' => 'MXN - Mexican Pesos','TWD' => 'TWD - New Taiwan Dollars','NZD' => 'NZD - New Zealand Dollars','NOK' => 'NOK - Norwegian Kroner','PHP' => 'PHP - Philippine Pesos','PLN' => 'PLN - Polish Zlotys','SGD' => 'SGD - Singapore Dollars','SEK' => 'SEK - Swedish Kronor','CHF' => 'CHF - Swiss Francs','THB' => 'THB - Thai Baht','TRY' => 'TRY - Turkish Liras', 'RUB'=>'RUB - Russian Ruble');
-		$currencies->symbols = array( 'EUR' => '&euro;','USD' => '$','GBP' => '&pound;','CAD' => '$','AUD' => '$','BRL' => 'R$','CZK' => 'K&#269;','DKK' => 'kr','HKD' => '$','HUF' => 'Ft','JPY' => '&#165;','MYR' => 'RM','MXN' => '$','TWD' => '$','NZD' => '$','NOK' => 'kr','PHP' => 'Php', 'PLN' => '&#122;&#322;','SGD' => '$','SEK' => 'kr','CHF' => 'CHF','TRY' => 'TL','RUB'=>'&#8381;');
-		$currencies->true_symbols = array( 'EUR' => '€','USD' => '$','GBP' => '£','CAD' => '$','AUD' => '$','BRL' => 'R$','CZK' => 'Kč','DKK' => 'kr','HKD' => '$','HUF' => 'Ft','JPY' => '¥','MYR' => 'RM','MXN' => '$','TWD' => '$','NZD' => '$','NOK' => 'kr','PHP' => 'Php','PLN' => 'zł','SGD' => '$','SEK' => 'kr','CHF' => 'CHF','TRY' => 'TL', 'RUB'=>'₽');
-		return $currencies;
 	}
 }

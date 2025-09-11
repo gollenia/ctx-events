@@ -114,7 +114,7 @@ class RecurringEventAdmin {
 	    	'date-time' => __('Date and Time','events'),
 	    	'author' => __('Owner','events'),
 	    ));
-		if( !get_option('dbem_locations_enabled') ){
+		if( !get_option('dbem_locations_enabled', 1) ){
 			unset($columns['location']);
 		}
 		return $columns;
@@ -164,14 +164,7 @@ class RecurringEventAdmin {
 	public static function admin_head(){
 		//quick hacks to make event admin table make more sense for events
 		?>
-		<script type="text/javascript">
-			jQuery(document).ready( function($){
-				$('.inline-edit-date').prev().css('display','none').next().css('display','none').next().css('display','none');
-				if(!EM.recurrences_menu){
-					$('#menu-posts-'+EM.event_post_type+', #menu-posts-'+EM.event_post_type+' > a').addClass('wp-has-current-submenu');
-				}
-			});
-		</script>
+		
 		<style>
 			table.fixed{ table-layout:auto !important; }
 			.tablenav select[name="m"] { display:none; }

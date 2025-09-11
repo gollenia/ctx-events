@@ -6,7 +6,7 @@ const rootElement = document.getElementById( 'booking_app' );
 const bookingButtons = document.getElementsByClassName( 'wp-block-events-manager-booking' );
 
 if ( rootElement ) {
-	const root = createRoot( document.getElementById( 'booking_app' ) );
+	const root = createRoot( rootElement );
 
 	root.render( <Booking post={ rootElement.dataset.post } open={ false } />, root );
 

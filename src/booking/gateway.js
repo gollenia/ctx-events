@@ -6,8 +6,12 @@ import { __ } from '@wordpress/i18n';
 const Gateway = ( props ) => {
 	const { state, dispatch } = props;
 	const { request, event } = state;
-
-	const { title, html, name, methods, description } = event.gateways_available[ request.gateway ];
+	console.log( request.gateway );
+	const gateway = event.gateways_available.find( ( gateway ) => {
+		return gateway.slug === request.gateway;
+	} );
+	console.log( 'gateway', gateway );
+	const { title, methods, description } = gateway;
 
 	function createMarkup() {
 		return { __html: description };

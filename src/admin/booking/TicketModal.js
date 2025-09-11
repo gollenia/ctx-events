@@ -1,7 +1,7 @@
 import { Button, Modal, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import React, { useEffect } from 'react';
-import AdminField from './AdminField';
+import AdminField from '../common/AdminField';
 
 const TicketModal = ( { store, onCancel, onSave } ) => {
 	const [ state, dispatch ] = store;

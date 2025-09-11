@@ -2,9 +2,9 @@
 
 namespace Contexis\Events\Models;
 
-use Contexis\Events\Utilities\Image;
+use Contexis\Events\Core\Utilities\Image;
 
-class Speaker {
+class Speaker implements \JsonSerializable{
 
 	var int $id = 0;
 	var $name = "";
@@ -55,7 +55,7 @@ class Speaker {
 
 	
 
-	public function get_rest_fields() {
+	public function jsonSerialize() : array {
 		return [
 			'id' => $this->id,
 			'name' => $this->name,

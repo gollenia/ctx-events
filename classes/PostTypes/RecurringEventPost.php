@@ -1,6 +1,8 @@
 <?php
 
-use Contexis\Events\Interfaces\PostType;
+namespace Contexis\Events\PostTypes;
+
+use Contexis\Events\Core\Contracts\PostType;
 use Contexis\Events\PostTypes\EventPost;
 
 class RecurringEventPost implements PostType {

@@ -1,5 +1,4 @@
 import { __ } from '@wordpress/i18n';
-import React from 'react';
 import SVG from 'react-inlinesvg';
 import { formatCurrency } from './modules/priceUtils';
 
@@ -8,7 +7,7 @@ import { formatCurrency } from './modules/priceUtils';
  */
 const Success = ( props ) => {
 	const { state, dispatch } = props;
-
+	const { locale, currency } = window.eventBookingLocalization;
 	const { request, response, event } = state;
 
 	const { booking } = response;
@@ -79,7 +78,7 @@ const Success = ( props ) => {
 						</tr>
 						<tr>
 							<th className="text-left">{ __( 'Amount', 'events' ) }</th>
-							<td>{ formatCurrency( gateway.amount, data.l10n.locale, data.l10n.currency ) }</td>
+							<td>{ formatCurrency( gateway.amount, locale, currency ) }</td>
 						</tr>
 					</table>
 				</div>

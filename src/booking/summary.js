@@ -13,20 +13,20 @@ function Summary( { state, dispatch } ) {
 		wizard.step == 3,
 	];
 
-	const ticketCount = request.tickets.length;
+	const ticketCount = request.attendees.length;
 
 	const ticketPrice = ( key ) => {
 		return (
 			event.tickets_available[ key ].price *
-			request.tickets.reduce( ( n, ticket ) => {
+			request.attendees.reduce( ( n, ticket ) => {
 				return n + ( ticket.id == event.tickets_available[ key ].id );
 			}, 0 )
 		);
 	};
 
 	const countTicketsById = ( id ) => {
-		let count = state.request.tickets.reduce( ( n, ticket ) => {
-			return n + ( ticket.id == id );
+		let count = request.attendees.reduce( ( n, ticket ) => {
+			return n + ( ticket.ticket_id == id );
 		}, 0 );
 		return count;
 	};
@@ -45,8 +45,8 @@ function Summary( { state, dispatch } ) {
 	};
 
 	const TICKETS_MISSING =
-		( TICKETS && request.tickets.length == 0 ) ||
-		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.tickets.length == 0 );
+		( TICKETS && request.attendees.length == 0 ) ||
+		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.attendees.length == 0 );
 
 	const fullPrice = useMemo( () => calculateFullPrice(), [ response.coupon, ticketCount, request.donation ] );
 
@@ -55,7 +55,7 @@ function Summary( { state, dispatch } ) {
 			<div className="list ticket-summary">
 				{ Object.keys( event.tickets_available ).map( ( id, key ) => {
 					const maxSpaces = Math.min(
-						event.available_spaces - request.tickets.length,
+						event.available_spaces - request.attendees.length,
 						event.tickets_available[ id ].max - countTicketsById( id )
 					);
 
@@ -111,7 +111,7 @@ function Summary( { state, dispatch } ) {
 											onClick={ () => dispatch( { type: 'ADD_TICKET', payload: id } ) }
 											disabled={
 												event.tickets_available[ id ].max == countTicketsById( id ) ||
-												request.tickets.length == event.available_spaces
+												request.attendees.length == event.available_spaces
 											}
 										>
 											<i className="material-icons material-symbols-outlined">add_circle</i>

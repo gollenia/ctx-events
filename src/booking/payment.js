@@ -1,4 +1,4 @@
-const { React } = require( 'react' );
+const { React, useMemo } = require( 'react' );
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import Coupon from './coupon';
@@ -17,14 +17,16 @@ const Payment = ( props ) => {
 
 	const [ allowDonation, setAllowDonation ] = useState( false );
 
-	const gatewayOptions = () => {
-		const result = {};
-		if ( event?.gateways_available == undefined ) return result;
-		Object.keys( event?.gateways_available ).forEach( ( id ) => {
-			result[ id ] = event.gateways_available[ id ].title;
-		} );
-		return result;
-	};
+	const gatewayOptions = useMemo( () => {
+		if ( ! Array.isArray( event?.gateways_available ) ) return {};
+
+		return event.gateways_available.reduce( ( acc, gateway ) => {
+			if ( gateway?.slug && gateway?.title ) {
+				acc[ gateway.slug ] = gateway.title;
+			}
+			return acc;
+		}, {} );
+	}, [ event?.gateways_available ] );
 
 	return (
 		<div className="grid xl:grid--columns-2 grid--gap-12">
@@ -34,10 +36,10 @@ const Payment = ( props ) => {
 			<div>
 				<form className="form--trap form grid xl:grid--columns-6 grid--gap-8">
 					{ event?.has_coupons && <Coupon state={ state } dispatch={ dispatch } /> }
-					{ Object.keys( event.gateways_available ).length > 1 && (
+					{ event.gateways_available.length > 1 && (
 						<InputField
 							label={ __( 'Payment Method', 'events' ) }
-							options={ gatewayOptions() }
+							options={ gatewayOptions }
 							name={ 'gateway' }
 							onChange={ ( event ) => {
 								dispatch( { type: 'SET_GATEWAY', payload: event } );

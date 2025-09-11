@@ -1,23 +1,25 @@
 <?php
 
+namespace Contexis\Events\Emails;
+
 use Contexis\Events\Models\Event;
-use Contexis\Events\Payment\GatewayService;
+use Contexis\Events\Payment\GatewayCollection;
 use Contexis\Events\PostTypes\EventPost;
 
-class EM_Custom_Emails_Admin {
+class CustomEmailsAdmin {
     public static $caps = array('custom_emails'=>'manage_bookings');
     
     public static function init(){
-		//Custom Event Emails
+		$instance = new self();
 		if( get_option('dbem_custom_emails_events') ){
-				add_action('admin_enqueue_scripts', 'EM_Custom_Emails_Admin::scripts');
-				add_action('add_meta_boxes', 'EM_Custom_Emails_Admin::meta_boxes');
-				add_filter('em_event_get_post_meta', 'EM_Custom_Emails_Admin::em_event_get_post_meta',100,2);
+				add_action('admin_enqueue_scripts', [$instance, 'scripts']);
+				add_action('add_meta_boxes', [$instance, 'meta_boxes']);
+				add_filter('em_event_get_post_meta', [$instance, 'em_event_get_post_meta'],100,2);
 				if( get_option('dbem_custom_emails_events_admins')){
-					add_filter('em_event_validate_meta', 'EM_Custom_Emails_Admin::em_event_validate_meta',100,2);
+					add_filter('em_event_validate_meta', [$instance, 'em_event_validate_meta'],100,2);
 				}
-				add_filter('em_event_save_meta', 'EM_Custom_Emails_Admin::em_event_save_meta',100,2);
-				add_filter('em_event_save_events', 'EM_Custom_Emails_Admin::em_event_save_events',100,4);
+				add_filter('em_event_save_meta', [$instance, 'em_event_save_meta'],100,2);
+				add_filter('em_event_save_events', [$instance, 'em_event_save_events'],100,4);
 		}
 		add_action( 'admin_enqueue_scripts', function() {
 			if ( 'profile' !== get_current_screen()->id ) {
@@ -42,8 +44,8 @@ class EM_Custom_Emails_Admin {
 		} );
 		//Custom Gateway Emails
 		if( get_option('dbem_custom_emails_gateways') ){
-			add_action('em_gateway_settings_footer','EM_Custom_Emails_Admin::em_gateway_settings_footer', 10, 1);
-			add_action('em_gateway_update','EM_Custom_Emails_Admin::em_gateway_update', 10, 1);
+			add_action('em_gateway_settings_footer',[$instance, 'em_gateway_settings_footer'], 10, 1);
+			add_action('em_gateway_update',[$instance, 'em_gateway_update'], 10, 1);
 		}
     }
     
@@ -100,7 +102,7 @@ class EM_Custom_Emails_Admin {
 						<tr>
 						<th><label><?php _e('Also Send Event Owner Emails To:', 'events'); ?></label></th>
 						<td><input type="email" class="emp-cet-email regular-text" multiple name="<?php echo $param ?>_admins[<?php echo $email_array_group_name; ?>]" value="<?php if( !empty($admin_emails_custom[$email_array_group_name]) ) echo $admin_emails_custom[$email_array_group_name]; ?>" /><br />
-						<p><?php esc_html_e('For multiple emails, seperate by commas (e.g. email1@test.com,email2@test.com, etc.)','events'); ?></p></td>
+						<p><?php _e('For multiple emails, seperate by commas (e.g. email1@test.com,email2@test.com, etc.)','events'); ?></p></td>
 						</tr>
 					</table>
 				<?php endif; ?>				
@@ -128,9 +130,9 @@ class EM_Custom_Emails_Admin {
 						<div class="em-select-mail-status">
 							<div class="em-mail-status-indicator" data-status="<?php echo $status ?>"></div>
 							<select class="em-cet-status" name="<?php echo $param; ?>[<?php echo $email_array_subgroup; ?>][<?php echo $email_type_name; ?>][status]">
-								<option value="0" class="emp-default"><?php esc_html_e('Default','events'); ?></option>
-								<option value="1" class="emp-enabled" <?php if( $status == 1) echo 'selected="selected"' ?>><?php esc_html_e('Enabled','events'); ?></option>
-								<option value="2" class="emp-disabled" <?php if( $status == 2) echo 'selected="selected"' ?>><?php esc_html_e('Disabled','events'); ?></option>
+								<option value="0" class="emp-default"><?php _e('Default','events'); ?></option>
+								<option value="1" class="emp-enabled" <?php if( $status == 1) echo 'selected="selected"' ?>><?php _e('Enabled','events'); ?></option>
+								<option value="2" class="emp-disabled" <?php if( $status == 2) echo 'selected="selected"' ?>><?php _e('Disabled','events'); ?></option>
 							</select>  
 						
 							<strong><?php echo $email_type['title'] ?></strong>
@@ -232,11 +234,11 @@ class EM_Custom_Emails_Admin {
 			$email_values_template = $email_values;
 			if( !empty($EM_Gateway) ){
 				$email_values = array();
-				$gateways = array($EM_Gateway->gateway => $EM_Gateway->title);
+				$gateways = [$EM_Gateway->slug];
 			}else{
-				$gateways = GatewayService::active_gateways();
+				$gateways = GatewayCollection::active()->list();
 			}
-    		foreach($gateways as $gateway => $gateway_name ){
+    		foreach($gateways as $gateway ){
     			//default values are - by default - the general settings values, overriden further down by $possible_email_values
     			$gateway_email_defaults = array($gateway.'-'.$mb_key.'admin' => $email_values_template[$mb_key.'admin'], $gateway.'-'.$mb_key.'user' => $email_values_template[$mb_key.'user']);
     		    //temporary fix, we assume everything is online except for offline - maybe a good reason for split offline/online base gateway subclasses
@@ -309,7 +311,7 @@ class EM_Custom_Emails_Admin {
 		$email_values = self::merge_gateway_default_values($gateway, $default_email_values, $gateway_email_values);
 		$admin_emails = false;
 		if( get_option('dbem_custom_emails_gateways_admins') ){
-			$admin_emails = EM_Custom_Emails::get_gateway_admin_emails($EM_Gateway);
+			$admin_emails = CustomEmails::get_gateway_admin_emails($EM_Gateway);
 		}
 		echo "<h3>". esc_html__('Custom Booking Email Templates','events').'</h3>';
 		$default_emails[$gateway]['title'] = __('Booking Email Templates','events');
@@ -383,12 +385,12 @@ class EM_Custom_Emails_Admin {
 
 	public static function get_gateway_default_emails( $EM_Gateway = false ){
 		$emails = array();
-		$gateways = is_object($EM_Gateway) ? array($EM_Gateway->gateway => $EM_Gateway->title) : GatewayService::active_gateways();		
-		foreach($gateways as $gateway => $gateway_name ){
-			$emails[$gateway] = array(
-				'title' => sprintf(__('%s Gateway','events'), $gateway_name),
+		$gateways = is_object($EM_Gateway) ? array($EM_Gateway) : GatewayCollection::active();
+		foreach($gateways as $gateway ){
+			$emails[$gateway->slug] = array(
+				'title' => sprintf(__('%s Gateway','events'), $gateway->title),
 				'subgroups' => array(
-					$gateway.'-admin'=>array(
+					$gateway->slug.'-admin'=>array(
 						'title' => __('Event Owner Emails','events'),
 						'text' => __('These emails get sent to the event owners when a person has made a booking using this specific gateway.','events'),
 						'emails' => array(
@@ -398,7 +400,7 @@ class EM_Custom_Emails_Admin {
 							3 => array('title'=> __('Booking cancelled','events'))
 						)
 					),
-					$gateway.'-user'=>array(
+					$gateway->slug.'-user'=>array(
 						'title' => __('Attendee Emails','events'),
 						'text' => __('These emails will be sent to the person who booked a place at your event and selected this specific gateway.','events'),
 						'emails' => array(
@@ -411,9 +413,9 @@ class EM_Custom_Emails_Admin {
 				)
 			);
 			//temporary fix, we assume everything is online except for offline - maybe a good reason for split offline/online base gateway subclasses
-			if( $gateway == 'offline' ){
-				$emails[$gateway]['subgroups'][$gateway.'-admin']['emails'][5] = array('title'=> __('Awaiting Offline Payment','events'));
-				$emails[$gateway]['subgroups'][$gateway.'-user']['emails'][5] = array('title'=> __('Awaiting Offline Payment','events'));
+			if( $gateway->slug == 'offline' ){
+				$emails[$gateway->slug]['subgroups'][$gateway->slug.'-admin']['emails'][5] = array('title'=> __('Awaiting Offline Payment','events'));
+				$emails[$gateway->slug]['subgroups'][$gateway->slug.'-user']['emails'][5] = array('title'=> __('Awaiting Offline Payment','events'));
 			}
 		}
 		return $emails;
@@ -451,10 +453,10 @@ class EM_Custom_Emails_Admin {
      * --------------------------------------------
      */
 	
-	public static function meta_boxes(){
+	public function meta_boxes(){
 		if( current_user_can(self::$caps['custom_emails']) ){
-			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array('EM_Custom_Emails_Admin','event_meta_box'),EventPost::POST_TYPE, 'normal','low');
-			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array('EM_Custom_Emails_Admin','event_meta_box'), 'event-recurring', 'normal','low');
+			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array($this,'event_meta_box'),EventPost::POST_TYPE, 'normal','low');
+			add_meta_box('em-event-custom-emails', __('Custom Automated Emails','events'), array($this,'event_meta_box'), 'event-recurring', 'normal','low');
 		}
 	}
 	
@@ -462,10 +464,10 @@ class EM_Custom_Emails_Admin {
 		$event = Event::find_by_post_id($post->ID);
 		
 		//get custom email values if they exist
-		$custom_email_values = EM_Custom_Emails::get_event_emails($event);
+		$custom_email_values = CustomEmails::get_event_emails($event);
 		$custom_admin_emails = false;
 		if( get_option('dbem_custom_emails_events_admins')){
-			$custom_admin_emails = EM_Custom_Emails::get_event_admin_emails($event);
+			$custom_admin_emails = CustomEmails::get_event_admin_emails($event);
 		}
 		
 		echo '<p>'. sprintf(__('Below you can modify the emails that are sent when bookings are made. This will override the default emails located in your %s settings page.','events'), '<a href="'.admin_url('edit.php?post_type=event&page=events-options#emails:booking-emails').'">'.esc_html('Booking Email Templates','events').'</a>');
@@ -571,4 +573,4 @@ class EM_Custom_Emails_Admin {
 		return $result;
 	}
 }
-EM_Custom_Emails_Admin::init();
+CustomEmailsAdmin::init();

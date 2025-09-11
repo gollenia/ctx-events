@@ -6,7 +6,7 @@ import { Button, CheckboxControl, Flex, FlexBlock, SelectControl, TextControl } 
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import 'leaflet/dist/leaflet.css';
+
 /**
  * Internal dependencies
  */
@@ -147,11 +147,11 @@ const edit = ( props ) => {
 				</Flex>
 				<CheckboxControl
 					label={ __( 'Activate for all events', 'events' ) }
-					checked={ meta._coupon_sitewide }
+					checked={ meta._coupon_global }
 					onChange={ ( value ) => {
 						setMeta( {
 							...meta,
-							_coupon_sitewide: value,
+							_coupon_global: value,
 						} );
 					} }
 					__next40pxDefaultSize

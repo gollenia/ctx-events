@@ -21,23 +21,22 @@ class Dashboard {
 	}
 
 	public static function bookings_box() {
-		$bookings = BookingCollection::get(['limit' => 5, 'orderby' => 'booking_id', 'order' => 'DESC']);
+		$bookings = BookingCollection::find(['limit' => 5, 'orderby' => 'booking_id', 'order' => 'DESC']);
 		
 		?>
-		<table style="width:100%">
-			<?php foreach($bookings as $booking) : ?>
-				<?php 
-					$status = array_search($booking->booking_status, array_column($booking->get_available_states(), 'search'));
-				?>
-				<tr>
-					<td><span class="em-label em-label-<?php echo $status ?>"><i class="material-symbols-outlined"><?php echo $booking->get_status_icon() ?></i></span></td>
-					<td><a href="#"> <?php echo $booking->get_full_name(); ?> - <?php echo $booking->get_event()->event_name; ?> </a></td>
-					<td><span class="em-date"><?php echo Date::get_date($booking->booking_date->getTimestamp()); ?></span></td>
-			</tr>
-			<?php endforeach; ?>
-			</table>
-		<div>
-			<a href="<?php echo admin_url('edit.php?post_type=event&page=events-bookings'); ?>">View all bookings</a>
+		<div class="bookings-block">
+			<h3><?php _e('Bookings that need attention', 'events-manager'); ?></h3>
+			<ul class="bookings-list">
+				<?php foreach($bookings as $booking) : ?>
+					<li>
+						<span class="em-date"><?php echo Date::get_date($booking->date->getTimestamp()); ?></span>
+						<a href="#"> <?php echo $booking->get_full_name(); ?> - <?php echo $booking->get_event()->event_name; ?> </a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<div>
+				<a href="<?php echo admin_url('edit.php?post_type=event&page=events-bookings'); ?>">View all bookings</a>
+			</div>
 		</div>
 		<?php
 	}

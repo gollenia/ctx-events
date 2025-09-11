@@ -33,6 +33,8 @@ const edit = ( props ) => {
 		return meta[ '_event_rsvp_end' ] ? formatDate( meta[ '_event_rsvp_end' ] ) : '';
 	};
 
+	console.log( meta );
+
 	const start = new Date( meta[ '_event_rsvp_start' ] );
 	const end = new Date( meta[ '_event_rsvp_end' ] );
 	const now = new Date();

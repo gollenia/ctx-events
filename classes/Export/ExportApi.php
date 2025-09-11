@@ -1,12 +1,12 @@
 <?php
 
-namespace Contexis\Events\Addons;
+namespace Contexis\Events\Export;
 
 use Contexis\Events\Collections\EventCollection;
-use Contexis\Events\Utilities\Plugin;
+use Contexis\Events\Core\Utilities\Plugin;
 use DateTime;
-use DateInterval;
-use Timber\Timber;
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
 use Mpdf\{
 	Mpdf,
 	HTMLParserMode,
@@ -90,20 +90,23 @@ class ExportApi {
 	}
 
 	public function generate_table() {
-		
-		$templates = [
-			get_stylesheet_directory() . '/plugins/events/pdf/template.twig',
-			Plugin::get_plugin_dir().'/templates/tables/pdf.twig'
-		];
-
+		$loader = new FilesystemLoader([
+			get_stylesheet_directory() . '/plugins/events/pdf/',
+			Plugin::get_plugin_dir() . '/templates/tables/',
+		]);
+	
+		$twig = new Environment($loader, [
+			'cache' => false,
+			'autoescape' => false,
+		]);
+	
 		$args = [
 			"month" => $this->month, 
 			"featured" => $this->get_featured_events(),
 			"start" => $this->start_date
 		];
-
-		$result = Timber::compile($templates,$args);
-		return $result;
+	
+		return $twig->render('pdf.twig', $args);
 	}
 
 	public function get_date_range($offset = 0) {

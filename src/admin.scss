@@ -874,3 +874,24 @@ table.em-caps-table td {
 		color: #000;
 	}
 }
+
+#dashboard-widgets .bookings-list {
+	margin: 8px -12px 0 -12px;
+
+	li {
+		display: grid;
+		grid-template-columns: clamp( 160px, calc( 2vw + 140px ), 200px ) auto;
+		column-gap: 10px;
+		color: #646970;
+		padding: 4px 12px;
+		&:nth-child( odd ) {
+			background: #f6f7f7;
+		}
+	}
+}
+
+.components-checkbox-control__input[type='checkbox']:disabled {
+	border-color: #000;
+	background-color: #000;
+	opacity: 0.3;
+}

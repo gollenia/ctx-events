@@ -2,7 +2,7 @@
 <?php
 
 $form_fields = EM_Booking_Form::get_form($booking->event_id)->form_fields;
-$form_values = $booking->booking_meta['booking'] ? array_merge($booking->booking_meta['registration'], $booking->booking_meta['booking']) : $booking->booking_meta['registration'];
+$form_values = $booking->metadata['booking'] ? array_merge($booking->metadata['registration'], $booking->metadata['booking']) : $booking->metadata['registration'];
 
 foreach($form_fields as $name => $field) {
 	if($field['type'] == "html") {

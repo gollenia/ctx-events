@@ -19,10 +19,6 @@ class BookingView
 			$placeholder_atts = array($result);
 			if( !empty($placeholders[3][$key]) ) $placeholder_atts[] = $placeholders[3][$key];
 			switch( $result ){
-				case '#_BOOKINGFORMCUSTOM':
-					if(!$placeholder_atts[1]) break; 
-					$replace = $booking->meta['booking'][$placeholder_atts[1]];
-					break;
 				case '#_BOOKINGFIELDS': 
 					ob_start();
 					em_locate_template('emails/bookingfields.php', true, array('booking'=>$booking));
@@ -30,22 +26,19 @@ class BookingView
 					break;
 				case '#_BOOKINGFIELD':
 					if(!$placeholder_atts[1]) break;
-					if(key_exists($placeholder_atts[1], $booking->meta['booking'])) {
-						$replace = $booking->booking_meta['booking'][$placeholder_atts[1]];
+					if(key_exists($placeholder_atts[1], $booking->registration)) {
+						$replace = $booking->registration[$placeholder_atts[1]];
 						break;
-					}
-					if(key_exists($placeholder_atts[1], $booking->meta['registration'])) {
-						$replace = $booking->booking_meta['registration'][$placeholder_atts[1]];
 					}
 					break;
 				case '#_BOOKINGID':
-					$replace = $booking->booking_id;
+					$replace = $booking->id;
 					break;
 				case '#_BOOKINGNAME':
-					$replace = $booking->get_full_name;
+					$replace = $booking->get_full_name();
 					break;
 				case '#_BOOKINGEMAIL':
-					$replace = $booking->booking_meta['registration']['user_email'];
+					$replace = $booking->user_email;
 					break;
 				case '#_BOOKINGDATE':
 					$replace = ( $booking->date() !== false ) ? \Contexis\Events\Intl\Date::get_date($booking->date()->getTimestamp()) :'n/a';
@@ -70,7 +63,7 @@ class BookingView
 					break;
 				case '#_BOOKINGADMINURL':
 				case '#_BOOKINGADMINLINK':
-					$bookings_link = esc_url( add_query_arg('booking_id', $booking->booking_id, $booking->get_event()->get_bookings_url()) );
+					$bookings_link = esc_url( add_query_arg('booking_id', $booking->id, $booking->get_event()->get_bookings_url()) );
 					if($result == '#_BOOKINGADMINLINK'){
 						$replace = '<a href="'.$bookings_link.'">'.esc_html__('Edit Booking', 'events'). '</a>';
 					}else{
@@ -84,10 +77,10 @@ class BookingView
 					$replace = get_option("em_offline_beneficiary", true);
 					break;
 				case '#_REFERENCE':
-					$replace = $booking->booking_id . "-" . $booking->get_event()->post_name . "-" . $booking->booking_meta['registration']['last_name'];
+					$replace = $booking->id . "-" . $booking->get_event()->post_name . "-" . $booking->get_last_name();
 					break;
 				case '#_PRICE': 
-					$replace = \Contexis\Events\Intl\Price::format($booking->booking_price);
+					$replace = \Contexis\Events\Intl\Price::format($booking->full_price);
 					break;
 				case '#_BANK':
 					$replace = get_option("em_offline_bank", true);
@@ -108,37 +101,37 @@ class BookingView
 					break;
 				case '#_BOOKINGCOUPON':
 					$replace = '';
-					if( !empty($booking->booking_meta['coupon']) ){
-						$coupon = new Coupon($booking->booking_meta['coupon']);
-						$replace = $coupon->coupon_code.' - '.$coupon->get_discount_text();					
+					if( !empty($booking->coupon_id) ){
+						$coupon = Coupon::get_by_id($booking->coupon_id);
+						$replace = $coupon->code.' - '.$coupon->get_discount_text();					
 					}
 					break;
 				case '#_BOOKINGCOUPONCODE':
 					$replace = '';
-					if( !empty($booking->booking_meta['coupon']) ){
-						$coupon = new Coupon($booking->booking_meta['coupon']);
-						$replace = $coupon->coupon_code;					
+					if( !empty($booking->coupon_id) ){
+						$coupon = Coupon::get_by_id($booking->coupon_id);
+						$replace = $coupon->code;					
 					}
 					break;
 				case '#_BOOKINGCOUPONDISCOUNT':
 					$replace = '';
-					if( !empty($booking->booking_meta['coupon']) ){
-						$coupon = new Coupon($booking->booking_meta['coupon']);
+					if( !empty($booking->coupon_id) ){
+						$coupon = Coupon::get_by_id($booking->coupon_id);
 						$replace = $coupon->get_discount_text();					
 					}
 					break;
 				case '#_BOOKINGCOUPONNAME':
 					$replace = '';
-					if( !empty($booking->booking_meta['coupon']) ){
-						$coupon = new Coupon($booking->booking_meta['coupon']);
-						$replace = $coupon->coupon_name;					
+					if( !empty($booking->coupon_id) ){
+						$coupon = Coupon::get_by_id($booking->coupon_id);
+						$replace = $coupon->name;					
 					}
 					break;
 				case '#_BOOKINGCOUPONDESCRIPTION':
 					$replace = '';
-					if( !empty($booking->booking_meta['coupon']) ){
-						$coupon = new Coupon($booking->booking_meta['coupon']);
-						$replace = $coupon->coupon_description;					
+					if( !empty($booking->coupon_id) ){
+						$coupon = Coupon::get_by_id($booking->coupon_id);
+						$replace = $coupon->description;					
 					}
 					break;
 				default:

@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\PostTypes;
 
-use Contexis\Events\Interfaces\PostType;
+use Contexis\Events\Core\Contracts\PostType;
 use Contexis\Events\PostTypes\EventPost;
 
 class LocationPost implements PostType {

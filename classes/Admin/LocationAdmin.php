@@ -1,11 +1,14 @@
 <?php
 
+namespace Contexis\Events\Admin;
+
 use Contexis\Events\Models\Location;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
 
 class LocationAdmin {
 	public static function init(){
+		$instance = new self();
 		global $pagenow;
 		if($pagenow == 'edit.php' && !empty($_REQUEST['post_type']) && $_REQUEST['post_type'] == LocationPost::POST_TYPE ){ //only needed if editing post
 			//hide some cols by default:
@@ -15,35 +18,12 @@ class LocationAdmin {
 				$hidden = array('location-id');
 				update_user_option(get_current_user_id(), "manage{$screen}columnshidden", $hidden, true);
 			}
-			add_action('admin_head', array('LocationAdmin','admin_head'));
-		}
-		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_columns' , array('LocationAdmin','columns_add'));
-		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_custom_column' , array('LocationAdmin','columns_output'),10,2 );
-		add_filter('manage_edit-'.LocationPost::POST_TYPE.'_sortable_columns', array('LocationAdmin','columns_sortable'));
 			
-	}
-	
-	public static function admin_head(){
-		//quick hacks to make event admin table make more sense for events
-		?>
-		<script type="text/javascript">
-			jQuery(document).ready( function($){
-				$('.inline-edit-date').prev().css('display','none').next().css('display','none').next().css('display','none');
-			});
-		</script>
-		<style>
-			table.fixed{ table-layout:auto !important; }
-			.tablenav select[name="m"] { display:none; }
-		</style>
-		<?php
-	}
-	
-	public static function admin_menu(){
-		global $menu, $submenu;
-	  	// Add a submenu to the custom top-level menu:
-   		$plugin_pages = array(); 
-		$plugin_pages[] = add_submenu_page('edit.php?post_type='.EventPost::POST_TYPE, __('Locations', 'events'), __('Locations', 'events'), 'edit_locations', 'events-locations', "edit.php?post_type=event");
-		$plugin_pages = apply_filters('em_create_locationss_submenu',$plugin_pages);
+		}
+		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_columns' , array($instance,'columns_add'));
+		add_filter('manage_'.LocationPost::POST_TYPE.'_posts_custom_column' , array($instance,'columns_output'),10,2 );
+		add_filter('manage_edit-'.LocationPost::POST_TYPE.'_sortable_columns', array($instance,'columns_sortable'));
+
 	}
 	
 	public static function columns_add($columns) {
@@ -66,7 +46,7 @@ class LocationAdmin {
 	    ));
 	}
 	
-	public static function columns_output( $column ) {
+	public static function columns_output( string $column ) {
 		$location = Location::find_by_post(get_post()); 
 		switch ( $column ) {
 			case 'location-id':
@@ -87,7 +67,7 @@ class LocationAdmin {
 		}
 	}
 
-	public static function columns_sortable( $columns ) { 
+	public static function columns_sortable( array $columns ) { 
 	   $columns['address'] = 'address';
 	   $columns['town'] = 'town';
 	   $columns['zip'] = 'zip';
@@ -96,4 +76,4 @@ class LocationAdmin {
 	}
  
 }
-add_action('admin_init', array('LocationAdmin','init'));
+add_action('admin_init', array(LocationAdmin::class,'init'));

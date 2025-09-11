@@ -1,5 +1,7 @@
 <?php
 
+namespace Contexis\Events\Export;
+
 use Contexis\Events\Admin\BookingsTable;
 use Contexis\Events\Forms\AttendeesForm;
 use \Contexis\Events\Models\Event;
@@ -46,8 +48,8 @@ class BookingExport
 		do {
 			$booking_collection = $bookings_table->get_bookings();
 
-			foreach ( $booking_collection->bookings as $booking ) {
-				$attendees = $booking->booking_meta['attendees'] ?? [];
+			foreach ( $booking_collection as $booking ) {
+				$attendees = $booking->attendees ?? [];
 
 				if ( $show_tickets ) {
 					foreach ( $attendees as $ticket_id => $attendee_group ) {
@@ -65,7 +67,7 @@ class BookingExport
 
 			$bookings_table->offset += $bookings_table->limit;
 		} while ( !empty($booking_collection->bookings) );
-		$xlsx = Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
+		$xlsx = \Shuchkin\SimpleXLSXGen::fromArray( $excel_sheet );
 		$xlsx->downloadAs($this->get_file_name($event));
 		
 		exit();

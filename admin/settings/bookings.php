@@ -1,5 +1,6 @@
 <?php 
 use \Contexis\Events\Options;
+use \Contexis\Events\Intl\Currency;
 if( !function_exists('current_user_can') || !current_user_can('manage_options') ) return; ?>
 <!-- BOOKING OPTIONS -->
 <div class="em-menu-bookings em-menu-group"  <?php if( !defined('EM_SETTINGS_TABS') || !EM_SETTINGS_TABS) : ?>style="display:none;"<?php endif; ?>>	
@@ -8,7 +9,6 @@ if( !function_exists('current_user_can') || !current_user_can('manage_options') 
 
 	<table class='form-table' role="presentation"> 
 		<?php 
-		Options::checkbox ( __( 'Approval Required?', 'events'), 'dbem_bookings_approval', __( 'Bookings will not be confirmed until the event administrator approves it.', 'events').' '.__( 'This setting is not applicable when using payment gateways, see individual gateways for approval settings.', 'events'));
 		Options::checkbox ( __( 'Reserved unconfirmed spaces?', 'events'), 'dbem_bookings_approval_reserved', __( 'By default, event spaces become unavailable once there are enough CONFIRMED bookings. To reserve spaces even if unapproved, choose yes.', 'events') );
 		Options::checkbox ( __( 'Allow overbooking when approving?', 'events'), 'dbem_bookings_approval_overbooking', __( 'If you get a lot of pending bookings and you decide to allow more bookings than spaces allow, setting this to yes will allow you to override the event space limit when manually approving.', 'events') );
 		?>
@@ -21,8 +21,8 @@ if( !function_exists('current_user_can') || !current_user_can('manage_options') 
 	<table class='form-table' role="presentation">
 		<?php
 		/* Tax & Currency */
-		Options::select ( __( 'Currency', 'events'), 'dbem_bookings_currency', \Contexis\Events\Intl\Price::currency_list()->names, __( 'Choose your currency for displaying event pricing.', 'events') );
-		
+		Options::select ( __( 'Currency', 'events'), 'dbem_bookings_currency',array_column(Currency::currency_list(), 'name', 'utf_symbol'), __( 'Choose your currency for displaying event pricing.', 'events') );
+
 		?>
 	</table>
 

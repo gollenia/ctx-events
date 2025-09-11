@@ -247,12 +247,6 @@
 		height: 4rem;
 		padding: 1rem 2rem;
 		border-top-left-radius: 2rem;
-
-		&--primary {
-			color: var( --primary-contrast );
-			background-color: var( --primary );
-		}
-
 		display: block;
 		position: relative;
 		background: var( --gray-200 );
@@ -261,6 +255,11 @@
 		height: auto;
 		padding: 1.5rem;
 		color: var( --black );
+
+		&--primary {
+			color: var( --primary-contrast );
+			background-color: var( --primary );
+		}
 
 		&--primary {
 			color: var( --primary-contrast );
@@ -540,12 +539,12 @@
 	.ticket-grid-form {
 		padding-right: 1rem;
 		padding-bottom: 2rem;
-		@media screen and ( min-width: 1440px ) {
-			grid-column: span 3 / span 3;
-		}
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
+		@media screen and ( min-width: 1440px ) {
+			grid-column: span 3 / span 3;
+		}
 	}
 }
 

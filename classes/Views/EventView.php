@@ -4,7 +4,7 @@ namespace Contexis\Events\Views;
 use Contexis\Events\Intl\Date;
 use \Contexis\Events\Models\Event;
 use Contexis\Events\Models\Location;
-use Contexis\Events\Utilities\Image;
+use Contexis\Events\Core\Utilities\Image;
 
 class EventView {
 
@@ -88,8 +88,8 @@ class EventView {
 					'has_location' => ( $this->event->has_location() && $this->event->get_location()->location_status ),
 					'has_time' => ( $this->event->start()->getTimestamp() != $this->event->end()->getTimestamp() && !$this->event->event_all_day ),
 					'all_day' => ($condition == 'all_day'),
-					'has_spaces' => $this->event->event_rsvp && $this->event->get_available_spaces() > 0,
-					'fully_booked' => $this->event->event_rsvp && $this->event->get_available_spaces() <= 0,
+					'has_spaces' => $this->event->event_rsvp && $this->event->spaces->available() > 0,
+					'fully_booked' => $this->event->event_rsvp && $this->event->spaces->available() <= 0,
 					'is_free' => !$this->event->event_rsvp || $this->event->is_free( $condition == 'is_free_now' ),
 					'is_recurrence' => $this->event->is_recurrence(),
 					default => false
@@ -169,27 +169,27 @@ class EventView {
 				case '#_EDITEVENTLINK':
 					$link = esc_url($this->event->get_edit_url());
 					if( $result == '#_EDITEVENTLINK'){
-						$replace = '<a href="'.$link.'">'.esc_html(sprintf(__('Edit Event','events'))).'</a>';
+						$replace = '<a href="'.$link.'">'._e('Edit Event','events').'</a>';
 					}else{
 						$replace = $link;
 					}
 					break;
 				case '#_AVAILABLESPACES':
-					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_available_spaces() : 0;
+					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->spaces->available() : 0;
 					break;
 				case '#_BOOKEDSPACES':
 					//This placeholder is actually a little misleading, as it'll consider reserved (i.e. pending) bookings as 'booked'
 					if ($this->event->event_rsvp && get_option('dbem_rsvp_enabled')) {
-						$replace = $this->event->get_booked_spaces();
+						$replace = $this->event->spaces->booked();
 						if( get_option('dbem_bookings_approval_reserved') ){
-							$replace += $this->event->get_pending_spaces();
+							$replace += $this->event->spaces->pending();
 						}
 					} else {
 						$replace = "0";
 					}
 					break;
 				case '#_PENDINGSPACES':
-					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->get_pending_spaces() : "0";
+					$replace = $this->event->event_rsvp && get_option('dbem_rsvp_enabled') ? $this->event->spaces->pending() : "0";
 					break;
 				case '#_SPACES':
 					$replace = $this->event->get_spaces();
@@ -294,7 +294,7 @@ class EventView {
 		 	}
 		}
 		//Now do dependent objects
-		if( get_option('dbem_locations_enabled') ){
+		if( get_option('dbem_locations_enabled', 1) ){
 			if( !empty($this->event->location_id) && $this->event->get_location()->location_status ){
 				$event_string = $this->event->get_location()->output($event_string, $target);
 			}else{

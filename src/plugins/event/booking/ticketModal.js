@@ -1,6 +1,7 @@
 import { Button, Flex, FlexItem, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import TicketEditor from './ticketEditor';
 import TicketRow from './ticketRow';
@@ -49,7 +50,7 @@ const TicketModal = ( props ) => {
 	};
 
 	const createNewTicket = () => ( {
-		ticket_id: crypto.getRandomValues( new Uint16Array( 1 ) )[ 0 ],
+		ticket_id: uuidv4(),
 		ticket_name: __( 'Default Ticket', 'events' ),
 		ticket_description: '',
 		ticket_price: 0,
@@ -115,9 +116,7 @@ const TicketModal = ( props ) => {
 													onToggleActive={ onToggleActive }
 													onDuplicate={ ( index ) => {
 														const newTicket = { ...tickets[ index ] };
-														newTicket.ticket_id = crypto.getRandomValues(
-															new Uint16Array( 1 )
-														)[ 0 ];
+														newTicket.ticket_id = uuidv4();
 														newTicket.is_new = true;
 														setCurrentTicket( newTicket );
 													} }

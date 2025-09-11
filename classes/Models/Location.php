@@ -19,7 +19,7 @@ use WP_Post;
  * @property int $owner              ID of author/owner, shorthand for location_owner
  * @property int $status             ID of post status, shorthand for location_status
  */
-class Location {
+class Location implements \JsonSerializable {
 
 	var $location_id = 0;
 	var $post_id = 0;
@@ -141,7 +141,7 @@ class Location {
 			$this->post_type = $location_post->post_type;
 	}
 
-	public function get_rest_fields() {
+	public function jsonSerialize() : array {
 		return [ 
 			'id' => $this->post_id, 
 			'address' => $this->location_address,

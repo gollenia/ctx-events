@@ -38,13 +38,18 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'ADD_TICKET':
-			state.request.tickets.push( JSON.parse( JSON.stringify( state.event.tickets_available[ payload ] ) ) );
+			const ticket = {
+				ticket_id: payload,
+				fields: {},
+			};
+
+			state.request.attendees.push( ticket );
 			state.wizard.checkValidity = true;
 			return { ...state };
 
 		case 'SET_FIELD':
-			if ( payload.form === 'ticket' ) {
-				state.request.tickets[ payload.index ].fields[ payload.field ] = payload.value;
+			if ( payload.form === 'attendee' ) {
+				state.request.attendees[ payload.index ].fields[ payload.field ] = payload.value;
 			}
 			if ( payload.form === 'registration' ) {
 				state.request.registration[ payload.field ] = payload.value;
@@ -59,8 +64,8 @@ const reducer = ( state = {}, action ) => {
 			const index =
 				payload.index !== undefined
 					? payload.index
-					: state.request.tickets.findIndex( ( ticket ) => ticket.id === payload.id );
-			state.request.tickets.splice( index, 1 );
+					: state.request.attendees.findIndex( ( ticket ) => ticket.id === payload.id );
+			state.request.attendees.splice( index, 1 );
 			state.wizard.checkValidity = true;
 			return { ...state };
 

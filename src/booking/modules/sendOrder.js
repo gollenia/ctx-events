@@ -1,3 +1,4 @@
+import apiFetch from '@wordpress/api-fetch';
 import { STATES } from './constants';
 
 const sendOrder = ( state, dispatch ) => {
@@ -27,28 +28,16 @@ const sendOrder = ( state, dispatch ) => {
 		...request,
 		_wpnonce: event._nonce,
 		event_id: event.id,
-		attendees: {},
 	};
 
-	for ( const id of Object.keys( event.tickets_available ) ) {
-		fetchRequest[ 'attendees' ][ id ] = [];
-	}
+	console.log( 'Fetch Request', fetchRequest );
 
-	request.tickets.map( ( ticket ) => {
-		fetchRequest.attendees[ ticket.id ].push( ticket.fields );
-	} );
-
-	fetch( `/wp-json/events/v2/booking/${ event.id }`, {
+	apiFetch( {
+		path: `/events/v2/booking/`,
 		method: 'POST',
-		body: JSON.stringify( fetchRequest ),
-		headers: new Headers( {
-			'Content-Type': 'application/json;charset=UTF-8',
-		} ),
-		beforeSend: function ( xhr ) {
-			xhr.setRequestHeader( 'X-WP-Nonce', event._nonce );
-		},
+		data: fetchRequest,
+		signal: signal,
 	} )
-		.then( ( resp ) => resp.json() )
 		.then( ( response ) => {
 			console.log( response );
 			dispatch( { type: 'BOOKING_RESPONSE', payload: { state: STATES.SUCCESS, response } } );

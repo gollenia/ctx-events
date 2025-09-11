@@ -14,42 +14,8 @@ function em_init_actions() {
 	//Event Actions
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,5) == 'event' ){
 		//Load the event object, with saved event if requested
-		if( !empty($_REQUEST['event_id']) ){
-			$event = \Contexis\Events\Models\Event::get_by_id($_REQUEST['event_id']);
-		}else{
-			$event = new \Contexis\Events\Models\Event;
-		}
 		
-		if( $_REQUEST['action'] == 'event_detach' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_detach_'.get_current_user_id().'_'.$event->event_id) ){ 
-			//Detach event and move on
-			if($event->detach()){
-				$EM_Notices->add_confirm( $event->feedback_message, true );
-			}else{
-				$EM_Notices->add_error( $event->errors, true );			
-			}
-			wp_safe_redirect(wp_validate_redirect(wp_get_raw_referer(), false ));
-			exit();
-		}elseif( $_REQUEST['action'] == 'event_attach' && !empty($_REQUEST['undo_id']) && wp_verify_nonce($_REQUEST['_wpnonce'],'event_attach_'.get_current_user_id().'_'.$event->event_id) ){ 
-			//Detach event and move on
-			if( $event->attach( absint($_REQUEST['undo_id']) ) ){
-				$EM_Notices->add_confirm( $event->feedback_message, true );
-			}else{
-				$EM_Notices->add_error( $event->errors, true );
-			}
-			wp_safe_redirect(wp_validate_redirect(wp_get_raw_referer(), false ));
-			exit();
-		}
 		
-		//AJAX Exit
-		if( isset($events_result) && !empty($_REQUEST['em_ajax']) ){
-			if( $events_result ){
-				$return = array('result'=>true, 'message'=>$event->feedback_message);
-			}else{		
-				$return = array('result'=>false, 'message'=>$event->feedback_message, 'errors'=>$event->errors);
-			}
-			echo json_encode($return);
-			exit();
-		}
 	}
 
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,7) == 'booking' && (is_user_logged_in() || ($_REQUEST['action'] == 'booking_add')) ){
@@ -87,7 +53,7 @@ function em_init_actions() {
 			
 		}
 
-		$return = array('result'=>$result, 'message'=>$feedback, 'error'=>$booking->get_errors());
+		
 		
 		//wp_die();
 	}

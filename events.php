@@ -3,7 +3,7 @@
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/events
 Description: Event registration and booking management for WordPress. Recurring events, locations, ical, booking registration and more!
-Version: 6.9.0
+Version: 7.0.0
 Requires at least: 6.8.0
 Requires PHP: 8.4
 License: GPL3
@@ -35,58 +35,63 @@ use Contexis\Events\Admin\{
 	EventAdmin,
 	LocationAdmin,
 	SpeakerAdmin,
-	RecurringEventAdmin
+	RecurringEventAdmin,
+    SidebarMenu
 };
 
 use Contexis\Events\Controllers\BookingController;
 use Contexis\Events\Collections\EventCollection;
+use Contexis\Events\Controllers\CouponController;
 use Contexis\Events\Controllers\EventController;
-use Contexis\Events\Utilities\Plugin;
+use Contexis\Events\Controllers\GatewayController;
+use Contexis\Events\Core\Bootstrap;
+use Contexis\Events\Emails\Mailer;
+use Contexis\Events\Export\BookingExport;
+use Contexis\Events\Forms\UserFields;
+use Contexis\Events\Payment\GatewayCollection;
+use Contexis\Events\Core\Utilities\Plugin;
+
+if(!defined('ABSPATH')) {
+	exit;
+}
+
+require_once( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
+
+register_activation_hook( __FILE__, '\Contexis\Events\Install::activate_plugin' );
+
 
 function em_load_textdomain() {
 	load_plugin_textdomain('events', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); 
 }
 add_action( 'plugin_loaded', 'em_load_textdomain', 10 );
 
-require_once __DIR__ . '/classes/Install.php';
-
-if(!class_exists('IntlDateFormatter')) {
-	add_action( 'admin_init', ['\\Contexis\\Events\\Install', 'deactivate_plugin'] );
-	add_action( 'admin_notices', ['\\Contexis\\Events\\Install', 'intallation_error_notice'] ); 
-	return;
-}
-
-require_once( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
-
-
+Bootstrap::init();
 EventPost::init();
 LocationPost::init();
 SpeakerPost::init();
 FormPost::init();
 CouponPost::init();
-
+GatewayController::init();
+SidebarMenu::init();
 BookingController::init();
+CouponController::init();
 EventController::init();
-
 CouponsAdmin::init();
 
 require_once __DIR__ . '/Assets.php';
-require_once __DIR__ . '/classes/Options.php';
 
-require_once __DIR__ . '/em-actions.php';
-require_once __DIR__ . '/em-ical.php';
 
-require_once __DIR__ . '/classes/Export/BookingExport.php';
+BookingExport::init();
+
 require_once __DIR__ . '/classes/PostTypes/RecurringEventPost.php';
 
-require_once __DIR__ . '/classes/Emails/Mailer.php';
 require_once __DIR__ . '/classes/Notices.php';
 //require_once __DIR__ . '/classes/Permalinks.php';
 
 //Admin Files
 if( is_admin() ){
 	require_once __DIR__ . '/classes/Forms/FormPostAdmin.php';
-	require_once __DIR__ . '/admin/em-admin.php';
+	
 	require_once __DIR__ . '/admin/em-bookings.php';
 	require_once __DIR__ . '/admin/em-docs.php';
 	require_once __DIR__ . '/admin/em-help.php';
@@ -102,11 +107,10 @@ if( is_admin() ){
 
 require_once __DIR__ . '/classes/Export/Export.php';
 
-require_once __DIR__ . '/classes/Forms/Form.php';
 require_once __DIR__ . '/classes/Payment/GatewayService.php';
-require_once __DIR__ . '/classes/Forms/BookingsForm.php';
+require_once __DIR__ . '/classes/Forms/BookingForm.php';
 require_once __DIR__ . '/classes/Emails/Emails.php';
-require_once __DIR__ . '/classes/Forms/UserFields.php';
+
 
 global $wpdb;
 $prefix = $wpdb->prefix;
@@ -116,37 +120,9 @@ define('EM_BOOKINGS_TABLE',$prefix.'em_bookings'); //TABLE NAME
 define('EM_EMAIL_QUEUE_TABLE', $wpdb->prefix.'em_email_queue'); //TABLE NAME
 
 
-
-/**
- * Perform init actions
- */
-function em_init(){
-	//Hard Links
-	global $EM_Mailer;
-	
-	
-	$EM_Mailer = new \EM_Mailer();
-	//Upgrade/Install Routine
-	if( !is_admin() || !current_user_can('manage_options') ) return;
-
-	if (version_compare(Plugin::get_installed_version(), Plugin::get_plugin_version(), '<')) {
-		require_once( dirname(__FILE__).'/em-install.php');
-		em_install();
-	}
-}
-add_filter('init','em_init',1);
-
-/**
- * This function will load an event into the variable during page initialization, provided an event_id is given in the url via GET or POST.
- * global $EM_Recurrences also holds global array of recurrence objects when loaded in this instance for performance
- * All functions (admin and public) can now work off this object rather than it around via arguments.
- * @return null
- */
 function em_load_event(){
-	global $EM_Recurrences, $booking;
+	global $booking;
 	if (defined('EM_LOADED')) return;
-	
-	$EM_Recurrences = array();
 
 	if( isset($_REQUEST['booking_id']) && is_numeric($_REQUEST['booking_id']) ){
 		$booking = Booking::get_by_id( absint($_REQUEST['booking_id']) );
@@ -178,29 +154,7 @@ function em_locate_template( $template_name, $load=false, $the_args = array() ) 
 	return $located;
 }
 
-
-
-register_activation_hook( __FILE__,function() {
-	update_option('dbem_flush_needed',1);
-});
-
-register_deactivation_hook( __FILE__,function() {
-	global $wp_rewrite;
-   	$wp_rewrite->flush_rules();
-});
-
-
-
-register_uninstall_hook(__DIR__ . '/classes/Install.php', '\Contexis\Events\Install::uninstall');
-
-
-//cron functions - ran here since functions aren't loaded, scheduling done by gateways and other modules
-/**
- * Adds a schedule according to EM
- * @param array $shcehules
- * @return array
- */
-function em_cron_schedules($schedules){
+function em_cron_schedules($schedules) {
 	$schedules['em_minute'] = array(
 		'interval' => 60,
 		'display' => 'Every Minute'
@@ -209,11 +163,7 @@ function em_cron_schedules($schedules){
 }
 add_filter('cron_schedules','em_cron_schedules',10,1);
 
-
-
-
-function em_register_blocks()
-{
+function em_register_blocks() : void {
 	
 	$blocks = [
 		'upcoming',

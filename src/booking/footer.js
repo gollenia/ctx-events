@@ -12,9 +12,9 @@ const Footer = ( { state, dispatch } ) => {
 	];
 
 	const TICKETS_MISSING =
-		( TICKETS && request.tickets.length == 0 ) ||
-		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.tickets.length == 0 );
-	const ATTENDEES_MISSING = TICKETS && request.tickets.length > 0 && ! wizard.steps.tickets.valid;
+		( TICKETS && request.attendees.length == 0 ) ||
+		( REGISTRATION && event.forms.attendee_fields.length == 0 && request.attendees.length == 0 );
+	const ATTENDEES_MISSING = TICKETS && request.attendees.length > 0 && ! wizard.steps.tickets.valid;
 	const REGISTRATION_MISSING = REGISTRATION && ! wizard.steps.registration.valid;
 	const PAYMENT_MISSING = PAYMENT && request.gateway == '';
 	const ONLINE_PAYMENT = request.gateway != 'offline';

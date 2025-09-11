@@ -107,7 +107,7 @@ while ( count($events) > 0 ){
 		foreach( $event->get_categories() as $category ){ 
 			$categories[] = $category->name;
 		}
-		$image = $event->get_image_url();
+		$image = $event->get_image('full');
 		
 		//create a UID, make it unique and update independent
 		$UID = $event->event_id . '@' . $site_domain;

@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\PostTypes;
 
-use Contexis\Events\Interfaces\PostType;
+use Contexis\Events\Core\Contracts\PostType;
 
 class SpeakerPost implements PostType {
 
