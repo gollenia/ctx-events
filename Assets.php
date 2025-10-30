@@ -7,6 +7,7 @@ use Contexis\Events\Models\Booking;
 use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\PostTypes\LocationPost;
 use Contexis\Events\Core\Utilities\Plugin;
+use Contexis\Events\Infrastructure\Wordpress\PluginInfo;
 
 class Assets {
 
@@ -26,8 +27,8 @@ class Assets {
 	 */
 	public function frontend_script() {
 
-		$script_asset_path = Plugin::get_plugin_dir() . "/build/frontend.asset.php";
-		$booking_asset_path = Plugin::get_plugin_dir() . "/build/booking.asset.php";
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/frontend.asset.php";
+		$booking_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/booking.asset.php";
 		if ( ! file_exists( $script_asset_path ) || ! file_exists( $booking_asset_path ) ) {
 			return;
 		}
@@ -35,14 +36,14 @@ class Assets {
 		$script_asset = require( $script_asset_path );
 		wp_enqueue_script(
 			'events-block-frontend',
-			plugins_url( '/build/frontend.js', __FILE__ ),
+			plugins_url( '/assets/build/frontend.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
 
 		wp_enqueue_style(
 			'events-frontend-style',
-			plugins_url( '/build/style-frontend.css', __FILE__ ),
+			plugins_url( '/assets/build/style-frontend.css', __FILE__ ),
 			[],
 			$script_asset['version'],
 			'all'
@@ -76,7 +77,7 @@ class Assets {
 	 */
 	public function booking_script() {
 
-		$script_asset_path =Plugin::get_plugin_dir() . "/build/booking.asset.php";
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/booking.asset.php";
 		
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
@@ -84,17 +85,17 @@ class Assets {
 
 		wp_register_script(
 			'booking-view',
-			plugins_url('/build/booking.js', __FILE__),
+			plugins_url('/assets/build/booking.js', __FILE__),
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
 
-		wp_set_script_translations('booking-view', 'events', Plugin::get_plugin_dir()  . '/languages');
+		wp_set_script_translations('booking-view', 'events', PluginInfo::get_plugin_dir()  . '/languages');
 
 		wp_register_style(
 			'booking-style',
-			plugins_url('/build/style-booking.css', __FILE__),
+			plugins_url('/assets/build/style-booking.css', __FILE__),
 			[],
 			$script_asset['version'],
 			'all'
@@ -103,7 +104,7 @@ class Assets {
 		wp_localize_script('booking-view', 'eventBookingLocalization', [
 			"consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'events')),
 			"donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'events')),
-			"currency" => new \Contexis\Events\Intl\Price(0)->get_currency_code(),
+			//"currency" => new \Contexis\Events\Intl\Price(0)->get_currency_code(),
 			"locale" => str_replace('_', '-', get_locale()),
 		]);
 	}
@@ -113,14 +114,14 @@ class Assets {
 	 * Enqueues script for Editor
 	 */
 	public function editor_script() {
-		
-		$script_asset_path = Plugin::get_plugin_dir() . "/build/index.asset.php";
+
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/index.asset.php";
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
 		$script_asset = require( $script_asset_path );
 		wp_enqueue_script(
 			'events-block-editor',
-			plugins_url( '/build/index.js', __FILE__ ),
+			plugins_url( '/assets/build/index.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
@@ -129,7 +130,7 @@ class Assets {
 
 		wp_enqueue_script(
 			'events-gateway-admin',
-			plugins_url( '/build/gateways.js', __FILE__ ),
+			plugins_url( '/assets/build/gateways.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
@@ -139,22 +140,22 @@ class Assets {
 		wp_localize_script('events-block-editor', 'eventBlocksLocalization', [
 			'locale' => str_replace('_', '-',get_locale()),
 			'rest_url' => get_rest_url(null, 'events/v2/events'),
-			'countries' => \Contexis\Events\Intl\Countries::get(),
+			//'countries' => \Contexis\Events\Intl\Countries::get(),
 			'default_country' => get_option('dbem_location_default_country'),
 			'currency' => get_option('dbem_bookings_currency'),
-			'bookings_enabled' => Booking::booking_enabled(),
+			//'bookings_enabled' => Booking::booking_enabled(),
 		]);
 
 		wp_register_style(
 			'events-block-style',
-			plugins_url( '/build/style-index.css', __FILE__ ),
+			plugins_url( '/assets/build/style-index.css', __FILE__ ),
 			array(),
 			$script_asset['version']
 		);
 
 		wp_register_style(
 			'events-block-editor-style',
-			plugins_url( '/build/index.css', __FILE__ ),
+			plugins_url( '/assets/build/index.css', __FILE__ ),
 			array(),
 			$script_asset['version']
 		);
@@ -164,11 +165,11 @@ class Assets {
 	
 	
 	public function admin_enqueue( ){
-		$version = Plugin::get_plugin_version();
-		wp_enqueue_script('events-manager', plugins_url('/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), $version);		
-		wp_enqueue_script('events-admin-script', plugins_url('/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), $version);		
-		wp_enqueue_style('events-admin', plugins_url('/build/admin.css',__FILE__), array('wp-components'), $version);
-		wp_enqueue_style('events-admin-booking', plugins_url('/build/style-admin.css',__FILE__), array(), $version);
+		$version = PluginInfo::get_plugin_version();
+		wp_enqueue_script('events-manager', plugins_url('/assets/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), $version);		
+		wp_enqueue_script('events-admin-script', plugins_url('/assets/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), $version);		
+		wp_enqueue_style('events-admin', plugins_url('/assets/build/admin.css',__FILE__), array('wp-components'), $version);
+		wp_enqueue_style('events-admin-booking', plugins_url('/assets/build/style-admin.css',__FILE__), array(), $version);
 		$this->localize_admin_script();
 		wp_set_script_translations( 'events-admin-script', 'events', plugin_dir_path( __FILE__ ) . '/languages' );
 	}
@@ -187,15 +188,14 @@ class Assets {
 			'is_ssl' => is_ssl(),
 		);
 
-		//booking-specific stuff
-		if( get_option('dbem_rsvp_enabled') ){
-		    $em_localized_js = array_merge($em_localized_js, array(
-				'bookings_export_save' => __('Export Bookings','events'),
-				'bookings_settings_save' => __('Save Settings','events'),
-				'booking_delete' => __("Are you sure you want to delete?",'events'),
-		    	'booking_offset' => 30,
-			));		
-		}
+
+		$em_localized_js = array_merge($em_localized_js, array(
+			'bookings_export_save' => __('Export Bookings','events'),
+			'bookings_settings_save' => __('Save Settings','events'),
+			'booking_delete' => __("Are you sure you want to delete?",'events'),
+			'booking_offset' => 30,
+		));		
+		
 		$em_localized_js['cache'] = defined('WP_CACHE') && WP_CACHE;
 		
 		//logged in messages that visitors shouldn't need to see
@@ -216,7 +216,7 @@ class Assets {
 		    }
 		}
 		//load admin/public only vars
-		if( is_admin() ){
+		/* if( is_admin() ){
 			$em_localized_js['event_post_type'] = EventPost::POST_TYPE;
 			$em_localized_js['location_post_type'] = LocationPost::POST_TYPE;
 			if( !empty($_GET['page']) && $_GET['page'] == 'events-options' ){
@@ -226,7 +226,7 @@ class Assets {
 			$em_localized_js["currency"] = new Price(0)->get_currency_code();
 			$em_localized_js["locale"] = str_replace('_', '-', get_locale());
 		}		
-		
+		 */
 		wp_localize_script('events-manager','EM', apply_filters('em_wp_localize_script', $em_localized_js));
 	}
 
