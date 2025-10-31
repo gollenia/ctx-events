@@ -2,22 +2,23 @@
 
 namespace Contexis\Events\Domain\Collections;
 
+use Contexis\Events\Domain\Models\Event;
 
-final class EventCollection
+final class EventCollection implements \Countable, \IteratorAggregate
 {
 	/** @var Event[] */
-	public array $events = [];
+	private array $events;
 
-	public function add(Event $event): void
-	{
-		$this->events[] = $event;
+
+	public function __construct(Event ...$events) {
+		$this->events = $events;
 	}
 
-	/**
-	 * @return Event[]
-	 */
-	public function all(): array
-	{
-		return $this->events;
+	public function getIterator(): \Traversable {
+		return new \ArrayIterator($this->events);
+	}
+
+	public function count(): int {
+		return count($this->events);
 	}
 }

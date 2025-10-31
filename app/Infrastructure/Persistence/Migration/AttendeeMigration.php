@@ -1,10 +1,10 @@
 <?php
 
-namespace Contexis\Events\Infrastructure\Migration\Migration;
+namespace Contexis\Events\Infrastructure\Persistence\Migration;
 
 final class AttendeeMigration implements Migration {
 
-	private string $table_name = 'attendees';
+	private string $table_name = 'ctx_event_attendees';
 
 	private array $columns = [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
@@ -13,7 +13,8 @@ final class AttendeeMigration implements Migration {
 		'first_name VARCHAR(100) NOT NULL',
 		'last_name VARCHAR(100) NOT NULL',
 		'email VARCHAR(200) NOT NULL',
-		'metadata JSON NULL'
+		'metadata JSON NULL',
+		'PRIMARY KEY  (id)'
 	];
 
 	public function get_columns(): array {

@@ -8,11 +8,10 @@ class Installer {
 
 	
 
-	public static function install(): void
+	public static function init(): void
 	{
-		Migration::run();
-		
-
+		register_activation_hook(__FILE__, [Migration::class, 'migrate']);
+		add_action('plugins_loaded', [Migration::class, 'migrate']); 
 	}
 	
 }

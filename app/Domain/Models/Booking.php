@@ -3,6 +3,12 @@
 namespace Contexis\Events\Domain\Models;
 use Contexis\Events\Domain\ValueObjects\Email;
 use Contexis\Events\Domain\ValueObjects\PriceSummary;
+use Contexis\Events\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Domain\Models\Event;
+use Contexis\Events\Domain\Collections\AttendeeCollection;
+use Contexis\Events\Domain\Collections\TransactionCollection;
+use Contexis\Events\Domain\Collections\RecordCollection;
+use Contexis\Events\Domain\Models\Coupon;
 
 final class Booking {
 	public function __construct(
@@ -13,7 +19,7 @@ final class Booking {
 		public readonly \DateTimeImmutable $created_at,
 		public readonly BookingStatus $status,
 		public readonly ?array $registration,
-		public readonly ?array $attendees,
+		public readonly AttendeeCollection $attendees,
 		public readonly ?string $gateway,
 		public readonly ?Coupon $coupon,
 		public readonly ?TransactionCollection $transactions,

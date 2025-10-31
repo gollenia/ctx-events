@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Infrastructure\Migration\Migration;
+namespace Contexis\Events\Infrastructure\Persistence\Migration;
 
 final class BookingMigration implements Migration {
 
@@ -21,7 +21,8 @@ final class BookingMigration implements Migration {
 		'gateway VARCHAR(50) NULL',
 		'notes JSON NULL',
 		'log JSON NULL',
-		'transactions JSON NULL'
+		'transactions JSON NULL',
+		'PRIMARY KEY  (id)'
 	];
 
 	public function get_columns(): array {

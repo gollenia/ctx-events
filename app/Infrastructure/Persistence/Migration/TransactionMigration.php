@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Infrastructure\Migration\Migration;
+namespace Contexis\Events\Infrastructure\Persistence\Migration;
 
 final class TransactionMigration implements Migration {
 
@@ -17,7 +17,8 @@ final class TransactionMigration implements Migration {
 		'transaction_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
 		'expires_at TIMESTAMP NULL',
 		'created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
-		'details JSON NULL'
+		'details JSON NULL',
+		'PRIMARY KEY  (id)'
 	];
 
 	public function get_columns(): array {

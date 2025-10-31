@@ -2,15 +2,32 @@
 
 namespace Contexis\Events\Infrastructure\Wordpress;
 
-use Contexis\Events\Infrastructure\Persistence\Migration\BookingMigration;
+use Contexis\Events\Infrastructure\Persistence\Migration\ {
+	BookingMigration,
+	TransactionMigration,
+	AttendeeMigration
+};
 
-class Migration {
+final class Migration {
+
+	const VERSION = '1.0.2';
 
 	private const MIGRATIONS = [
 		BookingMigration::class,
+		TransactionMigration::class,
+		AttendeeMigration::class
 	];
 
-	public static function run(): void
+	public static function migrate(): void
+	{
+		$current = get_option('ctx_events_db_version', '0');
+		if (version_compare($current, self::VERSION, '<')) {
+			self::run();
+			update_option('ctx_events_db_version', self::VERSION, false);
+		}
+	}
+
+	private static function run(): void
     {
         global $wpdb;
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -24,38 +41,11 @@ class Migration {
             $table = $migration->get_table_name();
             $cols  = $migration->get_columns_as_string();
 
-            $sql = "CREATE TABLE {$table} (
- 				 {$cols},
-  				 PRIMARY KEY  (id)
+            $sql = "CREATE TABLE `{$table}` (
+ 				 {$cols}
 			) {$charset};";
 
             dbDelta($sql);
-
         }
     }
-
-	public static function update(): void
-	{
-		global $wpdb;
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		$charset = $wpdb->get_charset_collate();
-
-		foreach (self::MIGRATIONS as $class) {
-
-			$migration = new $class();
-
-			$table = $migration->get_table_name();
-			$cols  = $migration->get_columns_as_string();
-
-			$sql = "UPDATE TABLE {$table} (
- 				 {$cols},
-  				 PRIMARY KEY  (id)
-			) {$charset};";
-
-			dbDelta($sql);
-
-		}
-		
-	}
 }
