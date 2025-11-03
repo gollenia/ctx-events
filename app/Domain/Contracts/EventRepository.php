@@ -7,8 +7,9 @@ use Contexis\Events\Domain\Models\Event;
 
 interface EventRepository
 {
-	public function find_by_id(int $id): ?Event;
-	public function find_by_criteria(EventCriteria $criteria): EventCollection;
+	public function find(int $id): void;
+	public function where(EventCriteria $criteria): void;
+	public function first(): ?Event;
+	public function get(): EventCollection;
 	public function count_by_criteria(EventCriteria $criteria): int;
-	public function get_capacity(int $event_id): int;
 }

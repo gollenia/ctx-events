@@ -6,26 +6,15 @@ use Contexis\Events\Domain\Models\Ticket;
 use IteratorAggregate;
 use Countable;
 
-final class TicketCollection implements IteratorAggregate, Countable {
-
-	/** @var Ticket[] */
-    private array $tickets;
+final class TicketCollection extends AbstractTypedCollection implements IteratorAggregate, Countable {
 
 	public function __construct(Ticket ...$tickets) {
-		$this->tickets = $tickets;
-	}
-
-	public function getIterator(): \Traversable {
-		return new \ArrayIterator($this->tickets);
-	}
-
-	public function count(): int {
-		return count($this->tickets);
+		$this->items = $tickets;
 	}
 
 	public function get_lowest_price(): ?int {
 		$lowest_price = null;
-		foreach ($this->tickets as $ticket) {
+		foreach ($this->items as $ticket) {
 			$price = $ticket->price->amount_cents;
 			$lowest_price = $lowest_price === null ? $price : min($lowest_price, $price);
 		}
@@ -34,7 +23,7 @@ final class TicketCollection implements IteratorAggregate, Countable {
 
 
 	public function get_valid_tickets(): self {
-		$valid_tickets = array_filter($this->tickets, function (Ticket $ticket) {
+		$valid_tickets = array_filter($this->items, function (Ticket $ticket) {
 			return $ticket->enabled === true;
 		});
 		return new self(...$valid_tickets);

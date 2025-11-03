@@ -8,39 +8,32 @@ use Contexis\Events\Domain\Models\Event;
 use Contexis\Events\Domain\Repositories\EventRepository;
 use Contexis\Events\Infrastructure\PostTypes\EventPost;
 use Contexis\Events\Infrastructure\Persistence\Mappers\EventMapper;
+use WP_Post;
 
-class WpEventRepository implements EventRepository {
+class WpEventRepository extends WpAbstractRepository implements EventRepository  {
 
 	protected const POST_TYPE_CLASS = \Contexis\Events\Infrastructure\PostTypes\EventPost::class;
-	protected const MODEL_CLASS = \Contexis\Events\Domain\Models\Event::class;
-	protected const COLLECTION_CLASS = \Contexis\Events\Domain\Collections\EventCollection::class;
-
-	public function query(array $args = []) : EventCollection { 
+	
+	public function where(array $args = []): void { 
 		$queryArgs = self::get_query_args($args);
-
-		$query = new WP_Query($queryArgs);
-
-		$events = array_map(function($post) {
-			return EventMapper::map($post);
-		}, $query->posts);
-
-		return new EventCollection(...$events);
+		$this->wp_query = new WP_Query($queryArgs);
 	}
 
-	public function by_id(int $id): ?Event {
-		$post = get_post($id, ARRAY_A);
-		if (!$post || $post['post_type'] !== EventPost::POST_TYPE) {
+	public function get() : EventCollection {
+		$posts = $this->wp_query->posts;
+		$events = new EventCollection();
+		foreach ($posts as $key => $post) {
+			$events->add(EventMapper::map($this->post_to_array($post, true)));
+		}
+		return $events;
+	}
+
+	public function find(int $id) : ?Event {
+		$post = get_post($id);
+		if(!$post) {
 			return null;
 		}
-
-		$meta = get_post_meta($post['ID']);
-		$post['meta'] = $meta;
-		
-		return EventMapper::map($post);
-	}
-
-	public function find(array $args = []) : EventCollection {
-		return $this->query(null, $args);
+		return EventMapper::map($this->post_to_array($post, true));
 	}
 
 	public function get_query_args($args) { 

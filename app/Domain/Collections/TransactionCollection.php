@@ -4,20 +4,10 @@ namespace Contexis\Events\Domain\Collections;
 
 use Contexis\Events\Domain\Models\Transaction;
 
-final class TransactionCollection implements \Countable, \IteratorAggregate {
-
-	/** @var Transaction[] */
-	private array $transactions = [];
+final class TransactionCollection extends AbstractTypedCollection {
 
 	public function __construct(Transaction ...$transactions) {
-		$this->transactions = $transactions;
+		$this->items = $transactions;
 	}
 
-	public function getIterator(): \Traversable {
-		return new \ArrayIterator($this->transactions);
-	}
-
-	public function count(): int {
-		return count($this->transactions);
-	}
 }

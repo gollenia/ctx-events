@@ -1,8 +1,8 @@
 <?php
 
-namespace Contexis\Events\Domain\Models;
+namespace Contexis\Events\Domain\ValueObjects;
 
-final class Record {
+final class LogEntry {
 
 	public function __construct(
 		public string $text,
