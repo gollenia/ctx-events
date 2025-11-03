@@ -2,5 +2,9 @@
 	"files.exclude": {
 		"node_modules": true,
 		"vendor": true
+	},
+	"material-icon-theme.folders.associations": {
+		"customFolderName": "app",
+		"sample": "dist"
 	}
 }
