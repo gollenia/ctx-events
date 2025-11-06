@@ -26,10 +26,10 @@ final class EventCriteria implements Criteria
     public string $order = 'DESC';
 
     public int $limit = 20;
-    public int $page = 1;     
-    public ?int $offset = null; 
+    public int $page = 1;
+    public ?int $offset = null;
     public bool $withLocation = false;
     public bool $withOrganizer = false;
     public bool $withTags = false;
-    public bool $withMeta = true; 
+    public bool $withMeta = true;
 }
