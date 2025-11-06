@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\Domain\ValueObjects;
 
-final class Attachment implements \JsonSerializable
+final class Image implements \JsonSerializable
 {
     public function __construct(
         public readonly ?string $url,
@@ -16,12 +16,7 @@ final class Attachment implements \JsonSerializable
 
     public function url(string $size = 'original'): string
     {
-        return match ($size) {
-            'thumbnail' => $this->sizes->thumbnail,
-            'medium'    => $this->sizes->medium ?? $this->url,
-            'large'     => $this->sizes->large ?? $this->url,
-            default     => $this->url,
-        };
+        return $this->sizes?->getSize($size)?->getUrl() ?? $this->url ?? '';
     }
 
     public function jsonSerialize(): array
@@ -32,7 +27,7 @@ final class Attachment implements \JsonSerializable
             'width' => $this->width,
             'height' => $this->height,
             'mimetype' => $this->mimeType,
-            'sizes' => $this->sizes?->toArray(),
+            'sizes' => $this->sizes
         ];
     }
 }

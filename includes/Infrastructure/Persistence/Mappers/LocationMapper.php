@@ -4,7 +4,7 @@ namespace Contexis\Events\Infrastructure\Persistence\Mappers;
 
 use Contexis\Events\Domain\Models\Location;
 use Contexis\Events\Domain\ValueObjects\Address;
-use Contexis\Events\Domain\ValueObjects\Id\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\ImageId;
 use Contexis\Events\Domain\ValueObjects\GeoCoordinates;
 use Contexis\Events\Domain\ValueObjects\Id\LocationId;
 use Contexis\Events\Infrastructure\PostTypes\PostSnapshot;
@@ -27,7 +27,7 @@ class LocationMapper
             geo: $snapshot->getMetaValue('lat') && $snapshot->getMetaValue('lng')
                 ? new GeoCoordinates($snapshot->getMetaValue('lat'), $snapshot->getMetaValue('lng'))
                 : null,
-            attachment_id: AttachmentId::from($snapshot->getThumbnailId()),
+            attachment_id: ImageId::from($snapshot->getThumbnailId()),
             external_url: $snapshot->getMetaValue('external_url')
         );
     }

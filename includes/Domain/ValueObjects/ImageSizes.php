@@ -2,23 +2,24 @@
 
 namespace Contexis\Events\Domain\ValueObjects;
 
-final readonly class ImageSizes
+final readonly class ImageSizes implements \JsonSerializable
 {
+    // @var array<string, ImageSize>
+    private array $sizes;
+
     public function __construct(
-        public ?string $thumbnail,
-        public ?string $medium,
-        public ?string $large,
-        public ?string $original
+        array $sizes = []
     ) {
+        $this->sizes = $sizes;
     }
 
-    public function toArray(): array
+    public function getSize(string $key): ?ImageSize
     {
-        return [
-            'thumbnail' => $this->thumbnail,
-            'medium'    => $this->medium,
-            'large'     => $this->large,
-            'original'  => $this->original,
-        ];
+        return $this->sizes[$key] ?? null;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->sizes;
     }
 }

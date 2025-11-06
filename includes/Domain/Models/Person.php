@@ -4,7 +4,7 @@ namespace Contexis\Events\Domain\Models;
 
 use Contexis\Events\Domain\ValueObjects\Id\PersonId;
 use Contexis\Events\Domain\ValueObjects\Email;
-use Contexis\Events\Domain\ValueObjects\Id\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\ImageId;
 use Contexis\Events\Domain\ValueObjects\Media;
 
 final class Person
@@ -20,7 +20,7 @@ final class Person
         public readonly ?string $website,
         public readonly ?string $jobTitle,
         public readonly ?string $worksFor,
-        public readonly AttachmentId $attachment_id
+        public readonly ImageId $attachment_id
     ) {
     }
 }

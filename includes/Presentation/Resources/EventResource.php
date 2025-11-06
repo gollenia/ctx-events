@@ -46,7 +46,7 @@ class EventResource implements JsonSerializable
         }
 
         if ($this->event->includes && $this->event->includes->image) {
-            $includes['image'] = new AttachmentResource($this->event->includes->image);
+            $includes['image'] = new ImageResource($this->event->includes->image);
         }
 
         if (!empty($includes)) {

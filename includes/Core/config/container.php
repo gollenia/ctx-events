@@ -24,6 +24,6 @@ return [
         => autowire(\Contexis\Events\Infrastructure\Persistence\WpLocationRepository::class),
     \Contexis\Events\Domain\Repositories\PersonRepository::class
         => autowire(\Contexis\Events\Infrastructure\Persistence\WpPersonRepository::class),
-    \Contexis\Events\Domain\Repositories\AttachmentRepository::class
-        => autowire(\Contexis\Events\Infrastructure\Persistence\WpAttachmentRepository::class),
+    \Contexis\Events\Domain\Repositories\ImageRepository::class
+        => autowire(\Contexis\Events\Infrastructure\Persistence\WpImageRepository::class),
 ];

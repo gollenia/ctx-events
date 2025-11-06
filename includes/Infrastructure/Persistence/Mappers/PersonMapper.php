@@ -4,7 +4,7 @@ namespace Contexis\Events\Infrastructure\Persistence\Mappers;
 
 use Contexis\Events\Domain\ValueObjects\Email;
 use Contexis\Events\Domain\Models\Person;
-use Contexis\Events\Domain\ValueObjects\Id\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\ImageId;
 use Contexis\Events\Infrastructure\PostTypes\PostSnapshot;
 
 final readonly class PersonMapper
@@ -22,7 +22,7 @@ final readonly class PersonMapper
             website: $snapshot->getMetaValue('website'),
             jobTitle: $snapshot->getMetaValue('job_title'),
             worksFor: $snapshot->getMetaValue('works_for'),
-            attachment_id: AttachmentId::from($snapshot->getThumbnailId())
+            attachment_id: ImageId::from($snapshot->getThumbnailId())
         );
     }
 }

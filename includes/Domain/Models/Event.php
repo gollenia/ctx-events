@@ -15,7 +15,7 @@ use WP_User;
 use Contexis\Events\Core\Contracts\Model;
 use Contexis\Events\Repositories\BookingRepository;
 use Contexis\Events\Core\Utilities\Image;
-use Contexis\Events\Domain\ValueObjects\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\ImageId;
 use Contexis\Events\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Domain\ValueObjects\Id\EventId;
 use Contexis\Events\Domain\ValueObjects\EventSchedule;
@@ -45,7 +45,7 @@ final class Event
         public readonly BookingPolicy $booking_policy,
         public readonly AuthorId $author_id,
         public readonly ?LocationId $location_id,
-        public readonly ?AttachmentId $attachment_id,
+        public readonly ?ImageId $attachment_id,
         public readonly ?RecurrenceId $recurrence_id
     ) {
     }

@@ -2,6 +2,6 @@
 
 namespace Contexis\Events\Domain\ValueObjects\Id;
 
-final class AttachmentId extends AbstractId
+final class ImageId extends AbstractId
 {
 }

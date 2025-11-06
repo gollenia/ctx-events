@@ -4,7 +4,7 @@ namespace Contexis\Events\Application\DTO;
 
 use Contexis\Events\Domain\ValueObjects\ImageSizes;
 
-final class Attachment
+final class Image
 {
     public function __construct(
         public readonly ?string $url,
@@ -16,7 +16,7 @@ final class Attachment
     ) {
     }
 
-    public static function fromDomainModel(\Contexis\Events\Domain\ValueObjects\Attachment $media): self
+    public static function fromDomainModel(\Contexis\Events\Domain\ValueObjects\Image $media): self
     {
         return new self(
             url: $media->url,
@@ -24,12 +24,7 @@ final class Attachment
             width: $media->width,
             height: $media->height,
             mimeType: $media->mimeType,
-            sizes: $media->sizes ? new ImageSizes(
-                thumbnail: $media->sizes->thumbnail,
-                medium: $media->sizes->medium,
-                large: $media->sizes->large,
-                original: $media->sizes->original
-            ) : new ImageSizes(null, null, null, null)
+            sizes: $media->sizes
         );
     }
 }

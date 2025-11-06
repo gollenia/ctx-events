@@ -3,7 +3,7 @@
 namespace Contexis\Events\Application\DTO;
 
 use Contexis\Events\Domain\ValueObjects\Address;
-use Contexis\Events\Domain\ValueObjects\Attachment;
+use Contexis\Events\Domain\ValueObjects\Image;
 use Contexis\Events\Domain\ValueObjects\GeoCoordinates;
 
 class Location
@@ -13,7 +13,7 @@ class Location
         public readonly string $name,
         public readonly Address $address,
         public readonly ?GeoCoordinates $geo,
-        public readonly ?Attachment $logo,
+        public readonly ?Image $logo,
         public readonly ?string $external_url
     ) {
     }

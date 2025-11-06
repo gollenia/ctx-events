@@ -14,6 +14,11 @@ abstract class WpAbstractRepository
     protected ?QueryOptions $options = null;
     protected ?WP_Query $last_wp_query = null;
 
+    public function getPostType(): string
+    {
+        return static::POST_TYPE_CLASS::POST_TYPE;
+    }
+
     private function reset(): void
     {
         $this->options = null;
@@ -58,6 +63,10 @@ abstract class WpAbstractRepository
         }
         $post = get_post($id->toInt());
         if (!$post) {
+            return null;
+        }
+
+        if ($post->post_type !== $this->getPostType()) {
             return null;
         }
         return new PostSnapshot($post);

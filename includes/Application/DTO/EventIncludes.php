@@ -8,7 +8,7 @@ class EventIncludes
 {
     public function __construct(
         public readonly ?DTO\Location $location = null,
-        public readonly ?DTO\Attachment $image = null
+        public readonly ?DTO\Image $image = null
     ) {
     }
 }

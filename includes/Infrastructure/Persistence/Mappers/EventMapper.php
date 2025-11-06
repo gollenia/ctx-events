@@ -10,7 +10,7 @@ use Contexis\Events\Domain\ValueObjects\EventStatus;
 use Contexis\Events\Domain\ValueObjects\Id\AuthorId;
 use Contexis\Events\Domain\ValueObjects\Id\EventId;
 use Contexis\Events\Domain\ValueObjects\Id\LocationId;
-use Contexis\Events\Domain\ValueObjects\Id\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\ImageId;
 use Contexis\Events\Domain\ValueObjects\Id\RecurrenceId;
 use Contexis\Events\Infrastructure\PostTypes\PostSnapshot;
 use DateTimeImmutable;
@@ -44,7 +44,7 @@ final class EventMapper
             endDate: new \DateTimeImmutable($post->getMetaValue('_event_end'), $timezone),
             createdAt: new \DateTimeImmutable($post->post_date),
             location_id: LocationId::from($post->getMetaValue('_location_id')),
-            attachment_id: AttachmentId::from($post->getMetaValue('_image_id')),
+            attachment_id: ImageId::from($post->getMetaValue('_thumbnail_id')),
             recurrence_id: RecurrenceId::from($post->getMetaValue('_recurrence_id')),
         );
 

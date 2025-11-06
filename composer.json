@@ -19,6 +19,9 @@
 			"role": "Manager"
 		}
 	],
+	"scripts": {
+		"test": "pest"
+	},
 	"config": {
 		"platform": {
 			"php": "8.4"
@@ -44,6 +47,11 @@
 	"autoload": {
 		"psr-4": {
 			"Contexis\\Events\\": "includes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
 		}
 	},
 	"require-dev": {
