@@ -2,20 +2,50 @@
 
 namespace Contexis\Events\Domain\ValueObjects;
 
-final class Address {
-	public function __construct(
-		public readonly ?string $street,
-		public readonly ?string $city,
-		public readonly ?string $region,
-		public readonly ?string $postal_code,
-		public readonly ?string $country_code
-	) {}
+final class Address implements \JsonSerializable
+{
+    public function __construct(
+        public readonly ?string $streetAddress,
+        public readonly ?string $addressLocality,
+        public readonly ?string $extendedAddress,
+        public readonly ?string $addressRegion,
+        public readonly ?string $postalCode,
+        public readonly ?string $addressCountry
+    ) {
+    }
 
-	public function is_empty(): bool {
-		return empty($this->street)
-			&& empty($this->city)
-			&& empty($this->region)
-			&& empty($this->postal_code)
-			&& empty($this->country_code);
-	}
-}	
+    public static function createOrNot(
+        ?string $streetAddress,
+        ?string $extendedAddress,
+        ?string $addressLocality,
+        ?string $addressRegion,
+        ?string $postalCode,
+        ?string $addressCountry
+    ): ?self {
+        $address = new self(
+            streetAddress: $streetAddress,
+            extendedAddress: $extendedAddress,
+            addressLocality: $addressLocality,
+            addressRegion: $addressRegion,
+            postalCode: $postalCode,
+            addressCountry: $addressCountry
+        );
+
+        return $address->isEmpty() ? null : $address;
+    }
+
+    public function isEmpty(): bool
+    {
+        return empty($this->streetAddress)
+        && empty($this->extendedAddress)
+        && empty($this->addressLocality)
+        && empty($this->addressRegion)
+        && empty($this->postalCode)
+        && empty($this->addressCountry);
+    }
+
+    public function jsonSerialize(): array
+    {
+        return get_object_vars($this);
+    }
+}

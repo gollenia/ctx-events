@@ -1,7 +1,6 @@
 <?php
 
-namespace Contexis\Events\Presentation\REST;
-
+namespace Contexis\Events\Presentation\Controllers;
 use Contexis\Events\Application\Services\GetEventSpaces;
 
 final class EventExtrasField implements RestAdapter

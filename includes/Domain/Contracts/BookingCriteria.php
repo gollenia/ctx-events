@@ -1,9 +1,10 @@
 <?php
 
-
 namespace Contexis\Events\Domain\Contracts;
 
-final class BookingCriteria
+use Contexis\Events\Core\Contracts\Criteria;
+
+final class BookingCriteria implements Criteria
 {
     public ?int $event_id = null;
     public ?int $coupon_id = null;

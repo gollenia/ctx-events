@@ -4,15 +4,26 @@ use function DI\autowire;
 use function DI\create;
 use function DI\get;
 
-use Contexis\Events\Domain\Repositories\EventRepository;
-use Contexis\Events\Presentation\REST\EventController;
-use Contexis\Events\Presentation\REST\RestRegistrar;
-
 return [
-    EventController::class => autowire(EventController::class),
+    \Contexis\Events\Presentation\Controllers\EventController::class => autowire(),
 
-    RestRegistrar::class   => create(RestRegistrar::class)
-        ->constructor(get(EventController::class)),
+    \Contexis\Events\Infrastructure\PostTypes\PostTypeRegistrar::class => create()
+        ->constructor([
+            \Contexis\Events\Infrastructure\PostTypes\EventPost::class,
+            \Contexis\Events\Infrastructure\PostTypes\LocationPost::class
+        ]),
 
-	EventRepository::class => autowire(\Contexis\Events\Infrastructure\Persistence\WpEventRepository::class)
+    \Contexis\Events\Presentation\Controllers\RestRegistrar::class   => create()
+        ->constructor(
+            get(\Contexis\Events\Presentation\Controllers\EventController::class)
+        ),
+
+    \Contexis\Events\Domain\Repositories\EventRepository::class
+        => autowire(\Contexis\Events\Infrastructure\Persistence\WpEventRepository::class),
+    \Contexis\Events\Domain\Repositories\LocationRepository::class
+        => autowire(\Contexis\Events\Infrastructure\Persistence\WpLocationRepository::class),
+    \Contexis\Events\Domain\Repositories\PersonRepository::class
+        => autowire(\Contexis\Events\Infrastructure\Persistence\WpPersonRepository::class),
+    \Contexis\Events\Domain\Repositories\AttachmentRepository::class
+        => autowire(\Contexis\Events\Infrastructure\Persistence\WpAttachmentRepository::class),
 ];

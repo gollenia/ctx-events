@@ -2,7 +2,7 @@
 
 namespace Contexis\Events\Domain\Models;
 
-use \Contexis\Events\PostTypes\EventPost;
+use Contexis\Events\PostTypes\EventPost;
 use Contexis\Events\Intl\Price;
 use DateTime;
 use Contexis\Events\Domain\Collections\BookingCollection;
@@ -15,49 +15,58 @@ use WP_User;
 use Contexis\Events\Core\Contracts\Model;
 use Contexis\Events\Repositories\BookingRepository;
 use Contexis\Events\Core\Utilities\Image;
+use Contexis\Events\Domain\ValueObjects\AttachmentId;
 use Contexis\Events\Domain\ValueObjects\BookingPolicy;
+use Contexis\Events\Domain\ValueObjects\Id\EventId;
 use Contexis\Events\Domain\ValueObjects\EventSchedule;
 use Contexis\Events\Domain\ValueObjects\Term;
 use Contexis\Events\Domain\ValueObjects\TermCollection;
 use Contexis\Events\Domain\ValueObjects\EventStatus;
+use Contexis\Events\Domain\ValueObjects\Id\AuthorId;
+use Contexis\Events\Domain\ValueObjects\Id\LocationId;
+use Contexis\Events\Domain\ValueObjects\Id\RecurrenceId;
 use Contexis\Events\Intl\Date;
 use Contexis\Events\Models\Booking;
 use DateTimeImmutable;
 use JsonSerializable;
 use Mpdf\Tag\B;
 
-final class Event { 
+final class Event
+{
+    public function __construct(
+        public readonly EventId $id,
+        public readonly string $name,
+        public readonly ?string $description,
+        public readonly ?string $audience,
+        public readonly EventStatus $eventStatus,
+        public readonly DateTimeImmutable $startDate,
+        public readonly DateTimeImmutable $endDate,
+        public readonly DateTimeImmutable $createdAt,
+        public readonly BookingPolicy $booking_policy,
+        public readonly AuthorId $author_id,
+        public readonly ?LocationId $location_id,
+        public readonly ?AttachmentId $attachment_id,
+        public readonly ?RecurrenceId $recurrence_id
+    ) {
+    }
 
-	public function __construct(
-		public int $id,
-		public string $title,
-		public string $description,
-		public int $author,
-		public EventStatus $status,
-		public DateTimeImmutable $created_at,
-		public EventSchedule $schedule,
-		public BookingPolicy $booking_policy,
-		public TicketCollection $tickets,
-		public ?int $person_id,
-		public ?int $location_id,
-	) {}
-	
-	public function start(): DateTimeImmutable {
-		return $this->schedule->start;
-	}
+    public function start(): DateTimeImmutable
+    {
+        return $this->startDate;
+    }
 
-	public function end(): DateTimeImmutable {
-		return $this->schedule->end;
-	}
+    public function end(): DateTimeImmutable
+    {
+        return $this->endDate;
+    }
 
-	function is_public(){
-		return $this->status->is_public();
-	}
+    public function duration(): \DateInterval
+    {
+        return $this->startDate->diff($this->endDate);
+    }
 
-	function get_title(): string {
-		return $this->title;
-	}
-
-	
-
+    public function isPublic()
+    {
+        return $this->eventStatus->isPublic();
+    }
 }

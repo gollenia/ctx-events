@@ -2,37 +2,57 @@
 
 namespace Contexis\Events\Presentation\Resources;
 
-use Contexis\Events\Application\DTO\EventDto;
+use Contexis\Events\Application\DTO as DTO;
+use Contexis\Events\Presentation\Services\Links;
 use JsonSerializable;
 
-class EventResource implements JsonSerializable {
-	public function __construct(
-		public readonly EventDto $event,
-	) {}
+class EventResource implements JsonSerializable
+{
+    public function __construct(
+        public readonly DTO\Event $event,
+    ) {
+    }
 
-	public function jsonSerialize(): array {
-		return [
-			'id' => $this->event->id,
-			'title' => $this->event->title,
-			'author' => $this->event->author,
-			'description' => $this->event->description,
-			'status' => $this->event->status->value,
-			'schedule' => [
-				'start' => $this->event->schedule->start->format('c'),
-				'end' => $this->event->schedule->end?->format('c')
-			],
-			'tickets' => $this->event->tickets ? $this->event->tickets : null,
-			'location' => $this->event->location ? [
-				'id' => $this->event->location->id,
-				'title' => $this->event->location->title
-			] : null,
-			'image' => $this->event->image ? [
-				'id' => $this->event->image->id,
-				'thumb_url' => $this->event->image->thumb_url,
-				'medium_url' => $this->event->image->medium_url,
-				'full_url' => $this->event->image->full_url,
-				'alt_text' => $this->event->image->alt_text,
-			] : null,
-		];
-	}
+    private function getJsonLd(): array
+    {
+        $jsonLd = [
+            "@context" => "https://schema.org/Event",
+            "@type" => "Event",
+            "@id" => Links::iri('event', $this->event->id)
+        ];
+
+        return $jsonLd;
+    }
+
+    public function jsonSerialize(): array
+    {
+        $result = [
+            ...$this->getJsonLd(),
+            'id' => $this->event->id,
+            'link' => Links::friendly($this->event->id),
+            'name' => $this->event->name,
+            'description' => $this->event->description,
+            'status' => $this->event->eventStatus->value,
+            'startDate' => $this->event->startDate->format('c'),
+            'endDate' => $this->event->endDate?->format('c'),
+            'bookingPolicy' => $this->event->bookingPolicy,
+            'audience' => $this->event->audience
+        ];
+
+        $includes = [];
+
+        if ($this->event->includes && $this->event->includes->location) {
+            $includes['location'] = new LocationResource($this->event->includes->location);
+        }
+
+        if ($this->event->includes && $this->event->includes->image) {
+            $includes['image'] = new AttachmentResource($this->event->includes->image);
+        }
+
+        if (!empty($includes)) {
+            $result['includes'] = $includes;
+        }
+
+        return $result;
+    }
 }

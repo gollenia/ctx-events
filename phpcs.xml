@@ -1,12 +1,29 @@
-<rule ref="Generic.PHP.ForbiddenGlobalVariables">
+<?xml version="1.0"?>
+<ruleset name="Contexis Events Ruleset">
+  <description>Custom PHPCS rules for the Contexis Events plugin</description>
+
+  <!-- Verzeichnisse, die geprüft werden sollen -->
+  <file>includes</file>
+  <exclude-pattern>vendor/*</exclude-pattern>
+  <exclude-pattern>node_modules/*</exclude-pattern>
+
+  <!-- 1. Ein Basestandard, damit PHPCS überhaupt was hat -->
+  <rule ref="PSR12" />
+
+  <!-- 2. Eigene Regeln -->
+  <rule ref="Generic.PHP.ForbiddenFunctions">
     <properties>
-        <property name="forbiddenGlobals" value="_REQUEST"/>
-		<property name="forbiddenGlobals" value="_GET"/>
-		<property name="forbiddenGlobals" value="_POST"/>
-		<property name="forbiddenGlobals" value="_COOKIE"/>
-		<property name="forbiddenGlobals" value="_SERVER"/>
-		<property name="forbiddenGlobals" value="_FILES"/>
-		<property name="forbiddenGlobals" value="_ENV"/>
-		<property name="forbiddenGlobals" value="_SESSION"/>
+      <property name="forbiddenFunctions" type="array">
+        <element key="var_dump" value="Use a logger instead."/>
+        <element key="print_r" value="Use a logger instead."/>
+      </property>
     </properties>
-</rule>
+  </rule>
+
+  <rule ref="Generic.Files.LineLength">
+    <properties>
+      <property name="lineLimit" value="140"/>
+      <property name="absoluteLineLimit" value="180"/>
+    </properties>
+  </rule>
+</ruleset>

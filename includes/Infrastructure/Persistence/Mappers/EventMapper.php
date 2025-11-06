@@ -7,53 +7,47 @@ use Contexis\Events\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Domain\ValueObjects\EventSchedule;
 use Contexis\Events\Domain\Collections\TicketCollection;
 use Contexis\Events\Domain\ValueObjects\EventStatus;
+use Contexis\Events\Domain\ValueObjects\Id\AuthorId;
+use Contexis\Events\Domain\ValueObjects\Id\EventId;
+use Contexis\Events\Domain\ValueObjects\Id\LocationId;
+use Contexis\Events\Domain\ValueObjects\Id\AttachmentId;
+use Contexis\Events\Domain\ValueObjects\Id\RecurrenceId;
+use Contexis\Events\Infrastructure\PostTypes\PostSnapshot;
 use DateTimeImmutable;
 
-final class EventMapper {
+final class EventMapper
+{
+    public static function map(PostSnapshot $post): Event
+    {
 
-	public static function map(array $post): Event {
+        $timezone = $post->getMetaValue('_timezone') ?? wp_timezone();
 
-		$timezone = isset($post['meta']['_timezone'][0]) && $post['meta']['_timezone'][0] !== ''
-            ? new \DateTimeZone($post['meta']['_timezone'][0])
-            : wp_timezone();
-		
-		$schedule = new EventSchedule(
-			start: new DateTimeImmutable($post['meta']['_event_start'][0], $timezone) ?? null,
-			end: new DateTimeImmutable($post['meta']['_event_end'][0], $timezone) ?? null,
-			all_day: $post['meta']['_event_all_day'][0] ?? false,
-			timezone: $timezone
-		);
+        $booking_policy = BookingPolicy::create_from_values(
+            enabled: (bool)$post->getMetaValue('_booking_enabled'),
+            start: !empty($post->getMetaValue('_booking_start'))
+            ? new DateTimeImmutable($post->getMetaValue('_booking_start'), $timezone)
+            : null,
+            end: !empty($post->getMetaValue('_booking_end')) ? new DateTimeImmutable($post->getMetaValue('_booking_end'), $timezone) : null,
+            event_created_at: new DateTimeImmutable($post->post_date, $timezone) ?? null,
+            event_start: new DateTimeImmutable($post->getMetaValue('_event_start'), $timezone) ?? null,
+        );
 
-		$booking_policy = BookingPolicy::create_from_values(
-			enabled: (isset($post['meta']['_booking_enabled'][0]) ? (bool)$post['meta']['_booking_enabled'][0] : false),
-			start: !empty($post['meta']['_booking_start'][0]) ? new DateTimeImmutable($post['meta']['_booking_start'][0], $timezone) : null,
-			end: !empty($post['meta']['_booking_end'][0]) ? new DateTimeImmutable($post['meta']['_booking_end'][0], $timezone) : null,
-			event_created_at: new DateTimeImmutable($post['post_date'], $timezone) ?? null,
-			event_start: new DateTimeImmutable($post['meta']['_event_start'][0], $timezone) ?? null,
-		);
+        $event = new Event(
+            id: EventId::from($post->id),
+            name: $post->post_title,
+            audience: $post->getMetaValue('audience') ?? null,
+            description: $post->post_excerpt,
+            eventStatus: EventStatus::from($post->post_status),
+            author_id: new AuthorId($post->post_author),
+            booking_policy: $booking_policy,
+            startDate: new \DateTimeImmutable($post->getMetaValue('_event_start'), $timezone),
+            endDate: new \DateTimeImmutable($post->getMetaValue('_event_end'), $timezone),
+            createdAt: new \DateTimeImmutable($post->post_date),
+            location_id: LocationId::from($post->getMetaValue('_location_id')),
+            attachment_id: AttachmentId::from($post->getMetaValue('_image_id')),
+            recurrence_id: RecurrenceId::from($post->getMetaValue('_recurrence_id')),
+        );
 
-		$tickets = array_map(function($ticket) {
-			return TicketMapper::map($ticket);
-		}, $post['meta']['_tickets'] ?? []);
-
-		$tickets = new TicketCollection(
-			...$tickets
-		);
-
-		$event = new Event(
-			id: $post['ID'],
-			title: $post['post_title'],
-			description: $post['post_excerpt'],
-			status: EventStatus::from($post['post_status']),
-			author: $post['post_author'],
-			booking_policy: $booking_policy,
-			schedule: $schedule,
-			person_id: $post['meta']['_person_id'][0] ?? null,
-			location_id: $post['meta']['_location_id'][0] ?? null,
-			created_at: new \DateTimeImmutable($post['post_date']),
-			tickets: $tickets
-		);
-		// Weitere Felder und Metadaten können hier zugewiesen werden
-		return $event;
-	}
+        return $event;
+    }
 }
