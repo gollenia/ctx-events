@@ -37,7 +37,7 @@ class Event
             eventStatus: $event->eventStatus,
             startDate: $event->startDate,
             endDate: $event->endDate,
-            bookingPolicy: $event->booking_policy,
+            bookingPolicy: $event->bookingPolicy,
             includes: $includes,
         );
     }

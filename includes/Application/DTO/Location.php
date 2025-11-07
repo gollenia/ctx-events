@@ -12,9 +12,9 @@ class Location
         public readonly int $id,
         public readonly string $name,
         public readonly Address $address,
-        public readonly ?GeoCoordinates $geo,
+        public readonly ?GeoCoordinates $geoCoordinates,
         public readonly ?Image $logo,
-        public readonly ?string $external_url
+        public readonly ?string $externalUrl
     ) {
     }
 
@@ -24,9 +24,9 @@ class Location
             id: $location->id->toInt(),
             name: $location->name,
             address: $location->address,
-            geo: $location->geo,
+            geoCoordinates: $location->geoCoordinates,
             logo: null,
-            external_url: $location->external_url
+            externalUrl: $location->externalUrl
         );
     }
 }

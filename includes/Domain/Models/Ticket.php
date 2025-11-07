@@ -15,30 +15,27 @@ final class Ticket
         public readonly ?string $description,
         public readonly Price $price,
         public readonly ?int $capacity,
-        public readonly ?int $min_per_booking,
-        public readonly ?int $max_per_booking,
         public readonly ?bool $enabled,
-        public readonly ?DateTimeImmutable $sales_start,
-        public readonly ?DateTimeImmutable $sales_end,
+        public readonly ?DateTimeImmutable $salesStart,
+        public readonly ?DateTimeImmutable $salesEnd,
     ) {
     }
 
     public function isFree(): bool
     {
-        return $this->price->is_free();
+        return $this->price->isFree();
     }
 
-    public function isAvailable(): bool
+    public function isCurrentlyAvailable(DateTimeImmutable $now): bool
     {
         if ($this->enabled === false) {
             return false;
         }
 
-        $now = new DateTimeImmutable();
-        if ($this->sales_start !== null && $now < $this->sales_start) {
+        if ($this->salesStart !== null && $now < $this->salesStart) {
             return false;
         }
-        if ($this->sales_end !== null && $now > $this->sales_end) {
+        if ($this->salesEnd !== null && $now > $this->salesEnd) {
             return false;
         }
         return true;

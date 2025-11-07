@@ -17,18 +17,18 @@ class LocationMapper
             id: LocationId::from($snapshot->id),
             name: $snapshot->post_title,
             address: Address::createOrNot(
-                streetAddress: $snapshot->getMetaValue('location_address'),
-                extendedAddress: $snapshot->getMetaValue('location_extended_address'),
-                addressLocality: $snapshot->getMetaValue('location_locality'),
-                addressRegion: $snapshot->getMetaValue('location_region'),
-                postalCode: $snapshot->getMetaValue('location_zip'),
-                addressCountry: $snapshot->getMetaValue('location_country')
+                streetAddress: $snapshot->getString('location_address'),
+                extendedAddress: $snapshot->getString('location_extended_address'),
+                addressLocality: $snapshot->getString('location_locality'),
+                addressRegion: $snapshot->getString('location_region'),
+                postalCode: $snapshot->getString('location_zip'),
+                addressCountry: $snapshot->getString('location_country')
             ),
-            geo: $snapshot->getMetaValue('lat') && $snapshot->getMetaValue('lng')
-                ? new GeoCoordinates($snapshot->getMetaValue('lat'), $snapshot->getMetaValue('lng'))
+            geoCoordinates: $snapshot->getFloat('lat') && $snapshot->getFloat('lng')
+                ? new GeoCoordinates($snapshot->getFloat('lat'), $snapshot->getFloat('lng'))
                 : null,
-            attachment_id: ImageId::from($snapshot->getThumbnailId()),
-            external_url: $snapshot->getMetaValue('external_url')
+            imageId: ImageId::from($snapshot->getThumbnailId()),
+            externalUrl: $snapshot->getString('external_url')
         );
     }
 }

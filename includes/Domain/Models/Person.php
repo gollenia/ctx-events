@@ -13,14 +13,14 @@ final class Person
         public readonly PersonId $id,
         public readonly ?string $givenName,
         public readonly ?string $familyName,
-        public readonly ?string $honorificSuffix,
-        public readonly ?string $honorificPrefix,
-        public readonly Email $email,
-        public readonly ?string $telephone,
-        public readonly ?string $website,
-        public readonly ?string $jobTitle,
-        public readonly ?string $worksFor,
-        public readonly ImageId $attachment_id
+        public readonly ?string $honorificSuffix = null,
+        public readonly ?string $honorificPrefix = null,
+        public readonly ?Email $email = null,
+        public readonly ?string $telephone = null,
+        public readonly ?array $sameAs = null,
+        public readonly ?string $jobTitle = null,
+        public readonly ?string $worksFor = null,
+        public readonly ?ImageId $imageId = null
     ) {
     }
 }

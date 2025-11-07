@@ -1,9 +1,16 @@
 <?php
 
-declare(strict_types=1);
+namespace Tests\Support;
 
-function toImmutable(DateTimeInterface $date): DateTimeImmutable {
-    return $date instanceof DateTimeImmutable
-        ? $date
-        : DateTimeImmutable::createFromMutable($date);
+use DateTimeImmutable;
+use DateTimeInterface;
+
+final class DateHelpers
+{
+    public static function toImmutable(DateTimeInterface $date): DateTimeImmutable
+    {
+        return $date instanceof DateTimeImmutable
+            ? $date
+            : DateTimeImmutable::createFromMutable($date);
+    }
 }

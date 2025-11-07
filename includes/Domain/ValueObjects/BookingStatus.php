@@ -5,8 +5,19 @@ namespace Contexis\Events\Domain\ValueObjects;
 enum BookingStatus: int
 {
     case PENDING = 1;
-    case CONFIRMED = 2;
-    case CANCELLED = 3;
+    case APPROVED = 2;
+    case CANCELED = 3;
     case EXPIRED = 4;
     case DELETED = 9;
+
+    public function canTransitionTo(BookingStatus $newStatus): bool
+    {
+        return match ($this) {
+            self::PENDING => in_array($newStatus, [self::APPROVED, self::CANCELED, self::EXPIRED, self::DELETED]),
+            self::APPROVED => in_array($newStatus, [self::CANCELED, self::DELETED, self::PENDING]),
+            self::CANCELED => in_array($newStatus, [self::DELETED]),
+            self::EXPIRED => in_array($newStatus, [self::DELETED]),
+            self::DELETED => false,
+        };
+    }
 }

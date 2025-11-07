@@ -1,0 +1,3 @@
+-   Basis Models fertig
+-   Tests für Models
+-   Usecase GetEvent finalisieren

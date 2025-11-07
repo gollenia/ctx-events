@@ -18,4 +18,18 @@ final class GeoCoordinates
             throw new \InvalidArgumentException('Longitude must be between -180 and 180.');
         }
     }
+
+    public static function fromFloats(float $latitude, float $longitude): self
+    {
+        return new self($latitude, $longitude);
+    }
+
+    public static function createOrNot(?float $latitude, ?float $longitude): ?self
+    {
+        if ($latitude === null || $longitude === null) {
+            return null;
+        }
+
+        return new self($latitude, $longitude);
+    }
 }

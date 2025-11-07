@@ -35,7 +35,6 @@ class EventResource implements JsonSerializable
             'status' => $this->event->eventStatus->value,
             'startDate' => $this->event->startDate->format('c'),
             'endDate' => $this->event->endDate?->format('c'),
-            'bookingPolicy' => $this->event->bookingPolicy,
             'audience' => $this->event->audience
         ];
 

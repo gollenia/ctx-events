@@ -6,7 +6,7 @@ final class Image implements \JsonSerializable
 {
     public function __construct(
         public readonly ?string $url,
-        public readonly ?string $alt_text,
+        public readonly ?string $altText,
         public readonly ?int $width,
         public readonly ?int $height,
         public readonly ?string $mimeType,
@@ -23,10 +23,10 @@ final class Image implements \JsonSerializable
     {
         return [
             'url' => $this->url,
-            'alt_text' => $this->alt_text,
+            'altText' => $this->altText,
             'width' => $this->width,
             'height' => $this->height,
-            'mimetype' => $this->mimeType,
+            'mimeType' => $this->mimeType,
             'sizes' => $this->sizes
         ];
     }

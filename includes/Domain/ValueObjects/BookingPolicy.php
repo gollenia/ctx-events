@@ -21,13 +21,13 @@ final class BookingPolicy
         }
     }
 
-    public static function create_disabled(): self
+    public static function createWithDisabledBookings(): self
     {
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         return new self(false, null, null, $now, $now);
     }
 
-    public static function create_from_values(
+    public static function create(
         bool $enabled,
         ?DateTimeImmutable $start,
         ?DateTimeImmutable $end,
@@ -58,7 +58,7 @@ final class BookingPolicy
         return $this->enabled;
     }
 
-    public function can_book_at(DateTimeImmutable $now): BookingDecision
+    public function canBookAt(DateTimeImmutable $now): BookingDecision
     {
         if (!$this->enabled) {
             return BookingDecision::deny(BookingDenyReason::DISABLED);
@@ -72,8 +72,8 @@ final class BookingPolicy
         return BookingDecision::allow();
     }
 
-    public function can_book(): BookingDecision
+    public function canBook(): BookingDecision
     {
-        return $this->can_book_at(new DateTimeImmutable());
+        return $this->canBookAt(new DateTimeImmutable());
     }
 }

@@ -31,7 +31,8 @@ class LocationResource implements JsonSerializable
             'link' => Links::friendly($this->location->id),
             'id' => $this->location->id,
             'name' => $this->location->name,
-            'address' => $this->location->address
+            'address' => $this->location->address,
+            'geoCoordinates' => $this->location->geoCoordinates
         ];
     }
 }
