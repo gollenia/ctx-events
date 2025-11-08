@@ -38,8 +38,8 @@ class GetEvent
             return null;
         }
 
-        $location = $includes->location ? $this->locationRepository->find($event->location_id) : null;
-        $image = $includes->image ? $this->imageRepository->find($event->attachment_id) : null;
+        $location = $includes->location ? $this->locationRepository->find($event->locationId) : null;
+        $image = $includes->image ? $this->imageRepository->find($event->imageId) : null;
 
         $locationDto = $location ? DTO\Location::fromDomainModel($location) : null;
 

@@ -8,7 +8,7 @@ final class Image
 {
     public function __construct(
         public readonly ?string $url,
-        public readonly ?string $alt_text,
+        public readonly ?string $altText,
         public readonly ?int $width,
         public readonly ?int $height,
         public readonly ?string $mimeType,
@@ -20,7 +20,7 @@ final class Image
     {
         return new self(
             url: $media->url,
-            alt_text: $media->alt_text,
+            altText: $media->altText,
             width: $media->width,
             height: $media->height,
             mimeType: $media->mimeType,

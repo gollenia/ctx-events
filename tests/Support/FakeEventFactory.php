@@ -15,11 +15,11 @@ use function Pest\Faker\fake;
 
 class FakeEventFactory
 {
-    public static function create(): Event
+    public static function create(int $id): Event
     {
 
         return new Event(
-            id: EventId::from(fake()->numberBetween(1, 1000)),
+            id: EventId::from($id),
             name: fake()->sentence(3),
             description: fake()->paragraph(),
             audience: fake()->word(),

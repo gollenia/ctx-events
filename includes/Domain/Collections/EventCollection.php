@@ -14,17 +14,7 @@ final class EventCollection extends AbstractCollection
     public function uniqueLocationIds(): array
     {
         $ids = array_map(
-            fn(Event $event) => $event->location_id,
-            $this->items
-        );
-
-        return array_values(array_unique(array_filter($ids)));
-    }
-
-    public function uniqueContactIds(): array
-    {
-        $ids = array_map(
-            fn(Event $event) => $event->contact_id,
+            fn(Event $event) => $event->locationId,
             $this->items
         );
 
