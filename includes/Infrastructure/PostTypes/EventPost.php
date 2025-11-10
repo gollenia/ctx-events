@@ -138,23 +138,20 @@ class EventPost extends AbstractPostType implements HasTaxonomies, HasMetaData
     public function registerMeta(): void
     {
         $metadata = [
-            [ "name" => "_booking_form","type" => "number"],
+            [ "name" => "_registration_form","type" => "number"],
             [ "name" => "_attendee_form","type" => "number"],
-            [ "name" => "_speaker_id","type" => "number"],
+            [ "name" => "_person_ids","type" => "array"],
             [ "name" => "_location_id","type" => "number"],
-            [ "name" => "_event_audience","type" => "string"],
             [ "name" => "_event_start","type" => "string"],
             [ "name" => "_event_end","type" => "string"],
             [ "name" => "_event_all_day","type" => "boolean"],
-            [ "name" => "_event_rsvp_end","type" => "string"],
-            [ "name" => "_event_rsvp_start","type" => "string"],
-            [ "name" => "_event_rsvp","type" => "boolean"],
-            [ "name" => "_event_spaces","type" => "number"],
-            [ "name" => "_event_rsvp_spaces","type" => "number"],
-            [ "name" => "_event_rsvp_donation","type" => "boolean"],
-            [ "name" => "_event_recurrence_id", "type" => "number"],
+            [ "name" => "_booking_end","type" => "string"],
+            [ "name" => "_booking_start","type" => "string"],
+            [ "name" => "_booking_enabled","type" => "boolean"],
+            [ "name" => "_booking_spaces","type" => "number"],
+            [ "name" => "_donation_enabled","type" => "boolean"],
+            [ "name" => "_recurrence_id", "type" => "number"],
             [ "name" => "_is_detached", "type" => "boolean"],
-
         ];
 
         foreach ($metadata as $meta) {

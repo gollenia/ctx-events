@@ -29,7 +29,7 @@ add_action( 'plugin_loaded', function() {
 	Bootstrap::init();
 }, 10 );
 
-function em_register_blocks() : void {
+function ctx_register_blocks() : void {
 	
 	$blocks = [
 		'upcoming',
@@ -46,8 +46,8 @@ function em_register_blocks() : void {
 	];
 
 	foreach ($blocks as $block) {
-		register_block_type(__DIR__ . '/assets/build/blocks/' . $block);
+		register_block_type(__DIR__ . '/build/blocks/' . $block);
 	}
 }
 
-add_action('init', 'em_register_blocks');
+add_action('init', 'ctx_register_blocks');

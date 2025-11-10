@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Presentation\REST;
+namespace Contexis\Events\Presentation\Controllers;
 
 
 

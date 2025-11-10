@@ -40,8 +40,8 @@ final class WpEventQuery extends AbstractWpQuery
             ];
         }
 
-        foreach ($c->speakers as $speakerId) {
-            $this->query['meta_query'][] = ['key' => '_speaker_id', 'value' => (string)$speakerId];
+        foreach ($c->persons as $personId) {
+            $this->query['meta_query'][] = ['key' => '_person_id', 'value' => (string)$personId];
         }
 
         if ($c->locationId) {

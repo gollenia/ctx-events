@@ -1,24 +1,24 @@
 {
 	"version": "7.0.0",
 	"scripts": {
-		"build": "wp-scripts build assets/src/events-manager.js assets/src/admin.js assets/src/index.js assets/src/frontend.js assets/src/booking.js",
-		"start": "wp-scripts start assets/src/events-manager.js assets/src/admin.js assets/src/index.js assets/src/frontend.js assets/src/booking.js",
-		"make-pot": "wp i18n make-pot . languages/events.pot --slug=events --domain=events --exclude=node_modules,assets/src",
+		"build": "wp-scripts build src/events-manager.js src/admin.js src/index.js src/frontend.js src/booking.js",
+		"start": "wp-scripts start src/events-manager.js src/admin.js src/index.js src/frontend.js src/booking.js",
+		"make-pot": "wp i18n make-pot . languages/events.pot --slug=events --domain=events --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
 	},
 	"dependencies": {
-		"@contexis/use-api-fetch": "^1.0.1",
-		"@contexis/wp-react-form": "^1.1.0",
-		"@wordpress/api-fetch": "^7.30.0",
+		"@contexis/use-api-fetch": "^1.0.4",
+		"@contexis/wp-react-form": "^1.1.6",
+		"@wordpress/api-fetch": "^7.34.0",
 		"@wordpress/dataviews": "^8.0.0",
-		"@wordpress/icons": "^10.30.0",
+		"@wordpress/icons": "^10.32.0",
 		"classnames": "^2.5.1",
 		"qs": "^6.14.0",
 		"react-inlinesvg": "^4.2.0",
 		"uuid": "^12.0.0"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.23.0"
+		"@wordpress/scripts": "^30.27.0"
 	}
 }

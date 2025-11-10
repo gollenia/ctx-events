@@ -9,7 +9,7 @@ final class RestRegistrar implements Registrar
     /** @var RestAdapter[] */
     private array $adapters = [];
 
-    public function __construct(RestAdapter ...$adapters)
+    public function __construct(array $adapters)
     {
         $this->adapters = $adapters;
     }

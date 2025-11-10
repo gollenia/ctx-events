@@ -27,8 +27,8 @@ class Assets {
 	 */
 	public function frontend_script() {
 
-		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/frontend.asset.php";
-		$booking_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/booking.asset.php";
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/build/frontend.asset.php";
+		$booking_asset_path = PluginInfo::get_plugin_dir() . "/build/booking.asset.php";
 		if ( ! file_exists( $script_asset_path ) || ! file_exists( $booking_asset_path ) ) {
 			return;
 		}
@@ -36,14 +36,14 @@ class Assets {
 		$script_asset = require( $script_asset_path );
 		wp_enqueue_script(
 			'events-block-frontend',
-			plugins_url( '/assets/build/frontend.js', __FILE__ ),
+			plugins_url( '/build/frontend.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
 
 		wp_enqueue_style(
 			'events-frontend-style',
-			plugins_url( '/assets/build/style-frontend.css', __FILE__ ),
+			plugins_url( '/build/style-frontend.css', __FILE__ ),
 			[],
 			$script_asset['version'],
 			'all'
@@ -77,7 +77,7 @@ class Assets {
 	 */
 	public function booking_script() {
 
-		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/booking.asset.php";
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/build/booking.asset.php";
 		
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
@@ -85,17 +85,18 @@ class Assets {
 
 		wp_register_script(
 			'booking-view',
-			plugins_url('/assets/build/booking.js', __FILE__),
+			plugins_url('/build/booking.js', __FILE__),
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
 
+
 		wp_set_script_translations('booking-view', 'events', PluginInfo::get_plugin_dir()  . '/languages');
 
 		wp_register_style(
 			'booking-style',
-			plugins_url('/assets/build/style-booking.css', __FILE__),
+			plugins_url('/build/style-booking.css', __FILE__),
 			[],
 			$script_asset['version'],
 			'all'
@@ -115,13 +116,13 @@ class Assets {
 	 */
 	public function editor_script() {
 
-		$script_asset_path = PluginInfo::get_plugin_dir() . "/assets/build/index.asset.php";
+		$script_asset_path = PluginInfo::get_plugin_dir() . "/build/index.asset.php";
 		if ( ! file_exists( $script_asset_path ) ) return;
 		
 		$script_asset = require( $script_asset_path );
 		wp_enqueue_script(
 			'events-block-editor',
-			plugins_url( '/assets/build/index.js', __FILE__ ),
+			plugins_url( '/build/index.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
@@ -130,7 +131,7 @@ class Assets {
 
 		wp_enqueue_script(
 			'events-gateway-admin',
-			plugins_url( '/assets/build/gateways.js', __FILE__ ),
+			plugins_url( '/build/gateways.js', __FILE__ ),
 			$script_asset['dependencies'],
 			$script_asset['version']
 		);
@@ -148,14 +149,14 @@ class Assets {
 
 		wp_register_style(
 			'events-block-style',
-			plugins_url( '/assets/build/style-index.css', __FILE__ ),
+			plugins_url( '/build/style-index.css', __FILE__ ),
 			array(),
 			$script_asset['version']
 		);
 
 		wp_register_style(
 			'events-block-editor-style',
-			plugins_url( '/assets/build/index.css', __FILE__ ),
+			plugins_url( '/build/index.css', __FILE__ ),
 			array(),
 			$script_asset['version']
 		);
@@ -166,10 +167,10 @@ class Assets {
 	
 	public function admin_enqueue( ){
 		$version = PluginInfo::get_plugin_version();
-		wp_enqueue_script('events-manager', plugins_url('/assets/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), $version);		
-		wp_enqueue_script('events-admin-script', plugins_url('/assets/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), $version);		
-		wp_enqueue_style('events-admin', plugins_url('/assets/build/admin.css',__FILE__), array('wp-components'), $version);
-		wp_enqueue_style('events-admin-booking', plugins_url('/assets/build/style-admin.css',__FILE__), array(), $version);
+		wp_enqueue_script('events-manager', plugins_url('/build/events-manager.js',__FILE__), array('jquery', 'jquery-ui-core','jquery-ui-widget','jquery-ui-position','jquery-ui-sortable','jquery-ui-datepicker','jquery-ui-autocomplete','jquery-ui-dialog','wp-color-picker'), $version);		
+		wp_enqueue_script('events-admin-script', plugins_url('/build/admin.js',__FILE__), array('jquery', 'wp-api', 'wp-i18n', 'wp-components', 'wp-element' ), $version);		
+		wp_enqueue_style('events-admin', plugins_url('/build/admin.css',__FILE__), array('wp-components'), $version);
+		wp_enqueue_style('events-admin-booking', plugins_url('/build/style-admin.css',__FILE__), array(), $version);
 		$this->localize_admin_script();
 		wp_set_script_translations( 'events-admin-script', 'events', plugin_dir_path( __FILE__ ) . '/languages' );
 	}

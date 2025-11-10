@@ -14,9 +14,10 @@ return [
         ]),
 
     \Contexis\Events\Presentation\Controllers\RestRegistrar::class   => create()
-        ->constructor(
-            get(\Contexis\Events\Presentation\Controllers\EventController::class)
-        ),
+        ->constructor([
+            get(\Contexis\Events\Presentation\Controllers\EventController::class),
+			get(\Contexis\Events\Presentation\Controllers\EventsController::class)
+        ]),
 
     \Contexis\Events\Domain\Repositories\EventRepository::class
         => autowire(\Contexis\Events\Infrastructure\Persistence\WpEventRepository::class),

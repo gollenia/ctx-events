@@ -1,34 +1,83 @@
 <?php
 
-namespace Contexis\Events\Presentation\REST;
+namespace Contexis\Events\Presentation\Controllers;
+
+use Contexis\Events\Presentation\Requests\ListEventsRequest;
+use Contexis\Events\Presentation\Security\ViewContextFactory;
 
 final class EventsController implements RestController {
 	public function register(): void {
-		register_rest_route( '/events/v3', '/event(?:/(?P<id>\d+))?', array(
+		register_rest_route( '/events/v3', '/events', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'get_item' ),
-                'permission_callback' => array( $this, 'get_item_permissions_check' ),
+                'callback'  => array( $this, 'get_events_page' ),
+                'permission_callback' => fn($req) => true,
+				'args' => [
+					'page' => [
+						'type' => 'integer',
+						'default' => 1,
+					],
+					'per_page' => [
+						'type' => 'integer',
+						'default' => 10,
+					],
+					'include' => [
+						'type' => 'array',
+						'items' => [
+							'type' => 'string',
+							'enum' => ['location', 'image','available', 'bookable', 'categories', 'tags', 'locations', 'persons' ]
+						],
+					],
+					'order_by' => [
+						'type' => 'string',
+						'type' => 'string',
+						'default' => 'date-time',
+					],
+					'order' => [
+						'type' => 'string',
+						'default' => 'DESC',
+					],
+					'scope' => [
+						'type' => 'string',
+						'default' => 'future',
+					],
+					'categories'  =>  [
+						'type' => 'array',
+						'items' => ['type' => 'integer'],
+					],
+    				'tags'       => [
+						'type' => 'array',
+						'items' => ['type' => 'integer'],
+					],
+    				'location'  => [
+						'type' => 'array',
+						'items' => ['type' => 'integer'],
+					],
+    				'persons'    => [
+						'type' => 'array',
+						'items' => ['type' => 'integer'],
+					],
+					'bookable' => [
+						'type' => 'boolean',
+						'default' => false,
+					],
+					'availibility' => [
+						'type' => 'boolean',
+						'default' => false,
+					],
+					'search' => [
+						'type' => 'string'
+					]
+				]
             ),
         ) );
 	}
 
-	public function get_events( \WP_REST_Request $request ): \WP_REST_Response {
-		$args = [
-			'post_type'      => 'event',
-			'posts_per_page' => 10,
-		];
-
-		$events = get_posts( $args );
-
-		$data = [];
-		foreach ( $events as $event ) {
-			$data[] = [
-				'id'    => $event->ID,
-				'title' => get_the_title( $event->ID ),
-			];
-		}
-
-		return new \WP_REST_Response( $data, 200 );
+	public function get_events_page( \WP_REST_Request $request ): \WP_REST_Response 
+	{	
+		$request = ListEventsRequest::fromParams($request->get_params());
+		var_dump($request);
+		$view = ViewContextFactory::createFromCurrentUser();
+		return new \WP_REST_Response( $view, 200 );
 	}
-}
+}	

@@ -25,6 +25,9 @@ class WpEventRepository extends WpAbstractRepository implements EventRepository
         return $events;
     }
 
+
+	
+
     public function find(?EventId $id): ?Event
     {
         $post = parent::getSnapshot($id);
