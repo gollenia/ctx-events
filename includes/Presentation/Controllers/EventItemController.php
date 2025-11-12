@@ -4,16 +4,18 @@ namespace Contexis\Events\Presentation\Controllers;
 
 use Contexis\Events\Application\Query\EventIncludes;
 use Contexis\Events\Application\UseCases\GetEvent;
+use Contexis\Events\Application\UseCases\GetEvents;
+use Contexis\Events\Domain\Collections\EventCollection;
+use Contexis\Events\Presentation\Factories\ViewContextFactory;
 use Contexis\Events\Presentation\Resources\EventResource;
-use Contexis\Events\Presentation\Security\ViewContextFactory;
 use Contexis\Events\Presentation\Services\Links;
+use Contexis\Events\Presentation\Requests\ListEventsRequest;
+
 use WP;
 
 final class EventController implements RestAdapter
 {
     private GetEvent $getEvent;
-
-    private const ROUTE_BASE = '/events/v3/event/(?P<id>\d+)';
 
     public function __construct(GetEvent $getEvent)
     {
@@ -41,6 +43,8 @@ final class EventController implements RestAdapter
                 )
             ),
         ));
+
+		
     }
 
     public function getItem(\WP_REST_Request $request): \WP_REST_Response
@@ -69,4 +73,6 @@ final class EventController implements RestAdapter
         }
         return $request;
     }
+
+	
 }

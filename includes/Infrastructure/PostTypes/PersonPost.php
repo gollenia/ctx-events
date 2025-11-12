@@ -4,23 +4,11 @@ namespace Contexis\Events\Infrastructure\PostTypes;
 
 use Contexis\Events\Core\Contracts\HasMetaData;
 use Contexis\Events\Core\Contracts\PostType;
+use Contexis\Events\Infrastructure\PostTypes\MetaData\PersonMeta;
 
 class PersonPost extends AbstractPostType implements HasMetaData
 {
     public const POST_TYPE = 'ctx-event-person';
-
-    private array $metadata = [
-        [ "name" => "_person_email","type" => "string"],
-        [ "name" => "_person_first_name","type" => "string"],
-        [ "name" => "_person_last_name","type" => "string"],
-        [ "name" => "_person_phone","type" => "string"],
-        [ "name" => "_person_gender","type" => "string"],
-        [ "name" => "_person_website","type" => "string"],
-        [ "name" => "_person_prefix","type" => "string"],
-        [ "name" => "_person_suffix","type" => "string"],
-        [ "name" => "_person_position","type" => "string"],
-        [ "name" => "_person_organization","type" => "string"]
-    ];
 
     public function registerPostType(): void
     {
@@ -63,16 +51,6 @@ class PersonPost extends AbstractPostType implements HasMetaData
 
     public function registerMeta(): void
     {
-
-        foreach ($this->metadata as $meta) {
-            register_post_meta(self::POST_TYPE, $meta['name'], [
-                'type' => $meta['type'],
-                'single' => true,
-                'show_in_rest' => true,
-                'auth_callback' => function () {
-                    return current_user_can('edit_posts');
-                },
-            ]);
-        }
+        PersonMeta::registerAll(self::POST_TYPE);
     }
 }

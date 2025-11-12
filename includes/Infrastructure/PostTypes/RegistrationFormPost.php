@@ -2,9 +2,9 @@
 
 namespace Contexis\Events\Infrastructure\PostTypes;
 
-class BookingFormPost extends AbstractPostType
+class RegistrationFormPost extends AbstractPostType
 {
-    public const POST_TYPE = 'ctx-booking-form';
+    public const POST_TYPE = 'ctx-registration-form';
 
     public function registerPostType(): void
     {

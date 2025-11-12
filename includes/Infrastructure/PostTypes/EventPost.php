@@ -2,22 +2,30 @@
 
 namespace Contexis\Events\Infrastructure\PostTypes;
 
-use Contexis\Events\Collections\EventCollection;
-use Contexis\Events\Core\Contracts\PostType;
-use Contexis\Events\Core\Contracts\HasTaxonomy;
 use Contexis\Events\Core\Contracts\HasMetaData;
-use Contexis\Events\Infrastructure\Persistence\WpEventRepository;
-use Contexis\Events\Application\Repositories\EventRepository;
 use Contexis\Events\Core\Contracts\HasTaxonomies;
-use Contexis\Events\Models\Event;
-use Contexis\Events\PostTypes\RecurringEventPost;
-use WP_Query;
+use Contexis\Events\Infrastructure\PostTypes\MetaData\EventMeta;
 
 class EventPost extends AbstractPostType implements HasTaxonomies, HasMetaData
 {
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
     public const TAGS = 'ctx-event-tags';
+
+	public  const META_REGISTRATION_FORM = '_registration_form';
+	public  const META_ATTENDEE_FORM = '_attendee_form';
+	public  const META_PERSONS = '_person_ids';
+	public  const META_LOCATION = '_location_id';
+	public  const META_EVENT_START = '_event_start';
+	public  const META_EVENT_END = '_event_end';
+	public  const META_EVENT_ALL_DAY = '_event_all_day';
+	public  const META_BOOKING_START = '_booking_start';
+	public  const META_BOOKING_END = '_booking_end';
+	public  const META_BOOKING_ENABLED = '_booking_enabled';
+	public  const META_BOOKING_SPACES = '_booking_spaces';
+	public  const META_DONATION_ENABLED = '_donation_enabled';
+	public  const META_RECURRENCE_ID = '_recurrence_id';
+	public  const META_IS_DETACHED = '_is_detached';
 
     public static function getSlug(): string
     {
@@ -113,19 +121,6 @@ class EventPost extends AbstractPostType implements HasTaxonomies, HasMetaData
             'rewrite' => ['slug' => 'events', 'with_front' => false],
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
-            'template' => [
-                    ['ctx-blocks/grid-row', [], [
-                        ['ctx-blocks/grid-column', ['widthLarge' => 2], [['core/paragraph', ['placeholder' => 'Event-Beschreibung']],]],
-                        ['ctx-blocks/grid-column', ['widthLarge' => 1], [
-                            ['events-manager/details', []],
-                        ]]
-                    ]],
-                    ['core/separator'],
-                    ['core/group',
-                        ['layout' => ['type' => 'flex', 'flexWrap' => 'nowrap', 'justifyContent' => 'right']],
-                        [['events-manager/booking', ['title' => 'Anmeldung']]]
-                    ]
-            ],
             'label' => __('Events', 'events'),
             'description' => __('Display events on your blog.', 'events'),
             'labels' => $labels,
@@ -137,137 +132,6 @@ class EventPost extends AbstractPostType implements HasTaxonomies, HasMetaData
 
     public function registerMeta(): void
     {
-        $metadata = [
-            [ "name" => "_registration_form","type" => "number"],
-            [ "name" => "_attendee_form","type" => "number"],
-            [ "name" => "_person_ids","type" => "array"],
-            [ "name" => "_location_id","type" => "number"],
-            [ "name" => "_event_start","type" => "string"],
-            [ "name" => "_event_end","type" => "string"],
-            [ "name" => "_event_all_day","type" => "boolean"],
-            [ "name" => "_booking_end","type" => "string"],
-            [ "name" => "_booking_start","type" => "string"],
-            [ "name" => "_booking_enabled","type" => "boolean"],
-            [ "name" => "_booking_spaces","type" => "number"],
-            [ "name" => "_donation_enabled","type" => "boolean"],
-            [ "name" => "_recurrence_id", "type" => "number"],
-            [ "name" => "_is_detached", "type" => "boolean"],
-        ];
-
-        foreach ($metadata as $meta) {
-            register_post_meta(self::POST_TYPE, $meta['name'], [
-                'type' => $meta['type'],
-                'single'       => true,
-
-                'sanitize_callback' => null,
-                'auth_callback' => function () {
-                    return current_user_can('edit_posts');
-                },
-                'show_in_rest' => [
-                    'schema' => [
-                        'type' => $meta['type']
-                    ]
-                ]
-            ]);
-        }
-
-        register_post_meta('event', '_event_coupons', [
-            'type' => 'array',
-            'single' => true,
-            'show_in_rest' => [
-                'schema' => [
-                    'type'  => 'array',
-                    'items' => [
-                        'type' => 'integer'
-                    ],
-                ]
-            ],
-            'auth_callback' => function () {
-                return current_user_can('edit_posts');
-            }
-        ]);
-
-        register_post_meta('event', '_event_tickets', [
-            'type' => 'array',
-            'single' => true,
-            'show_in_rest' => [
-                'schema' => [
-                    'type'  => 'array',
-                    'items' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'ticket_id' => [
-                                'type' => 'string'
-                            ],
-                            'ticket_name' => [
-                                'type' => 'string'
-                            ],
-                            'ticket_description' => [
-                                'type' => 'string'
-                            ],
-                            'ticket_price' => [
-                                'type' => 'number'
-                            ],
-                            'ticket_max' => [
-                                'type' => 'integer'
-                            ],
-                            'ticket_min' => [
-                                'type' => 'integer'
-                            ],
-                            'ticket_spaces' => [
-                                'type' => 'integer'
-                            ],
-                            'ticket_start' => [
-                                'type' => 'string'
-                            ],
-                            'ticket_end' => [
-                                'type' => 'string'
-                            ],
-                            'ticket_active' => [
-                                'type' => 'boolean',
-                                'default' => true
-                            ],
-                            'ticket_order' => [
-                                'type' => 'number'
-                            ],
-                            'ticket_form' => [
-                                'type' => 'integer'
-                            ],
-                            'ticket_enabled' => [
-                                'type' => 'integer'
-                            ],
-
-                        ]
-                    ],
-                ]
-            ],
-            'auth_callback' => function () {
-                return current_user_can('edit_posts');
-            }
-        ]);
-
-        register_meta('event', '_event_mails', [
-            'type' => 'array',
-            'single' => true,
-            'show_in_rest' => [
-                'schema' => [
-                    'type'  => 'array',
-                    'items' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'gateway'   => [ 'type' => 'string' ],
-                            'status'    => [ 'type' => 'string' ],
-                            'recipient' => [ 'type' => 'string' ],
-                            'subject'   => [ 'type' => 'string' ],
-                            'message'   => [ 'type' => 'string' ],
-                            'enabled'   => [ 'type' => 'boolean' ],
-                            'locale'    => [ 'type' => 'string' ]
-                        ]
-                    ],
-                ],
-            ],
-            'sanitize_callback' => null,
-            'auth_callback' => fn() => current_user_can('edit_posts'),
-        ]);
-    }
+		EventMeta::registerAll(self::POST_TYPE);
+	}
 }

@@ -2,11 +2,12 @@
 
 namespace Contexis\Events\Application\UseCases;
 
+use Contexis\Events\Application\Query\ListEventsQuery;
 use Contexis\Events\Domain\Contracts\EventRepository;
 use Contexis\Events\Domain\Contracts\EventCriteria;
 use Contexis\Events\Domain\Models\Event;
 
-final class GetEvents
+final class GetEventPage
 {
 	private EventRepository $eventRepository;
 
@@ -18,8 +19,8 @@ final class GetEvents
 	/**
 	 * @return Event[]
 	 */
-	public function execute(EventCriteria $criteria): array
+	public function execute(ListEventsQuery $query): array
 	{
-		return $this->eventRepository->query($criteria)->get();
+		return $this->eventRepository->query($query)->get();
 	}
 }

@@ -15,6 +15,20 @@ final class PostSnapshot
         $this->meta = get_post_meta($post->ID);
     }
 
+	static public function fromWpPostId(int $id): ?PostSnapshot 
+    {
+        if (!$id) {
+            return null;
+        }
+        $post = get_post($id);
+        if (!$post) {
+            return null;
+        }
+
+        return new PostSnapshot($post);
+    }
+	
+
     public function __get(string $key): mixed
     {
         if ($key === 'id') {

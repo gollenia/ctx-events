@@ -2,15 +2,26 @@
 
 namespace Contexis\Events\Presentation\Controllers;
 
-use Contexis\Events\Presentation\Requests\ListEventsRequest;
-use Contexis\Events\Presentation\Security\ViewContextFactory;
+use Contexis\Events\Application\Query\ListEventsQuery;
+use Contexis\Events\Application\UseCases\GetEventPage;
+use Contexis\Events\Presentation\Factories\ListEventsQueryFactory;
+use Contexis\Events\Presentation\Factories\ViewContextFactory;
 
-final class EventsController implements RestController {
-	public function register(): void {
+class EventListController implements RestAdapter
+{
+	private GetEventPage $listEvents;
+
+	public function __construct(GetEventPage $listEvents)
+	{
+		$this->listEvents = $listEvents;
+	}
+
+	public function register(): void
+	{
 		register_rest_route( '/events/v3', '/events', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'get_events_page' ),
+                'callback'  => array( $this, 'getEventPage' ),
                 'permission_callback' => fn($req) => true,
 				'args' => [
 					'page' => [
@@ -72,12 +83,11 @@ final class EventsController implements RestController {
             ),
         ) );
 	}
-
-	public function get_events_page( \WP_REST_Request $request ): \WP_REST_Response 
+	public function getEventPage( \WP_REST_Request $request ): \WP_REST_Response 
 	{	
-		$request = ListEventsRequest::fromParams($request->get_params());
-		var_dump($request);
+		$query = ListEventsQueryFactory::fromWpRequest($request);
 		$view = ViewContextFactory::createFromCurrentUser();
-		return new \WP_REST_Response( $view, 200 );
+		$page = $this->listEvents->execute($query, $view);
+		return new \WP_REST_Response( $page, 200 );
 	}
-}	
+}

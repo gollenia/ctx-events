@@ -5,6 +5,7 @@ namespace Contexis\Events\Infrastructure\PostTypes;
 use Contexis\Events\Core\Contracts\HasMetaData;
 use Contexis\Events\Infrastructure\PostTypes\AbstractPostType;
 use Contexis\Events\Infrastructure\PostTypes\EventPost;
+use Contexis\Events\Infrastructure\PostTypes\MetaData\LocationMeta;
 
 class LocationPost extends AbstractPostType implements HasMetaData
 {
@@ -89,34 +90,6 @@ class LocationPost extends AbstractPostType implements HasMetaData
 
     public function registerMeta(): void
     {
-        $meta_array = [
-            ["_location_address", 'string', ''],
-            ["_location_town", 'string', ''],
-            ["_location_state", 'string', ''],
-            ["_location_postcode", 'string', ''],
-            ["_location_region", 'string', ''],
-            ["_location_url", 'string', ''],
-            ["_location_country", 'string', ''],
-            ["_location_latitude", "number", 0],
-            ["_location_longitude", "number", 0]
-        ];
-
-        foreach ($meta_array as $meta) {
-            register_post_meta('location', $meta[0], [
-                'type' => $meta[1],
-                'single'       => true,
-                'default' => $meta[2],
-                'sanitize_callback' => null,
-                'auth_callback' => function () {
-                    return current_user_can('edit_posts');
-                },
-                'show_in_rest' => [
-                    'schema' => [
-                        'default' => $meta[2],
-                        'type' => $meta[1]
-                    ]
-                ]
-            ]);
-        }
+		LocationMeta::registerAll(self::POST_TYPE);
     }
 }

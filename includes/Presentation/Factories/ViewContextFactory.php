@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Presentation\Security;
+namespace Contexis\Events\Presentation\Factories;
 
 use Contexis\Events\Application\Security\ViewContext;
 

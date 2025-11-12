@@ -2,6 +2,6 @@
 
 namespace Contexis\Events\Core\Contracts;
 
-interface Criteria
+interface QueryRequest
 {
 }

@@ -3,21 +3,13 @@
 namespace Contexis\Events\Infrastructure\PostTypes;
 
 use Contexis\Events\Core\Contracts\HasMetaData;
+use Contexis\Events\Infrastructure\PostTypes\MetaData\CouponMeta;
 
 class CouponPost extends AbstractPostType implements HasMetaData
 {
     public const POST_TYPE = "ctx-coupon";
 
-    private array $metadata = [
-        [ "name" => "_coupon_code","type" => "string"],
-        [ "name" => "_coupon_type","type" => "string"],
-        [ "name" => "_coupon_value","type" => "number"],
-        [ "name" => "_coupon_expiry","type" => "string"],
-        [ "name" => "_coupon_limit","type" => "number"],
-        [ "name" => "_coupon_used","type" => "number"],
-        [ "name" => "_coupon_status","type" => "string"],
-        [ "name" => "_coupon_global","type" => "boolean"]
-    ];
+    
 
     public static function getAdminUrl(): string
     {
@@ -67,21 +59,6 @@ class CouponPost extends AbstractPostType implements HasMetaData
 
     public function registerMeta(): void
     {
-
-        foreach ($this->metadata as $meta) {
-            register_post_meta(self::POST_TYPE, $meta['name'], [
-                'type' => $meta['type'],
-                'single'       => true,
-                'sanitize_callback' => null,
-                'auth_callback' => function () {
-                    return current_user_can('edit_posts');
-                },
-                'show_in_rest' => [
-                    'schema' => [
-                        'type' => $meta['type']
-                    ]
-                ]
-            ]);
-        }
+		CouponMeta::registerAll(self::POST_TYPE);
     }
 }

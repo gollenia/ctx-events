@@ -2,76 +2,83 @@
 
 namespace Contexis\Events\Infrastructure\Persistence\Query;
 
+use Contexis\Events\Application\Query\ListEventsQuery;
+use Contexis\Events\Application\Requests\EventPageRequest;
 use DateTimeImmutable;
 use Contexis\Events\Domain\Contracts\EventCriteria;
 use Contexis\Events\Domain\ValueObjects\EventScope;
 use Contexis\Events\Infrastructure\PostTypes\EventPost;
 use Contexis\Events\Core\Contracts\QueryOptions;
 use Contexis\Events\Core\Contracts\Criteria;
+use Contexis\Events\Core\Contracts\QueryBuilder;
+use Contexis\Events\Core\Contracts\QueryRequest;
 
-final class WpEventQuery extends AbstractWpQuery
+final class WpEventQueryBuilder extends AbstractWpQueryBuilder
 {
-    public function build(Criteria $criteria): QueryOptions
-    {
-        $c = $criteria;
-        $this->query = [
+
+    protected function build(QueryRequest $request): void
+	{
+		if(!$request instanceof EventPageRequest) {
+			throw new \InvalidArgumentException('Expected instance of EventPageRequest');
+		}
+    
+        $this->args = [
             'post_type'      => EventPost::POST_TYPE,
-            'posts_per_page' => $c->limit,
-            'paged'          => max(1, $c->page),
+            'posts_per_page' => $request->perPage,
+            'paged'          => max(1, $request->page),
             'meta_query'     => ['relation' => 'AND'],
             'tax_query'      => [],
             'fields'         => 'all',
         ];
 
 
-        if ($c->categories) {
-            $this->query['tax_query'][] = [
+        if ($request->categories) {
+            $this->args['tax_query'][] = [
                 'taxonomy' => EventPost::CATEGORIES,
                 'field'    => 'slug',
-                'terms'    => $c->categories,
+                'terms'    => $request->categories,
             ];
         }
 
-        if ($c->tags) {
-            $this->query['tax_query'][] = [
+        if ($request->tags) {
+            $this->args['tax_query'][] = [
                 'taxonomy' => EventPost::TAGS,
                 'field'    => 'term_id',
-                'terms'    => $c->tags,
+                'terms'    => $request->tags,
             ];
         }
 
-        foreach ($c->persons as $personId) {
-            $this->query['meta_query'][] = ['key' => '_person_id', 'value' => (string)$personId];
+        foreach ($request->persons as $personId) {
+            $this->args['meta_query'][] = ['key' => '_person_id', 'value' => (string)$personId];
         }
 
-        if ($c->locationId) {
-            $this->query['meta_query'][] = ['key' => '_location_id', 'value' => (string)$c->locationId];
+        if ($request->location) {
+            $this->args['meta_query'][] = ['key' => '_location_id', 'value' => (string)$request->location];
         }
 
-        if ($c->bookableOnly) {
-            $this->query['meta_query'][] = ['key' => '_event_rsvp', 'value' => '1', 'compare' => '='];
+        if ($request->bookable) {
+            $this->args['meta_query'][] = ['key' => '_booking_enabled', 'value' => '1', 'compare' => '='];
         }
 
-        if ($c->scope) {
-            foreach ($this->dateScopeToMetaQuery($c->scope) as $cond) {
-                $this->query['meta_query'][] = $cond;
+        if ($request->scope) {
+            foreach (self::dateScopeToMetaQuery($request->scope) as $cond) {
+                $this->args['meta_query'][] = $cond;
             }
         }
 
         // Order / OrderBy Mapping
-        [$orderby, $metaKey] = $this->mapOrderBy($c->orderBy);
-        $this->query['order'] = strtoupper($c->order) === 'ASC' ? 'ASC' : 'DESC';
+        [$orderby, $metaKey] = self::mapOrderBy($request->orderBy);
+        $this->args['order'] = strtoupper($request->order) === 'ASC' ? 'ASC' : 'DESC';
         if ($metaKey) {
-            $this->query['orderby'] = 'meta_value';
-            $this->query['meta_key'] = $metaKey;
+            $this->args['orderby'] = 'meta_value';
+            $this->args['meta_key'] = $metaKey;
         } else {
-            $this->query['orderby'] = $orderby; // 'title', 'date', ...
+            $this->args['orderby'] = $orderby; // 'title', 'date', ...
         }
 
-        return $this;
     }
 
-    private function mapOrderBy(string $orderBy): array
+    private static function mapOrderBy(string $orderBy): array
     {
         return match ($orderBy) {
             'date-time'     => ['meta_value', '_event_start'],
@@ -82,7 +89,7 @@ final class WpEventQuery extends AbstractWpQuery
         };
     }
 
-    private function dateScopeToMetaQuery(EventScope $scope): array
+    private static function dateScopeToMetaQuery(EventScope $scope): array
     {
         $now = new DateTimeImmutable('now', wp_timezone());
         $date = $now->format('Y-m-d');
