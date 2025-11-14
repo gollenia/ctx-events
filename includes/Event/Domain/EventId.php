@@ -1,0 +1,9 @@
+<?php
+
+namespace Contexis\Events\Event\Domain;
+
+use Contexis\Events\Shared\Domain\Abstract\Id;
+
+final class EventId extends Id
+{
+}

@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/events
@@ -13,41 +14,41 @@ Author URI: https://github.com/gollenia/events
 Text Domain: events
 Domain Path: /languages
 */
+require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
+use Contexis\Events\Platform\Bootstrap;
 
-use Contexis\Events\Core\Bootstrap;
-
-if(!defined('ABSPATH')) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-require_once( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php');
+
 require_once __DIR__ . '/Assets.php';
+add_action('plugin_loaded', function () {
+
+    load_plugin_textdomain('events', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    Bootstrap::init();
+}, 10);
+
+function ctx_register_blocks(): void
+{
 
 
-add_action( 'plugin_loaded', function() {
-	load_plugin_textdomain('events', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-	Bootstrap::init();
-}, 10 );
-
-function ctx_register_blocks() : void {
-	
-	$blocks = [
-		'upcoming',
-		'details',
-		'details-audience',
-		'details-date',
-		'details-location',
-		'details-price',
-		'details-shutdown',
-		'details-spaces',
-		'details-time',
-		'details-speaker',
-		'booking'
-	];
-
-	foreach ($blocks as $block) {
-		register_block_type(__DIR__ . '/build/blocks/' . $block);
-	}
+    $blocks = [
+        'upcoming',
+        'details',
+        'details-audience',
+        'details-date',
+        'details-location',
+        'details-price',
+        'details-shutdown',
+        'details-spaces',
+        'details-time',
+        'details-speaker',
+        'booking'
+    ];
+    foreach ($blocks as $block) {
+        register_block_type(__DIR__ . '/build/blocks/' . $block);
+    }
 }
 
 add_action('init', 'ctx_register_blocks');
