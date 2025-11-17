@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Pwerson\Application;
+namespace Contexis\Events\Person\Application;
 
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
