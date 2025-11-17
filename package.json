@@ -1,8 +1,8 @@
 {
 	"version": "7.0.0",
 	"scripts": {
-		"build": "wp-scripts build src/events-manager.js src/admin.js src/index.js src/frontend.js src/booking.js",
-		"start": "wp-scripts start src/events-manager.js src/admin.js src/index.js src/frontend.js src/booking.js",
+		"build": "wp-scripts build --config webpack.config.js",
+		"start": "wp-scripts start --config webpack.config.js",
 		"make-pot": "wp i18n make-pot . languages/events.pot --slug=events --domain=events --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
@@ -10,15 +10,16 @@
 	"dependencies": {
 		"@contexis/use-api-fetch": "^1.0.4",
 		"@contexis/wp-react-form": "^1.1.6",
-		"@wordpress/api-fetch": "^7.34.0",
-		"@wordpress/dataviews": "^8.0.0",
-		"@wordpress/icons": "^10.32.0",
+		"@wordpress/api-fetch": "^7.35.0",
+		"@wordpress/dataviews": "^10.3.0",
+		"@wordpress/icons": "^11.2.0",
 		"classnames": "^2.5.1",
 		"qs": "^6.14.0",
 		"react-inlinesvg": "^4.2.0",
-		"uuid": "^12.0.0"
+		"uuid": "^13.0.0"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.27.0"
+		"@biomejs/biome": "2.3.5",
+		"@wordpress/scripts": "^31.0.0"
 	}
 }
