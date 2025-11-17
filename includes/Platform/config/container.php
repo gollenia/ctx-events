@@ -10,13 +10,15 @@ return [
     \Contexis\Events\Platform\Wordpress\PostTypeRegistrar::class => create()
         ->constructor([
             \Contexis\Events\Event\Infrastructure\EventPost::class,
-            \Contexis\Events\Location\Infrastructure\LocationPost::class
+            \Contexis\Events\Location\Infrastructure\LocationPost::class,
+            \Contexis\Events\Person\Infrastructure\PersonPost::class
         ]),
 
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => create()
         ->constructor([
             get(\Contexis\Events\Event\Presentation\EventController::class),
-            get(\Contexis\Events\Location\Presentation\LocationController::class)
+            get(\Contexis\Events\Location\Presentation\LocationController::class),
+            get(\Contexis\Events\Person\Presentation\PersonController::class)
         ]),
 
     \Contexis\Events\Event\Domain\EventRepository::class
