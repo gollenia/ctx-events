@@ -1,25 +1,27 @@
-const initializer = ( initialState ) => initialState;
+const initializer = (initialState) => initialState;
 
-const createTicket = ( availableFields, availableTickets ) => {
+const createTicket = (availableFields, availableTickets) => {
 	const fields = {};
-	for ( let field of availableFields ) {
-		fields[ field.fieldid ] = field.defaultValue || '';
-		if ( field.type === 'select' || field.type === 'radio' ) {
-			fields[ field.fieldid ] = field.options[ 0 ];
+	for (const field of availableFields) {
+		fields[field.fieldid] = field.defaultValue || '';
+		if (field.type === 'select' || field.type === 'radio') {
+			fields[field.fieldid] = field.options[0];
 		}
 	}
 	return {
-		id: parseInt( Object.keys( availableTickets )[ 0 ] ),
+		id: parseInt(Object.keys(availableTickets)[0]),
 		fields,
 	};
 };
 
-const reducer = ( state = {}, action ) => {
+const reducer = (state = {}, action) => {
 	const { type, payload } = action;
 	const { data } = state;
 
-	const getCouponData = ( couponId ) => {
-		const coupon = state.available_coupons?.find( ( coupon ) => coupon.value === couponId );
+	const getCouponData = (couponId) => {
+		const coupon = state.available_coupons?.find(
+			(coupon) => coupon.value === couponId,
+		);
 
 		return {
 			discount: coupon ? coupon.discount : 0,
@@ -27,57 +29,65 @@ const reducer = ( state = {}, action ) => {
 		};
 	};
 
-	switch ( type ) {
+	switch (type) {
 		case 'SET_DATA':
 			state.data = payload;
-			state.coupon = getCouponData( state.data.booking.coupon );
+			state.coupon = getCouponData(state.data.booking.coupon);
 			return { ...state };
 
 		case 'SET_STATE':
 			state.state = payload;
 			return { ...state };
 
-		case 'ADD_TICKET':
-			const ticket = createTicket( data.forms.attendee_fields, data.tickets_available );
-			state.data.attendees.push( ticket );
+		case 'ADD_TICKET': {
+			const ticket = createTicket(
+				data.forms.attendee_fields,
+				data.tickets_available,
+			);
+			state.data.attendees.push(ticket);
 			state.currentTicket = state.data.attendees.length - 1;
 			state.sendState = 'unsaved';
 			return { ...state };
+		}
 
 		case 'SET_FIELD':
-			if ( payload.form === 'ticket' ) {
-				state.data.attendees[ payload.index ].fields[ payload.field ] = payload.value;
+			if (payload.form === 'ticket') {
+				state.data.attendees[payload.index].fields[payload.field] =
+					payload.value;
 			}
-			if ( payload.form === 'registration' ) {
-				state.data.registration[ payload.field ] = payload.value;
+			if (payload.form === 'registration') {
+				state.data.registration[payload.field] = payload.value;
 			}
-			if ( payload.form === 'donation' ) {
+			if (payload.form === 'donation') {
 				state.data.booking.donation = payload.value;
 			}
 			state.sendState = 'unsaved';
 			return { ...state };
 
-		case 'REMOVE_TICKET':
+		case 'REMOVE_TICKET': {
 			const index =
 				payload.index !== undefined
 					? payload.index
-					: state.request.attendees.findIndex( ( ticket ) => ticket.id === payload.id );
-			state.data.attendees.splice( index, 1 );
+					: state.request.attendees.findIndex(
+							(ticket) => ticket.id === payload.id,
+						);
+			state.data.attendees.splice(index, 1);
 			state.sendState = 'unsaved';
 			return { ...state };
+		}
 
 		case 'SET_CURRENT_TICKET':
 			state.currentTicket = payload;
 			return { ...state };
 
 		case 'SET_TICKET':
-			state.data.attendees[ payload.index ] = payload.ticket;
+			state.data.attendees[payload.index] = payload.ticket;
 			state.sendState = 'unsaved';
 			return { ...state };
 
 		case 'SET_COUPON':
 			state.data.booking.coupon = payload;
-			state.coupon = getCouponData( payload );
+			state.coupon = getCouponData(payload);
 			state.sendState = 'unsaved';
 			return { ...state };
 
@@ -95,7 +105,7 @@ const reducer = ( state = {}, action ) => {
 			return { ...state };
 
 		case 'ADD_NOTE':
-			state.data.booking.notes.push( payload );
+			state.data.booking.notes.push(payload);
 			return { ...state };
 
 		case 'RESET':

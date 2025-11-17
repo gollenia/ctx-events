@@ -1,0 +1,60 @@
+{
+	"name": "events-manager/details-location",
+	"apiVersion": 3,
+	"title": "Event Location",
+	"description": "Show the event location",
+	"category": "widgets",
+	"postTypes": ["ctx-event"],
+	"attributes": {
+		"icon": {
+			"type": "string",
+			"default": ""
+		},
+		"description": {
+			"type": "string",
+			"default": ""
+		},
+		"showTitle": {
+			"type": "boolean",
+			"default": true
+		},
+		"showAddress": {
+			"type": "boolean",
+			"default": true
+		},
+		"showZip": {
+			"type": "boolean",
+			"default": true
+		},
+		"showCity": {
+			"type": "boolean",
+			"default": true
+		},
+		"showCountry": {
+			"type": "boolean",
+			"default": false
+		},
+		"showLink": {
+			"type": "boolean",
+			"default": true
+		},
+		"url": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"parent": ["events-manager/details"],
+	"styles": [
+		{
+			"name": "icon",
+			"label": "Icon",
+			"isDefault": true
+		},
+		{
+			"name": "photo",
+			"label": "Photo"
+		}
+	],
+	"usesContext": ["postId"],
+	"render": "file:./render.php"
+}

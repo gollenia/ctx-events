@@ -1,23 +1,27 @@
 import { __ } from '@wordpress/i18n';
-import React from 'react';
 
-const BookingDetails = ( { store } ) => {
-	const [ state, dispatch ] = store;
+const BookingDetails = ({ store }) => {
+	const [state, dispatch] = store;
 	const data = state.data;
 
-	const paymentClass = [ state.data.booking.status === 1 ? 'paid' : 'unpaid', 'payment-status' ].join( ' ' );
+	const paymentClass = [
+		state.data.booking.status === 1 ? 'paid' : 'unpaid',
+		'payment-status',
+	].join(' ');
 
 	return (
 		<div className="booking-details">
 			<div className="booking-info">
 				<span>
-					<b>{ __( 'Date', 'events' ) }</b> { data.booking.date }
+					<b>{__('Date', 'events')}</b> {data.booking.date}
 				</span>
 				<span>
-					<b>{ __( 'Booking ID', 'events' ) } </b> { data.booking.id }
+					<b>{__('Booking ID', 'events')} </b> {data.booking.id}
 				</span>
 			</div>
-			<span className={ paymentClass }>{ data.booking.status_array[ data.booking.status ] }</span>
+			<span className={paymentClass}>
+				{data.booking.status_array[data.booking.status]}
+			</span>
 		</div>
 	);
 };

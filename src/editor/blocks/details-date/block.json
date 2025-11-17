@@ -1,0 +1,28 @@
+{
+	"name": "events-manager/details-date",
+	"apiVersion": 3,
+	"title": "Event Date",
+	"description": "Show the event date",
+	"category": "widgets",
+	"attributes": {
+		"icon": {
+			"type": "string",
+			"default": ""
+		},
+		"format": {
+			"type": "string",
+			"default": ""
+		},
+		"description": {
+			"type": "string",
+			"default": ""
+		},
+		"iCalLink": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"parent": ["events-manager/details"],
+	"render": "file:./render.php",
+	"postTypes": ["ctx-event"]
+}

@@ -1,77 +1,89 @@
 import { Button, Modal, SelectControl } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import React, { useEffect } from 'react';
 import AdminField from '../common/AdminField';
 
-const TicketModal = ( { store, onCancel, onSave } ) => {
-	const [ state, dispatch ] = store;
-	const ticket = state.currentTicket != 999 ? state.data.attendees[ state.currentTicket ] : null;
+const TicketModal = ({ store, onCancel, onSave }) => {
+	const [state, dispatch] = store;
+	const ticket =
+		state.currentTicket != 999
+			? state.data.attendees[state.currentTicket]
+			: null;
 	const { attendee_fields, tickets_available } = state.data;
 
-	const [ shadowTicket, setShadowTicket ] = React.useState( ticket );
-	useEffect( () => {
-		setShadowTicket( ticket );
-	}, [ ticket ] );
+	const [shadowTicket, setShadowTicket] = useState(ticket);
+	useEffect(() => {
+		setShadowTicket(ticket);
+	}, [ticket]);
 
 	const ticketOptions = () => {
-		const options = Object.keys( tickets_available ).map( ( key ) => {
-			return { label: tickets_available[ key ].name, value: tickets_available[ key ].id };
-		} );
+		const options = Object.keys(tickets_available).map((key) => {
+			return {
+				label: tickets_available[key].name,
+				value: tickets_available[key].id,
+			};
+		});
 
 		return options;
 	};
 
 	return (
 		<>
-			{ ticket && (
-				<Modal onRequestClose={ onCancel }>
+			{ticket && (
+				<Modal onRequestClose={onCancel}>
 					<div className="events-ticket-modal-content">
-						<h2>{ __( 'Edit Ticket', 'events' ) }</h2>
+						<h2>{__('Edit Ticket', 'events')}</h2>
 						<div>
 							<SelectControl
 								label="Ticket Type"
 								type="select"
-								value={ shadowTicket?.ticket_id }
-								onChange={ ( value ) => {
-									const newTicket = { ...shadowTicket, ticket_id: parseInt( value ) };
-									setShadowTicket( newTicket );
-								} }
-								options={ ticketOptions() }
+								value={shadowTicket?.ticket_id}
+								onChange={(value) => {
+									const newTicket = {
+										...shadowTicket,
+										ticket_id: parseInt(value),
+									};
+									setShadowTicket(newTicket);
+								}}
+								options={ticketOptions()}
 							/>
 						</div>
 						<div>
-							{ attendee_fields.map( ( field ) => {
+							{attendee_fields.map((field) => {
 								return (
 									<AdminField
-										admin={ true }
-										{ ...field }
-										key={ field.fieldid }
-										label={ field.label }
-										value={ shadowTicket?.fields[ field.fieldid ] }
-										onChange={ ( value ) => {
+										admin={true}
+										{...field}
+										key={field.fieldid}
+										label={field.label}
+										value={shadowTicket?.fields[field.fieldid]}
+										onChange={(value) => {
 											const newTicket = {
 												...shadowTicket,
-												fields: { ...shadowTicket.fields, [ field.fieldid ]: value },
+												fields: {
+													...shadowTicket.fields,
+													[field.fieldid]: value,
+												},
 											};
-											setShadowTicket( newTicket );
-										} }
+											setShadowTicket(newTicket);
+										}}
 									/>
 								);
-							} ) }
+							})}
 						</div>
 						<div className="modal-actions">
 							<Button
-								onClick={ () => {
+								onClick={() => {
 									onCancel();
-								} }
+								}}
 								variant="secondary"
 							>
 								Cancel
 							</Button>
 							<Button
-								onClick={ () => {
-									onSave( shadowTicket, state.currentTicket );
-								} }
+								onClick={() => {
+									onSave(shadowTicket, state.currentTicket);
+								}}
 								variant="primary"
 							>
 								OK
@@ -79,7 +91,7 @@ const TicketModal = ( { store, onCancel, onSave } ) => {
 						</div>
 					</div>
 				</Modal>
-			) }
+			)}
 		</>
 	);
 };

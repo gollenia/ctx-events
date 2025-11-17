@@ -1,16 +1,10 @@
-import ReactDOM from 'react-dom';
+import { createRoot } from '@wordpress/element';
+import BookingTable from './BookingTable';
 import './style.scss';
 
-import BookingTable from './BookingTable';
+export function initBookingsAdmin(rootElement) {
+	if (!rootElement) return;
 
-function BookingsAdmin() {
-	document.addEventListener( 'DOMContentLoaded', () => {
-		const rootElement = document.getElementById( 'em-bookings-admin' );
-		if ( ! rootElement ) return;
-
-		const app = ReactDOM.createRoot( rootElement );
-
-		app.render( <BookingTable /> );
-	} );
+	const root = createRoot(rootElement);
+	root.render(<BookingTable />);
 }
-export { BookingsAdmin };

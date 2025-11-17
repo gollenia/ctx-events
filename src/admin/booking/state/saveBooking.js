@@ -1,9 +1,9 @@
 import apiFetch from '@wordpress/api-fetch';
 
-const saveBooking = ( bookingId, state, dispatch ) => {
+const saveBooking = (bookingId, state, dispatch) => {
 	const data = state.data;
 
-	let fetchRequest = {
+	const fetchRequest = {
 		registration: data.registration,
 		booking_id: bookingId,
 		gateway: data.booking.gateway,
@@ -14,21 +14,21 @@ const saveBooking = ( bookingId, state, dispatch ) => {
 		coupon: data.booking.coupon,
 	};
 
-	dispatch( { type: 'SET_SEND_STATE', payload: 'saving' } );
-	console.log( 'Saving booking with data:', data.booking );
-	apiFetch( {
-		path: `/events/v2/booking/${ bookingId }`,
+	dispatch({ type: 'SET_SEND_STATE', payload: 'saving' });
+	console.log('Saving booking with data:', data.booking);
+	apiFetch({
+		path: `/events/v2/booking/${bookingId}`,
 		method: 'PUT',
 		data: data.booking,
-	} )
-		.then( ( apiResponse ) => {
-			console.log( 'Booking saved successfully', apiResponse );
-			dispatch( { type: 'SET_SEND_STATE', payload: 'saved' } );
-		} )
-		.catch( ( error ) => {
-			console.error( 'Error saving booking:', error );
-			dispatch( { type: 'SET_SEND_STATE', payload: 'failed' } );
-		} );
+	})
+		.then((apiResponse) => {
+			console.log('Booking saved successfully', apiResponse);
+			dispatch({ type: 'SET_SEND_STATE', payload: 'saved' });
+		})
+		.catch((error) => {
+			console.error('Error saving booking:', error);
+			dispatch({ type: 'SET_SEND_STATE', payload: 'failed' });
+		});
 };
 
 export default saveBooking;
