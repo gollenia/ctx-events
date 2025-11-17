@@ -8,16 +8,7 @@ use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
 class LocationPost extends PostType implements HasMetaData
 {
-    public const POST_TYPE = 'location';
-
-    public static function init(): self
-    {
-        $instance = new self();
-        add_action('init', array($instance, 'register_post_type'));
-        //add_action('init', array($instance, 'meta_query_filter'));
-        add_action('init', array($instance, 'register_meta'));
-        return $instance;
-    }
+    public const POST_TYPE = 'ctx-event-location';
 
     public static function getSlug(): string
     {
@@ -71,11 +62,9 @@ class LocationPost extends PostType implements HasMetaData
             'exclude_from_search' => true,
             'publicly_queryable' => false,
             'rewrite' => ['slug' => self::getSlug(), 'with_front' => false],
+			'template' => [[ 'ctx-events/location-editor' ]],
             'query_var' => true,
             'has_archive' => false,
-            'template' => [
-                ['events-manager/locationeditor']
-            ],
             'template_lock' => 'all',
             'supports' => apply_filters('em_cp_location_supports', ['title','excerpt','thumbnail','editor','custom-fields']),
             'label' => __('Locations', 'events'),

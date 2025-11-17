@@ -7,6 +7,7 @@ use Contexis\Events\Shared\Infrastructure\Abstracts\MetaData;
 final class LocationMeta extends MetaData
 {
     public const ADDRESS   = '_location_address';
+	public const EXTENDED_ADDRESS = '_location_extended_address';
     public const CITY      = '_location_town';
     public const STATE     = '_location_state';
     public const POSTCODE  = '_location_postcode';
@@ -18,6 +19,7 @@ final class LocationMeta extends MetaData
 
     protected static array $metadata = [
         self::ADDRESS => ['type' => 'string'],
+		self::EXTENDED_ADDRESS => ['type' => 'string'],
         self::CITY => ['type' => 'string'],
         self::STATE => ['type' => 'string'],
         self::POSTCODE => ['type' => 'string'],
