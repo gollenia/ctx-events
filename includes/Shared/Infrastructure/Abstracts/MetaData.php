@@ -18,10 +18,10 @@ abstract class MetaData
 
     public static function getRegisterArgs(): array
     {
-        $base = self::baseArgs();
+        $base = static::baseArgs();
         $out  = [];
 
-        foreach (self::$metadata as $name => $args) {
+        foreach (static::$metadata as $name => $args) {
             $out[$name] = array_merge(
                 $base,
                 $args
@@ -31,7 +31,7 @@ abstract class MetaData
                 $out[$name]['show_in_rest'] = true;
             }
         }
-
+	
         return $out;
     }
 

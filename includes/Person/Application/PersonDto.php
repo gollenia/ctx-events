@@ -2,7 +2,8 @@
 
 namespace Contexis\Events\Pwerson\Application;
 
-use Contexis\Events\Domain\ValueObjects\Email;
+use Contexis\Events\Person\Domain\Person;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
 
 abstract class PersonDto
 {
@@ -14,13 +15,13 @@ abstract class PersonDto
         public readonly ?string $honorificPrefix,
         public readonly Email $email,
         public readonly ?string $telephone,
-        public readonly ?string $website,
+        public readonly ?array $sameAs,
         public readonly ?string $jobTitle,
         public readonly ?string $worksFor
     ) {
     }
 
-    public static function fromDomainModel(\Contexis\Events\Domain\Models\Person $person): self
+    public static function fromDomainModel(Person $person): self
     {
         return new self(
             id: $person->id->toInt(),
@@ -30,7 +31,7 @@ abstract class PersonDto
             honorificPrefix: $person->honorificPrefix,
             email: new Email($person->email),
             telephone: $person->telephone,
-            website: $person->website,
+            sameAs: $person->sameAs,
             jobTitle: $person->jobTitle,
             worksFor: $person->worksFor
         );

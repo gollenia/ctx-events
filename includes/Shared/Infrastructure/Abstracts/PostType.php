@@ -10,10 +10,10 @@ abstract class PostType
     {
         $instance = new static();
         add_action('init', [$instance, 'registerPostType']);
-        if (in_array('Contexis\Events\Core\Contracts\HasTaxonomies', class_implements($instance))) {
-                add_action('init', [$instance, 'registerTaxonomies']);
+		if(method_exists($instance, 'registerTaxonomies')) {
+            add_action('init', [$instance, 'registerTaxonomies']);
         }
-        if (in_array('Contexis\Events\Core\Contracts\HasMetaData', class_implements($instance))) {
+		if(method_exists($instance, 'registerMeta')) {
             add_action('init', [$instance, 'registerMeta']);
         }
         return $instance;

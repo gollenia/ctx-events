@@ -15,7 +15,8 @@ return [
 
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => create()
         ->constructor([
-            get(\Contexis\Events\Event\Presentation\EventController::class)
+            get(\Contexis\Events\Event\Presentation\EventController::class),
+            get(\Contexis\Events\Location\Presentation\LocationController::class)
         ]),
 
     \Contexis\Events\Event\Domain\EventRepository::class
