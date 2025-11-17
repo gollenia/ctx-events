@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "events-manager/details-item",
+	"name": "ctx-events/details-item",
 	"apiVersion": 3,
 	"title": "Other Item",
 	"keywords": ["list", "table"],
@@ -65,7 +65,7 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"supports": {
 		"spacing": {
 			"margin": ["top", "bottom"],
@@ -95,5 +95,6 @@
 		"border": ".wp-block-ctx-blocks-description-item .ctx__description-item-image"
 	},
 	"editorStyle": "events-block-editor-style",
-	"style": "events-block-style"
+	"style": "events-block-style",
+	"usesContext": ["postType"]
 }

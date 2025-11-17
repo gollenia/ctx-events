@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-date",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-date",
+	"apiVersion": 3,
 	"title": "Date Field",
 	"description": "Lets the user specify a date",
 	"category": "widgets",
@@ -18,11 +19,11 @@
 			"default": false
 		},
 		"min": {
-			"type": "datetime",
+			"type": "string",
 			"default": ""
 		},
 		"max": {
-			"type": "datetime",
+			"type": "string",
 			"default": ""
 		},
 		"label": {
@@ -42,5 +43,5 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

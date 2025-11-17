@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/details-time",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-time",
+	"apiVersion": 3,
 	"title": "Event Time",
 	"description": "Show the event Time",
 	"category": "widgets",
@@ -18,6 +19,7 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/details"],
+	"usesContext": ["postType"],
+	"parent": ["ctx-events/details"],
 	"render": "file:./render.php"
 }

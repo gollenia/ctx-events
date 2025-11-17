@@ -1,9 +1,9 @@
 {
-	"name": "events-manager/next",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/countdown",
 	"title": "Event Countdown",
 	"description": "Display a countdown to the next event or its date",
-	"text-domain": "events",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"category": "widgets",
 	"attributes": {
 		"display": {

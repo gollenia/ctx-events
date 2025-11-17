@@ -1,5 +1,6 @@
 {
-	"name": "events-manager/details-date",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-date",
 	"apiVersion": 3,
 	"title": "Event Date",
 	"description": "Show the event date",
@@ -22,7 +23,7 @@
 			"default": false
 		}
 	},
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"render": "file:./render.php",
-	"postTypes": ["ctx-event"]
+	"usesContext": ["postType"]
 }

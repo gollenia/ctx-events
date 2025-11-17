@@ -1,5 +1,6 @@
 {
-	"name": "events-manager/details-audience",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-audience",
 	"apiVersion": 3,
 	"title": "Event Audience",
 	"description": "Show the event audience",
@@ -23,6 +24,6 @@
 		}
 	},
 	"usesContext": ["postType"],
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"render": "file:./render.php"
 }

@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-country",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-country",
+	"apiVersion": 3,
 	"title": "Country",
 	"description": "Lets the user select a country",
 	"category": "widgets",
@@ -38,5 +39,5 @@
 			"default": "world"
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

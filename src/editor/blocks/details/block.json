@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "events-manager/details",
+	"name": "ctx-events/details",
 	"apiVersion": 3,
 	"title": "Event Details",
 	"keywords": ["list", "table"],
@@ -51,5 +51,6 @@
 	},
 
 	"editorStyle": "events-block-editor-style",
-	"style": "events-block-style"
+	"style": "events-block-style",
+	"usesContext": ["postType"]
 }

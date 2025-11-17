@@ -1,8 +1,9 @@
 {
-	"name": "events-manager/details-speaker",
-	"apiVersion": 2,
-	"title": "Event Speaker",
-	"description": "Show the event speaker",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-person",
+	"apiVersion": 3,
+	"title": "Event Person",
+	"description": "Show the event person",
 	"category": "widgets",
 	"attributes": {
 		"showPortrait": {
@@ -38,6 +39,6 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"render": "file:./render.php"
 }

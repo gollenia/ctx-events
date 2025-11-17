@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-textarea",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-textarea",
+	"apiVersion": 3,
 	"title": "Text Area",
 	"description": "Lets the user type a longer text",
 	"category": "widgets",
@@ -42,5 +43,5 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

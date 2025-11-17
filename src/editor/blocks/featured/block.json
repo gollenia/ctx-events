@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/featured",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/featured",
+	"apiVersion": 3,
 	"title": "Featured",
 	"category": "widgets",
 	"attributes": {

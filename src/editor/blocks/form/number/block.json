@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/number",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/number",
+	"apiVersion": 3,
 	"title": "Number Field",
 	"description": "Lets the user give a number or a range of numbers",
 	"category": "widgets",
@@ -54,5 +55,5 @@
 			"default": false
 		}
 	},
-	"parent": ["events-manager/form-fields"]
+	"parent": ["ctx-events/form-fields"]
 }

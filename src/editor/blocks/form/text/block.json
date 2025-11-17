@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-text",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-text",
+	"apiVersion": 3,
 	"title": "Text Field",
 	"description": "Lets the user type a short text",
 	"category": "widgets",
@@ -38,5 +39,5 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

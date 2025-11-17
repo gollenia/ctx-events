@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-select",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-select",
+	"apiVersion": 3,
 	"title": "Select",
 	"description": "Lets the user select something",
 	"category": "widgets",
@@ -42,5 +43,5 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

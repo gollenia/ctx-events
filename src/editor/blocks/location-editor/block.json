@@ -1,6 +1,7 @@
 {
+	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/location-editor",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"title": "Location Editor",
 	"description": "Edit a location's metadata.",
 	"category": "widgets",
@@ -18,5 +19,5 @@
 		"customClass": false,
 		"selector": false
 	},
-	"postTypes": ["ctx-event-location"]
+	"usesContext": ["postType"]
 }

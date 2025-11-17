@@ -1,5 +1,6 @@
 {
-	"name": "events-manager/booking",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/booking",
 	"apiVersion": 3,
 	"title": "Event Booking",
 	"description": "Add a button that allows the user to book tickets for an event.",
@@ -63,6 +64,5 @@
 	"editorStyle": "events-block-editor-style",
 	"style": "booking-style",
 	"render": "file:./render.php",
-	"viewScript": "booking-view",
-	"postTypes": ["ctx-event"]
+	"viewScript": "booking-view"
 }

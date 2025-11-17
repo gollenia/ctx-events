@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/form-radio",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/form-radio",
+	"apiVersion": 3,
 	"title": "Radio Select",
 	"description": "Lets the user check something",
 	"category": "widgets",
@@ -38,5 +39,5 @@
 			"default": []
 		}
 	},
-	"parent": ["events-manager/form-container"]
+	"parent": ["ctx-events/form-container"]
 }

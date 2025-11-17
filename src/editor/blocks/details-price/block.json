@@ -1,6 +1,7 @@
 {
-	"name": "events-manager/details-price",
-	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-price",
+	"apiVersion": 3,
 	"title": "Event Price",
 	"description": "Show the event price",
 	"category": "widgets",
@@ -22,7 +23,7 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"usesContext": ["postId", "postType"],
 	"render": "file:./render.php"
 }

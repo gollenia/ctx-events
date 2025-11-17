@@ -1,10 +1,11 @@
 {
-	"name": "events-manager/details-location",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/details-location",
 	"apiVersion": 3,
 	"title": "Event Location",
 	"description": "Show the event location",
 	"category": "widgets",
-	"postTypes": ["ctx-event"],
+	"usesContext": ["postType", "postId"],
 	"attributes": {
 		"icon": {
 			"type": "string",
@@ -43,7 +44,7 @@
 			"default": ""
 		}
 	},
-	"parent": ["events-manager/details"],
+	"parent": ["ctx-events/details"],
 	"styles": [
 		{
 			"name": "icon",
@@ -55,6 +56,5 @@
 			"label": "Photo"
 		}
 	],
-	"usesContext": ["postId"],
 	"render": "file:./render.php"
 }
