@@ -23,16 +23,15 @@ if (!defined('ABSPATH')) {
 
 
 require_once __DIR__ . '/Assets.php';
-add_action('plugin_loaded', function () {
 
+
+add_action('plugin_loaded', function () {
     load_plugin_textdomain('events', false, dirname(plugin_basename(__FILE__)) . '/languages');
     Bootstrap::init();
 }, 10);
 
 function ctx_register_blocks(): void
 {
-
-
     $blocks = [
         'upcoming',
         'details',
