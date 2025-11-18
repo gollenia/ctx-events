@@ -9,6 +9,21 @@ final class Email
     ) {
     }
 
+    public static function tryFrom(?string $address): ?self
+    {
+        if ($address === null) return null;
+
+        $address = trim($address);
+
+        if ($address === '') return null;
+
+        if (!filter_var($address, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        return new self($address);
+    }
+
     public function address(): string
     {
         return $this->address;

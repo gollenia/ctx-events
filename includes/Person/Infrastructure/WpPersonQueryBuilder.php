@@ -16,8 +16,6 @@ final class WpPersonQueryBuilder extends WpQueryBuilder
             ->withPagination($criteria->page, $criteria->perPage)
             ->withTaxonomy(PersonPost::CATEGORY, $criteria->categories)
             ->withStatus($criteria->status);
-
-
         return $builder;
     }
 }

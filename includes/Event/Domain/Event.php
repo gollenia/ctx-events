@@ -6,6 +6,7 @@ use Contexis\Events\Booking\Domain\BookingDecision;
 use Contexis\Events\Booking\Domain\BookingPolicy;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
+use Contexis\Events\Shared\Domain\ContentStatus;
 use Contexis\Events\Shared\Domain\Traits\ReplicatesProperties;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use DateTimeImmutable;
@@ -16,6 +17,7 @@ final class Event
 
     public function __construct(
         public readonly EventId $id,
+        public readonly ContentStatus $contentStatus,
         public readonly string $name,
         public readonly ?string $description,
         public readonly ?string $audience,

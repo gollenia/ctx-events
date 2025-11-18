@@ -2,7 +2,6 @@
 
 namespace Contexis\Events\Shared\Presentation\Contracts;
 
-interface RestAdapter
+interface Resource extends \JsonSerializable
 {
-    public function register(): void;
 }

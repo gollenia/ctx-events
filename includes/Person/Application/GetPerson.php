@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Contexis\Events\Person\Application;
 
@@ -8,15 +8,15 @@ use Contexis\Events\Person\Domain\PersonId;
 
 final class GetPerson
 {
-	public function __construct(
-		private readonly PersonRepository $personRepository,
-	) {
-	}
+    public function __construct(
+        private readonly PersonRepository $personRepository,
+    ) {
+    }
 
-	public function execute(int $id): PersonDto
-	{
-		$person = $this->personRepository->find(PersonId::from($id));
+    public function execute(int $id): PersonDto
+    {
+        $person = $this->personRepository->find(PersonId::from($id));
 
-		return PersonDto::fromDomainModel($person);
-	}
+        return PersonDto::fromDomainModel($person);
+    }
 }

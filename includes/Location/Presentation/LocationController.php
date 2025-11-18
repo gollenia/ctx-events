@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Contexis\Events\Location\Presentation;
 
@@ -10,7 +10,7 @@ use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class LocationController implements RestController
 {
-	public function __construct(
+    public function __construct(
         private GetLocation $getLocation,
         private ListLocations $listLocations
     ) {
@@ -19,9 +19,9 @@ final class LocationController implements RestController
     }
 
 
-	public function register(): void
-	{
-		register_rest_route('/events/v3', '/location/(?P<id>\d+)', array(
+    public function register(): bool
+    {
+        return register_rest_route('/events/v3', '/location/(?P<id>\d+)', array(
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
@@ -38,11 +38,9 @@ final class LocationController implements RestController
                 )
             ),
         ));
+    }
 
-
-	}
-
-	public function getItem(\WP_REST_Request $request): \WP_REST_Response
+    public function getItem(\WP_REST_Request $request): \WP_REST_Response
     {
         $event_id = (int) $request->get_param('id');
         $include = LocationIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
