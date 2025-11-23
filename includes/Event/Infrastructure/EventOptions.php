@@ -17,12 +17,14 @@ final class EventOptions extends WpOptions
                 'default'     => true,
                 'label'       => __('Show past events in public views', 'ctx-events'),
                 'description' => __('If enabled, past events will be visible to all users in public views.', 'ctx-events'),
+                'domain'      => 'events',
             ],
             self::EVENT_ONGOING_IS_PAST => [
                 'type'        => 'bool',
                 'default'     => false,
                 'label'       => __('Consider ongoing events as past', 'ctx-events'),
                 'description' => __('If enabled, events that are currently ongoing will be treated as past events.', 'ctx-events'),
+                'domain'      => 'events',
             ],
         ];
     }
