@@ -114,7 +114,7 @@ const renderFieldControl = (field, onChange) => {
  */
 const Options = () => {
 	const [fields, setFields] = useState([]);
-	const [values, setValues] = useState({});
+
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [notice, setNotice] = useState(null);
@@ -129,8 +129,7 @@ const Options = () => {
 			.then((response) => {
 				console.log('Loaded options:', response);
 				// Wir erwarten ein Array von Field-Objekten
-				setFields(response.fields || []);
-				setValues(response.values || {});
+				setFields(response || []);
 			})
 			.catch((err) => {
 				// simple error handling
@@ -140,8 +139,6 @@ const Options = () => {
 			})
 			.finally(() => setLoading(false));
 	}, []);
-
-	console.log('Rendering Options with fields:', fields);
 
 	// Domains/Tabs bestimmen
 	const domains = useMemo(() => {
@@ -231,13 +228,9 @@ const Options = () => {
 								const sectionLabel = sectionFields[0].section_label || null;
 
 								return (
-									<Card key={sectionId} className="ctx-events-settings-section">
-										{sectionLabel && (
-											<CardHeader>
-												<h2>{sectionLabel}</h2>
-											</CardHeader>
-										)}
-										<CardBody>
+									<div key={sectionId} className="ctx-events-settings-section">
+										{sectionLabel && <h2>{sectionLabel}</h2>}
+										<div>
 											{sectionFields.map((field) => (
 												<div
 													key={field.key}
@@ -248,8 +241,8 @@ const Options = () => {
 													)}
 												</div>
 											))}
-										</CardBody>
-									</Card>
+										</div>
+									</div>
 								);
 							})}
 						</div>
@@ -258,7 +251,12 @@ const Options = () => {
 			</TabPanel>
 
 			<div className="ctx-events-settings-actions">
-				<Button isPrimary isBusy={saving} onClick={handleSave}>
+				<Button
+					isBusy={saving}
+					onClick={handleSave}
+					style={{ marginTop: '20px' }}
+					isPrimary
+				>
 					{__('Änderungen speichern', 'ctx-events')}
 				</Button>
 			</div>

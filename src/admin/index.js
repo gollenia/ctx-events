@@ -1,9 +1,10 @@
 import domReady from '@wordpress/dom-ready';
-import './admin.scss';
+import './style.scss';
 import { initBookingsAdmin } from './bookings/index.js';
 import { initGatewayAdmin } from './gateways/index.js';
 import { initOptionsAdmin } from './options/index.js';
 
+console.log('ctx-events admin loaded');
 domReady(() => {
 	const mounts = [
 		{ id: 'ctx-bookings-admin', init: initBookingsAdmin },

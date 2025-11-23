@@ -1,0 +1,113 @@
+
+
+#wpcontent:has(#ctx-options-admin) {
+	padding-left: 0px !important;
+
+	.notice {
+		display: none !important;
+	}
+}
+
+.ctx-events-settings {
+	h1 {
+		
+    	font-weight: 600;
+    	font-size: 23px;
+    	line-height: 1.3;
+		background: #fff;
+		padding: 1rem;
+		margin: 0;
+		text-align: center;
+	}
+
+	.components-tab-panel__tabs {
+		background-color: #ffffff;
+		justify-content: center;
+	}
+
+	.components-tab-panel__tab-content {
+	    margin: auto;
+    	max-width: 800px;
+		margin-top: 2rem;
+	}
+
+	.ctx-events-settings-actions {
+		text-align: center;
+		margin-top: 2rem;
+	}
+}
+
+p.warning {
+	border: 2px solid #fd0000;
+	background: #ff7146;
+	color: #fff;
+	font-weight: bold;
+	padding: 5px;
+}
+.debug {
+	color: green;
+	background: #b7f98c;
+	margin: 15px;
+	padding: 10px;
+	border: 1px solid #629948;
+}
+
+.switch-tab {
+	background: #aaa;
+	width: 100px;
+	float: right;
+	text-align: center;
+	margin: 3px 1px 0 5px;
+	padding: 2px;
+}
+.switch-tab a {
+	color: #fff;
+	text-decoration: none;
+}
+.switch-tab a:hover {
+	color: #d54e21;
+}
+
+
+
+.em-booking-graph {
+	margin-top: 6px;
+	border-radius: 999px;
+	display: flex;
+	width: 100px;
+	position: relative;
+	height: 8px;
+	background: #dddddd;
+	box-shadow: inset 1px 1px 3px rgb( 0, 0, 0, 0.2 );
+}
+
+.em-booking-graph-booked {
+	border-radius: 999px;
+	position: relative;
+	height: 8px;
+	background: #4caf50;
+}
+
+.em-booking-graph-booked.cut {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.em-booking-graph-pending {
+	border-radius: 999px;
+	position: relative;
+	height: 8px;
+	background: #ffc107;
+}
+
+.em-booking-graph-pending.cut {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.em-booking-graph-full {
+	border-radius: 999px;
+	position: relative;
+	height: 8px;
+	background: #f55e53;
+}
