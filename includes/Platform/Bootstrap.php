@@ -14,8 +14,8 @@ class Bootstrap
 {
     public static function init(): void
     {
+        Assets::init();
         $container = ContainerFactory::build();
-
         $container->get(DatabaseRegistrar::class)->hook();
         $container->get(OptionsRegistrar::class)->hook();
         $container->get(PostTypeRegistrar::class)->hook();

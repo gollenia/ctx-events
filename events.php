@@ -16,7 +16,6 @@ Domain Path: /languages
 */
 
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
-require_once __DIR__ . '/Assets.php';
 
 add_action('plugins_loaded', function () {
     load_plugin_textdomain(
@@ -28,6 +27,7 @@ add_action('plugins_loaded', function () {
     Contexis\Events\Platform\Bootstrap::init();
     do_action('qm/stop', 'events');
 }, 10);
+
 
 function ctx_register_blocks(): void
 {
