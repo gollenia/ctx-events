@@ -36,15 +36,14 @@ final class OptionController implements RestController
     {
         $fields = $this->definitions->all();
 
-        $values = [];
+        $result = [];
         foreach ($fields as $key => $field) {
-            $values[$key] = get_option($key, $field['default'] ?? null);
+            $field['value'] = get_option($key, $field['default'] ?? null);
+            $field['key'] = $key;
+            $result[] = $field;
         }
 
-        return new \WP_REST_Response([
-            'fields' => $fields,
-            'values' => $values,
-        ]);
+        return new \WP_REST_Response($result);
     }
 
     public function update(\WP_REST_Request $request): \WP_REST_Response
