@@ -153,7 +153,7 @@ final class PostSnapshot
             try {
                 return (new DateTimeImmutable('@' . (int)$v))->setTimezone($tz ?? new DateTimeZone(date_default_timezone_get()));
             } catch (\Throwable) {
-            /* fall through */
+                return $default;
             }
         }
 

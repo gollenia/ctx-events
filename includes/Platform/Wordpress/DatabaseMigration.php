@@ -6,35 +6,34 @@ use Contexis\Events\Booking\Infrastructure\AttendeeMigration;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 
-final class Migration
+final class DatabaseMigration
 {
     private const VERSION = '1.0.2';
 
-    private const MIGRATIONS = [
-        BookingMigration::class,
-        TransactionMigration::class,
-        AttendeeMigration::class
-    ];
+    private DatabaseRegistrar $databases;
 
-    public static function migrate(): void
+    public function __construct(DatabaseRegistrar $databases)
+    {
+        $this->databases = $databases;
+    }
+
+    public function migrate(): void
     {
         $current = get_option('ctx_events_db_version', '0');
         if (version_compare($current, self::VERSION, '<')) {
-            self::run();
+            $this->run();
             update_option('ctx_events_db_version', self::VERSION, false);
         }
     }
 
-    private static function run(): void
+    private function run(): void
     {
         global $wpdb;
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         $charset = $wpdb->get_charset_collate();
 
-        foreach (self::MIGRATIONS as $class) {
-            $migration = new $class();
-
+        foreach ($this->databases->all() as $migration) {
             $table = $migration->getTableName();
             $cols  = $migration->getColumnsAsString();
 

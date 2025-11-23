@@ -2,6 +2,7 @@
 
 namespace Contexis\Events\Location\Infrastructure;
 
+use Contexis\Events\Shared\Infrastructure\Wordpress\PostStatusMapper;
 use Contexis\Events\Location\Domain\GeoCoordinates;
 use Contexis\Events\Location\Domain\Location;
 use Contexis\Events\Location\Domain\LocationId;
@@ -15,6 +16,7 @@ class LocationMapper
     {
         return new Location(
             id: LocationId::from($snapshot->id),
+            status: PostStatusMapper::fromPost($snapshot->post_status),
             name: $snapshot->post_title,
             address: Address::createOrNot(
                 streetAddress: $snapshot->getString(LocationMeta::ADDRESS),
@@ -26,8 +28,9 @@ class LocationMapper
             ),
             geoCoordinates: $snapshot->getFloat(LocationMeta::LATITUDE) && $snapshot->getFloat(LocationMeta::LONGITUDE)
                 ? new GeoCoordinates(
-					$snapshot->getFloat(LocationMeta::LATITUDE), 
-					$snapshot->getFloat(LocationMeta::LONGITUDE))
+                    $snapshot->getFloat(LocationMeta::LATITUDE),
+                    $snapshot->getFloat(LocationMeta::LONGITUDE)
+                )
                 : null,
             imageId: ImageId::from($snapshot->getThumbnailId()),
             externalUrl: $snapshot->getString(LocationMeta::URL)

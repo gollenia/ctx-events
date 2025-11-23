@@ -13,9 +13,9 @@ final class PersonController implements RestController
     ) {
     }
 
-    public function register(): bool
+    public function register(): void
     {
-        return register_rest_route('/events/v3', '/person/(?P<id>\d+)', array(
+        register_rest_route('/events/v3', '/person/(?P<id>\d+)', array(
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
@@ -39,7 +39,7 @@ final class PersonController implements RestController
         $person_id = (int) $request->get_param('id');
         $include = PersonIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
 
-        $person_dto = $this->getPerson->execute($person_id, $include);
+        $person_dto = $this->getPerson->execute($person_id, $include, ViewContextFactory::createFromCurrentUser());
 
         if (!$person_dto) {
             return new \WP_REST_Response(['message' => 'Person not found'], 404);

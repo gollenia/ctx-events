@@ -5,10 +5,10 @@ namespace Contexis\Events\Shared\Domain\ValueObjects;
 final class ViewContext
 {
     public function __construct(
-        private readonly int $userId, // 0 for anonymous
-        private readonly bool $canEditPosts = false, // author
-        private readonly bool $canEditOthersPosts = false,  // editor
-        private readonly bool $canManageOptions = false // admin
+        private readonly int $userId,
+        private readonly bool $canView = false,
+        private readonly bool $canEdit = false,
+        private readonly bool $canManageOptions = false
     ) {
     }
 
@@ -17,14 +17,14 @@ final class ViewContext
         return $this->userId === 0;
     }
 
-    public function canEditOwnPosts(): bool
+    public function canView(): bool
     {
-        return $this->canEditPosts && !$this->canEditOthersPosts;
+        return $this->canView;
     }
 
-    public function canEditOthersPosts(): bool
+    public function canEdit(): bool
     {
-        return $this->canEditOthersPosts;
+        return $this->canEdit;
     }
 
     public function isAdmin(): bool

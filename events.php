@@ -14,20 +14,19 @@ Author URI: https://github.com/gollenia/events
 Text Domain: events
 Domain Path: /languages
 */
+
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
-use Contexis\Events\Platform\Bootstrap;
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-
 require_once __DIR__ . '/Assets.php';
 
-
-add_action('plugin_loaded', function () {
-    load_plugin_textdomain('events', false, dirname(plugin_basename(__FILE__)) . '/languages');
-    Bootstrap::init();
+add_action('plugins_loaded', function () {
+    load_plugin_textdomain(
+        'events',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+    do_action('qm/start', 'events');
+    Contexis\Events\Platform\Bootstrap::init();
+    do_action('qm/stop', 'events');
 }, 10);
 
 function ctx_register_blocks(): void
@@ -42,11 +41,11 @@ function ctx_register_blocks(): void
         'details-shutdown',
         'details-spaces',
         'details-time',
-        'details-speaker',
+        'details-person',
         'booking'
     ];
     foreach ($blocks as $block) {
-        register_block_type(__DIR__ . '/build/blocks/' . $block);
+        register_block_type(__DIR__ . '/build/editor/blocks/' . $block);
     }
 }
 

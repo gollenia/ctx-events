@@ -2,6 +2,7 @@
 
 namespace Contexis\Events\Person\Infrastructure;
 
+use Contexis\Events\Shared\Infrastructure\Wordpress\PostStatusMapper;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Person\Domain\PersonId;
@@ -15,6 +16,7 @@ final readonly class PersonMapper
 
         return new Person(
             id: PersonId::from($snapshot->id),
+            status: PostStatusMapper::fromPost($snapshot->post_status),
             givenName: $snapshot->getMetaValue(PersonMeta::FIRST_NAME),
             familyName: $snapshot->getMetaValue(PersonMeta::LAST_NAME),
             honorificSuffix: $snapshot->getMetaValue(PersonMeta::PREFIX),

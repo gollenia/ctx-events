@@ -8,8 +8,11 @@ use Contexis\Events\Event\Domain\EventId;
 use Contexis\Events\Event\Domain\EventStatus;
 use Contexis\Events\Event\Domain\EventViewConfig;
 use Contexis\Events\Event\Domain\RecurrenceId;
+use Contexis\Events\Shared\Infrastructure\Wordpress\PostStatusMapper;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
+use Contexis\Events\Person\Domain\PersonId;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 use DateTimeImmutable;
@@ -31,10 +34,10 @@ final class EventMapper
 
         $event = new Event(
             id: EventId::from($post->id),
+            status: PostStatusMapper::fromPost($post->post_status),
             name: $post->getString('post_title'),
             audience: $post->getString('audience') ?? null,
             description: $post->getString('post_excerpt'),
-            eventStatus: EventStatus::from($post->getString('post_status')),
             authorId: new AuthorId($post->getInt('post_author')),
             bookingPolicy: $booking_policy,
             eventViewConfig: EventViewConfig::fromArray($post->getArray('_events_view_config', [])),
@@ -44,6 +47,7 @@ final class EventMapper
             locationId: LocationId::from($post->getInt('_location_id')),
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt('_recurrence_id')),
+            personId: $post->getInt('_person_id') ? PersonId::from($post->getInt('_person_id')) : null,
         );
 
         return $event;

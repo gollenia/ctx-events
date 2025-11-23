@@ -25,9 +25,9 @@ class Assets
     {
 
         $script_asset = $this->getAssetData('frontend');
-		if (!$script_asset) {
-			return;
-		}
+        if (!$script_asset) {
+            return;
+        }
 
         wp_enqueue_script(
             'ctx-events-frontend',
@@ -47,16 +47,20 @@ class Assets
         wp_set_script_translations('ctx-events-frontend', 'events', plugin_dir_path(__FILE__) . '/languages');
 
         wp_localize_script('ctx-events-frontend', 'eventBlocksLocalization', [
-			"consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'events')),
+            "consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'events')),
             "donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'events'))
         ]);
     }
 
     public function admin_script()
     {
+        if (!is_admin()) {
+            return;
+        }
+
         $script_asset = $this->getAssetData('admin');
 
-        wp_register_script(
+        wp_enqueue_script(
             'ctx-events-admin',
             plugins_url('/build/admin.js', __FILE__),
             $script_asset['dependencies'],
@@ -78,9 +82,9 @@ class Assets
     public function editor_script()
     {
         $script_asset = $this->getAssetData('editor');
-		if (!$script_asset) {
-			return;
-		}
+        if (!$script_asset) {
+            return;
+        }
 
         wp_enqueue_script(
             'ctx-events-editor',
@@ -99,14 +103,13 @@ class Assets
         );
     }
 
-	private function getAssetData($asset)
-	{
-		$asset_path = PluginInfo::getPluginDir() . "/build/{$asset}.asset.php";
-		if (!file_exists($asset_path)) {
-			return null;
-		}
-		return require($asset_path);
-	}
-   
+    private function getAssetData($asset)
+    {
+        $asset_path = PluginInfo::getPluginDir() . "/build/{$asset}.asset.php";
+        if (!file_exists($asset_path)) {
+            return null;
+        }
+        return require($asset_path);
+    }
 }
 Assets::init();

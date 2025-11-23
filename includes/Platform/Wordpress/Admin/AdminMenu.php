@@ -2,10 +2,18 @@
 
 namespace Contexis\Events\Platform\Wordpress\Admin;
 
+use Mpdf\Tag\A;
+
 final class AdminMenu implements AdminServiceInterface
 {
     public const MENU_SLUG = 'contexis_events_admin_menu';
     public string $hook = 'admin_menu';
+
+    public function hook(): void
+    {
+        add_action($this->hook, [$this, 'register']);
+    }
+
 
     public function register(): void
     {
@@ -14,18 +22,20 @@ final class AdminMenu implements AdminServiceInterface
             __('Events', 'events'),
             'manage_options',
             self::MENU_SLUG,
-            fn() => print('<div id="contexis-events-admin-app"></div>'),
+            [$this, 'settingsPage'],
             'dashicons-calendar-alt',
             6
         );
 
         add_submenu_page(
-            self::MENU_SLUG,
+            'contexis_events_admin_menu',
             __('Settings', 'events'),
             __('Settings', 'events'),
             'manage_options',
             'contexis_events_settings',
-            fn() => print('<div id="contexis-events-settings-app"></div>')
+            function () {
+                echo '<div id="ctx-options-admin"></div>';
+            }
         );
 
         add_submenu_page(
@@ -54,5 +64,11 @@ final class AdminMenu implements AdminServiceInterface
             'contexis_events_persons',
             fn() => print('<div id="contexis-events-persons-app"></div>')
         );
+    }
+
+    public function settingsPage(): string
+    {
+        echo "<h1>Settings Page</h1>";
+        return '';
     }
 }

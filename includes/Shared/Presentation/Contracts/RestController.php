@@ -4,5 +4,5 @@ namespace Contexis\Events\Shared\Presentation\Contracts;
 
 interface RestController
 {
-    public function register(): bool;
+    public function register(): void;
 }

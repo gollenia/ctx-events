@@ -5,6 +5,10 @@ use function DI\create;
 use function DI\get;
 
 return [
+
+    \Contexis\Events\Shared\Infrastructure\Contracts\Clock::class
+        => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
+
     \Contexis\Events\Event\Presentation\EventController::class => autowire(),
 
     \Contexis\Events\Platform\Wordpress\PostTypeRegistrar::class => create()
@@ -18,7 +22,20 @@ return [
         ->constructor([
             get(\Contexis\Events\Event\Presentation\EventController::class),
             get(\Contexis\Events\Location\Presentation\LocationController::class),
-            get(\Contexis\Events\Person\Presentation\PersonController::class)
+            get(\Contexis\Events\Person\Presentation\PersonController::class),
+            get(\Contexis\Events\Shared\Presentation\OptionController::class),
+        ]),
+
+    \Contexis\Events\Platform\Wordpress\DatabaseRegistrar::class => create()
+        ->constructor([
+            get(\Contexis\Events\Booking\Infrastructure\BookingMigration::class),
+            get(\Contexis\Events\Payment\Infrastructure\TransactionMigration::class),
+            get(\Contexis\Events\Booking\Infrastructure\AttendeeMigration::class)
+        ]),
+
+    \Contexis\Events\Platform\Wordpress\OptionsRegistrar::class => create()
+        ->constructor([
+            get(\Contexis\Events\Event\Infrastructure\EventOptions::class),
         ]),
 
     \Contexis\Events\Event\Domain\EventRepository::class

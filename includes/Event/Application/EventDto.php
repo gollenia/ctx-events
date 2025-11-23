@@ -10,8 +10,9 @@ use Contexis\Events\Location\Domain\Location;
 use Contexis\Events\Media\Application\ImageDto;
 use Contexis\Events\Media\Domain\Image;
 use Contexis\Events\Person\Domain\PersonCollection;
-use Contexis\Events\Pwerson\Application\PersonDto;
+use Contexis\Events\Person\Application\PersonDto;
 use Contexis\Events\Shared\Application\Contracts\DTO;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use DateTimeImmutable;
 
 class EventDto implements DTO
@@ -21,13 +22,13 @@ class EventDto implements DTO
         public readonly string $name,
         public readonly ?string $description,
         public readonly ?string $audience,
-        public readonly EventStatus $eventStatus,
+        public readonly Status $status,
         public readonly DateTimeImmutable $startDate,
         public readonly DateTimeImmutable $endDate,
         public readonly BookingPolicy $bookingPolicy,
         public readonly ?LocationDto $locationDto = null,
         public readonly ?ImageDto $imageDto = null,
-        public readonly ?PersonDto $personsDto = null
+        public readonly ?PersonDto $personDto = null
     ) {
     }
 
@@ -35,20 +36,20 @@ class EventDto implements DTO
         Event $event,
         ?LocationDto $locationDto = null,
         ?ImageDto $imageDto = null,
-        ?PersonDto $personsDto = null
+        ?PersonDto $personDto = null
     ): self {
         return new self(
             id: $event->id->toInt(),
             name: $event->name,
             description: $event->description,
             audience: $event->audience,
-            eventStatus: $event->eventStatus,
+            status: $event->status,
             startDate: $event->startDate,
             endDate: $event->endDate,
             bookingPolicy: $event->bookingPolicy,
             locationDto: $locationDto,
             imageDto: $imageDto,
-            personsDto: $personsDto
+            personDto: $personDto
         );
     }
 }

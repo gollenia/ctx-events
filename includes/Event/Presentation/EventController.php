@@ -6,6 +6,7 @@ use Contexis\Events\Event\Application\EventIncludes;
 use Contexis\Events\Event\Application\GetEvent;
 use Contexis\Events\Event\Application\ListEvents;
 use Contexis\Events\Shared\Infrastructure\Wordpress\ViewContextFactory;
+use Contexis\Events\Shared\Infrastructure\Wordpress\WpViewContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestAdapter;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Contexis\Events\Shared\Presentation\Links;
@@ -20,11 +21,11 @@ final class EventController implements RestController
         $this->listEvents = $listEvents;
     }
 
-    public function register(): bool
+    public function register(): void
     {
         $route = Links::restRoute('event', '(?P<id>\d+)');
 
-        $event_route = register_rest_route($route['ns'], $route['path'], array(
+        register_rest_route($route['ns'], $route['path'], array(
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
@@ -44,11 +45,11 @@ final class EventController implements RestController
 
 
 
-        $events_route = register_rest_route('/events/v3', '/events', array(
+        register_rest_route('/events/v3', '/events', array(
             array(
                 'methods'   => 'GET',
                 'callback'  => array( $this, 'getEventPage' ),
-                'permission_callback' => fn($req) => true,
+                'permission_callback' => '__return_true',
                 'args' => [
                     'page' => [
                         'type' => 'integer',
@@ -109,8 +110,6 @@ final class EventController implements RestController
                 ]
             ),
         ));
-
-        return $event_route && $events_route;
     }
 
 

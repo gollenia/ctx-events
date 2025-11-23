@@ -4,6 +4,7 @@ namespace Contexis\Events\Event\Application;
 
 use Contexis\Events\Event\Domain\TimeScope;
 use Contexis\Events\Shared\Application\Contracts\Criteria;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 
 /**
  * Class EventCriteria
@@ -16,7 +17,7 @@ final class EventCriteria implements Criteria
     public function __construct(
         public readonly int $page = 0,
         public readonly int $perPage = 10,
-        public readonly array $status = ['publish'],
+        public readonly Status $status = Status::Published,
         public readonly array $include = [],
         public readonly string $orderBy = 'date-time',
         public readonly string $order = 'DESC',

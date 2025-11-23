@@ -19,9 +19,7 @@ final class RestRegistrar implements Registrar
 
         add_action('rest_api_init', function () {
             foreach ($this->adapters as $adapter) {
-                if (!$adapter->register()) {
-                    throw new \RuntimeException('Failed to register REST adapter: ' . get_class($adapter));
-                }
+                $adapter->register();
             }
         });
     }

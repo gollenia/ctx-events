@@ -1,31 +1,29 @@
 <?php
 
-namespace Contexis\Events\Infrastructure\Wordpress;
+namespace Contexis\Events\Shared\Infrastructure\Wordpress;
 
-use Contexis\Events\Shared\Domain\ContentStatus;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 
 final class PostStatusMapper
 {
-    public static function fromPost(string $wpStatus): ContentStatus
+    public static function fromPost(string $wpStatus): Status
     {
         return match ($wpStatus) {
-            'publish' => ContentStatus::Published,
-            'private' => ContentStatus::Private,
-            'trash'   => ContentStatus::Deleted,
-            'pending' => ContentStatus::PendingReview,
-            'draft'   => ContentStatus::Draft,
-            default   => ContentStatus::Draft,
+            'publish' => Status::Published,
+            'private' => Status::Private,
+            'trash'   => Status::Trash,
+            'draft'   => Status::Draft,
+            default   => Status::Draft,
         };
     }
 
-    public static function toPost(ContentStatus $status): string
+    public static function toPost(Status $status): string
     {
         return match ($status) {
-            ContentStatus::Published      => 'publish',
-            ContentStatus::Private        => 'private',
-            ContentStatus::Deleted        => 'trash',
-            ContentStatus::PendingReview  => 'pending',
-            ContentStatus::Draft          => 'draft',
+            Status::Published      => 'publish',
+            Status::Private        => 'private',
+            Status::Trash        => 'trash',
+            Status::Draft          => 'draft',
         };
     }
 }
