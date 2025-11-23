@@ -38,9 +38,16 @@ class PluginInfo
         update_option('dbem_version', $version);
     }
 
-    public static function getPluginDir()
+    public static function getPluginDir(string $trailing = ''): string
     {
-        return plugin_dir_path(dirname(__DIR__, 2));
+        $path = plugin_dir_path(dirname(__DIR__, 2)) . $trailing;
+        return preg_replace('#(?<!:)//+#', '/', $path);
+    }
+
+    public static function getPluginUrl(string $trailing = ''): string
+    {
+        $url = plugin_dir_url(dirname(__DIR__, 2)) . $trailing;
+        return preg_replace('#(?<!:)//+#', '/', $url);
     }
 
     public static function getAdminUrl(): string
