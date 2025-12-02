@@ -7,9 +7,9 @@ use Contexis\Events\Shared\Domain\Contracts\WithPagination;
 
 final class EventCollection extends Collection implements WithPagination
 {
-    private int $totalItems;
-    private int $currentPage;
-    private int $perPage;
+    private int $totalItems = 0;
+    private int $currentPage = 1;
+    private int $perPage = 10;
 
     public function __construct(Event ...$events)
     {

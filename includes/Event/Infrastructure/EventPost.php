@@ -14,21 +14,6 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData
     public const CATEGORIES = 'ctx-event-categories';
     public const TAGS = 'ctx-event-tags';
 
-    public const META_REGISTRATION_FORM = '_registration_form';
-    public const META_ATTENDEE_FORM = '_attendee_form';
-    public const META_PERSONS = '_person_ids';
-    public const META_LOCATION = '_location_id';
-    public const META_EVENT_START = '_event_start';
-    public const META_EVENT_END = '_event_end';
-    public const META_EVENT_ALL_DAY = '_event_all_day';
-    public const META_BOOKING_START = '_booking_start';
-    public const META_BOOKING_END = '_booking_end';
-    public const META_BOOKING_ENABLED = '_booking_enabled';
-    public const META_BOOKING_SPACES = '_booking_spaces';
-    public const META_DONATION_ENABLED = '_donation_enabled';
-    public const META_RECURRENCE_ID = '_recurrence_id';
-    public const META_IS_DETACHED = '_is_detached';
-
     public static function getSlug(): string
     {
         return get_option('dbem_cp_events_slug', 'events');

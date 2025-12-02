@@ -20,6 +20,6 @@ final class ListEvents
     {
 
         $events = $this->eventRepository->search($criteria);
-        return new EventListDto($events);
+        return EventListDto::fromCollection($events);
     }
 }

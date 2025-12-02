@@ -134,7 +134,13 @@ final class EventController implements RestController
     {
         $query = EventCriteriaMapper::fromRequest($request);
         $view = ViewContextFactory::createFromCurrentUser();
+
         $page = $this->listEvents->execute($query);
-        return new \WP_REST_Response($page, 200);
+
+        $result = [];
+        foreach ($page as $index => $event_dto) {
+            $result[] = new EventResource($event_dto);
+        }
+        return new \WP_REST_Response($result, 200);
     }
 }

@@ -6,7 +6,6 @@ final class OptionsPage
 {
     public function register(): void
     {
-        // Menüeintrag
         add_action('admin_menu', function () {
             add_submenu_page(
                 'edit.php?post_type=ctx-events',          // Parent = dein CPT-Menü

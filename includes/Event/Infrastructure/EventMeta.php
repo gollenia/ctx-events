@@ -8,8 +8,8 @@ class EventMeta extends MetaData
 {
     public const REGISTRATION_FORM = '_registration_form';
     public const ATTENDEE_FORM     = '_attendee_form';
-    public const PERSONS           = '_person_ids';
-    public const LOCATION          = '_location_id';
+    public const PERSON_ID           = '_person_ids';
+    public const LOCATION_ID          = '_location_id';
     public const EVENT_START       = '_event_start';
     public const EVENT_END         = '_event_end';
     public const EVENT_ALL_DAY     = '_event_all_day';
@@ -69,7 +69,7 @@ class EventMeta extends MetaData
     public static array $metadata = [
         self::REGISTRATION_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
-        self::PERSONS           => [
+        self::PERSON_ID           => [
             'type'         => 'array',
             'show_in_rest' => [
                 'schema' => [
@@ -78,7 +78,7 @@ class EventMeta extends MetaData
                 ],
             ],
         ],
-        self::LOCATION         => ['type' => 'integer'],
+        self::LOCATION_ID         => ['type' => 'integer'],
         self::EVENT_START      => ['type' => 'string'],
         self::EVENT_END        => ['type' => 'string'],
         self::EVENT_ALL_DAY    => ['type' => 'boolean'],

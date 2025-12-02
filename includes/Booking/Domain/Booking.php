@@ -20,8 +20,6 @@ use Contexis\Events\Domain\ValueObjects\Id\EventId;
  */
 final class Booking
 {
-    use \Contexis\Events\Core\Traits\ReplicatesProperties;
-
     public function __construct(
         public readonly BookingId $id,
         public readonly Email $userEmail,
@@ -34,13 +32,13 @@ final class Booking
         public readonly ?Coupon $coupon,
         public readonly ?TransactionCollection $transactions,
         public readonly EventId $eventId,
-        public readonly ? $notes,
+        public readonly ?Notes $notes,
         public readonly ?LogEntryCollection $log
     ) {
     }
 
     public function withBookingStatus(BookingStatus $status): self
     {
-        return $this->replicate(['status' => $status]);
+        return clone($this, ['status' => $status]);
     }
 }

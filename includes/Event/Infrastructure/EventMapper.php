@@ -41,13 +41,13 @@ final class EventMapper
             authorId: new AuthorId($post->getInt('post_author')),
             bookingPolicy: $booking_policy,
             eventViewConfig: EventViewConfig::fromArray($post->getArray('_events_view_config', [])),
-            startDate: $post->getDateTime('_event_start', $timezone),
-            endDate: $post->getDateTime('_event_end', $timezone),
+            startDate: $post->getDateTime(EventMeta::EVENT_START, $timezone),
+            endDate: $post->getDateTime(EventMeta::EVENT_END, $timezone),
             createdAt: $post->getDateTime('post_date', $timezone),
-            locationId: LocationId::from($post->getInt('_location_id')),
+            locationId: LocationId::from($post->getInt(EventMeta::LOCATION_ID)),
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
-            recurrenceId: RecurrenceId::from($post->getInt('_recurrence_id')),
-            personId: $post->getInt('_person_id') ? PersonId::from($post->getInt('_person_id')) : null,
+            recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
+            personId: $post->getInt('_person_id') ? PersonId::from($post->getInt(EventMeta::PERSON_ID)) : null,
         );
 
         return $event;

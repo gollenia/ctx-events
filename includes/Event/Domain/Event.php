@@ -9,13 +9,11 @@ use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\Traits\HasStatus;
-use Contexis\Events\Shared\Domain\Traits\ReplicatesProperties;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use DateTimeImmutable;
 
 final class Event
 {
-    use ReplicatesProperties;
     use HasStatus;
 
     public function __construct(
@@ -62,8 +60,6 @@ final class Event
         return $at >= $this->endDate;
     }
 
-
-
     public function isBookable(): BookingDecision
     {
         return $this->bookingPolicy->canBook();
@@ -71,8 +67,6 @@ final class Event
 
     public function withStatus(EventStatus $status): self
     {
-        return $this->replicate([
-            'eventStatus' => $status
-        ]);
+        return clone($this, ['status' => $status]);
     }
 }

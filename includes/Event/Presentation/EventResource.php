@@ -34,7 +34,7 @@ class EventResource implements JsonSerializable
             'link' => Links::friendly($this->event_dto->id),
             'name' => $this->event_dto->name,
             'description' => $this->event_dto->description,
-            'status' => $this->event_dto->eventStatus->value,
+            'status' => $this->event_dto->status->value,
             'startDate' => $this->event_dto->startDate->format('c'),
             'endDate' => $this->event_dto->endDate?->format('c'),
             'audience' => $this->event_dto->audience

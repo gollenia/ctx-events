@@ -6,7 +6,9 @@ use Contexis\Events\Event\Application\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
 use Contexis\Events\Event\Domain\TimeScope;
 use Contexis\Events\Shared\Domain\ValueObjects\OrderBy;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Infrastructure\Abstracts\WpQueryBuilder;
+use Mpdf\Tag\Em;
 
 final class WpEventQueryBuilder extends WpQueryBuilder
 {
@@ -15,21 +17,21 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         $builder = new self()
             ->withPostType(EventPost::POST_TYPE)
             ->withPagination($criteria->page, $criteria->perPage)
-            ->withStatus($criteria->status ?? ['publish'])
+            ->withStatus($criteria->status->value ?? ['published'])
             ->withTaxonomy(EventPost::CATEGORIES, $criteria->categories)
             ->withTaxonomy(EventPost::TAGS, $criteria->tags)
         ;
 
         if ($criteria->location !== null) {
-            $builder = $builder->withMetaEquals('_location_id', (string) $criteria->location);
+            $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->location);
         }
 
         if ($criteria->bookable) {
-            $builder = $builder->withMetaEquals('_booking_enabled', '1');
+            $builder = $builder->withMetaEquals(EventMeta::BOOKING_ENABLED, '1');
         }
 
         if ($criteria->person != null) {
-            $builder = $builder->withMetaEquals('_person_id', (string) $criteria->person);
+            $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->person);
         }
 
         if ($criteria->scope) {
@@ -48,11 +50,11 @@ final class WpEventQueryBuilder extends WpQueryBuilder
     private static function mapOrderBy(string $orderBy): OrderBy
     {
         return match ($orderBy) {
-            'date-time'     => OrderBy::fromMeta('_event_start'),
-            'booking-date'  => OrderBy::fromMeta('_event_rsvp_end'),
-            'booking'       => OrderBy::fromMeta('_event_rsvp'),
-            'location'      => OrderBy::fromMeta('_location_id'),
-            'person'        => OrderBy::fromMeta('_person_id'),
+            'date-time'     => OrderBy::fromMeta(EventMeta::EVENT_START),
+            'booking-date'  => OrderBy::fromMeta(EventMeta::BOOKING_START),
+            'booking'       => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED),
+            'location'      => OrderBy::fromMeta(EventMeta::LOCATION_ID),
+            'person'        => OrderBy::fromMeta(EventMeta::PERSON_ID),
             default         => OrderBy::fromField($orderBy),
         };
     }
@@ -62,46 +64,50 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         $now = new \DateTimeImmutable('now', wp_timezone());
         $date = $now->format('Y-m-d');
         $dateTime = $now->format('Y-m-d H:i:s');
-        $field = get_option('dbem_events_current_are_past') ? '_event_end' : '_event_start';
+        $field = get_option(EventOptions::EVENT_ONGOING_IS_PAST) ? EventMeta::EVENT_END : EventMeta::EVENT_START;
 
         return match ($scope) {
             $scope::PAST    => [['key' => $field, 'value' => $dateTime, 'compare' => '<', 'type' => 'DATETIME']],
             $scope::FUTURE  => [['key' => $field, 'value' => $dateTime, 'compare' => '>', 'type' => 'DATETIME']],
             $scope::TODAY   => [
-                ['key' => '_event_start', 'value' => $date, 'compare' => '<=', 'type' => 'DATE'],
-                ['key' => '_event_end',   'value' => $date, 'compare' => '>=', 'type' => 'DATE'],
+                ['key' => EventMeta::EVENT_START, 'value' => $date, 'compare' => '<=', 'type' => 'DATE'],
+                ['key' => EventMeta::EVENT_END,   'value' => $date, 'compare' => '>=', 'type' => 'DATE'],
             ],
             $scope::TOMORROW => [
-                ['key' => '_event_start', 'value' => $now->modify('+1 day')->format('Y-m-d'), 'compare' => '=', 'type' => 'DATE'],
+                ['key' => EventMeta::EVENT_START, 'value' => $now->modify('+1 day')->format('Y-m-d'), 'compare' => '=', 'type' => 'DATE'],
             ],
             $scope::WEEK => [
-                ['key' => '_event_start', 'value' => [
+                ['key' => EventMeta::EVENT_START, 'value' => [
                     $date,
-                    $now->modify('+7 days')->format('Y-m-d')],
+                    $now->modify('+7 days')->format('Y-m-d')
+                ],
                     'compare' => 'BETWEEN',
                     'type' => 'DATE'
                 ],
             ],
             $scope::THIS_MONTH    => [
-                ['key' => '_event_start', 'value' => [
+                ['key' => EventMeta::EVENT_START, 'value' => [
                     $now->modify('first day of this month')->format('Y-m-d'),
-                    $now->modify('last day of this month')->format('Y-m-d')],
+                    $now->modify('last day of this month')->format('Y-m-d')
+                ],
                     'compare' => 'BETWEEN',
                     'type' => 'DATE'
                 ],
             ],
             $scope::NEXT_MONTH => [
-                ['key' => '_event_start', 'value' => [
+                ['key' => EventMeta::EVENT_START, 'value' => [
                     $now->modify('first day of next month')->format('Y-m-d'),
-                    $now->modify('last day of next month')->format('Y-m-d')],
+                    $now->modify('last day of next month')->format('Y-m-d')
+                ],
                     'compare' => 'BETWEEN',
                     'type' => 'DATE'
                 ],
             ],
             $scope::YEAR     => [
-                ['key' => '_event_start', 'value' => [
+                ['key' => EventMeta::EVENT_START, 'value' => [
                     $now->modify('first day of January')->format('Y-m-d'),
-                    $now->modify('last day of December')->format('Y-m-d')],
+                    $now->modify('last day of December')->format('Y-m-d')
+                ],
                     'compare' => 'BETWEEN',
                     'type' => 'DATE'
                 ],
