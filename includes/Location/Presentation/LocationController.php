@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Location\Presentation;
 
 use Contexis\Events\Location\Application\GetLocation;
 use Contexis\Events\Location\Application\ListLocations;
 use Contexis\Events\Location\Application\LocationIncludes;
-use Contexis\Events\Shared\Infrastructure\Wordpress\ViewContextFactory;
+use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class LocationController implements RestController
@@ -45,7 +46,7 @@ final class LocationController implements RestController
         $event_id = (int) $request->get_param('id');
         $include = LocationIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
 
-        $location_dto = $this->getLocation->execute($event_id, $include, ViewContextFactory::createFromCurrentUser());
+        $location_dto = $this->getLocation->execute($event_id, $include, UserContextFactory::createFromCurrentUser());
 
         if (!$location_dto) {
             return new \WP_REST_Response(['message' => 'Location not found'], 404);

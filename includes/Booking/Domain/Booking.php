@@ -1,21 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Domain;
 
-use Contexis\Events\Domain\ValueObjects\Email;
-use Contexis\Events\Domain\ValueObjects\PriceSummary;
-use Contexis\Events\Domain\ValueObjects\BookingStatus;
-use Contexis\Events\Domain\Models\Event;
-use Contexis\Events\Domain\Collections\AttendeeCollection;
-use Contexis\Events\Domain\Collections\LogEntryCollection;
-use Contexis\Events\Domain\Collections\TransactionCollection;
-use Contexis\Events\Domain\Collections\RecordCollection;
-use Contexis\Events\Domain\Models\Coupon;
-use Contexis\Events\Domain\ValueObjects\Id\BookingId;
-use Contexis\Events\Domain\ValueObjects\Id\EventId;
+use Contexis\Events\Event\Domain\EventId;
+use Contexis\Events\Payment\Domain\Coupon;
+use Contexis\Events\Payment\Domain\TransactionCollection;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
+use Contexis\Events\Shared\Domain\ValueObjects\PriceSummary;
 
 /**
- * @package Contexis\Events\Domain\Models
+ * @package Contexis\Events\Booking\Domain
  * @schema.booking
  */
 final class Booking
@@ -32,8 +27,8 @@ final class Booking
         public readonly ?Coupon $coupon,
         public readonly ?TransactionCollection $transactions,
         public readonly EventId $eventId,
-        public readonly ?Notes $notes,
-        public readonly ?LogEntryCollection $log
+        //public readonly ?Note $notes,
+        //public readonly ?LogEntryCollection $log
     ) {
     }
 

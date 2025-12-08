@@ -1,62 +1,62 @@
 <?php
+declare(strict_types=1);
 
 namespace Tests\Support;
 
-use Contexis\Events\Domain\Repositories\LocationRepository;
-use Contexis\Events\Domain\Models\Location;
-use Contexis\Events\Domain\Collections\LocationCollection;
-use Contexis\Events\Core\Contracts\QueryOptions;
-use Contexis\Events\Domain\ValueObjects\Id\LocationId;
+namespace Tests\Support;
+
+use Contexis\Events\Location\Domain\LocationRepository;
+use Contexis\Events\Location\Domain\Location;
+use Contexis\Events\Location\Domain\LocationCollection;
+use Contexis\Events\Location\Domain\LocationId;
+use Contexis\Events\Location\Domain\LocationCriteria;
 
 final class FakeLocationRepository implements LocationRepository
 {
     public ?Location $toReturn;
     public ?LocationId $lastFindArg = null;
+    public ?LocationCriteria $lastCriteria = null;
 
     public function __construct(?Location $toReturn = null)
     {
         $this->toReturn = $toReturn;
     }
 
-    /**
-     * Interface: public function find(?LocationId $id): ?Location
-     */
     public function find(?LocationId $id): ?Location
     {
         $this->lastFindArg = $id;
         return $this->toReturn;
     }
 
-    /**
-     * Interface: public function query(QueryOptions $args): static
-     */
-    public function query(QueryOptions $args): static
+    public function search(LocationCriteria $criteria): LocationCollection
     {
-        return $this;
+        $this->lastCriteria = $criteria;
+        return new LocationCollection();
     }
 
-    /**
-     * Interface: public function first(): ?Location
-     */
-    public function first(): ?Location
+    public function first(LocationCriteria $criteria): ?Location
     {
+        $this->lastCriteria = $criteria;
         return $this->toReturn;
     }
 
-    /**
-     * Interface: public function get(): LocationCollection
-     */
-    public function get(): LocationCollection
+    public function findByIds(array $ids): LocationCollection
     {
-        // In Unit-Tests meist nicht nötig, deshalb nur Platzhalter:
-        throw new \LogicException('get() not needed in FakeLocationRepository');
+        return new LocationCollection();
     }
 
-    /**
-     * Interface: public function count(): int
-     */
-    public function count(): int
+    public function get(LocationId $id): Location
     {
+        $this->lastFindArg = $id;
+        if ($this->toReturn === null) {
+            throw new \RuntimeException("Location not found (mock)");
+        }
+        return $this->toReturn;
+    }
+
+    public function count(LocationCriteria $criteria): int
+    {
+        $this->lastCriteria = $criteria;
         return $this->toReturn ? 1 : 0;
     }
 }

@@ -1,39 +1,37 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\Abstract;
+
+use Contexis\Events\Shared\Application\ValueObjects\Pagination;
+use mysqli;
 
 abstract class Collection implements \Countable, \IteratorAggregate
 {
     /** @var array */
     protected array $items = [];
-    public string $order = 'asc';
-    public string $orderBy = 'date';
+    protected ?Pagination $pagination = null;
 
     public function __construct(object ...$items)
     {
         $this->items = $items;
     }
 
-    public function getIterator(): \Traversable
+    public function withPagination(Pagination $pagination): self
     {
-        return new \ArrayIterator($this->items);
+        return clone($this, ['pagination' => $pagination]);
     }
 
-    public function add(object $item): void
+    public function pagination(): ?Pagination
     {
-        $this->items[] = $item;
+        return $this->pagination;
     }
 
-    public function join(object $other): self
+    public static function fromArray(array $items): self
     {
-        if ($this->orderBy !== $other->orderBy || $this->order !== $other->order) {
-            throw new \InvalidArgumentException('Cannot join collections with different sorting options.');
-        }
-
-        array_push($this->items, ...$other->items);
-        return $this;
+        $collection = new static(...$items);
+        return $collection;
     }
-
 
     public function count(): int
     {
@@ -48,5 +46,15 @@ abstract class Collection implements \Countable, \IteratorAggregate
     public function toArray(): array
     {
         return $this->items;
+    }
+
+    public function getIterator(): \Traversable
+    {
+        return new \ArrayIterator($this->items);
+    }
+
+    public function unicornFart(): string
+    {
+        return "🌈🦄💨";
     }
 }

@@ -1,20 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
-final class TicketId
+use Contexis\Events\Shared\Domain\Abstract\Id;
+
+final class TicketId extends Id
 {
-    public function __construct(private readonly string $id)
-    {
-    }
-
-    public function __toString(): string
-    {
-        return $this->id;
-    }
-
-    public function equals(TicketId $other): bool
-    {
-        return $this->id === $other->id;
-    }
 }

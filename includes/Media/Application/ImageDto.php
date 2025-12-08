@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Media\Application;
 
@@ -8,6 +9,7 @@ use Contexis\Events\Media\Domain\ImageSizes;
 final class ImageDto
 {
     public function __construct(
+        public readonly ?int $id,
         public readonly ?string $url,
         public readonly ?string $altText,
         public readonly ?int $width,
@@ -20,6 +22,7 @@ final class ImageDto
     public static function fromDomainModel(Image $media): self
     {
         return new self(
+            id: $media->id->toInt(),
             url: $media->url,
             altText: $media->altText,
             width: $media->width,

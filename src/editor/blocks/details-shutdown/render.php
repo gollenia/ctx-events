@@ -1,4 +1,5 @@
-<?php 
+<?php
+declare(strict_types=1); 
 
 $id = get_the_ID();
 $event = \Contexis\Events\Models\Event::find_by_post(get_post());
@@ -32,9 +33,11 @@ if ($current_time < $date_start) {
 			<i class="event-details-icon material-icons material-symbols-outlined">event_busy</i>
 		</div>
 		<div class="event-details-text">
-			<h4><?php echo $description ?></h4>
+			<h4><?php
+declare(strict_types=1); echo $description ?></h4>
 			<time class="event-details-data">
-				<?php echo $date ?>
+				<?php
+declare(strict_types=1); echo $date ?>
 			</time>
 		</div>                        
 	</div>

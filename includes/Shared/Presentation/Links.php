@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Presentation;
 
@@ -6,7 +7,7 @@ final class Links
 {
     public const NS = 'events/v3';
     public const PATTERNS = [
-        'event'    => '/event/%d',
+        'events'    => '/events/%d',
         'location' => '/location/%d',
         'person'  => '/person/%d',
         'attachment' => '/attachment/%d',

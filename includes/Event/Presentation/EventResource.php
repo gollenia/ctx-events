@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
 
@@ -20,7 +21,7 @@ class EventResource implements JsonSerializable
         $jsonLd = [
             "@context" => "https://schema.org/Event",
             "@type" => "Event",
-            "@id" => Links::iri('event', $this->event_dto->id)
+            "@id" => Links::iri('events', $this->event_dto->id)
         ];
 
         return $jsonLd;
@@ -49,6 +50,14 @@ class EventResource implements JsonSerializable
         if ($this->event_dto->imageDto) {
             $includes['image'] = new ImageResource($this->event_dto->imageDto);
         }
+
+		if ($this->event_dto->categories) {
+			$includes['categories'] = $this->event_dto->categories->toArray();
+		}
+
+		if ($this->event_dto->tags) {
+			$includes['tags'] = $this->event_dto->tags->toArray();
+		}
 
         if (!empty($includes)) {
             $result['includes'] = $includes;

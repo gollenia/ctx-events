@@ -1,17 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Tests\Support;
 
-use Contexis\Events\Domain\Repositories\ImageRepository;
-use Contexis\Events\Domain\ValueObjects\Image;
-use Contexis\Events\Domain\Collections\ImageCollection;
-use Contexis\Events\Core\Contracts\QueryOptions;
-use Contexis\Events\Domain\ValueObjects\Id\ImageId;
+use Contexis\Events\Media\Domain\ImageRepository;
+use Contexis\Events\Media\Domain\Image;
+use Contexis\Events\Media\Domain\ImageCollection;
+use Contexis\Events\Media\Domain\ImageId;
 
 final class FakeImageRepository implements ImageRepository
 {
     public ?Image $toReturn;
-    public ?ImageId $lastFindArg = null;
 
     public function __construct(?Image $toReturn = null)
     {
@@ -20,16 +19,12 @@ final class FakeImageRepository implements ImageRepository
 
     public function find(?ImageId $id): ?Image
     {
-        $this->lastFindArg = $id;
         return $this->toReturn;
     }
 
-    /**
-     * Interface: public function query(QueryOptions $args): static
-     */
-    public function query(QueryOptions $args): static
+    public function findByIds(array $ids): ImageCollection
     {
-        return $this;
+        return new ImageCollection();
     }
 
     /**
@@ -39,7 +34,6 @@ final class FakeImageRepository implements ImageRepository
     {
         return $this->toReturn;
     }
-
     /**
      * Interface: public function count(): int
      */

@@ -1,14 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Application\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
 use Contexis\Events\Event\Domain\TimeScope;
-use Contexis\Events\Shared\Domain\ValueObjects\OrderBy;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Infrastructure\Abstracts\WpQueryBuilder;
-use Mpdf\Tag\Em;
 
 final class WpEventQueryBuilder extends WpQueryBuilder
 {
@@ -17,7 +18,7 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         $builder = new self()
             ->withPostType(EventPost::POST_TYPE)
             ->withPagination($criteria->page, $criteria->perPage)
-            ->withStatus($criteria->status->value ?? ['published'])
+            ->withStatus($criteria->status ?? StatusList::public())
             ->withTaxonomy(EventPost::CATEGORIES, $criteria->categories)
             ->withTaxonomy(EventPost::TAGS, $criteria->tags)
         ;

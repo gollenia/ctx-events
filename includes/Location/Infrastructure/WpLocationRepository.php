@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Location\Infrastructure;
 
@@ -7,7 +8,8 @@ use Contexis\Events\Location\Domain\LocationCollection;
 use Contexis\Events\Location\Domain\LocationCriteria;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Location\Domain\LocationRepository;
-use Contexis\Events\Person\Infrastructure\WpLocationQueryBuilder;
+use Contexis\Events\Location\Infrastructure\WpLocationQueryBuilder;
+use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
 class WpLocationRepository implements LocationRepository
@@ -24,6 +26,25 @@ class WpLocationRepository implements LocationRepository
     {
         $snapshot = PostSnapshot::fromWpPostId($id->toInt());
         return LocationMapper::map($snapshot);
+    }
+
+    public function findByIds(array $ids): LocationCollection
+    {
+        $wpq = new \WP_Query([
+            'post_type'      => LocationPost::POST_TYPE,
+            'post__in'       => array_map(fn(LocationId $id) => $id->toInt(), $ids),
+            'posts_per_page' => -1,
+            'orderby'        => 'post__in',
+            'no_found_rows'  => true,
+            'fields'         => 'all',
+        ]);
+
+        $items = [];
+        foreach ($wpq->posts as $post) {
+            $items[] = LocationMapper::map(new PostSnapshot($post));
+        }
+
+        return new LocationCollection(...$items);
     }
 
     public function first(LocationCriteria $criteria): ?Location
@@ -47,12 +68,19 @@ class WpLocationRepository implements LocationRepository
 
         $wpq = new \WP_Query($builder->getArgs());
 
-        $locations = new LocationCollection();
+        $pagination = Pagination::of(
+            totalItems: (int)$wpq->found_posts,
+            currentPage: $criteria->page,
+            perPage: $criteria->perPage
+        );
+
+        $items = [];
         foreach ($wpq->posts as $post) {
-            $locations->add(LocationMapper::map(new PostSnapshot($post)));
+            $items[] = LocationMapper::map(new PostSnapshot($post));
         }
 
-        return $locations;
+        return new LocationCollection(...$items)
+          ->withPagination($pagination);
     }
 
     public function count(LocationCriteria $criteria): int

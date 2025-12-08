@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Media\Domain;
 
 final class Image implements \JsonSerializable
 {
     public function __construct(
+        public readonly ImageId $id,
         public readonly ?string $url,
         public readonly ?string $altText,
         public readonly ?int $width,
@@ -22,6 +24,7 @@ final class Image implements \JsonSerializable
     public function jsonSerialize(): array
     {
         return [
+            'id' => $this->id->toInt(),
             'url' => $this->url,
             'altText' => $this->altText,
             'width' => $this->width,

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
@@ -8,8 +9,8 @@ class EventMeta extends MetaData
 {
     public const REGISTRATION_FORM = '_registration_form';
     public const ATTENDEE_FORM     = '_attendee_form';
-    public const PERSON_ID           = '_person_ids';
-    public const LOCATION_ID          = '_location_id';
+    public const PERSON_ID         = '_person_id';
+    public const LOCATION_ID       = '_location_id';
     public const EVENT_START       = '_event_start';
     public const EVENT_END         = '_event_end';
     public const EVENT_ALL_DAY     = '_event_all_day';

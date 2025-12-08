@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
@@ -7,7 +8,7 @@ use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventCollection;
 use Contexis\Events\Event\Domain\EventId;
 use Contexis\Events\Event\Domain\EventRepository;
-use Contexis\Events\Shared\Domain\ValueObjects\ViewContext;
+use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
 class WpEventRepository implements EventRepository
@@ -36,12 +37,22 @@ class WpEventRepository implements EventRepository
         $builder = WpEventQueryBuilder::fromCriteria($criteria)
             ->withCache();
 
-        $wpq = new \WP_Query($builder->getArgs());
+        $query = new \WP_Query($builder->getArgs());
 
-        $events = new EventCollection();
-        foreach ($wpq->posts as $post) {
-            $events->add($this->mapper->map(new PostSnapshot($post)));
+        $pagination = Pagination::of(
+            totalItems: (int)$query->found_posts,
+            currentPage: $criteria->page,
+            perPage: $criteria->perPage
+        );
+
+        $items = [];
+
+        foreach ($query->posts as $post) {
+            $items[] = $this->mapper->map(new PostSnapshot($post));
         }
+
+        $events = EventCollection::fromArray($items)
+          ->withPagination($pagination);
 
         return $events;
     }

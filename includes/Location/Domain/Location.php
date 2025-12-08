@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Location\Domain;
 
@@ -20,5 +21,10 @@ final class Location
         public readonly ?ImageId $imageId,
         public readonly ?string $externalUrl
     ) {
+    }
+
+    public function getStatus(): Status
+    {
+        return $this->status;
     }
 }

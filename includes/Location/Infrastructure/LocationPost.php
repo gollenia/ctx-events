@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Location\Infrastructure;
 
@@ -13,22 +14,6 @@ class LocationPost extends PostType implements HasMetaData
     public static function getSlug(): string
     {
         return self::POST_TYPE;
-    }
-
-    public static function metaQueryFilter()
-    {
-        add_filter(
-            'rest_location_query',
-            function ($args, $request) {
-                if ($meta_key = $request->get_param('metaKey')) {
-                    $args['meta_key'] = $meta_key;
-                    $args['meta_value'] = $request->get_param('metaValue');
-                }
-                return $args;
-            },
-            10,
-            2
-        );
     }
 
     public function registerPostType(): void
@@ -62,7 +47,7 @@ class LocationPost extends PostType implements HasMetaData
             'exclude_from_search' => true,
             'publicly_queryable' => false,
             'rewrite' => ['slug' => self::getSlug(), 'with_front' => false],
-			'template' => [[ 'ctx-events/location-editor' ]],
+            'template' => [[ 'ctx-events/location-editor' ]],
             'query_var' => true,
             'has_archive' => false,
             'template_lock' => 'all',

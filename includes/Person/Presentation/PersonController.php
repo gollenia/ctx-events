@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Person\Presentation;
 
 use Contexis\Events\Person\Application\PersonIncludes;
-use Contexis\Events\Shared\Infrastructure\Wordpress\ViewContextFactory;
+use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class PersonController implements RestController
@@ -39,7 +40,7 @@ final class PersonController implements RestController
         $person_id = (int) $request->get_param('id');
         $include = PersonIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
 
-        $person_dto = $this->getPerson->execute($person_id, $include, ViewContextFactory::createFromCurrentUser());
+        $person_dto = $this->getPerson->execute($person_id, $include, UserContextFactory::createFromCurrentUser());
 
         if (!$person_dto) {
             return new \WP_REST_Response(['message' => 'Person not found'], 404);

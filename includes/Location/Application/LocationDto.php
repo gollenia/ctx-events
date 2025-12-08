@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Location\Application;
 
@@ -29,5 +30,20 @@ class LocationDto
             logo: null,
             externalUrl: $location->externalUrl
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'address' => $this->address->jsonSerialize(),
+            'geoCoordinates' => $this->geoCoordinates ? [
+                'latitude' => $this->geoCoordinates->latitude,
+                'longitude' => $this->geoCoordinates->longitude
+            ] : null,
+            'logo' => null,
+            'externalUrl' => $this->externalUrl,
+        ];
     }
 }

@@ -1,57 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
-use Contexis\Events\Shared\Domain\Contracts\WithPagination;
 
-final class EventCollection extends Collection implements WithPagination
+final class EventCollection extends Collection
 {
-    private int $totalItems = 0;
-    private int $currentPage = 1;
-    private int $perPage = 10;
-
-    public function __construct(Event ...$events)
-    {
+    public function __construct(
+        Event ...$events
+    ) {
         $this->items = $events;
-    }
-
-    public function withPagination(int $totalItems, int $currentPage, int $perPage): self
-    {
-        $clone = clone $this;
-        $clone->totalItems = $totalItems;
-        $clone->currentPage = $currentPage;
-        $clone->perPage = $perPage;
-        return $clone;
-    }
-
-    public function getTotalItems(): int
-    {
-        return $this->totalItems;
-    }
-
-    public function getTotalPages(): int
-    {
-        return (int) ceil($this->totalItems / $this->perPage);
-    }
-
-    public function getCurrentPage(): int
-    {
-        return $this->currentPage;
-    }
-
-    public function getPerPage(): int
-    {
-        return $this->perPage;
-    }
-
-    public function uniqueLocationIds(): array
-    {
-        $ids = array_map(
-            fn(Event $event) => $event->locationId,
-            $this->items
-        );
-
-        return array_values(array_unique(array_filter($ids)));
     }
 }

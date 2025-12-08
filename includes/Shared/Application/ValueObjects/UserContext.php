@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
-namespace Contexis\Events\Shared\Domain\ValueObjects;
+namespace Contexis\Events\Shared\Application\ValueObjects;
 
-final class ViewContext
+final class UserContext
 {
     public function __construct(
         private readonly int $userId,

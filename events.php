@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
 Plugin Name: Events
@@ -15,6 +16,10 @@ Text Domain: events
 Domain Path: /languages
 */
 
+// In memoriam. Once huge. Once everywhere.
+// May it rest in peace, besides global $EM_Event.
+define('EM_OBJECT', null);
+
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
 add_action('plugins_loaded', function () {
@@ -29,6 +34,10 @@ add_action('plugins_loaded', function () {
 }, 10);
 
 
+/**
+ * Register Gutenberg blocks for the Events plugin. This function must be at root level, otherwise
+ * the blocks won't be registered correctly.
+ */
 function ctx_register_blocks(): void
 {
     $blocks = [

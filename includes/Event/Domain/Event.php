@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
@@ -18,21 +19,27 @@ final class Event
 
     public function __construct(
         public readonly EventId $id,
-        public readonly Status $status,
+        private readonly Status $status,
         public readonly string $name,
-        public readonly ?string $description,
-        public readonly ?string $audience,
-        public readonly DateTimeImmutable $startDate,
-        public readonly DateTimeImmutable $endDate,
+        private readonly DateTimeImmutable $startDate,
+        private readonly DateTimeImmutable $endDate,
         public readonly DateTimeImmutable $createdAt,
         public readonly BookingPolicy $bookingPolicy,
         public readonly EventViewConfig $eventViewConfig,
         public readonly AuthorId $authorId,
-        public readonly ?LocationId $locationId,
-        public readonly ?PersonId $personId,
-        public readonly ?ImageId $imageId,
-        public readonly ?RecurrenceId $recurrenceId
+		public readonly ?string $description = null,
+        public readonly ?string $audience = null,
+        public readonly ?TicketCollection $tickets = null,
+        public readonly ?LocationId $locationId = null,
+        public readonly ?PersonId $personId = null,
+        public readonly ?ImageId $imageId = null,
+        public readonly ?RecurrenceId $recurrenceId = null
     ) {
+    }
+
+    public function getStatus(): Status
+    {
+        return $this->status;
     }
 
     public function start(): DateTimeImmutable
@@ -60,13 +67,18 @@ final class Event
         return $at >= $this->endDate;
     }
 
-    public function isBookable(): BookingDecision
+    public function meetsBookingPolicy(): BookingDecision
     {
         return $this->bookingPolicy->canBook();
     }
 
-    public function withStatus(EventStatus $status): self
+    public function bookingStartsAt(): ?DateTimeImmutable
     {
-        return clone($this, ['status' => $status]);
+        return $this->bookingPolicy->start();
+    }
+
+    public function bookingEndsAt(): ?DateTimeImmutable
+    {
+        return $this->bookingPolicy->end();
     }
 }

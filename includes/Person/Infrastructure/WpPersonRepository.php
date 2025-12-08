@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Person\Infrastructure;
 
@@ -39,6 +40,24 @@ class WpPersonRepository implements PersonRepository
             : null;
     }
 
+    public function findByIds(array $ids): PersonCollection
+    {
+        $builder = WpPersonQueryBuilder::fromCriteria(new PersonCriteria())
+            ->withCache()
+            ->addArg('post__in', array_map(fn(PersonId $id) => $id->toInt(), $ids))
+            ->addArg('posts_per_page', -1);
+
+        $wpq = new \WP_Query($builder->getArgs());
+
+        $persons = [];
+
+        foreach ($wpq->posts as $post) {
+            $persons[] = PersonMapper::map(new PostSnapshot($post));
+        }
+
+        return new PersonCollection(...$persons);
+    }
+
     public function search(PersonCriteria $criteria): PersonCollection
     {
         $builder = WpPersonQueryBuilder::fromCriteria($criteria)
@@ -46,12 +65,12 @@ class WpPersonRepository implements PersonRepository
 
         $wpq = new \WP_Query($builder->getArgs());
 
-        $persons = new PersonCollection();
+        $persons = [];
         foreach ($wpq->posts as $post) {
-            $persons->add(PersonMapper::map(new PostSnapshot($post)));
+            $persons[] = PersonMapper::map(new PostSnapshot($post));
         }
 
-        return $persons;
+        return new PersonCollection(...$persons);
     }
 
     public function count(PersonCriteria $criteria): int

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Infrastructure\Abstracts;
 
-use Contexis\Events\Shared\Domain\ValueObjects\OrderBy;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 
 abstract class WpQueryBuilder
 {
@@ -42,10 +44,10 @@ abstract class WpQueryBuilder
         return $clone;
     }
 
-    public function withStatus(array|string $status): self
+    public function withStatus(StatusList $status): self
     {
         $clone = clone $this;
-        $clone->args['post_status'] = $status;
+        $clone->args['post_status'] = $status->toArray();
         return $clone;
     }
 
@@ -87,9 +89,7 @@ abstract class WpQueryBuilder
     public function withMetaQuery(array $metaQuery): self
     {
         $clone = clone $this;
-        $clone->args['meta_query'] = array_merge(
-            $clone->args['meta_query'][] = $metaQuery
-        );
+        $clone->args['meta_query'][] = $metaQuery;
         return $clone;
     }
 

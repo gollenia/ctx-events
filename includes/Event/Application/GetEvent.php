@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
@@ -10,7 +11,7 @@ use Contexis\Events\Media\Application\ImageDto;
 use Contexis\Events\Media\Domain\ImageRepository;
 use Contexis\Events\Person\Application\PersonDto;
 use Contexis\Events\Person\Domain\PersonRepository;
-use Contexis\Events\Shared\Domain\ValueObjects\ViewContext;
+use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 
 class GetEvent
 {
@@ -28,7 +29,7 @@ class GetEvent
         $this->eventPolicy = $eventPolicy;
     }
 
-    public function execute(int $id, EventIncludes $includes, ViewContext $viewContext): EventDto|null
+    public function execute(int $id, EventIncludes $includes, UserContext $userContext): EventDto|null
     {
 
         $event = $this->eventRepository->find(EventId::from($id));
@@ -37,13 +38,13 @@ class GetEvent
             return null;
         }
 
-        if (!$this->eventPolicy->canView($event, $viewContext)) {
+        if (!$this->eventPolicy->userCanView($event, $userContext)) {
             return null;
         }
 
-        $location = $includes->location ? $this->locationRepository->find($event->locationId) : null;
-        $person = $includes->person ? $this->personRepository->find($event->personId) : null;
-        $image = $includes->image ? $this->imageRepository->find($event->imageId) : null;
+        $location = $includes->hasLocation() ? $this->locationRepository->find($event->locationId) : null;
+        $person = $includes->hasPerson() ? $this->personRepository->find($event->personId) : null;
+        $image = $includes->hasImage() ? $this->imageRepository->find($event->imageId) : null;
 
         $locationDto = $location ? LocationDto::fromDomainModel($location) : null;
         $personDto = $person ? PersonDto::fromDomainModel($person) : null;

@@ -1,13 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
 
 use Contexis\Events\Event\Application\EventIncludes;
 use Contexis\Events\Event\Application\GetEvent;
 use Contexis\Events\Event\Application\ListEvents;
-use Contexis\Events\Shared\Infrastructure\Wordpress\ViewContextFactory;
-use Contexis\Events\Shared\Infrastructure\Wordpress\WpViewContextFactory;
-use Contexis\Events\Shared\Presentation\Contracts\RestAdapter;
+use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Contexis\Events\Shared\Presentation\Links;
 
@@ -23,7 +22,7 @@ final class EventController implements RestController
 
     public function register(): void
     {
-        $route = Links::restRoute('event', '(?P<id>\d+)');
+        $route = Links::restRoute('events', '(?P<id>\d+)');
 
         register_rest_route($route['ns'], $route['path'], array(
             'methods'   => \WP_REST_Server::READABLE,
@@ -59,15 +58,21 @@ final class EventController implements RestController
                         'type' => 'integer',
                         'default' => 10,
                     ],
+                    'status' => [
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'string',
+                            'enum' => ['publish', 'future', 'draft', 'pending', 'private', 'trash']
+                        ],
+                    ],
                     'include' => [
                         'type' => 'array',
                         'items' => [
                             'type' => 'string',
-                            'enum' => ['location', 'image','available', 'bookable', 'categories', 'tags', 'locations', 'persons' ]
+                            'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
                         ],
                     ],
                     'order_by' => [
-                        'type' => 'string',
                         'type' => 'string',
                         'default' => 'date-time',
                     ],
@@ -119,7 +124,7 @@ final class EventController implements RestController
         $event_id = (int) $request->get_param('id');
         $include = EventIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
 
-        $event_dto = $this->getEvent->execute($event_id, $include, ViewContextFactory::createFromCurrentUser());
+        $event_dto = $this->getEvent->execute($event_id, $include, UserContextFactory::createFromCurrentUser());
 
         if (!$event_dto) {
             return new \WP_REST_Response(['message' => 'Event not found'], 404);
@@ -132,8 +137,8 @@ final class EventController implements RestController
 
     public function getEventPage(\WP_REST_Request $request): \WP_REST_Response
     {
-        $query = EventCriteriaMapper::fromRequest($request);
-        $view = ViewContextFactory::createFromCurrentUser();
+        $userContext = UserContextFactory::createFromCurrentUser();
+        $query = EventCriteriaMapper::fromRequest($request, $userContext);
 
         $page = $this->listEvents->execute($query);
 
@@ -141,6 +146,10 @@ final class EventController implements RestController
         foreach ($page as $index => $event_dto) {
             $result[] = new EventResource($event_dto);
         }
-        return new \WP_REST_Response($result, 200);
+
+        $response = new \WP_REST_Response($result, 200);
+        $response->header('X-WP-Total', $page->pagination()->totalItems);
+        $response->header('X-WP-TotalPages', $page->pagination()->totalPages());
+        return $response;
     }
 }

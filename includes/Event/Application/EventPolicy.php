@@ -1,14 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Infrastructure\EventOptions;
-use Contexis\Events\Shared\Domain\ValueObjects\ViewContext;
+use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Infrastructure\Contracts\Clock;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostPolicy;
 
-final class EventPolicy
+class EventPolicy
 {
     public function __construct(
         private readonly EventOptions $eventOptions,
@@ -16,15 +17,15 @@ final class EventPolicy
     ) {
     }
 
-    public function canView(
+    public function userCanView(
         Event $event,
-        ViewContext $viewContext,
+        UserContext $userContext,
     ): bool {
         if (!PostPolicy::canView($event->id->toInt())) {
             return false;
         }
 
-        if (!$viewContext->isAnonymous()) {
+        if (!$userContext->isAnonymous()) {
             return true;
         }
 

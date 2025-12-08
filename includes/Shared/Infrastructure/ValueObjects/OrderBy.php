@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace Contexis\Events\Shared\Domain\ValueObjects;
+namespace Contexis\Events\Shared\Infrastructure\ValueObjects;
 
 final class OrderBy
 {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use Contexis\Events\Models\Event;
 use Contexis\Events\Models\Speaker;
@@ -58,20 +59,32 @@ if($attributes['linkTo'] == 'custom') {
 <div class="event-details-item">
 	<div class="event-details-image">
 		<i class="material-icons material-symbols-outlined">
-			<?php if ($attributes['showPortrait'] && $speaker->image) : ?>
-				<img class="event-details-image" src="<?php echo $speaker->image->url_for('thumbnail') ?>" alt="<?php echo $speaker->image->alt ?>">
-			<?php else : ?>
-			<?php echo $attributes['icon'] ? $attributes['icon'] : $gender ?>
-			<?php endif; ?>
+			<?php
+declare(strict_types=1); if ($attributes['showPortrait'] && $speaker->image) : ?>
+				<img class="event-details-image" src="<?php
+declare(strict_types=1); echo $speaker->image->url_for('thumbnail') ?>" alt="<?php
+declare(strict_types=1); echo $speaker->image->alt ?>">
+			<?php
+declare(strict_types=1); else : ?>
+			<?php
+declare(strict_types=1); echo $attributes['icon'] ? $attributes['icon'] : $gender ?>
+			<?php
+declare(strict_types=1); endif; ?>
 		</i>
 	</div>
 	<div class="event-details-text">
-		<h4><?php echo $attributes['description'] ?: __("Speaker", "events") ?></h4>
-		<div class="event-details-data"><?php echo $speaker->name ?></div> 
+		<h4><?php
+declare(strict_types=1); echo $attributes['description'] ?: __("Speaker", "events") ?></h4>
+		<div class="event-details-data"><?php
+declare(strict_types=1); echo $speaker->name ?></div> 
 	</div>
-	<?php if($attributes['showLink'] && $url) : ?>
+	<?php
+declare(strict_types=1); if($attributes['showLink'] && $url) : ?>
 	<div class="event-details-action">
-		<a target="_blank" href="<?php echo $url ?>"><i class="material-icons material-symbols-outlined"><?php echo $linkIcon; ?></i></a>
+		<a target="_blank" href="<?php
+declare(strict_types=1); echo $url ?>"><i class="material-icons material-symbols-outlined"><?php
+declare(strict_types=1); echo $linkIcon; ?></i></a>
 	</div>
-	<?php endif; ?>
+	<?php
+declare(strict_types=1); endif; ?>
 </div> 
