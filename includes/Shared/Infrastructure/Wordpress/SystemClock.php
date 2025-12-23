@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Infrastructure\Wordpress;
 
-use Contexis\Events\Shared\Infrastructure\Contracts\Clock;
+use Contexis\Events\Shared\Domain\Contracts\Clock;
 use DateTimeImmutable;
 use DateTimeZone;
 

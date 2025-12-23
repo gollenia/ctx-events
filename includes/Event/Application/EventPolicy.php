@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
 use Contexis\Events\Event\Domain\Event;
-use Contexis\Events\Event\Infrastructure\EventOptions;
+use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
-use Contexis\Events\Shared\Infrastructure\Contracts\Clock;
+use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostPolicy;
 
 class EventPolicy

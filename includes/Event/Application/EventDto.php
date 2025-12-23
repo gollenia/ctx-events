@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
@@ -34,8 +35,8 @@ class EventDto implements DTO
         public readonly ?ImageDto $imageDto = null,
         public readonly ?PersonDto $personDto = null,
         public readonly ?TicketDtoCollection $ticketsDto = null,
-		public readonly ?TaxonomyCollection $categories = null,
-		public readonly ?TaxonomyCollection $tags = null
+        public readonly ?TaxonomyCollection $categories = null,
+        public readonly ?TaxonomyCollection $tags = null
     ) {
     }
 
@@ -45,8 +46,8 @@ class EventDto implements DTO
         ?ImageDto $imageDto = null,
         ?PersonDto $personDto = null,
         ?TicketDtoCollection $ticketsDto = null,
-		?TaxonomyCollection $categories = null,
-		?TaxonomyCollection $tags = null
+        ?TaxonomyCollection $categories = null,
+        ?TaxonomyCollection $tags = null
     ): self {
         return new self(
             id: $event->id->toInt(),
@@ -61,8 +62,8 @@ class EventDto implements DTO
             imageDto: $imageDto,
             personDto: $personDto,
             ticketsDto: $ticketsDto,
-			categories: $categories,
-			tags: $tags
+            categories: $categories,
+            tags: $tags
         );
     }
 }

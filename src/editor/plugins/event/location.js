@@ -14,8 +14,9 @@ import icons from './icons';
 
 const locationSelector = () => {
 	const postType = select('core/editor').getCurrentPostType();
+	const allowedPostTypes = ['ctx-event', 'event-recurring'];
 
-	if (['ctx-event', 'event-recurring'].indexOf(postType) === -1) {
+	if (!allowedPostTypes.includes(postType)) {
 		return null;
 	}
 
@@ -24,7 +25,7 @@ const locationSelector = () => {
 	const locationList = useSelect((select) => {
 		const { getEntityRecords } = select(coreStore);
 		const query = { per_page: -1, _embed: true };
-		const result = getEntityRecords('postType', 'ctx-location', query);
+		const result = getEntityRecords('postType', 'ctx-event-location', query);
 
 		const locations = [];
 		if (!result) {

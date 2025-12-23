@@ -21,11 +21,9 @@ const edit = (props) => {
 		setAttributes,
 	} = props;
 
-	const postType = props.context.postType;
+	if (props.context.postType !== 'ctx-event') return null;
 
-	if (postType !== 'ctx-event') return null;
-
-	const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
+	const [meta, setMeta] = useEntityProp('postType', props.context.postType, 'meta');
 
 	const blockProps = useBlockProps({ className: 'event-details-item' });
 

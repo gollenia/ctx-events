@@ -7,6 +7,7 @@ use Contexis\Events\Event\Application\EventPolicy;
 use Contexis\Events\Event\Application\GetEvent;
 use Contexis\Events\Location\Application\LocationDto;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
+use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeImageFactory;
 use Tests\Support\FakeEventRepository;
@@ -32,15 +33,13 @@ function fakeUserContext(): UserContext
 test('returns null when event not found', function () {
     $eventRepository   = new FakeEventRepository(null);
     $peopleRepository   = new FakePersonRepository();
-    $images   = new FakeImageRepository(null);
-    $locations = new FakeLocationRepository(null);
-    
-    // Mock EventPolicy usually allows view if event not found? 
-    // Actually GetEvent check logic: find event -> check policy.
-    // So if event is null, policy is not called. We can pass a dummy.
-    $policy = Mockery::mock(EventPolicy::class);
+    $imageRepository   = new FakeImageRepository(null);
+    $locationRepository = new FakeLocationRepository(null);
+    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $images, $locations, $policy);
+    $eventPolicy = Mockery::mock(EventPolicy::class);
+
+    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
     $dto = $uc->execute(999, new EventIncludes(location: false, image: false), fakeUserContext());
 
@@ -51,15 +50,16 @@ test('returns event dto without includes', function () {
     $id = fake()->numberBetween(1, 1000);
     $event = FakeEventFactory::create($id);
 
-    $eventRepository   = new FakeEventRepository($event);
+    $eventRepository   = new FakeEventRepository(null);
     $peopleRepository   = new FakePersonRepository();
-    $images   = new FakeImageRepository(null);
-    $locations = new FakeLocationRepository(null);
-    
-    $policy = Mockery::mock(EventPolicy::class);
-    $policy->shouldReceive('userCanView')->andReturn(true);
+    $imageRepository   = new FakeImageRepository(null);
+    $locationRepository = new FakeLocationRepository(null);
+    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $images, $locations, $policy);
+    $eventPolicy = Mockery::mock(EventPolicy::class);
+    $eventPolicy->shouldReceive('userCanView')->andReturn(true);
+
+    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
     $dto = $uc->execute($event->id->toInt(), new EventIncludes(location: false, image: false), fakeUserContext());
 
@@ -90,13 +90,14 @@ test('returns event dto when event found with includes', function () {
 
     $eventRepository   = new FakeEventRepository($event);
     $peopleRepository   = new FakePersonRepository();
-    $images   = new FakeImageRepository($image);
+    $imageRepository   = new FakeImageRepository($image);
     $locationRepository = new FakeLocationRepository($location);
+    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
 
-    $policy = Mockery::mock(EventPolicy::class);
-    $policy->shouldReceive('userCanView')->andReturn(true);
+    $eventPolicy = Mockery::mock(EventPolicy::class);
+    $eventPolicy->shouldReceive('userCanView')->andReturn(true);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $images, $locationRepository, $policy);
+    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
     $dto = $uc->execute($event->id->toInt(), new EventIncludes(location: true, image: true), fakeUserContext());
 

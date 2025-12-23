@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\Abstract;
 
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
-use mysqli;
 
 abstract class Collection implements \Countable, \IteratorAggregate
 {

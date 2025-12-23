@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
@@ -17,7 +18,7 @@ final class TicketDto implements DTO
     ) {
     }
 
-    public static function fromDomain(Ticket $ticket): self
+    public static function fromDomainModel(Ticket $ticket): self
     {
         return new self(
             id: $ticket->id->toInt(),
@@ -26,5 +27,16 @@ final class TicketDto implements DTO
             currency: $ticket->price->currency,
             availableQuantity: $ticket->capacity ?? 0
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'price_in_cents' => $this->priceInCents,
+            'currency' => $this->currency,
+            'available_quantity' => $this->availableQuantity,
+        ];
     }
 }

@@ -22,12 +22,7 @@ import { __ } from '@wordpress/i18n';
  * @return {JSX.Element} Element
  */
 const edit = (props) => {
-	const { context } = props;
-
-	const postType = useSelect(
-		(select) => select('core/editor').getCurrentPostType(),
-		[],
-	);
+	const postType = props.context.postType;
 	if (postType !== 'ctx-event-location') return null;
 	const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
@@ -69,7 +64,7 @@ const edit = (props) => {
 
 	return (
 		<div>
-			<div className="location-edit__admin">
+			<div className="location-edit__admin ctx-block-editor">
 				<TextControl
 					label={__('Address', 'events')}
 					value={meta._location_address}

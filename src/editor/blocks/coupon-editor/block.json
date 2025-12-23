@@ -1,9 +1,9 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "events/coupon-form",
+	"name": "ctx-events/coupon-editor",
 	"apiVersion": 3,
-	"title": "Location Editor",
-	"description": "Edit a location's metadata.",
+	"title": "Coupon Editor",
+	"description": "Edit a coupon's metadata.",
 	"category": "widgets",
 	"attributes": {
 		"content": {
@@ -18,5 +18,6 @@
 		"inserter": false,
 		"customClass": false,
 		"selector": false
-	}
+	},
+	"usesContext": ["postType"]
 }

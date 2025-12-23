@@ -6,7 +6,7 @@
 	"description": "Lets the user type an email address.",
 	"category": "widgets",
 	"attributes": {
-		"fieldid": {
+		"name": {
 			"type": "string",
 			"default": ""
 		},

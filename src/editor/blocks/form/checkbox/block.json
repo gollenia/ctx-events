@@ -6,13 +6,13 @@
 	"description": "Lets the user check something",
 	"category": "widgets",
 	"attributes": {
-		"fieldid": {
+		"name": {
 			"type": "string",
 			"default": ""
 		},
 		"width": {
 			"type": "number",
-			"default": 4
+			"default": 6
 		},
 		"required": {
 			"type": "boolean",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Location\Infrastructure;
 
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
@@ -41,7 +42,7 @@ class LocationPost extends PostType implements HasMetaData
             'show_in_rest' => true,
             'show_in_admin_bar' => true,
             'show_ui' => true,
-            'show_in_menu' => 'edit.php?post_type=' . EventPost::POST_TYPE,
+            'show_in_menu' => AdminMenu::MENU_SLUG,
             'show_in_nav_menus' => true,
             'can_export' => true,
             'exclude_from_search' => true,

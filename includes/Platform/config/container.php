@@ -7,7 +7,7 @@ use function DI\get;
 
 return [
 
-    \Contexis\Events\Shared\Infrastructure\Contracts\Clock::class
+    \Contexis\Events\Shared\Domain\Contracts\Clock::class
         => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
 
     \Contexis\Events\Event\Presentation\EventController::class => autowire(),
@@ -16,7 +16,10 @@ return [
         ->constructor([
             \Contexis\Events\Event\Infrastructure\EventPost::class,
             \Contexis\Events\Location\Infrastructure\LocationPost::class,
-            \Contexis\Events\Person\Infrastructure\PersonPost::class
+            \Contexis\Events\Person\Infrastructure\PersonPost::class,
+            \Contexis\Events\Payment\Infrastructure\CouponPost::class,
+			\Contexis\Events\Form\Infrastructure\RegistrationFormPost::class,
+			\Contexis\Events\Form\Infrastructure\AttendeeFormPost::class,
         ]),
 
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => create()
@@ -36,7 +39,7 @@ return [
 
     \Contexis\Events\Platform\Wordpress\OptionsRegistrar::class => create()
         ->constructor([
-            get(\Contexis\Events\Event\Infrastructure\EventOptions::class),
+            get(Contexis\Events\Event\Application\Contracts\EventOptions::class),
         ]),
 
     \Contexis\Events\Event\Domain\EventRepository::class
@@ -47,4 +50,7 @@ return [
         => autowire(\Contexis\Events\Person\Infrastructure\WpPersonRepository::class),
     \Contexis\Events\Media\Domain\ImageRepository::class
         => autowire(\Contexis\Events\Media\Infrastructure\WpImageRepository::class),
+
+	\Contexis\Events\Event\Application\Contracts\EventOptions::class
+        => autowire(\Contexis\Events\Event\Infrastructure\WpEventOptions::class),
 ];

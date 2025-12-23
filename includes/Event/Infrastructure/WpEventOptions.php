@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Shared\Infrastructure\Wordpress\WpOptions;
 
-final class EventOptions extends WpOptions
+final class WpEventOptions extends WpOptions implements EventOptions
 {
     public const EVENT_PUBLIC_SHOW_PAST = 'ctx_events_show_past_events';
     public const EVENT_ONGOING_IS_PAST = 'ctx_events_ongoing_events_are_past';

@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Contexis\Events\Booking\Infrastructure;
+namespace Contexis\Events\Form\Infrastructure;
 
+use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 
 class RegistrationFormPost extends PostType
@@ -17,8 +18,8 @@ class RegistrationFormPost extends PostType
                 'show_in_rest' => true,
                 'show_in_admin_bar' => true,
                 'show_ui' => true,
-                'show_in_menu' => false,
-                'show_in_nav_menus' => false,
+                'show_in_menu' => AdminMenu::MENU_SLUG,
+                'show_in_nav_menus' => true,
                 'can_export' => true,
                 'exclude_from_search' => true,
                 'publicly_queryable' => false,
@@ -26,34 +27,35 @@ class RegistrationFormPost extends PostType
                 'has_archive' => false,
                 'supports' => ['title','excerpt','editor'],
                 'label' => __('Forms', 'events'),
-                'description' => __('Display forms on your blog.', 'events'),
+                'description' => __('Form for the registration data', 'events'),
                 'template' => [
-                    ['events-manager/form-container', [], [
-                        ['events-manager/form-email', [
+                    ['ctx-events/form-container', [], [
+                        ['ctx-events/form-email', [
                             "lock" => ["remove" => true, "move" => false],
                             "required" => true, "label" => __('Email', 'events'),
-                            "fieldid" => 'user_email']
+                            "name" => 'user_email']
                         ],
-                        ['events-manager/form-text', [
+                        ['ctx-events/form-text', [
                             "lock" => ["remove" => true, "move" => false],
                             "required" => true,
                             "width" => 3,
                             "label" => __('First Name', 'events'),
-                            "fieldid" => 'first_name'
+                            "name" => 'first_name'
                         ]],
-                        ['events-manager/form-text', [
+                        ['ctx-events/form-text', [
                             "lock" => ["remove" => true, "move" => false],
                             "required" => true,
                             "width" => 3,
                             "label" => __('Last Name', 'events'),
-                            "fieldid" => 'last_name'
+                            "name" => 'last_name'
                         ]]]]
                 ],
+				'template_lock' => 'all',
                 'labels' => [
-                    'name' => __('Booking Form', 'events'),
+                    'name' => __('Registration Form', 'events'),
                     'singular_name' => __('Form', 'events'),
                     'menu_name' => __('Forms', 'events'),
-                    'add_new' => __('Add Booking Form', 'events'),
+                    'add_new' => __('Add Registration Form', 'events'),
                     'add_new_item' => __('Add New Form', 'events'),
                     'edit' => __('Edit', 'events'),
                     'edit_item' => __('Edit Form', 'events'),

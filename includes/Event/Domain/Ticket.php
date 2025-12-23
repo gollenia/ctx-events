@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
@@ -17,12 +18,21 @@ final class Ticket
         public readonly ?bool $enabled,
         public readonly ?DateTimeImmutable $salesStart,
         public readonly ?DateTimeImmutable $salesEnd,
+        public readonly int $order,
+        public readonly int $form,
+        public readonly int $min,
+        public readonly int $max
     ) {
     }
 
     public function isFree(): bool
     {
         return $this->price->isFree();
+    }
+
+    public function isBookable(DateTimeImmutable $now): bool
+    {
+        return $this->isCurrentlyAvailable($now) && ($this->enabled ?? true);
     }
 
     public function isCurrentlyAvailable(DateTimeImmutable $now): bool

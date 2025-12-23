@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
@@ -9,19 +10,29 @@ class EventSpaces
         public readonly int $capacity,
         public readonly int $confirmed,
         public readonly int $pending,
+        public readonly int $waiting,
         public readonly int $rejected,
         public readonly int $expired
     ) {
     }
 
-    public function available(bool $holdPending = true): int
+    public function available(): int
     {
-        $holds = $holdPending ? $this->pending : 0;
-        return max(0, $this->capacity - $this->confirmed - $holds);
+        return max(0, $this->capacity - $this->confirmed - $this->pending);
     }
 
-    public function isSoldOut(bool $holdPending = true): bool
+    public function isSoldOut(): bool
     {
-        return $this->available($holdPending) <= 0;
+        return $this->available() <= 0;
+    }
+
+    public function hasSpaces(): bool
+    {
+        return $this->capacity > 0;
+    }
+
+    public function isOverbooked(): bool
+    {
+        return $this->confirmed + $this->pending > $this->capacity;
     }
 }

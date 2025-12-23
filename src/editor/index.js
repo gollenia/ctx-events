@@ -4,6 +4,7 @@
 import { registerBlockType, unregisterBlockType } from '@wordpress/blocks';
 import domReady from '@wordpress/dom-ready';
 import { registerPlugin } from '@wordpress/plugins';
+import './editor.scss';
 
 /**
  * Blocks dependencies.
@@ -13,8 +14,7 @@ import * as booking from './blocks/booking/index.js';
 /**
  * Form dependencies.
  */
-
-import * as couponForm from './blocks/coupon-form/index.js';
+import * as couponEditor from './blocks/coupon-editor/index.js';
 import * as details from './blocks/details/index.js';
 import * as detailsAudience from './blocks/details-audience/index.js';
 import * as detailsDate from './blocks/details-date/index.js';
@@ -52,6 +52,7 @@ import peopleSelector from './plugins/event/people.js';
 import recurrenceSettings from './plugins/event/recurrence.js';
 import LocationAddress from './plugins/location/LocationAddress.js';
 import personalData from './plugins/person/personal.js';
+import DashboardButton from './plugins/event/DashboardButton.js';
 
 const blocks = [
 	upcoming,
@@ -69,7 +70,7 @@ const blocks = [
 	formRadio,
 	formHTML,
 	locationEditor,
-	couponForm,
+	couponEditor,
 	details,
 	detailsAudience,
 	detailsDate,
@@ -92,6 +93,7 @@ const plugins = [
 	{ name: 'event-recurrence-settings', component: recurrenceSettings },
 	{ name: 'event-booking-sidebar', component: bookingSidebar },
 	{ name: 'event-booking-status', component: BookingStatus },
+	{ name: 'event-dashboard-button', component: DashboardButton },
 ];
 
 plugins.forEach((plugin) => {

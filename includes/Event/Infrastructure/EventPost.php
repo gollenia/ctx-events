@@ -5,6 +5,7 @@ namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Infrastructure\EventMeta as InfrastructureEventMeta;
 use Contexis\Events\Event\Infrastructure\EventMeta;
+use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasTaxonomies;
@@ -100,7 +101,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData
             'public' => true,
             'hierarchical' => false,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
             'show_in_rest' => true,
             'show_in_nav_menus' => true,
             'can_export' => true,

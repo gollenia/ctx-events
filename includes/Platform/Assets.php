@@ -98,6 +98,13 @@ final class Assets
             array(),
             $script_asset['version']
         );
+
+		wp_enqueue_style(
+            'ctx-events-editor-style-be',
+            PluginInfo::getPluginUrl('/build/editor.css'),
+            array(),
+            $script_asset['version']
+        );
     }
 
     private function getAssetData($asset)

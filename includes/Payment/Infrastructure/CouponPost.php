@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Infrastructure;
 
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
 class CouponPost extends PostType implements HasMetaData
 {
-    public const POST_TYPE = "ctx-coupon";
-
-
+    public const POST_TYPE = "ctx-event-coupon";
 
     public static function getAdminUrl(): string
     {
@@ -42,13 +41,13 @@ class CouponPost extends PostType implements HasMetaData
             'show_in_rest' => true,
             'show_in_nav_menus' => true,
             'can_export' => true,
-            'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
-            'show_in_menu' => 'edit.php?post_type=' . EventPost::POST_TYPE,
+            'exclude_from_search' => true,
+            'show_in_menu' => AdminMenu::MENU_SLUG,
             'publicly_queryable' => false,
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
             'template' => [
-                [ 'events/coupon-form' ],
+                [ 'ctx-events/coupon-editor' ],
             ],
             'template_lock' => 'all',
             'label' => __('Coupons', 'events'),

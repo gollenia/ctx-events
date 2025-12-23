@@ -35,14 +35,12 @@ final class ListEvents
         $locationCollectionDto = $criteria->includes->hasLocation() ? (EventLocations::create($this->locationRepository))->preloadDtos($events) : null;
         $personCollectionDto = $criteria->includes->hasPerson() ? (EventPersons::create($this->personRepository))->preloadDtos($events) : null;
         $imageCollectionDto = $criteria->includes->hasImage() ? (EventImages::create($this->imageRepository))->preloadDtos($events) : null;
-        $ticketService = EventTickets::create($criteria->includes->allTickets());
         $items = [];
 
         foreach ($events as $event) {
             $locationDto = $locationCollectionDto?->findById($event->locationId ?? 0) ?: null;
             $personDto = $personCollectionDto?->findById($event->personId ?? 0) ?: null;
             $imageDto = $imageCollectionDto?->findById($event->imageId ?? 0) ?: null;
-            $tickets = $ticketService->getAllowedTickets($event);
 
 			if ($criteria->includes->hasCategories()) {
 				$categories = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES);
@@ -57,7 +55,6 @@ final class ListEvents
                 locationDto: $locationDto,
                 imageDto: $imageDto,
                 personDto: $personDto,
-                ticketsDto: $tickets,
 				categories: $categories ?? null,
 				tags: $tags ?? null
             );

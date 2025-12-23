@@ -1,0 +1,12 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Contexis\Events\Event\Application\Contracts;
+
+interface EventOptions
+{
+    public function publicShowPastEvents(): bool;
+
+    public function ongoingEventsArePast(): bool;
+}

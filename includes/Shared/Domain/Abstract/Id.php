@@ -28,9 +28,4 @@ abstract class Id
     {
         return $other::class === static::class && $this->value === $other->value;
     }
-
-    public function __toString(): string
-    {
-        return (string)$this->value;
-    }
 }

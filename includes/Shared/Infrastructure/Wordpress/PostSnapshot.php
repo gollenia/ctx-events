@@ -16,6 +16,11 @@ final class PostSnapshot
         $this->meta = get_post_meta($post->ID);
     }
 
+	public static function fromWpPost(WP_Post $post): PostSnapshot
+	{
+		return new PostSnapshot($post);
+	}
+
     public static function fromWpPostId(int $id): ?PostSnapshot
     {
         if (!$id) {

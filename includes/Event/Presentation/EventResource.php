@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
@@ -51,13 +52,20 @@ class EventResource implements JsonSerializable
             $includes['image'] = new ImageResource($this->event_dto->imageDto);
         }
 
-		if ($this->event_dto->categories) {
-			$includes['categories'] = $this->event_dto->categories->toArray();
-		}
+        if ($this->event_dto->categories) {
+            $includes['categories'] = $this->event_dto->categories->toArray();
+        }
 
-		if ($this->event_dto->tags) {
-			$includes['tags'] = $this->event_dto->tags->toArray();
-		}
+        if ($this->event_dto->tags) {
+            $includes['tags'] = $this->event_dto->tags->toArray();
+        }
+
+        if ($this->event_dto->ticketsDto) {
+            $includes['tickets'] = array_map(
+                fn($ticketDto) => $ticketDto->toArray(),
+                $this->event_dto->ticketsDto->toArray()
+            );
+        }
 
         if (!empty($includes)) {
             $result['includes'] = $includes;

@@ -23,11 +23,9 @@ import { __ } from '@wordpress/i18n';
  * @return {JSX.Element} Element
  */
 const edit = (props) => {
-	const postType = useSelect(
-		(select) => select('core/editor').getCurrentPostType(),
-		[],
-	);
-	if (postType !== 'coupon') return null;
+
+	const postType = props.context.postType;
+	if (postType !== 'ctx-event-coupon') return null;
 	const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
 	const blockProps = useBlockProps({

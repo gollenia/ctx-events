@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
@@ -9,16 +10,20 @@ use Contexis\Events\Event\Domain\EventId;
 use Contexis\Events\Event\Domain\EventStatus;
 use Contexis\Events\Event\Domain\EventViewConfig;
 use Contexis\Events\Event\Domain\RecurrenceId;
+use Contexis\Events\Event\Domain\Ticket;
+use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostStatusMapper;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
+use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
+use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
 use DateTimeImmutable;
 
-final class EventMapper
+final class EventMapper implements DatabaseMapper
 {
     public static function map(PostSnapshot $post): Event
     {
@@ -46,11 +51,21 @@ final class EventMapper
             endDate: $post->getDateTime(EventMeta::EVENT_END, $timezone),
             createdAt: $post->getDateTime('post_date', $timezone),
             locationId: LocationId::from($post->getInt(EventMeta::LOCATION_ID)),
+            tickets: $post->getArray(EventMeta::TICKETS) ? self::ticketsFromArray($post->getArray(EventMeta::TICKETS)) : null,
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
             personId: $post->getInt('_person_id') ? PersonId::from($post->getInt(EventMeta::PERSON_ID)) : null,
         );
 
         return $event;
+    }
+
+    private static function ticketsFromArray(array $ticketsData): TicketCollection
+    {
+        $tickets = [];
+        foreach ($ticketsData as $ticketData) {
+            $tickets[] = TicketMapper::fromArray($ticketData);
+        }
+        return TicketCollection::fromArray($tickets);
     }
 }

@@ -7,14 +7,27 @@ use Mpdf\Tag\A;
 
 final class AdminMenu implements AdminServiceInterface
 {
-    public const MENU_SLUG = 'contexis_events_admin_menu';
+    public const MENU_SLUG = 'ctx_events_admin_menu';
     public string $hook = 'admin_menu';
 
     public function hook(): void
     {
         add_action($this->hook, [$this, 'register']);
+		add_filter('parent_file', [$this, 'parent_file']);
     }
 
+
+    public function parent_file($parent_file) {
+		global $current_screen;
+
+		// Check, ob wir im CPT "event" sind (Edit oder New Screen)
+		if ($current_screen && $current_screen->post_type === 'ctx-event') {
+			// Wir zwingen WP, dein Menü als aktiv zu markieren
+			return AdminMenu::MENU_SLUG;
+		}
+
+		return $parent_file;
+    }
 
     public function register(): void
     {
@@ -23,13 +36,13 @@ final class AdminMenu implements AdminServiceInterface
             __('Events', 'events'),
             'manage_options',
             self::MENU_SLUG,
-            [$this, 'settingsPage'],
+            [$this, 'eventsPage'],
             'dashicons-calendar-alt',
             6
         );
 
         add_submenu_page(
-            'contexis_events_admin_menu',
+            self::MENU_SLUG,
             __('Settings', 'events'),
             __('Settings', 'events'),
             'manage_options',
@@ -67,9 +80,10 @@ final class AdminMenu implements AdminServiceInterface
         );
     }
 
-    public function settingsPage(): string
+    public function eventsPage(): string
     {
-        echo "<h1>Settings Page</h1>";
+        echo "<h1>Events Page</h1>";
+		echo "<p>Hier kommt die React app hin</p>";
         return '';
     }
 }

@@ -8,17 +8,23 @@ use Contexis\Events\Event\Application\TicketDto;
 use Contexis\Events\Event\Application\TicketDtoCollection;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\Ticket;
+use Contexis\Events\Event\Domain\TicketScope;
 
 final class EventTickets
 {
     public function __construct(
-        private readonly bool $allTickets
+        private readonly TicketScope $scope
     ) {
     }
 
-    public static function create(bool $allTickets): self
+    public static function onlyBookable(): self
     {
-        return new self($allTickets);
+        return new self(TicketScope::BOOKABLE_ONLY);
+    }
+
+    public static function all(): self
+    {
+        return new self(TicketScope::ALL);
     }
 
     public function getAllowedTickets(Event $event): ?TicketDtoCollection
@@ -33,11 +39,11 @@ final class EventTickets
         $items = [];
 
         foreach ($tickets as $ticket) {
-            if (!$this->allTickets && !$ticket->isBookable($now)) {
+            if ($this->scope === TicketScope::BOOKABLE_ONLY && !$ticket->isBookable($now)) {
                 continue;
             }
 
-            $items[] = TicketDto::fromDomain($ticket);
+            $items[] = TicketDto::fromDomainModel($ticket);
         }
 
         return TicketDtoCollection::fromArray($items);
