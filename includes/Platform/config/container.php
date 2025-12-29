@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use function DI\autowire;
@@ -8,7 +9,7 @@ use function DI\get;
 return [
 
     \Contexis\Events\Shared\Domain\Contracts\Clock::class
-        => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
+    => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
 
     \Contexis\Events\Event\Presentation\EventController::class => autowire(),
 
@@ -18,8 +19,8 @@ return [
             \Contexis\Events\Location\Infrastructure\LocationPost::class,
             \Contexis\Events\Person\Infrastructure\PersonPost::class,
             \Contexis\Events\Payment\Infrastructure\CouponPost::class,
-			\Contexis\Events\Form\Infrastructure\RegistrationFormPost::class,
-			\Contexis\Events\Form\Infrastructure\AttendeeFormPost::class,
+            \Contexis\Events\Form\Infrastructure\BookingFormPost::class,
+            \Contexis\Events\Form\Infrastructure\AttendeeFormPost::class,
         ]),
 
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => create()
@@ -43,14 +44,14 @@ return [
         ]),
 
     \Contexis\Events\Event\Domain\EventRepository::class
-        => autowire(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
+    => autowire(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
     \Contexis\Events\Location\Domain\LocationRepository::class
-        => autowire(\Contexis\Events\Location\Infrastructure\WpLocationRepository::class),
+    => autowire(\Contexis\Events\Location\Infrastructure\WpLocationRepository::class),
     \Contexis\Events\Person\Domain\PersonRepository::class
-        => autowire(\Contexis\Events\Person\Infrastructure\WpPersonRepository::class),
+    => autowire(\Contexis\Events\Person\Infrastructure\WpPersonRepository::class),
     \Contexis\Events\Media\Domain\ImageRepository::class
-        => autowire(\Contexis\Events\Media\Infrastructure\WpImageRepository::class),
+    => autowire(\Contexis\Events\Media\Infrastructure\WpImageRepository::class),
 
-	\Contexis\Events\Event\Application\Contracts\EventOptions::class
-        => autowire(\Contexis\Events\Event\Infrastructure\WpEventOptions::class),
+    \Contexis\Events\Event\Application\Contracts\EventOptions::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpEventOptions::class),
 ];

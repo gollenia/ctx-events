@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Form\Infrastructure;
@@ -26,26 +27,29 @@ class AttendeeFormPost extends PostType
             'publicly_queryable' => true,
             'query_var' => true,
             'has_archive' => false,
-            'supports' => ['title','excerpt','editor'],
-            'label' => __('Forms', 'events'),
+            'supports' => ['title', 'excerpt', 'editor'],
+            'label' => __('Attendee Forms', 'events'),
             'description' => __('Form for the attendee data', 'events'),
-			'template_lock' => 'all',
+
             'template' => [
-                ['ctx-events/form-container', [], [
+                ['ctx-events/form-container', ['lock' => [
+                    'move'   => true,
+                    'remove' => true
+                ]], [
                     ['ctx-events/form-text', ["required" => true, "width" => 3, "label" => __('Name', 'events'), "name" => 'name']]
                 ]]
             ],
             'labels' => [
                 'name' => __('Attendee Form', 'events'),
-                'singular_name' => __('Form', 'events'),
-                'menu_name' => __('Forms', 'events'),
+                'singular_name' => __('Attendee Form', 'events'),
+                'menu_name' => __('Attendee Forms', 'events'),
                 'add_new' => __('Add Attendee Form', 'events'),
-                'add_new_item' => __('Add New Form', 'events'),
+                'add_new_item' => __('Add New Attendee Form', 'events'),
                 'edit' => __('Edit', 'events'),
-                'edit_item' => __('Edit Form', 'events'),
-                'new_item' => __('New Form', 'events'),
+                'edit_item' => __('Edit Attendee Form', 'events'),
+                'new_item' => __('New Attendee Form', 'events'),
                 'view' => __('View', 'events'),
-                'view_item' => __('View Form', 'events'),
+                'view_item' => __('View Attendee Form', 'events'),
                 'search_items' => __('Search Forms', 'events'),
                 'not_found' => __('No Forms Found', 'events'),
                 'not_found_in_trash' => __('No Forms Found in Trash', 'events'),

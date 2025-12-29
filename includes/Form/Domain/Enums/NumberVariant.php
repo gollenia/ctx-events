@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Form\Domain\ValueObjects;
+namespace Contexis\Events\Form\Domain\Enums;
 
 enum NumberVariant: string
 {

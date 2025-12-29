@@ -6,17 +6,17 @@ namespace Contexis\Events\Form\Domain;
 
 use Contexis\Events\Form\Domain\ValueObjects\FormFieldCollection;
 use Contexis\Events\Form\Domain\ValueObjects\FormType;
+use Contexis\Events\Form\Domain\ValueObjects\ValidationResult;
 
 class Form
 {
-    public function __construct(
-        public readonly FormId $id,
-        public readonly FormType $type,
+	public function __construct(
+		public readonly FormId $id,
+		public readonly FormType $type,
 		public readonly FormFieldCollection $fields,
-        public readonly string $name,
-        public readonly ?string $description,
-    ) {
-    }
+		public readonly string $name,
+		public readonly ?string $description,
+	) {}
 
 	public function toArray(): array
 	{
@@ -29,9 +29,10 @@ class Form
 		];
 	}
 
-	public function validate(array $formData): array
+	public function validate(array $formData): ValidationResult
 	{
 		$allErrors = [];
+		$validatedData = [];
 
 		foreach ($this->fields as $field) {
 			if (!$field->shouldValidate($formData)) {
@@ -40,9 +41,16 @@ class Form
 
 			if (!$field->validate($formData[$field->name])) {
 				$allErrors[$field->name] = $field->customErrorMessage;
+				continue;
 			}
+
+			$validatedData[$field->name] = $field->validate($formData[$field->name]);
 		}
 
-		return $allErrors;
+		if (empty($allErrors)) {
+			return ValidationResult::valid($validatedData);
+		}
+
+		return ValidationResult::invalid($allErrors);
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress\Admin;
@@ -13,20 +14,21 @@ final class AdminMenu implements AdminServiceInterface
     public function hook(): void
     {
         add_action($this->hook, [$this, 'register']);
-		add_filter('parent_file', [$this, 'parent_file']);
+        add_filter('parent_file', [$this, 'parent_file']);
     }
 
 
-    public function parent_file($parent_file) {
-		global $current_screen;
+    public function parent_file($parent_file)
+    {
+        global $current_screen;
 
-		// Check, ob wir im CPT "event" sind (Edit oder New Screen)
-		if ($current_screen && $current_screen->post_type === 'ctx-event') {
-			// Wir zwingen WP, dein Menü als aktiv zu markieren
-			return AdminMenu::MENU_SLUG;
-		}
+        // Check, ob wir im CPT "event" sind (Edit oder New Screen)
+        if ($current_screen && $current_screen->post_type === 'ctx-event') {
+            // Wir zwingen WP, dein Menü als aktiv zu markieren
+            return AdminMenu::MENU_SLUG;
+        }
 
-		return $parent_file;
+        return $parent_file;
     }
 
     public function register(): void
@@ -39,6 +41,16 @@ final class AdminMenu implements AdminServiceInterface
             [$this, 'eventsPage'],
             'dashicons-calendar-alt',
             6
+        );
+
+        add_submenu_page(
+            self::MENU_SLUG,
+            __('Dashboard', 'events'),
+            __('Dashboard', 'events'),
+            'manage_options',
+            self::MENU_SLUG,
+            [$this, 'eventsPage'],
+            0
         );
 
         add_submenu_page(
@@ -60,30 +72,12 @@ final class AdminMenu implements AdminServiceInterface
             'contexis_events_bookings',
             fn() => print('<div id="contexis-events-bookings-app"></div>')
         );
-
-        add_submenu_page(
-            self::MENU_SLUG,
-            __('Locations', 'events'),
-            __('Locations', 'events'),
-            'manage_options',
-            'contexis_events_locations',
-            fn() => print('<div id="contexis-events-locations-app"></div>')
-        );
-
-        add_submenu_page(
-            self::MENU_SLUG,
-            __('Persons', 'events'),
-            __('Persons', 'events'),
-            'manage_options',
-            'contexis_events_persons',
-            fn() => print('<div id="contexis-events-persons-app"></div>')
-        );
     }
 
     public function eventsPage(): string
     {
         echo "<h1>Events Page</h1>";
-		echo "<p>Hier kommt die React app hin</p>";
+        echo "<p>Hier kommt die React app hin</p>";
         return '';
     }
 }

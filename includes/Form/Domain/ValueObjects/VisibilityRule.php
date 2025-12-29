@@ -9,7 +9,7 @@ final readonly class VisibilityRule
     public function __construct(
         public string $dependsOnField,
         public mixed $expectedValue,
-        public string $operator = 'equals' 
+        public string $operator = 'equals'
     ) {}
 
     public function toArray(): array
@@ -20,7 +20,7 @@ final readonly class VisibilityRule
             'operator' => $this->operator,
         ];
     }
-    
+
     public function isMet(array $allFormData): bool
     {
         $actualValue = $allFormData[$this->dependsOnField] ?? null;
@@ -28,6 +28,7 @@ final readonly class VisibilityRule
         return match ($this->operator) {
             'equals' => $actualValue == $this->expectedValue,
             'not_equals' => $actualValue != $this->expectedValue,
+            'not_empty' => !empty($actualValue) && $actualValue !== false && $actualValue !== '0',
             default => false,
         };
     }

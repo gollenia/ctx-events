@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace Contexis\Events\Form\Domain\ValueObjects;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
+use Contexis\Events\Form\Domain\Enums\ValidationError;
 
 final class FormField
 {
-    public function __construct(
-        public readonly string $name,
-        public readonly string $label,
-        public readonly bool $required,
-        public readonly FieldWidth $width = FieldWidth::SIX,
-        public readonly ?string $description = null,
+	public function __construct(
+		public readonly string $name,
+		public readonly string $label,
+		public readonly bool $required,
+		public readonly FieldWidth $width = FieldWidth::SIX,
+		public readonly ?string $description = null,
 		public readonly string $customErrorMessage = '',
 		public readonly FieldDetails $details,
 		public readonly ?VisibilityRule $visibilityRule = null,
-    ) {
-    }
+	) {}
 
 	public function toArray(): array
 	{
@@ -35,16 +35,24 @@ final class FormField
 	}
 
 	public function shouldValidate(array $allFormData): bool
-    {
-        if ($this->visibilityRule === null) {
-            return true;
-        }
-
-        return $this->visibilityRule->isMet($allFormData);
-    }
-
-	public function validate(mixed $value): bool
 	{
+		if ($this->visibilityRule === null) {
+			return true;
+		}
+
+		return $this->visibilityRule->isMet($allFormData);
+	}
+
+	public function validate(mixed $value): ?ValidationError
+	{
+		if (!$this->shouldValidate($value)) {
+			return null;
+		}
+
+		if ($this->required && $this->details->isEmpty($value)) {
+			return ValidationError::REQUIRED;
+		}
+
 		return $this->details->validateValue($value);
 	}
 }

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Contexis\Events\Form\Domain\ValueObjects;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
-use Contexis\Events\Form\Domain\ValueObjects\NumberVariant;
+use Contexis\Events\Form\Domain\Enums\FieldType;
+use Contexis\Events\Form\Domain\Enums\ValidationError;
+use Contexis\Events\Form\Domain\Enums\NumberVariant;
 
 final readonly class NumberDetails implements FieldDetails
 {
@@ -38,23 +40,28 @@ final readonly class NumberDetails implements FieldDetails
         ];
     }
 
-    public function validateValue(mixed $value): bool
+    public function validateValue(mixed $value): ?ValidationError
     {
         if (!is_numeric($value)) {
-            return false;
+            return ValidationError::INVALID_FORMAT;
         }
 
         $number = (int) $value;
 
         if ($this->min !== null && $number < $this->min) {
-            return false;
+            return ValidationError::TOO_LOW;
         }
 
         if ($this->max !== null && $number > $this->max) {
-            return false;
+            return ValidationError::TOO_HIGH;
         }
 
-        return true;
+        return null;
+    }
+
+    public function hydrate(mixed $value): mixed
+    {
+        return (int) $value;
     }
 
     public function isEmpty(mixed $value): bool
