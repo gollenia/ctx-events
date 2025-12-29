@@ -6,7 +6,7 @@
 	"description": "Lets the user check something",
 	"category": "widgets",
 	"attributes": {
-		"fieldid": {
+		"name": {
 			"type": "string",
 			"default": ""
 		},
@@ -26,18 +26,20 @@
 			"type": "number",
 			"default": 0
 		},
-		"help": {
-			"type": "string",
-			"default": ""
-		},
-		"error": {
+		"description": {
 			"type": "string",
 			"default": ""
 		},
 		"options": {
 			"type": "array",
 			"default": []
+		},
+		"visibilityRule": {
+			"type": "object",
+			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-container"]
+	"parent": [
+		"ctx-events/form-container"
+	]
 }

@@ -1,4 +1,5 @@
 import { InspectorControls } from '@wordpress/block-editor';
+import { getNeighbourBlocks } from '../../../shared/blockHelpers.js';
 import {
 	Button,
 	Icon,
@@ -15,15 +16,28 @@ const Inspector = (props) => {
 		attributes: {
 			width,
 			required,
-			pattern,
-			label,
-			options,
-			style,
-			help,
-			error,
+			variant,
+			requiredMessage,
+			visibilityRule
 		},
 		setAttributes,
 	} = props;
+
+	const neighbourBlocks = getNeighbourBlocks(props.clientId);
+
+	const setVisibilityRule = (field) => {
+		if (field === '') {
+			setAttributes({ visibilityRule: null });
+			return;
+		}
+		setAttributes({
+			visibilityRule: {
+				field,
+				operator: 'equals',
+				value: 'true'
+			}
+		});
+	}
 
 	return (
 		<InspectorControls>
@@ -40,8 +54,8 @@ const Inspector = (props) => {
 						'Text to inform the user that this checkbox must be checked',
 						'events',
 					)}
-					value={error}
-					onChange={(value) => setAttributes({ error: value })}
+					value={requiredMessage}
+					onChange={(value) => setAttributes({ requiredMessage: value })}
 				/>
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
@@ -77,6 +91,19 @@ const Inspector = (props) => {
 					max={6}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
+				/>
+			</PanelBody>
+
+			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+				<ToggleControl
+					label={__('Visibility rule', 'events')}
+					onChange={(value) => setAttributes({ visibilityRule: value })}
+				/>
+				<SelectControl
+					label={__('Field', 'events')}
+					value={visibilityRule.field}
+					options={neighbourBlocks}
+					onChange={(value) => setAttributes({ visibilityRule: { ...visibilityRule, field: value } })}
 				/>
 			</PanelBody>
 		</InspectorControls>

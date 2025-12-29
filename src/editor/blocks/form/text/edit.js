@@ -26,30 +26,28 @@ const edit = (props) => {
 			pattern,
 			placeholder,
 			label,
-			fieldid,
-			help,
-			error,
+			name,
 		},
 		setAttributes,
 	} = props;
 
-	const lockFieldId = ['first_name', 'last_name'].includes(fieldid);
-	const validFieldId = () => {
+	const lockFieldId = ['first_name', 'last_name'].includes(name);
+	const validName = () => {
 		const validPattern = /([a-zA-Z0-9_]){3,40}/;
-		return validPattern.test(fieldid);
+		return validPattern.test(name);
 	};
 
-	const setFieldId = (value) => {
+	const setName = (value) => {
 		value = value.toLowerCase();
 		value = value.replace(/\s/g, '-');
-		setAttributes({ fieldid: value.toLowerCase() });
+		setAttributes({ name: value.toLowerCase() });
 	};
 
 	const blockProps = useBlockProps({
 		className: [
 			'ctx:event-field',
 			'ctx:event-field--' + width,
-			validFieldId() == false ? 'ctx:event-field--error' : '',
+			validName() == false ? 'ctx:event-field--error' : '',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -80,22 +78,22 @@ const edit = (props) => {
 						<RichText
 							tagName="p"
 							className="ctx:event-details__label"
-							value={fieldid}
+							value={name}
 							placeholder={__('Slug', 'events')}
-							onChange={(value) => setFieldId(value)}
+							onChange={(value) => setName(value)}
 						/>
 					)}
 					{lockFieldId && (
 						<span className="ctx:event-details__label--lock">
-							{fieldid} <Icon icon={lock} size={14} />
+							{name} <Icon icon={lock} size={14} />
 						</span>
 					)}
-					{validFieldId() == false && (
+					{validName() == false && (
 						<span className="ctx:event-field__error-message">
 							{__('Please type in a unique itentifier for the field', 'events')}
 						</span>
 					)}
-					{validFieldId() && (
+					{validName() && (
 						<span className="ctx:event-field__label">
 							{__('Unique identifier', 'events')}
 						</span>

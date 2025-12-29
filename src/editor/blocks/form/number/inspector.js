@@ -16,19 +16,19 @@ const Inspector = (props) => {
 		attributes: {
 			width,
 			required,
-			fieldid,
+			name,
 			range,
 			min,
 			max,
 			step,
-			placeholder,
+			defaultValue,
 			hasLabels,
 			hasTicks,
 		},
 		setAttributes,
 	} = props;
 
-	const lockFieldId = ['first_name', 'last_name'].includes(fieldid);
+	const lockName = ['first_name', 'last_name'].includes(name);
 
 	return (
 		<InspectorControls>
@@ -36,7 +36,7 @@ const Inspector = (props) => {
 				<ToggleControl
 					label={__('Required', 'events')}
 					checked={required}
-					disabled={lockFieldId}
+					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 
@@ -45,8 +45,8 @@ const Inspector = (props) => {
 						label={__('Minimum value', 'events')}
 						value={min}
 						onChange={(value) => {
-							if (placeholder < value) {
-								setAttributes({ placeholder: value });
+							if (defaultValue < value) {
+								setAttributes({ defaultValue: value });
 							}
 							setAttributes({ min: value });
 						}}
@@ -55,8 +55,8 @@ const Inspector = (props) => {
 						label={__('Maximum value', 'events')}
 						value={max}
 						onChange={(value) => {
-							if (placeholder > value) {
-								setAttributes({ placeholder: max });
+							if (defaultValue > value) {
+								setAttributes({ defaultValue: max });
 							}
 							setAttributes({ max: value });
 						}}

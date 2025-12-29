@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, help, error, options, hasEmptyOption },
+		attributes: { width, required, options, hasEmptyOption },
 		setAttributes,
 	} = props;
 
@@ -35,22 +35,7 @@ const Inspector = (props) => {
 					disabled={required}
 					onChange={(value) => setAttributes({ hasEmptyOption: value })}
 				/>
-				<TextControl
-					label={__('Help', 'events')}
-					help={__('Alternate text for the empty option', 'events')}
-					value={help}
-					disabled={!hasEmptyOption}
-					onChange={(value) => setAttributes({ help: value })}
-				/>
-				<TextControl
-					label={__('Error message', 'events')}
-					help={__(
-						'Text to inform the user that a choice has to be made',
-						'events',
-					)}
-					value={error}
-					onChange={(value) => setAttributes({ error: value })}
-				/>
+
 				<TextareaControl
 					label={__('Options', 'events')}
 					value={options.join('\n')}

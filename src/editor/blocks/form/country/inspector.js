@@ -15,23 +15,16 @@ const Inspector = (props) => {
 		setAttributes,
 	} = props;
 
-	const [regions, setRegions] = useState([]);
-
-	const fetchRegions = async () => {
-		const response = await fetch('https://countries.kids-team.com/regions/de');
-		const data = await response.json();
-		const items = Object.entries(data).map(([key, value]) => {
-			return {
-				value: key,
-				label: value,
-			};
-		});
-		setRegions(items);
-	};
-
-	useEffect(() => {
-		fetchRegions();
-	}, []);
+	const regions = [
+		{ value: 'ALL', label: __('World', 'events') },
+		{ value: 'DACH', label: __('DACH', 'events') },
+		{ value: 'EU', label: __('Europe', 'events') },
+		{ value: 'AS', label: __('Asia', 'events') },
+		{ value: 'AF', label: __('Africa', 'events') },
+		{ value: 'NA', label: __('North America', 'events') },
+		{ value: 'SA', label: __('South America', 'events') },
+		{ value: 'OC', label: __('Oceania', 'events') }
+	];
 
 	return (
 		<InspectorControls>

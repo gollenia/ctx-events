@@ -13,34 +13,35 @@ export default function Edit({ ...props }) {
 	const { clientId } = props;
 	const blockProps = useBlockProps();
 
-	const postType = useSelect(select('core/editor').getCurrentPostType);
-	if (!['bookingform', 'attendeeform'].includes(postType)) return null;
+	const postType = props.context.postType;
+	if (!['ctx-booking-form', 'ctx-attendee-form'].includes(postType)) return null;
 
 	document
 		.getElementsByClassName('edit-post-fullscreen-mode-close')[0]
 		?.setAttribute('href', 'edit.php?post_type=event&page=events-forms');
 
 	const allowedBlocks = [
-		'events-manager/form-text',
-		'events-manager/form-email',
-		'events-manager/form-textarea',
-		'events-manager/form-select',
-		'events-manager/form-country',
-		'events-manager/form-phone',
-		'events-manager/form-radio',
-		'events-manager/form-checkbox',
-		'events-manager/form-date',
-		'events-manager/form-html',
+		'ctx-events/form-text',
+		'ctx-events/form-email',
+		'ctx-events/form-textarea',
+		'ctx-events/form-select',
+		'ctx-events/form-country',
+		'ctx-events/form-phone',
+		'ctx-events/form-radio',
+		'ctx-events/form-checkbox',
+		'ctx-events/form-date',
+		'ctx-events/form-html',
 	];
 
 	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		allowedBlocks,
-		renderAppender: false,
+		templateLock: false,
 	});
 
 	function SectionAppender({ rootClientId }) {
 		return (
 			<Inserter
+				allowedBlocks={allowedBlocks}
 				rootClientId={rootClientId}
 				renderToggle={({ onToggle, disabled }) => (
 					<a className="components-button is-primary" onClick={onToggle}>

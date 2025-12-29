@@ -6,7 +6,7 @@
 	"description": "Lets the user give a number or a range of numbers",
 	"category": "widgets",
 	"attributes": {
-		"fieldid": {
+		"name": {
 			"type": "string",
 			"default": ""
 		},
@@ -53,7 +53,13 @@
 		"hasTicks": {
 			"type": "boolean",
 			"default": false
+		},
+		"visibilityRule": {
+			"type": "object",
+			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-fields"]
+	"parent": [
+		"ctx-events/form-fields"
+	]
 }

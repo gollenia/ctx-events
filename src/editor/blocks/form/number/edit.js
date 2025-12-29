@@ -23,7 +23,7 @@ const edit = (props) => {
 			required,
 			placeholder,
 			label,
-			fieldid,
+			name,
 			range,
 			min,
 			max,
@@ -32,23 +32,23 @@ const edit = (props) => {
 		setAttributes,
 	} = props;
 
-	const lockFieldId = ['first_name', 'last_name'].includes(fieldid);
-	const validFieldId = () => {
+	const lockName = ['first_name', 'last_name'].includes(name);
+	const validName = () => {
 		const validPattern = /([a-zA-Z0-9_]){3,40}/;
-		return validPattern.test(fieldid);
+		return validPattern.test(name);
 	};
 
-	const setFieldId = (value) => {
+	const setName = (value) => {
 		value = value.toLowerCase();
 		value = value.replace(/\s/g, '-');
-		setAttributes({ fieldid: value.toLowerCase() });
+		setAttributes({ name: value.toLowerCase() });
 	};
 
 	const blockProps = useBlockProps({
 		className: [
 			'ctx:form-field',
 			'ctx:form-field--' + width,
-			validFieldId() == false || label === '' ? 'ctx:form-field--error' : '',
+			validName() == false || label === '' ? 'ctx:form-field--error' : '',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -79,26 +79,26 @@ const edit = (props) => {
 				</div>
 
 				<div className="ctx:form-field__name">
-					{!lockFieldId && (
+					{!lockName && (
 						<RichText
 							tagName="p"
 							className="ctx:form-details__label"
-							value={fieldid}
+							value={name}
 							placeholder={__('Slug', 'events')}
-							onChange={(value) => setFieldId(value)}
+							onChange={(value) => setName(value)}
 						/>
 					)}
-					{lockFieldId && (
+					{lockName && (
 						<span className="ctx:form-details__label--lock">
-							{fieldid} <Icon icon={lock} size={14} />
+							{name} <Icon icon={lock} size={14} />
 						</span>
 					)}
-					{validFieldId() == false && (
+					{validName() == false && (
 						<span className="ctx:form-field__error-message">
 							{__('Please type in a unique itentifier for the field', 'events')}
 						</span>
 					)}
-					{validFieldId() && (
+					{validName() && (
 						<span className="ctx:form-field__label">
 							{__('Unique identifier', 'events')}
 						</span>

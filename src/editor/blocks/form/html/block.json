@@ -9,7 +9,13 @@
 		"width": {
 			"type": "number",
 			"default": 6
+		},
+		"visibilityRule": {
+			"type": "object",
+			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-container"]
+	"parent": [
+		"ctx-events/form-container"
+	]
 }

@@ -9,11 +9,11 @@ import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, fieldid, pattern, label, name, help, error },
+		attributes: { width, required, name, description },
 		setAttributes,
 	} = props;
 
-	const lockFieldId = 'user_email' === fieldid;
+	const lockName = 'user_email' === name;
 
 	return (
 		<InspectorControls>
@@ -21,23 +21,13 @@ const Inspector = (props) => {
 				<ToggleControl
 					label={__('Required', 'events')}
 					checked={required}
-					disabled={lockFieldId}
+					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 				<TextControl
-					label={__('Help', 'events')}
-					help={__('Help text for the input field', 'events')}
-					value={help}
-					onChange={(value) => setAttributes({ help: value })}
-				/>
-				<TextControl
-					label={__('Error message', 'events')}
-					help={__(
-						'Text to display when the user types in invalid or insufficient data',
-						'events',
-					)}
-					value={error}
-					onChange={(value) => setAttributes({ error: value })}
+					label={__('Description', 'events')}
+					value={description}
+					onChange={(value) => setAttributes({ description: value })}
 				/>
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>

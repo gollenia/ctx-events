@@ -5,12 +5,14 @@ import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { Icon } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { validFieldName } from '../../../shared/fieldHelpers.js';
 
 /**
  * Internal dependencies
  */
 import icon from './icon.js';
 import Inspector from './inspector.js';
+import { getByRegion } from './countries.js';
 
 /**
  * @param {Props} props
@@ -18,46 +20,26 @@ import Inspector from './inspector.js';
  */
 const edit = (props) => {
 	const {
-		attributes: { width, required, placeholder, label, fieldid, region },
+		attributes: { width, required, defaulValue, label, name, region },
 		setAttributes,
 	} = props;
 
-	const [countries, setCountries] = useState([]);
+	const locale = document.documentElement.lang
 
-	const fetchCountries = async () => {
-		const response = await fetch(
-			'https://countries.kids-team.com/countries/' + region + '/' + 'de',
-		);
-		const data = await response.json();
-		const items = Object.entries(data).map(([key, value]) => {
-			return {
-				value: key,
-				label: value,
-			};
-		});
-		setCountries(items);
-	};
+	const countryCodes = getByRegion(region)
+	const regionNames = new Intl.DisplayNames([locale], { type: 'region' });
 
-	useEffect(() => {
-		fetchCountries();
-	}, [region]);
-
-	const validFieldId = () => {
-		const validPattern = /([a-zA-Z0-9_]){3,40}/;
-		return validPattern.test(fieldid);
-	};
-
-	const setFieldId = (value) => {
+	const setName = (value) => {
 		value = value.toLowerCase();
 		value = value.replace(/\s/g, '-');
-		setAttributes({ fieldid: value.toLowerCase() });
+		setAttributes({ name: value.toLowerCase() });
 	};
 
 	const blockProps = useBlockProps({
 		className: [
-			'ctx:form-field',
-			'ctx:form-field--' + width,
-			validFieldId() == false || label === '' ? 'ctx:form-field--error' : '',
+			'ctx:event-field',
+			'ctx:event-field--' + width,
+			validFieldName(name) ? '' : 'ctx:event-field--error',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -67,14 +49,14 @@ const edit = (props) => {
 		<div {...blockProps}>
 			<Inspector {...props} />
 
-			<div className="ctx:form-field__caption">
-				<div className="ctx:form-field__info">
+			<div className="ctx:event-field__caption">
+				<div className="ctx:event-field__info">
 					<Icon icon={icon} />
-					<div className="ctx:form-field__description">
+					<div className="ctx:event-field__description">
 						<span>
 							<RichText
 								tagName="span"
-								className="ctx:form-details__label"
+								className="ctx:event-field__label"
 								value={label}
 								placeholder={__('Label', 'events')}
 								onChange={(value) => setAttributes({ label: value })}
@@ -82,27 +64,27 @@ const edit = (props) => {
 
 							<span>{required ? '*' : ''}</span>
 						</span>
-						<span className="ctx:form-field__label">
+						<span className="ctx:event-field__label">
 							{__('Label for the field', 'events')}
 						</span>
 					</div>
 				</div>
 
-				<div className="ctx:form-field__name">
+				<div className="ctx:event-field__name">
 					<RichText
 						tagName="p"
-						className="ctx:form-details__label"
-						value={fieldid}
+						className="ctx:event-field__label"
+						value={name}
 						placeholder={__('Slug', 'events')}
-						onChange={(value) => setFieldId(value)}
+						onChange={(value) => setName(value)}
 					/>
-					{validFieldId() == false && (
-						<span className="ctx:form-field__error-message">
+					{validFieldName(name) == false && (
+						<span className="ctx:event-field__error-message">
 							{__('Please type in a unique itentifier for the field', 'events')}
 						</span>
 					)}
-					{validFieldId() && (
-						<span className="ctx:form-field__label">
+					{validFieldName(name) && (
+						<span className="ctx:event-field__label">
 							{__('Unique identifier', 'events')}
 						</span>
 					)}
@@ -113,15 +95,15 @@ const edit = (props) => {
 					setAttributes({ placeholder: event.target.value });
 				}}
 			>
-				{countries.map((country, index) => {
+				{countryCodes.map((country, index) => {
 					if (!country) return null;
 					return (
 						<option
 							key={index}
-							value={country.value}
-							selected={placeholder == country.value}
+							value={country}
+							selected={defaulValue == country}
 						>
-							{country.label}
+							{regionNames.of(country)}
 						</option>
 					);
 				})}

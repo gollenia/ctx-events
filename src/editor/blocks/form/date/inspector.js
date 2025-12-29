@@ -15,29 +15,6 @@ const Inspector = (props) => {
 		setAttributes,
 	} = props;
 
-	const [referenceDate, setReferenceDate] = useState(Date());
-
-	const minAge = dateDiff(min, referenceDate);
-	const maxAge = dateDiff(max, referenceDate);
-
-	const ageInfo = () => {
-		if (minAge === 0 && maxAge !== 0) {
-			return `${__('at best', 'events')} ${maxAge.result} }`;
-		}
-		if (minAge !== 0 && maxAge === 0) {
-			return `${__('at least', 'events')} ${minAge.result} }`;
-		}
-		if (minAge === maxAge) {
-			return `${minAge.result}`;
-		}
-		return (
-			<>
-				{__('from', 'events')} {maxAge.result}
-				<br />
-				{__('to', 'events')} {minAge.result}
-			</>
-		);
-	};
 
 	return (
 		<InspectorControls>
@@ -77,18 +54,7 @@ const Inspector = (props) => {
 					onChange={(value) => setAttributes({ max: value })}
 					type="date"
 				/>
-				<p className="age-info">
-					<TextControl
-						label={__('Reference Date', 'events')}
-						help={__('Only for testing', 'events')}
-						value={referenceDate}
-						onChange={(value) => {
-							setReferenceDate(value);
-						}}
-						type="date"
-					/>
-					{ageInfo()}
-				</p>
+
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
 				<RangeControl

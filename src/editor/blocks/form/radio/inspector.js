@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, options, error },
+		attributes: { width, required, options },
 		setAttributes,
 	} = props;
 
@@ -23,15 +23,7 @@ const Inspector = (props) => {
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 
-				<TextControl
-					label={__('Error message', 'events')}
-					help={__(
-						'Text to inform the user that a choice has to be made',
-						'events',
-					)}
-					value={error}
-					onChange={(value) => setAttributes({ error: value })}
-				/>
+
 				<TextareaControl
 					label={__('Options', 'events')}
 					value={options.join('\n')}

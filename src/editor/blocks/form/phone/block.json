@@ -8,7 +8,7 @@
 	"attributes": {
 		"name": {
 			"type": "string",
-			"default": "email"
+			"default": ""
 		},
 		"width": {
 			"type": "number",
@@ -30,10 +30,12 @@
 			"type": "string",
 			"default": ""
 		},
-		"error": {
-			"type": "string",
-			"default": ""
+		"visibilityRule": {
+			"type": "object",
+			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-container"]
+	"parent": [
+		"ctx-events/form-container"
+	]
 }

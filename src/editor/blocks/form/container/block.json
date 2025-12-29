@@ -11,7 +11,9 @@
 			"default": ""
 		}
 	},
-	"usesContext": ["postType"],
+	"usesContext": [
+		"postType"
+	],
 	"supports": {
 		"html": false,
 		"reusable": false,

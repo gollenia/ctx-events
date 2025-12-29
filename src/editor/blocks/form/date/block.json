@@ -6,7 +6,7 @@
 	"description": "Lets the user specify a date",
 	"category": "widgets",
 	"attributes": {
-		"fieldid": {
+		"name": {
 			"type": "string",
 			"default": ""
 		},
@@ -30,18 +30,20 @@
 			"type": "string",
 			"default": ""
 		},
-		"placeholder": {
+		"defaultValue": {
 			"type": "string",
 			"default": ""
 		},
-		"help": {
+		"description": {
 			"type": "string",
 			"default": ""
 		},
-		"error": {
-			"type": "string",
-			"default": ""
+		"visibilityRule": {
+			"type": "object",
+			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-container"]
+	"parent": [
+		"ctx-events/form-container"
+	]
 }

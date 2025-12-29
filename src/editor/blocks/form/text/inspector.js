@@ -9,11 +9,11 @@ import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, pattern, fieldid, label, name, help, error },
+		attributes: { width, required, pattern, name },
 		setAttributes,
 	} = props;
 
-	const lockFieldId = ['first_name', 'last_name'].includes(fieldid);
+	const lockName = ['first_name', 'last_name'].includes(name);
 
 	return (
 		<InspectorControls>
@@ -21,7 +21,7 @@ const Inspector = (props) => {
 				<ToggleControl
 					label={__('Required', 'events')}
 					checked={required}
-					disabled={lockFieldId}
+					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 				<TextControl
@@ -33,21 +33,7 @@ const Inspector = (props) => {
 					value={pattern}
 					onChange={(value) => setAttributes({ pattern: value })}
 				/>
-				<TextControl
-					label={__('Help', 'events')}
-					help={__('Details about how to fill this field', 'events')}
-					value={help}
-					onChange={(value) => setAttributes({ help: value })}
-				/>
-				<TextControl
-					label={__('Error message', 'events')}
-					help={__(
-						'Text to display when the user types in invalid or insufficient data',
-						'events',
-					)}
-					value={error}
-					onChange={(value) => setAttributes({ error: value })}
-				/>
+
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
 				<RangeControl
