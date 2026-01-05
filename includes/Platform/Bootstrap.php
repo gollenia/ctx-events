@@ -5,11 +5,11 @@ namespace Contexis\Events\Platform;
 
 use Contexis\Events\Platform\ContainerFactory;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
+use Contexis\Events\Platform\Wordpress\AdminRegistrar;
 use Contexis\Events\Platform\Wordpress\DatabaseRegistrar;
 use Contexis\Events\Platform\Wordpress\OptionsRegistrar;
 use Contexis\Events\Platform\Wordpress\PostTypeRegistrar;
 use Contexis\Events\Platform\Wordpress\RestRegistrar;
-use Contexis\Events\Shared\Presentation\OptionsPage;
 
 class Bootstrap
 {
@@ -22,5 +22,6 @@ class Bootstrap
         $container->get(PostTypeRegistrar::class)->hook();
         $container->get(RestRegistrar::class)->hook();
         $container->get(AdminMenu::class)->hook();
+		$container->get(AdminRegistrar::class)->hook();
     }
 }

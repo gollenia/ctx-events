@@ -54,6 +54,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"variant": {
+			"type": "string",
+			"default": "default"
+		},
 		"visibilityRule": {
 			"type": "object",
 			"default": null

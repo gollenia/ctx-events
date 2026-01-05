@@ -32,8 +32,8 @@ add_action('plugins_loaded', function () {
     do_action('qm/start', 'events');
     Contexis\Events\Platform\Bootstrap::init();
     do_action('qm/stop', 'events');
+	
 }, 10);
-
 
 
 
@@ -62,3 +62,5 @@ function ctx_register_blocks(): void
 }
 
 add_action('init', 'ctx_register_blocks');
+
+

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Form\Domain\ValueObjects;
+namespace Contexis\Events\Form\Domain\Fields;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
 use Contexis\Events\Form\Domain\Enums\ValidationError;
+use Contexis\Events\Form\Domain\ValueObjects\FieldWidth;
+use Contexis\Events\Form\Domain\ValueObjects\VisibilityRule;
 
 final class FormField
 {
@@ -14,9 +16,8 @@ final class FormField
 		public readonly string $label,
 		public readonly bool $required,
 		public readonly FieldWidth $width = FieldWidth::SIX,
-		public readonly ?string $description = null,
-		public readonly string $customErrorMessage = '',
 		public readonly FieldDetails $details,
+		public readonly ?string $description = null,
 		public readonly ?VisibilityRule $visibilityRule = null,
 	) {}
 
@@ -28,7 +29,6 @@ final class FormField
 			'required' => $this->required,
 			'width' => $this->width->value,
 			'description' => $this->description,
-			'customErrorMessage' => $this->customErrorMessage,
 			'visibilityRule' => $this->visibilityRule?->toArray(),
 			...$this->details->toArray(),
 		];

@@ -51,15 +51,30 @@
 		}
 	}
 
-	&__name {
+	&__slug {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
+		
+		&-input {
+			font-family: 'Menlo', 'Consolas', monospace;
+		}
 	}
 
-	&__label {
+	&__sublabel {
 		font-size: 0.8rem;
 		color: #999;
+	}
+
+	&__info {
+		display: flex;
+		align-items: center;
+		gap: .5rem;
+	}
+
+	&__description {
+		display: flex;
+    flex-direction: column;	
 	}
 
 	&__error-message {

@@ -34,6 +34,10 @@
 			"type": "string",
 			"default": "world"
 		},
+		"allowedCountries": {
+			"type": "array",
+			"default": []
+		},
 		"visibilityRule": {
 			"type": "object",
 			"default": null

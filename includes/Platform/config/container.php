@@ -43,6 +43,11 @@ return [
             get(Contexis\Events\Event\Application\Contracts\EventOptions::class),
         ]),
 
+    \Contexis\Events\Platform\Wordpress\AdminRegistrar::class => create()
+        ->constructor([
+            get(\Contexis\Events\Form\Presentation\FormAdmin::class),
+        ]),
+
     \Contexis\Events\Event\Domain\EventRepository::class
     => autowire(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
     \Contexis\Events\Location\Domain\LocationRepository::class

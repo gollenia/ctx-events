@@ -62,6 +62,10 @@ class GetEvent
             tags: $tags
         );
 
+		$registry = \WP_Block_Type_Registry::get_instance();
+        $blockType = $registry->get_registered('ctx-events/details-audience');
+		var_dump($blockType->attributes);
+
         return $response;
     }
 }

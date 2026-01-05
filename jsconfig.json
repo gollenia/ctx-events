@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@events/form/*": ["src/editor/blocks/form/_shared/*"],
+			"@events/details/*": ["src/editor/blocks/details/_shared/*"]
+		},
+		"jsx": "react"
+	},
+	"exclude": ["node_modules", "dist", "build"]
+}

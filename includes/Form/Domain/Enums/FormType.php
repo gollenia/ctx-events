@@ -6,6 +6,6 @@ namespace Contexis\Events\Form\Domain\ValueObjects;
 
 enum FormType: string
 {
-    case REGISTRATION = 'registration';
+    case BOOKING = 'booking';
     case ATTENDEE = 'attendee';
 }

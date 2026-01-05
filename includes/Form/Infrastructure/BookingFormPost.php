@@ -43,7 +43,7 @@ class BookingFormPost extends PostType
                             "lock" => ["remove" => true, "move" => false],
                             "required" => true,
                             "label" => __('Email', 'events'),
-                            "name" => 'user_email'
+                            "name" => 'email'
                         ]
                     ],
                     ['ctx-events/form-text', [

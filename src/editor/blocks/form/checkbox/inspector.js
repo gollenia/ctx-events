@@ -1,5 +1,5 @@
 import { InspectorControls } from '@wordpress/block-editor';
-import { getNeighbourBlocks } from '../../../shared/blockHelpers.js';
+import { useOtherFormFields } from '@events/form';
 import {
 	Button,
 	Icon,
@@ -7,9 +7,11 @@ import {
 	RangeControl,
 	TextControl,
 	ToggleControl,
+	SelectControl
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import icons from './icons.js';
+import { VisibilityRules } from '@events/form';
 
 const Inspector = (props) => {
 	const {
@@ -22,22 +24,6 @@ const Inspector = (props) => {
 		},
 		setAttributes,
 	} = props;
-
-	const neighbourBlocks = getNeighbourBlocks(props.clientId);
-
-	const setVisibilityRule = (field) => {
-		if (field === '') {
-			setAttributes({ visibilityRule: null });
-			return;
-		}
-		setAttributes({
-			visibilityRule: {
-				field,
-				operator: 'equals',
-				value: 'true'
-			}
-		});
-	}
 
 	return (
 		<InspectorControls>
@@ -68,15 +54,15 @@ const Inspector = (props) => {
 					</label>
 					<div className="styleSelector">
 						<Button
-							onClick={() => setAttributes({ style: 'checkbox' })}
-							className={style == 'checkbox' ? 'active' : ''}
+							onClick={() => setAttributes({ variant: 'checkbox' })}
+							className={variant == 'checkbox' ? 'active' : ''}
 						>
 							<Icon size="64" className="icon" icon={icons.checkbox} />
 							<div>{__('Box', 'events')}</div>
 						</Button>
 						<Button
-							onClick={() => setAttributes({ style: 'toggle' })}
-							className={style == 'toggle' ? 'active' : ''}
+							onClick={() => setAttributes({ variant: 'toggle' })}
+							className={variant == 'toggle' ? 'active' : ''}
 						>
 							<Icon size="64" className="icon" icon={icons.toggle} />
 							<div>{__('Toggle', 'events')}</div>
@@ -95,15 +81,8 @@ const Inspector = (props) => {
 			</PanelBody>
 
 			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
-				<ToggleControl
-					label={__('Visibility rule', 'events')}
-					onChange={(value) => setAttributes({ visibilityRule: value })}
-				/>
-				<SelectControl
-					label={__('Field', 'events')}
-					value={visibilityRule.field}
-					options={neighbourBlocks}
-					onChange={(value) => setAttributes({ visibilityRule: { ...visibilityRule, field: value } })}
+				<VisibilityRules 
+					props={props}
 				/>
 			</PanelBody>
 		</InspectorControls>

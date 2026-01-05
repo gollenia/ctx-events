@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Form\Domain;
 
-use Contexis\Events\Form\Domain\ValueObjects\FormFieldCollection;
+use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
 use Contexis\Events\Form\Domain\ValueObjects\FormType;
 use Contexis\Events\Form\Domain\ValueObjects\ValidationResult;
 
-class Form
+abstract class Form
 {
 	public function __construct(
 		public readonly FormId $id,

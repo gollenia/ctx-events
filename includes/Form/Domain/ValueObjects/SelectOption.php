@@ -12,6 +12,27 @@ final class SelectOption
     ) {
     }
 
+	public static function fromMixed(array|string $option): self
+    {
+		if(is_array($option)) {
+			$label = $option['label'] ?? $option['value'] ?? '';
+			
+			return new self(
+                label: (string)$label,
+                value: isset($option['value']) ? (string)$option['value'] : null
+            );
+		}
+
+		if(is_string($option)) {
+			return new self(
+				label: (string)$option,
+				value: null
+			);
+		}
+
+		throw new \InvalidArgumentException('Option must be string or array');
+	}
+
 	public function getEffectiveValue(): string
     {
         return $this->value ?? $this->label;

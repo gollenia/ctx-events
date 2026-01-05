@@ -72,6 +72,7 @@ final class AdminMenu implements AdminServiceInterface
             'contexis_events_bookings',
             fn() => print('<div id="contexis-events-bookings-app"></div>')
         );
+
     }
 
     public function eventsPage(): string
@@ -80,4 +81,6 @@ final class AdminMenu implements AdminServiceInterface
         echo "<p>Hier kommt die React app hin</p>";
         return '';
     }
+
+	
 }

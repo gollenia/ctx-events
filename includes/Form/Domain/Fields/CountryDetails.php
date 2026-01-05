@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Form\Domain\ValueObjects;
+namespace Contexis\Events\Form\Domain\Fields;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
 use Contexis\Events\Form\Domain\Enums\ValidationError;
 use Contexis\Events\Form\Domain\Enums\FieldType;
+use Contexis\Events\Form\Domain\ValueObjects\CountryCodes;
 
 final class CountryDetails implements FieldDetails
 {

@@ -4,22 +4,49 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Form\Domain\ValueObjects;
 
-final class SelectOptions
+final class SelectOptions implements \IteratorAggregate, \Countable, \JsonSerializable
 {
-    public function __construct(
-        public readonly array $options,
-    ) {
+   	/** @var SelectOption[] */
+    private array $options;
+
+    public function __construct(SelectOption ...$options)
+    {
+        $this->options = $options;
+    }
+
+	public static function fromArray(array $options): self
+    {
+        $options = array_map(fn($option) => SelectOption::fromMixed($option), $options);
+        return new self(...$options);
     }
 
 	public function contains(string $value): bool
     {
-        return in_array($value, $this->options);
+       foreach ($this->options as $option) {
+            if ($option->getEffectiveValue() === $value) {
+                return true;
+            }
+        }
+        return false;
     }
 
 	public function toArray(): array
     {
-        return [
-            'options' => $this->options,
-        ];
+        return array_map(fn($option) => $option->toArray(), $this->options);
+    }
+
+	public function getIterator(): \Traversable
+    {
+        return new \ArrayIterator($this->options);
+    }
+
+	public function count(): int
+    {
+        return count($this->options);
+    }
+
+	public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

@@ -30,7 +30,11 @@ final class CountryCodes
 
 	public function contains(string $code): bool
 	{
-		return in_array($code, $this->codes);
+		if(!$this->codes === []) {
+			return in_array($code, $this->codes);
+		}
+		
+		return true;
 	}
 
 	public function count(): int

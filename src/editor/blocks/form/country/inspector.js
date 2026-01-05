@@ -6,8 +6,8 @@ import {
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { VisibilityRules } from '@events/form';
 
 const Inspector = (props) => {
 	const {
@@ -25,6 +25,13 @@ const Inspector = (props) => {
 		{ value: 'SA', label: __('South America', 'events') },
 		{ value: 'OC', label: __('Oceania', 'events') }
 	];
+
+	useEffect(() => {
+        const codesToSave = region === 'ALL' ? [] : getByRegion(region);
+        if (JSON.stringify(codesToSave) !== JSON.stringify(allowedCountries)) {
+            setAttributes({ allowedCountries: codesToSave });
+        }
+    }, [region]);
 
 	return (
 		<InspectorControls>
@@ -57,6 +64,11 @@ const Inspector = (props) => {
 					max={6}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
+				/>
+			</PanelBody>
+			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+				<VisibilityRules
+					props={props}
 				/>
 			</PanelBody>
 		</InspectorControls>

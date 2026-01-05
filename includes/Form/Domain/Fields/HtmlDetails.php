@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Form\Domain\ValueObjects;
+namespace Contexis\Events\Form\Domain\Fields;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
 use Contexis\Events\Form\Domain\Enums\FieldType;
@@ -11,7 +11,7 @@ use Contexis\Events\Form\Domain\Enums\ValidationError;
 final readonly class HtmlDetails implements FieldDetails
 {
     public function __construct(
-        public readonly string $htmlContent
+        public readonly string $content
     ) {}
 
     public function getType(): FieldType
@@ -23,7 +23,7 @@ final readonly class HtmlDetails implements FieldDetails
     {
         return [
             'type' => $this->getType()->value,
-            'content' => $this->htmlContent,
+            'content' => $this->content,
         ];
     }
 
