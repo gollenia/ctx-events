@@ -6,8 +6,9 @@ namespace Contexis\Events\Event\Infrastructure;
 use Contexis\Events\Event\Application\EventCriteria;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventCollection;
-use Contexis\Events\Event\Domain\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\EventRepository;
+use Contexis\Events\Event\Domain\ValueObjects\EventSpaces;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
@@ -93,4 +94,9 @@ class WpEventRepository implements EventRepository
         }
         return $event;
     }
+
+	public function save(Event $event): void
+	{
+		
+	}
 }

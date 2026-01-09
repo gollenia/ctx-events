@@ -6,22 +6,30 @@ namespace Contexis\Events\Platform;
 use Contexis\Events\Platform\ContainerFactory;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Platform\Wordpress\AdminRegistrar;
-use Contexis\Events\Platform\Wordpress\DatabaseRegistrar;
-use Contexis\Events\Platform\Wordpress\OptionsRegistrar;
+use Contexis\Events\Platform\Wordpress\Assets;
+use Contexis\Events\Platform\Wordpress\DatabaseMigration;
+use Contexis\Events\Platform\Wordpress\OptionsMigration;
 use Contexis\Events\Platform\Wordpress\PostTypeRegistrar;
 use Contexis\Events\Platform\Wordpress\RestRegistrar;
 
 class Bootstrap
 {
+	private const REGISTRARS = [
+		Assets::class,
+        DatabaseMigration::class,
+        OptionsMigration::class,
+        PostTypeRegistrar::class,
+        RestRegistrar::class,
+        AdminMenu::class,
+        AdminRegistrar::class
+    ];
+
     public static function init(): void
     {
-        Assets::init();
         $container = ContainerFactory::build();
-        $container->get(DatabaseRegistrar::class)->hook();
-        $container->get(OptionsRegistrar::class)->hook();
-        $container->get(PostTypeRegistrar::class)->hook();
-        $container->get(RestRegistrar::class)->hook();
-        $container->get(AdminMenu::class)->hook();
-		$container->get(AdminRegistrar::class)->hook();
+
+        foreach (self::REGISTRARS as $registrar) {
+            $container->get($registrar)->hook();
+        }
     }
 }

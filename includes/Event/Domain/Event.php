@@ -3,11 +3,15 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
-use Contexis\Events\Booking\Domain\BookingDecision;
-use Contexis\Events\Booking\Domain\BookingPolicy;
+use Contexis\Events\Event\Domain\ValueObjects\BookingDecision;
+use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
+use Contexis\Events\Event\Domain\ValueObjects\EventForms;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\EventViewConfig;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
+use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\Traits\HasStatus;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
@@ -27,6 +31,7 @@ final class Event
         public readonly BookingPolicy $bookingPolicy,
         public readonly EventViewConfig $eventViewConfig,
         public readonly AuthorId $authorId,
+		public readonly EventForms $forms,
 		public readonly ?string $description = null,
         public readonly ?string $audience = null,
         public readonly ?TicketCollection $tickets = null,

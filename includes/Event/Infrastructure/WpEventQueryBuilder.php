@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Event\Application\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
-use Contexis\Events\Event\Domain\TimeScope;
+use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
@@ -41,6 +42,12 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             }
         }
 
+		$builder = match ($criteria->isFree) {
+			true    => $builder->withMetaEquals(EventMeta::CACHED_MIN_PRICE, '0'),
+			false   => $builder->withMetaCompare(EventMeta::CACHED_MIN_PRICE, '0', '>', 'NUMERIC'),
+			default => $builder,
+		};
+
         $orderBy = self::mapOrderBy($criteria->orderBy)->withOrder($criteria->order);
         $builder = $builder->orderBy($orderBy);
 
@@ -56,6 +63,7 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             'booking'       => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED),
             'location'      => OrderBy::fromMeta(EventMeta::LOCATION_ID),
             'person'        => OrderBy::fromMeta(EventMeta::PERSON_ID),
+            'price'         => OrderBy::fromMeta(EventMeta::CACHED_MIN_PRICE),
             default         => OrderBy::fromField($orderBy),
         };
     }
@@ -65,7 +73,7 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         $now = new \DateTimeImmutable('now', wp_timezone());
         $date = $now->format('Y-m-d');
         $dateTime = $now->format('Y-m-d H:i:s');
-        $field = get_option(EventOptions::EVENT_ONGOING_IS_PAST) ? EventMeta::EVENT_END : EventMeta::EVENT_START;
+        $field = get_option(WpEventOptions::EVENT_ONGOING_IS_PAST) ? EventMeta::EVENT_END : EventMeta::EVENT_START;
 
         return match ($scope) {
             $scope::PAST    => [['key' => $field, 'value' => $dateTime, 'compare' => '<', 'type' => 'DATETIME']],

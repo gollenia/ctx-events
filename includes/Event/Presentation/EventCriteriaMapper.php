@@ -5,10 +5,11 @@ namespace Contexis\Events\Event\Presentation;
 
 use Contexis\Events\Event\Application\EventCriteria;
 use Contexis\Events\Event\Application\EventIncludes;
+use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Event\Domain\TicketScope;
-use Contexis\Events\Event\Domain\TimeScope;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
 use WP_REST_Request;
 
@@ -29,8 +30,8 @@ final class EventCriteriaMapper implements CriteriaMapper
             tags: $request->get_param('tags') ?? [],
             location: $request->get_param('location') ?? null,
             person: $request->get_param('person') ?? null,
+            isFree: $request->get_param('is_free') ?? null,
             bookable: $request->get_param('bookable') ?? false,
-            availibility: $request->get_param('availibility') ?? false,
             search: $request->get_param('search') ?? null
         );
     }
@@ -55,9 +56,6 @@ final class EventCriteriaMapper implements CriteriaMapper
 		}
 
         return new EventIncludes(
-            tickets: in_array('tickets', $data, true)
-                ? ($userContext->canEdit() ? TicketScope::ALL : TicketScope::BOOKABLE_ONLY)
-                : TicketScope::NONE,
             location: in_array('location', $data, true),
             person: in_array('person', $data, true),
             image: in_array('image', $data, true),

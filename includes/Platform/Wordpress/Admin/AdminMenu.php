@@ -79,6 +79,7 @@ final class AdminMenu implements AdminServiceInterface
     {
         echo "<h1>Events Page</h1>";
         echo "<p>Hier kommt die React app hin</p>";
+		echo "<div id='ctx-events-list'></div>";
         return '';
     }
 

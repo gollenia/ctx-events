@@ -6,7 +6,7 @@ namespace Contexis\Events\Form\Domain\Fields;
 
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
 use Contexis\Events\Form\Domain\Enums\ValidationError;
-use Contexis\Events\Form\Domain\ValueObjects\FieldWidth;
+use Contexis\Events\Form\Domain\Enums\FieldWidth;
 use Contexis\Events\Form\Domain\ValueObjects\VisibilityRule;
 
 final class FormField

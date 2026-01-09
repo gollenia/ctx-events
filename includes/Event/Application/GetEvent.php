@@ -1,71 +1,74 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
 use Contexis\Events\Event\Application\Service\EventTickets;
 use Contexis\Events\Event\Domain\EventRepository;
-use Contexis\Events\Event\Domain\EventId;
-use Contexis\Events\Event\Infrastructure\EventPost;
-use Contexis\Events\Location\Application\LocationDto;
-use Contexis\Events\Location\Domain\LocationRepository;
-use Contexis\Events\Media\Application\ImageDto;
-use Contexis\Events\Media\Domain\ImageRepository;
-use Contexis\Events\Person\Application\PersonDto;
-use Contexis\Events\Person\Domain\PersonRepository;
-use Contexis\Events\Shared\Application\ValueObjects\UserContext;
-use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
+	use Contexis\Events\Event\Domain\ValueObjects\EventId;
+	use Contexis\Events\Event\Infrastructure\EventPost;
+	use Contexis\Events\Form\Domain\FormRepository;
+	use Contexis\Events\Location\Application\LocationDto;
+	use Contexis\Events\Location\Domain\LocationRepository;
+	use Contexis\Events\Media\Application\ImageDto;
+	use Contexis\Events\Media\Domain\ImageRepository;
+	use Contexis\Events\Person\Application\PersonDto;
+	use Contexis\Events\Person\Domain\PersonRepository;
+    use Contexis\Events\Platform\Demo\HelloWorldEvent;
+    use Contexis\Events\Shared\Application\ValueObjects\UserContext;
+	use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
+	use Psr\EventDispatcher\EventDispatcherInterface;
 
-class GetEvent
-{
-    public function __construct(
-        private EventRepository $eventRepository,
-        private PersonRepository $personRepository,
-        private ImageRepository $imageRepository,
-        private LocationRepository $locationRepository,
-        private EventPolicy $eventPolicy,
-        private TaxonomyLoader $taxonomyLoader,
-    ) {
-    }
+	class GetEvent
+	{
+		public function __construct(
+			private EventRepository $eventRepository,
+			private PersonRepository $personRepository,
+			private ImageRepository $imageRepository,
+			private LocationRepository $locationRepository,
+			private EventPolicy $eventPolicy,
+			private TaxonomyLoader $taxonomyLoader,
+			private FormRepository $formRepository,
+			private EventDispatcherInterface $dispatcher
+		) {
+		}
 
-    public function execute(int $id, EventIncludes $includes, UserContext $userContext): EventDto|null
-    {
+		public function execute(int $id, EventIncludes $includes, UserContext $userContext): EventDto|null
+		{
 
-        $event = $this->eventRepository->find(EventId::from($id));
+			$event = $this->eventRepository->find(EventId::from($id));
 
-        if (!$event) {
-            return null;
-        }
+			if (!$event) {
+				return null;
+			}
 
-        if (!$this->eventPolicy->userCanView($event, $userContext)) {
-            return null;
-        }
+			if (!$this->eventPolicy->userCanView($event, $userContext)) {
+				return null;
+			}
 
-        $location = $includes->hasLocation() ? $this->locationRepository->find($event->locationId) : null;
-        $person = $includes->hasPerson() ? $this->personRepository->find($event->personId) : null;
-        $image = $includes->hasImage() ? $this->imageRepository->find($event->imageId) : null;
-        $categories = $includes->hasCategories() ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES) : null;
-        $tags = $includes->hasTags() ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::TAGS) : null;
-        $tickets = $includes->hasTickets() ? EventTickets::onlyBookable()->getAllowedTickets($event) : null;
-        // Missing: Forms
-        // Missing: Available Coupons
-        // Missing: Booking Info
+			$this->dispatcher->dispatch(new HelloWorldEvent("Hallo Thomas, DI funktioniert!"));
+			$location = $includes->hasLocation() ? $this->locationRepository->find($event->locationId) : null;
+			$person = $includes->hasPerson() ? $this->personRepository->find($event->personId) : null;
+			$image = $includes->hasImage() ? $this->imageRepository->find($event->imageId) : null;
+			$categories = $includes->hasCategories() ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES) : null;
+			$tags = $includes->hasTags() ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::TAGS) : null;
+			$tickets = $includes->hasTickets() ? EventTickets::onlyBookable()->getAllowedTickets($event) : null;
+			// Missing: Available Coupons
+			// Missing: Booking Info
+			$bookingForm = $this->formRepository->find($event->forms->bookingForm);
+			$attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
+			
 
-        $response = EventDto::fromDomainModel(
-            event: $event,
-            locationDto: $location ? LocationDto::fromDomainModel($location) : null,
-            imageDto: $image ? ImageDto::fromDomainModel($image) : null,
-            personDto: $person ? PersonDto::fromDomainModel($person) : null,
-            categories: $categories,
-            ticketsDto: $tickets,
-            tags: $tags
-        );
+			$response = EventDto::fromDomainModel(
+				event: $event,
+				locationDto: $location ? LocationDto::fromDomainModel($location) : null,
+				imageDto: $image ? ImageDto::fromDomainModel($image) : null,
+				personDto: $person ? PersonDto::fromDomainModel($person) : null,
+				categories: $categories,
+				tags: $tags
+			);
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-        $blockType = $registry->get_registered('ctx-events/details-audience');
-		var_dump($blockType->attributes);
-
-        return $response;
-    }
-}
+			
+			return $response;
+		}
+	}

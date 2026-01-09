@@ -4,32 +4,43 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Form\Infrastructure\Mappers;
 
+use Contexis\Events\Form\Domain\AttendeeForm;
+use Contexis\Events\Form\Domain\BookingForm;
 use Contexis\Events\Form\Domain\Fields\FormField;
 use Contexis\Events\Form\Domain\Form;
 use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
 use Contexis\Events\Form\Domain\FormId;
-use Contexis\Events\Form\Domain\ValueObjects\FieldWidth;
-use Contexis\Events\Form\Domain\ValueObjects\FormType;
+use Contexis\Events\Form\Domain\Enums\FormType;
+use Contexis\Events\Form\Domain\Enums\FieldWidth;
 use Contexis\Events\Form\Infrastructure\Contracts\DetailsMapper;
+use Contexis\Events\Form\Infrastructure\FormPostTypes;
 use Contexis\Events\Platform\Wordpress\PluginInfo;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
-use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
+use Contexis\Events\Shared\Infrastructure\Contracts\PostMapper;
 use Contexis\Events\Shared\Infrastructure\Wordpress\BlockAttributesResolver;
 
-class FormMapper implements DatabaseMapper
+
+class FormMapper implements PostMapper
 {
     public static function map(PostSnapshot $snapshot): Form
     {
-    
+    	//var_dump($snapshot);
         $fields = self::getFormFields($snapshot->post_content);
+		$type = FormPostTypes::fromPostType($snapshot->post_type);
+		
+			
+        $args = [
+            'id' => FormId::from($snapshot->ID),
+			'type' => $type,
+            'name' => $snapshot->post_title,
+            'description' => $snapshot->post_excerpt,
+            'fields' => $fields,
+        ];
 
-        return new Form(
-            id: FormId::from($snapshot->ID),
-			type: FormType::from($snapshot->post_type),
-            name: $snapshot->post_title,
-            description: $snapshot->post_excerpt,
-            fields: $fields,
-        );
+		return match($type) {
+            FormType::BOOKING  => new BookingForm(...$args),
+            FormType::ATTENDEE => new AttendeeForm(...$args),
+        };
            
     }
 
@@ -62,12 +73,12 @@ class FormMapper implements DatabaseMapper
 
 			$mapper = self::getDetailsMapper($type);
 			if (!$mapper) continue;
-
+			
 			$fields[] = new FormField(
 				name: $attributes['name'], 
 				label: $attributes['label'], 
 				required: $attributes['required'] ?? false,
-				width: FieldWidth::from($attributes['width']),
+				width: $attributes['width'] ? FieldWidth::from($attributes['width']) : FieldWidth::SIX,
 				description: $attributes['description'] ?? '',
 				details: $mapper->map($attributes),
 			);

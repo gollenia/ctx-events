@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Form\Domain;
 
 use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
-use Contexis\Events\Form\Domain\ValueObjects\FormType;
+use Contexis\Events\Form\Domain\Enums\FormType;
 use Contexis\Events\Form\Domain\ValueObjects\ValidationResult;
 
 abstract class Form

@@ -4,7 +4,7 @@ namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\TicketCollection;
-use Contexis\Events\Event\Domain\TicketId;
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use DateTimeImmutable;
 

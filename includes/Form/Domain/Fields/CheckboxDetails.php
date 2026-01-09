@@ -7,7 +7,7 @@ namespace Contexis\Events\Form\Domain\Fields;
 use Contexis\Events\Form\Domain\Contracts\FieldDetails;
 use Contexis\Events\Form\Domain\Enums\FieldType;
 use Contexis\Events\Form\Domain\Enums\ValidationError;
-use Contexis\Events\Form\Domain\ValueObjects\CheckboxVariant;
+use Contexis\Events\Form\Domain\Enums\CheckboxVariant;
 
 final class CheckboxDetails implements FieldDetails
 {

@@ -24,30 +24,30 @@ final class EventController implements RestController
     {
         $route = Links::restRoute('events', '(?P<id>\d+)');
 
-        register_rest_route($route['ns'], $route['path'], array(
+        register_rest_route($route['ns'], $route['path'], [
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
-            'args' => array(
-                'id' => array(
+            'args' => [
+                'id' => [
                     'required' => true,
                     'description' => 'The ID of the event to retrieve.',
                     'type' => 'integer',
-                ),
-                'include' => array(
-                    'required' => false,
-                    'description' => 'Comma-separated list of related resources to include (e.g., "speakers,location,media").',
-                    'type' => 'string',
-                )
-            ),
-        ));
+                ],
+                'include' => [
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'string',
+                            'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
+                        ],
+                ],
+            ],
+        ]);
 
-
-
-        register_rest_route('/events/v3', '/events', array(
-            array(
+        register_rest_route('/events/v3', '/events', [
+            [
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getEventPage' ),
+                'callback'  => [$this, 'getEventPage'],
                 'permission_callback' => '__return_true',
                 'args' => [
                     'page' => [
@@ -96,7 +96,6 @@ final class EventController implements RestController
                         'type' => 'integer',
                         'default' => null
                     ],
-
                     'persons'    => [
                         'type' => 'array',
                         'items' => ['type' => 'integer'],
@@ -109,12 +108,30 @@ final class EventController implements RestController
                         'type' => 'boolean',
                         'default' => false,
                     ],
+					'price' => [
+                        'type' => 'integer',
+                        'default' => null,
+                    ],
                     'search' => [
                         'type' => 'string'
-                    ]
+					]
                 ]
-            ),
-        ));
+            ],
+        ]);
+
+		register_rest_route('/events/v3', '/events/(?P<id>\d+)/prepare-booking', [
+            [
+                'methods'   => 'GET',
+                'callback'  => [$this, 'prepareBooking'],
+                'permission_callback' => '__return_true',
+                'args' => [
+                    'id' => [
+                        'type' => 'integer',
+                        'required' => true,
+                    ],
+                ],
+            ],
+        ]);
     }
 
 
@@ -152,4 +169,11 @@ final class EventController implements RestController
         $response->header('X-WP-TotalPages', $page->pagination()->totalPages());
         return $response;
     }
+
+	public function prepareBooking(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$event_id = (int) $request->get_param('id');
+		
+		return new \WP_REST_Response(['message' => 'Die Stubsmaus'], 200);
+	}
 }

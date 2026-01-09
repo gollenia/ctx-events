@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Presentation;
 
-use Contexis\Events\Platform\Wordpress\OptionsRegistrar;
+use Contexis\Events\Platform\Wordpress\OptionsMigration;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class OptionController implements RestController
 {
     public function __construct(
-        private OptionsRegistrar $definitions,
+        private OptionsMigration $definitions,
     ) {
     }
 

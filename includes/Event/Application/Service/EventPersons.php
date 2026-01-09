@@ -24,7 +24,7 @@ final class EventPersons
     public function preloadDtos(EventCollection $events): ?PersonDtoCollection
     {
         $ids = array_map(function (Event $event) {
-            return $event->personId?->toInt();
+            return $event->personId;
         }, $events->toArray())
           |> array_filter(...)
           |> array_unique(...);

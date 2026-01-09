@@ -86,6 +86,18 @@ abstract class WpQueryBuilder
         return $clone;
     }
 
+    public function withMetaCompare(string $key, string $value, string $compare = '=', string $type = 'CHAR'): self
+    {
+        $clone = clone $this;
+        $clone->args['meta_query'][] = [
+            'key'   => $key,
+            'value' => $value,
+            'compare' => $compare,
+            'type' => $type,
+        ];
+        return $clone;
+    }
+
     public function withMetaQuery(array $metaQuery): self
     {
         $clone = clone $this;

@@ -7,25 +7,40 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 
 final class BookingMigration implements Migration
 {
-    private string $table_name = 'ctx_event_bookings';
+    private const TABLE_NAME = 'ctx_event_bookings';
+
+	public const ID = 'id';
+	public const EVENT_ID = 'event_id';
+	public const SPACES = 'spaces';
+	public const EMAIL = 'email';
+	public const DATE = 'date';
+	public const STATUS = 'status';
+	public const FINAL_PRICE = 'final_price';
+	public const DONATION = 'donation';
+	public const REGISTRATION = 'registration';
+	public const COUPON_ID = 'coupon_id';
+	public const GATEWAY = 'gateway';
+	public const NOTES = 'notes';
+	public const LOG = 'log';
+	public const TRANSACTIONS = 'transactions';
 
     private array $columns = [
-        'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-        'event_id BIGINT UNSIGNED NOT NULL',
-        'spaces TINYINT NOT NULL',
-        'user_email VARCHAR(200) NOT NULL',
-        'date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
-        'status TINYINT NOT NULL DEFAULT 0',
-        'full_price DECIMAL(10,2) NOT NULL DEFAULT 0',
-        'donation DECIMAL(10,2) NOT NULL DEFAULT 0',
-        'registration JSON NULL',
-        'attendees JSON NULL',
-        'coupon_id BIGINT UNSIGNED NULL',
-        'gateway VARCHAR(50) NULL',
-        'notes JSON NULL',
-        'log JSON NULL',
-        'transactions JSON NULL',
-        'PRIMARY KEY  (id)'
+        self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+        self::EVENT_ID . ' BIGINT UNSIGNED NOT NULL',
+        self::SPACES . ' TINYINT NOT NULL',
+        self::EMAIL . ' VARCHAR(200) NOT NULL',
+        self::DATE . ' TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        self::STATUS . ' TINYINT NOT NULL DEFAULT 0',
+        self::FINAL_PRICE . ' DECIMAL(10,2) NOT NULL DEFAULT 0',
+        self::DONATION . ' DECIMAL(10,2) NOT NULL DEFAULT 0',
+        self::REGISTRATION . ' JSON NULL',
+        self::COUPON_ID . ' BIGINT UNSIGNED NULL',
+        self::GATEWAY . ' VARCHAR(50) NULL',
+        self::NOTES . ' JSON NULL',
+        self::LOG . ' JSON NULL',
+        self::TRANSACTIONS . ' JSON NULL',
+        'PRIMARY KEY  (' . self::ID . ')',
+		'INDEX (' . self::EVENT_ID . ')'
     ];
 
     public function getColumns(): array
@@ -38,9 +53,9 @@ final class BookingMigration implements Migration
         return implode(",\n  ", $this->columns);
     }
 
-    public function getTableName(): string
+	public static function getTableName(): string
     {
         global $wpdb;
-        return $wpdb->prefix . $this->table_name;
+        return $wpdb->prefix . self::TABLE_NAME;
     }
 }

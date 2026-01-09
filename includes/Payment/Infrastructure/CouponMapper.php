@@ -8,10 +8,10 @@ use Contexis\Events\Payment\Domain\CouponCode;
 use Contexis\Events\Payment\Domain\CouponId;
 use Contexis\Events\Payment\Domain\DiscountType;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
-use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
+use Contexis\Events\Shared\Infrastructure\Contracts\PostMapper;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
-class CouponMapper implements DatabaseMapper
+class CouponMapper implements PostMapper
 {
 	public static function map(PostSnapshot $post): Coupon
 	{

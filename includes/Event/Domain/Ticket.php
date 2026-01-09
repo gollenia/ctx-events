@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use DateTimeImmutable;
 

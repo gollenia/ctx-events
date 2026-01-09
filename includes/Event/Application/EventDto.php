@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
-use Contexis\Events\Booking\Domain\BookingPolicy;
+use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventStatus;
 use Contexis\Events\Event\Domain\Ticket;
@@ -34,7 +34,6 @@ class EventDto implements DTO
         public readonly ?LocationDto $locationDto = null,
         public readonly ?ImageDto $imageDto = null,
         public readonly ?PersonDto $personDto = null,
-        public readonly ?TicketDtoCollection $ticketsDto = null,
         public readonly ?TaxonomyCollection $categories = null,
         public readonly ?TaxonomyCollection $tags = null
     ) {
@@ -45,7 +44,6 @@ class EventDto implements DTO
         ?LocationDto $locationDto = null,
         ?ImageDto $imageDto = null,
         ?PersonDto $personDto = null,
-        ?TicketDtoCollection $ticketsDto = null,
         ?TaxonomyCollection $categories = null,
         ?TaxonomyCollection $tags = null
     ): self {
@@ -61,7 +59,6 @@ class EventDto implements DTO
             locationDto: $locationDto,
             imageDto: $imageDto,
             personDto: $personDto,
-            ticketsDto: $ticketsDto,
             categories: $categories,
             tags: $tags
         );

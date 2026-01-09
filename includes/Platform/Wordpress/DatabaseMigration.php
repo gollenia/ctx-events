@@ -3,39 +3,71 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress;
 
-use Contexis\Events\Booking\Infrastructure\AttendeeMigration;
-use Contexis\Events\Booking\Infrastructure\BookingMigration;
-use Contexis\Events\Payment\Infrastructure\TransactionMigration;
+use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 
-final class DatabaseMigration
+final class DatabaseMigration implements Registrar
 {
-    private const VERSION = '1.0.2';
 
-    private DatabaseRegistrar $databases;
+	private const VERSION = '1.0.2';
 
-    public function __construct(DatabaseRegistrar $databases)
+	/*
+	 * @var Migration[]
+	 */
+    public function __construct(
+		private readonly iterable $migrations,
+	)
     {
-        $this->databases = $databases;
     }
 
-    public function migrate(): void
+    public function hook(): void
     {
-        $current = get_option('ctx_events_db_version', '0');
-        if (version_compare($current, self::VERSION, '<')) {
-            $this->run();
-            update_option('ctx_events_db_version', self::VERSION, false);
-        }
+        $this->migrate();
     }
 
-    private function run(): void
+    public function all(): array
+    {
+        return $this->migrations;
+    }
+
+	public function migrate(): void
+    {
+		if ($this->tablesExist() && $this->versionIsUpToDate()) {
+			return;
+		}
+
+		$this->runDbDelta();
+        update_option('ctx_events_db_version', self::VERSION, false);
+    }
+
+	private function tablesExist(): bool
+	{
+		global $wpdb;
+		foreach ($this->migrations as $migration) {
+			$table = $migration::getTableName();
+			if ($wpdb->get_var("SHOW TABLES LIKE '{$table}'") !== $table) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function versionIsUpToDate(): bool
+	{
+		$current = get_option('ctx_events_db_version', '0');
+
+		return version_compare($current, self::VERSION, '>=');
+	}
+
+    private function runDbDelta(): void
     {
         global $wpdb;
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         $charset = $wpdb->get_charset_collate();
 
-        foreach ($this->databases->all() as $migration) {
-            $table = $migration->getTableName();
+        foreach ($this->migrations as $migration) {
+            $table = $migration::getTableName();
             $cols  = $migration->getColumnsAsString();
 
             $sql = "CREATE TABLE `{$table}` (

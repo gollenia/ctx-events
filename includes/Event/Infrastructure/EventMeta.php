@@ -7,7 +7,7 @@ use Contexis\Events\Shared\Infrastructure\Abstracts\MetaData;
 
 class EventMeta extends MetaData
 {
-    public const REGISTRATION_FORM = '_registration_form';
+    public const BOOKING_FORM      = '_booking_form';
     public const ATTENDEE_FORM     = '_attendee_form';
     public const PERSON_ID         = '_person_id';
     public const LOCATION_ID       = '_location_id';
@@ -17,13 +17,17 @@ class EventMeta extends MetaData
     public const BOOKING_START     = '_booking_start';
     public const BOOKING_END       = '_booking_end';
     public const BOOKING_ENABLED   = '_booking_enabled';
-    public const BOOKING_SPACES    = '_booking_spaces';
+    public const BOOKING_CAPACITY  = '_booking_capacity';
     public const DONATION_ENABLED  = '_donation_enabled';
     public const RECURRENCE_ID     = '_recurrence_id';
     public const IS_DETACHED       = '_is_detached';
     public const TICKETS           = '_event_tickets';
     public const BOOKING_MAILS     = '_booking_mails';
     public const BOOKING_COUPONS   = '_booking_coupons';
+    public const CACHED_AVAILABLE  = '_cached_available';
+    public const CACHED_BOOKING_STATS = '_cached_booking_stats';
+	public const CACHED_MIN_PRICE = '_cached_min_price';
+	public const CACHED_MAX_PRICE = '_cached_max_price';
 
     public const TICKETS_SCHEMA = [
         'schema' => [
@@ -68,7 +72,7 @@ class EventMeta extends MetaData
     ];
 
     public static array $metadata = [
-        self::REGISTRATION_FORM => ['type' => 'integer'],
+        self::BOOKING_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
         self::PERSON_ID           => [
             'type'         => 'array',
@@ -86,7 +90,7 @@ class EventMeta extends MetaData
         self::BOOKING_START    => ['type' => 'string'],
         self::BOOKING_END      => ['type' => 'string'],
         self::BOOKING_ENABLED  => ['type' => 'boolean'],
-        self::BOOKING_SPACES   => ['type' => 'integer'],
+        self::BOOKING_CAPACITY => ['type' => 'integer'],
         self::DONATION_ENABLED => ['type' => 'boolean'],
         self::RECURRENCE_ID    => ['type' => 'integer'],
         self::IS_DETACHED      => ['type' => 'boolean'],
@@ -110,5 +114,8 @@ class EventMeta extends MetaData
                 ],
             ],
         ],
+
+		self::CACHED_AVAILABLE => ['type' => 'integer'],
+		self::CACHED_BOOKING_STATS => ['type' => 'array'],
     ];
 }

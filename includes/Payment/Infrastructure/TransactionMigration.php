@@ -7,7 +7,7 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 
 final class TransactionMigration implements Migration
 {
-    private string $table_name = 'ctx_event_transactions';
+    private const TABLE_NAME = 'ctx_event_transactions';
 
     private array $columns = [
         'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
@@ -34,9 +34,9 @@ final class TransactionMigration implements Migration
         return implode(",\n  ", $this->columns);
     }
 
-    public function getTableName(): string
+    public static function getTableName(): string
     {
         global $wpdb;
-        return $wpdb->prefix . $this->table_name;
+        return $wpdb->prefix . self::TABLE_NAME;
     }
 }

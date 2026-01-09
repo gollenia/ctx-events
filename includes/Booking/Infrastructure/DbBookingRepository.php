@@ -3,45 +3,46 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Infrastructure;
 
+use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesCount;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesStats;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
+use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
+use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 
 class DbBookingPersistanceRepository implements BookingRepository
 {
-    const TABLE_NAME = 'event_bookings';
+    
+	public function find(BookingId $id): ?Booking
+	{
+		global $wpdb;
 
-    public static function sum_event_spaces(int $event_id): array
-    {
-        $table = self::get_table_name();
-        global $wpdb;
-        $results = $wpdb->get_row(
-            $wpdb->prepare("
-                SELECT
-                    SUM(CASE WHEN status = 1 THEN spaces ELSE 0 END) AS booked,
-                    SUM(CASE WHEN status = 0 THEN spaces ELSE 0 END) AS pending,
-					SUM(CASE WHEN status = 2 THEN spaces ELSE 0 END) AS rejected,
-					SUM(CASE WHEN status = 3 THEN spaces ELSE 0 END) AS canceled,
-					SUM(CASE WHEN status = 4 THEN spaces ELSE 0 END) AS expired
-                FROM $table
-                WHERE event_id = %d
-            ", $event_id)
-        );
+		$table = BookingMigration::getTableName();
+		$sql = "SELECT * FROM $table WHERE id = %s";
+		$result = $wpdb->get_row($wpdb->prepare($sql, $id->toInt()));
 
-        return [
-            'confirmed'     => (int) $results->booked,
-            'pendingActive' => (int) $results->pending,
-            'rejected'      => (int) $results->rejected,
-            'canceled'      => (int) $results->canceled,
-            'expired'       => (int) $results->expired
-        ];
-    }
+		if (!$result) {
+			return null;
+		}
 
-    public static function buildQuery(array $args = []): array
+		$attendees = $this->getBookingAttendees($id);
+		$transactions = $this->getBookingTransactions($id);
+
+		$result['attendees'] = $attendees;
+		$result['transactions'] = $transactions;
+		return BookingMapper::map($result);
+	}
+
+    public function buildQuery(array $args = []): array
     {
 
         global $wpdb;
 
-        $table = self::get_table_name();
+        $table = BookingMigration::getTableName();
         $sql = "SELECT * FROM $table";
         $where = [];
         $params = [];
@@ -116,4 +117,65 @@ class DbBookingPersistanceRepository implements BookingRepository
 
         return (int) $wpdb->get_var($wpdb->prepare($sql, ...$params));
     }
+
+	public function getSalesStatsForEvent(int $eventId): TicketSalesStats
+	{
+		global $wpdb;
+
+		$attendeeTable = AttendeeMigration::getTableName();
+		$bookingTable = BookingMigration::getTableName();
+
+		$sql = sprintf(
+			"SELECT 
+				a.ticket_id,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as pending,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as approved,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as cancelled,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as expired
+			FROM %s a
+			JOIN %s b ON a.booking_id = b.id
+			WHERE b.event_id = %%d 
+			GROUP BY a.ticket_id",
+			
+			BookingStatus::PENDING->value,
+			BookingStatus::APPROVED->value,
+			BookingStatus::CANCELED->value,
+			BookingStatus::EXPIRED->value,
+			$attendeeTable,
+			$bookingTable
+		);
+
+		$rows = $wpdb->get_results($wpdb->prepare($sql, $eventId));
+
+		$statsObjects = [];
+		foreach ($rows as $row) {
+			$statsObjects[] = new TicketSalesCount(
+				TicketId::from($row->ticket_id),
+				(int)$row->pending,
+				(int)$row->approved,
+				(int)$row->cancelled,
+				(int)$row->expired
+			);
+		}
+
+		return new TicketSalesStats($statsObjects);
+	}
+
+	private function getBookingAttendees(BookingId $id): array
+	{
+		global $wpdb;
+		$table = AttendeeMigration::getTableName();
+		$sql = "SELECT * FROM $table WHERE booking_id = %s";
+		$result = $wpdb->get_results($wpdb->prepare($sql, $id->toInt()));
+		return $result;
+	}
+
+	private function getBookingTransactions(BookingId $id): array
+	{
+		global $wpdb;
+		$table = TransactionMigration::getTableName();
+		$sql = "SELECT * FROM $table WHERE booking_id = %s";
+		$result = $wpdb->get_results($wpdb->prepare($sql, $id->toInt()));
+		return $result;
+	}
 }

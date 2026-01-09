@@ -45,7 +45,7 @@ import * as upcoming from './blocks/upcoming/index.js';
  * Plugin dependencies.
  */
 import BookingStatus from './plugins/event/BookingStatus.js';
-import bookingSidebar from './plugins/event/booking.js';
+import bookingSidebar from './plugins/event/BookingSidebar.js';
 import datetimeSelector from './plugins/event/datetime.js';
 import locationSelector from './plugins/event/location.js';
 import peopleSelector from './plugins/event/people.js';

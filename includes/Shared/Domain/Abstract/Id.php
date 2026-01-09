@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\Abstract;
 
-abstract class Id
+abstract class Id implements \Stringable
 {
     public function __construct(
         private readonly int $value
@@ -27,5 +27,10 @@ abstract class Id
     public function equals(self $other): bool
     {
         return $other::class === static::class && $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->value;
     }
 }

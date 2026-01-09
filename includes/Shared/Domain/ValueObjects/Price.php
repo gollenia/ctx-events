@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 
-class Price
+final class Price
 {
     public function __construct(
         public readonly int $amount_cents,

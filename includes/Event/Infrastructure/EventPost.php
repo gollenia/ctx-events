@@ -7,14 +7,22 @@ use Contexis\Events\Event\Infrastructure\EventMeta as InfrastructureEventMeta;
 use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasHooks;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasTaxonomies;
 
-class EventPost extends PostType implements HasTaxonomies, HasMetaData
+class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
 {
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
     public const TAGS = 'ctx-event-tags';
+
+	public function __construct(
+		private readonly EventHooks $hooks
+	)
+	{
+		
+	}
 
     public static function getSlug(): string
     {
@@ -123,4 +131,9 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData
     {
         EventMeta::registerAll(self::POST_TYPE);
     }
+
+	public function registerHooks(): void
+	{
+		$this->hooks->register();	
+	}
 }

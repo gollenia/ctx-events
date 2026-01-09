@@ -3,15 +3,30 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress;
 
-final class OptionsMigration
+use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
+
+final class OptionsMigration implements Registrar
 {
     private const EVENT_OPTIONS_VERSION = '1.0.0';
+	private array $definedOptions = [];
 
-    private array $options = [];
-
-    public function __construct(OptionsRegistrar $options)
+	/*
+	 * @var iterable<OptionProvider>
+	 */
+	public function __construct(
+		private readonly iterable $providers,
+	)
     {
-        $this->options = $options->all();
+        foreach ($this->providers as $provider) {
+            if (method_exists($provider, 'fields')) {
+                $this->definedOptions = array_merge($this->definedOptions, $provider->fields());
+            }
+        }
+    }
+
+	public function hook(): void
+    {
+        add_action('admin_init', [$this, 'migrate']);
     }
 
     public function migrate(): void
@@ -30,7 +45,7 @@ final class OptionsMigration
 
     private function installNewOptions(): void
     {
-        foreach ($this->options as $key => $field) {
+        foreach ($this->definedOptions as $key => $field) {
             $existing = get_option($key, null);
             if ($existing !== null) {
                 continue;
@@ -47,7 +62,7 @@ final class OptionsMigration
         $all = $this->getAllFromDatabase();
 
         foreach ($all as $key => $value) {
-            if (!array_key_exists($key, $this->options)) {
+            if (!array_key_exists($key, $this->definedOptions)) {
                     delete_option($key);
             }
         }
@@ -75,5 +90,10 @@ final class OptionsMigration
             $result[$key] = $value;
         }
         return $result;
+    }
+
+	public function all(): array
+    {
+        return $this->definedOptions;
     }
 }

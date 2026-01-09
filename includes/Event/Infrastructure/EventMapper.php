@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
-use Contexis\Events\Booking\Domain\BookingPolicy;
+use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\Event;
-use Contexis\Events\Event\Domain\EventId;
-use Contexis\Events\Event\Domain\EventStatus;
-use Contexis\Events\Event\Domain\EventViewConfig;
-use Contexis\Events\Event\Domain\RecurrenceId;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\EventViewConfig;
+use Contexis\Events\Event\Domain\ValueObjects\EventForms;
+use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\TicketCollection;
+use Contexis\Events\Form\Domain\FormId;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostStatusMapper;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
-use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
+use Contexis\Events\Shared\Infrastructure\Contracts\PostMapper;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
 use DateTimeImmutable;
 
-final class EventMapper implements DatabaseMapper
+final class EventMapper implements PostMapper
 {
     public static function map(PostSnapshot $post): Event
     {
@@ -54,6 +55,10 @@ final class EventMapper implements DatabaseMapper
             tickets: $post->getArray(EventMeta::TICKETS) ? self::ticketsFromArray($post->getArray(EventMeta::TICKETS)) : null,
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
+			forms: new EventForms(
+				bookingForm: FormId::from($post->getInt(EventMeta::BOOKING_FORM)),
+				attendeeForm: FormId::from($post->getInt(EventMeta::ATTENDEE_FORM))
+			),
             personId: $post->getInt('_person_id') ? PersonId::from($post->getInt(EventMeta::PERSON_ID)) : null,
         );
 

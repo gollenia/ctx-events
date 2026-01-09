@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application;
 
-use Contexis\Events\Event\Domain\TicketScope;
+use Contexis\Events\Event\Domain\Enums\TicketScope;
 use Contexis\Events\Shared\Application\Contracts\Includes;
 
 final class EventIncludes implements Includes

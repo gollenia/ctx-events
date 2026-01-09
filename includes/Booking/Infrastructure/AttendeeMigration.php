@@ -7,17 +7,24 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 
 final class AttendeeMigration implements Migration
 {
-    private string $table_name = 'ctx_event_attendees';
+    private const TABLE_NAME = 'ctx_event_attendees';
+
+	public const ID = 'id';
+	public const TICKET_ID = 'ticket_id';
+	public const BOOKING_ID = 'booking_id';
+	public const FIRST_NAME = 'first_name';
+	public const LAST_NAME = 'last_name';
+	public const METADATA = 'metadata';
 
     private array $columns = [
-        'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-        'ticket_id VARCHAR(100) NOT NULL',
-        'booking_id BIGINT UNSIGNED NOT NULL',
-        'first_name VARCHAR(100) NOT NULL',
-        'last_name VARCHAR(100) NOT NULL',
-        'email VARCHAR(200) NOT NULL',
-        'metadata JSON NULL',
-        'PRIMARY KEY  (id)'
+        self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+        self::TICKET_ID . ' VARCHAR(100) NOT NULL',
+        self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
+        self::FIRST_NAME . ' VARCHAR(100) NOT NULL',
+        self::LAST_NAME . ' VARCHAR(100) NOT NULL',
+        self::METADATA . ' JSON NULL',
+        'PRIMARY KEY  (' . self::ID . ')',
+		'INDEX (' . self::BOOKING_ID . ')'
     ];
 
     public function getColumns(): array
@@ -30,9 +37,9 @@ final class AttendeeMigration implements Migration
         return implode(",\n  ", $this->columns);
     }
 
-    public function getTableName(): string
+    public static function getTableName(): string
     {
         global $wpdb;
-        return $wpdb->prefix . $this->table_name;
+        return $wpdb->prefix . self::TABLE_NAME;
     }
 }

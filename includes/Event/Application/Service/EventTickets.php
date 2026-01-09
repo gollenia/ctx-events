@@ -8,7 +8,7 @@ use Contexis\Events\Event\Application\TicketDto;
 use Contexis\Events\Event\Application\TicketDtoCollection;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\Ticket;
-use Contexis\Events\Event\Domain\TicketScope;
+use Contexis\Events\Event\Domain\Enums\TicketScope;
 
 final class EventTickets
 {

@@ -22,6 +22,7 @@ final class TicketCollection extends Collection implements IteratorAggregate, Co
         $lowestPriceObject = null;
 
         foreach ($this->items as $ticket) {
+			if(!$ticket->isCurrentlyAvailable()) continue;
             $currentPriceCents = $ticket->price->amount_cents;
             if ($lowestPriceObject === null || $currentPriceCents < $lowestPriceObject->amount_cents) {
                 $lowestPriceObject = $ticket->price;

@@ -10,15 +10,11 @@ final class TaxonomyLoader
 {
     public function termsForPost(int $postId, string $taxonomy): ?TaxonomyCollection
     {
-		var_dump($postId);
-		var_dump($taxonomy);
         $terms = wp_get_object_terms($postId, $taxonomy, ['fields' => 'all']);
 
-		
         if (is_wp_error($terms) || empty($terms)) {		
             return null;
         }
-
 		
         $terms = array_map(
             static fn(\WP_Term $term) => new Taxonomy(
