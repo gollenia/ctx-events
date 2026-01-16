@@ -28,6 +28,7 @@ class EventMeta extends MetaData
     public const CACHED_BOOKING_STATS = '_cached_booking_stats';
 	public const CACHED_MIN_PRICE = '_cached_min_price';
 	public const CACHED_MAX_PRICE = '_cached_max_price';
+	public const GATEWAYS_EXCLUDED = '_gateways_excluded';
 
     public const TICKETS_SCHEMA = [
         'schema' => [

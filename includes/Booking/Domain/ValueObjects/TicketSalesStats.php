@@ -21,11 +21,6 @@ final class TicketSalesStats
         }
 	}
 
-	public static function fromArray(array $items): self
-    {
-        return new self($items);
-    }
-
 	public function getCountFor(TicketId $ticketId, BookingStatus $status): int
     {
         return $this->getStatsFor($ticketId)->getCountFor($status);

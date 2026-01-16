@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { formatPrice } from '../../shared/formatPrice.js';
+import { formatPrice } from '@events/i18n';
 
 const FullPrice = ({ store }) => {
 	const [state, dispatch] = store;

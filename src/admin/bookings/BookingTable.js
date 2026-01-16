@@ -16,7 +16,7 @@ import {
 	swatch,
 	trash,
 } from '@wordpress/icons';
-import { formatPrice } from '../../shared/formatPrice';
+import { formatPrice } from '@events/i18n';
 import { initialViewFromURL } from './filters';
 
 const BookingTable = () => {

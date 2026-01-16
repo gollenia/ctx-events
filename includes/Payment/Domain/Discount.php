@@ -13,7 +13,7 @@ final class Discount
 
     public static function percent(float $percent): self
     {
-        return new self(DiscountType::PERCENT, $percent);
+        return new self(DiscountType::PERCENTAGE, $percent);
     }
 
     public static function fixed(float $cents): self
@@ -24,7 +24,7 @@ final class Discount
     public function applyTo(int $amountCents): int
     {
         return match ($this->type) {
-            DiscountType::PERCENT => max(0, (int) round($amountCents * (1 - $this->amount / 100))),
+            DiscountType::PERCENTAGE => max(0, (int) round($amountCents * (1 - $this->amount / 100))),
             DiscountType::FIXED   => max(0, (int) round($amountCents - $this->amount)),
             default   => $amountCents,
         };

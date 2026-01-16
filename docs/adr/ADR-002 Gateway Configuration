@@ -1,0 +1,109 @@
+# ADR-002: Active Record Pattern and Defensive State Management for Gateway Configuration
+
+* **Status:** Accepted
+* **Date:** 2026-01-14
+* **Context:** Payment Domain / Infrastructure Layer
+
+## Context
+
+We need a persistent configuration mechanism for Payment Gateways (i.E. the `OfflineGateway`) to store settings like `enabled`, `title`, and complex banking information (`BankData`).
+
+The constraints and requirements are:
+
+1. **Persistence:** Settings must be stored in the WordPress `wp_options` table.
+2. **Input Source:** Updates come from a React-Frontend via REST API as a generic `array`.
+3. **Decoupling:** The Application Layer (UseCases) and the Gateway itself should not be coupled to specific Infrastructure Data Transfer Objects (DTOs). They should pass raw data (`array`) and rely on the infrastructure to handle validation.
+4. **State Management:** The configuration object must handle partial updates (PATCH) without erasing existing data if keys are missing in the input.
+
+## Decision
+
+We will implement the `OfflineConfiguration` class using a modified **Active Record Pattern** with a **Defensive Update Mechanism**.
+
+### 1. Active Record & Self-Loading
+
+The Configuration class is responsible for its own persistence.
+
+* **Loading:** The constructor automatically calls a `refresh()` method to load data from `wp_options` and populate class properties.
+* **Saving:** A private `save()` method serializes the current state back to the database.
+* **Mutability:** Class properties are **not** `readonly` to allow runtime updates via the API.
+
+### 2. Defensive Update Strategy ("Patching")
+
+Instead of using an external DTO, the `updateFromArray(array $input)` method serves as the boundary guard.
+
+* **Allow-listing:** The method iterates through known keys only (e.g., `title`, `iban`). Unknown keys in the input array (e.g., `t-rex-hidden-door`) are silently ignored.
+* **Sanitization:** All inputs are sanitized immediately using WordPress functions (`sanitize_text_field`, `absint`) before assignment.
+* **Partial Updates:** If a key is missing in the input array, the existing property value is preserved. This enables `PATCH` behavior (updating just one setting without sending the whole payload).
+
+### 3. Handling Value Objects
+
+* **Internal:** Internally, banking details are encapsulated in a `BankData` Value Object to ensure type safety and domain validity.
+* **External (DB/Form):** Data is stored "flattened" in the database (snake_case keys) and accepted as flattened keys from the form input. The `OfflineConfiguration` class handles the mapping between the flat array and the nested `BankData` object.
+
+## Consequences
+
+### Positive
+
+* **Loose Coupling:** The UseCase does not need to know about specific config classes or DTOs; it simply passes the request array.
+* **Robustness:** The implementation is resilient against malformed input or unknown parameters.
+* **Encapsulation:** Database logic (`get_option`/`update_option`) and mapping logic are contained entirely within the Infrastructure class, keeping the Domain clean.
+* **Developer Experience:** Instantiating the class (`new OfflineConfiguration()`) immediately provides a usable object with current data.
+
+### Negative
+
+* **Mutability:** Unlike standard Domain Entities, the Configuration object is mutable, which theoretically allows side effects if not handled carefully (though necessary here for the Active Record pattern).
+* **Boilerplate:** The `updateFromArray` method requires manual mapping of every field, which can be verbose.
+
+## Technical Implementation
+
+```php
+final class OfflineConfiguration 
+{
+    private const OPTION_KEY = 'ctx_events_gateway_offline';
+
+    public bool $isEnabled;
+    public string $title;
+    public BankData $bankData;
+
+    public function __construct()
+    {
+        $this->refresh();
+    }
+
+    private function refresh(): void
+    {
+        $data = get_option(self::OPTION_KEY, []);
+        // ... hydrate properties ...
+        $this->bankData = new BankData(...);
+    }
+
+    public function updateFromArray(array $input): void
+    {
+        // Defensive Update: Only touch what exists in input
+        if (array_key_exists('title', $input)) {
+            $this->title = sanitize_text_field($input['title']);
+        }
+        
+        // Re-create Value Object merging new input with existing state
+        $this->bankData = new BankData(
+            accountHolder: array_key_exists('account_holder', $input) 
+                ? sanitize_text_field($input['account_holder']) 
+                : $this->bankData->accountHolder,
+            // ... other fields ...
+        );
+
+        $this->save();
+    }
+
+    private function save(): void
+    {
+        // Flatten and save to wp_options
+        update_option(self::OPTION_KEY, [
+            'title' => $this->title,
+            'account_holder' => $this->bankData->accountHolder,
+            // ...
+        ]);
+    }
+}
+
+```

@@ -60,13 +60,6 @@ class EventResource implements JsonSerializable
             $includes['tags'] = $this->event_dto->tags->toArray();
         }
 
-        if ($this->event_dto->ticketsDto) {
-            $includes['tickets'] = array_map(
-                fn($ticketDto) => $ticketDto->toArray(),
-                $this->event_dto->ticketsDto->toArray()
-            );
-        }
-
         if (!empty($includes)) {
             $result['includes'] = $includes;
         }

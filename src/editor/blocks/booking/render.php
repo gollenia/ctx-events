@@ -32,7 +32,7 @@ if ($attributes['buttonIcon']) {
     echo "<i class=\"material-icons material-symbols-outlined\">{$attributes['buttonIcon']}</i>";
 }
 if (!$attributes['iconOnly']) {
-    echo $attributes['buttonTitle'] ?: __("Register", "events");
+    echo $attributes['buttonTitle'] ?: __("Register", "ctx-events");
 }
 ?>
 </button>

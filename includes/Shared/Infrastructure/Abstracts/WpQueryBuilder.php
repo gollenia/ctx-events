@@ -115,7 +115,7 @@ abstract class WpQueryBuilder
             $clone->args['orderby'] = $orderBy->field;
         }
 
-        $clone->args['order'] = $orderBy->direction()->value;
+        $clone->args['order'] = $orderBy->order->value;
         return $clone;
     }
 

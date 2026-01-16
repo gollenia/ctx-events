@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal Dependencies
  */
-import { formatDateRange } from './formatDate';
+import { formatDateRange } from '@events/i18n';
 import truncate from './truncate';
 
 function EventCards(props) {

@@ -11,6 +11,7 @@ use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Infrastructure\Abstracts\WpQueryBuilder;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
 
 final class WpEventQueryBuilder extends WpQueryBuilder
 {
@@ -48,23 +49,23 @@ final class WpEventQueryBuilder extends WpQueryBuilder
 			default => $builder,
 		};
 
-        $orderBy = self::mapOrderBy($criteria->orderBy)->withOrder($criteria->order);
+        $orderBy = self::mapOrderBy($criteria->orderBy);
         $builder = $builder->orderBy($orderBy);
 
         return $builder;
     }
 
 
-    private static function mapOrderBy(string $orderBy): OrderBy
+    private static function mapOrderBy(OrderBy $orderBy): OrderBy
     {
         return match ($orderBy) {
-            'date-time'     => OrderBy::fromMeta(EventMeta::EVENT_START),
-            'booking-date'  => OrderBy::fromMeta(EventMeta::BOOKING_START),
-            'booking'       => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED),
-            'location'      => OrderBy::fromMeta(EventMeta::LOCATION_ID),
-            'person'        => OrderBy::fromMeta(EventMeta::PERSON_ID),
-            'price'         => OrderBy::fromMeta(EventMeta::CACHED_MIN_PRICE),
-            default         => OrderBy::fromField($orderBy),
+            'date-time'     => OrderBy::fromMeta(EventMeta::EVENT_START, $orderBy->order),
+            'booking-date'  => OrderBy::fromMeta(EventMeta::BOOKING_START, $orderBy->order),
+            'booking'       => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED, $orderBy->order),
+            'location'      => OrderBy::fromMeta(EventMeta::LOCATION_ID, $orderBy->order),
+            'person'        => OrderBy::fromMeta(EventMeta::PERSON_ID, $orderBy->order),
+            'price'         => OrderBy::fromMeta(EventMeta::CACHED_MIN_PRICE, $orderBy->order),
+            default         => OrderBy::fromField($orderBy->field, $orderBy->order),
         };
     }
 

@@ -29,9 +29,9 @@ add_action('plugins_loaded', function () {
         false,
         dirname(plugin_basename(__FILE__)) . '/languages'
     );
-    do_action('qm/start', 'events');
+    do_action('qm/start', 'ctx-events');
     Contexis\Events\Platform\Bootstrap::init();
-    do_action('qm/stop', 'events');
+    do_action('qm/stop', 'ctx-events');
 	
 }, 10);
 

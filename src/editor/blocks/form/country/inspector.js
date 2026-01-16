@@ -8,6 +8,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { VisibilityRules } from '@events/form';
+import { getCountriesByRegion } from '@events/i18n';
 
 const Inspector = (props) => {
 	const {
@@ -27,7 +28,7 @@ const Inspector = (props) => {
 	];
 
 	useEffect(() => {
-        const codesToSave = region === 'ALL' ? [] : getByRegion(region);
+        const codesToSave = region === 'ALL' ? [] : getCountriesByRegion(region);
         if (JSON.stringify(codesToSave) !== JSON.stringify(allowedCountries)) {
             setAttributes({ allowedCountries: codesToSave });
         }

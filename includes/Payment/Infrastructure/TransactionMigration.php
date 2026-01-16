@@ -9,19 +9,35 @@ final class TransactionMigration implements Migration
 {
     private const TABLE_NAME = 'ctx_event_transactions';
 
+	public const ID = 'id';
+	public const EXTERNAL_ID = 'external_id';
+	public const BOOKING_ID = 'booking_id';
+	public const AMOUNT = 'amount';
+	public const CURRENCY = 'currency';
+	public const GATEWAY = 'gateway';
+	public const STATUS = 'status';
+	public const TRANSACTION_DATE = 'transaction_date';
+	public const EXPIRES_AT = 'expires_at';
+	public const CREATED_AT = 'created_at';
+	public const DETAILS = 'details';
+
     private array $columns = [
-        'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-        'external_id VARCHAR(100) NOT NULL',
-        'booking_id BIGINT UNSIGNED NOT NULL',
-        'amount BIGINT NOT NULL DEFAULT 0',
-        'currency VARCHAR(10) NOT NULL',
-        'gateway VARCHAR(50) NOT NULL',
-        'status TINYINT NOT NULL DEFAULT 0',
-        'transaction_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
-        'expires_at TIMESTAMP NULL',
-        'created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
-        'details JSON NULL',
-        'PRIMARY KEY  (id)'
+        self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+        self::EXTERNAL_ID . ' VARCHAR(100) NOT NULL',
+        self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
+        self::AMOUNT . ' BIGINT NOT NULL DEFAULT 0',
+        self::CURRENCY . ' VARCHAR(3) NOT NULL',
+        self::GATEWAY . ' VARCHAR(50) NOT NULL',
+        self::STATUS . ' TINYINT NOT NULL DEFAULT 0',
+        self::TRANSACTION_DATE . ' TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        self::EXPIRES_AT . ' TIMESTAMP NULL',
+        self::CREATED_AT . ' TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        self::DETAILS . ' JSON NULL',
+        'PRIMARY KEY  (' . self::ID . ')',
+		'UNIQUE KEY (' . self::EXTERNAL_ID . ')',
+		'INDEX (' . self::BOOKING_ID . ')',
+		'INDEX (' . self::STATUS . ')',
+		'INDEX (' . self::EXPIRES_AT . ')'
     ];
 
     public function getColumns(): array

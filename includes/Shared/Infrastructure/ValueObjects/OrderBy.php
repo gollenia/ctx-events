@@ -7,31 +7,28 @@ final class OrderBy
 {
     private function __construct(
         public readonly string $field,
-        public readonly ?Order $direction,
+        public readonly Order $order = Order::DESC,
         public readonly bool $isMeta = false
     ) {
     }
 
-    public static function fromField(string $field, Order|string $direction = 'ASC'): self
+    public static function fromField(string $field, Order $order = Order::DESC): self
     {
-        $dir = $direction instanceof Order ? $direction : Order::from($direction);
-        return new self($field, $dir, false);
+        return new self($field, $order, false);
     }
 
-    public static function fromMeta(string $metaKey, Order|string $direction = 'ASC'): self
+    public static function fromMeta(string $metaKey, Order $order = Order::DESC): self
     {
-        $dir = $direction instanceof Order ? $direction : Order::from($direction);
-        return new self($metaKey, $dir, true);
+        return new self($metaKey, $order, true);
     }
 
-    public function withOrder(Order|string $direction): self
+    public function withOrder(Order $order): self
     {
-        $dir = $direction instanceof Order ? $direction : Order::from($direction);
-        return new self($this->field, $dir, $this->isMeta);
+        return new self($this->field, $order, $this->isMeta);
     }
 
-    public function direction(): Order
+    public function order(): Order
     {
-        return $this->direction ?? Order::DESC;
+        return $this->order;
     }
 }

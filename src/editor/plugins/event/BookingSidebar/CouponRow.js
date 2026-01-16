@@ -1,5 +1,5 @@
 import { CheckboxControl, Disabled } from '@wordpress/components';
-import { formatPrice } from '../../../../shared/formatPrice';
+import { formatPrice } from '@events/i18n';
 
 const CouponRow = (props) => {
 	const { coupon, index, onToggle, isSelected } = props;

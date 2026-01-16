@@ -4,7 +4,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
-import { formatDate } from '../../../shared/formatDate.js';
+import { formatDate } from '../../../shared/i18n/datetime.js';
 /**
  * Internal dependencies
  */

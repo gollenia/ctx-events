@@ -1406,14 +1406,18 @@ const countries = [
 
 ]
 
-const getAll = () => {
-    return countries.map(country => country.code)
-}
+const allCountryCodes = countries.map(c => c.code);
 
-const getByRegion = (region) => {
-    return countries.filter((country) => {
-        return country.regions.includes(region)
-    }).map(country => country.code)
-}
+const countriesByRegionMap = countries.reduce((acc, country) => {
+    country.regions.forEach(region => {
+        if (!acc[region]) acc[region] = [];
+        acc[region].push(country.code);
+    });
+    return acc;
+}, {});
 
-export { getAll, getByRegion }
+export const getCountries = () => allCountryCodes;
+
+export const getCountriesByRegion = (region) => {
+    return countriesByRegionMap[region] || [];
+};

@@ -9,4 +9,6 @@ interface EventOptions
     public function publicShowPastEvents(): bool;
 
     public function ongoingEventsArePast(): bool;
+
+	public function getEventsSlug(): string;
 }

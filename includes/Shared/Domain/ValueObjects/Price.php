@@ -45,6 +45,11 @@ final class Price
         return $this->amount_cents === 0;
     }
 
+    public function toFloat(): float
+    {
+        return $this->amount_cents / 100;
+    }
+
     public function equals(Price $other): bool
     {
         return $this->amount_cents === $other->amount_cents && $this->currency === $other->currency;

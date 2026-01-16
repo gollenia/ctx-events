@@ -1,6 +1,6 @@
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { formatPrice } from '../../../common/formatPrice';
+import { formatPrice } from '@events/i18n';
 
 const TicketRow = (props) => {
 	const { ticket, index, onDelete, onToggleActive, onSelect, onDuplicate } =

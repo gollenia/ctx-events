@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { formatTimeRange } from './../../../shared/formatDate';
+import { formatTimeRange } from '../../../shared/i18n/datetime';
 import Inspector from './inspector.js';
 
 /**

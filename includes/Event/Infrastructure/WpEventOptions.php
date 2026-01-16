@@ -11,6 +11,7 @@ final class WpEventOptions extends WpOptions implements EventOptions
 {
     public const EVENT_PUBLIC_SHOW_PAST = 'ctx_events_show_past_events';
     public const EVENT_ONGOING_IS_PAST = 'ctx_events_ongoing_events_are_past';
+    public const EVENT_SLUG = 'ctx_events_event_slug';
 
     public function fields(): array
     {
@@ -29,6 +30,13 @@ final class WpEventOptions extends WpOptions implements EventOptions
                 'description' => __('If enabled, events that are currently ongoing will be treated as past events.', 'ctx-events'),
                 'domain'      => 'events',
             ],
+            self::EVENT_SLUG => [
+                'type'        => 'string',
+                'default'     => 'events',
+                'label'       => __('Event slug', 'ctx-events'),
+                'description' => __('The slug for the event post type. This is used in the URL to access the event (e.g. `example.com/events/concert`).', 'ctx-events'),
+                'domain'      => 'events',
+            ],
         ];
     }
 
@@ -41,4 +49,9 @@ final class WpEventOptions extends WpOptions implements EventOptions
     {
         return $this->getBool(self::EVENT_ONGOING_IS_PAST);
     }
+
+	public function getEventsSlug(): string
+	{
+		return $this->getString(self::EVENT_SLUG);
+	}
 }

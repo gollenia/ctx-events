@@ -5,8 +5,10 @@ import {
 	SelectControl,
 	TextareaControl,
 	TextControl,
+	__experimentalHeading as Heading
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
+import { key } from '@wordpress/icons';
 
 const AdminField = ({
 	type,
@@ -18,45 +20,34 @@ const AdminField = ({
 	required,
 	...props
 }) => {
-	const [countries, setCountries] = useState([]);
+	
 	const [pages, setPages] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const browserLanguage = navigator.language.split('-')[0];
-
-	useEffect(() => {
-		if (type !== 'country') {
-			return;
-		}
-		fetch(
-			`https://countries.kids-team.com/countries/${props.region ?? 'world'}/${browserLanguage}`,
-		)
-			.then((response) => response.json())
-			.then((data) => {
-				const countryList = Object.entries(data).map(([key, name], index) => {
-					return { value: key, label: name };
-				});
-
-				setCountries(countryList);
-			});
-	}, []);
+	const [loading, setLoading] = useState(false);
+	
 
 	useEffect(() => {
 		if (type !== 'page_select') {
+			setLoading(false);
 			return;
 		}
-		apiFetch({ path: '/wp/v2/pages' })
+
+		setLoading(true);
+		apiFetch({ path: '/wp/v2/pages?per_page=100' })
 			.then((data) => {
 				setPages(data);
 				setLoading(false);
 			})
 			.catch((err) => {
-				console.error('Fehler beim Laden der Seiten:', err);
+				console.error(err);
 				setPages([]);
 				setLoading(false);
 			});
-	}, []);
+	}, [type]);
 
-	console.log('AdminField', type, label);
+
+	if(type === 'heading') {
+		return <Heading level={props.level ?? 2}>{label}</Heading>
+	}
 
 	if (type === 'textarea') {
 		return (
@@ -73,8 +64,8 @@ const AdminField = ({
 	}
 
 	if (type === 'select' || type === 'radio') {
-		const mappedOptions = props.options.map((option) => {
-			return { label: option, value: option };
+		const mappedOptions = Object.entries(props.options || {}).map(([label, value]) => {
+			return { label, value };
 		});
 
 		return (
@@ -88,20 +79,6 @@ const AdminField = ({
 				required={required}
 				options={mappedOptions}
 				defaultValue={mappedOptions[0].value}
-			/>
-		);
-	}
-
-	if (type === 'country') {
-		return (
-			<SelectControl
-				label={label}
-				value={value}
-				onChange={onChange}
-				help={help}
-				error={error}
-				required={required}
-				options={countries}
 			/>
 		);
 	}

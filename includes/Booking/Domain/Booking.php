@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Domain;
@@ -12,6 +13,7 @@ use Contexis\Events\Payment\Domain\TransactionCollection;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 /**
  * @package Contexis\Events\Booking\Domain
@@ -21,7 +23,9 @@ final class Booking
 {
     public function __construct(
         public readonly BookingId $id,
+        public readonly string $uuid,
         public readonly Email $email,
+        public readonly PersonName $name,
         public readonly PriceSummary $priceSummary,
         public readonly \DateTimeImmutable $bookingTime,
         public readonly BookingStatus $status,

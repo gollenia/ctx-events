@@ -1,7 +1,7 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-import { formatPrice } from '../../shared/formatPrice.js';
+import { formatPrice } from '@events/i18n';
 import FullPrice from './FullPrice.js';
 
 const AttendeeTable = ({ store }) => {

@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 
-import { formatPrice } from '../../../shared/formatPrice.js';
+import { formatPrice } from '@events/i18n';
 import Inspector from './inspector.js';
 
 /**

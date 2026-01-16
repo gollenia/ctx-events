@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal Dependencies
  */
-import { formatDate, formatDateRange } from './formatDate';
+import { formatDate, formatDateRange } from '@events/i18n';
 import truncate from './truncate';
 
 function Table(props) {

@@ -7,6 +7,8 @@ use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Shared\Application\Contracts\Criteria;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 
 final class EventCriteria implements Criteria
 {
@@ -15,8 +17,7 @@ final class EventCriteria implements Criteria
         public readonly int $perPage = 10,
         public readonly ?StatusList $status = null,
         public readonly ?EventIncludes $includes = null,
-        public readonly string $orderBy = 'date-time',
-        public readonly string $order = 'DESC',
+        public readonly OrderBy $orderBy,
         public readonly TimeScope $scope = TimeScope::FUTURE,
         public readonly array $categories = [],
         public readonly array $tags = [],

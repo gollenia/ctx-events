@@ -78,8 +78,8 @@ const Inspector = (props) => {
 	];
 
 	const orderListViewOptions = [
-		{ value: 'ASC', label: __('Ascending', 'events') },
-		{ value: 'DESC', label: __('Descending', 'events') },
+		{ value: 'asc', label: __('Ascending', 'events') },
+		{ value: 'desc', label: __('Descending', 'events') },
 	];
 
 	const filteredCategories = useMemo(() => {

@@ -12,15 +12,15 @@ $current_time = time();
 
 if ($current_time < $date_start) {
     // Booking has not started yet
-    $description = __("Booking will start on", "events");
+    $description = __("Booking will start on", "ctx-events");
     $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_start()->getTimestamp());
 } elseif ($current_time > $date_end) {
     // Booking has ended
-    $description = __("Booking has ended on", "events");
+    $description = __("Booking has ended on", "ctx-events");
     $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_end()->getTimestamp());
 } else {
     // Booking is ongoing
-    $description = __("Booking ends on", "events");
+    $description = __("Booking ends on", "ctx-events");
     $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_end()->getTimestamp());
 }
 

@@ -4,7 +4,7 @@ import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { trash } from '@wordpress/icons';
 import { v4 as uuidv4 } from 'uuid';
-import '../booking.scss';
+
 import TicketEditor from './TicketEditor';
 
 const TicketModal = (props) => {

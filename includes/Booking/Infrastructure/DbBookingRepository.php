@@ -13,6 +13,7 @@ use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
 
 class DbBookingPersistanceRepository implements BookingRepository
 {
@@ -81,7 +82,7 @@ class DbBookingPersistanceRepository implements BookingRepository
         if (!empty($args['orderby'])) {
             $valid_fields = ['date', 'status', 'event_id'];
             $orderby = in_array($args['orderby'], $valid_fields, true) ? $args['orderby'] : 'date';
-            $order = (strtoupper($args['order'] ?? 'DESC') === 'ASC') ? 'ASC' : 'DESC';
+            $order = (strtoupper($args['order'] ?? Order::ASC->value) === Order::ASC->value) ? Order::ASC->value : Order::DESC->value;
             $sql .= " ORDER BY $orderby $order";
         }
 

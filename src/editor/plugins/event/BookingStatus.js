@@ -3,7 +3,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { dispatch, select, useDispatch } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
-import './booking.scss';
+
 
 const BookingStatus = () => {
 	const postType = select('core/editor').getCurrentPostType();

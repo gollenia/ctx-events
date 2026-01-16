@@ -1,6 +1,6 @@
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import AdminField from '../common/AdminField';
+import AdminField from '../../shared/adminfields/AdminField';
 
 const Registration = ({ store }) => {
 	const [state, dispatch] = store;

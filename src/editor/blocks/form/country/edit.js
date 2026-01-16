@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import icon from './icon.js';
 import Inspector from './inspector.js';
 import { FieldHeader, useFieldProps } from '@events/form'
-import { getByRegion } from './countries.js';
+import { getCountriesByRegion } from '@events/i18n';
 
 /**
  * @param {Props} props
@@ -25,7 +25,7 @@ const edit = (props) => {
 
 	const locale = document.documentElement.lang
 
-	const countryCodes = getByRegion(region)
+	const countryCodes = getCountriesByRegion(region)
 	const regionNames = new Intl.DisplayNames([locale], { type: 'region' });
 
 	const blockProps = useFieldProps(attributes);

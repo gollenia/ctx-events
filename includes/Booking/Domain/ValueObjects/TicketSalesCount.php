@@ -16,18 +16,6 @@ final class TicketSalesCount
 		private readonly int $expired
 	) {
 	}
-
-	public static function fromArray(TicketId $ticketId, array $countsByStatus): self
-    {
-        return new self(
-            $ticketId,
-            $countsByStatus[BookingStatus::PENDING->value] ?? 0,
-            $countsByStatus[BookingStatus::APPROVED->value] ?? 0,
-            $countsByStatus[BookingStatus::CANCELED->value] ?? 0,
-            $countsByStatus[BookingStatus::EXPIRED->value] ?? 0
-        );
-    }
-
 	public static function empty(TicketId $ticketId): self
     {
         return new self($ticketId, 0, 0, 0, 0);

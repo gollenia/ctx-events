@@ -45,8 +45,8 @@ final class AdminMenu implements AdminServiceInterface
 
         add_submenu_page(
             self::MENU_SLUG,
-            __('Dashboard', 'events'),
-            __('Dashboard', 'events'),
+            __('Events', 'events'),
+            __('Events', 'events'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'eventsPage'],
@@ -72,6 +72,15 @@ final class AdminMenu implements AdminServiceInterface
             'contexis_events_bookings',
             fn() => print('<div id="contexis-events-bookings-app"></div>')
         );
+
+		add_submenu_page(
+			self::MENU_SLUG,
+			__('Gateways', 'events'),
+			__('Gateways', 'events'),
+			'manage_options',
+			'contexis_events_gateways',
+			fn() => print('<div id="ctx-gateways-admin"></div>')
+		);
 
     }
 

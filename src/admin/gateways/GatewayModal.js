@@ -2,17 +2,18 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, Modal } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import AdminField from '../common/AdminField';
+import AdminField from '../../shared/adminfields/AdminField';
 
 const GatewayModal = ({ slug, onCancel }) => {
 	const [gateway, setGateway] = useState({});
 	const [loading, setLoading] = useState(true);
 
+	console.log(slug)
 	useEffect(() => {
 		if (slug === '') {
 			return;
 		}
-		apiFetch({ path: `/events/v2/gateway/?slug=${slug}` })
+		apiFetch({ path: `/events/v3/gateways/${slug}` })
 			.then((data) => {
 				console.log(data);
 				setGateway(data);
@@ -24,9 +25,8 @@ const GatewayModal = ({ slug, onCancel }) => {
 	}, [slug]);
 
 	const onSave = () => {
-		console.log(`/events/v2/gateway/`);
 		apiFetch({
-			path: `/events/v2/gateway`,
+			path: `/events/v3/gateways/${slug}`,
 			method: 'POST',
 			data: { slug, settings: gateway.settings },
 		})
@@ -50,7 +50,6 @@ const GatewayModal = ({ slug, onCancel }) => {
 					size="medium"
 				>
 					<div className="events-ticket-modal-content">
-						<h2>{__('Edit Gateway', 'events')}</h2>
 						{Array.isArray(gateway?.settings) &&
 							gateway?.settings?.map((field, index) => {
 								return (

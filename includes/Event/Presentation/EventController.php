@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
@@ -35,11 +36,11 @@ final class EventController implements RestController
                     'type' => 'integer',
                 ],
                 'include' => [
-                        'type' => 'array',
-                        'items' => [
-                            'type' => 'string',
-                            'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
-                        ],
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'string',
+                        'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
+                    ],
                 ],
             ],
         ]);
@@ -108,18 +109,18 @@ final class EventController implements RestController
                         'type' => 'boolean',
                         'default' => false,
                     ],
-					'price' => [
+                    'price' => [
                         'type' => 'integer',
                         'default' => null,
                     ],
                     'search' => [
                         'type' => 'string'
-					]
+                    ]
                 ]
             ],
         ]);
 
-		register_rest_route('/events/v3', '/events/(?P<id>\d+)/prepare-booking', [
+        register_rest_route('/events/v3', '/events/(?P<id>\d+)/prepare-booking', [
             [
                 'methods'   => 'GET',
                 'callback'  => [$this, 'prepareBooking'],
@@ -170,10 +171,10 @@ final class EventController implements RestController
         return $response;
     }
 
-	public function prepareBooking(\WP_REST_Request $request): \WP_REST_Response
-	{
-		$event_id = (int) $request->get_param('id');
-		
-		return new \WP_REST_Response(['message' => 'Die Stubsmaus'], 200);
-	}
+    public function prepareBooking(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $event_id = (int) $request->get_param('id');
+
+        return new \WP_REST_Response(['message' => 'Die Stubsmaus'], 200);
+    }
 }

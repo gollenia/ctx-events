@@ -10,6 +10,8 @@ use Contexis\Events\Event\Domain\TicketScope;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
+use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
 use WP_REST_Request;
 
@@ -23,8 +25,7 @@ final class EventCriteriaMapper implements CriteriaMapper
             perPage: $request->get_param('per_page') ?? -1,
             includes: self::eventIncludesFromArray($request->get_param('include') ?? [], $userContext),
             status: self::getStatusList($request->get_param('status'), $userContext->isAdmin()),
-            orderBy: $request->get_param('order_by') ?? 'date-time',
-            order: $request->get_param('order') ?? 'DESC',
+            orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date-time', Order::from($request->get_param('order') ?? 'DESC')),
             scope: TimeScope::from($request->get_param('scope')),
             categories: $request->get_param('categories') ?? [],
             tags: $request->get_param('tags') ?? [],

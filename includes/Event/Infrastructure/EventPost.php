@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Event\Infrastructure\EventMeta as InfrastructureEventMeta;
 use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
@@ -18,15 +19,16 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
     public const TAGS = 'ctx-event-tags';
 
 	public function __construct(
-		private readonly EventHooks $hooks
+		private readonly EventHooks $hooks,
+		private readonly EventOptions $options
 	)
 	{
 		
 	}
 
-    public static function getSlug(): string
+    public function getSlug($suffix = ''): string
     {
-        return get_option('dbem_cp_events_slug', 'events');
+        return $this->options->getEventsSlug() . $suffix;
     }
 
     public function registerTaxonomies(): void
@@ -65,7 +67,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'show_in_rest' => true,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => ['slug' => EventPost::POST_TYPE . '/categories', 'hierarchical' => true,'with_front' => false],
+            'rewrite' => ['slug' => $this->getSlug('/categories'), 'hierarchical' => true,'with_front' => false],
             'show_in_nav_menus' => true,
             'label' => __('Event Categories', 'events'),
             'singular_label' => __('Event Category', 'events'),
@@ -115,7 +117,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'can_export' => true,
             'exclude_from_search' => false,
             'publicly_queryable' => true,
-            'rewrite' => ['slug' => 'events', 'with_front' => false],
+            'rewrite' => ['slug' => $this->getSlug(), 'with_front' => false],
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
             'label' => __('Events', 'events'),
