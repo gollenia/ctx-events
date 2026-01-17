@@ -47,6 +47,10 @@ final class OfflineGateway implements PaymentGateway
 		$this->config->updateFromArray($settings);
 	}
 
+	public function save(): void {
+		$this->config->save();
+	}
+
     public function initiatePayment(Booking $booking): Transaction
     {
         return Transaction::forBankTransfer(
@@ -57,17 +61,12 @@ final class OfflineGateway implements PaymentGateway
         );
     }
 
-	public function enable(): void
+	public function setActive(bool $active): void
 	{
-		$this->config->enable();
+		$this->config->setActive($active);
 	}
 
-	public function disable(): void
-	{
-		$this->config->disable();
-	}
-
-	public function isEnabled(): bool
+	public function isActive(): bool
 	{
 		return $this->config->isEnabled;
 	}

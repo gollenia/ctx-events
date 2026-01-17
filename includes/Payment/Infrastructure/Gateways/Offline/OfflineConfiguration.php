@@ -38,6 +38,22 @@ final class OfflineConfiguration implements GatewayConfiguration
 		$this->instructions = (string) ($data['instructions'] ?? '');
     }
 
+	private function mapDataToProperties(array $data): void
+    {
+        $this->isEnabled = (bool) ($data['enabled'] ?? $data['enabled'] ?? false);
+        $this->title = (string) ($data['title'] ?? $this->title ?? __('Bank Transfer', 'ctx-events'));
+        $this->paymentTerm = (int) ($data['paymentTerm'] ?? $data['payment_term'] ?? 0); // Handle snake_case from DB vs camelCase from Form
+        $this->instructions = (string) ($data['instructions'] ?? $this->instructions ?? '');
+
+        $this->bankData = new BankData(
+            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData->accountHolder ?? ''),
+            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData->iban ?? ''),
+            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData->bic ?? ''),
+            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData->bankName ?? ''),
+            (string) ($data['reference'] ?? $data['reference'] ?? $this->bankData->reference ?? ''),
+        );
+    }
+
     public function updateFromArray(array $data): void
     {
 		$this->bankData = new BankData(
@@ -61,15 +77,12 @@ final class OfflineConfiguration implements GatewayConfiguration
         }
 
         if (array_key_exists('instructions', $data)) {
-            $this->instructions = sanitize_textarea_field($data['instructions']);
+            $this->instructions = wp_kses_post($data['instructions']);
         }
-
-		$this->save();
     }
 
-	private function save(): void
+	public function save(): void
     {
-        // Zurück zu Snake_Case für die DB 🐍
         update_option(self::OPTION_KEY, [
             'enabled' => $this->isEnabled,
             'title' => $this->title,
@@ -83,17 +96,11 @@ final class OfflineConfiguration implements GatewayConfiguration
         ]);
     }
 
-	public function enable(): void
+	public function setActive(bool $active): void
 	{
-		$this->isEnabled = true;
-		$this->save();
+		$this->isEnabled = $active;
 	}
 
-	public function disable(): void
-	{
-		$this->isEnabled = false;
-		$this->save();
-	}
 
     public function getFormSchema(): array
     {

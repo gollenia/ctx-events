@@ -16,7 +16,7 @@ interface PaymentGateway
     public function getId(): string;
 	public function getAdminName(): string;
 	public function getTitle(): string;
-    public function enable(): void;
-    public function disable(): void;
-    public function isEnabled(): bool;
+    public function setActive(bool $active): void;
+    public function isActive(): bool;
+	public function save(): void;
 }

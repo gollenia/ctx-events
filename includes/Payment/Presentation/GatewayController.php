@@ -48,7 +48,7 @@ final class GatewayController implements RestController
         ]);
 
 		register_rest_route('events/v3', '/gateways', [
-            'methods'   => \WP_REST_Server::EDITABLE,
+            'methods'   => 'PUT',
             'callback'  => [$this, 'updateGateway'],
             'permission_callback' => '__return_true',
             'args' => [
@@ -61,6 +61,26 @@ final class GatewayController implements RestController
                     'required' => true,
                     'description' => 'The data of the gateway to update.',
                     'type' => 'object',
+                ]
+            ],
+			'permission_callback' => '__return_true',
+        ]);
+
+
+		register_rest_route('events/v3', '/gateways', [
+            'methods'   => 'PATCH',
+            'callback'  => [$this, 'toggleGateway'],
+            'permission_callback' => '__return_true',
+            'args' => [
+                'slug' => [
+                    'required' => true,
+                    'description' => 'The slug of the gateway to update.',
+                    'type' => 'string',
+                ],
+                'switch' => [
+                    'required' => true,
+                    'description' => 'Activate or deactivate the gateway.',
+                    'type' => 'boolean',
                 ]
             ],
 			'permission_callback' => '__return_true',
@@ -84,6 +104,19 @@ final class GatewayController implements RestController
 
 	public function updateGateway(\WP_REST_Request $request): \WP_REST_Response
 	{
-		return new \WP_REST_Response([]);
+		$gateway = $this->updateGateway->execute($request->get_param('slug'), $request->get_param('data'));
+		if(!$gateway) {
+			return new \WP_REST_Response([], 404);
+		}
+		return new \WP_REST_Response($gateway);
+	}
+
+	public function toggleGateway(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$gateway = $this->toggleGateway->execute($request->get_param('slug'), $request->get_param('switch'));
+		if(!$gateway) {
+			return new \WP_REST_Response([], 404);
+		}
+		return new \WP_REST_Response($gateway);
 	}
 }

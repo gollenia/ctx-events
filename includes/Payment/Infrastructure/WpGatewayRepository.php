@@ -7,14 +7,12 @@ namespace Contexis\Events\Payment\Infrastructure;
 use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Infrastructure\Enums\PaymentProvider;
-use Contexis\Events\Payment\Infrastructure\Gateways\Mollie\MollieGateway;
-use Contexis\Events\Payment\Infrastructure\Gateways\Offline\OfflineGateway;
 
 final class WpGatewayRepository implements GatewayRepository
 {
     private array $instances = [];
 
-    public function get(string $id): PaymentGateway
+    public function find(string $id): ?PaymentGateway
     {
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
@@ -26,7 +24,7 @@ final class WpGatewayRepository implements GatewayRepository
 			$this->instances[$provider->value] = $gateway;
     	}
 
-        return $this->instances[$id];
+        return $this->instances[$id] ?? null;
     }
 
     public function findAll(): array
@@ -35,7 +33,7 @@ final class WpGatewayRepository implements GatewayRepository
         $result = [];
         foreach ($allIds as $id) {
             try {
-                $result[] = $this->get($id);
+                $result[] = $this->find($id);
             } catch (\Throwable $e) {
                 error_log($e->getMessage());
             }

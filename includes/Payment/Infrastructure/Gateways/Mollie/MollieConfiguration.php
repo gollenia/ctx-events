@@ -21,19 +21,8 @@ final class MollieConfiguration implements GatewayConfiguration
     public function __construct(
        
     ) {
-        $this->init();
-    }
-
-	public function init(): void
-    {
         $data = get_option(self::OPTION_KEY, []);
-        $this->isEnabled = (bool) ($data['enabled'] ?? false);
-        $this->mode = (string) ($data['mode'] ?? 'test');
-        $this->apiKeyLive = (string) ($data['api_key_live'] ?? '');
-        $this->apiKeyTest = (string) ($data['api_key_test'] ?? '');
-        $this->returnUrl = (string) ($data['return_url'] ?? '');
-		$this->instructions = (string) ($data['instructions'] ?? '');
-		$this->title = (string) ($data['title'] ?? 'Mollie');
+        $this->mapDataToProperties($data);
     }
 
 	public function getId(): string
@@ -46,16 +35,29 @@ final class MollieConfiguration implements GatewayConfiguration
 		return $this->mode === 'live' ? $this->apiKeyLive : $this->apiKeyTest;
 	}
 
-	public function updateFromArray(array $data): void
+	public function updateFromArray(array $data): void	
     {
-		$this->isEnabled = (bool) $data['enabled'];
-		$this->mode = (string) $data['mode'];
-		$this->apiKeyLive = (string) $data['api_key_live'];
-		$this->apiKeyTest = (string) $data['api_key_test'];
-		$this->returnUrl = (string) $data['return_url'];
-		$this->instructions = (string) $data['instructions'];
-		$this->title = (string) $data['title'];
-		$this->save();
+		$cleanData = [
+            'enabled' => isset($data['enabled']) ? (bool) $data['enabled'] : false,
+            'title' => sanitize_text_field($data['title'] ?? 'Mollie'),
+            'mode' => sanitize_key($data['mode'] ?? 'test'),
+            'api_key_live' => sanitize_text_field($data['api_key_live'] ?? ''),
+            'api_key_test' => sanitize_text_field($data['api_key_test'] ?? ''),
+            'return_url' => esc_url_raw($data['return_url'] ?? ''),
+            'instructions' => wp_kses_post($data['instructions'] ?? ''),
+        ];
+		$this->mapDataToProperties($cleanData);
+    }
+
+	private function mapDataToProperties(array $data): void
+    {
+        $this->isEnabled = (bool) ($data['enabled'] ?? false);
+        $this->title = (string) ($data['title'] ?? 'Mollie');
+        $this->mode = (string) ($data['mode'] ?? 'test');
+        $this->apiKeyLive = (string) ($data['api_key_live'] ?? '');
+        $this->apiKeyTest = (string) ($data['api_key_test'] ?? '');
+        $this->returnUrl = (string) ($data['return_url'] ?? '');
+        $this->instructions = (string) ($data['instructions'] ?? '');
     }
 
 	public function save(): void
@@ -133,13 +135,8 @@ final class MollieConfiguration implements GatewayConfiguration
         return $this->isEnabled;
     }
 
-    public function enable(): void
+    public function setActive(bool $active): void
     {
-        $this->isEnabled = true;
-    }
-
-    public function disable(): void
-    {
-        $this->isEnabled = false;
+        $this->isEnabled = $active;
     }
 }
