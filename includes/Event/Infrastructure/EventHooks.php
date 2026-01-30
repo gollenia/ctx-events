@@ -10,28 +10,26 @@ use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 class EventHooks
 {
-	public function __construct(
-		public SignalDispatcher $signalDispatcher,
-	)
-	{
-		
-	}
+    public function __construct(
+        public SignalDispatcher $signalDispatcher,
+    ) {
+    }
 
-	public function register(): void
-	{
-		add_action('updated_post_meta', [$this, 'saveMetaData'], 10, 4);
-	}
+    public function register(): void
+    {
+        add_action('updated_post_meta', [$this, 'saveMetaData'], 10, 4);
+    }
 
-	public function saveMetaData(int $meta_id, int $post_id, string $meta_key, mixed $meta_value): void
-	{
-		if (get_post_type($post_id) !== 'ctx-event') {
-			return;
-		}
+    public function saveMetaData(int $meta_id, int $post_id, string $meta_key, mixed $meta_value): void
+    {
+        if (get_post_type($post_id) !== 'ctx-event') {
+            return;
+        }
 
-		if ($meta_key !== EventMeta::BOOKING_CAPACITY) {
-			return;
-		}
+        if ($meta_key !== EventMeta::BOOKING_CAPACITY) {
+            return;
+        }
 
-		$this->signalDispatcher->dispatch(new EventCapacityChanged(EventId::from($post_id)));
-	}
+        $this->signalDispatcher->dispatch(new EventCapacityChanged(EventId::from($post_id)));
+    }
 }
