@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
@@ -26,9 +27,9 @@ class EventMeta extends MetaData
     public const BOOKING_COUPONS   = '_booking_coupons';
     public const CACHED_AVAILABLE  = '_cached_available';
     public const CACHED_BOOKING_STATS = '_cached_booking_stats';
-	public const CACHED_MIN_PRICE = '_cached_min_price';
-	public const CACHED_MAX_PRICE = '_cached_max_price';
-	public const GATEWAYS_EXCLUDED = '_gateways_excluded';
+    public const CACHED_MIN_PRICE = '_cached_min_price';
+    public const CACHED_MAX_PRICE = '_cached_max_price';
+    public const GATEWAYS_EXCLUDED = '_gateways_excluded';
 
     public const TICKETS_SCHEMA = [
         'schema' => [
@@ -116,7 +117,7 @@ class EventMeta extends MetaData
             ],
         ],
 
-		self::CACHED_AVAILABLE => ['type' => 'integer'],
-		self::CACHED_BOOKING_STATS => ['type' => 'array'],
+        self::CACHED_AVAILABLE => ['type' => 'integer'],
+        self::CACHED_BOOKING_STATS => ['type' => 'array'],
     ];
 }

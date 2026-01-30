@@ -1,11 +1,10 @@
+import { DataTable, RowActions } from '@events/datatable';
 import apiFetch from '@wordpress/api-fetch';
-
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { check, closeSmall, Icon, trash } from '@wordpress/icons';
-import GatewayModal from './GatewayModal';
-import { DataTable, RowActions } from '@events/datatable';
 import classNames from 'classnames';
+import GatewayModal from './GatewayModal';
 
 const GatewayTable = () => {
 	const [gateways, setGateways] = useState([]);
@@ -27,30 +26,34 @@ const GatewayTable = () => {
 			orderby: 'title',
 		},
 	});
-	
+
 	const columns = [
 		{
 			label: __('Title', 'events'),
 			render: (gateway) => (
-                <>
-                    <strong>
-                        <a onClick={() => setActiveSlug(gateway.slug)} href="#">{gateway.title}</a>
-                    </strong>
-                    <RowActions
-                        actions={[
-                            {
-                                label: __('Edit', 'events'),
-                                callback: () => setActiveSlug(gateway.slug),
-                            },
-                            {
-                                label: gateway.active ? __('Disable', 'events') : __('Enable', 'events'),
+				<>
+					<strong>
+						<a onClick={() => setActiveSlug(gateway.slug)} href="#">
+							{gateway.title}
+						</a>
+					</strong>
+					<RowActions
+						actions={[
+							{
+								label: __('Edit', 'events'),
+								callback: () => setActiveSlug(gateway.slug),
+							},
+							{
+								label: gateway.active
+									? __('Disable', 'events')
+									: __('Enable', 'events'),
 								delete: true,
-                                callback: () => onToggle(gateway.slug, gateway.active),
-                            },
-                        ]}
-                    />
-                </>
-            ),
+								callback: () => onToggle(gateway.slug, gateway.active),
+							},
+						]}
+					/>
+				</>
+			),
 			sortable: true,
 			className: 'column-title column-primary has-row-actions',
 		},
@@ -63,7 +66,7 @@ const GatewayTable = () => {
 			label: __('Active', 'events'),
 			id: 'active',
 			sortable: true,
-			render: ( item ) => {
+			render: (item) => {
 				return item.active ? <Icon icon={check} /> : <Icon icon={closeSmall} />;
 			},
 
@@ -71,7 +74,7 @@ const GatewayTable = () => {
 		},
 	];
 
-	const onSort = () => {}
+	const onSort = () => {};
 
 	useEffect(() => {
 		apiFetch({ path: '/events/v3/gateways' })
@@ -88,10 +91,11 @@ const GatewayTable = () => {
 	const onToggle = (slug, isActive) => {
 		apiFetch({
 			path: `/events/v3/gateways/${slug}`,
-			method: 'POST',
+			method: 'PATCH',
 			data: { enabled: !isActive },
 		})
 			.then((data) => {
+				console.log(data);
 				setGateways((prev) => {
 					const updatedGateways = prev.map((gateway) => {
 						if (gateway.slug === slug) {
@@ -122,12 +126,12 @@ const GatewayTable = () => {
 	return (
 		<div>
 			<DataTable
-				items={gateways}         
+				items={gateways}
 				columns={columns}
 				view={view}
 				onSort={onSort}
-				loading={loading}        
-				noItemsMessage = {__('No gateways found.', 'ctx-events')}
+				loading={loading}
+				noItemsMessage={__('No gateways found.', 'ctx-events')}
 			/>
 
 			<GatewayModal slug={activeSlug} onCancel={onCancel} />

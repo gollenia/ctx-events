@@ -14,9 +14,9 @@ interface PaymentGateway
     public function getSettingsSchema(): array;
     public function updateSettings(array $settings): void;
     public function getId(): string;
-	public function getAdminName(): string;
-	public function getTitle(): string;
+    public function getAdminName(): string;
+    public function getTitle(): string;
     public function setActive(bool $active): void;
     public function isActive(): bool;
-	public function save(): void;
+    public function save(): void;
 }

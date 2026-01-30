@@ -55,10 +55,10 @@ final class EventMapper implements PostMapper
             tickets: $post->getArray(EventMeta::TICKETS) ? self::ticketsFromArray($post->getArray(EventMeta::TICKETS)) : null,
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
-			forms: new EventForms(
-				bookingForm: FormId::from($post->getInt(EventMeta::BOOKING_FORM)),
-				attendeeForm: FormId::from($post->getInt(EventMeta::ATTENDEE_FORM))
-			),
+            forms: new EventForms(
+                bookingForm: FormId::from($post->getInt(EventMeta::BOOKING_FORM)),
+                attendeeForm: FormId::from($post->getInt(EventMeta::ATTENDEE_FORM))
+            ),
             personId: $post->getInt('_person_id') ? PersonId::from($post->getInt(EventMeta::PERSON_ID)) : null,
         );
 
