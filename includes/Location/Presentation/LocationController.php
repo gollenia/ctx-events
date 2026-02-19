@@ -6,6 +6,7 @@ namespace Contexis\Events\Location\Presentation;
 use Contexis\Events\Location\Application\GetLocation;
 use Contexis\Events\Location\Application\ListLocations;
 use Contexis\Events\Location\Application\LocationIncludes;
+use Contexis\Events\Location\Presentation\Resources\LocationResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
@@ -52,7 +53,7 @@ final class LocationController implements RestController
             return new \WP_REST_Response(['message' => 'Location not found'], 404);
         }
 
-        $location_resource = new LocationResource($location_dto);
+        $location_resource = LocationResource::fromDto($location_dto);
 
         return new \WP_REST_Response($location_resource, 200);
     }

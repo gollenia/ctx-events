@@ -108,7 +108,7 @@ const EditUpcoming = (props) => {
 			<div {...blockProps}>
 				<div className="components-placeholder is-large">
 					<div className="components-placeholder__label">
-						{__('Upcoming Events', 'events')}
+						{__('Upcoming Events', 'ctx-events')}
 					</div>
 
 					<div className="components-placeholder__instructions">

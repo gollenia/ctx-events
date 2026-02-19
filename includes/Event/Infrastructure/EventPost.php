@@ -43,20 +43,20 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'show_admin_column' => true,
             'singular_label' => __('Event Tag'),
             'labels' => [
-                'name' => __('Event Tags', 'events'),
-                'singular_name' => __('Event Tag', 'events'),
-                'search_items' => __('Search Event Tags', 'events'),
-                'popular_items' => __('Popular Event Tags', 'events'),
-                'all_items' => __('All Event Tags', 'events'),
-                'parent_items' => __('Parent Event Tags', 'events'),
-                'parent_item_colon' => __('Parent Event Tag:', 'events'),
-                'edit_item' => __('Edit Event Tag', 'events'),
-                'update_item' => __('Update Event Tag', 'events'),
-                'add_new_item' => __('Add New Event Tag', 'events'),
-                'new_item_name' => __('New Event Tag Name', 'events'),
-                'separate_items_with_commas' => __('Separate event tags with commas', 'events'),
-                'add_or_remove_items' => __('Add or remove events', 'events'),
-                'choose_from_the_most_used' => __('Choose from most used event tags', 'events'),
+                'name' => __('Event Tags', 'ctx-events'),
+                'singular_name' => __('Event Tag', 'ctx-events'),
+                'search_items' => __('Search Event Tags', 'ctx-events'),
+                'popular_items' => __('Popular Event Tags', 'ctx-events'),
+                'all_items' => __('All Event Tags', 'ctx-events'),
+                'parent_items' => __('Parent Event Tags', 'ctx-events'),
+                'parent_item_colon' => __('Parent Event Tag:', 'ctx-events'),
+                'edit_item' => __('Edit Event Tag', 'ctx-events'),
+                'update_item' => __('Update Event Tag', 'ctx-events'),
+                'add_new_item' => __('Add New Event Tag', 'ctx-events'),
+                'new_item_name' => __('New Event Tag Name', 'ctx-events'),
+                'separate_items_with_commas' => __('Separate event tags with commas', 'ctx-events'),
+                'add_or_remove_items' => __('Add or remove events', 'ctx-events'),
+                'choose_from_the_most_used' => __('Choose from most used event tags', 'ctx-events'),
             ]
         ]);
 
@@ -69,23 +69,23 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'query_var' => true,
             'rewrite' => ['slug' => $this->getSlug('/categories'), 'hierarchical' => true,'with_front' => false],
             'show_in_nav_menus' => true,
-            'label' => __('Event Categories', 'events'),
-            'singular_label' => __('Event Category', 'events'),
+            'label' => __('Event Categories', 'ctx-events'),
+            'singular_label' => __('Event Category', 'ctx-events'),
             'labels' => [
-                'name' => __('Event Categories', 'events'),
-                'singular_name' => __('Event Category', 'events'),
-                'search_items' => __('Search Event Categories', 'events'),
-                'popular_items' => __('Popular Event Categories', 'events'),
-                'all_items' => __('All Event Categories', 'events'),
-                'parent_items' => __('Parent Event Categories', 'events'),
-                'parent_item_colon' => __('Parent Event Category:', 'events'),
-                'edit_item' => __('Edit Event Category', 'events'),
-                'update_item' => __('Update Event Category', 'events'),
-                'add_new_item' => __('Add New Event Category', 'events'),
-                'new_item_name' => __('New Event Category Name', 'events'),
-                'separate_items_with_commas' => __('Separate event categories with commas', 'events'),
-                'add_or_remove_items' => __('Add or remove events', 'events'),
-                'choose_from_the_most_used' => __('Choose from most used event categories', 'events'),
+                'name' => __('Event Categories', 'ctx-events'),
+                'singular_name' => __('Event Category', 'ctx-events'),
+                'search_items' => __('Search Event Categories', 'ctx-events'),
+                'popular_items' => __('Popular Event Categories', 'ctx-events'),
+                'all_items' => __('All Event Categories', 'ctx-events'),
+                'parent_items' => __('Parent Event Categories', 'ctx-events'),
+                'parent_item_colon' => __('Parent Event Category:', 'ctx-events'),
+                'edit_item' => __('Edit Event Category', 'ctx-events'),
+                'update_item' => __('Update Event Category', 'ctx-events'),
+                'add_new_item' => __('Add New Event Category', 'ctx-events'),
+                'new_item_name' => __('New Event Category Name', 'ctx-events'),
+                'separate_items_with_commas' => __('Separate event categories with commas', 'ctx-events'),
+                'add_or_remove_items' => __('Add or remove events', 'ctx-events'),
+                'choose_from_the_most_used' => __('Choose from most used event categories', 'ctx-events'),
             ]
         ]);
     }
@@ -93,18 +93,18 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
     public function registerPostType(): void
     {
         $labels = [
-            'name' => __('Events', 'events'),
-            'singular_name' => __('Event', 'events'),
-            'menu_name' => __('Events', 'events'),
-            'add_new_item' => __('Add New Event', 'events'),
-            'edit' => __('Edit', 'events'),
-            'edit_item' => __('Edit Event', 'events'),
-            'view' => __('View', 'events'),
-            'view_item' => __('View Event', 'events'),
-            'search_items' => __('Search Events', 'events'),
-            'not_found' => __('No Events Found', 'events'),
-            'not_found_in_trash' => __('No Events Found in Trash', 'events'),
-            'parent' => __('Parent Event', 'events'),
+            'name' => __('Events', 'ctx-events'),
+            'singular_name' => __('Event', 'ctx-events'),
+            'menu_name' => __('Events', 'ctx-events'),
+            'add_new_item' => __('Add New Event', 'ctx-events'),
+            'edit' => __('Edit', 'ctx-events'),
+            'edit_item' => __('Edit Event', 'ctx-events'),
+            'view' => __('View', 'ctx-events'),
+            'view_item' => __('View Event', 'ctx-events'),
+            'search_items' => __('Search Events', 'ctx-events'),
+            'not_found' => __('No Events Found', 'ctx-events'),
+            'not_found_in_trash' => __('No Events Found in Trash', 'ctx-events'),
+            'parent' => __('Parent Event', 'ctx-events'),
         ];
 
         $event_post_type = [
@@ -120,13 +120,23 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'rewrite' => ['slug' => $this->getSlug(), 'with_front' => false],
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
-            'label' => __('Events', 'events'),
-            'description' => __('Display events on your blog.', 'events'),
+            'label' => __('Events', 'ctx-events'),
+            'description' => __('Display events on your blog.', 'ctx-events'),
             'labels' => $labels,
             'menu_icon' => 'dashicons-calendar-alt'
         ];
 
         register_post_type(self::POST_TYPE, $event_post_type);
+		
+		register_post_status('cancelled', [
+			'label'                     => _x('Cancelled', 'post status', 'ctx-events'),
+			'public'                    => false,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop('Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'ctx-events'),
+		]);
+		
     }
 
     public function registerMeta(): void

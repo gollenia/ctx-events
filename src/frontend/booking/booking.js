@@ -71,7 +71,7 @@ const Booking = ({ post, open }) => {
 	if (modal.initialState === STATES.ERROR)
 		return (
 			<div className="alert alert--error">
-				{__('An error occured. Please try again later.', 'events')}
+				{__('An error occured. Please try again later.', 'ctx-events')}
 			</div>
 		);
 
@@ -86,7 +86,7 @@ const Booking = ({ post, open }) => {
 					<div className="event-modal-header">
 						<div className="event-modal-caption">
 							<div className="">
-								<b className="margin--0">{__('Booking', 'events')}</b>
+								<b className="margin--0">{__('Booking', 'ctx-events')}</b>
 								<h3 className="margin--0">{event?.title}</h3>
 							</div>
 							<WizardGuide state={state} />
@@ -117,8 +117,8 @@ const Booking = ({ post, open }) => {
 											valid={wizard.steps.tickets.valid}
 											invalidMessage={
 												request.attendees.length == 0
-													? __('Please select at least one ticket', 'events')
-													: __('Please fill out all required fields', 'events')
+													? __('Please select at least one ticket', 'ctx-events')
+													: __('Please fill out all required fields', 'ctx-events')
 											}
 										>
 											<Attendees {...{ state, dispatch }} />

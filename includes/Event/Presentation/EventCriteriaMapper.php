@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
 
-use Contexis\Events\Event\Application\EventCriteria;
-use Contexis\Events\Event\Application\EventIncludes;
+use Contexis\Events\Event\Application\DTOs\EventCriteria;
+use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
 use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Event\Domain\TicketScope;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
@@ -19,11 +19,9 @@ final class EventCriteriaMapper implements CriteriaMapper
 {
     public static function fromRequest(WP_REST_Request $request, UserContext $userContext): EventCriteria
     {
-
-        return new EventCriteria(
+		return new EventCriteria(
             page: $request->get_param('page') ?? 0,
             perPage: $request->get_param('per_page') ?? -1,
-            includes: self::eventIncludesFromArray($request->get_param('include') ?? [], $userContext),
             status: self::getStatusList($request->get_param('status'), $userContext->isAdmin()),
             orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date-time', Order::from($request->get_param('order') ?? 'DESC')),
             scope: TimeScope::from($request->get_param('scope')),
@@ -32,7 +30,7 @@ final class EventCriteriaMapper implements CriteriaMapper
             location: $request->get_param('location') ?? null,
             person: $request->get_param('person') ?? null,
             isFree: $request->get_param('is_free') ?? null,
-            bookable: $request->get_param('bookable') ?? false,
+            bookable: $request->has_param('bookable') ? $request->get_param('bookable') : null,
             search: $request->get_param('search') ?? null
         );
     }
@@ -48,21 +46,5 @@ final class EventCriteriaMapper implements CriteriaMapper
         }
 
         return \Contexis\Events\Shared\Domain\ValueObjects\StatusList::defaultAdmin();
-    }
-
-    private static function eventIncludesFromArray(array $data, UserContext $userContext): EventIncludes
-    {
-		if(array_key_exists('all', $data) && $userContext->canEdit()) {
-			return EventIncludes::createForAll();
-		}
-
-        return new EventIncludes(
-            location: in_array('location', $data, true),
-            person: in_array('person', $data, true),
-            image: in_array('image', $data, true),
-            bookingSpaces: in_array('bookingSpaces', $data, true),
-			categories: in_array('categories', $data, true),
-			tags: in_array('tags', $data, true)
-        );
     }
 }

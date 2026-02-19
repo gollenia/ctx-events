@@ -104,11 +104,15 @@ final class MollieGateway implements PaymentGateway
 		return $this->config->getFormSchema();
 	}
 
-	public function isActive(): bool {
+	public function isEnabled(): bool {
 		return $this->config->isEnabled;
 	}
 
-	public function setActive(bool $active): void {
-		$this->config->setActive($active);
+	public function setEnabled(bool $active): void {
+		$this->config->setEnabled($active);
+	}
+
+	public function isValid(): bool {
+		return $this->config->isValid();
 	}
 }

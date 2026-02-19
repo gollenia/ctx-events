@@ -35,11 +35,11 @@ const edit = (props) => {
 	return (
 		<div {...blockProps}>
 			<div className="coupon-edit__admin">
-				<h3>{__('Coupon Settings', 'events')}</h3>
+				<h3>{__('Coupon Settings', 'ctx-events')}</h3>
 				<div className="coupon-edit__code">
 					<div className="coupon-edit__code-input">
 						<TextControl
-							label={__('Coupon Code', 'events')}
+							label={__('Coupon Code', 'ctx-events')}
 							__next40pxDefaultSize
 							value={meta._coupon_code}
 							onChange={(value) => {
@@ -66,12 +66,12 @@ const edit = (props) => {
 							}}
 							className="generate"
 						>
-							{__('Generate', 'events')}
+							{__('Generate', 'ctx-events')}
 						</Button>
 					</div>
 				</div>
 				<TextControl
-					label={__('Description', 'events')}
+					label={__('Description', 'ctx-events')}
 					__next40pxDefaultSize
 					value={meta._coupon_description}
 					onChange={(value) => {
@@ -81,11 +81,11 @@ const edit = (props) => {
 						});
 					}}
 				/>
-				<h3>{__('Coupon Limits', 'events')}</h3>
+				<h3>{__('Coupon Limits', 'ctx-events')}</h3>
 				<Flex>
 					<FlexBlock>
 						<TextControl
-							label={__('Total Coupons', 'events')}
+							label={__('Total Coupons', 'ctx-events')}
 							type="number"
 							__next40pxDefaultSize
 							value={meta._coupon_limit}
@@ -99,7 +99,7 @@ const edit = (props) => {
 					</FlexBlock>
 					<FlexBlock>
 						<TextControl
-							label={__('Expiry date', 'events')}
+							label={__('Expiry date', 'ctx-events')}
 							type="date"
 							__next40pxDefaultSize
 							value={meta._coupon_expiry}
@@ -112,11 +112,11 @@ const edit = (props) => {
 						/>
 					</FlexBlock>
 				</Flex>
-				<h3>{__('Discount', 'events')}</h3>
+				<h3>{__('Discount', 'ctx-events')}</h3>
 				<Flex>
 					<FlexBlock>
 						<TextControl
-							label={__('Discount Amount', 'events')}
+							label={__('Discount Amount', 'ctx-events')}
 							type="number"
 							max={meta._coupon_type === 'percentage' ? 100 : undefined}
 							min={0}
@@ -136,15 +136,15 @@ const edit = (props) => {
 						<SelectControl
 							options={[
 								{
-									label: __('Percentage', 'events'),
+									label: __('Percentage', 'ctx-events'),
 									value: 'percentage',
 								},
 								{
-									label: __('Fixed Amount', 'events'),
+									label: __('Fixed Amount', 'ctx-events'),
 									value: 'fixed',
 								},
 							]}
-							label={__('Discount Type', 'events')}
+							label={__('Discount Type', 'ctx-events')}
 							value={meta._coupon_type}
 							__next40pxDefaultSize
 							onChange={(value) => {
@@ -157,7 +157,7 @@ const edit = (props) => {
 					</FlexBlock>
 				</Flex>
 				<CheckboxControl
-					label={__('Activate for all events', 'events')}
+					label={__('Activate for all events', 'ctx-events')}
 					checked={meta._coupon_global}
 					onChange={(value) => {
 						setMeta({

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Application\Service;
 
 use Contexis\Events\Event\Application\EventCriteria;
-use Contexis\Events\Event\Application\TicketDto;
-use Contexis\Events\Event\Application\TicketDtoCollection;
+use Contexis\Events\Event\Application\DTOs\TicketResponse;
+use Contexis\Events\Event\Application\DTOs\TicketResponseCollection;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\Enums\TicketScope;
@@ -13,7 +13,7 @@ use Contexis\Events\Event\Domain\Enums\TicketScope;
 final class EventTickets
 {
     public function __construct(
-        private readonly TicketScope $scope
+        
     ) {
     }
 
@@ -27,7 +27,7 @@ final class EventTickets
         return new self(TicketScope::ALL);
     }
 
-    public function getAllowedTickets(Event $event): ?TicketDtoCollection
+    public function getAllowedTickets(Event $event, TicketScope $scope): ?TicketResponseCollection
     {
         $tickets = $event->tickets;
         if ($tickets === null) {
@@ -39,13 +39,13 @@ final class EventTickets
         $items = [];
 
         foreach ($tickets as $ticket) {
-            if ($this->scope === TicketScope::BOOKABLE_ONLY && !$ticket->isBookable($now)) {
+            if ($scope === TicketScope::BOOKABLE_ONLY && !$ticket->isBookable($now)) {
                 continue;
             }
 
-            $items[] = TicketDto::fromDomainModel($ticket);
+            $items[] = TicketResponse::fromDomainModel($ticket);
         }
 
-        return TicketDtoCollection::fromArray($items);
+        return TicketResponseCollection::fromArray($items);
     }
 }

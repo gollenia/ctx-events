@@ -39,7 +39,7 @@ const edit = (props) => {
 				setAttributes={setAttributes}
 				clientId={props.clientId}
 				icon={icon}
-				helpText={__('Select a country', 'events')}
+				helpText={__('Select a country', 'ctx-events')}
 			/>
 			
 			<select

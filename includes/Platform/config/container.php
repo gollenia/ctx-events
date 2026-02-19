@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Contexis\Events\Platform\Demo\DumpSubscriber;
 use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
+use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\Wordpress\WordpressSignalDispatcher;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -26,6 +27,8 @@ return [
     \Contexis\Events\Shared\Domain\Contracts\Clock::class
     => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
 	SignalDispatcher::class => autowire(WordpressSignalDispatcher::class),
+
+	Database::class => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpDatabase::class),
 
     \Contexis\Events\Platform\Wordpress\PostTypeRegistrar::class => autowire()->constructor($posttypes),
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => autowire()->constructor($controllers),

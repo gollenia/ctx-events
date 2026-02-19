@@ -34,12 +34,12 @@ const Toolbar = (props) => {
 					allowedTypes={ALLOWED_MEDIA_TYPES}
 					accept="image/*,video/*"
 					onSelect={onSelectMedia}
-					name={!imageUrl ? __('Add Media', 'events') : __('Replace', 'events')}
+					name={!imageUrl ? __('Add Media', 'ctx-events') : __('Replace', 'ctx-events')}
 				/>
 				{imageUrl && (
 					<ToolbarButton
 						icon="trash"
-						title={__('Remove Media', 'events')}
+						title={__('Remove Media', 'ctx-events')}
 						onClick={() => {
 							setAttributes({
 								imageId: 0,
@@ -52,7 +52,7 @@ const Toolbar = (props) => {
 				<ToolbarButton
 					name="link"
 					icon={link}
-					title={__('Link', 'events')}
+					title={__('Link', 'ctx-events')}
 					onClick={() => setIsEditingURL(true)}
 				/>
 			</BlockControls>

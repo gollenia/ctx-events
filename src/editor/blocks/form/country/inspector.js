@@ -17,14 +17,14 @@ const Inspector = (props) => {
 	} = props;
 
 	const regions = [
-		{ value: 'ALL', label: __('World', 'events') },
-		{ value: 'DACH', label: __('DACH', 'events') },
-		{ value: 'EU', label: __('Europe', 'events') },
-		{ value: 'AS', label: __('Asia', 'events') },
-		{ value: 'AF', label: __('Africa', 'events') },
-		{ value: 'NA', label: __('North America', 'events') },
-		{ value: 'SA', label: __('South America', 'events') },
-		{ value: 'OC', label: __('Oceania', 'events') }
+		{ value: 'ALL', label: __('World', 'ctx-events') },
+		{ value: 'DACH', label: __('DACH', 'ctx-events') },
+		{ value: 'EU', label: __('Europe', 'ctx-events') },
+		{ value: 'AS', label: __('Asia', 'ctx-events') },
+		{ value: 'AF', label: __('Africa', 'ctx-events') },
+		{ value: 'NA', label: __('North America', 'ctx-events') },
+		{ value: 'SA', label: __('South America', 'ctx-events') },
+		{ value: 'OC', label: __('Oceania', 'ctx-events') }
 	];
 
 	useEffect(() => {
@@ -36,38 +36,38 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ToggleControl
-					label={__('Required', 'events')}
+					label={__('Required', 'ctx-events')}
 					checked={required}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 
 				<SelectControl
-					label={__('Region', 'events')}
+					label={__('Region', 'ctx-events')}
 					value={region}
 					options={regions}
 					onChange={(value) => setAttributes({ region: value })}
 				/>
 
 				<TextControl
-					label={__('Empty option', 'events')}
-					help={__('Text to display when no country is selected', 'events')}
+					label={__('Empty option', 'ctx-events')}
+					help={__('Text to display when no country is selected', 'ctx-events')}
 					value={help}
 					onChange={(value) => setAttributes({ help: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={6}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					props={props}
 				/>

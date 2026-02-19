@@ -4,7 +4,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
-import { formatDate } from '../../../shared/i18n/datetime.js';
+import { formatDate } from '../../../shared/i18n/datetime.ts';
 /**
  * Internal dependencies
  */
@@ -57,10 +57,10 @@ const edit = (props) => {
 				<div>
 					<h4 className="event-details_title">
 						{bookingEnded
-							? __('Booking ended', 'events')
+							? __('Booking ended', 'ctx-events')
 							: bookingStarted
-								? __('Booking end', 'events')
-								: __('Booking start', 'events')}
+								? __('Booking end', 'ctx-events')
+								: __('Booking start', 'ctx-events')}
 					</h4>
 
 					<span className="event-details_audience description-editable">

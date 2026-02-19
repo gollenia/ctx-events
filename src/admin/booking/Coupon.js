@@ -7,7 +7,7 @@ const Coupon = ({ store }) => {
 	return (
 		<div className="booking-coupon">
 			<SelectControl
-				label={__('Coupon Code', 'events')}
+				label={__('Coupon Code', 'ctx-events')}
 				value={state.data.booking.coupon}
 				onChange={(value) => {
 					dispatch({

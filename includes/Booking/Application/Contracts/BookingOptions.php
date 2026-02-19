@@ -5,4 +5,5 @@ namespace Contexis\Events\Booking\Application\Contracts;
 interface BookingOptions
 {
     public function enabled(): bool;
+	public function currency(): string;
 }

@@ -10,17 +10,17 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={4}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					props={props}
 				/>

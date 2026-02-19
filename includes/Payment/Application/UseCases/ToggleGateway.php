@@ -13,14 +13,14 @@ final class ToggleGateway
         private readonly GatewayRepository $gatewayRepository,
     ) {
     }
-    public function execute(string $slug, bool $switch): ?GatewayListItemDto
+    public function execute(string $slug, bool $enabled): ?GatewayListItemDto
     {
         $gateway = $this->gatewayRepository->find($slug);
         if (!$gateway) {
             return null;
         }
 
-        $gateway->setActive($switch);
+        $gateway->setEnabled($enabled);
         $gateway->save($gateway);
         return GatewayListItemDto::fromPaymentGateway($gateway);
     }

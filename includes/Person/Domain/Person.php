@@ -27,4 +27,14 @@ final class Person
         public readonly ?ImageId $imageId = null
     ) {
     }
+
+	public function getStatus(): Status
+	{
+		return $this->status;
+	}
+
+	public function setStatus(Status $status): static
+	{
+		return clone($this, ['status' => $status]);
+	}
 }

@@ -30,7 +30,7 @@ const VisibilityRules = (props) => {
 
 	return (
 		<SelectControl
-			label={__('Field', 'events')}
+			label={__('Field', 'ctx-events')}
 			value={visibilityRule?.field || ''}
 			options={availableFields}
 			onChange={(value) => setSuperiorField(value)}

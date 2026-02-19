@@ -48,14 +48,14 @@ function EventCards(props) {
 					if (item.bookings?.spaces > 0) {
 						return (
 							<span className="event-card-pill event-card-pill-warning">
-								{__('Nearly Booked up', 'events')}
+								{__('Nearly Booked up', 'ctx-events')}
 							</span>
 						);
 					}
 
 					return (
 						<span className="event-card-pill event-card-pill-error">
-							{__('Booked up', 'events')}
+							{__('Booked up', 'ctx-events')}
 						</span>
 					);
 				};

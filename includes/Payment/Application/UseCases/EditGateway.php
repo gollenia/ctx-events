@@ -16,7 +16,7 @@ final class EditGateway
 
     public function execute(string $id): ?EditGatewayDto
     {
-        $gateway = $this->gatewayRepository->get($id);
+        $gateway = $this->gatewayRepository->find($id);
 
 		if (!$gateway) {
 			return null;

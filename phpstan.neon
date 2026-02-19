@@ -6,3 +6,8 @@ parameters:
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
+services:
+    -
+        class: Contexis\Events\Platform\Development\PhpStan\ResourcePropertyTypesRule
+        tags:
+            - phpstan.rules.rule

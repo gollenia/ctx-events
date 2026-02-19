@@ -48,7 +48,7 @@ const FullPrice = ({ store }) => {
 			{couponId && (
 				<tr>
 					<td colspan={data.attendee_fields.length + 1}>
-						{__('Discount', 'events')} ({discount.discount}
+						{__('Discount', 'ctx-events')} ({discount.discount}
 						{discount.discountType} )
 					</td>
 					<td>
@@ -60,7 +60,7 @@ const FullPrice = ({ store }) => {
 			)}
 			<tr>
 				<td colspan={data.attendee_fields.length + 1}>
-					<b>{__('Full Price', 'events')}</b>
+					<b>{__('Full Price', 'ctx-events')}</b>
 				</td>
 
 				<td>

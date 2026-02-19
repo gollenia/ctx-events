@@ -9,10 +9,10 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<PanelRow>
 					<ToggleControl
-						label={__('Lines as separators', 'events')}
+						label={__('Lines as separators', 'ctx-events')}
 						checked={dividers}
 						onChange={(event) => setAttributes({ dividers: event })}
 					/>

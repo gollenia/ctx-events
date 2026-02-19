@@ -44,44 +44,44 @@ const Inspector = (props) => {
 							?.thumbnail?.source_url,
 				};
 			})
-		: [{ name: __('Loading...', 'events'), key: 'loading' }];
+		: [{ name: __('Loading...', 'ctx-events'), key: 'loading' }];
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<CheckboxControl
-					label={__('Show Portrait if possible', 'events')}
+					label={__('Show Portrait if possible', 'ctx-events')}
 					checked={showPortrait}
 					onChange={(value) => setAttributes({ showPortrait: value })}
 				/>
 				<CheckboxControl
-					label={__('Show Link', 'events')}
+					label={__('Show Link', 'ctx-events')}
 					checked={showLink}
 					onChange={(value) => setAttributes({ showLink: value })}
 				/>
 				<SelectControl
-					label={__('Link to', 'events')}
+					label={__('Link to', 'ctx-events')}
 					value={linkTo}
 					onChange={(value) => setAttributes({ linkTo: value })}
 					options={[
-						{ label: __('E-Mail', 'events'), value: 'mail' },
-						{ label: __('Phone', 'events'), value: 'call' },
-						{ label: __('Website', 'events'), value: 'public' },
-						{ label: __('Custom URL', 'events'), value: 'custom' },
+						{ label: __('E-Mail', 'ctx-events'), value: 'mail' },
+						{ label: __('Phone', 'ctx-events'), value: 'call' },
+						{ label: __('Website', 'ctx-events'), value: 'public' },
+						{ label: __('Custom URL', 'ctx-events'), value: 'custom' },
 					]}
 					disabled={!showLink}
 				/>
 
 				<TextControl
-					label={__('Custom URL', 'events')}
+					label={__('Custom URL', 'ctx-events')}
 					value={url}
 					onChange={(value) => setAttributes({ url: value })}
 					disabled={linkTo !== 'custom' || !showLink}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ComboboxControl
-					label={__('Select a speaker', 'events')}
+					label={__('Select a speaker', 'ctx-events')}
 					value={customSpeakerId}
 					onChange={(value) => {
 						setAttributes({ customSpeakerId: value });

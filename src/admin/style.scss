@@ -37,6 +37,17 @@
 	}
 }
 
+input.components-text-control__input:invalid {
+    border: 2px solid #ff0000 !important;
+    background-color: #fff8f8 !important;
+}
+
+/* Wichtig: Manche Browser zeigen :invalid erst nach einer Interaktion 
+   oder wenn das Formular versucht wurde abzusenden. */
+input.components-text-control__input:not(:placeholder-shown):invalid {
+    border-color: #d63638 !important;
+}
+
 p.warning {
 	border: 2px solid #fd0000;
 	background: #ff7146;

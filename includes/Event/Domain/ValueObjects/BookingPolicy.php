@@ -71,10 +71,20 @@ final class BookingPolicy
             return BookingDecision::deny(BookingDenyReason::ENDED);
         }
         return BookingDecision::allow();
-    }
+    }	
 
     public function canBook(): BookingDecision
     {
         return $this->canBookAt(new DateTimeImmutable());
     }
+
+	public function toArray(DateTimeImmutable $now): array
+	{
+		return [
+			'enabled' => $this->enabled,
+			'canBook' => $this->canBookAt($now),
+			'start'   => $this->start()?->format(DATE_ATOM),
+			'end'     => $this->end()?->format(DATE_ATOM),
+		];
+	}
 }

@@ -7,10 +7,10 @@ const Inspector = (props) => {
 	const { iCalLink } = attributes;
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<PanelRow>
 					<CheckboxControl
-						label={__('Show iCal link', 'events')}
+						label={__('Show iCal link', 'ctx-events')}
 						checked={iCalLink}
 						onChange={(value) => setAttributes({ iCalLink: value })}
 					/>

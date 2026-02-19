@@ -42,4 +42,14 @@ final class Booking
     {
         return clone($this, ['status' => $status]);
     }
+
+	public function countAttendees(): int
+	{
+		return count($this->attendees);
+	}
+
+	public function calculateTotalPrice(): float
+	{
+		
+	}
 }

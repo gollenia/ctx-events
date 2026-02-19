@@ -14,13 +14,15 @@ final class TicketMapper
             id: $data['id'],
             name: $data['name'],
             description: $data['description'] ?? null,
-            price: new Price($data['price'], get_option('ctx_events_currency', 'USD')),
+            price: new Price($data['price'], get_option(WpBookingOptions::BOOKING_CURRENCY, 'USD')),
             capacity: isset($data['capacity']) ? (int)$data['capacity'] : null,
-            minPerBooking: isset($data['min_per_booking']) ? (int)$data['min_per_booking'] : null,
-            maxPerBooking: isset($data['max_per_booking']) ? (int)$data['max_per_booking'] : null,
+            min: isset($data['min_per_booking']) ? (int)$data['min_per_booking'] : null,
+            max: isset($data['max_per_booking']) ? (int)$data['max_per_booking'] : null,
             enabled: isset($data['enabled']) ? (bool)$data['enabled'] : null,
-            sales_start: isset($data['sales_start']) ? new \DateTimeImmutable($data['sales_start']) : null,
-            sales_end: isset($data['sales_end']) ? new \DateTimeImmutable($data['sales_end']) : null,
+			order: isset($data['order']) ? (int)$data['order'] : null,
+			form: $data['form'] ?? null,
+            salesStart: isset($data['sales_start']) ? new \DateTimeImmutable($data['sales_start']) : null,
+            salesEnd: isset($data['sales_end']) ? new \DateTimeImmutable($data['sales_end']) : null,
         );
     }
 }

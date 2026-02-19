@@ -27,15 +27,15 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ToggleControl
-					label={__('Required', 'events')}
+					label={__('Required', 'ctx-events')}
 					checked={required}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 
 				<TextControl
-					label={__('Error message', 'events')}
+					label={__('Error message', 'ctx-events')}
 					help={__(
 						'Text to inform the user that this checkbox must be checked',
 						'events',
@@ -44,13 +44,13 @@ const Inspector = (props) => {
 					onChange={(value) => setAttributes({ requiredMessage: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<div>
 					<label
 						className="components-base-control__label"
 						htmlFor="inspector-range-control-4"
 					>
-						{__('Style', 'events')}
+						{__('Style', 'ctx-events')}
 					</label>
 					<div className="styleSelector">
 						<Button
@@ -58,21 +58,21 @@ const Inspector = (props) => {
 							className={variant == 'checkbox' ? 'active' : ''}
 						>
 							<Icon size="64" className="icon" icon={icons.checkbox} />
-							<div>{__('Box', 'events')}</div>
+							<div>{__('Box', 'ctx-events')}</div>
 						</Button>
 						<Button
 							onClick={() => setAttributes({ variant: 'toggle' })}
 							className={variant == 'toggle' ? 'active' : ''}
 						>
 							<Icon size="64" className="icon" icon={icons.toggle} />
-							<div>{__('Toggle', 'events')}</div>
+							<div>{__('Toggle', 'ctx-events')}</div>
 						</Button>
 					</div>
 				</div>
 
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={6}
 					min={1}
@@ -80,7 +80,7 @@ const Inspector = (props) => {
 				/>
 			</PanelBody>
 
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules 
 					props={props}
 				/>

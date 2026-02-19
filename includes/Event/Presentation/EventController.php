@@ -4,28 +4,32 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Presentation;
 
-use Contexis\Events\Event\Application\EventIncludes;
-use Contexis\Events\Event\Application\GetEvent;
-use Contexis\Events\Event\Application\ListEvents;
+use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
+use Contexis\Events\Event\Application\UseCases\GetEvent;
+use Contexis\Events\Event\Application\UseCases\CancelEvent;
+use Contexis\Events\Event\Application\UseCases\ListEvents;
+use Contexis\Events\Event\Presentation\Resources\EventResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Contexis\Events\Shared\Presentation\Links;
+use Contexis\Events\Shared\Presentation\RestRoute;
 
 final class EventController implements RestController
 {
+	private RestRoute $route;
     public function __construct(
         private GetEvent $getEvent,
-        private ListEvents $listEvents
+        private ListEvents $listEvents,
+		private CancelEvent $cancelEvent,
+		private \Contexis\Events\Shared\Domain\Contracts\Clock $clock
     ) {
-        $this->getEvent = $getEvent;
-        $this->listEvents = $listEvents;
+        $this->route = RestRoute::forType('events');
     }
 
     public function register(): void
     {
-        $route = Links::restRoute('events', '(?P<id>\d+)');
 
-        register_rest_route($route['ns'], $route['path'], [
+        register_rest_route(...$this->route->getForSingle(), args: [
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
@@ -39,13 +43,56 @@ final class EventController implements RestController
                     'type' => 'array',
                     'items' => [
                         'type' => 'string',
-                        'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
+                        'enum' => ['location', 'image', 'available', 'author', 'bookings', 'categories', 'tags', 'locations', 'persons', 'all' ]
                     ],
                 ],
             ],
         ]);
 
-        register_rest_route('/events/v3', '/events', [
+		register_rest_route(...$this->route->getForSingle(), args: [
+			[
+				'methods'   => \WP_REST_Server::DELETABLE,
+				'callback'  => [$this, 'deleteEvent'],
+				'permission_callback' => '__return_true',
+				'args' => [
+					'id' => [
+						'required' => true,
+						'description' => 'The ID of the event to delete.',
+						'type' => 'integer',
+					]
+				],
+			],
+		]);
+
+		register_rest_route(...$this->route->getForSingle('/cancel'), args: [
+			[
+				'methods'   => 'POST',
+				'callback'  => [$this, 'cancelEvent'],
+				'permission_callback' => '__return_true',
+				'args' => [
+					'id' => [
+						'required' => true,
+						'description' => 'The ID of the event to cancel.',
+						'type' => 'integer',
+					],
+					'notifyAttendees' => [
+						'required' => false,
+						'description' => 'Whether to notify attendees about the cancellation.',
+						'type' => 'boolean',
+						'default' => false,
+					],
+					'attendee_message' => [
+						'required' => false,
+						'sanitize_callback' => 'sanitize_text_field',
+						'description' => 'An optional message to include in the cancellation notification sent to attendees.',
+						'type' => 'string',
+						'default' => '',
+					]
+				],
+			],
+		]);
+
+        register_rest_route(...$this->route->getForCollection(), args: [
             [
                 'methods'   => 'GET',
                 'callback'  => [$this, 'getEventPage'],
@@ -70,7 +117,7 @@ final class EventController implements RestController
                         'type' => 'array',
                         'items' => [
                             'type' => 'string',
-                            'enum' => ['location', 'image', 'available', 'bookable', 'categories', 'tags', 'locations', 'persons', 'all' ]
+                            'enum' => ['location', 'image', 'available', 'author', 'bookings', 'categories', 'tags', 'locations', 'persons', 'all' ]
                         ],
                     ],
                     'order_by' => [
@@ -103,7 +150,7 @@ final class EventController implements RestController
                     ],
                     'bookable' => [
                         'type' => 'boolean',
-                        'default' => false,
+                        'default' => null,
                     ],
                     'availibility' => [
                         'type' => 'boolean',
@@ -120,7 +167,7 @@ final class EventController implements RestController
             ],
         ]);
 
-        register_rest_route('/events/v3', '/events/(?P<id>\d+)/prepare-booking', [
+        register_rest_route(...$this->route->getForSingle('/prepare-booking'), args: [
             [
                 'methods'   => 'GET',
                 'callback'  => [$this, 'prepareBooking'],
@@ -135,20 +182,18 @@ final class EventController implements RestController
         ]);
     }
 
-
-
     public function getItem(\WP_REST_Request $request): \WP_REST_Response
     {
         $event_id = (int) $request->get_param('id');
-        $include = EventIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));
+        $include = EventIncludeRequest::fromArray(explode(',', $request->get_param('include') ?? ''));
+		$userContext = UserContextFactory::createFromCurrentUser();
+        $response = $this->getEvent->execute($event_id, $include, $userContext);
 
-        $event_dto = $this->getEvent->execute($event_id, $include, UserContextFactory::createFromCurrentUser());
-
-        if (!$event_dto) {
+        if (!$response) {
             return new \WP_REST_Response(['message' => 'Event not found'], 404);
         }
 
-        $event_resource = new EventResource($event_dto);
+        $event_resource = EventResource::fromDto($response, $this->route);
 
         return new \WP_REST_Response($event_resource, 200);
     }
@@ -156,18 +201,22 @@ final class EventController implements RestController
     public function getEventPage(\WP_REST_Request $request): \WP_REST_Response
     {
         $userContext = UserContextFactory::createFromCurrentUser();
-        $query = EventCriteriaMapper::fromRequest($request, $userContext);
+        $criteria = EventCriteriaMapper::fromRequest($request, $userContext);
+		$includes = EventIncludeRequest::fromArray($request->get_param('include') ?? []);
 
-        $page = $this->listEvents->execute($query);
+        $page = $this->listEvents->execute($criteria, $includes, $userContext);
 
         $result = [];
         foreach ($page as $index => $event_dto) {
-            $result[] = new EventResource($event_dto);
+			
+            $result[] = EventResource::fromDto($event_dto, $this->route);
         }
 
         $response = new \WP_REST_Response($result, 200);
         $response->header('X-WP-Total', $page->pagination()->totalItems);
         $response->header('X-WP-TotalPages', $page->pagination()->totalPages());
+		$response->header('X-WP-StatusCounts', json_encode($page->statusCounts));
+		
         return $response;
     }
 
@@ -177,4 +226,21 @@ final class EventController implements RestController
 
         return new \WP_REST_Response(['message' => 'Die Stubsmaus'], 200);
     }
+
+	public function cancelEvent(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$event_id = (int) $request->get_param('id');
+		$inform_attendees = (bool) $request->get_param('informAttendees');
+		$result = $this->cancelEvent->execute($event_id);
+
+
+		return new \WP_REST_Response(['message' => 'Event cancelled'], 200);
+	}
+
+	public function deleteEvent(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$event_id = (int) $request->get_param('id');
+
+		return new \WP_REST_Response(['message' => 'Event deleted'], 200);
+	}
 }

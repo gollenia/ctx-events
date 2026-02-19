@@ -45,7 +45,7 @@ export default function Edit({ ...props }) {
 				rootClientId={rootClientId}
 				renderToggle={({ onToggle, disabled }) => (
 					<a className="components-button is-primary" onClick={onToggle}>
-						{__('Add Field', 'events')}
+						{__('Add Field', 'ctx-events')}
 					</a>
 				)}
 				isAppender

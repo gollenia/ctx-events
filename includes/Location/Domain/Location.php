@@ -27,4 +27,9 @@ final class Location
     {
         return $this->status;
     }
+
+	public function setStatus(Status $status): static
+	{
+		return clone($this, ['status' => $status]);
+	}
 }

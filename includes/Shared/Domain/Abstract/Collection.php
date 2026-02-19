@@ -17,7 +17,7 @@ abstract class Collection implements \Countable, \IteratorAggregate
         $this->items = $items;
     }
 
-    public function withPagination(Pagination $pagination): self
+    public function withPagination(Pagination $pagination): static
     {
         return clone($this, ['pagination' => $pagination]);
     }
@@ -27,7 +27,7 @@ abstract class Collection implements \Countable, \IteratorAggregate
         return $this->pagination;
     }
 
-    public static function fromArray(array $items): self
+    public static function fromArray(array $items): static
     {
         $collection = new static(...$items);
         return $collection;
@@ -41,6 +41,21 @@ abstract class Collection implements \Countable, \IteratorAggregate
     public function isEmpty(): bool
     {
         return empty($this->items);
+    }
+
+	public function filter(callable $callback): static
+	{
+		return new static(...array_filter($this->items, $callback));
+	}
+
+	public function first(): ?object
+    {
+        return $this->items[0] ?? null;
+    }
+
+    public function map(callable $callback): array
+    {
+        return array_map($callback, $this->items);
     }
 
     public function toArray(): array

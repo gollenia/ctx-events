@@ -42,23 +42,23 @@ const datetimeSelector = () => {
 	};
 
 	const dayArray = [
-		{ label: __('Sun', 'events'), value: '0' },
-		{ label: __('Mon', 'events'), value: '1' },
-		{ label: __('Tue', 'events'), value: '2' },
-		{ label: __('Wed', 'events'), value: '3' },
-		{ label: __('Thu', 'events'), value: '4' },
-		{ label: __('Fri', 'events'), value: '5' },
-		{ label: __('Sat', 'events'), value: '6' },
+		{ label: __('Sun', 'ctx-events'), value: '0' },
+		{ label: __('Mon', 'ctx-events'), value: '1' },
+		{ label: __('Tue', 'ctx-events'), value: '2' },
+		{ label: __('Wed', 'ctx-events'), value: '3' },
+		{ label: __('Thu', 'ctx-events'), value: '4' },
+		{ label: __('Fri', 'ctx-events'), value: '5' },
+		{ label: __('Sat', 'ctx-events'), value: '6' },
 	];
 
 	const longDayArray = [
-		{ label: __('Sunday', 'events'), value: '0' },
-		{ label: __('Monday', 'events'), value: '1' },
-		{ label: __('Tuesday', 'events'), value: '2' },
-		{ label: __('Wednesday', 'events'), value: '3' },
-		{ label: __('Thursday', 'events'), value: '4' },
-		{ label: __('Friday', 'events'), value: '5' },
-		{ label: __('Saturday', 'events'), value: '6' },
+		{ label: __('Sunday', 'ctx-events'), value: '0' },
+		{ label: __('Monday', 'ctx-events'), value: '1' },
+		{ label: __('Tuesday', 'ctx-events'), value: '2' },
+		{ label: __('Wednesday', 'ctx-events'), value: '3' },
+		{ label: __('Thursday', 'ctx-events'), value: '4' },
+		{ label: __('Friday', 'ctx-events'), value: '5' },
+		{ label: __('Saturday', 'ctx-events'), value: '6' },
 	];
 
 	const addOneDay = (date) => {
@@ -76,13 +76,13 @@ const datetimeSelector = () => {
 		<>
 			<PluginDocumentSettingPanel
 				name="events-datetime-settings"
-				title={__('Time and Date', 'events')}
+				title={__('Time and Date', 'ctx-events')}
 				className="events-datetime-settings"
 			>
 				<div className="em-date-row">
-					<h3>{__('Date', 'events')}</h3>
+					<h3>{__('Date', 'ctx-events')}</h3>
 					<PanelRow>
-						<label for="em-from-date">{__('First time', 'events')}</label>
+						<label for="em-from-date">{__('First time', 'ctx-events')}</label>
 						<div>
 							<TextControl
 								value={
@@ -101,7 +101,7 @@ const datetimeSelector = () => {
 						</div>
 					</PanelRow>
 					<PanelRow>
-						<label for="em-to-date">{__('Last time', 'events')}</label>
+						<label for="em-to-date">{__('Last time', 'ctx-events')}</label>
 						<div>
 							<TextControl
 								value={meta._event_end_date}
@@ -116,7 +116,7 @@ const datetimeSelector = () => {
 						</div>
 					</PanelRow>
 				</div>
-				<h3>{__('Time', 'events')}</h3>
+				<h3>{__('Time', 'ctx-events')}</h3>
 				<PanelRow className="em-time-row">
 					<TextControl
 						className="em-time-input"
@@ -124,7 +124,7 @@ const datetimeSelector = () => {
 						onChange={(value) => {
 							setMeta({ _event_start_time: value });
 						}}
-						label={__('Start', 'events')}
+						label={__('Start', 'ctx-events')}
 						disabled={meta._event_all_day}
 						type="time"
 					/>
@@ -137,7 +137,7 @@ const datetimeSelector = () => {
 						}}
 						min={minEndDate}
 						disabled={meta._event_all_day}
-						label={__('End', 'events')}
+						label={__('End', 'ctx-events')}
 						type="time"
 					/>
 				</PanelRow>
@@ -147,22 +147,22 @@ const datetimeSelector = () => {
 					onChange={(value) => {
 						setMeta({ _event_all_day: value ? 1 : 0 });
 					}}
-					label={__('All day', 'events')}
+					label={__('All day', 'ctx-events')}
 				/>
 			</PluginDocumentSettingPanel>
 			<PluginDocumentSettingPanel
 				name="events-recurrence-settings"
-				title={__('Recurrence', 'events')}
+				title={__('Recurrence', 'ctx-events')}
 				className="events-recurrence-settings"
 			>
 				<SelectControl
-					label={__('Recurring', 'events')}
+					label={__('Recurring', 'ctx-events')}
 					options={[
-						{ label: __('None', 'events'), value: '' },
-						{ label: __('Daily', 'events'), value: 'daily' },
-						{ label: __('Weekly', 'events'), value: 'weekly' },
-						{ label: __('Monthly', 'events'), value: 'monthly' },
-						{ label: __('Yearly', 'events'), value: 'yearly' },
+						{ label: __('None', 'ctx-events'), value: '' },
+						{ label: __('Daily', 'ctx-events'), value: 'daily' },
+						{ label: __('Weekly', 'ctx-events'), value: 'weekly' },
+						{ label: __('Monthly', 'ctx-events'), value: 'monthly' },
+						{ label: __('Yearly', 'ctx-events'), value: 'yearly' },
 					]}
 					value={meta._recurrence_freq}
 					onChange={(value) => {
@@ -186,7 +186,7 @@ const datetimeSelector = () => {
 				)}
 				<NumberControl
 					className="mt-4"
-					label={__('Interval', 'events')}
+					label={__('Interval', 'ctx-events')}
 					value={meta._recurrence_interval}
 					min={1}
 					onChange={(value) => {
@@ -197,14 +197,14 @@ const datetimeSelector = () => {
 					<>
 						<PanelRow className="mt-4">
 							<SelectControl
-								label={__('Every', 'events')}
+								label={__('Every', 'ctx-events')}
 								options={[
-									{ label: __('First', 'events'), value: '1' },
-									{ label: __('Second', 'events'), value: '2' },
-									{ label: __('Third', 'events'), value: '3' },
-									{ label: __('Fourth', 'events'), value: '4' },
-									{ label: __('Fifth', 'events'), value: '5' },
-									{ label: __('Last', 'events'), value: '-1' },
+									{ label: __('First', 'ctx-events'), value: '1' },
+									{ label: __('Second', 'ctx-events'), value: '2' },
+									{ label: __('Third', 'ctx-events'), value: '3' },
+									{ label: __('Fourth', 'ctx-events'), value: '4' },
+									{ label: __('Fifth', 'ctx-events'), value: '5' },
+									{ label: __('Last', 'ctx-events'), value: '-1' },
 								]}
 								value={meta._recurrence_byweekno}
 								onChange={(value) => {
@@ -213,7 +213,7 @@ const datetimeSelector = () => {
 							/>
 
 							<SelectControl
-								label={__('Weekday', 'events')}
+								label={__('Weekday', 'ctx-events')}
 								options={longDayArray}
 								value={meta._recurrence_byday}
 								onChange={(value) => {

@@ -41,21 +41,21 @@ const Inspector = (props) => {
 	} = props;
 
 	const locationViewOptions = [
-		{ value: '', label: __('', 'events') },
-		{ value: 'city', label: __('City', 'events') },
-		{ value: 'name', label: __('Name', 'events') },
+		{ value: '', label: __('', 'ctx-events') },
+		{ value: 'city', label: __('City', 'ctx-events') },
+		{ value: 'name', label: __('Name', 'ctx-events') },
 	];
 
 	const orderListViewOptions = [
-		{ value: 'asc', label: __('Ascending', 'events') },
-		{ value: 'desc', label: __('Descending', 'events') },
+		{ value: 'asc', label: __('Ascending', 'ctx-events') },
+		{ value: 'desc', label: __('Descending', 'ctx-events') },
 	];
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<SelectControl
-					label={__('Category', 'events')}
+					label={__('Category', 'ctx-events')}
 					value={selectedCategory}
 					options={categoryList}
 					onChange={(value) => {
@@ -63,7 +63,7 @@ const Inspector = (props) => {
 					}}
 				/>
 				<FormTokenField
-					label={__('Tags', 'events')}
+					label={__('Tags', 'ctx-events')}
 					value={tagsFieldValue}
 					suggestions={tagNames}
 					onChange={(selectedTags) => {
@@ -83,7 +83,7 @@ const Inspector = (props) => {
 				/>
 
 				<SelectControl
-					label={__('Location', 'events')}
+					label={__('Location', 'ctx-events')}
 					value={selectedLocation}
 					options={locationList}
 					onChange={(value) => {
@@ -92,10 +92,10 @@ const Inspector = (props) => {
 				/>
 			</PanelBody>
 
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<PanelRow>
 					<ToggleControl
-						label={__('Drop shadow', 'events')}
+						label={__('Drop shadow', 'ctx-events')}
 						checked={dropShadow}
 						onChange={(value) => setAttributes({ dropShadow: value })}
 					/>
@@ -103,7 +103,7 @@ const Inspector = (props) => {
 
 				<PanelRow>
 					<SelectControl
-						label={__('Location', 'events')}
+						label={__('Location', 'ctx-events')}
 						value={showLocation}
 						options={locationViewOptions}
 						onChange={(value) => {
@@ -112,10 +112,10 @@ const Inspector = (props) => {
 					/>
 				</PanelRow>
 				<RangeControl
-					label={__('Length of preview text', 'events')}
+					label={__('Length of preview text', 'ctx-events')}
 					max={200}
 					min={0}
-					help={__('Number of words', 'events')}
+					help={__('Number of words', 'ctx-events')}
 					onChange={(value) => {
 						setAttributes({ excerptLength: value });
 					}}
@@ -123,14 +123,14 @@ const Inspector = (props) => {
 				/>
 				<PanelRow>
 					<CheckboxControl
-						label={__('Show Audience', 'events')}
+						label={__('Show Audience', 'ctx-events')}
 						checked={showAudience}
 						onChange={(value) => setAttributes({ showAudience: value })}
 					/>
 				</PanelRow>
 				<PanelRow>
 					<CheckboxControl
-						label={__('Show Speaker', 'events')}
+						label={__('Show Speaker', 'ctx-events')}
 						checked={showSpeaker}
 						onChange={(value) => setAttributes({ showSpeaker: value })}
 					/>
@@ -138,7 +138,7 @@ const Inspector = (props) => {
 
 				<PanelRow>
 					<CheckboxControl
-						label={__('Show category', 'events')}
+						label={__('Show category', 'ctx-events')}
 						checked={showCategory}
 						onChange={(value) => setAttributes({ showCategory: value })}
 					/>

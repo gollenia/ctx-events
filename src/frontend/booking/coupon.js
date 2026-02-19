@@ -57,7 +57,7 @@ function Coupon({ state, dispatch }) {
 	return (
 		<div className="input-group grid__column--span-6">
 			<div className="input input-group__main">
-				<label>{__('Coupon code', 'events')}</label>
+				<label>{__('Coupon code', 'ctx-events')}</label>
 				<input
 					value={state.request.coupon}
 					onChange={(event) => {
@@ -77,7 +77,7 @@ function Coupon({ state, dispatch }) {
 				}}
 				className={buttonClass}
 			>
-				{status < STATES.LOADING && __('Check coupon', 'events')}
+				{status < STATES.LOADING && __('Check coupon', 'ctx-events')}
 				{status == STATES.ERROR && (
 					<i class="material-icons material-symbols-outlined">close</i>
 				)}

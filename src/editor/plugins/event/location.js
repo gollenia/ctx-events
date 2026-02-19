@@ -51,11 +51,11 @@ const locationSelector = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="events-location-settings"
-			title={__('Location', 'events')}
+			title={__('Location', 'ctx-events')}
 			className="events-location-settings"
 		>
 			<ComboboxControl
-				label={__('Select a location', 'events')}
+				label={__('Select a location', 'ctx-events')}
 				value={meta._location_id}
 				onChange={(value) => {
 					setMeta({ _location_id: value || 0 });

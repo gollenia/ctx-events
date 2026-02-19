@@ -54,7 +54,7 @@ const edit = (props) => {
 					className="ctx:event-details__label"
 					value={attributes.description}
 					required
-					placeholder={__('What should your visitor say "yes" to?', 'events')}
+					placeholder={__('What should your visitor say "yes" to?', 'ctx-events')}
 					onChange={(value) => setAttributes({ description: value })}
 				/>
 			</div>

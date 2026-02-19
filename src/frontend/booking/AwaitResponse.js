@@ -6,8 +6,8 @@ const AwaitResponse = ({ state }) => {
 	return (
 		<aside>
 			<div className="spinning-loader"></div>
-			<h3>{__('Please wait', 'events')}</h3>
-			<h4>{__('Your booking is beeing processed.', 'events')}</h4>
+			<h3>{__('Please wait', 'ctx-events')}</h3>
+			<h4>{__('Your booking is beeing processed.', 'ctx-events')}</h4>
 			{modal.orderState > 1 && (
 				<div className="alert alert--warning">
 					{modal.orderState == STATES.LOADING &&

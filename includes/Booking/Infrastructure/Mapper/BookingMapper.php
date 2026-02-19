@@ -13,6 +13,7 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Payment\Domain\TransactionCollection;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\LogEntryCollection;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
 
 final class BookingMapper implements DatabaseMapper
@@ -21,7 +22,9 @@ final class BookingMapper implements DatabaseMapper
 	{
 		return new Booking(
 			id: BookingId::from($data['id']),
+			uuid: $data['uuid'],
 			email: Email::tryFrom($data['email']),
+			name: PersonName::from($data['first_name'], $data['last_name']),
 			priceSummary: PriceSummary::fromValues(
 				(int)$data['total_price'],
 				(int)$data['donation_amount'],
@@ -35,7 +38,8 @@ final class BookingMapper implements DatabaseMapper
 			gateway: $data['gateway'],
 			coupon: $data['coupon'],
 			transactions: TransactionCollection::fromArray($data['transactions']),
-			eventId: EventId::from($data['event_id'])
+			eventId: EventId::from($data['event_id']),
+			
 		);
 	}
 

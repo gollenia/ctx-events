@@ -20,20 +20,20 @@ class LocationPost extends PostType implements HasMetaData
     public function registerPostType(): void
     {
         $labels = [
-            'name' => __('Locations', 'events'),
-            'singular_name' => __('Location', 'events'),
-            'menu_name' => __('Locations', 'events'),
-            'add_new' => __('Add Location', 'events'),
-            'add_new_item' => __('Add New Location', 'events'),
-            'edit' => __('Edit', 'events'),
-            'edit_item' => __('Edit Location', 'events'),
-            'new_item' => __('New Location', 'events'),
-            'view' => __('View', 'events'),
-            'view_item' => __('View Location', 'events'),
-            'search_items' => __('Search Locations', 'events'),
-            'not_found' => __('No Locations Found', 'events'),
-            'not_found_in_trash' => __('No Locations Found in Trash', 'events'),
-            'parent' => __('Parent Location', 'events'),
+            'name' => __('Locations', 'ctx-events'),
+            'singular_name' => __('Location', 'ctx-events'),
+            'menu_name' => __('Locations', 'ctx-events'),
+            'add_new' => __('Add Location', 'ctx-events'),
+            'add_new_item' => __('Add New Location', 'ctx-events'),
+            'edit' => __('Edit', 'ctx-events'),
+            'edit_item' => __('Edit Location', 'ctx-events'),
+            'new_item' => __('New Location', 'ctx-events'),
+            'view' => __('View', 'ctx-events'),
+            'view_item' => __('View Location', 'ctx-events'),
+            'search_items' => __('Search Locations', 'ctx-events'),
+            'not_found' => __('No Locations Found', 'ctx-events'),
+            'not_found_in_trash' => __('No Locations Found in Trash', 'ctx-events'),
+            'parent' => __('Parent Location', 'ctx-events'),
         ];
 
         $post_type = [
@@ -53,8 +53,8 @@ class LocationPost extends PostType implements HasMetaData
             'has_archive' => false,
             'template_lock' => 'all',
             'supports' => apply_filters('em_cp_location_supports', ['title','excerpt','thumbnail','editor','custom-fields']),
-            'label' => __('Locations', 'events'),
-            'description' => __('Display locations on your blog.', 'events'),
+            'label' => __('Locations', 'ctx-events'),
+            'description' => __('Display locations on your blog.', 'ctx-events'),
             'labels' => $labels
         ];
 

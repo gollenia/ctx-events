@@ -61,13 +61,18 @@ final class OfflineGateway implements PaymentGateway
         );
     }
 
-	public function setActive(bool $active): void
+	public function setEnabled(bool $active): void
 	{
-		$this->config->setActive($active);
+		$this->config->setEnabled($active);
 	}
 
-	public function isActive(): bool
+	public function isEnabled(): bool
 	{
 		return $this->config->isEnabled;
+	}
+
+	public function isValid(): bool
+	{
+		return $this->config->isValid();
 	}
 }

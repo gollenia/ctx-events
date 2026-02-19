@@ -18,30 +18,30 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ToggleControl
-					label={__('Required', 'events')}
+					label={__('Required', 'ctx-events')}
 					checked={required}
 					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 				<TextControl
-					label={__('Description', 'events')}
+					label={__('Description', 'ctx-events')}
 					value={description}
 					onChange={(value) => setAttributes({ description: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={6}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					{...props}
 				/>

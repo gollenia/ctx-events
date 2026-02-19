@@ -44,11 +44,11 @@ const peopleSelector = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="events-location-settings"
-			title={__('Persons', 'events')}
+			title={__('Persons', 'ctx-events')}
 			className="events-location-settings"
 		>
 			<ComboboxControl
-				label={__('Select a speaker', 'events')}
+				label={__('Select a speaker', 'ctx-events')}
 				value={meta._speaker_id}
 				onChange={(value) => {
 					setMeta({ _speaker_id: value || 0 });
@@ -80,7 +80,7 @@ const peopleSelector = () => {
 			/>
 
 			<TextControl
-				label={__('Audience', 'events')}
+				label={__('Audience', 'ctx-events')}
 				value={meta._event_audience}
 				onChange={(value) => {
 					setMeta({ _event_audience: value });

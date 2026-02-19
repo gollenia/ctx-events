@@ -43,7 +43,7 @@ const BookingEditor = ({ bookingId }) => {
 	}, [state.sendState]);
 
 	if (state.state === 'loading' || !data) {
-		return <p>{__('Loading Data...', 'events')}</p>;
+		return <p>{__('Loading Data...', 'ctx-events')}</p>;
 	}
 
 	if (error) {

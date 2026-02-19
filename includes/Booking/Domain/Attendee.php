@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Domain;
 
-use Contexis\Events\Domain\ValueObjects\BookingPolicy;
-use Contexis\Events\Domain\ValueObjects\Id\AttendeeId;
-use Contexis\Events\Domain\ValueObjects\Id\BookingId;
-use Contexis\Events\Domain\ValueObjects\Id\TicketId;
+use Contexis\Events\Booking\Domain\ValueObjects\AttendeeId;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use DateTimeImmutable;
 
 final class Attendee
@@ -14,6 +14,7 @@ final class Attendee
     public function __construct(
         public readonly AttendeeId $id,
         public readonly TicketId $ticketId,
+		public readonly Price $ticketPrice,
         public readonly BookingId $bookingId,
         public readonly string $firstName,
         public readonly string $lastName,

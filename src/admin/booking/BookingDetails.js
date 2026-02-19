@@ -13,10 +13,10 @@ const BookingDetails = ({ store }) => {
 		<div className="booking-details">
 			<div className="booking-info">
 				<span>
-					<b>{__('Date', 'events')}</b> {data.booking.date}
+					<b>{__('Date', 'ctx-events')}</b> {data.booking.date}
 				</span>
 				<span>
-					<b>{__('Booking ID', 'events')} </b> {data.booking.id}
+					<b>{__('Booking ID', 'ctx-events')} </b> {data.booking.id}
 				</span>
 			</div>
 			<span className={paymentClass}>

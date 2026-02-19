@@ -64,24 +64,24 @@ const CouponModal = (props) => {
 		<>
 			{showCoupons && (
 				<Modal
-					title={__('Select Coupons', 'events')}
+					title={__('Select Coupons', 'ctx-events')}
 					onRequestClose={closeModal}
 					size="large"
 				>
 					<TextControl
-						label={__('Search Coupons', 'events')}
+						label={__('Search Coupons', 'ctx-events')}
 						value={searchTerm}
 						onChange={(value) => setSearchTerm(value)}
-						placeholder={__('Search coupons', 'events')}
+						placeholder={__('Search coupons', 'ctx-events')}
 					/>
 					<table className="wp-list-table widefat striped table-view-list posts">
 						<thead>
 							<tr>
 								<th>#</th>
-								<th>{__('Name', 'events')}</th>
-								<th>{__('Code', 'events')}</th>
-								<th>{__('Amount', 'events')}</th>
-								<th>{__('Expires', 'events')}</th>
+								<th>{__('Name', 'ctx-events')}</th>
+								<th>{__('Code', 'ctx-events')}</th>
+								<th>{__('Amount', 'ctx-events')}</th>
+								<th>{__('Expires', 'ctx-events')}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -106,7 +106,7 @@ const CouponModal = (props) => {
 									setShowCoupons(false);
 								}}
 							>
-								{__('Close', 'events')}
+								{__('Close', 'ctx-events')}
 							</Button>
 						</FlexItem>
 					</Flex>

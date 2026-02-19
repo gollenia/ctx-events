@@ -16,7 +16,7 @@ const TicketEditor = (props) => {
 			<Flex direction="column">
 				<FlexItem>
 					<TextControl
-						label={__('Name', 'events')}
+						label={__('Name', 'ctx-events')}
 						type="text"
 						value={ticket.ticket_name}
 						onChange={(value) => setTicket({ ...ticket, ticket_name: value })}
@@ -24,7 +24,7 @@ const TicketEditor = (props) => {
 				</FlexItem>
 				<FlexItem>
 					<TextareaControl
-						label={__('Description', 'events')}
+						label={__('Description', 'ctx-events')}
 						value={ticket.ticket_description}
 						onChange={(value) =>
 							setTicket({
@@ -37,7 +37,7 @@ const TicketEditor = (props) => {
 				<Flex justify="flex-start">
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
-							label={__('Price', 'events')}
+							label={__('Price', 'ctx-events')}
 							type="text"
 							width="100%"
 							pattern="[0-9]+(\.[0-9][0-9]?)?"
@@ -52,7 +52,7 @@ const TicketEditor = (props) => {
 					</FlexItem>
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
-							label={__('Spaces', 'events')}
+							label={__('Spaces', 'ctx-events')}
 							type="number"
 							min={0}
 							width="100%"
@@ -69,7 +69,7 @@ const TicketEditor = (props) => {
 				<Flex>
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
-							label={__('Minimum bookable', 'events')}
+							label={__('Minimum bookable', 'ctx-events')}
 							type="number"
 							min={0}
 							width="100%"
@@ -79,7 +79,7 @@ const TicketEditor = (props) => {
 					</FlexItem>
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
-							label={__('Maximum bookable', 'events')}
+							label={__('Maximum bookable', 'ctx-events')}
 							type="number"
 							min={1}
 							width="100%"
@@ -90,7 +90,7 @@ const TicketEditor = (props) => {
 				</Flex>
 				<FlexItem>
 					<TextControl
-						label={__('Start date', 'events')}
+						label={__('Start date', 'ctx-events')}
 						type="date"
 						value={ticket.ticket_start}
 						onChange={(value) => setTicket({ ...ticket, ticket_start: value })}
@@ -98,7 +98,7 @@ const TicketEditor = (props) => {
 				</FlexItem>
 				<FlexItem>
 					<TextControl
-						label={__('Order', 'events')}
+						label={__('Order', 'ctx-events')}
 						type="number"
 						value={ticket.ticket_order}
 						onChange={(value) => setTicket({ ...ticket, ticket_order: value })}
@@ -113,7 +113,7 @@ const TicketEditor = (props) => {
 							onCancel();
 						}}
 					>
-						{__('Cancel', 'events')}
+						{__('Cancel', 'ctx-events')}
 					</Button>
 				</FlexItem>
 				<FlexItem>
@@ -124,7 +124,7 @@ const TicketEditor = (props) => {
 							onUpdate();
 						}}
 					>
-						{__('Save', 'events')}
+						{__('Save', 'ctx-events')}
 					</Button>
 				</FlexItem>
 			</Flex>

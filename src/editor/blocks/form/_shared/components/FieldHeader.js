@@ -7,7 +7,7 @@ import useDependencyLock from '../hooks/useDependencyLock';
 
 const FieldHeader = ({ attributes, setAttributes, clientId, icon = null, helpText = null }) => {
     const { label, name, required } = attributes;
-    const description = helpText || __('Label for the field', 'events');
+    const description = helpText || __('Label for the field', 'ctx-events');
 
     const isSystemLocked = isSlugLocked(name);
 	const isReferenced = useDependencyLock(clientId, name);
@@ -18,10 +18,10 @@ const FieldHeader = ({ attributes, setAttributes, clientId, icon = null, helpTex
 
 	let lockReason = '';
     if (isSystemLocked) {
-        lockReason += __('System field: Cannot be changed.', 'events');
+        lockReason += __('System field: Cannot be changed.', 'ctx-events');
     } 
     if (isReferenced) {
-        lockReason += __('Locked: Used by another field as visibility condition.', 'events');
+        lockReason += __('Locked: Used by another field as visibility condition.', 'ctx-events');
     }
 
     const onChangeName = (value) => {
@@ -40,7 +40,7 @@ const FieldHeader = ({ attributes, setAttributes, clientId, icon = null, helpTex
                             tagName="span"
                             className={`ctx:event-field__label ${!isLabelValid ? 'ctx:input-error' : ''}`}
                             value={label}
-                            placeholder={__('Label', 'events')}
+                            placeholder={__('Label', 'ctx-events')}
                             onChange={(value) => setAttributes({ label: value })}
                             allowedFormats={[]} 
                         />
@@ -59,7 +59,7 @@ const FieldHeader = ({ attributes, setAttributes, clientId, icon = null, helpTex
                         tagName="p"
                         className="ctx:event-field__slug-input"
                         value={name}
-                        placeholder={__('Slug', 'events')}
+                        placeholder={__('Slug', 'ctx-events')}
                         onChange={onChangeName}
                         allowedFormats={[]}
                     />
@@ -74,11 +74,11 @@ const FieldHeader = ({ attributes, setAttributes, clientId, icon = null, helpTex
                 
                 { isSlugValid ? (
                     <span className="ctx:event-field__sublabel">
-                		{__('Unique identifier', 'events')}
+                		{__('Unique identifier', 'ctx-events')}
             		</span>
                 ) : (
                     <span className="ctx:event-field__error-message">
-                        {__('Please type in a unique identifier for the field', 'events')}
+                        {__('Please type in a unique identifier for the field', 'ctx-events')}
                     </span>
                 )}
             </div>

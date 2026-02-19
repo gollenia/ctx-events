@@ -32,7 +32,7 @@ const TicketModal = ({ store, onCancel, onSave }) => {
 			{ticket && (
 				<Modal onRequestClose={onCancel}>
 					<div className="events-ticket-modal-content">
-						<h2>{__('Edit Ticket', 'events')}</h2>
+						<h2>{__('Edit Ticket', 'ctx-events')}</h2>
 						<div>
 							<SelectControl
 								label="Ticket Type"

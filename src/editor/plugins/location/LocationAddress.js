@@ -16,11 +16,11 @@ const LocationAddress = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="events-location-address-settings"
-			title={__('Address', 'events')}
+			title={__('Address', 'ctx-events')}
 			className="events-location-address-settings"
 		>
 			<TextControl
-				label={__('Street Address', 'events')}
+				label={__('Street Address', 'ctx-events')}
 				value={meta._location_address}
 				onChange={(value) => {
 					setMeta({ _location_address: value });
@@ -28,7 +28,7 @@ const LocationAddress = () => {
 			/>
 
 			<TextControl
-				label={__('City', 'events')}
+				label={__('City', 'ctx-events')}
 				value={meta._location_town}
 				onChange={(value) => {
 					setMeta({ _location_town: value });
@@ -36,7 +36,7 @@ const LocationAddress = () => {
 			/>
 
 			<TextControl
-				label={__('State/Province', 'events')}
+				label={__('State/Province', 'ctx-events')}
 				value={meta._location_state}
 				onChange={(value) => {
 					setMeta({ _location_state: value });
@@ -44,7 +44,7 @@ const LocationAddress = () => {
 			/>
 
 			<TextControl
-				label={__('Postal/Zip Code', 'events')}
+				label={__('Postal/Zip Code', 'ctx-events')}
 				value={meta._location_postcode}
 				onChange={(value) => {
 					setMeta({ _location_postcode: value });
@@ -52,7 +52,7 @@ const LocationAddress = () => {
 			/>
 
 			<TextControl
-				label={__('Country', 'events')}
+				label={__('Country', 'ctx-events')}
 				value={meta._location_country}
 				onChange={(value) => {
 					setMeta({ _location_country: value });

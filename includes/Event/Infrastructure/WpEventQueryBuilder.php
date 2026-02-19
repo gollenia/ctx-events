@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Application\Contracts\EventOptions;
-use Contexis\Events\Event\Application\EventCriteria;
+use Contexis\Events\Event\Application\DTOs\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
 use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
@@ -22,18 +22,17 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             ->withPagination($criteria->page, $criteria->perPage)
             ->withStatus($criteria->status ?? StatusList::public())
             ->withTaxonomy(EventPost::CATEGORIES, $criteria->categories)
-            ->withTaxonomy(EventPost::TAGS, $criteria->tags)
-        ;
+            ->withTaxonomy(EventPost::TAGS, $criteria->tags);
 
         if ($criteria->location !== null) {
             $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->location);
         }
-
-        if ($criteria->bookable) {
-            $builder = $builder->withMetaEquals(EventMeta::BOOKING_ENABLED, '1');
+		
+        if ($criteria->bookable !== null) {
+            $builder = $builder->withMetaEquals(EventMeta::BOOKING_ENABLED, (string) $criteria->bookable);
         }
 
-        if ($criteria->person != null) {
+        if ($criteria->person !== null) {
             $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->person);
         }
 
@@ -78,7 +77,9 @@ final class WpEventQueryBuilder extends WpQueryBuilder
 
         return match ($scope) {
             $scope::PAST    => [['key' => $field, 'value' => $dateTime, 'compare' => '<', 'type' => 'DATETIME']],
-            $scope::FUTURE  => [['key' => $field, 'value' => $dateTime, 'compare' => '>', 'type' => 'DATETIME']],
+            $scope::FUTURE  => [
+				['key' => $field, 'value' => $dateTime, 'compare' => '>', 'type' => 'DATETIME']
+			],
             $scope::TODAY   => [
                 ['key' => EventMeta::EVENT_START, 'value' => $date, 'compare' => '<=', 'type' => 'DATE'],
                 ['key' => EventMeta::EVENT_END,   'value' => $date, 'compare' => '>=', 'type' => 'DATE'],
@@ -122,7 +123,9 @@ final class WpEventQueryBuilder extends WpQueryBuilder
                     'type' => 'DATE'
                 ],
             ],
+			$scope::ALL	 => [],
             default    => [['key' => $field, 'value' => $dateTime, 'compare' => '>', 'type' => 'DATETIME']]
+
         };
     }
 }

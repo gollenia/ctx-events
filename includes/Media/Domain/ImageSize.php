@@ -3,26 +3,12 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Media\Domain;
 
-final readonly class ImageSize implements \JsonSerializable
+final readonly class ImageSize
 {
     public function __construct(
-        private string $url,
-        private int $width,
-        private int $height
+        public string $url,
+        public int $width,
+        public int $height
     ) {
-    }
-
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'url' => $this->url,
-            'width' => $this->width,
-            'height' => $this->height,
-        ];
     }
 }

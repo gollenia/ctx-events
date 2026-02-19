@@ -24,7 +24,6 @@ class FormMapper implements PostMapper
 {
     public static function map(PostSnapshot $snapshot): Form
     {
-    	//var_dump($snapshot);
         $fields = self::getFormFields($snapshot->post_content);
 		$type = FormPostTypes::fromPostType($snapshot->post_type);
 		

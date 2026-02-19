@@ -11,4 +11,9 @@ final class AttendeeCollection extends Collection
     {
         $this->items = $attendees;
     }
+
+	public function getTicketIds(): array
+    {
+        return array_map(fn(Attendee $a) => $a->ticketId->value, $this->items);
+    }
 }

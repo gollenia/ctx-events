@@ -34,8 +34,8 @@ final class AdminMenu implements AdminServiceInterface
     public function register(): void
     {
         add_menu_page(
-            __('Events', 'events'),
-            __('Events', 'events'),
+            __('Events', 'ctx-events'),
+            __('Events', 'ctx-events'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'eventsPage'],
@@ -45,8 +45,8 @@ final class AdminMenu implements AdminServiceInterface
 
         add_submenu_page(
             self::MENU_SLUG,
-            __('Events', 'events'),
-            __('Events', 'events'),
+            __('Events', 'ctx-events'),
+            __('Events', 'ctx-events'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'eventsPage'],
@@ -55,8 +55,8 @@ final class AdminMenu implements AdminServiceInterface
 
         add_submenu_page(
             self::MENU_SLUG,
-            __('Settings', 'events'),
-            __('Settings', 'events'),
+            __('Settings', 'ctx-events'),
+            __('Settings', 'ctx-events'),
             'manage_options',
             'contexis_events_settings',
             function () {
@@ -66,8 +66,8 @@ final class AdminMenu implements AdminServiceInterface
 
         add_submenu_page(
             self::MENU_SLUG,
-            __('Bookings', 'events'),
-            __('Bookings', 'events'),
+            __('Bookings', 'ctx-events'),
+            __('Bookings', 'ctx-events'),
             'manage_options',
             'contexis_events_bookings',
             fn() => print('<div id="contexis-events-bookings-app"></div>')
@@ -75,8 +75,8 @@ final class AdminMenu implements AdminServiceInterface
 
 		add_submenu_page(
 			self::MENU_SLUG,
-			__('Gateways', 'events'),
-			__('Gateways', 'events'),
+			__('Gateways', 'ctx-events'),
+			__('Gateways', 'ctx-events'),
 			'manage_options',
 			'contexis_events_gateways',
 			fn() => print('<div id="ctx-gateways-admin"></div>')
@@ -86,8 +86,6 @@ final class AdminMenu implements AdminServiceInterface
 
     public function eventsPage(): string
     {
-        echo "<h1>Events Page</h1>";
-        echo "<p>Hier kommt die React app hin</p>";
 		echo "<div id='ctx-events-list'></div>";
         return '';
     }

@@ -8,7 +8,7 @@ const Registration = ({ store }) => {
 
 	return (
 		<div className="booking-registration">
-			<h2>{__('Registration', 'events')}</h2>
+			<h2>{__('Registration', 'ctx-events')}</h2>
 
 			<Panel>
 				<PanelBody header="Registration">

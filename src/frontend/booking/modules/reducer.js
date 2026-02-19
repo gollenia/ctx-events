@@ -29,7 +29,7 @@ const reducer = (state = {}, action) => {
 		case 'SET_MODAL':
 			state.modal.visible = payload;
 			state.modal.title = payload
-				? `${__('Registration', 'events')} ${event?.title}`
+				? `${__('Registration', 'ctx-events')} ${event?.title}`
 				: state.originalDocumentTitle;
 			return { ...state };
 

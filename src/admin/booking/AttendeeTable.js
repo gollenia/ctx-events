@@ -10,24 +10,24 @@ const AttendeeTable = ({ store }) => {
 	return (
 		<>
 			<div className="flex-header">
-				<h2>{__('Attendees', 'events')}</h2>
+				<h2>{__('Attendees', 'ctx-events')}</h2>
 				<Button
 					onClick={() => {
 						dispatch({ type: 'ADD_TICKET' });
 					}}
 					variant="secondary"
 				>
-					{__('Add Attendee', 'events')}
+					{__('Add Attendee', 'ctx-events')}
 				</Button>
 			</div>
 			<table className="widefat">
 				<thead>
 					<tr>
-						<th>{__('Name', 'events')}</th>
+						<th>{__('Name', 'ctx-events')}</th>
 						{data.attendee_fields.map((field) => (
 							<th>{field.label}</th>
 						))}
-						<th>{__('Price', 'events')}</th>
+						<th>{__('Price', 'ctx-events')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -80,7 +80,7 @@ const AttendeeTable = ({ store }) => {
 						);
 					})}
 					<tr>
-						<td>{__('Donation', 'events')}</td>
+						<td>{__('Donation', 'ctx-events')}</td>
 						<td colSpan={4}></td>
 
 						<td>

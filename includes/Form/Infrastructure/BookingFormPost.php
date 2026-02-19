@@ -27,8 +27,8 @@ class BookingFormPost extends PostType
             'query_var' => true,
             'has_archive' => false,
             'supports' => ['title', 'excerpt', 'editor'],
-            'label' => __('Booking Forms', 'events'),
-            'description' => __('Forms for the booking data', 'events'),
+            'label' => __('Booking Forms', 'ctx-events'),
+            'description' => __('Forms for the booking data', 'ctx-events'),
             'template' => [
                 ['ctx-events/form-container', [
                     'templateLock' => false,
@@ -42,7 +42,7 @@ class BookingFormPost extends PostType
                         [
                             "lock" => ["remove" => true, "move" => false],
                             "required" => true,
-                            "label" => __('Email', 'events'),
+                            "label" => __('Email', 'ctx-events'),
                             "name" => 'email'
                         ]
                     ],
@@ -50,34 +50,34 @@ class BookingFormPost extends PostType
                         "lock" => ["remove" => true, "move" => false],
                         "required" => true,
                         "width" => 3,
-                        "label" => __('First Name', 'events'),
+                        "label" => __('First Name', 'ctx-events'),
                         "name" => 'first_name'
                     ]],
                     ['ctx-events/form-text', [
                         "lock" => ["remove" => true, "move" => false],
                         "required" => true,
                         "width" => 3,
-                        "label" => __('Last Name', 'events'),
+                        "label" => __('Last Name', 'ctx-events'),
                         "name" => 'last_name'
                     ]]
                 ]]
             ],
             'template_lock' => 'all',
             'labels' => [
-                'name' => __('Booking Forms', 'events'),
-                'singular_name' => __('Booking Form', 'events'),
-                'menu_name' => __('Booking Forms', 'events'),
-                'add_new' => __('Add Booking Form', 'events'),
-                'add_new_item' => __('Add New Booking Form', 'events'),
-                'edit' => __('Edit', 'events'),
-                'edit_item' => __('Edit Booking Form', 'events'),
-                'new_item' => __('New Booking Form', 'events'),
-                'view' => __('View', 'events'),
-                'view_item' => __('View Booking Form', 'events'),
-                'search_items' => __('Search Booking Forms', 'events'),
-                'not_found' => __('No Booking Forms Found', 'events'),
-                'not_found_in_trash' => __('No Booking Forms Found in Trash', 'events'),
-                'parent' => __('Parent Booking Form', 'events'),
+                'name' => __('Booking Forms', 'ctx-events'),
+                'singular_name' => __('Booking Form', 'ctx-events'),
+                'menu_name' => __('Booking Forms', 'ctx-events'),
+                'add_new' => __('Add Booking Form', 'ctx-events'),
+                'add_new_item' => __('Add New Booking Form', 'ctx-events'),
+                'edit' => __('Edit', 'ctx-events'),
+                'edit_item' => __('Edit Booking Form', 'ctx-events'),
+                'new_item' => __('New Booking Form', 'ctx-events'),
+                'view' => __('View', 'ctx-events'),
+                'view_item' => __('View Booking Form', 'ctx-events'),
+                'search_items' => __('Search Booking Forms', 'ctx-events'),
+                'not_found' => __('No Booking Forms Found', 'ctx-events'),
+                'not_found_in_trash' => __('No Booking Forms Found in Trash', 'ctx-events'),
+                'parent' => __('Parent Booking Form', 'ctx-events'),
             ],
         ];
 

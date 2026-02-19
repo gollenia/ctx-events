@@ -14,13 +14,13 @@ const Payment = ({ store }) => {
 	return (
 		<>
 			<div className="flex-header">
-				<h2>{__('Payment', 'events')}</h2>
+				<h2>{__('Payment', 'ctx-events')}</h2>
 			</div>
 			<Panel>
 				<PanelBody header="Payment">
 					<div className="booking-payment-method">
 						<SelectControl
-							label={__('Payment Method', 'events')}
+							label={__('Payment Method', 'ctx-events')}
 							value={data.booking.gateway}
 							options={Object.keys(data.available_gateways).map((key) => {
 								return {
@@ -41,7 +41,7 @@ const Payment = ({ store }) => {
 
 					<TextControl
 						type="number"
-						label={__('Donation', 'events')}
+						label={__('Donation', 'ctx-events')}
 						value={data.booking.donation}
 						onChange={(value) =>
 							dispatch({

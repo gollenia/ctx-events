@@ -35,7 +35,7 @@ const edit = (props) => {
 			<div className="ctx:event-field__select">
 				<select value={attributes.defaultValue} onChange={(event) => setAttributes({ defaultValue: event.target.value })}>
 					{attributes.hasEmptyOption && (
-						<option value="">{__('Make a selection', 'events')}</option>
+						<option value="">{__('Make a selection', 'ctx-events')}</option>
 					)}
 					{attributes.options.map((option, index) => {
 						return (

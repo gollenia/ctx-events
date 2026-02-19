@@ -38,9 +38,9 @@ const edit = (props) => {
 					window.eventBlocksLocalization.currency,
 				);
 			}
-			return __('Free', 'events');
+			return __('Free', 'ctx-events');
 		}
-		return __('Free', 'events');
+		return __('Free', 'ctx-events');
 	};
 
 	return (
@@ -55,7 +55,7 @@ const edit = (props) => {
 					<RichText
 						tagName="h4"
 						className="event-details_title description-editable"
-						placeholder={__('Price', 'events')}
+						placeholder={__('Price', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
 							setAttributes({ description: value });

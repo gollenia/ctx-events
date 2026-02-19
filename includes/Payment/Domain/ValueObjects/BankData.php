@@ -10,21 +10,26 @@ final class BankData implements \JsonSerializable
         public readonly string $accountHolder,
         public readonly string $iban,
         public readonly string $bic,
-        public readonly string $bankName,
-        public readonly string $reference
+        public readonly string $bankName
     ) {
     }
 
-	public static function fromArray(array $data): self
+	public static function fromValues(
+		string $accountHolder,
+		string $iban,
+		string $bic,
+		string $bankName
+	): ?self
     {
-		$data['iban'] = self::checkIban($data['iban']);
-        return new self(
-            $data['accountHolder'] ?? '',
-            $data['iban'] ?? '',
-            $data['bic'] ?? '',
-            $data['bankName'] ?? '',
-            $data['reference'] ?? '',
-        );
+		$cleanIban = !empty($iban) ? self::checkIban($iban) : '';
+		$cleanBic = !empty($bic) ? self::checkBic($bic) : '';
+
+		return new self(
+			$accountHolder,
+			$cleanIban,
+			$cleanBic,
+			$bankName
+		);
     }
 
 	private static function checkIban(string $iban): string
@@ -35,13 +40,9 @@ final class BankData implements \JsonSerializable
             
         $clean = preg_replace('/[\s-]/', '', $result);
 
-        if (empty($clean)) {
-             return ''; 
-        }
-
         $len = strlen($clean);
         if ($len < 15 || $len > 34) {
-            throw new \InvalidArgumentException("IBAN length invalid ($len characters).");
+            throw new \InvalidArgumentException("BANK_DATA_INVALID_IBAN_LENGTH ($len characters).");
         }
 
 		self::verifyChecksum($clean);
@@ -72,9 +73,26 @@ final class BankData implements \JsonSerializable
         }
 
         if ($remainder !== 1) {
-            throw new \InvalidArgumentException('IBAN checksum invalid.');
+            throw new \InvalidArgumentException('BANK_DATA_INVALID_IBAN_CHECKSUM');
         }
     }
+
+	private static function checkBic(string $bic): string 
+	{
+		$bic = strtoupper(trim($bic));
+		if (!preg_match('/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/', $bic)) {
+			throw new \InvalidArgumentException("BANK_DATA_INVALID_BIC");
+		}
+		return $bic;
+	}
+
+	public function isValid(): bool
+	{
+		return !empty(trim($this->accountHolder)) 
+        && !empty(trim($this->iban)) 
+        && !empty(trim($this->bic))
+		&& !empty(trim($this->bankName));
+	}
 
     public function jsonSerialize(): array
     {
@@ -82,8 +100,7 @@ final class BankData implements \JsonSerializable
             'accountHolder' => $this->accountHolder,
             'iban' => $this->iban,
             'bic' => $this->bic,
-            'bankName' => $this->bankName,
-            'reference' => $this->reference,
+            'bankName' => $this->bankName
         ];
     }
 }

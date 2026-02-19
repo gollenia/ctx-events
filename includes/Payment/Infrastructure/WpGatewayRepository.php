@@ -29,6 +29,7 @@ final class WpGatewayRepository implements GatewayRepository
 
     public function findAll(): array
     {
+		
         $allIds = array_map(fn($case) => $case->value, PaymentProvider::cases());
         $result = [];
         foreach ($allIds as $id) {

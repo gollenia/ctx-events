@@ -52,7 +52,7 @@ const edit = (props) => {
 		}
 
 		return [
-			{ value: '', label: __('Select Country', 'events') },
+			{ value: '', label: __('Select Country', 'ctx-events') },
 			...COUNTRY_CODES.map((code) => ({
 				value: code,
 				label: regionNames ? regionNames.of(code) : code,
@@ -66,7 +66,7 @@ const edit = (props) => {
 		<div>
 			<div className="location-edit__admin ctx-block-editor">
 				<TextControl
-					label={__('Address', 'events')}
+					label={__('Address', 'ctx-events')}
 					value={meta._location_address}
 					onChange={(value) => {
 						setMeta({
@@ -78,7 +78,7 @@ const edit = (props) => {
 				<Flex>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('ZIP Code', 'events')}
+							label={__('ZIP Code', 'ctx-events')}
 							value={meta._location_postcode}
 							onChange={(value) => {
 								setMeta({
@@ -90,7 +90,7 @@ const edit = (props) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('City', 'events')}
+							label={__('City', 'ctx-events')}
 							value={meta._location_town}
 							onChange={(value) => {
 								setMeta({
@@ -103,7 +103,7 @@ const edit = (props) => {
 				</Flex>
 
 				<SelectControl
-					label={__('Country', 'events')}
+					label={__('Country', 'ctx-events')}
 					value={meta._location_country}
 					options={countries}
 					onChange={(value) => {
@@ -115,7 +115,7 @@ const edit = (props) => {
 				/>
 
 				<TextControl
-					label={__('State', 'events')}
+					label={__('State', 'ctx-events')}
 					value={meta._location_state}
 					onChange={(value) => {
 						setMeta({
@@ -126,7 +126,7 @@ const edit = (props) => {
 				/>
 
 				<TextControl
-					label={__('URL', 'events')}
+					label={__('URL', 'ctx-events')}
 					value={meta._location_url}
 					onChange={(value) => {
 						setMeta({

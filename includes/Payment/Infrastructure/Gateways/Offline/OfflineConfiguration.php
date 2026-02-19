@@ -6,6 +6,7 @@ namespace Contexis\Events\Payment\Infrastructure\Gateways\Offline;
 
 use Contexis\Events\Payment\Infrastructure\Contracts\GatewayConfiguration;
 use Contexis\Events\Payment\Domain\ValueObjects\BankData;
+use Contexis\Events\Shared\Domain\ValueObjects\MalfunctionException;
 
 final class OfflineConfiguration implements GatewayConfiguration
 {
@@ -13,7 +14,7 @@ final class OfflineConfiguration implements GatewayConfiguration
 	private const string OPTION_KEY = 'ctx_events_gateway_offline';
 	public private(set) bool $isEnabled;
 	public private(set) string $title;
-	public private(set) BankData $bankData;
+	public private(set) ?BankData $bankData = null;
 	public private(set) int $paymentTerm;
 	public private(set) string $instructions;
     public function __construct(
@@ -25,17 +26,7 @@ final class OfflineConfiguration implements GatewayConfiguration
 	private function init(): void
     {
         $data = get_option(self::OPTION_KEY, []);
-        $this->isEnabled = (bool) ($data['enabled'] ?? false);
-        $this->title = (string) ($data['title'] ?? __('Bank Transfer', 'ctx-events'));
-        $this->bankData = new BankData(
-            $data['account_holder'] ?? '',
-            $data['iban'] ?? '',
-            $data['bic'] ?? '',
-            $data['bank_name'] ?? '',
-            $data['reference'] ?? '',
-        );
-		$this->paymentTerm = (int) ($data['payment_term'] ?? 0);
-		$this->instructions = (string) ($data['instructions'] ?? '');
+        $this->mapDataToProperties($data);
     }
 
 	private function mapDataToProperties(array $data): void
@@ -45,40 +36,42 @@ final class OfflineConfiguration implements GatewayConfiguration
         $this->paymentTerm = (int) ($data['paymentTerm'] ?? $data['payment_term'] ?? 0); // Handle snake_case from DB vs camelCase from Form
         $this->instructions = (string) ($data['instructions'] ?? $this->instructions ?? '');
 
-        $this->bankData = new BankData(
-            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData->accountHolder ?? ''),
-            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData->iban ?? ''),
-            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData->bic ?? ''),
-            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData->bankName ?? ''),
-            (string) ($data['reference'] ?? $data['reference'] ?? $this->bankData->reference ?? ''),
+        $this->bankData = BankData::fromValues(
+            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData?->accountHolder ?? ''),
+            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData?->iban ?? ''),
+            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData?->bic ?? ''),
+            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData?->bankName ?? '')
         );
+
+		if($this->isEnabled && (!$this->bankData || !$this->bankData->isValid())) {
+            $this->isEnabled = false;
+        }
     }
 
     public function updateFromArray(array $data): void
     {
-		$this->bankData = new BankData(
-            $data['accountHolder'] ?? $this->bankData->accountHolder,
-            $data['iban'] ?? $this->bankData->iban,
-            $data['bic'] ?? $this->bankData->bic,
-            $data['bankName'] ?? $this->bankData->bankName,
-            $data['reference'] ?? $this->bankData->reference,
-        );
+		$allowedKeys = ['enabled', 'title', 'paymentTerm', 'instructions', 'accountHolder', 'iban', 'bic', 'bankName'];
+    	$filteredData = array_intersect_key($data, array_flip($allowedKeys));
 
-		if (array_key_exists('enabled', $data)) {
-            $this->isEnabled = (bool) $data['enabled'];
-        }
-        
-        if (array_key_exists('title', $data)) {
-            $this->title = sanitize_text_field($data['title']);
-        }
-        
-        if (array_key_exists('paymentTerm', $data)) {
-            $this->paymentTerm = absint($data['paymentTerm']);
-        }
+		if (empty($filteredData)) {
+			throw new \DomainException(
+				__("No valid data provided to update the offline gateway configuration.", 'ctx-events'),
+				400
+			);
+		}
 
-        if (array_key_exists('instructions', $data)) {
-            $this->instructions = wp_kses_post($data['instructions']);
-        }
+		$cleanData = [
+			'enabled' => isset($data['enabled']) ? (bool) $data['enabled'] : $this->isEnabled,
+			'title' => sanitize_text_field($data['title'] ?? $this->title),
+			'paymentTerm' => isset($data['paymentTerm']) ? (int) $data['paymentTerm'] : $this->paymentTerm,
+			'instructions' => wp_kses_post($data['instructions'] ?? $this->instructions),
+			'accountHolder' => sanitize_text_field($data['accountHolder'] ?? $this->bankData?->accountHolder ?? ''),
+			'iban' => sanitize_text_field($data['iban'] ?? $this->bankData?->iban ?? ''),
+			'bic' => sanitize_text_field($data['bic'] ?? $this->bankData?->bic ?? ''),
+			'bankName' => sanitize_text_field($data['bankName'] ?? $this->bankData?->bankName ?? '')
+		];
+
+		$this->mapDataToProperties($cleanData);
     }
 
 	public function save(): void
@@ -91,14 +84,28 @@ final class OfflineConfiguration implements GatewayConfiguration
             'account_holder' => $this->bankData->accountHolder,
             'iban' => $this->bankData->iban,
             'bic' => $this->bankData->bic,
-            'bank_name' => $this->bankData->bankName,
-            'reference' => $this->bankData->reference,
+            'bank_name' => $this->bankData->bankName
         ]);
     }
 
-	public function setActive(bool $active): void
+	public function setEnabled(bool $active): void
 	{
+		if ($active) {
+            $this->validateSettings(); 
+        }
+		
 		$this->isEnabled = $active;
+	}
+
+	private function validateSettings(): void
+	{
+		if (!$this->bankData) {
+			throw new \DomainException(__("Bank data is missing", 'ctx-events'), 400);
+		}
+
+		if(!$this->bankData->isValid()) {
+			throw new \DomainException(__("Invalid banking data", 'ctx-events'), 400);
+		}
 	}
 
 
@@ -107,16 +114,9 @@ final class OfflineConfiguration implements GatewayConfiguration
         return [
 			[
 				'type' => 'heading',
-				'level' => 2,
+				'level' => 3,
 				'label' => __('General settings', 'ctx-events')
 			],
-            [
-                'type' => 'checkbox',
-                'name' => 'enabled',
-                'label' => __('Enable Payment Method', 'ctx-events'),
-				'help' => __('Enable or disable the offline payment method', 'ctx-events'),
-				'value' => $this->isEnabled,
-            ],
             [
                 'type' => 'text',
                 'name' => 'title',
@@ -134,32 +134,35 @@ final class OfflineConfiguration implements GatewayConfiguration
 			],
 			[
 				'type' => 'heading',
-				'level' => 2,
+				'level' => 3,
 				'label' => __('Banking Details', 'ctx-events')
 			],
             [
-                'type' => 'textarea',
+                'type' => 'text',
                 'name' => 'accountHolder',
+				'required' => true,
                 'label' => __("Account Holder", 'ctx-events'),
 				'help' => __("The name of the account holder", 'ctx-events'),
 				'value' => $this->bankData->accountHolder,
             ],
             [
-                'type' => 'textarea',
+                'type' => 'text',
                 'name' => 'iban',
+				'required' => true,
                 'label' => 'IBAN',
 				'help' => __('The IBAN of the account', 'ctx-events'),
 				'value' => $this->bankData->iban,
             ],
             [
-                'type' => 'textarea',
+                'type' => 'text',
                 'name' => 'bic',
-                'label' => 'BIC',
+				'label' => 'BIC',
+				'required' => true,
 				'help' => __('The BIC of the account', 'ctx-events'),
 				'value' => $this->bankData->bic,
             ],
             [
-                'type' => 'textarea',
+                'type' => 'text',
                 'name' => 'bankName',
                 'label' => __('Bank Name', 'ctx-events'),
 				'help' => __('The name of the bank', 'ctx-events'),
@@ -174,4 +177,14 @@ final class OfflineConfiguration implements GatewayConfiguration
 			],
         ];
     }
+
+	public function isValid(): bool
+	{
+		try {
+			$this->validateSettings();
+			return true;
+		} catch (\DomainException $e) {
+			return false;
+		}
+	}
 }

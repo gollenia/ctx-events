@@ -28,32 +28,32 @@ class AttendeeFormPost extends PostType
             'query_var' => true,
             'has_archive' => false,
             'supports' => ['title', 'excerpt', 'editor'],
-            'label' => __('Attendee Forms', 'events'),
-            'description' => __('Form for the attendee data', 'events'),
+            'label' => __('Attendee Forms', 'ctx-events'),
+            'description' => __('Form for the attendee data', 'ctx-events'),
 
             'template' => [
                 ['ctx-events/form-container', ['lock' => [
                     'move'   => true,
                     'remove' => true
                 ]], [
-                    ['ctx-events/form-text', ["required" => true, "width" => 3, "label" => __('Name', 'events'), "name" => 'name']]
+                    ['ctx-events/form-text', ["required" => true, "width" => 3, "label" => __('Name', 'ctx-events'), "name" => 'name']]
                 ]]
             ],
             'labels' => [
-                'name' => __('Attendee Form', 'events'),
-                'singular_name' => __('Attendee Form', 'events'),
-                'menu_name' => __('Attendee Forms', 'events'),
-                'add_new' => __('Add Attendee Form', 'events'),
-                'add_new_item' => __('Add New Attendee Form', 'events'),
-                'edit' => __('Edit', 'events'),
-                'edit_item' => __('Edit Attendee Form', 'events'),
-                'new_item' => __('New Attendee Form', 'events'),
-                'view' => __('View', 'events'),
-                'view_item' => __('View Attendee Form', 'events'),
-                'search_items' => __('Search Forms', 'events'),
-                'not_found' => __('No Forms Found', 'events'),
-                'not_found_in_trash' => __('No Forms Found in Trash', 'events'),
-                'parent' => __('Parent Form', 'events'),
+                'name' => __('Attendee Form', 'ctx-events'),
+                'singular_name' => __('Attendee Form', 'ctx-events'),
+                'menu_name' => __('Attendee Forms', 'ctx-events'),
+                'add_new' => __('Add Attendee Form', 'ctx-events'),
+                'add_new_item' => __('Add New Attendee Form', 'ctx-events'),
+                'edit' => __('Edit', 'ctx-events'),
+                'edit_item' => __('Edit Attendee Form', 'ctx-events'),
+                'new_item' => __('New Attendee Form', 'ctx-events'),
+                'view' => __('View', 'ctx-events'),
+                'view_item' => __('View Attendee Form', 'ctx-events'),
+                'search_items' => __('Search Forms', 'ctx-events'),
+                'not_found' => __('No Forms Found', 'ctx-events'),
+                'not_found_in_trash' => __('No Forms Found in Trash', 'ctx-events'),
+                'parent' => __('Parent Form', 'ctx-events'),
             ],
         ];
 

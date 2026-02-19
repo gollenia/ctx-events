@@ -25,11 +25,11 @@ const BookingStatus = () => {
 		<PluginPostStatusInfo>
 			<HStack className="editor-post-panel__row">
 				<div className="editor-post-panel__row-label">
-					{__('Bookings', 'events')}
+					{__('Bookings', 'ctx-events')}
 				</div>
 				<div className="editor-post-panel__row-value">
 					<Button onClick={openBookingSidebar} variant="tertiary" isCompact>
-						{isEnabled ? __('enabled', 'events') : __('disabled', 'events')}
+						{isEnabled ? __('enabled', 'ctx-events') : __('disabled', 'ctx-events')}
 					</Button>
 				</div>
 			</HStack>

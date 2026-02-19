@@ -16,39 +16,39 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ToggleControl
-					label={__('Required', 'events')}
+					label={__('Required', 'ctx-events')}
 					checked={required}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
 
 				<TextControl
-					label={__('Pattern', 'events')}
-					help={__('Help text for the input field', 'events')}
+					label={__('Pattern', 'ctx-events')}
+					help={__('Help text for the input field', 'ctx-events')}
 					value={help}
 					onChange={(value) => setAttributes({ help: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={4}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
 				/>
 				<RangeControl
-					label={__('Height', 'events')}
-					help={__('Number of text rows', 'events')}
+					label={__('Height', 'ctx-events')}
+					help={__('Number of text rows', 'ctx-events')}
 					value={rows}
 					onChange={(value) => setAttributes({ rows: value })}
 					min={1}
 					max={12}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					props={props}
 				/>

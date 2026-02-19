@@ -6,7 +6,7 @@ namespace Contexis\Events\Event\Infrastructure;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 use Contexis\Events\Event\Infrastructure\EventPost;
 
-class RecurringEventPost implements PostType
+class RecurringEventPost extends PostType
 {
     public const POST_TYPE = 'event-recurring';
 
@@ -21,18 +21,18 @@ class RecurringEventPost implements PostType
     public function registerPostType(): void
     {
         $labels = [
-            'name' => __('Recurring Events', 'events'),
-            'singular_name' => __('Recurring Event', 'events'),
-            'menu_name' => __('Recurring Events', 'events'),
-            'add_new' => __('Add Recurring Event', 'events'),
-            'add_new_item' => __('Add New Recurring Event', 'events'),
-            'edit' => __('Edit', 'events'),
-            'edit_item' => __('Edit Recurring Event', 'events'),
-            'new_item' => __('New Recurring Event', 'events'),
-            'view' => __('View', 'events'),
-            'view_item' => __('View Recurring Event', 'events'),
-            'search_items' => __('Search Recurring Events', 'events'),
-            'not_found' => __('No Recurring Events Found', 'events'),
+            'name' => __('Recurring Events', 'ctx-events'),
+            'singular_name' => __('Recurring Event', 'ctx-events'),
+            'menu_name' => __('Recurring Events', 'ctx-events'),
+            'add_new' => __('Add Recurring Event', 'ctx-events'),
+            'add_new_item' => __('Add New Recurring Event', 'ctx-events'),
+            'edit' => __('Edit', 'ctx-events'),
+            'edit_item' => __('Edit Recurring Event', 'ctx-events'),
+            'new_item' => __('New Recurring Event', 'ctx-events'),
+            'view' => __('View', 'ctx-events'),
+            'view_item' => __('View Recurring Event', 'ctx-events'),
+            'search_items' => __('Search Recurring Events', 'ctx-events'),
+            'not_found' => __('No Recurring Events Found', 'ctx-events'),
         ];
 
         $post_type = [
@@ -49,8 +49,8 @@ class RecurringEventPost implements PostType
             'hierarchical' => false,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
             'rewrite' => ['slug' => 'events-recurring','with_front' => false],
-            'label' => __('Recurring Events', 'events'),
-            'description' => __('Recurring Events Template', 'events'),
+            'label' => __('Recurring Events', 'ctx-events'),
+            'description' => __('Recurring Events Template', 'ctx-events'),
             'labels' => $labels
         ];
 

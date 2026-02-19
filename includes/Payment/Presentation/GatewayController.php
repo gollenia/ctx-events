@@ -6,6 +6,8 @@ namespace Contexis\Events\Payment\Presentation;
 
 use Contexis\Events\Payment\Application\UseCases\EditGateway;
 use Contexis\Events\Payment\Application\UseCases\ListGateways;
+use Contexis\Events\Payment\Application\UseCases\ToggleGateway;
+use Contexis\Events\Payment\Application\UseCases\UpdateGateway;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class GatewayController implements RestController
@@ -16,74 +18,50 @@ final class GatewayController implements RestController
 	public function __construct(
 		private readonly EditGateway $editGateway,
 		private readonly ListGateways $listGateways,
+		private readonly ToggleGateway $toggleGateway,
+		private readonly UpdateGateway $updateGateway,
 	) {}
 	public function register(): void
     {
-        register_rest_route('events/v3', '/gateways/(?P<slug>\w+)', [
-            'methods'   => \WP_REST_Server::READABLE,
-            'callback'  => [$this, 'editGateway'],
-            'permission_callback' => '__return_true',
-            'args' => [
-                'slug' => [
-                    'required' => true,
-                    'description' => 'The slug of the gateway to retrieve.',
-                    'type' => 'string',
-                ]
-            ],
-			'permission_callback' => '__return_true',
-        ]);
+
+		$base_args = [
+            'slug' => [
+                'required'    => true,
+                'type'        => 'string',
+                'description' => 'unique gateway identifier',
+                'sanitize_callback' => 'sanitize_title'
+            ]
+        ];
 
 		register_rest_route('events/v3', '/gateways', [
-            'methods'   => \WP_REST_Server::READABLE,
-            'callback'  => [$this, 'listGateways'],
-            'permission_callback' => '__return_true',
-            'args' => [
-                'active' => [
-                    'required' => false,
-                    'description' => 'The active status of the gateway to retrieve.',
-                    'type' => 'boolean',
-                ]
-            ],
-			'permission_callback' => '__return_true',
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [$this, 'listGateways'],
+            'permission_callback' => [$this, 'checkGatewayPermission'],
         ]);
 
-		register_rest_route('events/v3', '/gateways', [
-            'methods'   => 'PUT',
-            'callback'  => [$this, 'updateGateway'],
-            'permission_callback' => '__return_true',
-            'args' => [
-                'slug' => [
-                    'required' => true,
-                    'description' => 'The slug of the gateway to update.',
-                    'type' => 'string',
-                ],
-                'data' => [
-                    'required' => true,
-                    'description' => 'The data of the gateway to update.',
-                    'type' => 'object',
-                ]
+		register_rest_route('events/v3', '/gateways/(?P<slug>\w+)', [
+            [
+                'methods'             => \WP_REST_Server::READABLE,
+                'callback'            => [$this, 'editGateway'],
+                'permission_callback' => [$this, 'checkGatewayPermission'],
+                'args'                => $base_args,
             ],
-			'permission_callback' => '__return_true',
-        ]);
-
-
-		register_rest_route('events/v3', '/gateways', [
-            'methods'   => 'PATCH',
-            'callback'  => [$this, 'toggleGateway'],
-            'permission_callback' => '__return_true',
-            'args' => [
-                'slug' => [
-                    'required' => true,
-                    'description' => 'The slug of the gateway to update.',
-                    'type' => 'string',
-                ],
-                'switch' => [
-                    'required' => true,
-                    'description' => 'Activate or deactivate the gateway.',
-                    'type' => 'boolean',
-                ]
+            [
+                'methods'             => 'PUT',
+                'callback'            => [$this, 'updateGateway'],
+                'permission_callback' => [$this, 'checkGatewayPermission'],
+                'args'                => array_merge($base_args, [
+                    'settings' => ['required' => true, 'type' => 'object']
+                ]),
             ],
-			'permission_callback' => '__return_true',
+            [
+                'methods'             => 'PATCH',
+                'callback'            => [$this, 'toggleGateway'],
+                'permission_callback' => [$this, 'checkGatewayPermission'],
+                'args'                => array_merge($base_args, [
+                    'enabled' => ['required' => true, 'type' => 'boolean']
+                ]),
+            ],
         ]);
     }
 
@@ -104,19 +82,33 @@ final class GatewayController implements RestController
 
 	public function updateGateway(\WP_REST_Request $request): \WP_REST_Response
 	{
-		$gateway = $this->updateGateway->execute($request->get_param('slug'), $request->get_param('data'));
-		if(!$gateway) {
-			return new \WP_REST_Response([], 404);
+		try {
+			$result = $this->updateGateway->execute($request->get_param('slug'), $request->get_param('settings'));
+			if(!$result) {
+				return new \WP_REST_Response([], 400);
+			}
+			return new \WP_REST_Response($request->get_param('settings'));
+		} catch (\DomainException $e) {
+			return new \WP_REST_Response(['error'=> $e->getMessage()], 400);
 		}
-		return new \WP_REST_Response($gateway);
-	}
+	}	
 
 	public function toggleGateway(\WP_REST_Request $request): \WP_REST_Response
 	{
-		$gateway = $this->toggleGateway->execute($request->get_param('slug'), $request->get_param('switch'));
-		if(!$gateway) {
-			return new \WP_REST_Response([], 404);
+		try {
+			$result = $this->toggleGateway->execute($request->get_param('slug'), $request->get_param('enabled'));
+			if(!$result) {
+				return new \WP_REST_Response([], 400);
+			}
+			return new \WP_REST_Response($result);
+		} catch (\DomainException $e) {	
+			return new \WP_REST_Response(['error'=> $e->getMessage()], 400);
 		}
-		return new \WP_REST_Response($gateway);
+	}
+
+	public function checkGatewayPermission(): bool
+	{
+		return true;
+		return current_user_can('manage_options');
 	}
 }

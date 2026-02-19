@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "jsxFactory": "window.wp.element.createElement",
+    "jsxFragmentFactory": "window.wp.element.Fragment",
+    "baseUrl": ".",
+    "paths": {
+			"@events/form": ["src/editor/blocks/form/_shared"],
+			"@events/form/*": ["src/editor/blocks/form/_shared/*"],
+			
+			"@events/details": ["src/editor/blocks/details/_shared"],
+			"@events/details/*": ["src/editor/blocks/details/_shared/*"],
+			
+			"@events/datatable": ["src/shared/datatable"],
+			"@events/datatable/*": ["src/shared/datatable/*"],
+			
+			"@events/adminfields": ["src/shared/adminfields"],
+			"@events/adminfields/*": ["src/shared/adminfields/*"],
+			
+			"@events/i18n": ["src/shared/i18n"],
+			"@events/i18n/*": ["src/shared/i18n/*"]
+		},
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*"]
+}

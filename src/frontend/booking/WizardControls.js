@@ -40,16 +40,16 @@ const WizardControls = ({ state, dispatch }) => {
 
 	const message = () => {
 		if (TICKETS_MISSING)
-			return __('Please select at least one ticket', 'events');
+			return __('Please select at least one ticket', 'ctx-events');
 		if (ATTENDEES_MISSING)
-			return __('Please fill in all required fields', 'events');
+			return __('Please fill in all required fields', 'ctx-events');
 		if (REGISTRATION_MISSING)
-			return __('Please fill in all required fields', 'events');
-		if (PAYMENT_MISSING) return __('Please select a payment method', 'events');
+			return __('Please fill in all required fields', 'ctx-events');
+		if (PAYMENT_MISSING) return __('Please select a payment method', 'ctx-events');
 		if (PRIVACY_MISSING)
-			return __('Please accept the privacy policy', 'events');
+			return __('Please accept the privacy policy', 'ctx-events');
 		if (ONLINE_PAYMENT)
-			return __('You will be redirected to the payment gateway', 'events');
+			return __('You will be redirected to the payment gateway', 'ctx-events');
 		return '';
 	};
 	return (
@@ -63,7 +63,7 @@ const WizardControls = ({ state, dispatch }) => {
 							dispatch({ type: 'DECREMENT_WIZARD' });
 						}}
 					>
-						{__('Back', 'events')}
+						{__('Back', 'ctx-events')}
 					</button>
 				)}
 
@@ -71,7 +71,7 @@ const WizardControls = ({ state, dispatch }) => {
 			{wizard.step < FINAL_STEP && (
 				<>
 					{message() != '' && (
-						<span className="button--pseudo">{__(message(), 'events')}</span>
+						<span className="button--pseudo">{__(message(), 'ctx-events')}</span>
 					)}
 					<button
 						type="button"
@@ -82,7 +82,7 @@ const WizardControls = ({ state, dispatch }) => {
 							dispatch({ type: 'INCREMENT_WIZARD' });
 						}}
 					>
-						{__('Next', 'events')}
+						{__('Next', 'ctx-events')}
 					</button>
 				</>
 			)}
@@ -100,7 +100,7 @@ const WizardControls = ({ state, dispatch }) => {
 						sendOrder(state, dispatch);
 					}}
 				>
-					{__('Book now', 'events')}
+					{__('Book now', 'ctx-events')}
 				</button>
 			)}
 			{SUCCESS && (
@@ -111,7 +111,7 @@ const WizardControls = ({ state, dispatch }) => {
 						dispatch({ type: 'RESET' });
 					}}
 				>
-					{__('Close', 'events')}
+					{__('Close', 'ctx-events')}
 				</button>
 			)}
 		</div>

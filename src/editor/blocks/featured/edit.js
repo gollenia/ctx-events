@@ -181,7 +181,7 @@ const edit = (props) => {
 						</div>
 					</div>
 				)}
-				{!currentEvent && <h2>{__('No events found', 'events')}</h2>}
+				{!currentEvent && <h2>{__('No events found', 'ctx-events')}</h2>}
 			</div>
 		</>
 	);

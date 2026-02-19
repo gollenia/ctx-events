@@ -7,24 +7,31 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesCount;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesStats;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
+use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
 
 class DbBookingPersistanceRepository implements BookingRepository
 {
+	public function __construct(
+		private Database $db
+	)
+	{
+	}
     
 	public function find(BookingId $id): ?Booking
 	{
-		global $wpdb;
-
 		$table = BookingMigration::getTableName();
 		$sql = "SELECT * FROM $table WHERE id = %s";
-		$result = $wpdb->get_row($wpdb->prepare($sql, $id->toInt()));
+		$result = $this->db->getRow($this->db->prepare($sql, $id->toInt()));
 
 		if (!$result) {
 			return null;
@@ -40,8 +47,6 @@ class DbBookingPersistanceRepository implements BookingRepository
 
     public function buildQuery(array $args = []): array
     {
-
-        global $wpdb;
 
         $table = BookingMigration::getTableName();
         $sql = "SELECT * FROM $table";
@@ -64,7 +69,7 @@ class DbBookingPersistanceRepository implements BookingRepository
 
                 case 'search':
                     $where[] = "registration LIKE %s";
-                    $params[] = '%' . $wpdb->esc_like($value) . '%';
+                    $params[] = '%' . $this->db->db->esc_like($value) . '%';
                     break;
             }
         }
@@ -99,58 +104,35 @@ class DbBookingPersistanceRepository implements BookingRepository
         return [$sql, $params];
     }
 
-    public static function sumSpaces(int $event_id, array $status = []): int
-    {
-        global $wpdb;
-        $table = BookingMigration::getTableName();
-
-        $where = ['event_id = %d'];
-        $params = [$event_id];
-        if (empty($status)) {
-            $status = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        }
-
-        $placeholders = implode(',', array_fill(0, count($status), '%d'));
-        $where[] = "status IN ($placeholders)";
-        $params = array_merge($params, $status);
-
-        $sql = "SELECT SUM(spaces) FROM $table WHERE " . implode(' AND ', $where);
-
-        return (int) $wpdb->get_var($wpdb->prepare($sql, ...$params));
-    }
-
-	public function getSalesStatsForEvent(int $eventId): TicketSalesStats
+	public function getBookingsForEvent(EventId $eventId): TicketBookingsMap
 	{
-		global $wpdb;
 
 		$attendeeTable = AttendeeMigration::getTableName();
 		$bookingTable = BookingMigration::getTableName();
 
-		$sql = sprintf(
+		$sql = $this->db->prepare(
 			"SELECT 
 				a.ticket_id,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as pending,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as approved,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as cancelled,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as expired
-			FROM %s a
-			JOIN %s b ON a.booking_id = b.id
-			WHERE b.event_id = %%d 
+			FROM {$attendeeTable} a
+			JOIN {$bookingTable} b ON a.booking_id = b.id
+			WHERE b.event_id = %d 
 			GROUP BY a.ticket_id",
-			
 			BookingStatus::PENDING->value,
 			BookingStatus::APPROVED->value,
 			BookingStatus::CANCELED->value,
 			BookingStatus::EXPIRED->value,
-			$attendeeTable,
-			$bookingTable
+			$eventId->toInt()
 		);
 
-		$rows = $wpdb->get_results($wpdb->prepare($sql, $eventId));
+    	$rows = $this->db->getResults($sql);
 
 		$statsObjects = [];
 		foreach ($rows as $row) {
-			$statsObjects[] = new TicketSalesCount(
+			$statsObjects[] = new TicketBookings(
 				TicketId::from($row->ticket_id),
 				(int)$row->pending,
 				(int)$row->approved,
@@ -159,24 +141,22 @@ class DbBookingPersistanceRepository implements BookingRepository
 			);
 		}
 
-		return new TicketSalesStats($statsObjects);
+		return new TicketBookingsMap($statsObjects);
 	}
 
 	private function getBookingAttendees(BookingId $id): array
 	{
-		global $wpdb;
 		$table = AttendeeMigration::getTableName();
-		$sql = "SELECT * FROM $table WHERE booking_id = %s";
-		$result = $wpdb->get_results($wpdb->prepare($sql, $id->toInt()));
+		$sql = "SELECT * FROM $table WHERE booking_id = %d";
+		$result = $this->db->getResults($this->db->prepare($sql, $id->toInt()));
 		return $result;
 	}
 
 	private function getBookingTransactions(BookingId $id): array
 	{
-		global $wpdb;
 		$table = TransactionMigration::getTableName();
-		$sql = "SELECT * FROM $table WHERE booking_id = %s";
-		$result = $wpdb->get_results($wpdb->prepare($sql, $id->toInt()));
+		$sql = "SELECT * FROM $table WHERE booking_id = %d";
+		$result = $this->db->getResults($this->db->prepare($sql, $id->toInt()));
 		return $result;
 	}
 }

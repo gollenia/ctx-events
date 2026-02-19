@@ -36,7 +36,7 @@ const Payment = (props) => {
 					{event?.has_coupons && <Coupon state={state} dispatch={dispatch} />}
 					{event.gateways_available.length > 1 && (
 						<InputField
-							label={__('Payment Method', 'events')}
+							label={__('Payment Method', 'ctx-events')}
 							options={gatewayOptions}
 							name={'gateway'}
 							onChange={(event) => {
@@ -50,7 +50,7 @@ const Payment = (props) => {
 					{event.allow_donation &&
 						window.eventBookingLocalization.donation != '' && (
 							<div className="donation" style={{ gridColumn: 'span 6' }}>
-								<h4>{__('Donation', 'events')}</h4>
+								<h4>{__('Donation', 'ctx-events')}</h4>
 								<p
 									dangerouslySetInnerHTML={{
 										__html: window.eventBookingLocalization.donation,
@@ -69,12 +69,12 @@ const Payment = (props) => {
 									type={'checkbox'}
 									value={allowDonation}
 									name={'allow_donation'}
-									help={__('Yes, I want to donate', 'events')}
+									help={__('Yes, I want to donate', 'ctx-events')}
 									locale={event.l10n.locale}
 									className="donation-checkbox"
 								/>
 								<InputField
-									label={__('Amount', 'events')}
+									label={__('Amount', 'ctx-events')}
 									onChange={(event) => {
 										dispatch({
 											type: 'SET_FIELD',

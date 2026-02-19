@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use Contexis\Events\Event\Application\EventDto;
-use Contexis\Events\Event\Application\EventIncludes;
+use Contexis\Events\Event\Application\EventResponse;
+use Contexis\Events\Event\Application\EventIncludeRequest;
 use Contexis\Events\Event\Application\EventPolicy;
 use Contexis\Events\Event\Application\GetEvent;
 use Contexis\Events\Location\Application\LocationDto;
@@ -41,7 +41,7 @@ test('returns null when event not found', function () {
 
     $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
-    $dto = $uc->execute(999, new EventIncludes(location: false, image: false), fakeUserContext());
+    $dto = $uc->execute(999, new EventIncludeRequest(location: false, image: false), fakeUserContext());
 
     expect($dto)->toBeNull();
 });
@@ -61,16 +61,16 @@ test('returns event dto without includes', function () {
 
     $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
-    $dto = $uc->execute($event->id->toInt(), new EventIncludes(location: false, image: false), fakeUserContext());
+    $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: false, image: false), fakeUserContext());
 
-    expect($dto)->toBeInstanceOf(EventDto::class);
+    expect($dto)->toBeInstanceOf(EventResponse::class);
     expect($dto->id)->toBe($id);
     expect($dto->id)->toBe($event->id->toInt());
     expect($dto->locationDto)->toBeNull();
     // image is not in top level DTO usually as property 'includes', but let's check class def.
     // Looking at GetEvent.php: 
     /*
-        $response = EventDto::fromDomainModel(
+        $response = EventResponse::fromDomainModel(
             event: $event,
             locationDto: $locationDto,
             imageDto: $imageDto,
@@ -78,7 +78,7 @@ test('returns event dto without includes', function () {
         );
     */
     // So properties are likely flattened or on the dto itself. 
-    // Assuming EventDto matches what we see in ListEvents context roughly.
+    // Assuming EventResponse matches what we see in ListEvents context roughly.
 });
 
 
@@ -99,9 +99,9 @@ test('returns event dto when event found with includes', function () {
 
     $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
 
-    $dto = $uc->execute($event->id->toInt(), new EventIncludes(location: true, image: true), fakeUserContext());
+    $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: true, image: true), fakeUserContext());
 
-    expect($dto)->toBeInstanceOf(EventDto::class);
+    expect($dto)->toBeInstanceOf(EventResponse::class);
     expect($dto->id)->toBe($id);
     // Validation of includes
     if (property_exists($dto, 'locationDto')) {

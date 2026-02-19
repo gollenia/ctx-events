@@ -5,7 +5,7 @@ const Notes = ({ store }) => {
 	const { booking } = state.data;
 	return (
 		<div className="booking-notes">
-			<h2>{__('Notes', 'events')}</h2>
+			<h2>{__('Notes', 'ctx-events')}</h2>
 			{booking.notes && booking.notes.length > 0 ? (
 				<ul>
 					{booking.notes.map((note, index) => (
@@ -15,11 +15,11 @@ const Notes = ({ store }) => {
 					))}
 				</ul>
 			) : (
-				<p>{__('No notes available for this booking.', 'events')}</p>
+				<p>{__('No notes available for this booking.', 'ctx-events')}</p>
 			)}
-			<p>{__('Add a note to this booking:', 'events')}</p>
+			<p>{__('Add a note to this booking:', 'ctx-events')}</p>
 			<textarea
-				placeholder={__('Type your note here...', 'events')}
+				placeholder={__('Type your note here...', 'ctx-events')}
 				rows="4"
 				style={{ width: '100%' }}
 				onChange={(e) => {
@@ -41,7 +41,7 @@ const Notes = ({ store }) => {
 				}}
 				style={{ marginTop: '10px' }}
 			>
-				{__('Add Note', 'events')}
+				{__('Add Note', 'ctx-events')}
 			</button>
 		</div>
 	);

@@ -28,14 +28,14 @@ final class FormAdmin implements AdminService
 			'<a href="%s" class="%s">%s</a>',
 			$bookingUrl,
 			$isBooking ? 'current' : '', // WP Standard-Klasse für aktiven Link
-			__('Buchungsvorlagen', 'events')
+			__('Buchungsvorlagen', 'ctx-events')
 		);
 
 		$attendeeLink = sprintf(
 			'<a href="%s" class="%s">%s</a>',
 			$attendeeUrl,
 			$isAttendee ? 'current' : '',
-			__('Teilnehmervorlagen', 'events')
+			__('Teilnehmervorlagen', 'ctx-events')
 		);
 
 		// Jetzt der Trick: Wir bauen ein neues Array, setzen unsere Links nach vorne

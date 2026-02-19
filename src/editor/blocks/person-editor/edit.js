@@ -32,7 +32,7 @@ const edit = ({ context }) => {
 				<Flex>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Organization', 'events')}
+							label={__('Organization', 'ctx-events')}
 							value={meta._person_organization}
 							onChange={(value) => {
 								setMeta({
@@ -44,7 +44,7 @@ const edit = ({ context }) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Prefix', 'events')}
+							label={__('Prefix', 'ctx-events')}
 							value={meta._person_prefix}
 							onChange={(value) => {
 								setMeta({
@@ -56,7 +56,7 @@ const edit = ({ context }) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Suffix', 'events')}
+							label={__('Suffix', 'ctx-events')}
 							value={meta._person_suffix}
 							onChange={(value) => {
 								setMeta({
@@ -70,7 +70,7 @@ const edit = ({ context }) => {
 				<Flex>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Position', 'events')}
+							label={__('Position', 'ctx-events')}
 							value={meta._person_position}
 							onChange={(value) => {
 								setMeta({
@@ -84,12 +84,12 @@ const edit = ({ context }) => {
 				<Flex>
 					<FlexItem isBlock>
 						<SelectControl
-							label={__('Gender', 'events')}
+							label={__('Gender', 'ctx-events')}
 							value={meta._person_gender}
 							options={[
-								{ label: __('Select gender', 'events'), value: '' },
-								{ label: __('Male', 'events'), value: 'male' },
-								{ label: __('Female', 'events'), value: 'female' },
+								{ label: __('Select gender', 'ctx-events'), value: '' },
+								{ label: __('Male', 'ctx-events'), value: 'male' },
+								{ label: __('Female', 'ctx-events'), value: 'female' },
 							]}
 							onChange={(value) => {
 								setMeta({
@@ -101,7 +101,7 @@ const edit = ({ context }) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('First Name', 'events')}
+							label={__('First Name', 'ctx-events')}
 							value={meta._person_first_name}
 							onChange={(value) => {
 								setMeta({
@@ -113,7 +113,7 @@ const edit = ({ context }) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Last Name', 'events')}
+							label={__('Last Name', 'ctx-events')}
 							value={meta._person_last_name}
 							onChange={(value) => {
 								setMeta({
@@ -127,7 +127,7 @@ const edit = ({ context }) => {
 				<Flex>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('E-Mail', 'events')}
+							label={__('E-Mail', 'ctx-events')}
 							value={meta._person_email}
 							onChange={(value) => {
 								setMeta({
@@ -139,7 +139,7 @@ const edit = ({ context }) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Telephone', 'events')}
+							label={__('Telephone', 'ctx-events')}
 							value={meta._person_phone}
 							onChange={(value) => {
 								setMeta({
@@ -154,7 +154,7 @@ const edit = ({ context }) => {
 					{meta._person_same_as.map((sameAs, index) => (
 						<Item key={index}>
 							<TextControl
-								label={__('Social Link', 'events')}
+								label={__('Social Link', 'ctx-events')}
 								value={sameAs}
 								onChange={(value) => {
 									const newSameAs = [...meta._person_same_as];
@@ -179,7 +179,7 @@ const edit = ({ context }) => {
 						});
 					}}
 				>
-					{__('Add Social Link', 'events')}
+					{__('Add Social Link', 'ctx-events')}
 				</button>
 			</div>
 		</div>

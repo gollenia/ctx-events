@@ -22,17 +22,4 @@ final class BookingDecision
     {
         return new self(false, $reason);
     }
-
-    public function message(): string
-    {
-        return match ($this->reason) {
-            BookingDenyReason::DISABLED   => 'Booking is disabled for this event.',
-            BookingDenyReason::NO_CAPACITY => 'No capacity available.',
-            BookingDenyReason::NOT_STARTED => 'Booking period has not started yet.',
-            BookingDenyReason::ENDED      => 'Booking period has ended.',
-            BookingDenyReason::SOLD_OUT   => 'Tickets are sold out.',
-            BookingDenyReason::FORM_ERROR => 'Form error.',
-            default => '',
-        };
-    }
 }

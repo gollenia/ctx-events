@@ -74,7 +74,7 @@ function Summary({ state, dispatch }) {
 									{event.tickets_available[id].description}
 								</div>
 								<div className="list__subtitle">
-									{__('Base price:', 'events')}{' '}
+									{__('Base price:', 'ctx-events')}{' '}
 									{formatCurrency(
 										event.tickets_available[id].price,
 										window.eventBookingLocalization.locale,
@@ -83,7 +83,7 @@ function Summary({ state, dispatch }) {
 								</div>
 								{maxSpaces < 5 && (
 									<div className="list__subtitle has-red-text">
-										{__('Available:', 'events')} {maxSpaces}
+										{__('Available:', 'ctx-events')} {maxSpaces}
 									</div>
 								)}
 							</div>
@@ -150,7 +150,7 @@ function Summary({ state, dispatch }) {
 					<div className="list__item">
 						<div className="list__content">
 							<div className="list__title">
-								{response.coupon.description || __('Coupon', 'events')}
+								{response.coupon.description || __('Coupon', 'ctx-events')}
 							</div>
 						</div>
 						<div className="list__actions">
@@ -176,7 +176,7 @@ function Summary({ state, dispatch }) {
 				<div className="list__item">
 					<div className="list__content">
 						<div className="list__title">
-							<b>{__('Full price', 'events')}</b>
+							<b>{__('Full price', 'ctx-events')}</b>
 						</div>
 					</div>
 					<div className="list__actions">

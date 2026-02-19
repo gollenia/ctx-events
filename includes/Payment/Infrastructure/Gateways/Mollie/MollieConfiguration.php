@@ -77,13 +77,6 @@ final class MollieConfiguration implements GatewayConfiguration
     {
         return [
             [
-                'name' => 'enabled',
-                'type' => 'toggle',
-                'label' => __('Activate Mollie', 'ctx-events'),
-                'description' => __('Activate Mollie payments in your event system.', 'ctx-events'),
-				'value' => $this->isEnabled,
-            ],
-            [
                 'name' => 'apiKeyLive',
                 'type' => 'password',
                 'label' => __('Live API Key', 'ctx-events'),
@@ -135,8 +128,29 @@ final class MollieConfiguration implements GatewayConfiguration
         return $this->isEnabled;
     }
 
-    public function setActive(bool $active): void
-    {
-        $this->isEnabled = $active;
-    }
+    public function setEnabled(bool $active): void
+	{
+		if ($active) {
+            $this->validateSettings(); 
+        }
+		
+		$this->isEnabled = $active;
+	}
+
+	private function validateSettings(): void
+	{
+		if (!$this->apiKeyLive && !$this->apiKeyTest) {
+			throw new \DomainException(__("API keys are missing", 'ctx-events'), 400);
+		}
+	}
+
+	public function isValid(): bool
+	{
+		try {
+			$this->validateSettings();
+			return true;
+		} catch (\DomainException $e) {
+			return false;
+		}
+	}
 }

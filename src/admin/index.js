@@ -3,7 +3,7 @@ import './style.scss';
 import { initBookingsAdmin } from './bookings/index.js';
 import { initGatewayAdmin } from './gateways/index.js';
 import { initOptionsAdmin } from './options/index.js';
-import { initEventsList } from './events/index.js';
+import { initEventsList } from './events/index.tsx';
 
 console.log('ctx-events admin loaded');
 domReady(() => {

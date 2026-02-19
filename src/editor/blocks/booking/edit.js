@@ -57,7 +57,7 @@ const edit = (props) => {
 					tagName="span"
 					value={buttonTitle}
 					onChange={(value) => setAttributes({ buttonTitle: value })}
-					placeholder={__('Registration', 'events')}
+					placeholder={__('Registration', 'ctx-events')}
 					allowedFormats={['core/bold', 'core/italic']}
 				/>
 			</span>

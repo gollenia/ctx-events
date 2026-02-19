@@ -40,14 +40,14 @@ function EventCards(props) {
 					if (item.bookings?.spaces > 0) {
 						return (
 							<span className="pills__item pills__item--warning">
-								{__('Nearly Booked up', 'events')}
+								{__('Nearly Booked up', 'ctx-events')}
 							</span>
 						);
 					}
 
 					return (
 						<span className="pills__item pills__item--error">
-							{__('Booked up', 'events')}
+							{__('Booked up', 'ctx-events')}
 						</span>
 					);
 				};

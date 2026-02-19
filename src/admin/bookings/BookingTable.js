@@ -63,7 +63,7 @@ const BookingTable = () => {
 
 	const fields = [
 		{
-			label: __('Name', 'events'),
+			label: __('Name', 'ctx-events'),
 			id: 'full_name',
 			enableHiding: false,
 			enableGlobalSearch: true,
@@ -71,7 +71,7 @@ const BookingTable = () => {
 			type: 'string',
 		},
 		{
-			label: __('E-Mail', 'events'),
+			label: __('E-Mail', 'ctx-events'),
 			id: 'user_email',
 			enableHiding: false,
 			enableGlobalSearch: true,
@@ -79,7 +79,7 @@ const BookingTable = () => {
 			type: 'string',
 		},
 		{
-			label: __('Event', 'events'),
+			label: __('Event', 'ctx-events'),
 			id: 'event',
 			enableSorting: false,
 			filterBy: {
@@ -93,7 +93,7 @@ const BookingTable = () => {
 			},
 		},
 		{
-			label: __('Price', 'events'),
+			label: __('Price', 'ctx-events'),
 			id: 'price',
 			type: 'string',
 			render: ({ item }) => {
@@ -105,7 +105,7 @@ const BookingTable = () => {
 			enableSorting: false,
 		},
 		{
-			label: __('Donation', 'events'),
+			label: __('Donation', 'ctx-events'),
 			id: 'donation',
 			type: 'string',
 			render: ({ item }) => {
@@ -117,7 +117,7 @@ const BookingTable = () => {
 			enableSorting: false,
 		},
 		{
-			label: __('Attendees', 'events'),
+			label: __('Attendees', 'ctx-events'),
 			id: 'attendees',
 			type: 'string',
 			render: ({ item }) => {
@@ -130,19 +130,19 @@ const BookingTable = () => {
 			enableSorting: false,
 		},
 		{
-			label: __('ID', 'events'),
+			label: __('ID', 'ctx-events'),
 			id: 'id',
 			type: 'number',
 			enableSorting: true,
 		},
 		{
-			label: __('Gateway', 'events'),
+			label: __('Gateway', 'ctx-events'),
 			id: 'gateway',
 			type: 'string',
 			enableSorting: true,
 		},
 		{
-			label: __('Date', 'events'),
+			label: __('Date', 'ctx-events'),
 			id: 'date',
 			filterBy: {
 				operators: ['is', 'before', 'after'],
@@ -153,19 +153,19 @@ const BookingTable = () => {
 		},
 
 		{
-			label: __('Status', 'events'),
+			label: __('Status', 'ctx-events'),
 			id: 'status',
 			type: 'string',
 			filterBy: {
 				operators: ['is', 'is not'],
 			},
 			elements: [
-				{ value: 0, label: __('Pending', 'events') },
-				{ value: 1, label: __('Approved', 'events') },
-				{ value: 2, label: __('Rejected', 'events') },
-				{ value: 3, label: __('Canceled', 'events') },
-				{ value: 6, label: __('Awaiting Payment', 'events') },
-				{ value: 7, label: __('Payment Paid', 'events') },
+				{ value: 0, label: __('Pending', 'ctx-events') },
+				{ value: 1, label: __('Approved', 'ctx-events') },
+				{ value: 2, label: __('Rejected', 'ctx-events') },
+				{ value: 3, label: __('Canceled', 'ctx-events') },
+				{ value: 6, label: __('Awaiting Payment', 'ctx-events') },
+				{ value: 7, label: __('Payment Paid', 'ctx-events') },
 			],
 			render: ({ item }) => {
 				return (
@@ -239,9 +239,9 @@ const BookingTable = () => {
 			<HStack
 				style={{ marginBottom: '1em', padding: '12px 48px', width: 'auto' }}
 			>
-				<h1>{__('Bookings', 'events')}</h1>
+				<h1>{__('Bookings', 'ctx-events')}</h1>
 				<Button variant="secondary" onClick={() => setShowAddNew(true)}>
-					{__('Export', 'events')}
+					{__('Export', 'ctx-events')}
 				</Button>
 			</HStack>
 			{/* { slug && <GatewayModal slug={ slug } onClose={ onCancel } onToggle={ onToggle } /> } */}
@@ -262,7 +262,7 @@ const BookingTable = () => {
 				actions={[
 					{
 						id: 'approve',
-						label: __('Approve', 'events'),
+						label: __('Approve', 'ctx-events'),
 						icon: trash,
 						callback: async ([item]) => {
 							setStatus(item.id, 'approved');
@@ -270,7 +270,7 @@ const BookingTable = () => {
 					},
 					{
 						id: 'reject',
-						label: __('Reject', 'events'),
+						label: __('Reject', 'ctx-events'),
 						icon: trash,
 						callback: async ([item]) => {
 							setStatus(item.id, 'rejected');
@@ -278,7 +278,7 @@ const BookingTable = () => {
 					},
 					{
 						id: 'delete',
-						label: __('Delete', 'events'),
+						label: __('Delete', 'ctx-events'),
 						icon: <Icon icon={trash} />,
 						callback: async ([item]) => {
 							setSlug(item.slug);

@@ -139,7 +139,7 @@ function Upcoming(props) {
 	if (status == 'ERROR') {
 		return (
 			<div className="error">
-				<h4>{__('An Error occurred', 'events')}</h4>
+				<h4>{__('An Error occurred', 'ctx-events')}</h4>
 				{error}
 			</div>
 		);
@@ -159,7 +159,7 @@ function Upcoming(props) {
 						{showSearch && (
 							<div class="filter__search">
 								<div class="input">
-									<label>{__('Search', 'events')}</label>
+									<label>{__('Search', 'ctx-events')}</label>
 									<input
 										type="text"
 										onChange={(event) => {
@@ -224,7 +224,7 @@ function Upcoming(props) {
 						{showCategoryFilter && Object.keys(categories).length > 0 && (
 							<div>
 								<h5 className="event-filters-title">
-									{__('Select category', 'events')}
+									{__('Select category', 'ctx-events')}
 								</h5>
 								<div className="event-filter-pills">
 									<button
@@ -233,7 +233,7 @@ function Upcoming(props) {
 											changeFilter('category', 0);
 										}}
 									>
-										{__('All', 'events')}
+										{__('All', 'ctx-events')}
 									</button>
 									{Object.keys(categories).map((item, index) => (
 										<button
@@ -253,7 +253,7 @@ function Upcoming(props) {
 						{showTagFilter && Object.keys(tags).length > 0 && (
 							<div className="">
 								<h5 className="event-filters-title">
-									{__('Select tags', 'events')}
+									{__('Select tags', 'ctx-events')}
 								</h5>
 
 								{Object.keys(tags).map((item, index) => (

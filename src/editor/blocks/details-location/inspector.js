@@ -16,42 +16,42 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<CheckboxControl
-					label={__('Show Title', 'events')}
+					label={__('Show Title', 'ctx-events')}
 					checked={showTitle}
 					onChange={(value) => setAttributes({ showTitle: value })}
 				/>
 				<CheckboxControl
-					label={__('Show Address', 'events')}
+					label={__('Show Address', 'ctx-events')}
 					checked={showAddress}
 					onChange={(value) => setAttributes({ showAddress: value })}
 				/>
 				<CheckboxControl
-					label={__('Show Zip', 'events')}
+					label={__('Show Zip', 'ctx-events')}
 					checked={showZip}
 					onChange={(value) => setAttributes({ showZip: value })}
 				/>
 				<CheckboxControl
-					label={__('Show City', 'events')}
+					label={__('Show City', 'ctx-events')}
 					checked={showCity}
 					onChange={(value) => setAttributes({ showCity: value })}
 				/>
 
 				<CheckboxControl
-					label={__('Show Country', 'events')}
+					label={__('Show Country', 'ctx-events')}
 					checked={showCountry}
 					onChange={(value) => setAttributes({ showCountry: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behaviour', 'events')} initialOpen={true}>
+			<PanelBody title={__('Behaviour', 'ctx-events')} initialOpen={true}>
 				<CheckboxControl
-					label={__('Show Link', 'events')}
+					label={__('Show Link', 'ctx-events')}
 					checked={showLink}
 					onChange={(value) => setAttributes({ showLink: value })}
 				/>
 				<URLInput
-					label={__('Custom Link', 'events')}
+					label={__('Custom Link', 'ctx-events')}
 					value={url}
 					onChange={(value) => setAttributes({ url: value })}
 				/>

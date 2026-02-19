@@ -27,22 +27,22 @@ const Toolbar = (props) => {
 					alignmentControls={[
 						{
 							icon: pullLeft,
-							title: __('Align icon left', 'events'),
+							title: __('Align icon left', 'ctx-events'),
 							align: 'left',
 						},
 						{
 							icon: pullRight,
-							title: __('Align icon right', 'events'),
+							title: __('Align icon right', 'ctx-events'),
 							align: 'right',
 						},
 					]}
-					label={__('Icon alignment', 'events')}
+					label={__('Icon alignment', 'ctx-events')}
 				/>
 				{icon && (
 					<ToolbarButton
 						name="iconOnly"
 						icon={iconOnly ? unseen : seen}
-						title={__('Hide text', 'events')}
+						title={__('Hide text', 'ctx-events')}
 						isActive={iconOnly}
 						onClick={() => setAttributes({ iconOnly: !iconOnly })}
 					/>

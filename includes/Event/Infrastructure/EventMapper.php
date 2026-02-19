@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
+use Contexis\Events\Booking\Infrastructure\WpBookingOptions;
 use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
@@ -30,8 +33,8 @@ final class EventMapper implements PostMapper
     {
 
         $timezone = $post->getString('_timezone') ?? wp_timezone();
-
-        $booking_policy = $post->getBool('_booking_enabled') ? BookingPolicy::create(
+		$currency = $post->getString(EventMeta::BOOKING_CURRENCY) ?? get_option(WpBookingOptions::BOOKING_CURRENCY, 'USD');
+		$booking_policy = $post->getBool('_booking_enabled') ? BookingPolicy::create(
             enabled: true,
             start: $post->getDateTime('_booking_start', $timezone),
             end: $post->getDateTime('_booking_end', $timezone),
@@ -47,12 +50,14 @@ final class EventMapper implements PostMapper
             description: $post->getString('post_excerpt'),
             authorId: new AuthorId($post->getInt('post_author')),
             bookingPolicy: $booking_policy,
-            eventViewConfig: EventViewConfig::fromArray($post->getArray('_events_view_config', [])),
-            startDate: $post->getDateTime(EventMeta::EVENT_START, $timezone),
-            endDate: $post->getDateTime(EventMeta::EVENT_END, $timezone),
+			overallCapacity: $post->getInt(EventMeta::BOOKING_CAPACITY) ?: null,
+            eventViewConfig: EventViewConfig::fromArray($post->getArray(EventMeta::VIEW_CONFIG, [])),
+            startDate: $post->getDateTime(EventMeta::EVENT_START, $timezone) ?: new DateTimeImmutable('01-01-1970 00:00:00', $timezone),
+            endDate: $post->getDateTime(EventMeta::EVENT_END, $timezone) ?: new DateTimeImmutable('01-01-1970 00:00:00', $timezone),
             createdAt: $post->getDateTime('post_date', $timezone),
             locationId: LocationId::from($post->getInt(EventMeta::LOCATION_ID)),
-            tickets: $post->getArray(EventMeta::TICKETS) ? self::ticketsFromArray($post->getArray(EventMeta::TICKETS)) : null,
+            tickets: $post->getArray(EventMeta::TICKETS) ? self::ticketsFromArray($post->getArray(EventMeta::TICKETS), $currency) : null,
+			ticketBookingsMap: $post->getArray(EventMeta::CACHED_BOOKING_STATS) ? TicketBookingsMap::fromArray($post->getArray(EventMeta::CACHED_BOOKING_STATS)) : TicketBookingsMap::empty(),
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
             forms: new EventForms(
@@ -65,11 +70,11 @@ final class EventMapper implements PostMapper
         return $event;
     }
 
-    private static function ticketsFromArray(array $ticketsData): TicketCollection
+    private static function ticketsFromArray(array $ticketsData, string $currency): TicketCollection
     {
         $tickets = [];
         foreach ($ticketsData as $ticketData) {
-            $tickets[] = TicketMapper::fromArray($ticketData);
+            $tickets[] = TicketMapper::fromArray($ticketData, $currency);
         }
         return TicketCollection::fromArray($tickets);
     }

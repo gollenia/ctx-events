@@ -44,7 +44,7 @@ const Success = (props) => {
 				<div>
 					<div className="iban-scan">
 						<div className="card__content">
-							<h2>{__('Scan to pay', 'events')}</h2>
+							<h2>{__('Scan to pay', 'ctx-events')}</h2>
 							<h4>
 								{__(
 									'Scan the QR-Code with your phone to start payment',
@@ -62,27 +62,27 @@ const Success = (props) => {
 					<p dangerouslySetInnerHTML={{ __html: gateway.message }}></p>
 					<table className="table--dotted">
 						<tr>
-							<th className="text-left">{__('Bank', 'events')}</th>
+							<th className="text-left">{__('Bank', 'ctx-events')}</th>
 							<td>{gateway.bank}</td>
 						</tr>
 						<tr>
-							<th className="text-left">{__('IBAN', 'events')}</th>
+							<th className="text-left">{__('IBAN', 'ctx-events')}</th>
 							<td>{formatIBAN(gateway.iban)}</td>
 						</tr>
 						<tr>
-							<th className="text-left">{__('BIC', 'events')}</th>
+							<th className="text-left">{__('BIC', 'ctx-events')}</th>
 							<td>{gateway.bic}</td>
 						</tr>
 						<tr>
-							<th className="text-left">{__('Beneficial', 'events')}</th>
+							<th className="text-left">{__('Beneficial', 'ctx-events')}</th>
 							<td>{gateway.beneficiary}</td>
 						</tr>
 						<tr>
-							<th className="text-left">{__('Purpose', 'events')}</th>
+							<th className="text-left">{__('Purpose', 'ctx-events')}</th>
 							<td>{gateway.purpose}</td>
 						</tr>
 						<tr>
-							<th className="text-left">{__('Amount', 'events')}</th>
+							<th className="text-left">{__('Amount', 'ctx-events')}</th>
 							<td>{formatCurrency(gateway.amount, locale, currency)}</td>
 						</tr>
 					</table>

@@ -19,7 +19,9 @@ class EventMeta extends MetaData
     public const BOOKING_END       = '_booking_end';
     public const BOOKING_ENABLED   = '_booking_enabled';
     public const BOOKING_CAPACITY  = '_booking_capacity';
+	public const BOOKING_CURRENCY  = '_booking_currency';
     public const DONATION_ENABLED  = '_donation_enabled';
+	public const VIEW_CONFIG		  = '_view_config';
     public const RECURRENCE_ID     = '_recurrence_id';
     public const IS_DETACHED       = '_is_detached';
     public const TICKETS           = '_event_tickets';
@@ -76,6 +78,7 @@ class EventMeta extends MetaData
     public static array $metadata = [
         self::BOOKING_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
+        self::BOOKING_CURRENCY => ['type' => 'string', 'default' => 'AUD'],
         self::PERSON_ID           => [
             'type'         => 'array',
             'show_in_rest' => [
@@ -93,6 +96,7 @@ class EventMeta extends MetaData
         self::BOOKING_END      => ['type' => 'string'],
         self::BOOKING_ENABLED  => ['type' => 'boolean'],
         self::BOOKING_CAPACITY => ['type' => 'integer'],
+		self::VIEW_CONFIG => ['type' => 'array'],
         self::DONATION_ENABLED => ['type' => 'boolean'],
         self::RECURRENCE_ID    => ['type' => 'integer'],
         self::IS_DETACHED      => ['type' => 'boolean'],
@@ -112,12 +116,40 @@ class EventMeta extends MetaData
             'show_in_rest' => [
                 'schema' => [
                     'type'  => 'array',
-                    'items' => ['type' => 'string'], // z.B. Coupon-Codes/IDs
+                    'items' => ['type' => 'string'],
                 ],
             ],
         ],
 
-        self::CACHED_AVAILABLE => ['type' => 'integer'],
-        self::CACHED_BOOKING_STATS => ['type' => 'array'],
+        self::CACHED_AVAILABLE => ['type' => 'integer', 'readonly' => true],
+        self::CACHED_BOOKING_STATS => [
+			'type'         => 'array',
+			'readonly' => true,
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type'       => 'object',
+						'properties' => [
+							'pending'  => ['type' => 'integer'],
+							'approved' => ['type' => 'integer'],
+							'canceled' => ['type' => 'integer'],
+							'expired'  => ['type' => 'integer'],
+						],
+					],
+				],
+			],
+		],
+		self::CACHED_MIN_PRICE => ['type' => 'number', 'readonly' => true],
+		self::CACHED_MAX_PRICE => ['type' => 'number', 'readonly' => true],
+		self::GATEWAYS_EXCLUDED => [
+			'type'         => 'array',
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => ['type' => 'string'],
+				],
+			],
+		],
     ];
 }

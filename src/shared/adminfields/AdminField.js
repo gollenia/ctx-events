@@ -9,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { key } from '@wordpress/icons';
+import classNames from 'classnames';
 
 const AdminField = ({
 	type,
@@ -18,13 +19,13 @@ const AdminField = ({
 	help,
 	error,
 	required,
+	name,
 	...props
 }) => {
 	
 	const [pages, setPages] = useState([]);
 	const [loading, setLoading] = useState(false);
 	
-
 	useEffect(() => {
 		if (type !== 'page_select') {
 			setLoading(false);
@@ -43,6 +44,11 @@ const AdminField = ({
 				setLoading(false);
 			});
 	}, [type]);
+
+	const classes = classNames({
+		'required-field': required,
+		'error-field': error,
+	});
 
 
 	if(type === 'heading') {
@@ -99,7 +105,8 @@ const AdminField = ({
 	if (type === 'date') {
 		return (
 			<TextControl
-				label={label}
+				className={classes}
+				label={label + (required ? ' *' : '')}
 				value={value}
 				onChange={onChange}
 				help={help}
@@ -131,8 +138,9 @@ const AdminField = ({
 
 	return (
 		<TextControl
-			label={label}
 			value={value}
+			label={label + (required ? ' *' : '')}
+			className={classes}
 			onChange={onChange}
 			help={help}
 			error={error}

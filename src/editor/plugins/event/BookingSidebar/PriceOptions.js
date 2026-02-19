@@ -9,9 +9,9 @@ const PriceAdjustments = (props) => {
 	const [showTickets, setShowTickets] = useState(false);
 	const { meta, setMeta } = props;
 	return (
-		<PanelBody title={__('Price Options', 'events')} initialOpen={true}>
+		<PanelBody title={__('Price Options', 'ctx-events')} initialOpen={true}>
 			<CheckboxControl
-				label={__('Allow Donation', 'events')}
+				label={__('Allow Donation', 'ctx-events')}
 				help={__(
 					'Allow attendees to donate for other attendees when booking.',
 					'events',
@@ -27,10 +27,10 @@ const PriceAdjustments = (props) => {
 				variant="secondary"
 				disabled={!meta._event_rsvp}
 			>
-				{__('Select Coupons', 'events')}
+				{__('Select Coupons', 'ctx-events')}
 			</Button>
 			<p>
-				{__('Currently selected coupons: ', 'events')}{' '}
+				{__('Currently selected coupons: ', 'ctx-events')}{' '}
 				{meta._event_coupons?.length}
 			</p>
 			<CouponModal
@@ -45,7 +45,7 @@ const PriceAdjustments = (props) => {
 				variant="secondary"
 				disabled={!meta._booking_enabled}
 			>
-				{__('Edit Tickets', 'events')}
+				{__('Edit Tickets', 'ctx-events')}
 			</Button>
 			<TicketModal
 				{...props}

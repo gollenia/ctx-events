@@ -8,6 +8,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Status;
 trait HasStatus
 {
     abstract protected function getStatus(): Status;
+	abstract public function setStatus(Status $status): static;
 
     public function status(): Status
     {
@@ -28,4 +29,9 @@ trait HasStatus
     {
         return $this->getStatus() === Status::Private;
     }
+
+	public function isDraft(): bool
+	{
+		return $this->getStatus() === Status::Draft;
+	}
 }

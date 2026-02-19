@@ -15,9 +15,9 @@ const Inspector = (props) => {
 	return (
 		<>
 			<InspectorControls group="styles">
-				<PanelBody title={__('Button Settings', 'events')} initialOpen={true}>
+				<PanelBody title={__('Button Settings', 'ctx-events')} initialOpen={true}>
 					<TextControl
-						label={__('Button Icon', 'events')}
+						label={__('Button Icon', 'ctx-events')}
 						value={buttonIcon}
 						onChange={(value) => {
 							setAttributes({ buttonIcon: value });

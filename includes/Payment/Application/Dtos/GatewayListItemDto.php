@@ -13,6 +13,7 @@ final class GatewayListItemDto
         public string $adminName,
         public string $title,
         public bool $active,
+		public bool $isValid
     ) {}
 
 	static function fromPaymentGateway(PaymentGateway $gateway): self
@@ -22,6 +23,7 @@ final class GatewayListItemDto
 			$gateway->getAdminName(),
 			$gateway->getTitle(),
 			$gateway->isEnabled(),
+			$gateway->isValid()
 		);
 	}
 
@@ -32,6 +34,7 @@ final class GatewayListItemDto
             'adminName' => $this->adminName,
             'title' => $this->title,
             'active' => $this->active,
+			'isValid' => $this->isValid
         ];
     }
 }

@@ -6,7 +6,7 @@ namespace Contexis\Events\Shared\Application\ValueObjects;
 final class UserContext
 {
     public function __construct(
-        private readonly int $userId,
+        private readonly int $userId = 0,
         private readonly bool $canView = false,
         private readonly bool $canEdit = false,
         private readonly bool $canManageOptions = false

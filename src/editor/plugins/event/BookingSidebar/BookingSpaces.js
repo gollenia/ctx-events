@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 const BookingSpaces = (props) => {
 	const { meta, setMeta } = props;
 	return (
-		<PanelBody title={__('Spaces Settings', 'events')} initialOpen={true}>
+		<PanelBody title={__('Spaces Settings', 'ctx-events')} initialOpen={true}>
 			<TextControl
-				label={__('Spaces overall', 'events')}
+				label={__('Spaces overall', 'ctx-events')}
 				value={meta._booking_capacity}
 				type="number"
 				onChange={(value) => {
@@ -16,7 +16,7 @@ const BookingSpaces = (props) => {
 			/>
 
 			<TextControl
-				label={__('Maximum spaces per booking', 'events')}
+				label={__('Maximum spaces per booking', 'ctx-events')}
 				value={meta._max_per_booking}
 				type="number"
 				onChange={(value) => {

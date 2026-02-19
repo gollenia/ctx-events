@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesStats;
+use Contexis\Events\Event\Domain\Enums\BookingDenyReason;
 use Contexis\Events\Event\Domain\ValueObjects\BookingDecision;
 use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\ValueObjects\EventForms;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\EventSpaces;
 use Contexis\Events\Event\Domain\ValueObjects\EventViewConfig;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
@@ -15,75 +19,109 @@ use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\Traits\HasStatus;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use DateTimeImmutable;
 
-final class Event
+final readonly class Event
 {
     use HasStatus;
 
     public function __construct(
-        public readonly EventId $id,
-        private readonly Status $status,
-        public readonly string $name,
-        private readonly DateTimeImmutable $startDate,
-        private readonly DateTimeImmutable $endDate,
-        public readonly DateTimeImmutable $createdAt,
-        public readonly BookingPolicy $bookingPolicy,
-        public readonly EventViewConfig $eventViewConfig,
-        public readonly AuthorId $authorId,
-		public readonly EventForms $forms,
-		public readonly ?string $description = null,
-        public readonly ?string $audience = null,
-        public readonly ?TicketCollection $tickets = null,
-        public readonly ?LocationId $locationId = null,
-        public readonly ?PersonId $personId = null,
-        public readonly ?ImageId $imageId = null,
-        public readonly ?RecurrenceId $recurrenceId = null
+        public EventId $id,
+        public Status $status,
+        public string $name,
+        public DateTimeImmutable $startDate,
+        public DateTimeImmutable $endDate,
+        public DateTimeImmutable $createdAt,
+        public EventViewConfig $eventViewConfig,
+        public AuthorId $authorId,
+		public EventForms $forms,
+		public ?string $description = null,
+        public ?string $audience = null,
+		public ?int $overallCapacity = null,
+		public ?BookingPolicy $bookingPolicy = null,
+        public ?TicketCollection $tickets = null,
+		public ?TicketBookingsMap $ticketBookingsMap = null,
+        public ?LocationId $locationId = null,
+        public ?PersonId $personId = null,
+        public ?ImageId $imageId = null,
+        public ?RecurrenceId $recurrenceId = null
     ) {
     }
 
-    public function getStatus(): Status
-    {
-        return $this->status;
-    }
+	public function getStatus(): Status
+	{
+		return $this->status;
+	}
 
-    public function start(): DateTimeImmutable
-    {
-        return $this->startDate;
-    }
+	public function setStatus(Status $status): Event
+	{
+		return clone($this, [
+			'status' => $status
+		]);
+	}
 
-    public function end(): DateTimeImmutable
-    {
-        return $this->endDate;
-    }
+	public function acceptsBookings(): bool
+	{
+		if ($this->bookingPolicy === null) {
+			return false;
+		}
 
-    public function duration(): \DateInterval
-    {
-        return $this->startDate->diff($this->endDate);
-    }
+		return $this->bookingPolicy->enabled();
+	}
 
-    public function isOngoing(DateTimeImmutable $at): bool
-    {
-        return $at >= $this->startDate && $at <= $this->endDate;
-    }
+	public function getAvailableTickets(DateTimeImmutable $now): ?TicketCollection
+	{
+		if ($this->tickets === null || $this->ticketBookingsMap === null) {
+			return null;
+		}
 
-    public function isPast(DateTimeImmutable $at): bool
-    {
-        return $at >= $this->endDate;
-    }
+		return $this->tickets->getAvailableTickets($this->ticketBookingsMap, $now);
+	}
 
-    public function meetsBookingPolicy(): BookingDecision
-    {
-        return $this->bookingPolicy->canBook();
-    }
+	public function getLowestAvailablePrice(DateTimeImmutable $now): ?Price
+	{
+		$availableTickets = $this->getAvailableTickets($now);
+		if ($availableTickets === null) {
+			return null;
+		}
 
-    public function bookingStartsAt(): ?DateTimeImmutable
-    {
-        return $this->bookingPolicy->start();
-    }
+		$lowestPrice = $availableTickets->getLowestAvailablePrice($now);
+		return $lowestPrice;
+	}
 
-    public function bookingEndsAt(): ?DateTimeImmutable
-    {
-        return $this->bookingPolicy->end();
-    }
+	public function getFreeSpaces(DateTimeImmutable $now): ?int
+	{
+		if ($this->tickets === null || $this->ticketBookingsMap === null) {
+			return null;
+		}
+		$ticketFreeSpaces = $this->tickets->getFreeSpaces($this->ticketBookingsMap);
+		$eventSoldTotal = $this->ticketBookingsMap->getTotalBookedCount(); 
+		$eventFreeSpaces = ($this->overallCapacity === null) ? null : max(0, $this->overallCapacity - $eventSoldTotal);
+
+		if ($ticketFreeSpaces === null && $eventFreeSpaces === null) {
+			return null; 
+		}
+
+		if ($ticketFreeSpaces === null) return $eventFreeSpaces;
+		if ($eventFreeSpaces === null) return $ticketFreeSpaces;
+
+		return min($ticketFreeSpaces, $eventFreeSpaces);
+	}
+
+	public function canBookAt(DateTimeImmutable $now): BookingDecision
+	{
+		if( $this->tickets === null || $this->ticketBookingsMap === null) {
+			return BookingDecision::deny(BookingDenyReason::NO_TICKETS);
+		}
+		if ($this->bookingPolicy === null) {
+			return BookingDecision::deny(BookingDenyReason::DISABLED);
+		}
+
+		if(!$this->getFreeSpaces( $now)) {
+			return BookingDecision::deny(BookingDenyReason::SOLD_OUT);
+		}
+
+		return $this->bookingPolicy->canBookAt($now);
+	}
 }

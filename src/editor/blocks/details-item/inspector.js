@@ -32,23 +32,23 @@ const Inspector = (props) => {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Behaviour', 'events')} initialOpen={true}>
+				<PanelBody title={__('Behaviour', 'ctx-events')} initialOpen={true}>
 					<TextControl
-						label={__('Link', 'events')}
+						label={__('Link', 'ctx-events')}
 						value={url}
 						onChange={(value) => setAttributes({ url: value })}
 					/>
 					<TextControl
-						label={__('Icon for Link', 'events')}
+						label={__('Icon for Link', 'ctx-events')}
 						value={urlIcon}
 						onChange={(value) => setAttributes({ urlIcon: value })}
 					/>
 				</PanelBody>
 
-				<PanelBody title={__('Image', 'events')} initialOpen={true}>
+				<PanelBody title={__('Image', 'ctx-events')} initialOpen={true}>
 					<PanelRow>
 						<TextControl
-							label={__('Icon', 'events')}
+							label={__('Icon', 'ctx-events')}
 							value={icon}
 							onChange={(value) => setAttributes({ icon: value })}
 						/>
@@ -59,7 +59,7 @@ const Inspector = (props) => {
 				<ColorGradientSettingsDropdown
 					settings={[
 						{
-							label: __('Icon Background', 'events'),
+							label: __('Icon Background', 'ctx-events'),
 							colorValue:
 								iconBackgroundColor.color || customIconBackgroundColor,
 							onColorChange: (value) => {
@@ -80,7 +80,7 @@ const Inspector = (props) => {
 				<ColorGradientSettingsDropdown
 					settings={[
 						{
-							label: __('Icon Color', 'events'),
+							label: __('Icon Color', 'ctx-events'),
 							colorValue: iconColor.color || customIconColor,
 							onColorChange: (value) => {
 								setIconColor(value);

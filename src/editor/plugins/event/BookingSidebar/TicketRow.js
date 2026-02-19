@@ -13,38 +13,35 @@ const TicketRow = (props) => {
 					label=""
 					checked={ticket.ticket_enabled == 1}
 					onChange={(value) => {
-						//ticket.ticket_enabled = value ? 1 : 0;
-						onToggleActive(ticket.ticket_id, value ? 1 : 0);
+							
 					}}
 				/>
 			</td>
 
 			<td>
-				<b>{ticket.ticket_name}</b>
+				<b><a onClick={() => onSelect(index)}>{ticket.ticket_name}</a>	</b>
 
 				<div className="row-actions">
 					<a className="edit" onClick={() => onSelect(index)}>
-						{__('Edit', 'events')}
+						{__('Edit', 'ctx-events')}
 					</a>
 					&nbsp;|&nbsp;
 					<a className="view" onClick={() => onDuplicate(index)}>
-						{__('Duplicate', 'events')}
+						{__('Duplicate', 'ctx-events')}
 					</a>
 					&nbsp;|&nbsp;
 					<span className="trash">
 						<a onClick={() => onDelete(ticket.ticket_id)}>
-							{__('Delete', 'events')}
+							{__('Delete', 'ctx-events')}
 						</a>
 					</span>
 				</div>
 			</td>
 			<td>{ticket.ticket_description}</td>
 			<td>
-				{formatPrice(ticket.ticket_price, eventBlocksLocalization.currency)}
+				{formatPrice(ticket.ticket_price, window.eventEditorLocalization.currency)}
 			</td>
 			<td>{ticket.ticket_spaces}</td>
-			<td>{ticket.ticket_min}</td>
-			<td>{ticket.ticket_max}</td>
 		</tr>
 	);
 };

@@ -33,9 +33,9 @@ const Inspector = (props) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={__('Data', 'events')} initialOpen={true}>
+			<PanelBody title={__('Data', 'ctx-events')} initialOpen={true}>
 				<ToggleControl
-					label={__('Required', 'events')}
+					label={__('Required', 'ctx-events')}
 					checked={required}
 					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
@@ -43,7 +43,7 @@ const Inspector = (props) => {
 
 				<div className="ctx:form__panel-row">
 					<NumberControl
-						label={__('Minimum value', 'events')}
+						label={__('Minimum value', 'ctx-events')}
 						value={min}
 						onChange={(value) => {
 							if (defaultValue < value) {
@@ -53,7 +53,7 @@ const Inspector = (props) => {
 						}}
 					/>
 					<NumberControl
-						label={__('Maximum value', 'events')}
+						label={__('Maximum value', 'ctx-events')}
 						value={max}
 						onChange={(value) => {
 							if (defaultValue > value) {
@@ -64,20 +64,20 @@ const Inspector = (props) => {
 					/>
 				</div>
 				<NumberControl
-					label={__('Step', 'events')}
+					label={__('Step', 'ctx-events')}
 					value={step}
 					max={max}
 					onChange={(value) => setAttributes({ step: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<div className="styleSelector">
 					<Button
 						onClick={() => setAttributes({ range: false })}
 						className={range ? '' : 'active'}
 					>
 						<Icon size="40" className="icon" icon={icons.number} />
-						<span>{__('Input', 'events')}</span>
+						<span>{__('Input', 'ctx-events')}</span>
 					</Button>
 					<Button
 						onClick={() => setAttributes({ range: true })}
@@ -85,32 +85,32 @@ const Inspector = (props) => {
 					>
 						<Icon size="40" className="icon" icon={icons.range} />
 
-						<span>{__('Range', 'events')}</span>
+						<span>{__('Range', 'ctx-events')}</span>
 					</Button>
 				</div>
 
 				<CheckboxControl
-					label={__('Show labels', 'events')}
+					label={__('Show labels', 'ctx-events')}
 					checked={hasLabels}
 					onChange={(value) => setAttributes({ hasLabels: value })}
 				/>
 
 				<CheckboxControl
-					label={__('Show ticks', 'events')}
+					label={__('Show ticks', 'ctx-events')}
 					checked={hasTicks}
 					onChange={(value) => setAttributes({ hasTicks: value })}
 				/>
 
 				<RangeControl
-					label={__('Width', 'events')}
-					help={__('Number of columns the input field will occupy', 'events')}
+					label={__('Width', 'ctx-events')}
+					help={__('Number of columns the input field will occupy', 'ctx-events')}
 					value={width}
 					max={6}
 					min={1}
 					onChange={(value) => setAttributes({ width: value })}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Behavior', 'events')} initialOpen={false}>
+			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					props={props}
 				/>

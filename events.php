@@ -25,7 +25,7 @@ require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
 add_action('plugins_loaded', function () {
     load_plugin_textdomain(
-        'events',
+        'ctx-events',
         false,
         dirname(plugin_basename(__FILE__)) . '/languages'
     );

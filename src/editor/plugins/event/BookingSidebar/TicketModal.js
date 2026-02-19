@@ -6,6 +6,7 @@ import { trash } from '@wordpress/icons';
 import { v4 as uuidv4 } from 'uuid';
 
 import TicketEditor from './TicketEditor';
+import TicketTable from './TicketTable';
 
 const TicketModal = (props) => {
 	const { showTickets, setShowTickets, meta, setMeta } = props;
@@ -32,30 +33,30 @@ const TicketModal = (props) => {
 
 	const fields = [
 		{
-			label: __('Name', 'events'),
+			label: __('Name', 'ctx-events'),
 			id: 'ticket_name',
 			enableHiding: false,
 			enableGlobalSearch: true,
 			type: 'string',
 		},
 		{
-			label: __('Description', 'events'),
+			label: __('Description', 'ctx-events'),
 			id: 'ticket_description',
 			enableSorting: false,
 			enableGlobalSearch: true,
 			type: 'string',
 		},
 		{
-			label: __('Price', 'events'),
+			label: __('Price', 'ctx-events'),
 			id: 'ticket_price',
 			render: ({ item }) => {
-				return item.ticket_price.toFixed(2);
+				return item.ticket_price;
 			},
 
 			enableSorting: false,
 		},
 		{
-			label: __('Spaces', 'events'),
+			label: __('Spaces', 'ctx-events'),
 			id: 'ticket_spaces',
 			render: ({ item }) => {
 				return item.ticket_spaces;
@@ -105,7 +106,7 @@ const TicketModal = (props) => {
 
 	const createNewTicket = () => ({
 		ticket_id: uuidv4(),
-		ticket_name: __('Default Ticket', 'events'),
+		ticket_name: __('Default Ticket', 'ctx-events'),
 		ticket_description: '',
 		ticket_price: 0,
 		ticket_spaces: meta._event_spaces || 0,
@@ -121,9 +122,9 @@ const TicketModal = (props) => {
 	const modalTitle =
 		Object.keys(currentTicket).length > 0
 			? currentTicket.ticket_id == 0
-				? __('New Ticket', 'events')
-				: __('Edit Ticket', 'events')
-			: __('Tickets', 'events');
+				? __('New Ticket', 'ctx-events')
+				: __('Edit Ticket', 'ctx-events')
+			: __('Tickets', 'ctx-events');
 
 	return (
 		<>
@@ -140,46 +141,22 @@ const TicketModal = (props) => {
 						/>
 					) : (
 						<>
-							<DataViews
-								data={shownData}
-								view={view}
-								onChangeView={setView}
-								paginationInfo={paginationInfo}
-								// You can define custom columns if needed
-								defaultLayouts={{
-									table: {
-										// Define default table layout settings
-										spacing: 'normal',
-										showHeader: true,
-									},
+							<TicketTable 
+								tickets={shownData} 
+								onToggleActive={onToggleActive} 
+								onSelect={(index) => setCurrentTicket(shownData[index])} 
+								onDelete={onDelete} 
+								onDuplicate={(index) => {
+									const ticketToDuplicate = shownData[index];
+									const newTicket = {
+										...ticketToDuplicate,
+										ticket_id: uuidv4(),
+										ticket_name: `${ticketToDuplicate.ticket_name} (Copy)`,
+										ticket_order: tickets.length + 1,
+									};
+									updateTickets([...tickets, newTicket]);
 								}}
-								fields={fields}
-								actions={[
-									{
-										id: 'toggle',
-										label: ([item]) => {
-											return item.active
-												? __('Deactivate', 'events')
-												: __('Activate', 'events');
-										},
-										isDestructive: true,
-										icon: trash,
-										callback: async ([item]) => {
-											onToggle(item.slug);
-										},
-									},
-									{
-										id: 'settings',
-										label: __('Settings', 'events'),
-										icon: trash,
-										callback: async ([item]) => {
-											setSlug(item.slug);
-										},
-									},
-								]}
-							>
-								<DataViews.Layout />
-							</DataViews>
+							/>
 							<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
 								<FlexItem>
 									<Button
@@ -188,7 +165,7 @@ const TicketModal = (props) => {
 											setCurrentTicket(createNewTicket());
 										}}
 									>
-										{__('Add Ticket', 'events')}
+										{__('Add Ticket', 'ctx-events')}
 									</Button>
 								</FlexItem>
 							</Flex>

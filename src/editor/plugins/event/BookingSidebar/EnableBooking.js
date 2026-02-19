@@ -7,11 +7,11 @@ const EnableBooking = (props) => {
 	const [showTickets, setShowTickets] = useState(false);
 	console.log('EnableBooking', meta);
 	return (
-		<PanelBody title={__('Booking Settings', 'events')} initialOpen={true}>
+		<PanelBody title={__('Booking Settings', 'ctx-events')} initialOpen={true}>
 			{!window?.eventEditorLocalization?.bookingEnabled ? (
 				<div className="inspector-message inspector-message--error">
 					<div>
-						<b>{__('Bookings are globally disabled', 'events')}</b>
+						<b>{__('Bookings are globally disabled', 'ctx-events')}</b>
 					</div>
 					<span>
 						{window?.eventEditorLocalization?.bookingMessage}
@@ -20,7 +20,7 @@ const EnableBooking = (props) => {
 			) : null}
 
 			<CheckboxControl
-				label={__('Enable Bookings', 'events')}
+				label={__('Enable Bookings', 'ctx-events')}
 				checked={meta._booking_enabled}
 				onChange={(value) => {
 					setMeta({ _booking_enabled: value });
@@ -31,7 +31,7 @@ const EnableBooking = (props) => {
 			/>
 
 			<TextControl
-				label={__('Booking Start Date', 'events')}
+				label={__('Booking Start Date', 'ctx-events')}
 				value={meta._booking_start}
 				type="datetime-local"
 				onChange={(value) => {
@@ -41,7 +41,7 @@ const EnableBooking = (props) => {
 			/>
 
 			<TextControl
-				label={__('Booking End Date', 'events')}
+				label={__('Booking End Date', 'ctx-events')}
 				value={meta._booking_end}
 				type="datetime-local"
 				onChange={(value) => {

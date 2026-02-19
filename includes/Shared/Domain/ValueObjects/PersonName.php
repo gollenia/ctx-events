@@ -23,6 +23,11 @@ final class PersonName
         return new self($firstName, $lastName);
     }
 
+	public static function from(string $firstName, string $lastName, ?string $prefix = '', ?string $suffix = ''): self
+	{
+		return new self($firstName, $lastName, $prefix, $suffix);
+	}
+
     public function getFullName(): string
     {
         $fullName = trim(($this->prefix ? $this->prefix . ' ' : '') . $this->firstName . ' ' . $this->lastName . ($this->suffix ? ' ' . $this->suffix : ''));

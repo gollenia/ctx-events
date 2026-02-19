@@ -20,18 +20,18 @@ class CouponPost extends PostType implements HasMetaData
     public function registerPostType(): void
     {
         $labels = [
-            'name' => __('Coupons', 'events'),
-            'singular_name' => __('Coupon', 'events'),
-            'menu_name' => __('Coupons', 'events'),
-            'add_new_item' => __('Add New Coupon', 'events'),
-            'edit' => __('Edit', 'events'),
-            'edit_item' => __('Edit Coupon', 'events'),
-            'view' => __('View', 'events'),
-            'view_item' => __('View Coupon', 'events'),
-            'search_items' => __('Search Coupon', 'events'),
-            'not_found' => __('No Coupons Found', 'events'),
-            'not_found_in_trash' => __('No Coupons Found in Trash', 'events'),
-            'parent' => __('Parent Coupon', 'events'),
+            'name' => __('Coupons', 'ctx-events'),
+            'singular_name' => __('Coupon', 'ctx-events'),
+            'menu_name' => __('Coupons', 'ctx-events'),
+            'add_new_item' => __('Add New Coupon', 'ctx-events'),
+            'edit' => __('Edit', 'ctx-events'),
+            'edit_item' => __('Edit Coupon', 'ctx-events'),
+            'view' => __('View', 'ctx-events'),
+            'view_item' => __('View Coupon', 'ctx-events'),
+            'search_items' => __('Search Coupon', 'ctx-events'),
+            'not_found' => __('No Coupons Found', 'ctx-events'),
+            'not_found_in_trash' => __('No Coupons Found in Trash', 'ctx-events'),
+            'parent' => __('Parent Coupon', 'ctx-events'),
         ];
 
         $coupon_post_type = [
@@ -50,8 +50,8 @@ class CouponPost extends PostType implements HasMetaData
                 [ 'ctx-events/coupon-editor' ],
             ],
             'template_lock' => 'all',
-            'label' => __('Coupons', 'events'),
-            'description' => __('Manage coupons for event booking', 'events'),
+            'label' => __('Coupons', 'ctx-events'),
+            'description' => __('Manage coupons for event booking', 'ctx-events'),
             'labels' => $labels,
         ];
 
