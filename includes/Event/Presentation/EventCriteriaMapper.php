@@ -23,7 +23,7 @@ final class EventCriteriaMapper implements CriteriaMapper
             page: $request->get_param('page') ?? 0,
             perPage: $request->get_param('per_page') ?? -1,
             status: self::getStatusList($request->get_param('status'), $userContext->isAdmin()),
-            orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date-time', Order::from($request->get_param('order') ?? 'DESC')),
+            orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date', Order::from($request->get_param('order') ?? 'DESC')),
             scope: TimeScope::from($request->get_param('scope')),
             categories: $request->get_param('categories') ?? [],
             tags: $request->get_param('tags') ?? [],

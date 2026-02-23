@@ -6,7 +6,9 @@ namespace Contexis\Events\Event\Infrastructure;
 use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Event\Application\DTOs\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
+use Contexis\Events\Event\Domain\Enums\EventOrderBy;
 use Contexis\Events\Event\Domain\Enums\TimeScope;
+use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
@@ -54,17 +56,18 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         return $builder;
     }
 
-
     private static function mapOrderBy(OrderBy $orderBy): OrderBy
     {
-        return match ($orderBy) {
-            'date-time'     => OrderBy::fromMeta(EventMeta::EVENT_START, $orderBy->order),
-            'booking-date'  => OrderBy::fromMeta(EventMeta::BOOKING_START, $orderBy->order),
-            'booking'       => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED, $orderBy->order),
-            'location'      => OrderBy::fromMeta(EventMeta::LOCATION_ID, $orderBy->order),
-            'person'        => OrderBy::fromMeta(EventMeta::PERSON_ID, $orderBy->order),
-            'price'         => OrderBy::fromMeta(EventMeta::CACHED_MIN_PRICE, $orderBy->order),
-            default         => OrderBy::fromField($orderBy->field, $orderBy->order),
+		
+        return match ($orderBy->field) {
+			EventOrderBy::EVENT_TITLE->value      => OrderBy::fromField('post_title', $orderBy->order),
+            EventOrderBy::EVEN_START->value     => OrderBy::fromMeta(EventMeta::EVENT_START, $orderBy->order),
+            EventOrderBy::BOOKING_START->value  => OrderBy::fromMeta(EventMeta::BOOKING_START, $orderBy->order),
+            EventOrderBy::BOOKING_ENABLED->value   => OrderBy::fromMeta(EventMeta::BOOKING_ENABLED, $orderBy->order),
+            EventOrderBy::LOCATION->value      => OrderBy::fromMeta(EventMeta::LOCATION_ID, $orderBy->order),
+            EventOrderBy::PERSON->value        => OrderBy::fromMeta(EventMeta::PERSON_ID, $orderBy->order),
+            EventOrderBy::PRICE->value         => OrderBy::fromMeta(EventMeta::CACHED_MIN_PRICE, $orderBy->order),
+            default         => OrderBy::fromMeta(EventMeta::EVENT_START, $orderBy->order),
         };
     }
 
@@ -87,7 +90,7 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             $scope::TOMORROW => [
                 ['key' => EventMeta::EVENT_START, 'value' => $now->modify('+1 day')->format('Y-m-d'), 'compare' => '=', 'type' => 'DATE'],
             ],
-            $scope::WEEK => [
+            $scope::ONE_WEEK => [
                 ['key' => EventMeta::EVENT_START, 'value' => [
                     $date,
                     $now->modify('+7 days')->format('Y-m-d')
@@ -96,6 +99,15 @@ final class WpEventQueryBuilder extends WpQueryBuilder
                     'type' => 'DATE'
                 ],
             ],
+			$scope::THIS_WEEK   => [
+				['key' => EventMeta::EVENT_START, 'value' => [
+					$now->modify('monday this week')->format('Y-m-d'),
+					$now->modify('sunday this week')->format('Y-m-d')
+				],
+					'compare' => 'BETWEEN',
+					'type' => 'DATE'
+				],
+			],
             $scope::THIS_MONTH    => [
                 ['key' => EventMeta::EVENT_START, 'value' => [
                     $now->modify('first day of this month')->format('Y-m-d'),
@@ -114,7 +126,34 @@ final class WpEventQueryBuilder extends WpQueryBuilder
                     'type' => 'DATE'
                 ],
             ],
-            $scope::YEAR     => [
+			$scope::ONE_MONTH    => [
+				['key' => EventMeta::EVENT_START, 'value' => [
+					$date,
+					$now->modify('+1 month')->format('Y-m-d')
+				],
+					'compare' => 'BETWEEN',
+					'type' => 'DATE'
+				],
+			],
+			$scope::TWO_MONTHS   => [
+				['key' => EventMeta::EVENT_START, 'value' => [
+					$date,
+					$now->modify('+2 months')->format('Y-m-d')
+				],
+					'compare' => 'BETWEEN',
+					'type' => 'DATE'
+				],
+			],
+			$scope::THREE_MONTHS => [
+				['key' => EventMeta::EVENT_START, 'value' => [
+					$date,
+					$now->modify('+3 months')->format('Y-m-d')
+				],
+					'compare' => 'BETWEEN',	
+					'type' => 'DATE'
+				],
+			],
+            $scope::THIS_YEAR     => [
                 ['key' => EventMeta::EVENT_START, 'value' => [
                     $now->modify('first day of January')->format('Y-m-d'),
                     $now->modify('last day of December')->format('Y-m-d')
@@ -123,6 +162,15 @@ final class WpEventQueryBuilder extends WpQueryBuilder
                     'type' => 'DATE'
                 ],
             ],
+			$scope::ONE_YEAR      => [
+				['key' => EventMeta::EVENT_START, 'value' => [
+					$date,
+					$now->modify('+1 year')->format('Y-m-d')
+				],
+					'compare' => 'BETWEEN',
+					'type' => 'DATE'
+				],
+			],
 			$scope::ALL	 => [],
             default    => [['key' => $field, 'value' => $dateTime, 'compare' => '>', 'type' => 'DATETIME']]
 
