@@ -1,162 +1,112 @@
-import React from '@wordpress/element';
+import type React from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import Filter from './Filter';
+import ScreenMeta from './ScreenMeta';
+import ScreenMetaLinks from './ScreenMetaLinks';
+import StatusSelect from './StatusSelect';
+import Table from './Table';
+import type {
+	DataFieldConfig,
+	DataPaginationInfo,
+	DataStatusItem,
+	DataTableAction,
+	DataViewConfig,
+} from './types';
 
-type DataTableView = {
-	page: number,
-	totalPages: number,
-	totalItems: number,
-	sortBy: string,
-	sortOrder: 'asc' | 'desc'
+interface DataTableProps {
+	data: Array<any>;
+	fields: Array<DataFieldConfig>;
+	view: DataViewConfig;
+	onChangeView: (updates: Partial<DataViewConfig>) => void;
+	actions?: Array<DataTableAction>;
+	paginationInfo?: DataPaginationInfo;
+	search?: boolean;
+	searchLabel?: string;
+	isLoading: boolean;
+	empty?: React.ComponentType;
+	availableStatusItems: Array<DataStatusItem>;
+	title?: string;
+	createLink?: string;
+	createLinkLabel?: string;
 }
 
-type DataTableColumn = {
-	id: string|number,
-	key: string,
-	label: string,
-	sortable?: boolean,
-	className?: string,
-	render?: (item: any) => React.Element
-}
-
-type DataTableProps = {
-	items: Array<any>,          
-	columns: Array<DataTableColumn>,
-	view: DataTableView,
-	onPageChange?: (page: number) => void,
-	onSort?: (key: string) => void,
-	loading?: boolean,
-	variant?: string,
-	noItemsMessage?: string
-};	
-
-const DataTable = ({ 
-    items,          
-    columns,        
-    view,           
-    onPageChange = undefined,   
-	onSort,
-    loading,    
-	variant = 'posts',    
-    noItemsMessage = __('No items found.', 'ctx-events')
+const DataTable = ({
+	data,
+	fields,
+	view,
+	onChangeView,
+	actions,
+	paginationInfo,
+	searchLabel,
+	isLoading,
+	empty,
+	availableStatusItems,
+	title,
+	createLink,
+	createLinkLabel,
 }: DataTableProps) => {
-
-    const isFirstPage = view.page === 1;
-    const isLastPage = view.page === view.totalPages;
-
-    return (
-        <div className="wp-table-wrapper">
-            
-            {loading && <p>{__('Loading...', 'ctx-events')}</p>}
-
-            {!loading && (
-                <>
-                    <table className={`wp-list-table widefat fixed striped ${variant}`}>
-                        <thead>
-                            <tr>
-                                <td id="cb" className="manage-column column-cb check-column">
-                                    <input id="cb-select-all-1" type="checkbox"/>
-                                </td>
-								
-                                {columns.map((column, index) => {
-									const headerClasses = clsx(
-										column.className,
-										'manage-column',
-										{
-											'sortable': column.sortable,
-											'sorted': view.sortBy === column.key,
-											[view.sortOrder]: view.sortBy === column.key 
-										}
-									)
-                                    return <th 
-                                        key={index} 
-                                        className={headerClasses}
-                                        scope="col"
-                                    >
-                                        {column.sortable ? (
-                                            <a 
-                                                href="#" 
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    if (onSort) {
-                                                        onSort(column.key);
-                                                    }
-                                                }}
-                                            >
-                                                <span>{column.label}</span>
-                                                <span className="sorting-indicator"></span>
-                                            </a>
-                                        ) : (
-                                            column.label
-                                        )}
-                                    </th>
-                                })}
-                            </tr>
-                        </thead>
-                        <tbody>
-							{!loading && items.length === 0 && 
-									<tr><td colSpan={columns.length}>{noItemsMessage}</td></tr>}
-                            {items.map((item) => (
-												
-                                <tr key={item.id || Math.random()} className={item.active ? 'active' : ''}>
-                                    <th className="cb column-cb check-column">
-                                        <input type="checkbox"/>
-                                    </th>
-                                    
-                                    {columns.map((column, index) => (
-						
-                                        <td key={index} className={column.className || ''}>
-                                            {column.render 
-                                                ? column.render(item) 
-                                                : item[column.id || column.key]
-                                            }
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-					
-					{ onPageChange != null &&
-                    <div className="tablenav bottom">
-                        <div className="tablenav-pages">
-                            <span className="displaying-num">{view.totalItems} {__('items', 'ctx-events')}</span>
-                            <span className="pagination-links">
-                                <button 
-                                    className={`tablenav-pages-navspan button ${isFirstPage ? 'disabled' : ''}`}
-                                    onClick={() => onPageChange(1)}
-                                    disabled={isFirstPage}
-                                >«</button>
-                                <button 
-                                    className={`tablenav-pages-navspan button ${isFirstPage ? 'disabled' : ''}`}
-                                    onClick={() => onPageChange(view.page - 1)}
-                                    disabled={isFirstPage}
-                                >‹</button>
-                                
-                                <span className="screen-reader-text">{__('Current page', 'ctx-events')}</span>
-                                <span id="table-paging" className="paging-input">
-                                    <span className="tablenav-paging-text"> {view.page} {__('of', 'ctx-events')} <span className="total-pages">{view.totalPages}</span></span>
-                                </span>
-
-                                <button 
-                                    className={`next-page button ${isLastPage ? 'disabled' : ''}`} 
-                                    onClick={() => onPageChange(view.page + 1)}
-                                    disabled={isLastPage}
-                                >›</button>
-                                <button 
-                                    className={`last-page button ${isLastPage ? 'disabled' : ''}`}
-                                    onClick={() => onPageChange(view.totalPages)}
-                                    disabled={isLastPage}
-                                >»</button>
-                            </span>
-                        </div>
-                        <br className="clear"/>
-                    </div> }
-                </>
-            )}
-        </div>
-    );
+	const [screenMetaContext, setScreenMetaContext] = useState('');
+	return (
+		<>
+			<ScreenMeta
+				context={screenMetaContext}
+				view={view}
+				onChangeView={onChangeView}
+				fields={fields}
+			/>
+			<ScreenMetaLinks
+				setScreenMeta={(context) =>
+					setScreenMetaContext(screenMetaContext ? '' : context)
+				}
+			/>
+			<div
+				className="wrap ctx-datatable"
+				style={{ padding: '10px 20px 0 2px', margin: 0 }}
+			>
+				<h1 className="wp-heading-inline">
+					{title || __('Items', 'ctx-events')}
+				</h1>
+				{createLink && (
+					<a href={createLink} className="page-title-action">
+						{createLinkLabel || __('New Item', 'ctx-events')}
+					</a>
+				)}
+				<hr className="wp-header-end" />
+				<StatusSelect
+					statusItems={availableStatusItems}
+					view={view}
+					onViewChange={onChangeView}
+				/>
+				<Filter fields={fields} view={view} onChangeView={onChangeView} />
+				<Table
+					items={data}
+					titleField={view.titleField}
+					mediaField={view.mediaField}
+					actions={actions}
+					descriptionField={view.descriptionField}
+					paginationInfo={paginationInfo}
+					fields={view.fields}
+					fieldConfig={fields}
+					view={view}
+					onPageChange={(page) => onChangeView({ ...view, page })}
+					onSort={(key) =>
+						onChangeView({
+							...view,
+							sort: {
+								field: key,
+								direction:
+									view.sort.field === key && view.sort.direction === 'asc'
+										? 'desc'
+										: 'asc',
+							},
+						})
+					}
+				/>
+			</div>
+		</>
+	);
 };
 
 export default DataTable;
-export type { DataTableColumn, DataTableView };
+export type { DataTableProps };

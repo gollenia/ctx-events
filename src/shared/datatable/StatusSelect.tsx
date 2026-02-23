@@ -1,44 +1,65 @@
-import { __ } from '@wordpress/i18n';
 import React from '@wordpress/element';
-
-type StatusItem = {
-    label: string;
-    value: string;
-	count: number;
-	showEmpty?: boolean; 
-}
+import { __ } from '@wordpress/i18n';
+import type { DataStatusItem, DataViewConfig } from './types';
 
 type StatusSelectProps = {
-    statusItems?: Array<StatusItem>;
-    currentStatus: string; // Neu: Wir müssen wissen, was aktiv ist
-    onChange: (status: string) => void;
-}
+	statusItems?: Array<DataStatusItem>;
+	view: DataViewConfig;
+	onViewChange: (updates: Partial<DataViewConfig>) => void;
+};
 
-const StatusSelect = ({ statusItems = [], currentStatus, onChange }: StatusSelectProps) => {
-    
-    if (statusItems.length === 0) return null;
+const StatusSelect = ({
+	statusItems = [],
+	view,
+	onViewChange,
+}: StatusSelectProps) => {
+	if (statusItems.length === 0) return null;
+	const currentStatus =
+		view.filters?.find((f) => f.field === 'status')?.value || 'publish';
 
-    return (
-        <ul className="subsubsub">
-            {statusItems.filter((item: StatusItem) => item.showEmpty || item.count > 0).map((item, index, visibleItems) => {
-                return (
-					<li key={item.value}>
-						<a 
-							href={`#${item.value}`}
-							className={currentStatus === item.value ? 'current' : ''} 
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onChange(item.value);
-                        }}
-                    >
-                        {item.label}
-                    </a> ({item.count})
-                    {index < visibleItems.length - 1 && ' | '}
-                </li>
-            	)})}
-        </ul>
-    );
-}
+	const handleStatusChange = (newStatus: string) => {
+		const otherFilters =
+			view.filters?.filter((f) => f.field !== 'status') || [];
+
+		const nextFilters =
+			newStatus === 'publish'
+				? otherFilters
+				: [
+						...otherFilters,
+						{ field: 'status', operator: 'is', value: newStatus },
+					];
+
+		onViewChange({
+			...view,
+			filters: nextFilters,
+			page: 1,
+		});
+	};
+
+	return (
+		<ul className="subsubsub">
+			{statusItems
+				.filter((item: DataStatusItem) => item.showEmpty || item.count > 0)
+				.map((item, index, visibleItems) => {
+					return (
+						<li key={item.value}>
+							<a
+								href={`#${item.value}`}
+								className={currentStatus === item.value ? 'current' : ''}
+								onClick={(e) => {
+									e.preventDefault();
+									handleStatusChange(item.value);
+								}}
+							>
+								{item.label}
+							</a>{' '}
+							({item.count}){index < visibleItems.length - 1 && ' | '}
+						</li>
+					);
+				})}
+		</ul>
+	);
+};
 
 export default StatusSelect;
-export type { StatusSelectProps, StatusItem };
+export type { StatusSelectProps };
