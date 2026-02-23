@@ -1,5 +1,6 @@
 export type BookingDenyReason = "disabled" | "no_capacity" | "not_started" | "ended" | "sold_out" | "form_error" | "no_tickets";
-export type TimeScope = "all" | "future" | "past" | "today" | "tomorrow" | "week" | "this-week" | "this-month" | "next-month" | "1-months" | "2-months" | "3-months" | "6-months" | "12-months" | "year";
+export type TimeScope = "all" | "future" | "past" | "today" | "tomorrow" | "one-week" | "this-week" | "this-month" | "next-month" | "1-months" | "2-months" | "3-months" | "this-year" | "1-year";
+export type EventOrderBy = "event_start" | "event_title" | "booking_start" | "booking_enabled" | "location" | "person" | "price";
 export type EventStatus = "draft" | "publish" | "future" | "pending" | "private" | "trash" | "cancelled";
 export type EventBookingSummary = {
 readonly isBookable: boolean
