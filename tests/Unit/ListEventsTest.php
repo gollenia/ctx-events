@@ -16,6 +16,7 @@ use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
+use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
 use Tests\Support\FakeImageRepository;
@@ -53,6 +54,7 @@ test('lists events with pagination and status counts', function () {
         tickets: EventTickets::onlyBookable(),
         taxonomyLoader: new TaxonomyLoader(),
         clock: $clock,
+        bookingRepository: FakeBookingRepository::empty(),
     );
 
     $useCase = new ListEvents(

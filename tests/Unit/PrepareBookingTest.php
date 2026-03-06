@@ -8,8 +8,7 @@ use Contexis\Events\Event\Application\DTOs\PrepareBookingResponse;
 use Contexis\Events\Event\Application\Service\EventPolicy;
 use Contexis\Events\Event\Application\Service\PrepareBookingTicketLimits;
 use Contexis\Events\Event\Application\UseCases\PrepareBooking;
-use Contexis\Events\Payment\Domain\GatewayCollection;
-use Contexis\Events\Payment\Domain\GatewayRepository;
+use Tests\Support\FakeGatewayRepository;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\SessionHashResolver;
@@ -28,10 +27,7 @@ test('prepare booking returns response with forms, tickets and token', function 
     $bookingRepository = FakeBookingRepository::empty();
     $bookingRepository->seedBookingsForEvent($event, $formRepository, 4);
 
-    $gatewayRepository = Mockery::mock(GatewayRepository::class);
-    $gatewayRepository->shouldReceive('findActive')
-        ->once()
-        ->andReturn(new GatewayCollection());
+    $gatewayRepository = FakeGatewayRepository::withActiveGateway();
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
     $eventPolicy->shouldReceive('userCanView')
