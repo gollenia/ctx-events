@@ -6,7 +6,7 @@ namespace Contexis\Events\Form\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-class FormSummaryCollection extends Collection
+readonly class FormSummaryCollection extends Collection
 {
     public function __construct(
         FormSummary ...$forms

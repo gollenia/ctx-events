@@ -23,13 +23,21 @@ final readonly class VisibilityRule
 
     public function isMet(array $allFormData): bool
     {
-        $actualValue = $allFormData[$this->dependsOnField] ?? null;
+        $actual = $this->normalize($allFormData[$this->dependsOnField] ?? null);
+        $expected = $this->normalize($this->expectedValue);
 
         return match ($this->operator) {
-            'equals' => $actualValue == $this->expectedValue,
-            'not_equals' => $actualValue != $this->expectedValue,
-            'not_empty' => !empty($actualValue) && $actualValue !== false && $actualValue !== '0',
-            default => false,
+            'equals'     => $actual == $expected,
+            'not_equals' => $actual != $expected,
+            'not_empty'  => $actual !== null && $actual !== '' && $actual !== false,
+            default      => false,
         };
+    }
+
+    private function normalize(mixed $value): mixed
+    {
+        if (in_array($value, ['checked', 'on', '1', 1, true], true)) return true;
+        if (in_array($value, ['unchecked', 'off', '0', 0, false], true)) return false;
+        return $value;
     }
 }

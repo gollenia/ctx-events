@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Application\DTOs;
 
 use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
+use Contexis\Events\Event\Domain\Enums\EventStatus;
 use Contexis\Events\Event\Domain\Event;
-use Contexis\Events\Event\Domain\EventStatus;
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Location\Application\LocationDto;
 use Contexis\Events\Location\Application\LocationDtoCollection;
@@ -27,7 +27,7 @@ class EventResponse implements DTO
         public readonly string $name,
         public readonly ?string $description,
         public readonly ?string $audience,
-        public readonly Status $status,
+        public readonly EventStatus $status,
         public readonly DateTimeImmutable $startDate,
         public readonly DateTimeImmutable $endDate,
         public readonly ?EventBookingSummary $bookingSummary,

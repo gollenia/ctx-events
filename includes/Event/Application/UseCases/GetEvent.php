@@ -56,8 +56,6 @@ final class GetEvent
 		$tickets = $includes->tickets ? EventTickets::onlyBookable()->getAllowedTickets($event, $userContext->isAdmin() ? TicketScope::ALL : TicketScope::BOOKABLE_ONLY) : null;
 		// Missing: Available Coupons -really?
 		// Missing: Booking Info
-		$bookingForm = $this->formRepository->find($event->forms->bookingForm);
-		$attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
 		
 
 		$response = EventResponse::fromDomainModel(

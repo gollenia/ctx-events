@@ -34,6 +34,10 @@ final class OfflineGateway implements PaymentGateway
 		return $this->config->title;
 	}
 
+	public function getDescription(): ?string {
+		return $this->config->description;
+	}
+
 	public function verifyPayment(Transaction $transaction): Transaction
 	{
 		return $transaction->complete();
@@ -54,10 +58,10 @@ final class OfflineGateway implements PaymentGateway
     public function initiatePayment(Booking $booking): Transaction
     {
         return Transaction::forBankTransfer(
-            $booking->id,
-            $booking->priceSummary->finalPrice,
-            'offline',
-            $this->config->bankData
+            bookingId: $booking->id,
+            amount: $booking->priceSummary->finalPrice,
+            gateway: 'offline',
+            bankData: $this->config->bankData
         );
     }
 

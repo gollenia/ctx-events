@@ -6,7 +6,7 @@ namespace Contexis\Events\Shared\Domain\ValueObjects;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-final class LogEntryCollection extends Collection
+final readonly class LogEntryCollection extends Collection
 {
 	 public function __construct(
         LogEntry ...$entries

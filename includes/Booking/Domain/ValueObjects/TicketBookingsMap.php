@@ -65,6 +65,24 @@ final class TicketBookingsMap implements \JsonSerializable
 		}
 		return $total;
 	}
+	
+	public function getTotalPendingCount(): int
+	{
+		$total = 0;
+		foreach ($this->keyedItems as $stats) {
+			$total += $stats->getCountFor(BookingStatus::PENDING);
+		}
+		return $total;
+	}
+
+	public function getTotalApprovedCount(): int
+	{
+		$total = 0;
+		foreach ($this->keyedItems as $stats) {
+			$total += $stats->getCountFor(BookingStatus::APPROVED);
+		}
+		return $total;
+	}
 
 	public function jsonSerialize(): array
 	{

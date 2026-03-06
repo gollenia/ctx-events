@@ -23,7 +23,7 @@ abstract class Form
 		return [
 			'id' => $this->id->toInt(),
 			'type' => $this->type->value,
-			'fields' => $this->fields->toArray(),
+			'fields' => array_map(fn($f) => $f->toArray(), $this->fields->toArray()),
 			'name' => $this->name,
 			'description' => $this->description,
 		];
@@ -39,12 +39,15 @@ abstract class Form
 				continue;
 			}
 
-			if (!$field->validate($formData[$field->name])) {
-				$allErrors[$field->name] = $field->customErrorMessage;
+			$fieldValue = $formData[$field->name] ?? null;
+
+			$error = $field->validate($fieldValue);
+			if ($error !== null) {
+				$allErrors[$field->name] = $error->value;
 				continue;
 			}
 
-			$validatedData[$field->name] = $field->validate($formData[$field->name]);
+			$validatedData[$field->name] = $field->details->hydrate($fieldValue);
 		}
 
 		if (empty($allErrors)) {

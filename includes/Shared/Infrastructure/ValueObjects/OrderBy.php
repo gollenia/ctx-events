@@ -12,6 +12,11 @@ final class OrderBy
     ) {
     }
 
+	public static function default(): self
+	{
+		return new self('date', Order::DESC, false);
+	}
+
     public static function fromField(string $field, Order $order = Order::DESC): self
     {
         return new self($field, $order, false);

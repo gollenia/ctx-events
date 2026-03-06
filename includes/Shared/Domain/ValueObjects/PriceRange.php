@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 
 final readonly class PriceRange
@@ -8,7 +10,11 @@ final readonly class PriceRange
 		public ?Price $min,
 		public ?Price $max,
 	) {
-		if ($min->currency !== $max->currency) {
+		if (($min === null) !== ($max === null)) {
+			throw new \DomainException('PriceRange min and max must both be null or both be prices');
+		}
+
+		if ($min !== null && $max !== null && $min->currency->toString() !== $max->currency->toString()) {
             throw new \DomainException("PriceRange min and max must have the same currency");
         }
 	}

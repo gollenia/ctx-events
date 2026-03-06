@@ -6,10 +6,12 @@ namespace Contexis\Events\Form\Infrastructure;
 
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasTaxonomies;
 
-class BookingFormPost extends PostType
+class BookingFormPost extends PostType implements HasTaxonomies
 {
     public const POST_TYPE = 'ctx-booking-form';
+	public const TAGS = 'ctx_form_tag';
 
     public function registerPostType(): void
     {
@@ -83,4 +85,34 @@ class BookingFormPost extends PostType
 
         register_post_type(BookingFormPost::POST_TYPE, $args);
     }
+
+	public function registerTaxonomies(): void
+	{
+		register_taxonomy(self::POST_TYPE . '-tags', [self::POST_TYPE], [
+            'hierarchical' => false,
+            'public' => true,
+            'show_ui' => true,
+            'show_in_rest' => true,
+            'query_var' => true,
+            'label' => __('Form Tags', 'ctx-events'),
+            'show_admin_column' => true,
+            'singular_label' => __('Form Tag', 'ctx-events'),
+            'labels' => [
+                'name' => __('Form Tags', 'ctx-events'),
+                'singular_name' => __('Form Tag', 'ctx-events'),
+                'search_items' => __('Search Form Tags', 'ctx-events'),
+                'popular_items' => __('Popular Form Tags', 'ctx-events'),
+                'all_items' => __('All Form Tags', 'ctx-events'),
+                'parent_items' => __('Parent Form Tags', 'ctx-events'),
+                'parent_item_colon' => __('Parent Form Tag:', 'ctx-events'),
+                'edit_item' => __('Edit Form Tag', 'ctx-events'),
+                'update_item' => __('Update Form Tag', 'ctx-events'),
+                'add_new_item' => __('Add New Form Tag', 'ctx-events'),
+                'new_item_name' => __('New Form Tag Name', 'ctx-events'),
+                'separate_items_with_commas' => __('Separate form tags with commas', 'ctx-events'),
+                'add_or_remove_items' => __('Add or remove form tags', 'ctx-events'),
+                'choose_from_the_most_used' => __('Choose from most used form tags', 'ctx-events'),
+            ]
+        ]);
+	}
 }

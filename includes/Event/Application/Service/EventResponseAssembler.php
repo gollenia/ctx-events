@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\Service;
 
+use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Event\Application\DTOs\EventBookingSummary;
 use Contexis\Events\Event\Application\DTOs\EventResponse;
 use Contexis\Events\Event\Application\DTOs\EventResponseCollection;
@@ -24,7 +25,8 @@ final class EventResponseAssembler
 		private EventPersons $persons,
 		private EventTickets $tickets,
 		private TaxonomyLoader $taxonomyLoader,
-		private Clock $clock
+		private Clock $clock,
+		private BookingRepository $bookingRepository,
 	) {
 	}
 
@@ -32,6 +34,7 @@ final class EventResponseAssembler
 		$locationCollectionDto = $includes->location ? $this->locations->preloadDtos($events) : null;
 		$imageCollectionDto = $includes->image ? $this->images->preloadDtos($events) : null;
 		$personCollectionDto = $includes->person ? $this->persons->preloadDtos($events) : null;
+		$ticketBookingsMaps = $includes->bookings ? $this->bookingRepository->getTicketBookingsForEvents($events->getIds()) : null;
 
 		$items = [];
 		$now = $this->clock->now();
@@ -50,6 +53,8 @@ final class EventResponseAssembler
 			}
 
 			if ($includes->bookings) {
+				$ticketBookingsMap = $ticketBookingsMaps[$event->id->toInt()] ?? null;
+				$event = $event->withAvailabilitySnapshot($ticketBookingsMap);
 				$bookingSummary = EventBookingSummary::fromEvent($event, $now, $userContext->isAnonymous());
 			}
 		

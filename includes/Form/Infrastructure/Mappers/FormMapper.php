@@ -73,13 +73,25 @@ class FormMapper implements PostMapper
 			$mapper = self::getDetailsMapper($type);
 			if (!$mapper) continue;
 			
+			$rawRule = $attributes['visibilityRule'] ?? null;
+			$visibilityRule = is_array($rawRule) && isset($rawRule['field'])
+				? new \Contexis\Events\Form\Domain\ValueObjects\VisibilityRule(
+					dependsOnField: (string) $rawRule['field'],
+					expectedValue: $rawRule['value'] ?? null,
+					operator: (string) ($rawRule['operator'] ?? 'equals'),
+				)
+				: null;
+
 			$fields[] = new FormField(
-				name: $attributes['name'], 
-				label: $attributes['label'], 
+				name: $attributes['name'],
+				label: $attributes['label'],
 				required: $attributes['required'] ?? false,
-				width: $attributes['width'] ? FieldWidth::from($attributes['width']) : FieldWidth::SIX,
+				width: isset($attributes['width'])
+					? FieldWidth::from((int)$attributes['width'])
+					: FieldWidth::SIX,
 				description: $attributes['description'] ?? '',
 				details: $mapper->map($attributes),
+				visibilityRule: $visibilityRule,
 			);
 			
 		}

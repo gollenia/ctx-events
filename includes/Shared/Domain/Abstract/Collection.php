@@ -6,11 +6,11 @@ namespace Contexis\Events\Shared\Domain\Abstract;
 
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 
-abstract class Collection implements \Countable, \IteratorAggregate
+abstract readonly class Collection implements \Countable, \IteratorAggregate
 {
     /** @var array */
-    protected array $items = [];
-    protected ?Pagination $pagination = null;
+    protected array $items;
+    protected ?Pagination $pagination;
 
     public function __construct(object ...$items)
     {

@@ -7,7 +7,7 @@ use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Person\Domain\PersonCollection;
 use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
-final class PersonDtoCollection extends DtoCollection
+final readonly class PersonDtoCollection extends DtoCollection
 {
     public function __construct(
         PersonDto ...$persons

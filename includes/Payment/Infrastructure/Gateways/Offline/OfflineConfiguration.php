@@ -14,6 +14,7 @@ final class OfflineConfiguration implements GatewayConfiguration
 	private const string OPTION_KEY = 'ctx_events_gateway_offline';
 	public private(set) bool $isEnabled;
 	public private(set) string $title;
+	public private(set) ?string $description = null;
 	public private(set) ?BankData $bankData = null;
 	public private(set) int $paymentTerm;
 	public private(set) string $instructions;
@@ -33,6 +34,7 @@ final class OfflineConfiguration implements GatewayConfiguration
     {
         $this->isEnabled = (bool) ($data['enabled'] ?? $data['enabled'] ?? false);
         $this->title = (string) ($data['title'] ?? $this->title ?? __('Bank Transfer', 'ctx-events'));
+		$this->description = (string) ($data['description'] ?? $this->description ?? '');
         $this->paymentTerm = (int) ($data['paymentTerm'] ?? $data['payment_term'] ?? 0); // Handle snake_case from DB vs camelCase from Form
         $this->instructions = (string) ($data['instructions'] ?? $this->instructions ?? '');
 
@@ -63,6 +65,7 @@ final class OfflineConfiguration implements GatewayConfiguration
 		$cleanData = [
 			'enabled' => isset($data['enabled']) ? (bool) $data['enabled'] : $this->isEnabled,
 			'title' => sanitize_text_field($data['title'] ?? $this->title),
+			'description' => sanitize_text_field($data['description'] ?? $this->description),	
 			'paymentTerm' => isset($data['paymentTerm']) ? (int) $data['paymentTerm'] : $this->paymentTerm,
 			'instructions' => wp_kses_post($data['instructions'] ?? $this->instructions),
 			'accountHolder' => sanitize_text_field($data['accountHolder'] ?? $this->bankData?->accountHolder ?? ''),
@@ -84,7 +87,8 @@ final class OfflineConfiguration implements GatewayConfiguration
             'account_holder' => $this->bankData->accountHolder,
             'iban' => $this->bankData->iban,
             'bic' => $this->bankData->bic,
-            'bank_name' => $this->bankData->bankName
+            'bank_name' => $this->bankData->bankName,
+            'description' => $this->description
         ]);
     }
 
@@ -125,6 +129,13 @@ final class OfflineConfiguration implements GatewayConfiguration
                 'default' => __('Bank Transfer', 'ctx-events'),
 				'value' => $this->title,
             ],
+			[
+				'type' => 'text',
+				'name' => 'description',
+				'label' => __('Description', 'ctx-events'),
+				'help' => __('A brief description shown when the user selects the gateway', 'ctx-events'),
+				'value' => $this->description,
+			],
 			[
 				'type' => 'number',
 				'name' => 'paymentTerm',

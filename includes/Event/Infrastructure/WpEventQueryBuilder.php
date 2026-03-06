@@ -44,6 +44,10 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             }
         }
 
+		if($criteria->search) {
+			$builder = $builder->withSearch($criteria->search);
+		}
+
 		$builder = match ($criteria->isFree) {
 			true    => $builder->withMetaEquals(EventMeta::CACHED_MIN_PRICE, '0'),
 			false   => $builder->withMetaCompare(EventMeta::CACHED_MIN_PRICE, '0', '>', 'NUMERIC'),

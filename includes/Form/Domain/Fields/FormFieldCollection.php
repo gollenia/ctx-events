@@ -9,11 +9,12 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 /**
  * @extends Collection<FormField>
  */
-final class FormFieldCollection extends Collection
+final readonly class FormFieldCollection extends Collection
 {
     public function __construct(
         FormField ...$fields
     ) {
         $this->items = $fields;
     }
+
 }

@@ -6,8 +6,9 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use function DI\create;
 use function DI\factory;
 
+
 $subscribers = [
-    \Contexis\Events\Event\Application\Subscribers\EventSpaceSubscriber::class,
+    \Contexis\Events\Event\Application\Subscribers\EventCacheSubscriber::class,
 ];
 
 return [

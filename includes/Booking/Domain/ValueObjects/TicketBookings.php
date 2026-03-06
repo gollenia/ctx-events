@@ -26,6 +26,16 @@ final class TicketBookings implements \JsonSerializable
         return $this->pending + $this->approved;
     }
 
+	public function getApprovedCount(): int
+	{
+		return $this->approved;
+	}
+
+	public function getPendingCount(): int
+	{
+		return $this->pending;
+	}
+
 	public function getLostCount(): int
     {
         return $this->canceled + $this->expired;

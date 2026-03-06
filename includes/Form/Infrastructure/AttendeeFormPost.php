@@ -10,7 +10,7 @@ use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 class AttendeeFormPost extends PostType
 {
     public const POST_TYPE = 'ctx-attendee-form';
-
+	public const TAGS = 'ctx_form_tag';
     public function registerPostType(): void
     {
 
@@ -34,9 +34,22 @@ class AttendeeFormPost extends PostType
             'template' => [
                 ['ctx-events/form-container', ['lock' => [
                     'move'   => true,
-                    'remove' => true
+                    'remove' => true,
                 ]], [
-                    ['ctx-events/form-text', ["required" => true, "width" => 3, "label" => __('Name', 'ctx-events'), "name" => 'name']]
+                    ['ctx-events/form-text', [
+                        'lock'     => ['remove' => true, 'move' => false],
+                        'required' => false,
+                        'width'    => 3,
+                        'label'    => __('First Name', 'ctx-events'),
+                        'name'     => 'first_name',
+                    ]],
+                    ['ctx-events/form-text', [
+                        'lock'     => ['remove' => true, 'move' => false],
+                        'required' => false,
+                        'width'    => 3,
+                        'label'    => __('Last Name', 'ctx-events'),
+                        'name'     => 'last_name',
+                    ]],
                 ]]
             ],
             'labels' => [

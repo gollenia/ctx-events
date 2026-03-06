@@ -51,7 +51,7 @@ abstract class WpQueryBuilder
         return $clone;
     }
 
-    protected function withPostType(string $postType): self
+    protected function withPostType(string|array $postType): self
     {
         $clone = clone $this;
         $clone->args['post_type'] = $postType;

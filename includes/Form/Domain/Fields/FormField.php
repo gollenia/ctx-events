@@ -15,8 +15,8 @@ final class FormField
 		public readonly string $name,
 		public readonly string $label,
 		public readonly bool $required,
-		public readonly FieldWidth $width = FieldWidth::SIX,
 		public readonly FieldDetails $details,
+		public readonly FieldWidth $width = FieldWidth::SIX,
 		public readonly ?string $description = null,
 		public readonly ?VisibilityRule $visibilityRule = null,
 	) {}
@@ -45,11 +45,7 @@ final class FormField
 
 	public function validate(mixed $value): ?ValidationError
 	{
-		if (!$this->shouldValidate($value)) {
-			return null;
-		}
-
-		if ($this->required && $this->details->isEmpty($value)) {
+		if ($this->required && ($value === null || $this->details->isEmpty($value))) {
 			return ValidationError::REQUIRED;
 		}
 

@@ -19,14 +19,39 @@ use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
 
-class DbBookingPersistanceRepository implements BookingRepository
+class DbBookingRepository implements BookingRepository
 {
 	public function __construct(
 		private Database $db
 	)
 	{
 	}
-    
+
+	public function save(Booking $booking): BookingId
+	{
+		$table = BookingMigration::getTableName();
+		$data = [
+			'uuid'         => $booking->reference->toString(),
+			'event_id'     => $booking->eventId->toInt(),
+			'spaces'       => $booking->countAttendees(),
+			'email'        => $booking->email->toString(),
+			'status'       => $booking->status->value,
+			'final_price'  => $booking->priceSummary->finalPrice->amountCents,
+			'donation'     => $booking->priceSummary->donationAmount->amountCents,
+			'registration' => wp_json_encode($booking->registration->all()),
+			'gateway'      => $booking->gateway,
+			'coupon_id'    => $booking->coupon?->id?->toInt(),
+		];
+
+		$insertId = $this->db->insert($table, $data);
+
+		if ($insertId === false || $insertId === 0) {
+			throw new \RuntimeException('Failed to save booking.');
+		}
+
+		return BookingId::from($insertId);
+	}
+
 	public function find(BookingId $id): ?Booking
 	{
 		$table = BookingMigration::getTableName();
@@ -104,44 +129,148 @@ class DbBookingPersistanceRepository implements BookingRepository
         return [$sql, $params];
     }
 
-	public function getBookingsForEvent(EventId $eventId): TicketBookingsMap
+	public function getTicketBookingsForEvent(EventId $eventId, array $ticketIds = []): TicketBookingsMap
 	{
+		$expectedTicketIds = $this->normalizeTicketIds($ticketIds);
 
 		$attendeeTable = AttendeeMigration::getTableName();
 		$bookingTable = BookingMigration::getTableName();
+		$ticketFilterSql = '';
+
+		if ($expectedTicketIds !== []) {
+			$ticketPlaceholders = implode(', ', array_fill(0, count($expectedTicketIds), '%s'));
+			$ticketFilterSql = " AND a.ticket_id IN ({$ticketPlaceholders})";
+		}
 
 		$sql = $this->db->prepare(
 			"SELECT 
 				a.ticket_id,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as pending,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as approved,
-				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as cancelled,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as canceled,
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as expired
 			FROM {$attendeeTable} a
 			JOIN {$bookingTable} b ON a.booking_id = b.id
 			WHERE b.event_id = %d 
+			{$ticketFilterSql}
 			GROUP BY a.ticket_id",
 			BookingStatus::PENDING->value,
 			BookingStatus::APPROVED->value,
 			BookingStatus::CANCELED->value,
 			BookingStatus::EXPIRED->value,
-			$eventId->toInt()
+			$eventId->toInt(),
+			...array_map(static fn (TicketId $ticketId): string => $ticketId->toString(), $expectedTicketIds)
 		);
 
-    	$rows = $this->db->getResults($sql);
+	    $rows = $this->db->getResults($sql);
 
-		$statsObjects = [];
+		$result = [];
+
+		if ($ticketIds === []) {
+			foreach ($rows as $row) {
+				$result[] = new TicketBookings(
+					ticketId: TicketId::from($row->ticket_id),
+					pending: (int) $row->pending,
+					approved: (int) $row->approved,
+					canceled: (int) $row->canceled,
+					expired: (int) $row->expired
+				);
+			}
+		} else {
+			$rowsByTicket = array_column($rows, null, 'ticket_id');
+			foreach ($ticketIds as $ticketId) {
+				$row = $rowsByTicket[$ticketId] ?? null;
+				$result[] = new TicketBookings(
+					ticketId: TicketId::from($ticketId),
+					pending: $row !== null ? (int) $row->pending : 0,
+					approved: $row !== null ? (int) $row->approved : 0,
+					canceled: $row !== null ? (int) $row->canceled : 0,
+					expired: $row !== null ? (int) $row->expired : 0
+				);
+			}
+		}
+
+		return new TicketBookingsMap($result);
+	}
+
+	public function getTicketBookingsForEvents(array $eventIds): array
+	{
+		if ($eventIds === []) {
+			return [];
+		}
+
+		$eventPlaceholders = implode(', ', array_fill(0, count($eventIds), '%d'));
+
+		$attendeeTable = AttendeeMigration::getTableName();
+		$bookingTable = BookingMigration::getTableName();
+
+		$sql = $this->db->prepare(
+			"SELECT 
+				b.event_id,
+				a.ticket_id,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as pending,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as approved,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as canceled,
+				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as expired
+			FROM {$attendeeTable} a
+			JOIN {$bookingTable} b ON a.booking_id = b.id
+			WHERE b.event_id IN ({$eventPlaceholders})
+			GROUP BY b.event_id, a.ticket_id",
+			BookingStatus::PENDING->value,
+			BookingStatus::APPROVED->value,
+			BookingStatus::CANCELED->value,
+			BookingStatus::EXPIRED->value,
+			...array_map(static fn (EventId $eventId): int => $eventId->toInt(), $eventIds)
+		);
+
+		$rows = $this->db->getResults($sql);
+
+		$result = [];
+		foreach ($eventIds as $eventId) {
+			$result[$eventId->toInt()] = [];
+		}
+
 		foreach ($rows as $row) {
-			$statsObjects[] = new TicketBookings(
-				TicketId::from($row->ticket_id),
-				(int)$row->pending,
-				(int)$row->approved,
-				(int)$row->cancelled,
-				(int)$row->expired
+			$eventKey = (int) $row->event_id;
+
+			$result[$eventKey][] = new TicketBookings(
+				ticketId: TicketId::from($row->ticket_id),
+				pending: (int) $row->pending,
+				approved: (int) $row->approved,
+				canceled: (int) $row->canceled,
+				expired: (int) $row->expired
 			);
 		}
 
-		return new TicketBookingsMap($statsObjects);
+		foreach ($result as $eventKey => $ticketBookings) {
+			$result[$eventKey] = new TicketBookingsMap($ticketBookings);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param string[] $ticketIds
+	 * @return TicketId[]
+	 */
+	private function normalizeTicketIds(array $ticketIds): array
+	{
+		$normalized = [];
+
+		foreach ($ticketIds as $ticketId) {
+			if (!is_string($ticketId) || $ticketId === '') {
+				continue;
+			}
+
+			$resolvedTicketId = TicketId::from($ticketId);
+			if ($resolvedTicketId === null) {
+				continue;
+			}
+
+			$normalized[$resolvedTicketId->toString()] = $resolvedTicketId;
+		}
+
+		return array_values($normalized);
 	}
 
 	private function getBookingAttendees(BookingId $id): array

@@ -12,6 +12,7 @@ final class GatewayListItemDto
         public string $slug,
         public string $adminName,
         public string $title,
+		public ?string $description,
         public bool $active,
 		public bool $isValid
     ) {}
@@ -22,6 +23,7 @@ final class GatewayListItemDto
 			$gateway->getId(),
 			$gateway->getAdminName(),
 			$gateway->getTitle(),
+			$gateway->getDescription(),
 			$gateway->isEnabled(),
 			$gateway->isValid()
 		);
@@ -33,6 +35,7 @@ final class GatewayListItemDto
             'slug' => $this->slug,
             'adminName' => $this->adminName,
             'title' => $this->title,
+			'description' => $this->description,
             'active' => $this->active,
 			'isValid' => $this->isValid
         ];

@@ -8,7 +8,7 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 final class DatabaseMigration implements Registrar
 {
 
-	private const VERSION = '1.0.2';
+	private const VERSION = '1.0.3';
 
 	/*
 	 * @var Migration[]

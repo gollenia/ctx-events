@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Presentation;
 
 use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
+use Contexis\Events\Event\Application\UseCases\PrepareBooking;
 use Contexis\Events\Event\Application\UseCases\GetEvent;
 use Contexis\Events\Event\Application\UseCases\CancelEvent;
 use Contexis\Events\Event\Application\UseCases\ListEvents;
 use Contexis\Events\Event\Presentation\Resources\EventResource;
+use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Contexis\Events\Shared\Presentation\Links;
@@ -21,6 +23,7 @@ final class EventController implements RestController
         private GetEvent $getEvent,
         private ListEvents $listEvents,
 		private CancelEvent $cancelEvent,
+		private PrepareBooking $prepareBooking,
 		private \Contexis\Events\Shared\Domain\Contracts\Clock $clock
     ) {
         $this->route = RestRoute::forType('events');
@@ -167,27 +170,27 @@ final class EventController implements RestController
             ],
         ]);
 
-        register_rest_route(...$this->route->getForSingle('/prepare-booking'), args: [
-            [
-                'methods'   => 'GET',
-                'callback'  => [$this, 'prepareBooking'],
-                'permission_callback' => '__return_true',
-                'args' => [
-                    'id' => [
-                        'type' => 'integer',
-                        'required' => true,
-                    ],
-                ],
-            ],
-        ]);
+		register_rest_route(...$this->route->getForSingle('/prepare-booking'), args: [
+			[
+				'methods'   => 'GET',
+				'callback'  => [$this, 'prepareBooking'],
+				'permission_callback' => '__return_true',
+				'args' => [
+					'id' => [
+						'type' => 'integer',
+						'required' => true,
+					],
+				],
+			],
+		]);
     }
 
-    public function getItem(\WP_REST_Request $request): \WP_REST_Response
-    {
-        $event_id = (int) $request->get_param('id');
-        $include = EventIncludeRequest::fromArray(explode(',', $request->get_param('include') ?? ''));
+	public function getItem(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$event_id = (int) $request->get_param('id');
+		$include = EventIncludeRequest::fromArray($this->normalizeIncludeParam($request->get_param('include')));
 		$userContext = UserContextFactory::createFromCurrentUser();
-        $response = $this->getEvent->execute($event_id, $include, $userContext);
+		$response = $this->getEvent->execute($event_id, $include, $userContext);
 
         if (!$response) {
             return new \WP_REST_Response(['message' => 'Event not found'], 404);
@@ -223,8 +226,19 @@ final class EventController implements RestController
     public function prepareBooking(\WP_REST_Request $request): \WP_REST_Response
     {
         $event_id = (int) $request->get_param('id');
+		$userContext = UserContextFactory::createFromCurrentUser();
 
-        return new \WP_REST_Response(['message' => 'Die Stubsmaus'], 200);
+		try {
+			$response = $this->prepareBooking->execute($event_id, $userContext);
+		} catch (\DomainException $e) {
+			return new \WP_REST_Response(['message' => $e->getMessage()], 422);
+		}
+
+		if ($response === null) {
+			return new \WP_REST_Response(['message' => 'Event not found'], 404);
+		}
+
+		return new \WP_REST_Response(PrepareBookingResource::fromResponse($response)->toArray(), 200);
     }
 
 	public function cancelEvent(\WP_REST_Request $request): \WP_REST_Response
@@ -242,5 +256,27 @@ final class EventController implements RestController
 		$event_id = (int) $request->get_param('id');
 
 		return new \WP_REST_Response(['message' => 'Event deleted'], 200);
+	}
+
+	private function normalizeIncludeParam(mixed $includeParam): array
+	{
+		if ($includeParam === null) {
+			return [];
+		}
+
+		if (is_array($includeParam)) {
+			return array_values(array_filter(
+				$includeParam,
+				static fn (mixed $value): bool => is_string($value) && $value !== ''
+			));
+		}
+
+		if (!is_string($includeParam) || $includeParam === '') {
+			return [];
+		}
+
+		$parts = explode(',', $includeParam);
+
+		return array_values(array_filter($parts, static fn (string $value): bool => $value !== ''));
 	}
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Event\Domain\Signals\EventAvailabilityChanged;
 use Contexis\Events\Event\Domain\Signals\EventCapacityChanged;
 use Contexis\Events\Event\Domain\Signals\EventTicketsChanged;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
@@ -11,6 +12,17 @@ use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 class EventHooks
 {
+
+	private const AVAILABILITY_KEYS = [
+		EventMeta::TICKETS,
+		EventMeta::BOOKING_CAPACITY,
+		EventMeta::BOOKING_ENABLED,
+		EventMeta::BOOKING_START,
+		EventMeta::BOOKING_END,
+		EventMeta::EVENT_START,
+		EventMeta::BOOKING_CURRENCY,
+	];
+
     public function __construct(
         public SignalDispatcher $signalDispatcher,
     ) {
@@ -30,14 +42,8 @@ class EventHooks
 
 		$eventId = EventId::from($post_id);
 
-        match ($meta_key) {
-			EventMeta::BOOKING_CAPACITY => 
-				$this->signalDispatcher->dispatch(new EventCapacityChanged($eventId)),
-
-			EventMeta::TICKETS => 
-				$this->signalDispatcher->dispatch(new EventTicketsChanged($eventId)),
-
-			default => null
+		if(in_array($meta_key, self::AVAILABILITY_KEYS, true)) {
+				$this->signalDispatcher->dispatch(new EventAvailabilityChanged($eventId));
 		};
 
     }

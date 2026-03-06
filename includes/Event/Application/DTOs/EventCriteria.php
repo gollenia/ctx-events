@@ -14,13 +14,13 @@ use Contexis\Events\Shared\Infrastructure\ValueObjects\OrderBy;
 final class EventCriteria implements DTO
 {
     public function __construct(
-        public readonly int $page = 0,
-        public readonly int $perPage = 10,
-        public readonly ?StatusList $status = null,
+        public readonly int $page,
+        public readonly int $perPage,
         public readonly OrderBy $orderBy,
         public readonly TimeScope $scope = TimeScope::FUTURE,
         public readonly array $categories = [],
         public readonly array $tags = [],
+		public readonly ?StatusList $status = null,
         public readonly ?int $location = null,
         public readonly ?int $person = null,
 		public readonly ?bool $isFree = null,

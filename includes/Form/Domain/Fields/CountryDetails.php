@@ -12,9 +12,9 @@ use Contexis\Events\Form\Domain\ValueObjects\CountryCodes;
 final class CountryDetails implements FieldDetails
 {
 	public function __construct(
+		public readonly CountryCodes $countryCodes,
 		public readonly string $defaultValue = '',
 		public readonly string $placeholder = '',
-		public readonly CountryCodes $countryCodes,
 		public readonly bool $hasNullOption = false,
 	) {}
 

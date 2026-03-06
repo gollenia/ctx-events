@@ -27,6 +27,12 @@ return [
     \Contexis\Events\Shared\Domain\Contracts\Clock::class
     => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
 	SignalDispatcher::class => autowire(WordpressSignalDispatcher::class),
+	\Contexis\Events\Shared\Domain\Contracts\TokenGenerator::class
+	=> autowire(\Contexis\Events\Shared\Infrastructure\Security\RandomTokenGenerator::class),
+	\Contexis\Events\Shared\Domain\Contracts\HashGenerator::class
+	=> autowire(\Contexis\Events\Shared\Infrastructure\Security\WpHashGenerator::class),
+	\Contexis\Events\Shared\Domain\Contracts\SessionHashResolver::class
+	=> autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpSessionHashResolver::class),
 
 	Database::class => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpDatabase::class),
 

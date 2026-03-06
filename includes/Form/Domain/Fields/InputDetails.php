@@ -60,6 +60,7 @@ final class InputDetails implements FieldDetails
 	{
 		return [
 			'type' => $this->getType()->value,
+			'inputType' => $this->inputType->value,
 			'placeholder' => $this->placeholder,
 			'defaultValue' => $this->defaultValue,
 			'pattern' => $this->pattern,

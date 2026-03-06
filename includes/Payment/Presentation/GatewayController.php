@@ -8,6 +8,7 @@ use Contexis\Events\Payment\Application\UseCases\EditGateway;
 use Contexis\Events\Payment\Application\UseCases\ListGateways;
 use Contexis\Events\Payment\Application\UseCases\ToggleGateway;
 use Contexis\Events\Payment\Application\UseCases\UpdateGateway;
+use Contexis\Events\Payment\Presentation\Resources\GatewayResource;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class GatewayController implements RestController
@@ -77,7 +78,8 @@ final class GatewayController implements RestController
 	public function listGateways(\WP_REST_Request $request): \WP_REST_Response
 	{
 		$gateways = $this->listGateways->execute();
-		return new \WP_REST_Response($gateways);
+		$result = array_map(fn($gateway) => GatewayResource::fromDto($gateway), $gateways);
+		return new \WP_REST_Response($result);
 	}
 
 	public function updateGateway(\WP_REST_Request $request): \WP_REST_Response

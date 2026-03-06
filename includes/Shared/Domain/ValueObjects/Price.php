@@ -10,19 +10,19 @@ final class Price
 {
     public function __construct(
         public readonly int $amountCents,
-        public readonly string $currency
+        public readonly Currency $currency
     ) {
         if ($amountCents < 0) {
             throw new \InvalidArgumentException('Amount cents cannot be negative');
         }
     }
 
-    public static function fromFloat(float $amount, string $currency): self
+    public static function fromFloat(float $amount, Currency $currency): self
     {
         return new self((int) round($amount * 100), $currency);
     }
 
-    public static function from(int $amountCents, string $currency): self
+    public static function from(int $amountCents, Currency $currency): self
     {
         return new self($amountCents, $currency);
     }
@@ -59,14 +59,22 @@ final class Price
 
     public function equals(Price $other): bool
     {
-        return $this->amountCents === $other->amountCents && $this->currency === $other->currency;
+        return $this->amountCents === $other->amountCents && $this->currency->equals($other->currency);
     }
+
+	public function add(Price $other): self
+	{
+		if (!$this->currency->equals($other->currency)) {
+			throw new \InvalidArgumentException('Cannot add prices with different currencies');
+		}
+		return $this->withAmount($this->amountCents + $other->amountCents);
+	}
 
 	public function toArray(): array
 	{
 		return [
 			'amountCents' => $this->amountCents,
-			'currency' => $this->currency
+			'currency' => $this->currency->toString()
 		];
 	}
 }

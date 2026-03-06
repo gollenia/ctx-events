@@ -6,7 +6,7 @@ namespace Contexis\Events\Person\Domain;
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-class PersonCollection extends Collection
+readonly class PersonCollection extends Collection
 {
     public function __construct(Person ...$persons)
     {

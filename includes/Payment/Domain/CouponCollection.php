@@ -6,7 +6,7 @@ namespace Contexis\Events\Payment\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-class CouponCollection extends Collection
+final readonly class CouponCollection extends Collection
 {
     protected function getItemClass(): string
     {

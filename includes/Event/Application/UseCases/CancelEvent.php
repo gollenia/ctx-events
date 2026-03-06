@@ -4,6 +4,7 @@ namespace Contexis\Events\Event\Application\UseCases;
 
 use Contexis\Events\Event\Application\DTOs\EventResponse;
 use Contexis\Events\Event\Domain\EventRepository;
+use Contexis\Events\Event\Domain\EventStatusRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Application\Contracts\UseCase;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
@@ -11,7 +12,9 @@ use Contexis\Events\Shared\Domain\ValueObjects\Status;
 class CancelEvent implements UseCase
 {
 	public function __construct(
-		private EventRepository $eventRepository,	) {
+		private EventRepository $eventRepository,
+		private EventStatusRepository $eventStatusRepository,
+	) {
 	}
 
 	/**
@@ -22,7 +25,7 @@ class CancelEvent implements UseCase
 	{
 		$event = $this->eventRepository->find(EventId::from($eventId));
 		$event->setStatus(Status::Trash);
-		$this->eventRepository->saveStatus($event);
+		$this->eventStatusRepository->saveStatus($event);
 		return null;
 	}
 }

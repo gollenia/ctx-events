@@ -11,7 +11,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\PriceRange;
 use IteratorAggregate;
 use Countable;
 
-final class TicketCollection extends Collection implements IteratorAggregate, Countable
+final readonly class TicketCollection extends Collection
 {
     public function __construct(Ticket ...$tickets)
     {
@@ -91,6 +91,7 @@ final class TicketCollection extends Collection implements IteratorAggregate, Co
 		if (empty($prices)) {
 			return PriceRange::empty();
 		}
+		
 		return PriceRange::fromPrices(...$prices);
 	}
 
@@ -99,12 +100,29 @@ final class TicketCollection extends Collection implements IteratorAggregate, Co
 		$totalFreeSpaces = 0;
 		foreach ($this->items as $ticket) {
 			if ($ticket->capacity === null) {
-				return null; // Unlimited capacity, so we return null to indicate this
+				return null;
 			}
 			$soldCount = $map->getStatsFor($ticket->id)->getBookedCount();
 			$freeSpaces = max(0, $ticket->capacity - $soldCount);
 			$totalFreeSpaces += $freeSpaces;
 		}
 		return $totalFreeSpaces;
+	}
+
+	public function getTicketIds(): array
+	{
+		return array_map(fn (Ticket $ticket): string => $ticket->id->toString(), $this->items);
+	}
+
+	public function getCapacity(): ?int
+	{
+		$totalCapacity = 0;
+		foreach ($this->items as $ticket) {
+			if ($ticket->capacity === null) {
+				return null;
+			}
+			$totalCapacity += $ticket->capacity;
+		}
+		return $totalCapacity;
 	}
 }

@@ -5,7 +5,7 @@ namespace Contexis\Events\Media\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-final class ImageCollection extends Collection
+final readonly class ImageCollection extends Collection
 {
     public function __construct(
         Image ...$images

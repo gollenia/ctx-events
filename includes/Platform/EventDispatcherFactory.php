@@ -4,7 +4,6 @@ namespace Contexis\Events\Platform;
 
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Contexis\Events\Event\Application\Subscribers\EventSpaceSubscriber;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class EventDispatcherFactory

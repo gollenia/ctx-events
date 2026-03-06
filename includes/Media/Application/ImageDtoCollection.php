@@ -7,7 +7,7 @@ use Contexis\Events\Media\Domain\ImageCollection;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
-final class ImageDtoCollection extends DtoCollection
+final readonly class ImageDtoCollection extends DtoCollection
 {
     public function __construct(
         ImageDto ...$images

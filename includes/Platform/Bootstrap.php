@@ -24,12 +24,22 @@ class Bootstrap
         AdminRegistrar::class
     ];
 
+    private static ?\DI\Container $container = null;
+
     public static function init(): void
     {
-        $container = ContainerFactory::build();
+        self::$container = ContainerFactory::build();
 
         foreach (self::REGISTRARS as $registrar) {
-            $container->get($registrar)->hook();
+            self::$container->get($registrar)->hook();
         }
+    }
+
+    public static function container(): \DI\Container
+    {
+        if (self::$container === null) {
+            throw new \RuntimeException('Container not initialized. Call Bootstrap::init() first.');
+        }
+        return self::$container;
     }
 }

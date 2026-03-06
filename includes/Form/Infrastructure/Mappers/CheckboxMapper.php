@@ -14,7 +14,8 @@ class CheckboxMapper implements DetailsMapper
         return new CheckboxDetails(
             defaultValue: $attributes['defaultValue'] ?? false,
             requiredMessage: $attributes['requiredMessage'] ?? '',
-            variant: $attributes['variant'] ? CheckboxVariant::from($attributes['variant']) : CheckboxVariant::DEFAULT
+            variant: CheckboxVariant::tryFrom((string)($attributes['variant'] ?? ''))
+    			?? CheckboxVariant::DEFAULT,
         );
     }
 }

@@ -5,7 +5,7 @@ namespace Contexis\Events\Shared\Application\ValueObjects;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 
-final class TaxonomyCollection extends Collection
+final readonly class TaxonomyCollection extends Collection
 {
     public function all(): array
     {

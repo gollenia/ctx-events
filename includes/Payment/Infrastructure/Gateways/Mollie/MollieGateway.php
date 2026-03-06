@@ -33,6 +33,10 @@ final class MollieGateway implements PaymentGateway
 		return $this->config->title;
 	}
 
+	public function getDescription(): ?string {
+		return $this->config->description;
+	}
+
     public array $transaction_detail = [
         'Mollie Dashboard',
         'https://www.mollie.com/dashboard/payments/%s',
@@ -63,19 +67,20 @@ final class MollieGateway implements PaymentGateway
         }
 
         $mollieInstance = $this->getClient();
+        $reference = $booking->reference->toString();
         $molliePayment = $mollieInstance->payments->create(
             [
                 'amount' => [
-                    'currency' => $booking->priceSummary->finalPrice->currency,
+                    'currency' => $booking->priceSummary->finalPrice->currency->toString(),
                     'value' => $booking->priceSummary->finalPrice->toFloat(),
                 ],
-                'description' => sprintf('Booking #%s', $booking->id),
-                'redirectUrl' => site_url('/wp-json/events/v3/bookings/return?booking_uuid=' . $booking->uuid),
-                'webhookUrl' => site_url('/payment-webhook'),
+                'description' => sprintf('Booking #%s', $reference),
+                'redirectUrl' => site_url('/wp-json/events/v3/bookings/return?booking_uuid=' . $reference),
+                'webhookUrl' => site_url('/wp-json/events/v3/bookings/webhook'),
                 'locale' => get_locale(),
                 'metadata' => [
-                    'booking_uuid' => (string) $booking->uuid,
-                    'customer_name' => (string) $booking->name,
+                    'booking_uuid' => $reference,
+                    'customer_name' => $booking->name->toString(),
                     'customer_email' => (string) $booking->email,
                 ],
                 'sequenceType' => 'oneoff',

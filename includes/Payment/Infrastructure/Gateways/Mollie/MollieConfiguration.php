@@ -13,6 +13,7 @@ final class MollieConfiguration implements GatewayConfiguration
   
 	public private(set) bool $isEnabled;
 	public private(set) string $title;
+	public private(set) ?string $description;
 	public private(set) string $mode;
 	public private(set) string $apiKeyLive;
 	public private(set) string $apiKeyTest;
@@ -45,6 +46,7 @@ final class MollieConfiguration implements GatewayConfiguration
             'api_key_test' => sanitize_text_field($data['api_key_test'] ?? ''),
             'return_url' => esc_url_raw($data['return_url'] ?? ''),
             'instructions' => wp_kses_post($data['instructions'] ?? ''),
+            'description' => sanitize_text_field($data['description'] ?? ''),
         ];
 		$this->mapDataToProperties($cleanData);
     }
@@ -57,6 +59,7 @@ final class MollieConfiguration implements GatewayConfiguration
         $this->apiKeyLive = (string) ($data['api_key_live'] ?? '');
         $this->apiKeyTest = (string) ($data['api_key_test'] ?? '');
         $this->returnUrl = (string) ($data['return_url'] ?? '');
+		$this->description = (string) ($data['description'] ?? '');
         $this->instructions = (string) ($data['instructions'] ?? '');
     }
 
@@ -69,6 +72,7 @@ final class MollieConfiguration implements GatewayConfiguration
             'api_key_test' => $this->apiKeyTest,
             'return_url' => $this->returnUrl,
 			'instructions' => $this->instructions,
+			'description' => $this->description,
 			'title' => $this->title,
         ]);
     }
@@ -105,6 +109,13 @@ final class MollieConfiguration implements GatewayConfiguration
                 'label' => __('Return URL after payment (optional)', 'ctx-events'),
                 'description' => __('URL to redirect to after payment.', 'ctx-events'),
 				'value' => $this->returnUrl,
+			],
+			[
+				'type' => 'textarea',
+				'name' => 'description',
+				'label' => __('Description', 'ctx-events'),
+				'help' => __('A brief description shown when the user selects the gateway', 'ctx-events'),
+				'value' => $this->description,
 			],
 			[
 				'type' => 'textarea',

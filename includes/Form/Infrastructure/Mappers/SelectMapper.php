@@ -14,8 +14,16 @@ class SelectMapper implements DetailsMapper
 {
     public function map(array $attributes): FieldDetails
     {
+		$rawVariant = $attributes['selectVariant'] ?? null;
+		$normalizedVariant = is_string($rawVariant) ? strtolower(trim($rawVariant)) : null;
+
+		$selectVariant = match ($normalizedVariant) {
+			'default', '', null => SelectVariant::SELECT,
+			default => SelectVariant::tryFrom($normalizedVariant) ?? SelectVariant::SELECT,
+		};
+
         return new SelectDetails(
-			selectVariant: SelectVariant::from($attributes['selectVariant'] ?? 'default'),
+			selectVariant: $selectVariant,
             options: SelectOptions::fromArray($attributes['options'] ?? []),
             placeholder: $attributes['placeholder'] ?? '',
             hasNullOption: $attributes['hasNullOption'] ?? false,

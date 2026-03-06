@@ -20,6 +20,6 @@ final class ListGateways
         $list = $this->repository->findAll();
 		return array_map(function (PaymentGateway $gateway) {
 			return GatewayListItemDto::fromPaymentGateway($gateway);
-		}, $list);
+		}, $list->toArray());
     }
 }

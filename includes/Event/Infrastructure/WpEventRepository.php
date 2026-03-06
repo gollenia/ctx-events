@@ -4,21 +4,25 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Application\DTOs\EventCriteria;
+use Contexis\Events\Event\Application\DTOs\EventCacheSnapshot;
+use Contexis\Events\Event\Domain\EventCacheRepository;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventCollection;
+use Contexis\Events\Event\Domain\EventStatusRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventStatusCounts;
 use Contexis\Events\Event\Domain\ValueObjects\EventSpaces;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
-use Contexis\Events\Shared\Domain\Contracts\Clock;
+use Contexis\Events\Shared\Infrastructure\Wordpress\InteractsWithStatusCounts;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
-class WpEventRepository implements EventRepository
+class WpEventRepository implements EventRepository, EventStatusRepository, EventCacheRepository
 {
+    use InteractsWithStatusCounts;
+
     public function __construct(
-        private EventMapper $mapper,
-		private Clock $clock
+        private EventMapper $mapper
 
     ) {
     }
@@ -99,15 +103,17 @@ class WpEventRepository implements EventRepository
         return $event;
     }
 
-	public function saveCache(Event $event): void
+	public function saveCache(EventCacheSnapshot $snapshot): void
 	{
-		$now = $this->clock->now();
-		$post_id = $event->id->toInt();
-		$priceRange = $event->getAvailableTickets($now)?->getPriceRange($now);
-		update_post_meta($post_id, EventMeta::CACHED_MIN_PRICE, $priceRange?->min->amountCents);
-        update_post_meta($post_id, EventMeta::CACHED_MAX_PRICE, $priceRange?->max->amountCents);
-		update_post_meta($post_id, EventMeta::CACHED_AVAILABLE, $event->getAvailableTickets($now)?->count() ?? 0);
-		update_post_meta($post_id, EventMeta::CACHED_BOOKING_STATS, $event->ticketBookingsMap?->jsonSerialize());
+		
+		$postId = (int) $snapshot->eventId;
+
+		update_post_meta($postId, EventMeta::CACHED_MIN_PRICE, (int) $snapshot->minPriceAmountCents);
+		update_post_meta($postId, EventMeta::CACHED_MAX_PRICE, (int) $snapshot->maxPriceAmountCents);
+		update_post_meta($postId, EventMeta::CACHED_AVAILABLE, (int) $snapshot->availableSpaces);
+		update_post_meta($postId, EventMeta::CACHED_PENDING, (int) $snapshot->bookingStats->getTotalPendingCount());
+		update_post_meta($postId, EventMeta::CACHED_APPROVED, (int) $snapshot->bookingStats->getTotalApprovedCount());
+		update_post_meta($postId, EventMeta::CACHED_BOOKING_STATS, $snapshot->bookingStats->jsonSerialize());
 	}
 
 	public function saveStatus(Event $event): void
@@ -120,15 +126,16 @@ class WpEventRepository implements EventRepository
 
 	public function getCountsByStatus(): EventStatusCounts
 	{
-		$counts = wp_count_posts(EventPost::POST_TYPE); 
-    
+        $counts = wp_count_posts(EventPost::POST_TYPE);
+        $baseCounts = $this->mapWpCountsToStatusCounts($counts);
+
 		return new EventStatusCounts(
-			draft: (int) ($counts->draft ?? 0),
-			publish: (int) ($counts->publish ?? 0),
-			future: (int) ($counts->future ?? 0),
-			pending: (int) ($counts->pending ?? 0),
-			private: (int) ($counts->private ?? 0),
-			trash: (int) ($counts->trash ?? 0),
+            draft: $baseCounts->draft,
+            publish: $baseCounts->publish,
+            future: $baseCounts->future,
+            pending: $baseCounts->pending,
+            private: $baseCounts->private,
+            trash: $baseCounts->trash,
 			cancelled: (int) ($counts->cancelled ?? 0),
 		);
 	}

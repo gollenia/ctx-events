@@ -15,9 +15,10 @@ final readonly class EventBookingSummary
 	public function __construct(
 		public bool $isBookable,
 		public BookingDenyReason|null $denyReason,
-		public int $totalBookedCount,
-		public ?int $totalAvailableCount = null,
+		public int $approved,
+		public ?int $available = null,
 		public ?int $totalCapacity = null,
+		public ?int $pending = null,
 		public ?Price $lowestAvailablePrice,
 		public ?Price $lowestPrice,
 		public ?Price $highestPrice,
@@ -37,14 +38,15 @@ final readonly class EventBookingSummary
 		return new self(
 			isBookable: $bookingDecision->allowed,
 			denyReason: $bookingDecision->reason,
-			totalBookedCount: $event->ticketBookingsMap?->getTotalBookedCount() ?? 0,
-			totalAvailableCount: $canSeeSpaces ? $freeSpaces : null,
-			totalCapacity: $event->overallCapacity,
+			approved: $event->ticketBookingsMap?->getTotalApprovedCount() ?? 0,
+			pending: $event->ticketBookingsMap?->getTotalPendingCount() ?? 0,
+			available: $canSeeSpaces ? $freeSpaces : null,
+			totalCapacity: $event->getCapacity(),
 			lowestAvailablePrice: $event->getLowestAvailablePrice($now),
 			lowestPrice: $priceRange->min,
 			highestPrice: $priceRange->max,
-			bookingStart: $event->bookingPolicy->start(),
-			bookingEnd: $event->bookingPolicy->end()
+			bookingStart: $event->bookingPolicy?->start(),
+			bookingEnd: $event->bookingPolicy?->end()
 		);
 	}
 
@@ -53,8 +55,9 @@ final readonly class EventBookingSummary
 		return [
 			'isBookable' => $this->isBookable,
 			'denyReason' => $this->denyReason?->value,
-			'totalBookedCount' => $this->totalBookedCount,
-			'totalAvailableCount' => $this->totalAvailableCount,
+			'approved' => $this->approved,
+			'pending' => $this->pending,
+			'available' => $this->available,
 			'totalCapacity' => $this->totalCapacity,
 			'lowestAvailablePrice' => $this->lowestAvailablePrice?->toArray(),
 			'lowestPrice' => $this->lowestPrice?->toArray(),

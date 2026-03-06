@@ -5,18 +5,19 @@ namespace Contexis\Events\Event\Infrastructure;
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use DateTimeImmutable;
 
 class TicketMapper
 {
-    public static function fromArray(array $ticket, string $currency): Ticket
+    public static function fromArray(array $ticket, Currency $currency): Ticket
     {
         return new Ticket(
             id: TicketId::from($ticket['ticket_id']),
             name: $ticket['ticket_name'],
             description: $ticket['ticket_description'],
-            price: Price::fromFloat($ticket['ticket_price'], $currency),
+            price: Price::fromFloat((float) $ticket['ticket_price'], $currency),
             capacity: $ticket['ticket_spaces'],
             max: $ticket['ticket_max'],
             min: $ticket['ticket_min'],

@@ -9,5 +9,7 @@ interface CouponRepository
 {
     public function find(CouponId $id): ?Coupon;
 	public function findByCode(string $code): ?Coupon;
+    public function findMany(array $ids): CouponCollection;
+    public function findGlobal(): CouponCollection;
     public function get(CouponId $id): Coupon;
 }

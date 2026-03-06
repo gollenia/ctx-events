@@ -9,7 +9,7 @@ use Contexis\Events\Location\Domain\LocationCollection;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
-final class LocationDtoCollection extends DtoCollection
+final readonly class LocationDtoCollection extends DtoCollection
 {
     public function __construct(
         LocationDto ...$locations

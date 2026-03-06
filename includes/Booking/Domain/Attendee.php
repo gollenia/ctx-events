@@ -12,12 +12,10 @@ use DateTimeImmutable;
 final class Attendee
 {
     public function __construct(
-        public readonly AttendeeId $id,
         public readonly TicketId $ticketId,
 		public readonly Price $ticketPrice,
-        public readonly BookingId $bookingId,
-        public readonly string $firstName,
-        public readonly string $lastName,
+        public readonly ?string $firstName,
+        public readonly ?string $lastName,
         public readonly ?DateTimeImmutable $birthDate = null,
         public readonly array $metadata = []
     ) {

@@ -12,10 +12,10 @@ use Contexis\Events\Shared\Application\Contracts\DTO;
 use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 
-final class EventResponseCollection extends DtoCollection
+final readonly class EventResponseCollection extends DtoCollection
 {
-    public ?Pagination $pagination = null;
-	public ?EventStatusCounts $statusCounts = null;
+    public ?Pagination $pagination;
+	public ?EventStatusCounts $statusCounts;
 
     public function __construct(
         EventResponse ...$events

@@ -30,7 +30,7 @@ final class Email
         return $this->address;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->address;
     }

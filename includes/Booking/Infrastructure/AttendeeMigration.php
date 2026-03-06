@@ -21,9 +21,9 @@ final class AttendeeMigration implements Migration
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
         self::TICKET_ID . ' VARCHAR(100) NOT NULL',
         self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
-        self::FIRST_NAME . ' VARCHAR(191) NOT NULL',
-        self::LAST_NAME . ' VARCHAR(191) NOT NULL',
-        self::CHECKIN_AT . ' TIMESTAMP NULL',
+        self::FIRST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',
+        self::LAST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',
+        self::CHECKIN_AT . ' TIMESTAMP NULL DEFAULT NULL',
         self::METADATA . ' JSON NULL',
         'PRIMARY KEY  (' . self::ID . ')',
 		'INDEX (' . self::BOOKING_ID . ')'

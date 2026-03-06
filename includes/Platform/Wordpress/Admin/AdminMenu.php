@@ -75,6 +75,15 @@ final class AdminMenu implements AdminServiceInterface
 
 		add_submenu_page(
 			self::MENU_SLUG,
+			__('Forms', 'ctx-events'),
+			__('Forms', 'ctx-events'),
+			'manage_options',
+			'contexis_events_forms',
+			fn() => print('<div id="ctx-forms-admin"></div>')
+		);
+
+		add_submenu_page(
+			self::MENU_SLUG,
 			__('Gateways', 'ctx-events'),
 			__('Gateways', 'ctx-events'),
 			'manage_options',

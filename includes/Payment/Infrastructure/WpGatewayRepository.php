@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Infrastructure;
 
+use Contexis\Events\Payment\Domain\GatewayCollection;
 use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Infrastructure\Enums\PaymentProvider;
@@ -27,7 +28,7 @@ final class WpGatewayRepository implements GatewayRepository
         return $this->instances[$id] ?? null;
     }
 
-    public function findAll(): array
+    public function findAll(): GatewayCollection
     {
 		
         $allIds = array_map(fn($case) => $case->value, PaymentProvider::cases());
@@ -39,14 +40,15 @@ final class WpGatewayRepository implements GatewayRepository
                 error_log($e->getMessage());
             }
         }
-        return $result;
+        return new GatewayCollection(...$result);
     }
 
-    public function findActive(): array
+    public function findActive(): GatewayCollection
     {
-        return array_filter(
-            $this->findAll(),
+        return new GatewayCollection(...array_filter(
+            $this->findAll()->toArray(),
             fn(PaymentGateway $g) => $g->isEnabled()
-        );
+        ));
+
     }
 }
