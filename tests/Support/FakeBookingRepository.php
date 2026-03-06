@@ -104,6 +104,17 @@ final class FakeBookingRepository implements BookingRepository
         return new TicketBookingsMap($items);
     }
 
+	 public function getTicketBookingsForEvents(array $eventIds): array
+         {
+            $result = [];
+      
+              foreach ($eventIds as $eventId) {
+                  $result[$eventId->toInt()] = $this->getTicketBookingsForEvent($eventId);
+              }
+      
+              return $result;
+    }
+
     public function seedBookingsForEvent(Event $event, FakeFormRepository $formRepository, int $count = 4): void
     {
         if ($count <= 0) {
