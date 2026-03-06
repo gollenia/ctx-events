@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "browser": {
+      "type": "http",
+      "url": "http://192.168.20.65:7337"
+    },
+    "logs": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/var/log/nginx"
+      ]
+    }
+  }
+}

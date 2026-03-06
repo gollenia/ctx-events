@@ -9,10 +9,14 @@ module.exports = {
 		alias: {
 			...defaultConfig.resolve.alias,
 			'@events/form': path.resolve(__dirname, 'src/editor/blocks/form/_shared'),
-            '@events/details': path.resolve(__dirname, 'src/editor/blocks/details/_shared'),
+			'@events/details': path.resolve(
+				__dirname,
+				'src/editor/blocks/details/_shared',
+			),
 			'@events/datatable': path.resolve(__dirname, 'src/shared/datatable'),
 			'@events/adminfields': path.resolve(__dirname, 'src/shared/adminfields'),
 			'@events/i18n': path.resolve(__dirname, 'src/shared/i18n'),
+			'@events/utilities': path.resolve(__dirname, 'src/shared/utilities'),
 		},
 	},
 

@@ -2,5 +2,10 @@
 	"material-icon-theme.folders.associations": {
 		"DTO": "Less",
 		"UseCases": "Pipe"
-	}
+	},
+	"github.copilot.chat.codeGeneration.instructions": [
+		{
+			"file": "code-style.md"
+		}
+	]
 }
