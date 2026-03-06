@@ -1,3 +1,5 @@
+import { useDataTable } from './DataTableContext';
+
 interface ScreenMetaProps {
 	setScreenMeta: (context: string) => void;
 }
@@ -40,4 +42,10 @@ const ScreenMetaLinks = ({ setScreenMeta }: ScreenMetaProps) => {
 	);
 };
 
+const DataTableScreenMetaLinks = () => {
+	const { setScreenMetaContext } = useDataTable();
+	return <ScreenMetaLinks setScreenMeta={setScreenMetaContext} />;
+};
+
 export default ScreenMetaLinks;
+export { DataTableScreenMetaLinks };

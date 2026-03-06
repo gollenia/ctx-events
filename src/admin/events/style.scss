@@ -1,3 +1,47 @@
 .danger {
 	color: var(--wp--preset--color-danger);
 }
+
+.ctx-booking-graph {
+	margin-top: 6px;
+	border-radius: 999px;
+	display: flex;
+	width: 100px;
+	position: relative;
+	height: 8px;
+	background: #dddddd;
+	box-shadow: inset 1px 1px 3px rgb(0 0 0 / 20%);
+
+	&__label {
+		font-size: 11px;
+		white-space: nowrap;
+	}
+
+	&__booked {
+		border-radius: 999px;
+		height: 8px;
+		background: #4caf50;
+
+		&.cut {
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+	}
+
+	&__pending {
+		border-radius: 999px;
+		height: 8px;
+		background: #ffc107;
+
+		&.cut {
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+	}
+
+	&__full {
+		border-radius: 999px;
+		height: 8px;
+		background: #f55e53;
+	}
+}

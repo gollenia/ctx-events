@@ -6,11 +6,13 @@ declare module '@events/i18n' {
 }
 
 declare global {
-  interface Window {
-    eventBlocksLocalization?: {
-      locale: string;
-    };
-  }
+	interface Window {
+		eventBlocksLocalization?: {
+			locale: string;
+		};
+	}
 }
 
 export {};
+
+declare module '@wordpress/block-editor';

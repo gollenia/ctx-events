@@ -1,5 +1,7 @@
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useDataTable } from './DataTableContext';
+import Search from './Search';
 import type {
 	DataFieldConfig,
 	DataFilterConfig,
@@ -42,6 +44,7 @@ const Filter = ({ fields, view, onChangeView }: DataFilterProps) => {
 			case 'number':
 			case 'array':
 			case 'date':
+			case 'text':
 				return (
 					<select
 						key={fieldId}
@@ -49,6 +52,7 @@ const Filter = ({ fields, view, onChangeView }: DataFilterProps) => {
 						value={currentFilterValue.toString()}
 						onChange={(e) => onChangeFilter(fieldId, e.target.value)}
 						className="postform"
+						multiple={filterConfig.type === 'array'}
 						style={{ marginRight: '5px' }}
 					>
 						{filterConfig.label && (
@@ -61,19 +65,6 @@ const Filter = ({ fields, view, onChangeView }: DataFilterProps) => {
 							</option>
 						))}
 					</select>
-				);
-
-			case 'text':
-				return (
-					<input
-						key={fieldId}
-						type="search"
-						placeholder={filterConfig.label}
-						value={currentFilterValue.toString()}
-						onChange={(e) => onChangeFilter(fieldId, e.target.value)}
-						className="form-control"
-						style={{ marginRight: '5px', height: '30px' }}
-					/>
 				);
 
 			case 'boolean':
@@ -101,27 +92,18 @@ const Filter = ({ fields, view, onChangeView }: DataFilterProps) => {
 					renderInput(field.id, field.filterBy),
 				)}
 			</div>
-			<p className="search-box">
-				<label className="screen-reader-text" htmlFor="post-search-input">
-					{__('Search Items', 'ctx-events')}
-				</label>
-				<input
-					type="search"
-					id="post-search-input"
-					name="s"
-					value={view.search}
-					onChange={(e) => onChangeView({ search: e.target.value })}
-				/>
-				<input
-					type="submit"
-					id="search-submit"
-					className="button"
-					value={__('Search Items', 'ctx-events')}
-				/>
-			</p>
+			<Search view={view} onChangeView={onChangeView} />
 		</div>
 	);
 };
 
+const DataTableFilter = () => {
+	const { fields, view, onChangeView } = useDataTable();
+	if (!view || !onChangeView) return null;
+
+	return <Filter fields={fields} view={view} onChangeView={onChangeView} />;
+};
+
 export default Filter;
+export { DataTableFilter };
 export type { DataFilterField, DataFilterProps };

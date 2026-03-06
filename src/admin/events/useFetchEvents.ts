@@ -11,7 +11,7 @@ type EventFilterField = DataFilterField & {
 export const useFetchEvents = (view: DataViewConfig) => {
 	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [statusItems, setStatusItems] = useState<any>({});
+	const [statusItems, setStatusItems] = useState<Record<string, number>>({});
 	const [pagination, setPagination] = useState({
 		totalItems: 0,
 		totalPages: 0,
@@ -41,11 +41,14 @@ export const useFetchEvents = (view: DataViewConfig) => {
 			per_page: view.perPage?.toString(),
 			order_by: view.sort?.field,
 			order: view.sort?.direction,
+			search: view.search || '',
 		});
 
 		for (const f of availableFilters) {
 			params.append(f.id, String(f.value));
 		}
+
+		console.log('URL Params:', params.toString());
 
 		if (view.search) params.append('search', view.search);
 		return params.toString();

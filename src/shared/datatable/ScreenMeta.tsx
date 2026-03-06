@@ -1,4 +1,4 @@
-import { fields } from 'src/admin/events/fields';
+import { useDataTable } from './DataTableContext';
 import type { DataFieldConfig, DataViewConfig } from './types';
 
 interface ScreenMetaProps {
@@ -74,4 +74,17 @@ const ScreenMeta = ({
 	);
 };
 
+const DataTableScreenMeta = () => {
+	const { screenMetaContext, view, onChangeView, fields } = useDataTable();
+	return (
+		<ScreenMeta
+			context={screenMetaContext}
+			fields={fields}
+			view={view}
+			onChangeView={onChangeView}
+		/>
+	);
+};
+
 export default ScreenMeta;
+export { DataTableScreenMeta };

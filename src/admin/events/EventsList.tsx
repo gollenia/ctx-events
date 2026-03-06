@@ -16,6 +16,11 @@ const EventsList = () => {
 			operator: 'is',
 			value: 'future',
 		},
+		{
+			field: 'status',
+			operator: 'is',
+			value: 'publish',
+		},
 	];
 
 	const [view, setView] = useState<DataViewConfig>({
@@ -33,8 +38,11 @@ const EventsList = () => {
 			'categories',
 			'price',
 			'bookable',
+			'availability',
 		],
 	});
+
+	console.log('EventsList view', view);
 
 	const { events, loading, statusItems, pagination } = useFetchEvents(view);
 

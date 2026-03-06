@@ -1,3 +1,4 @@
+import { mapStatusItems } from '@events/datatable/statusItems';
 import { __ } from '@wordpress/i18n';
 import type { EventStatus } from '../../types/types';
 
@@ -12,11 +13,8 @@ const STATUSES = [
 ];
 
 export const eventStatusItems = (apiCounts: Record<string, number>) => {
-	return STATUSES.map((status) => {
-		return {
-			value: status.value as EventStatus,
-			label: status.label,
-			count: apiCounts[status.value] ?? 0,
-		};
-	});
+	return mapStatusItems(
+		STATUSES as Array<{ value: EventStatus; label: string }>,
+		apiCounts,
+	);
 };

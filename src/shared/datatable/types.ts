@@ -1,6 +1,7 @@
 export type DataViewConfig = {
 	type?: 'table' | 'grid' | 'list';
 	search?: string;
+	refreshKey?: number;
 	filters: Array<DataFilterField>;
 	page: number;
 	perPage: number;
@@ -78,10 +79,10 @@ export type DataFilterElement<T = string> = {
 
 export type DataTableAction = {
 	id: string;
-	label: string | (() => string);
+	label: string | ((item: any) => string);
 	supportsBulk?: boolean;
 	isPrimary?: boolean;
-	disabled?: boolean;
+	disabled?: boolean | ((item: any) => boolean);
 	context?: 'list' | 'single';
 	callback: (
 		items: Array<any>,
@@ -94,7 +95,7 @@ export type DataTableAction = {
 	modalHeader?: string | (() => string);
 	modalSize?: 'small' | 'medium' | 'large';
 	modalFocusOnMount?: boolean | string;
-	delete?: boolean;
+	delete?: boolean | ((item: any) => boolean);
 };
 
 export type DataPaginationInfo = {
@@ -111,6 +112,7 @@ export type DataFieldConfig = {
 	filterBy?: DataFilterConfig;
 	render?: (item: any) => React.ReactElement;
 	isVisible?: boolean;
+	isPluginStatus?: boolean;
 	enableHiding?: boolean;
 };
 

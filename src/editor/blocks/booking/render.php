@@ -1,16 +1,15 @@
 <?php
-declare(strict_types=1);
+use Contexis\Events\Event\Domain\EventRepository;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Platform\Bootstrap;
 
-use Contexis\Events\Event\Domain\EventId;
-
-$repository = new \Contexis\Events\Event\Domain\EventRepository();
-$id = new EventId(get_the_ID());
-$event = $repository->find($id);
+$repository = Bootstrap::container()->get(EventRepository::class);
+$event = $repository->find(EventId::from(get_the_ID()));
 
 if (!$event) {
     return;
 }
-if (!$event->isBookable()) {
+if (!$event->acceptsBookings()) {
     return;
 }
 
@@ -24,10 +23,8 @@ $block_attributes = get_block_wrapper_attributes(['class' => join(" ", $classNam
 
 ?>
 
-<button <?php
-declare(strict_types=1); echo $block_attributes ?> id="booking_button">
+<button <?php echo $block_attributes; ?> id="booking_button">
 <?php
-declare(strict_types=1);
 if ($attributes['buttonIcon']) {
     echo "<i class=\"material-icons material-symbols-outlined\">{$attributes['buttonIcon']}</i>";
 }
@@ -38,10 +35,6 @@ if (!$attributes['iconOnly']) {
 </button>
 
 <?php
-declare(strict_types=1);
-
 add_action('wp_footer', function () {
     echo "<div id=\"booking_app\" data-post=\"" . get_the_ID() . "\"></div>";
 });
-?>
-

@@ -94,7 +94,24 @@ const renderFieldControl = (field, onChange) => {
 			);
 		}
 
-		case 'string':
+		case 'select': {
+			const { SelectControl } = wp.components;
+			const options = field.options || [];
+			return (
+				<SelectControl
+					label={label}
+					help={description}
+					value={value ?? ''}
+					onChange={(val) => onChange(val)}
+					options={options.map((opt) =>
+						typeof opt === 'string'
+							? { label: opt, value: opt }
+							: { label: opt.label, value: opt.value },
+					)}
+				/>
+			);
+		}
+
 		default: {
 			const { TextControl } = wp.components;
 			return (

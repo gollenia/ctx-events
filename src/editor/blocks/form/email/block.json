@@ -10,6 +10,10 @@
 			"type": "string",
 			"default": ""
 		},
+		"context": {
+			"type": "string",
+			"default": ""
+		},
 		"width": {
 			"type": "number",
 			"default": 6
@@ -35,7 +39,5 @@
 			"default": null
 		}
 	},
-	"parent": [
-		"ctx-events/form-container"
-	]
+	"parent": ["ctx-events/form-container"]
 }

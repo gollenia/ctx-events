@@ -1,32 +1,32 @@
 <?php
-declare(strict_types=1); 
 
-$id = get_the_ID();
-$event = \Contexis\Events\Models\Event::find_by_post_id($id);
-if(!$event) return;
-$date = \Contexis\Events\Intl\Date::get_date($event->start()->getTimestamp(), $event->end()->getTimestamp());
-$ical = $attributes['iCalLink'] ?: false;
+declare(strict_types=1);
+
+use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+
+$event = BlockEventLoader::load(get_the_ID());
+if (!$event) {
+    return;
+}
+
+$date = BlockEventLoader::formatDateRange($event->startDate, $event->endDate);
+$ical = $attributes['iCalLink'] ?? false;
+
 ?>
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<i class="material-icons material-symbols-outlined"><?php
-declare(strict_types=1); echo $attributes['icon'] ?: 'event' ?></i>
+		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'calendar_today') ?>
 	</div>
 	<div class="event-details-text">
-		<h4><?php
-declare(strict_types=1); echo $attributes['description'] ?: __("Date", "events") ?></h4>
-		<div class="event-details-data"><?php
-declare(strict_types=1); echo $date ?></div> 
+		<h4><?= esc_html($attributes['description'] ?: __('Date', 'ctx-events')) ?></h4>
+		<div class="event-details-data"><?= esc_html($date) ?></div>
 	</div>
-	<?php
-declare(strict_types=1); if($ical) { ?>
+	<?php if ($ical) : ?>
 		<div class="event-details-action">
-		<a href="<?php
-declare(strict_types=1); echo $ical ?>" target="_blank">
-				<i class="material-icons material-symbols-outlined">calendar_today</i>
-		</a>
+			<a href="<?= esc_url($ical) ?>" target="_blank">
+				<?= BlockEventLoader::renderIcon('download') ?>
+			</a>
 		</div>
-	<?php
-declare(strict_types=1); } ?>
-</div> 
+	<?php endif; ?>
+</div>

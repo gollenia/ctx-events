@@ -2,14 +2,13 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	CheckboxControl,
 	ComboboxControl,
+	__experimentalHeading as Heading,
 	SelectControl,
 	TextareaControl,
 	TextControl,
-	__experimentalHeading as Heading
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
-import { key } from '@wordpress/icons';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 const AdminField = ({
 	type,
@@ -22,10 +21,9 @@ const AdminField = ({
 	name,
 	...props
 }) => {
-	
 	const [pages, setPages] = useState([]);
 	const [loading, setLoading] = useState(false);
-	
+
 	useEffect(() => {
 		if (type !== 'page_select') {
 			setLoading(false);
@@ -45,14 +43,13 @@ const AdminField = ({
 			});
 	}, [type]);
 
-	const classes = classNames({
+	const classes = clsx({
 		'required-field': required,
 		'error-field': error,
 	});
 
-
-	if(type === 'heading') {
-		return <Heading level={props.level ?? 2}>{label}</Heading>
+	if (type === 'heading') {
+		return <Heading level={props.level ?? 2}>{label}</Heading>;
 	}
 
 	if (type === 'textarea') {
@@ -70,9 +67,11 @@ const AdminField = ({
 	}
 
 	if (type === 'select' || type === 'radio') {
-		const mappedOptions = Object.entries(props.options || {}).map(([label, value]) => {
-			return { label, value };
-		});
+		const mappedOptions = Object.entries(props.options || {}).map(
+			([label, value]) => {
+				return { label, value };
+			},
+		);
 
 		return (
 			<SelectControl

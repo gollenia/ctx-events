@@ -1,9 +1,10 @@
 import domReady from '@wordpress/dom-ready';
 import './style.scss';
 import { initBookingsAdmin } from './bookings/index.js';
-import { initGatewayAdmin } from './gateways/index.js';
-import { initOptionsAdmin } from './options/index.js';
 import { initEventsList } from './events/index.tsx';
+import { initFormList } from './forms/index.tsx';
+import { initGatewayAdmin } from './gateways/index.tsx';
+import { initOptionsAdmin } from './options/index.js';
 
 console.log('ctx-events admin loaded');
 domReady(() => {
@@ -12,8 +13,9 @@ domReady(() => {
 		{ id: 'ctx-gateways-admin', init: initGatewayAdmin },
 		{ id: 'ctx-options-admin', init: initOptionsAdmin },
 		{ id: 'ctx-events-list', init: initEventsList },
+		{ id: 'ctx-forms-admin', init: initFormList },
 	];
-	console.log('Admin mounts:', mounts);
+
 	mounts.forEach(({ id, init }) => {
 		const element = document.getElementById(id);
 		if (!element) return;

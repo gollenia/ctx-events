@@ -1,5 +1,5 @@
-import React from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useDataTable } from './DataTableContext';
 import type { DataStatusItem, DataViewConfig } from './types';
 
 type StatusSelectProps = {
@@ -39,7 +39,10 @@ const StatusSelect = ({
 	return (
 		<ul className="subsubsub">
 			{statusItems
-				.filter((item: DataStatusItem) => item.showEmpty || item.count > 0)
+				.filter(
+					(item: DataStatusItem) =>
+						typeof item.count === 'number' && item.count > 0,
+				)
 				.map((item, index, visibleItems) => {
 					return (
 						<li key={item.value}>
@@ -61,5 +64,31 @@ const StatusSelect = ({
 	);
 };
 
+const DataTableStatusSelect = () => {
+	const { view, onChangeView, availableStatusItems, isLoading } =
+		useDataTable();
+
+	if (!view || !onChangeView) return null;
+
+	if (isLoading) {
+		return (
+			<ul className="subsubsub">
+				<li>
+					<span className="current">{__('Loading...', 'events')}</span>
+				</li>
+			</ul>
+		);
+	}
+
+	return (
+		<StatusSelect
+			statusItems={availableStatusItems}
+			view={view}
+			onViewChange={onChangeView}
+		/>
+	);
+};
+
 export default StatusSelect;
+export { DataTableStatusSelect };
 export type { StatusSelectProps };

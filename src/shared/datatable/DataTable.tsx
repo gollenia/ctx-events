@@ -1,11 +1,14 @@
-import type React from '@wordpress/element';
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import Filter from './Filter';
-import ScreenMeta from './ScreenMeta';
-import ScreenMetaLinks from './ScreenMetaLinks';
-import StatusSelect from './StatusSelect';
-import Table from './Table';
+import clsx from 'clsx';
+import type React from 'react';
+import { DataTableContext } from './DataTableContext';
+import { DataTableFilter } from './Filter';
+import { DataTableHeader } from './Header';
+import { DataTablePagination } from './Pagination';
+import { DataTableScreenMeta } from './ScreenMeta';
+import { DataTableScreenMetaLinks } from './ScreenMetaLinks';
+import { DataTableStatusSelect } from './StatusSelect';
+import { DataTableTable } from './Table';
 import type {
 	DataFieldConfig,
 	DataPaginationInfo,
@@ -14,28 +17,52 @@ import type {
 	DataViewConfig,
 } from './types';
 
-interface DataTableProps {
-	data: Array<any>;
+interface DataTableProps<T> {
+	data: Array<T>;
 	fields: Array<DataFieldConfig>;
 	view: DataViewConfig;
 	onChangeView: (updates: Partial<DataViewConfig>) => void;
+	isLoading: boolean;
+	variant?: 'default' | 'plugins';
 	actions?: Array<DataTableAction>;
 	paginationInfo?: DataPaginationInfo;
 	search?: boolean;
 	searchLabel?: string;
-	isLoading: boolean;
 	empty?: React.ComponentType;
 	availableStatusItems: Array<DataStatusItem>;
 	title?: string;
 	createLink?: string;
 	createLinkLabel?: string;
+	children?: React.ReactNode;
+	screenMeta?: boolean;
 }
 
-const DataTable = ({
+type DataTableComponent = (<T extends object>(
+	props: DataTableProps<T>,
+) => JSX.Element) & {
+	Header: React.ComponentType;
+	Filter: React.ComponentType;
+	Table: React.ComponentType;
+	StatusSelect: React.ComponentType;
+	Pagination: React.ComponentType;
+};
+
+const defaultChildren = () => (
+	<>
+		<DataTableHeader />
+		<DataTableStatusSelect />
+		<DataTableFilter />
+		<DataTableTable />
+		<DataTablePagination />
+	</>
+);
+
+const DataTable: DataTableComponent = <T extends object>({
 	data,
 	fields,
 	view,
 	onChangeView,
+	variant = 'default',
 	actions,
 	paginationInfo,
 	searchLabel,
@@ -45,68 +72,57 @@ const DataTable = ({
 	title,
 	createLink,
 	createLinkLabel,
-}: DataTableProps) => {
+	children,
+	screenMeta = true,
+}: DataTableProps<T>) => {
 	const [screenMetaContext, setScreenMetaContext] = useState('');
 	return (
-		<>
-			<ScreenMeta
-				context={screenMetaContext}
-				view={view}
-				onChangeView={onChangeView}
-				fields={fields}
-			/>
-			<ScreenMetaLinks
-				setScreenMeta={(context) =>
-					setScreenMetaContext(screenMetaContext ? '' : context)
-				}
-			/>
+		<DataTableContext.Provider
+			value={{
+				data,
+				fields,
+				view,
+				onChangeView,
+				variant,
+				actions,
+				paginationInfo,
+				searchLabel,
+				isLoading,
+				empty,
+				availableStatusItems,
+				title,
+				createLink,
+				createLinkLabel,
+				setScreenMetaContext,
+				screenMetaContext,
+			}}
+		>
+			{screenMeta && (
+				<>
+					<DataTableScreenMeta />
+					<DataTableScreenMetaLinks />
+				</>
+			)}
+
 			<div
-				className="wrap ctx-datatable"
+				className={clsx(
+					'wrap ctx-datatable',
+					variant === 'plugins' && 'datatable--plugins',
+					isLoading && 'datatable--loading',
+				)}
 				style={{ padding: '10px 20px 0 2px', margin: 0 }}
 			>
-				<h1 className="wp-heading-inline">
-					{title || __('Items', 'ctx-events')}
-				</h1>
-				{createLink && (
-					<a href={createLink} className="page-title-action">
-						{createLinkLabel || __('New Item', 'ctx-events')}
-					</a>
-				)}
-				<hr className="wp-header-end" />
-				<StatusSelect
-					statusItems={availableStatusItems}
-					view={view}
-					onViewChange={onChangeView}
-				/>
-				<Filter fields={fields} view={view} onChangeView={onChangeView} />
-				<Table
-					items={data}
-					titleField={view.titleField}
-					mediaField={view.mediaField}
-					actions={actions}
-					descriptionField={view.descriptionField}
-					paginationInfo={paginationInfo}
-					fields={view.fields}
-					fieldConfig={fields}
-					view={view}
-					onPageChange={(page) => onChangeView({ ...view, page })}
-					onSort={(key) =>
-						onChangeView({
-							...view,
-							sort: {
-								field: key,
-								direction:
-									view.sort.field === key && view.sort.direction === 'asc'
-										? 'desc'
-										: 'asc',
-							},
-						})
-					}
-				/>
+				{children ?? defaultChildren()}
 			</div>
-		</>
+		</DataTableContext.Provider>
 	);
 };
+
+DataTable.Header = DataTableHeader;
+DataTable.Filter = DataTableFilter;
+DataTable.Table = DataTableTable;
+DataTable.StatusSelect = DataTableStatusSelect;
+DataTable.Pagination = DataTablePagination;
 
 export default DataTable;
 export type { DataTableProps };

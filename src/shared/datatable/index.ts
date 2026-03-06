@@ -1,4 +1,4 @@
-import DataTable from './Table';
+import DataTable from './DataTable';
 import './style.scss';
 export { DataTable };
 export type {

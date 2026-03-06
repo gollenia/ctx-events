@@ -1,3 +1,5 @@
+import { DataTable } from '@events/datatable';
+import { formatPrice } from '@events/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
@@ -5,7 +7,6 @@ import {
 	Icon,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews/wp';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -16,7 +17,6 @@ import {
 	swatch,
 	trash,
 } from '@wordpress/icons';
-import { formatPrice } from '@events/i18n';
 import { initialViewFromURL } from './filters';
 
 const BookingTable = () => {
@@ -245,7 +245,7 @@ const BookingTable = () => {
 				</Button>
 			</HStack>
 			{/* { slug && <GatewayModal slug={ slug } onClose={ onCancel } onToggle={ onToggle } /> } */}
-			<DataViews
+			<DataTable
 				data={shownData}
 				view={view}
 				onChangeView={setView}

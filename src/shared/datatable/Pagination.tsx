@@ -1,19 +1,25 @@
 import { __ } from '@wordpress/i18n';
+import { useDataTable } from './DataTableContext';
 import type { DataPaginationInfo } from './types';
 
 interface PaginationProps {
 	paginationInfo: DataPaginationInfo;
 	page: number;
-	onPageChange: (page: number) => void;
+	onChangeView: (updates: Partial<{ page: number }>) => void;
 }
 
 const Pagination = ({
 	paginationInfo,
-	onPageChange,
+	onChangeView,
 	page,
 }: PaginationProps) => {
 	const isFirstPage = page === 1;
 	const isLastPage = page === paginationInfo.totalPages;
+
+	const onPageChange = (newPage: number) => {
+		if (newPage < 1 || newPage > paginationInfo.totalPages) return;
+		onChangeView({ page: newPage });
+	};
 
 	return (
 		<div className="tablenav bottom">
@@ -73,5 +79,18 @@ const Pagination = ({
 	);
 };
 
+const DataTablePagination = () => {
+	const { view, onChangeView, paginationInfo } = useDataTable();
+	if (!paginationInfo) return null;
+	return (
+		<Pagination
+			paginationInfo={paginationInfo}
+			page={view.page}
+			onChangeView={onChangeView}
+		/>
+	);
+};
+
 export default Pagination;
+export { DataTablePagination };
 export type { PaginationProps };

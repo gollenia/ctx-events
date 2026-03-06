@@ -1,43 +1,41 @@
 <?php
-declare(strict_types=1); 
 
-$id = get_the_ID();
-$event = \Contexis\Events\Models\Event::find_by_post(get_post());
-if(!$event || !$event->event_rsvp) return;
+declare(strict_types=1);
 
-$date_start = $event->get_rsvp_start()->getTimestamp();
-$date_end = $event->get_rsvp_end()->getTimestamp();
+use Contexis\Events\Event\Infrastructure\BlockEventLoader;
 
-$current_time = time();
-
-if ($current_time < $date_start) {
-    // Booking has not started yet
-    $description = __("Booking will start on", "ctx-events");
-    $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_start()->getTimestamp());
-} elseif ($current_time > $date_end) {
-    // Booking has ended
-    $description = __("Booking has ended on", "ctx-events");
-    $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_end()->getTimestamp());
-} else {
-    // Booking is ongoing
-    $description = __("Booking ends on", "ctx-events");
-    $date = \Contexis\Events\Intl\Date::get_date($event->get_rsvp_end()->getTimestamp());
+$event = BlockEventLoader::load(get_the_ID());
+if (!$event || !$event->bookingSummary) {
+    return;
 }
 
+$summary = $event->bookingSummary;
+if (!$summary->bookingStart && !$summary->bookingEnd) {
+    return;
+}
 
+$now = time();
+$dateFormat = get_option('date_format');
+
+if ($summary->bookingStart && $now < $summary->bookingStart->getTimestamp()) {
+    $description = __('Booking will start on', 'ctx-events');
+    $date = wp_date($dateFormat, $summary->bookingStart->getTimestamp());
+} elseif ($summary->bookingEnd && $now > $summary->bookingEnd->getTimestamp()) {
+    $description = __('Booking has ended on', 'ctx-events');
+    $date = wp_date($dateFormat, $summary->bookingEnd->getTimestamp());
+} else {
+    $description = __('Booking ends on', 'ctx-events');
+    $date = wp_date($dateFormat, $summary->bookingEnd->getTimestamp());
+}
 
 ?>
 
 <div class="event-details-item">
-		<div class="event-details-image">
-			<i class="event-details-icon material-icons material-symbols-outlined">event_busy</i>
-		</div>
-		<div class="event-details-text">
-			<h4><?php
-declare(strict_types=1); echo $description ?></h4>
-			<time class="event-details-data">
-				<?php
-declare(strict_types=1); echo $date ?>
-			</time>
-		</div>                        
+	<div class="event-details-image">
+		<?= BlockEventLoader::renderIcon('event_busy') ?>
 	</div>
+	<div class="event-details-text">
+		<h4><?= esc_html($description) ?></h4>
+		<time class="event-details-data"><?= esc_html($date) ?></time>
+	</div>
+</div>

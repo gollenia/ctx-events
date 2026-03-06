@@ -1,18 +1,31 @@
 export type BookingDenyReason = "disabled" | "no_capacity" | "not_started" | "ended" | "sold_out" | "form_error" | "no_tickets";
 export type TimeScope = "all" | "future" | "past" | "today" | "tomorrow" | "one-week" | "this-week" | "this-month" | "next-month" | "1-months" | "2-months" | "3-months" | "this-year" | "1-year";
-export type EventOrderBy = "event_start" | "event_title" | "booking_start" | "booking_enabled" | "location" | "person" | "price";
+export type EventOrderBy = "date" | "title" | "booking_start" | "booking" | "location" | "person" | "price";
 export type EventStatus = "draft" | "publish" | "future" | "pending" | "private" | "trash" | "cancelled";
 export type EventBookingSummary = {
 readonly isBookable: boolean
 readonly denyReason: string | null
-readonly totalBookedCount: number
-readonly totalAvailableCount: number | null
+readonly approved: number
+readonly available: number | null
+readonly pending: number | null
 readonly totalCapacity: number | null
 readonly lowestAvailablePrice: Price | null
 readonly lowestPrice: Price | null
 readonly highestPrice: Price | null
 readonly bookingStart: string | null
 readonly bookingEnd: string | null
+};
+export type BookingInfo = {
+eventName: string
+eventStartDate: string
+eventEndDate: string
+eventDescription: string
+tickets: []
+gateways: []
+bookingForm: []
+attendeeForm: [] | null
+couponsEnabled: boolean
+token: string
 };
 export type EventIncludes = {
 image: undefined | null
@@ -36,7 +49,7 @@ export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
 export type Order = "asc" | "desc";
 export type Price = {
 readonly amountCents: number
-readonly currency: string
+readonly currency: undefined
 };
 export type Status = "publish" | "future" | "draft" | "private" | "trash";
 export type ErrorType = "ERROR" | "WARNING" | "INFO";
@@ -56,6 +69,12 @@ export type BookingStatus = 1 | 2 | 3 | 4 | 9;
 export type PaymentProvider = "offline" | "mollie";
 export type DiscountType = "percent" | "fixed";
 export type TransactionStatus = 0 | 1 | 2 | 3 | 4 | 5;
+export type Gateway = {
+readonly slug: string
+readonly name: string
+readonly enabled: boolean
+readonly settings: []
+};
 export type Location = {
 id: number
 link: undefined
@@ -71,3 +90,13 @@ export type NumberVariant = "input" | "slider";
 export type FormType = "booking" | "attendee";
 export type InputType = "email" | "tel" | "url" | "text" | "number" | "date";
 export type FieldWidth = 1 | 2 | 3 | 4 | 5 | 6;
+export type Form = {
+readonly id: number
+readonly title: string
+readonly description: string | null
+readonly type: string
+readonly createdAt: string
+readonly usageCount: number
+readonly tags: undefined
+readonly status: string
+};

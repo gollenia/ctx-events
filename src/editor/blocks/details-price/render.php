@@ -1,44 +1,47 @@
 <?php
-declare(strict_types=1); 
 
-global $post;
-$event = \Contexis\Events\Models\Event::find_by_post($post);
-if(!$event) return;
+declare(strict_types=1);
 
-if($attributes['overwritePrice']) {
-	
+use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+
+$event = BlockEventLoader::load(get_the_ID());
+if (!$event || !$event->bookingSummary) {
+    return;
 }
-$price = $event->get_formatted_price();
-$is_free = $event->is_free();
+
+$summary = $event->bookingSummary;
+$overwritePrice = $attributes['overwritePrice'] ?? '';
+$lowestPrice = $summary->lowestPrice;
+$highestPrice = $summary->highestPrice;
+
+$isFree = !$overwritePrice && $lowestPrice !== null && $lowestPrice->isFree() && $highestPrice->isFree();
+
+if (!$isFree && $lowestPrice !== null) {
+    $priceDisplay = $lowestPrice->equals($highestPrice)
+        ? BlockEventLoader::formatPrice($lowestPrice)
+        : BlockEventLoader::formatPrice($lowestPrice) . ' – ' . BlockEventLoader::formatPrice($highestPrice);
+}
 
 ?>
 
-<?php
-declare(strict_types=1); if($price->free && !$attributes['overwritePrice']) : ?>
+<?php if ($isFree) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<i class="material-icons material-symbols-outlined">savings</i>
+			<?= BlockEventLoader::renderIcon('savings') ?>
 		</div>
 		<div class="event-details-text">
-			<h4><?php
-declare(strict_types=1); echo $attributes['description'] ? $attributes['description'] : __("Price", "events") ?></h4>
-			<div class="event-details-data"><?php
-declare(strict_types=1); echo __("Free", "events") ?></div> 
+			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
+			<div class="event-details-data"><?= esc_html(__('Free', 'ctx-events')) ?></div>
 		</div>
 	</div>
-<?php
-declare(strict_types=1); else : ?>
+<?php elseif ($overwritePrice || isset($priceDisplay)) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<i class="event-details-icon material-icons material-symbols-outlined">payments</i>
+			<?= BlockEventLoader::renderIcon('payments') ?>
 		</div>
 		<div class="event-details-text">
-			<h4><?php
-declare(strict_types=1); echo $attributes['description'] ? $attributes['description'] : __("Price", "events") ?></h4>
-			<div class="event-details-data"><?php
-declare(strict_types=1); echo $attributes['overwritePrice'] ? $attributes['overwritePrice'] : $price->format ?></div> 
+			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
+			<div class="event-details-data"><?= esc_html($overwritePrice ?: ($priceDisplay ?? '')) ?></div>
 		</div>
 	</div>
-<?php
-declare(strict_types=1); endif; ?>
-
+<?php endif; ?>

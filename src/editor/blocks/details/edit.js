@@ -10,16 +10,16 @@ import Inspector from './inspector';
 
 export default function Edit({ ...props }) {
 	const allowedBlocks = [
-		'events-manager/details-audience',
-		'events-manager/details-time',
-		'events-manager/details-speaker',
-		'events-manager/details-spaces',
-		'events-manager/details-shutdown',
-		'events-manager/details-date',
-		'events-manager/details-item',
-		'events-manager/details-price',
-		'events-manager/details-audience',
-		'events-manager/details-location',
+		'ctx-events/details-audience',
+		'ctx-events/details-time',
+		'ctx-events/details-speaker',
+		'ctx-events/details-spaces',
+		'ctx-events/details-shutdown',
+		'ctx-events/details-date',
+		'ctx-events/details-item',
+		'ctx-events/details-price',
+		'ctx-events/details-audience',
+		'ctx-events/details-location',
 	];
 
 	const {
@@ -32,14 +32,14 @@ export default function Edit({ ...props }) {
 		.join(' ');
 
 	const template = [
-		['events-manager/details-audience'],
-		['events-manager/details-date'],
-		['events-manager/details-time'],
-		['events-manager/details-speaker'],
-		['events-manager/details-location'],
-		['events-manager/details-price'],
-		['events-manager/details-spaces'],
-		['events-manager/details-shutdown'],
+		['ctx-events/details-audience'],
+		['ctx-events/details-date'],
+		['ctx-events/details-time'],
+		['ctx-events/details-speaker'],
+		['ctx-events/details-location'],
+		['ctx-events/details-price'],
+		['ctx-events/details-spaces'],
+		['ctx-events/details-shutdown'],
 	];
 
 	const blockProps = useBlockProps({ className: classes });

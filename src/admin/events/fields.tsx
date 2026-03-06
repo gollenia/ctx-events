@@ -5,6 +5,7 @@ import type {
 	DataFilterElement,
 } from '../../shared/datatable/types';
 import type { Event, TimeScope } from '../../types/types';
+import { BookingGraph } from './BookingGraph';
 import { bookingDenyReason } from './bookingDenyReason';
 
 const scopeElements: DataFilterElement<TimeScope>[] = [
@@ -140,5 +141,34 @@ export const fields: Array<DataFieldConfig> = [
 			);
 		},
 		enableSorting: true,
+	},
+	{
+		id: 'availability',
+		label: __('Availability', 'ctx-events'),
+		render: (event: Event) => {
+			return event.bookingSummary ? (
+				<BookingGraph bookingSummary={event.bookingSummary} />
+			) : (
+				<>—</>
+			);
+		},
+		enableSorting: true,
+	},
+	{
+		id: 'status',
+		label: __('Status', 'ctx-events'),
+		getValue: (event: Event) => event.status,
+		enableSorting: true,
+		isVisible: false,
+		filterBy: {
+			id: 'status',
+			label: __('Status', 'ctx-events'),
+			type: 'text',
+			elements: [
+				{ value: 'publish', label: __('Published', 'ctx-events') },
+				{ value: 'draft', label: __('Draft', 'ctx-events') },
+				{ value: 'trash', label: __('Trashed', 'ctx-events') },
+			],
+		},
 	},
 ];

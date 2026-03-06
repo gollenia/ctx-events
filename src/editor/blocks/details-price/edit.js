@@ -35,7 +35,7 @@ const edit = (props) => {
 			if (ticket.ticket_price) {
 				return formatPrice(
 					ticket.ticket_price,
-					window.eventBlocksLocalization.currency,
+					window.eventEditorLocalization.currency,
 				);
 			}
 			return __('Free', 'ctx-events');

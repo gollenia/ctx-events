@@ -1,5 +1,5 @@
 import { Button, Flex, FlexItem, Modal } from '@wordpress/components';
-import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews/wp';
+
 import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { trash } from '@wordpress/icons';
@@ -66,10 +66,6 @@ const TicketModal = (props) => {
 		},
 	];
 
-	const { data: shownData, paginationInfo } = useMemo(() => {
-		return filterSortAndPaginate(tickets, view, fields);
-	}, [view, tickets]);
-
 	const closeModal = () => {
 		setShowTickets(false);
 	};
@@ -121,7 +117,7 @@ const TicketModal = (props) => {
 
 	const modalTitle =
 		Object.keys(currentTicket).length > 0
-			? currentTicket.ticket_id == 0
+			? currentTicket.ticket_id === 0
 				? __('New Ticket', 'ctx-events')
 				: __('Edit Ticket', 'ctx-events')
 			: __('Tickets', 'ctx-events');
@@ -141,13 +137,13 @@ const TicketModal = (props) => {
 						/>
 					) : (
 						<>
-							<TicketTable 
-								tickets={shownData} 
-								onToggleActive={onToggleActive} 
-								onSelect={(index) => setCurrentTicket(shownData[index])} 
-								onDelete={onDelete} 
+							<TicketTable
+								tickets={tickets}
+								onToggleActive={onToggleActive}
+								onSelect={(index) => setCurrentTicket(tickets[index])}
+								onDelete={onDelete}
 								onDuplicate={(index) => {
-									const ticketToDuplicate = shownData[index];
+									const ticketToDuplicate = tickets[index];
 									const newTicket = {
 										...ticketToDuplicate,
 										ticket_id: uuidv4(),

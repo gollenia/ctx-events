@@ -2,6 +2,7 @@ import React from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Actions from './Actions';
+import { useDataTable } from './DataTableContext';
 import Pagination from './Pagination';
 import type {
 	DataFieldConfig,
@@ -15,8 +16,7 @@ interface DataTableProps {
 	fields: Array<string>;
 	fieldConfig?: Array<DataFieldConfig>;
 	view: DataViewConfig;
-	onPageChange?: (page: number) => void;
-	onSort?: (key: string) => void;
+	onChangeView: (updates: Partial<DataViewConfig>) => void;
 	titleField?: string;
 	mediaField?: string;
 	paginationInfo?: DataPaginationInfo;
@@ -33,81 +33,95 @@ const Table = ({
 	fields,
 	view,
 	actions,
-	onPageChange = undefined,
-	onSort,
-	paginationInfo,
 	loading,
 	variant = 'posts',
+	onChangeView,
 	noItemsMessage = __('No items found.', 'ctx-events'),
 }: DataTableProps) => {
+	console.log('Rendering Table with items', items);
+
+	const pluginStatusField = fieldConfig?.find((f) => f.isPluginStatus)?.id;
+	console.log('Plugin status field:', pluginStatusField);
+
 	return (
 		<div className="wp-table-wrapper">
 			{loading && <p>{__('Loading...', 'ctx-events')}</p>}
 
 			{!loading && (
-				<>
-					<table className={`wp-list-table widefat fixed striped ${variant}`}>
-						<thead>
-							<tr>
-								<td
-									id="cb"
-									style={{ width: '1%' }}
-									className="manage-field field-cb check-field"
-								>
-									<input id="cb-select-all-1" type="checkbox" />
-								</td>
+				<table className={`wp-list-table widefat fixed striped ${variant}`}>
+					<thead>
+						<tr>
+							<td
+								id="cb"
+								style={{ width: '1%' }}
+								className="manage-field field-cb check-field"
+							>
+								<input id="cb-select-all-1" type="checkbox" />
+							</td>
 
-								{fields.map((field, index) => {
-									const fieldData = fieldConfig?.find((f) => f.id === field);
-									if (!fieldData) {
-										return (
-											<th key={index} scope="col">
-												{field}
-											</th>
-										);
-									}
-									const headerClasses = clsx(
-										fieldData.className,
-										'manage-field',
-										{
-											sortable: fieldData.enableSorting,
-											sorted: view.sort.field === fieldData.id,
-											[view.sort.direction]: view.sort.field === fieldData.id,
-										},
-									);
+							{fields.map((field, index) => {
+								const fieldData = fieldConfig?.find((f) => f.id === field);
+								if (!fieldData) {
 									return (
-										<th key={index} className={headerClasses} scope="col">
-											{fieldData.enableSorting ? (
-												<a
-													href="#"
-													onClick={(e) => {
-														e.preventDefault();
-														if (onSort) {
-															onSort(fieldData.id);
-														}
-													}}
-												>
-													<span>{fieldData.label}</span>
-													<span className="sorting-indicator"></span>
-												</a>
-											) : (
-												fieldData.label
-											)}
+										<th key={index} scope="col">
+											{field}
 										</th>
 									);
-								})}
+								}
+								const headerClasses = clsx(
+									fieldData.className,
+									'manage-field',
+									{
+										sortable: fieldData.enableSorting,
+										sorted: view.sort.field === fieldData.id,
+										[view.sort.direction]: view.sort.field === fieldData.id,
+									},
+								);
+								return (
+									<th key={index} className={headerClasses} scope="col">
+										{fieldData.enableSorting ? (
+											<a
+												href="#"
+												onClick={(e) => {
+													e.preventDefault();
+													onChangeView({
+														...view,
+														sort: {
+															field: fieldData.id,
+															direction:
+																view.sort.field === fieldData.id &&
+																view.sort.direction === 'asc'
+																	? 'desc'
+																	: 'asc',
+														},
+													});
+												}}
+											>
+												<span>{fieldData.label}</span>
+												<span className="sorting-indicator"></span>
+											</a>
+										) : (
+											fieldData.label
+										)}
+									</th>
+								);
+							})}
+						</tr>
+					</thead>
+					<tbody>
+						{!loading && items.length === 0 && (
+							<tr>
+								<td colSpan={fields.length}>{noItemsMessage}</td>
 							</tr>
-						</thead>
-						<tbody>
-							{!loading && items.length === 0 && (
-								<tr>
-									<td colSpan={fields.length}>{noItemsMessage}</td>
-								</tr>
-							)}
-							{items.map((item) => (
+						)}
+						{items.map((item) => {
+							console.log('Rendering row for item', item);
+							return (
 								<tr
 									key={item.id || Math.random()}
-									className={item.active ? 'active' : ''}
+									className={
+										pluginStatusField && item[pluginStatusField] ? 'active' : ''
+									}
 								>
 									<th className="cb field-cb check-field">
 										<input type="checkbox" />
@@ -141,6 +155,7 @@ const Table = ({
 																id: item.id,
 															}))}
 															showOnHover={false}
+															item={item}
 														/>
 													)}
 												</>
@@ -154,22 +169,31 @@ const Table = ({
 										);
 									})}
 								</tr>
-							))}
-						</tbody>
-					</table>
-
-					{onPageChange != null && paginationInfo != null && (
-						<Pagination
-							paginationInfo={paginationInfo}
-							page={view.page}
-							onPageChange={onPageChange}
-						/>
-					)}
-				</>
+							);
+						})}
+					</tbody>
+				</table>
 			)}
 		</div>
 	);
 };
 
+const DataTableTable = () => {
+	const { data, fields, view, actions, onChangeView, isLoading } =
+		useDataTable();
+	return (
+		<Table
+			items={data}
+			fieldConfig={fields}
+			fields={view.fields}
+			view={view}
+			actions={actions}
+			onChangeView={onChangeView}
+			loading={isLoading}
+		/>
+	);
+};
+
 export default Table;
+export { DataTableTable };
 export type { DataTableProps };
