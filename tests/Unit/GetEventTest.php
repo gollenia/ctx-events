@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use Contexis\Events\Event\Application\EventResponse;
-use Contexis\Events\Event\Application\EventIncludeRequest;
-use Contexis\Events\Event\Application\EventPolicy;
-use Contexis\Events\Event\Application\GetEvent;
+use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
+use Contexis\Events\Event\Application\DTOs\EventResponse;
+use Contexis\Events\Event\Application\Service\EventPolicy;
+use Contexis\Events\Event\Application\UseCases\GetEvent;
+use Contexis\Events\Form\Domain\FormRepository;
 use Contexis\Events\Location\Application\LocationDto;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
@@ -31,15 +32,24 @@ function fakeUserContext(): UserContext
 // ======= TESTS =======
 
 test('returns null when event not found', function () {
-    $eventRepository   = new FakeEventRepository(null);
-    $peopleRepository   = new FakePersonRepository();
-    $imageRepository   = new FakeImageRepository(null);
+    $eventRepository = FakeEventRepository::empty();
+    $peopleRepository = new FakePersonRepository();
+    $imageRepository = new FakeImageRepository(null);
     $locationRepository = new FakeLocationRepository(null);
-    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
+    $taxonomyLoader = new TaxonomyLoader();
+    $formRepository = Mockery::mock(FormRepository::class);
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
+    $uc = new GetEvent(
+        $eventRepository,
+        $peopleRepository,
+        $imageRepository,
+        $locationRepository,
+        $eventPolicy,
+        $taxonomyLoader,
+        $formRepository,
+    );
 
     $dto = $uc->execute(999, new EventIncludeRequest(location: false, image: false), fakeUserContext());
 
@@ -50,16 +60,25 @@ test('returns event dto without includes', function () {
     $id = fake()->numberBetween(1, 1000);
     $event = FakeEventFactory::create($id);
 
-    $eventRepository   = new FakeEventRepository(null);
-    $peopleRepository   = new FakePersonRepository();
-    $imageRepository   = new FakeImageRepository(null);
+    $eventRepository = FakeEventRepository::one($event);
+    $peopleRepository = new FakePersonRepository();
+    $imageRepository = new FakeImageRepository(null);
     $locationRepository = new FakeLocationRepository(null);
-    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
+    $taxonomyLoader = new TaxonomyLoader();
+    $formRepository = Mockery::mock(FormRepository::class);
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
     $eventPolicy->shouldReceive('userCanView')->andReturn(true);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
+    $uc = new GetEvent(
+        $eventRepository,
+        $peopleRepository,
+        $imageRepository,
+        $locationRepository,
+        $eventPolicy,
+        $taxonomyLoader,
+        $formRepository,
+    );
 
     $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: false, image: false), fakeUserContext());
 
@@ -67,18 +86,7 @@ test('returns event dto without includes', function () {
     expect($dto->id)->toBe($id);
     expect($dto->id)->toBe($event->id->toInt());
     expect($dto->locationDto)->toBeNull();
-    // image is not in top level DTO usually as property 'includes', but let's check class def.
-    // Looking at GetEvent.php: 
-    /*
-        $response = EventResponse::fromDomainModel(
-            event: $event,
-            locationDto: $locationDto,
-            imageDto: $imageDto,
-            personDto: $personDto
-        );
-    */
-    // So properties are likely flattened or on the dto itself. 
-    // Assuming EventResponse matches what we see in ListEvents context roughly.
+    expect($dto->imageDto)->toBeNull();
 });
 
 
@@ -88,23 +96,30 @@ test('returns event dto when event found with includes', function () {
     $location = FakeLocationFactory::create();
     $image = FakeImageFactory::create();
 
-    $eventRepository   = new FakeEventRepository($event);
-    $peopleRepository   = new FakePersonRepository();
-    $imageRepository   = new FakeImageRepository($image);
+    $eventRepository = FakeEventRepository::one($event);
+    $peopleRepository = new FakePersonRepository();
+    $imageRepository = new FakeImageRepository($image);
     $locationRepository = new FakeLocationRepository($location);
-    $taxonomyLoader = Mockery::mock(TaxonomyLoader::class);
+    $taxonomyLoader = new TaxonomyLoader();
+    $formRepository = Mockery::mock(FormRepository::class);
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
     $eventPolicy->shouldReceive('userCanView')->andReturn(true);
 
-    $uc = new GetEvent($eventRepository, $peopleRepository, $imageRepository, $locationRepository, $eventPolicy, $taxonomyLoader);
+    $uc = new GetEvent(
+        $eventRepository,
+        $peopleRepository,
+        $imageRepository,
+        $locationRepository,
+        $eventPolicy,
+        $taxonomyLoader,
+        $formRepository,
+    );
 
     $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: true, image: true), fakeUserContext());
 
     expect($dto)->toBeInstanceOf(EventResponse::class);
     expect($dto->id)->toBe($id);
-    // Validation of includes
-    if (property_exists($dto, 'locationDto')) {
-        expect($dto->locationDto)->toBeInstanceOf(LocationDto::class);
-    }
+    expect($dto->locationDto)->toBeInstanceOf(LocationDto::class);
+    expect($dto->imageDto)->not->toBeNull();
 });

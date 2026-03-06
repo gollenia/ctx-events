@@ -6,15 +6,16 @@ use Contexis\Events\Media\Domain\ImageSize;
 use Contexis\Events\Media\Domain\ImageSizes;
 use Contexis\Events\Media\Domain\Image;
 use Contexis\Events\Media\Domain\ImageId;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 test('Price cannot be negative', function () {
-    expect(fn() => new Price(-1, 'EUR'))->toThrow(\InvalidArgumentException::class);
+    expect(fn() => new Price(-1, Currency::fromCode('EUR')))->toThrow(\InvalidArgumentException::class);
 });
 
 test('Price equality compares amount and currency', function () {
-    $a = new Price(1000, 'EUR');
-    $b = new Price(1000, 'EUR');
+    $a = new Price(1000, Currency::fromCode('EUR'));
+    $b = new Price(1000, Currency::fromCode('EUR'));
     expect($a->equals($b))->toBeTrue();
 });
 
