@@ -27,11 +27,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 				'type'        => 'select',
 				'default'     => 'CHF',
 				'options'     => [
-					'EUR' => 'EUR',
-					'CHF' => 'CHF',
-					'USD' => 'USD',
-					'GBP' => 'GBP',
-					'JPY' => 'JPY'
+					'EUR', 'CHF', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'NZD', 'SEK', 'NOK', 'DKK', 'ZAR', 'HKD', 'SGD', 'MXN', 'BRL', 'INR', 'RUB', 'TRY', 'KRW', 'PLN'
 				],
 				'label'       => __('Booking currency', 'ctx-events'),
 				'description' => __('Currency used for bookings.', 'ctx-events'),

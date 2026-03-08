@@ -1,10 +1,10 @@
 import { createRoot } from '@wordpress/element';
-import BookingTable from './BookingTable';
+import BookingsList from './BookingsList';
 import './style.scss';
 
 export function initBookingsAdmin(rootElement) {
 	if (!rootElement) return;
 
 	const root = createRoot(rootElement);
-	root.render(<BookingTable />);
+	root.render(<BookingsList />);
 }

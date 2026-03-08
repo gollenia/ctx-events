@@ -1,4 +1,6 @@
+import type { ChangeEvent } from 'react';
 import { useRef, useState } from '@wordpress/element';
+import type { FieldValue } from '../types';
 
 export type TextAreaProps = {
 	label: string;
@@ -10,51 +12,44 @@ export type TextAreaProps = {
 	rows: number;
 	formTouched?: boolean;
 	customErrorMessage?: string;
-	onChange: (value: string) => void;
+	error?: string;
+	onChange: (value: FieldValue) => void;
 	value: string;
 };
 
 const TextArea = (props: TextAreaProps) => {
-	const {
-		label,
-		placeholder,
-		name,
-		required,
-		width,
-		rows,
-		disabled,
-		onChange,
-		customErrorMessage,
-		value,
-	} = props;
+	const { label, placeholder, name, required, width, rows, disabled, onChange, customErrorMessage, error, value } = props;
 
 	const textInputRef = useRef<HTMLTextAreaElement>(null);
 	const [touched, setTouched] = useState(false);
-	const onChangeHandler = (event: any) => {
+
+	const onChangeHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
 		onChange(event.target.value);
 	};
 
 	const isTouched = touched || props.formTouched;
+	const hasError = !!error || (!textInputRef?.current?.validity.valid && isTouched);
+	const errorMessage = error ?? customErrorMessage ?? textInputRef.current?.validationMessage;
+	const errorId = `${name}-error`;
 
 	const classes = [
 		'ctx-form-field',
 		'textarea',
 		'input--width-' + width,
 		required ? 'input--required' : '',
-		!textInputRef?.current?.validity.valid && isTouched ? 'error' : '',
+		hasError ? 'error' : '',
 	].join(' ');
 
 	return (
-		<div
-			className={classes}
-			style={{
-				gridColumn: `span ${width}`,
-			}}
-		>
-			<label>{label}</label>
+		<div className={classes} style={{ gridColumn: `span ${width}` }}>
+			<label htmlFor={name}>{label}</label>
 			<textarea
+				id={name}
 				name={name}
 				required={required}
+				aria-required={required}
+				aria-invalid={hasError || undefined}
+				aria-describedby={hasError && errorMessage ? errorId : undefined}
 				disabled={disabled}
 				rows={rows}
 				onBlur={() => setTouched(true)}
@@ -62,14 +57,12 @@ const TextArea = (props: TextAreaProps) => {
 				placeholder={placeholder}
 				onChange={onChangeHandler}
 				value={value}
-			></textarea>
-			{!textInputRef?.current?.validity.valid &&
-				isTouched &&
-				textInputRef.current?.validationMessage && (
-					<span className="error-message">
-						{customErrorMessage || textInputRef.current?.validationMessage}
-					</span>
-				)}
+			/>
+			{hasError && errorMessage && (
+				<span id={errorId} role="alert" className="error-message">
+					{errorMessage}
+				</span>
+			)}
 		</div>
 	);
 };

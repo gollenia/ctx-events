@@ -1,12 +1,13 @@
-type Props = {
+type SubmitProps = {
 	label: string;
 	width: number;
 	alignment: 'left' | 'center' | 'right';
 	disabled: boolean;
-	placeholder: string;
+	placeholder?: string;
+	type?: 'submit' | 'button' | 'reset';
 };
 
-const Submit = (props: Props) => {
+const Submit = (props: SubmitProps) => {
 	const { label, width, alignment, disabled, placeholder } = props;
 
 	const classes = [
@@ -14,19 +15,18 @@ const Submit = (props: Props) => {
 		'flex',
 		'input--width-' + width,
 		'flex--align-center',
-		alignment == 'right' ? 'flex--justify-end' : '',
+		alignment === 'right' ? 'flex--justify-end' : '',
 	].join(' ');
+
 	return (
 		<div
 			className={classes}
-			style={{
-				gridColumn: `span ${width}`,
-			}}
+			style={{ gridColumn: `span ${width}` }}
 		>
 			<input
 				className="button button--primary"
 				type="submit"
-				value={label ? label : placeholder}
+				value={label || placeholder}
 				disabled={disabled}
 			/>
 		</div>

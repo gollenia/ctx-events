@@ -7,7 +7,7 @@ import {
 	Icon,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	drafts,
@@ -21,61 +21,64 @@ import { initialViewFromURL } from './filters';
 
 const BookingTable = () => {
 	const [bookings, setBookings] = useState([]);
+	const [total, setTotal] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const [slug, setSlug] = useState('');
 
 	const [view, setView] = useState(
 		initialViewFromURL({
 			type: 'table',
 			search: '',
 			page: 1,
-			perPage: 100,
-			fields: ['user_email', 'event', 'price', 'date', 'status', 'gateway'],
+			perPage: 25,
+			fields: ['email', 'event', 'price', 'date', 'status', 'gateway'],
 			filters: [],
 			layout: {},
-			titleField: 'full_name',
+			titleField: 'email',
 			sort: {
-				order: 'asc',
+				order: 'desc',
 				orderby: 'date',
 			},
 		}),
 	);
 
-	console.log(bookings);
-
-	const StatusIcon = (status) => {
-		console.log(status);
-		switch (status.status) {
-			case 0:
-				return <Icon icon={drafts} />;
+	const StatusIcon = ({ status }) => {
+		switch (status) {
 			case 1:
-				return <Icon icon={published} />;
-			case 2:
-				return <Icon icon={notAllowed} />;
-			case 3:
-				return <Icon icon={swatch} />;
-			case 6:
 				return <Icon icon={pending} />;
+			case 2:
+				return <Icon icon={published} />;
+			case 3:
+				return <Icon icon={notAllowed} />;
+			case 4:
+				return <Icon icon={swatch} />;
+			default:
+				return <Icon icon={drafts} />;
 		}
-		return <Icon icon={trash} />;
+	};
+
+	const statusLabels = {
+		1: __('Pending', 'ctx-events'),
+		2: __('Approved', 'ctx-events'),
+		3: __('Canceled', 'ctx-events'),
+		4: __('Expired', 'ctx-events'),
+		9: __('Deleted', 'ctx-events'),
 	};
 
 	const fields = [
 		{
 			label: __('Name', 'ctx-events'),
-			id: 'full_name',
+			id: 'name',
 			enableHiding: false,
-			enableGlobalSearch: true,
-			elements: [],
+			enableGlobalSearch: false,
 			type: 'string',
+			render: ({ item }) => `${item.name.first} ${item.name.last}`.trim(),
 		},
 		{
 			label: __('E-Mail', 'ctx-events'),
-			id: 'user_email',
+			id: 'email',
 			enableHiding: false,
-			enableGlobalSearch: true,
-			editable: true,
+			enableGlobalSearch: false,
 			type: 'string',
 		},
 		{
@@ -85,7 +88,7 @@ const BookingTable = () => {
 			filterBy: {
 				operators: ['is'],
 			},
-			enableGlobalSearch: true,
+			enableGlobalSearch: false,
 			elements: [],
 			type: 'string',
 			render: ({ item }) => {
@@ -117,16 +120,10 @@ const BookingTable = () => {
 			enableSorting: false,
 		},
 		{
-			label: __('Attendees', 'ctx-events'),
-			id: 'attendees',
+			label: __('Spaces', 'ctx-events'),
+			id: 'spaces',
 			type: 'string',
-			render: ({ item }) => {
-				return item.tickets.map((ticket) => (
-					<div key={ticket.id}>
-						{ticket.title} x {ticket.quantity}
-					</div>
-				));
-			},
+			render: ({ item }) => item.spaces,
 			enableSorting: false,
 		},
 		{
@@ -151,27 +148,24 @@ const BookingTable = () => {
 			format: 'Y-m-d H:i',
 			enableSorting: true,
 		},
-
 		{
 			label: __('Status', 'ctx-events'),
 			id: 'status',
-			type: 'string',
+			type: 'integer',
 			filterBy: {
 				operators: ['is', 'is not'],
 			},
 			elements: [
-				{ value: 0, label: __('Pending', 'ctx-events') },
-				{ value: 1, label: __('Approved', 'ctx-events') },
-				{ value: 2, label: __('Rejected', 'ctx-events') },
+				{ value: 1, label: __('Pending', 'ctx-events') },
+				{ value: 2, label: __('Approved', 'ctx-events') },
 				{ value: 3, label: __('Canceled', 'ctx-events') },
-				{ value: 6, label: __('Awaiting Payment', 'ctx-events') },
-				{ value: 7, label: __('Payment Paid', 'ctx-events') },
+				{ value: 4, label: __('Expired', 'ctx-events') },
 			],
 			render: ({ item }) => {
 				return (
 					<HStack style={{ width: 'auto' }}>
 						<StatusIcon status={item.status} />
-						<Text>{item.status_array[item.status] || item.status}</Text>
+						<Text>{statusLabels[item.status] || item.status}</Text>
 					</HStack>
 				);
 			},
@@ -179,13 +173,44 @@ const BookingTable = () => {
 		},
 	];
 
-	const { data: shownData, paginationInfo } = useMemo(() => {
-		return filterSortAndPaginate(bookings, view, fields);
-	}, [view, bookings]);
-
 	useEffect(() => {
-		apiFetch({ path: '/events/v2/bookings' })
-			.then((data) => {
+		const params = new URLSearchParams();
+		params.set('page', String(view.page ?? 1));
+		params.set('per_page', String(view.perPage ?? 25));
+
+		if (view.search) {
+			params.set('search', view.search);
+		}
+
+		if (view.sort?.orderby) {
+			params.set('order_by', view.sort.orderby);
+		}
+
+		if (view.sort?.order) {
+			params.set('order', view.sort.order);
+		}
+
+		const eventIdFilter = view.filters?.find((f) => f.field === 'event_id');
+		if (eventIdFilter?.value) {
+			params.set('event_id', String(eventIdFilter.value));
+		}
+
+		const statusFilter = view.filters?.find((f) => f.field === 'status');
+		if (statusFilter?.value) {
+			const values = Array.isArray(statusFilter.value)
+				? statusFilter.value
+				: [statusFilter.value];
+			values.forEach((value) => params.append('status[]', String(value)));
+		}
+
+		setLoading(true);
+		apiFetch({ path: `/events/v3/bookings?${params.toString()}`, parse: false })
+			.then(async (response) => {
+				const totalHeader = response.headers.get('X-WP-Total');
+				if (totalHeader !== null) {
+					setTotal(parseInt(totalHeader, 10));
+				}
+				const data = await response.json();
 				setBookings(data);
 				setLoading(false);
 			})
@@ -195,36 +220,9 @@ const BookingTable = () => {
 			});
 	}, [view]);
 
-	const onToggle = (slug) => {
-		apiFetch({
-			path: `/events/v2/gateway/toggle`,
-			method: 'POST',
-			data: { slug },
-		})
-			.then((data) => {
-				console.log(data);
-				setGateways((prev) => {
-					const updatedGateways = prev.map((gateway) => {
-						if (gateway.slug === slug) {
-							return {
-								...gateway,
-								active: !gateway.active,
-							};
-						}
-						return gateway;
-					});
-					return updatedGateways;
-				});
-				setLoading(false);
-			})
-			.catch((err) => {
-				setError(err.message);
-				setLoading(false);
-			});
-	};
-
-	const onCancel = () => {
-		setSlug('');
+	const paginationInfo = {
+		totalItems: total,
+		totalPages: Math.ceil(total / (view.perPage ?? 25)),
 	};
 
 	if (loading) {
@@ -234,26 +232,24 @@ const BookingTable = () => {
 	if (error) {
 		return <div>Error: {error}</div>;
 	}
+
 	return (
 		<div>
 			<HStack
 				style={{ marginBottom: '1em', padding: '12px 48px', width: 'auto' }}
 			>
 				<h1>{__('Bookings', 'ctx-events')}</h1>
-				<Button variant="secondary" onClick={() => setShowAddNew(true)}>
+				<Button variant="secondary">
 					{__('Export', 'ctx-events')}
 				</Button>
 			</HStack>
-			{/* { slug && <GatewayModal slug={ slug } onClose={ onCancel } onToggle={ onToggle } /> } */}
 			<DataTable
-				data={shownData}
+				data={bookings}
 				view={view}
 				onChangeView={setView}
 				paginationInfo={paginationInfo}
-				// You can define custom columns if needed
 				defaultLayouts={{
 					table: {
-						// Define default table layout settings
 						spacing: 'normal',
 						showHeader: true,
 					},
@@ -263,25 +259,36 @@ const BookingTable = () => {
 					{
 						id: 'approve',
 						label: __('Approve', 'ctx-events'),
-						icon: trash,
+						icon: published,
 						callback: async ([item]) => {
-							setStatus(item.id, 'approved');
+							await apiFetch({
+								path: `/events/v3/bookings/${item.reference}`,
+								method: 'PATCH',
+								data: { status: 'approved' },
+							});
 						},
 					},
 					{
-						id: 'reject',
-						label: __('Reject', 'ctx-events'),
-						icon: trash,
+						id: 'cancel',
+						label: __('Cancel', 'ctx-events'),
+						icon: notAllowed,
 						callback: async ([item]) => {
-							setStatus(item.id, 'rejected');
+							await apiFetch({
+								path: `/events/v3/bookings/${item.reference}`,
+								method: 'PATCH',
+								data: { status: 'canceled' },
+							});
 						},
 					},
 					{
 						id: 'delete',
 						label: __('Delete', 'ctx-events'),
-						icon: <Icon icon={trash} />,
+						icon: trash,
 						callback: async ([item]) => {
-							setSlug(item.slug);
+							await apiFetch({
+								path: `/events/v3/bookings/${item.reference}`,
+								method: 'DELETE',
+							});
 						},
 					},
 				]}

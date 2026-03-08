@@ -13,7 +13,7 @@ import { addQueryArgs } from '@wordpress/url';
  * @returns {Promise<BookingsResponse>}
  */
 export async function getBookings(query, signal) {
-	const path = addQueryArgs('/events/v2/bookings', query);
+	const path = addQueryArgs('/events/v3/bookings', query);
 
 	// parse:false, um Headers lesen zu können
 	const res = await apiFetch({ path, method: 'GET', parse: false, signal });

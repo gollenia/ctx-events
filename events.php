@@ -23,7 +23,7 @@ define('EM_OBJECT', null);
 
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
-add_action('plugins_loaded', function () {
+add_action('init', function () {
     load_plugin_textdomain(
         'ctx-events',
         false,

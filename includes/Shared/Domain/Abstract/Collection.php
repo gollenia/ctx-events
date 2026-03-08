@@ -22,6 +22,12 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
         return clone($this, ['pagination' => $pagination]);
     }
 
+    public function withEnrichment(\Closure $enrichmentCallback): static
+    {
+        $enrichedItems = array_map($enrichmentCallback, $this->items);
+        return clone($this, ['items' => $enrichedItems]);
+    }
+
     public function pagination(): ?Pagination
     {
         return $this->pagination;

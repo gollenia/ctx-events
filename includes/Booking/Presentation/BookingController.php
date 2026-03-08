@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Presentation;
 
+use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
+use Contexis\Events\Booking\Application\UseCases\ListBookings;
+use Contexis\Events\Booking\Application\UseCases\UpdateBookingStatus;
+use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class BookingController implements RestController
 {
-    public function __construct(private CreateBooking $createBooking) {}
+    public function __construct(
+        private CreateBooking $createBooking,
+        private ListBookings $listBookings,
+        private UpdateBookingStatus $updateBookingStatus,
+    ) {
+    }
 
     public function register(): void
     {
@@ -21,7 +30,27 @@ final class BookingController implements RestController
             [
                 'methods'             => \WP_REST_Server::READABLE,
                 'callback'            => [$this, 'listBookings'],
-                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'permission_callback' => '__return_true',
+                'args'                => [
+                    'event_id' => ['type' => 'integer', 'required' => false],
+                    'status'   => ['type' => 'array', 'required' => false, 'items' => ['type' => 'integer']],
+                    'search'   => ['type' => 'string', 'required' => false],
+                    'gateway'  => ['type' => 'string', 'required' => false],
+                    'page'     => ['type' => 'integer', 'required' => false, 'default' => 1],
+                    'per_page' => ['type' => 'integer', 'required' => false, 'default' => 25],
+                    'order_by' => [
+                        'type'     => 'string',
+                        'required' => false,
+                        'default'  => 'date',
+                        'enum'     => ['date', 'status', 'event_id'],
+                    ],
+                    'order'    => [
+                        'type'     => 'string',
+                        'required' => false,
+                        'default'  => 'desc',
+                        'enum'     => ['asc', 'desc'],
+                    ],
+                ],
             ],
             [
                 'methods'             => 'POST',
@@ -69,7 +98,36 @@ final class BookingController implements RestController
 
     public function listBookings(\WP_REST_Request $request): \WP_REST_Response
     {
-        return new \WP_REST_Response([], 200);
+        $eventIdParam = $request->get_param('event_id');
+        $statusParam = $request->get_param('status');
+
+        $query = new BookingListRequest(
+            eventId: $eventIdParam !== null ? EventId::from((int) $eventIdParam) : null,
+            status: is_array($statusParam) ? array_map('intval', $statusParam) : null,
+            search: $request->get_param('search'),
+            gateway: $request->get_param('gateway'),
+            page: (int) $request->get_param('page'),
+            perPage: (int) $request->get_param('per_page'),
+            orderBy: (string) $request->get_param('order_by'),
+            order: (string) $request->get_param('order'),
+        );
+
+        $result = $this->listBookings->execute($query);
+
+        $items = array_map(
+            static fn ($item) => BookingListItemResource::fromDTO($item),
+            $result->toArray()
+        );
+
+        $response = new \WP_REST_Response($items, 200);
+        $response->header('X-WP-Total', (string) $result->pagination->totalItems);
+        $response->header('X-WP-TotalPages', (string) $result->pagination->totalPages());
+
+        if ($result->hasStatusCounts()) {
+            $response->header('X-WP-StatusCounts', (string) json_encode($result->statusCounts));
+        }
+
+        return $response;
     }
 
     public function editBooking(\WP_REST_Request $request): \WP_REST_Response
@@ -105,7 +163,15 @@ final class BookingController implements RestController
 
     public function setBookingStatus(\WP_REST_Request $request): \WP_REST_Response
     {
-        return new \WP_REST_Response([], 200);
+        $uuid   = (string) $request->get_param('uuid');
+        $status = (string) $request->get_param('status');
+
+        try {
+            $this->updateBookingStatus->execute($uuid, $status);
+            return new \WP_REST_Response(null, 204);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
     }
 
     public function checkBookingAdminPermission(): bool

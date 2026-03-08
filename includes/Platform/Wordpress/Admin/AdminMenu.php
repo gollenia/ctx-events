@@ -70,7 +70,7 @@ final class AdminMenu implements AdminServiceInterface
             __('Bookings', 'ctx-events'),
             'manage_options',
             'contexis_events_bookings',
-            fn() => print('<div id="contexis-events-bookings-app"></div>')
+            fn() => print('<div id="ctx-bookings-admin"></div>')
         );
 
 		add_submenu_page(

@@ -1,5 +1,5 @@
 import type { FormField as FormFieldType } from '../types';
-import { isFieldVisible } from '../hooks/useFieldVisibility';
+import { isFieldVisible } from '../../../shared/__experimentalForm';
 import { FormField } from './FormField';
 
 type Props = {

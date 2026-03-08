@@ -1,4 +1,6 @@
+import type { ChangeEvent, FormEvent, InvalidEvent } from 'react';
 import { useRef, useState } from '@wordpress/element';
+import type { FieldValue } from '../types';
 
 type InputFieldTypes =
 	| 'text'
@@ -9,18 +11,6 @@ type InputFieldTypes =
 	| 'password'
 	| 'search'
 	| 'datetime-local'
-	| 'select'
-	| 'radio'
-	| 'textarea'
-	| 'checkbox'
-	| 'country'
-	| 'html'
-	| 'hidden'
-	| 'range'
-	| 'file'
-	| 'toggle'
-	| 'combobox'
-	| 'options'
 	| 'date'
 	| 'week'
 	| 'month'
@@ -41,10 +31,11 @@ type InputProps = {
 	min?: number;
 	max?: number;
 	customErrorMessage?: string;
+	error?: string;
 	type: InputFieldTypes;
-	help: string;
+	help?: string;
 	formTouched: boolean;
-	onChange: (value: any) => void;
+	onChange: (value: FieldValue) => void;
 	value: string;
 };
 
@@ -52,46 +43,37 @@ const TextInput = (props: InputProps) => {
 	const [touched, setTouched] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const {
-		label,
-		required,
-		width,
-		onChange,
-		pattern,
-		min,
-		max,
-		customErrorMessage,
-		value,
-		help,
-	} = props;
+	const { label, required, width, onChange, pattern, min, max, customErrorMessage, error, value, name } = props;
 
-	const onChangeHandler = (event: any) => {
+	const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
 		onChange(event.target.value);
 	};
 
-	const onKeyPressHandler = (event: any) => {
+	const onKeyPressHandler = (event: FormEvent<HTMLInputElement>) => {
 		if (!pattern) return;
-
+		const inputEvent = event.nativeEvent as InputEvent;
 		const regex = new RegExp(pattern, 'gu');
-
-		if (regex.test(event.data) === false) {
+		if (inputEvent.data !== null && !regex.test(inputEvent.data ?? '')) {
 			event.preventDefault();
 		}
 	};
 
-	const setInvalidity = (event: any) => {
+	const setInvalidity = (event: InvalidEvent<HTMLInputElement>) => {
 		if (!props.customError) return;
 		event.target.setCustomValidity(props.customError);
 	};
 
 	const isTouched = props.formTouched || touched;
+	const hasError = !!error || (!inputRef?.current?.validity.valid && isTouched);
+	const errorMessage = error ?? customErrorMessage ?? inputRef.current?.validationMessage;
+	const errorId = `${name}-error`;
 
 	const classes = [
 		'ctx-form-field',
 		'input',
 		'input--width-' + width,
 		required ? 'input--required' : '',
-		!inputRef?.current?.validity.valid && isTouched ? 'error' : '',
+		hasError ? 'error' : '',
 	].join(' ');
 
 	const minMax = {
@@ -102,23 +84,22 @@ const TextInput = (props: InputProps) => {
 	};
 
 	return (
-		<div
-			className={classes}
-			style={{
-				gridColumn: `span ${width}`,
-			}}
-		>
-			<label>{label}</label>
+		<div className={classes} style={{ gridColumn: `span ${width}` }}>
+			<label htmlFor={name}>{label}</label>
 			<input
 				{...minMax}
+				id={name}
+				name={name}
 				placeholder={props.placeholder}
-				name={props.name}
 				required={required}
+				aria-required={required}
+				aria-invalid={hasError || undefined}
+				aria-describedby={hasError && errorMessage ? errorId : undefined}
 				onBlur={() => setTouched(true)}
 				type={props.type}
 				autoComplete={props.autoComplete}
 				disabled={props.disabled}
-				pattern={props.pattern ? props.pattern : undefined}
+				pattern={props.pattern ?? undefined}
 				defaultValue={props.defaultValue}
 				value={value}
 				ref={inputRef}
@@ -126,13 +107,11 @@ const TextInput = (props: InputProps) => {
 				onChange={onChangeHandler}
 				onBeforeInput={onKeyPressHandler}
 			/>
-			{!inputRef?.current?.validity.valid &&
-				isTouched &&
-				inputRef.current?.validationMessage && (
-					<span className="error-message">
-						{customErrorMessage || inputRef.current?.validationMessage}
-					</span>
-				)}
+			{hasError && errorMessage && (
+				<span id={errorId} role="alert" className="error-message">
+					{errorMessage}
+				</span>
+			)}
 		</div>
 	);
 };

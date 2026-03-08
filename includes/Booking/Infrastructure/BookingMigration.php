@@ -12,7 +12,6 @@ final class BookingMigration implements Migration
 	public const ID = 'id';
 	public const UUID = 'uuid';
 	public const EVENT_ID = 'event_id';
-	public const SPACES = 'spaces';
 	public const EMAIL = 'email';
 	public const DATE = 'date';
 	public const STATUS = 'status';
@@ -28,7 +27,6 @@ final class BookingMigration implements Migration
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		self::UUID . ' VARCHAR(191) NOT NULL',
         self::EVENT_ID . ' BIGINT UNSIGNED NOT NULL',
-        self::SPACES . ' TINYINT NOT NULL',
         self::EMAIL . ' VARCHAR(191) NOT NULL',
         self::DATE . ' TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
         self::STATUS . ' TINYINT NOT NULL DEFAULT 1',

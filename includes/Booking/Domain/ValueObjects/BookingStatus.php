@@ -16,8 +16,8 @@ enum BookingStatus: int
         return match ($this) {
             self::PENDING => in_array($newStatus, [self::APPROVED, self::CANCELED, self::EXPIRED, self::DELETED]),
             self::APPROVED => in_array($newStatus, [self::CANCELED, self::DELETED, self::PENDING]),
-            self::CANCELED => in_array($newStatus, [self::DELETED]),
-            self::EXPIRED => in_array($newStatus, [self::DELETED]),
+            self::CANCELED => in_array($newStatus, [self::APPROVED, self::DELETED]),
+            self::EXPIRED => in_array($newStatus, [self::APPROVED, self::DELETED]),
             self::DELETED => false,
         };
     }

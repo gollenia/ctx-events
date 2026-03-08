@@ -1,10 +1,12 @@
+import { sanitizeHtml } from '../sanitize';
+
 export type HTMLBlockProps = {
-	content: string;
-	width: number;
+	content?: string;
+	width?: number;
 };
 
 const HTMLBlock = (props: HTMLBlockProps) => {
-	const { content, width } = props;
+	const { content = '', width = 6 } = props;
 	const classes = [
 		'ctx-form-field',
 		'core-block',
@@ -17,7 +19,7 @@ const HTMLBlock = (props: HTMLBlockProps) => {
 			style={{
 				gridColumn: `span ${width}`,
 			}}
-			dangerouslySetInnerHTML={{ __html: content }}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
 		/>
 	);
 };

@@ -5,6 +5,8 @@ namespace Tests\Support;
 
 use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
+use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
+use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
@@ -52,6 +54,17 @@ final class FakeBookingRepository implements BookingRepository
         $this->lastFindArg = $id;
 
         return $this->bookingsById[$id->toInt()] ?? null;
+    }
+
+    public function findByReference(string $reference): ?Booking
+    {
+        foreach ($this->bookingsById as $booking) {
+            if ($booking->reference->toString() === $reference) {
+                return $booking;
+            }
+        }
+
+        return null;
     }
 
     public function save(Booking $booking): BookingId
@@ -102,6 +115,26 @@ final class FakeBookingRepository implements BookingRepository
         }
 
         return new TicketBookingsMap($items);
+    }
+
+    public function search(BookingListRequest $query): BookingListResponse
+    {
+        return new BookingListResponse();
+    }
+
+    public function delete(BookingId $id): void
+    {
+        unset($this->bookingsById[$id->toInt()]);
+    }
+
+    public function updateStatus(BookingId $id, BookingStatus $status): void
+    {
+        if (!isset($this->bookingsById[$id->toInt()])) {
+            return;
+        }
+
+        $booking = $this->bookingsById[$id->toInt()];
+        $this->bookingsById[$id->toInt()] = clone($booking, ['status' => $status]);
     }
 
 	 public function getTicketBookingsForEvents(array $eventIds): array

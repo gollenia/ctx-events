@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress;
 
+use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 
 final class DatabaseMigration implements Registrar
 {
 
-	private const VERSION = '1.0.3';
+	private const VERSION = '1.0.4';
 
 	/*
 	 * @var Migration[]
@@ -35,6 +36,7 @@ final class DatabaseMigration implements Registrar
 			return;
 		}
 
+		$this->runAlterations();
 		$this->runDbDelta();
         update_option('ctx_events_db_version', self::VERSION, false);
     }
@@ -58,6 +60,11 @@ final class DatabaseMigration implements Registrar
 
 		return version_compare($current, self::VERSION, '>=');
 	}
+
+    private function runAlterations(): void
+    {
+        // Future alterations here
+    }
 
     private function runDbDelta(): void
     {
