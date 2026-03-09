@@ -7,6 +7,8 @@ use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
+use Contexis\Events\Person\Domain\Person;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final class AttendeeFactory
 {
@@ -19,41 +21,23 @@ final class AttendeeFactory
             throw new \DomainException('At least one attendee is required.');
         }
 
-        $ticketPriceIndex = $this->buildTicketPriceIndex($tickets);
         $attendees = [];
 
         foreach ($payload as $item) {
-            $ticketId = (string) ($item['ticket_id'] ?? '');
-            if ($ticketId === '') {
-                throw new \DomainException('Attendee is missing ticket_id.');
-            }
+            $ticketId = TicketId::from($item['ticket_id'] ?? '');
 
-            $ticketPrice = $ticketPriceIndex[$ticketId] ?? null;
-            if ($ticketPrice === null) {
-                throw new \DomainException("Ticket not found: {$ticketId}");
-            }
+            $ticket = $tickets->getTicketById($ticketId);
 
-            $firstName = trim((string) ($item['first_name'] ?? '')) ?: null;
-            $lastName = trim((string) ($item['last_name'] ?? '')) ?: null;
+			$metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
 
-            $metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
-            $birthDate = isset($metadata['birth_date']) && is_string($metadata['birth_date'])
-                ? \DateTimeImmutable::createFromFormat('Y-m-d', $metadata['birth_date']) ?: null
-                : null;
-
-            if ($birthDate !== null) {
-                unset($metadata['birth_date']);
-            }
-
-            $resolvedTicketId = TicketId::from($ticketId)
-                ?? throw new \DomainException("Invalid ticket_id: {$ticketId}");
+			$personName = $this->getPersonName($metadata);
+            $birthDate = $this->getBithdate($metadata);
 
             $attendees[] = new Attendee(
-                ticketId: $resolvedTicketId,
-                ticketPrice: $ticketPrice,
-                firstName: $firstName,
-                lastName: $lastName,
-                birthDate: $birthDate,
+                ticketId: $ticketId,
+                ticketPrice: $ticket->price,
+                name: $personName ? $personName : null,
+				birthDate: $birthDate,
                 metadata: $metadata,
             );
         }
@@ -61,13 +45,26 @@ final class AttendeeFactory
         return new AttendeeCollection(...$attendees);
     }
 
-    /** @return array<string, \Contexis\Events\Shared\Domain\ValueObjects\Price> */
-    private function buildTicketPriceIndex(TicketCollection $tickets): array
-    {
-        $index = [];
-        foreach ($tickets as $ticket) {
-            $index[$ticket->id->toString()] = $ticket->price;
-        }
-        return $index;
-    }
+	private function getPersonName(array $metadata): ?PersonName
+	{
+		$firstName = $metadata['first_name'] ?? null;
+		$lastName = $metadata['last_name'] ?? null;
+
+		if ($firstName === null || $lastName === null) {
+			return null;
+		}
+
+		return new PersonName($firstName, $lastName);
+	}
+
+	private function getBithdate(array $metadata): ?\DateTimeImmutable
+	{
+		if (!isset($metadata['birth_date']) || !is_string($metadata['birth_date'])) {
+			return null;
+		}
+
+		return \DateTimeImmutable::createFromFormat('Y-m-d', $metadata['birth_date']) ?: null;
+	}
+
+   
 }

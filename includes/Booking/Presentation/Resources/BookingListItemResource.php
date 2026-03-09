@@ -10,7 +10,6 @@ use Contexis\Events\Shared\Presentation\Contracts\Resource;
 final readonly class BookingListItemResource implements Resource
 {
     public function __construct(
-        public int $id,
         public string $reference,
         public string $email,
         public array $name,
@@ -37,7 +36,6 @@ final readonly class BookingListItemResource implements Resource
         }
 
         return new self(
-            id: $item->id,
             reference: $item->reference,
             email: $item->email,
             name: ['first' => $item->firstName, 'last' => $item->lastName],
@@ -55,7 +53,7 @@ final readonly class BookingListItemResource implements Resource
     public function jsonSerialize(): array
     {
         return [
-            'id'        => $this->id,
+
             'reference' => $this->reference,
             'email'     => $this->email,
             'name'      => $this->name,

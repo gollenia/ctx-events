@@ -79,9 +79,11 @@ final class EventMapper implements PostMapper
                 attendeeForm: FormId::from($post->getInt(EventMeta::ATTENDEE_FORM))
             ),
 			eventCoupons: new EventCoupons(
-				enabled: $post->getBool(EventMeta::ALLOW_COUPONS, true) ?? true
+				enabled: $post->getBool(EventMeta::ALLOW_COUPONS, true) ?? true,
+				allowedIds: array_map('intval', $post->getArray(EventMeta::COUPONS_ALLOWED, [])),
 			),
-			overallCapacity: $post->getInt(EventMeta::BOOKING_CAPACITY)
+			overallCapacity: $post->getInt(EventMeta::BOOKING_CAPACITY),
+			donationEnabled: $post->getBool(EventMeta::DONATION_ENABLED, false) ?? false
 		);
 		
 		

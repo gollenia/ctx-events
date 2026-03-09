@@ -14,10 +14,8 @@ class PostTypeRegistrar implements Registrar
 
     public function hook(): void
     {
-        add_action('init', function () {
-            foreach ($this->post_types as $post_type) {
-                $post_type->register();
-            }
-        }, 9);
+        foreach ($this->post_types as $post_type) {
+            $post_type->register();
+        }
     }
 }

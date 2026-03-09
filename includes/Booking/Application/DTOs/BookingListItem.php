@@ -19,7 +19,7 @@ final readonly class BookingListItem
         public int $donationAmount,
         public ?string $gateway,
         public \DateTimeImmutable $bookingTime,
-        public array $ticketBreakdown = [],   // [ticketId => count]
+        public array $ticketBreakdown = [], 
         public int $spaces = 0,
         public ?string $gatewayName = null,
     ) {

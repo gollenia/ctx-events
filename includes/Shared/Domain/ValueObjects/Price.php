@@ -32,9 +32,12 @@ final class Price
         return clone($this, ['amountCents' => $amountCents]);
     }
 
-    public function minus(int $cents): self
+    public function subtract(Price $other): self
     {
-        return $this->withAmount(max(0, $this->amountCents - $cents));
+        if (!$this->currency->equals($other->currency)) {
+            throw new \InvalidArgumentException('Cannot subtract prices with different currencies');
+        }
+        return $this->withAmount(max(0, $this->amountCents - $other->amountCents));
     }
 
     public function percentageOf(int $percent): int

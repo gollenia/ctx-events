@@ -71,6 +71,7 @@ final class PrepareBooking
             bookingForm: $bookingForm,
             attendeeForm: $attendeeForm,
             couponsEnabled: $event->allowsCoupons(),
+			donationEnabled: $event->donationEnabled,
             token: $token,
         );
     }

@@ -13,8 +13,10 @@ use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Payment\Domain\TransactionCollection;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
 
 final class BookingMapper implements DatabaseMapper
@@ -27,12 +29,7 @@ final class BookingMapper implements DatabaseMapper
 			reference: BookingReference::fromString($data['uuid']),
 			email: Email::tryFrom($data['email']),
 			name: PersonName::from($data['first_name'] ?? '', $data['last_name'] ?? ''),
-			priceSummary: PriceSummary::fromValues(
-				(int) ($data['final_price'] ?? 0),
-				(int) ($data['donation'] ?? 0),
-				0,
-				$data['currency'] ?? 'EUR'
-			),
+			priceSummary: self::priceMapper($data),
 			bookingTime: \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date'])
 				?: new \DateTimeImmutable($data['date']),
 			status: BookingStatus::from((int) $data['status']),
@@ -43,6 +40,17 @@ final class BookingMapper implements DatabaseMapper
 			transactions: TransactionCollection::fromArray($data['transactions'] ?? []),
 			eventId: EventId::from((int) $data['event_id']),
 			id: BookingId::from((int) $data['id']),
+		);
+	}
+
+	private static function priceMapper(array $data): PriceSummary
+	{
+		$currency = Currency::fromCode($data['currency']);
+		return PriceSummary::fromValues(
+			bookingPrice: Price::from((int) $data['booking_price'], $currency),
+			donationAmount: Price::from((int) $data['donation_amount'], $currency),
+			discountAmount: Price::from((int) $data['discount_amount'], $currency),
+			currency: $currency
 		);
 	}
 }

@@ -8,30 +8,31 @@ use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use DateTimeImmutable;
 
-final class Coupon
+final readonly class Coupon
 {
     public function __construct(
-        public readonly CouponId $id,
-        private readonly Status $status,
-        private readonly CouponCode $code,
-        public readonly string $name,
-        private readonly DiscountType $discountType,
-        public readonly int $value,
-        private readonly ?DateTimeImmutable $validFrom,
-        private readonly ?DateTimeImmutable $expiresAt,
-        private readonly ?int $usageLimit,
-        private readonly ?int $usageCount,
-        public readonly ?string $description,
+        public CouponId $id,
+        private Status $status,
+        private CouponCode $code,
+        public string $name,
+        private DiscountType $discountType,
+        public int $value,
+        private ?DateTimeImmutable $validFrom,
+        private ?DateTimeImmutable $expiresAt,
+        private ?int $usageLimit,
+        private ?int $usageCount,
+        public ?string $description,
+        public bool $isGlobal = false,
     ) {
     }
 
-    public function applyTo(Price $price): Price
-    {
-        $minus = $this->discountType->isPercentage()
-            ? $price->percentageOf($this->value)
-            : $this->value;
-        return $price->minus($minus);
-    }
+	public function getDiscountAmount(Price $price): Price
+	{
+		$minus = $this->discountType->isPercentage()
+			? $price->percentageOf($this->value)
+			: $this->value;
+		return Price::from($minus, $price->currency);
+	}
 
     public function isUsableAt(DateTimeImmutable $now): bool
     {
@@ -81,5 +82,10 @@ final class Coupon
     public function getCode(): CouponCode
     {
         return $this->code;
+    }
+
+    public function getDiscountType(): DiscountType
+    {
+        return $this->discountType;
     }
 }

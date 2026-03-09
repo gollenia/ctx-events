@@ -5,7 +5,6 @@ import { drafts, notAllowed, pending, published, swatch } from '@wordpress/icons
 import type { DataFieldConfig, DataFilterElement } from '../../shared/datatable/types';
 
 type Booking = {
-	id: number;
 	reference: string;
 	email: string;
 	name: { first: string; last: string };

@@ -5,21 +5,24 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
+use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
+use Contexis\Events\Booking\Application\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\BookingTokenStore;
-use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
+use Contexis\Events\Booking\Domain\Signals\BookingCreated;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Booking\Infrastructure\BookingReferenceGenerator;
+use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Domain\EventRepository;
-use Contexis\Events\Event\Domain\TicketCollection;
+use Contexis\Events\Payment\Domain\Coupon;
+use Contexis\Events\Payment\Domain\CouponRepository;
 use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
-use Contexis\Events\Shared\Domain\Contracts\SessionHashResolver;
-use Contexis\Events\Shared\Domain\ValueObjects\Email;
-use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 final class CreateBooking
 {
@@ -29,16 +32,23 @@ final class CreateBooking
         private EventRepository $eventRepository,
         private GatewayRepository $gatewayRepository,
         private TransactionRepository $transactionRepository,
-        private BookingTokenStore $tokenStore,
         private BookingReferenceGenerator $referenceGenerator,
         private AttendeeFactory $attendeeFactory,
-        private SessionHashResolver $sessionHashResolver,
         private Clock $clock,
+        private CheckTicketAvailibility $checkTicketAvailibility,
+		private CalculateBookingPrice $calculateBookingPrice,
+		private CouponRepository $couponRepository,
+		private EventDispatcher $eventDispatcher,
+		private BookingTokenValidator $tokenValidator
     ) {}
 
     public function execute(CreateBookingRequest $request): string
     {
-        $this->validateToken($request);
+		if($request->token === null) {
+			throw new \DomainException('Booking token is required.');
+		}
+
+        $this->tokenValidator->perform($request->eventId, $request->token);
 
         $now = $this->clock->now();
         $event = $this->eventRepository->find($request->eventId);
@@ -49,24 +59,33 @@ final class CreateBooking
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($request->eventId);
         $event = $event->withAvailabilitySnapshot($ticketBookingsMap);
+
         $decision = $event->canBookAt($now);
 
         if (!$decision->allowed) {
             throw new \DomainException('Event is not bookable: ' . $decision->reason->name);
         }
 
-        $tickets = $event->tickets ?? new TicketCollection();
-        $attendees = $this->attendeeFactory->fromPayload($request->attendees, $tickets);
+        $availableTickets = $event->tickets;
+        $attendees = $this->attendeeFactory->fromPayload($request->attendees, $availableTickets);
 
-        $currency = $event->currency?->toString() ?? 'EUR';
-        $totalCents = array_sum(
-            array_map(fn ($a) => $a->ticketPrice->amountCents, $attendees->toArray())
-        );
-        $priceSummary = PriceSummary::fromValues($totalCents, 0, 0, $currency);
+        $this->checkTicketAvailibility->perform($attendees, $ticketBookingsMap, $availableTickets,$now);
+
+        $currency = $event->currency ?? Currency::fromCode('EUR');
+        $coupon = $this->resolveCoupon($request->couponCode);
+        $donation = $this->resolveDonation($request->donationAmount, $event->donationEnabled, $currency);
+
+        $priceSummary = $this->calculateBookingPrice->perform(
+			availableTickets: $availableTickets,
+			coupon: $coupon,
+			attendees: $attendees->toArray(),
+			donation: $donation,
+			currency: $currency,
+		);
 
         $registration = new RegistrationData($request->registration);
-        $email = $this->extractEmail($request->registration);
-        $name = $this->extractName($request->registration);
+        $email = $registration->requireEmail();
+        $name = $registration->requirePersonName();
         $reference = $this->referenceGenerator->create();
 
         $booking = Booking::createPending(
@@ -95,52 +114,34 @@ final class CreateBooking
             $this->transactionRepository->save($transaction);
         }
 
-        $this->tokenStore->delete($request->token);
+		$bookingCreated = new BookingCreated(
+			eventId: $request->eventId,
+			bookingId: $bookingId
+		);
+		$this->eventDispatcher->dispatch($bookingCreated);
 
         return $reference->toString();
     }
 
-    private function validateToken(CreateBookingRequest $request): void
+    private function resolveCoupon(?string $couponCode): ?Coupon
     {
-        $record = $this->tokenStore->find($request->token);
-
-        if ($record === null) {
-            throw new \DomainException('Invalid or expired booking token.');
+        if ($couponCode === null || $couponCode === '') {
+            return null;
         }
 
-        if ($record->eventId !== $request->eventId->toInt()) {
-            throw new \DomainException('Booking token does not match event.');
-        }
-
-        $sessionHash = $this->sessionHashResolver->resolve();
-        if ($record->sessionHash !== $sessionHash) {
-            throw new \DomainException('Session mismatch. Please reload the page and try again.');
-        }
+        return $this->couponRepository->findByCode($couponCode);
     }
 
-    /** @param array<string, mixed> $registration */
-    private function extractEmail(array $registration): Email
+    private function resolveDonation(?int $amountCents, bool $donationEnabled, Currency $currency): ?Price
     {
-        $address = trim((string) ($registration['email'] ?? ''));
-        $email = Email::tryFrom($address);
-
-        if ($email === null) {
-            throw new \DomainException('A valid email address is required.');
+        if (!$amountCents) {
+            return null;
         }
 
-        return $email;
-    }
-
-    /** @param array<string, mixed> $registration */
-    private function extractName(array $registration): PersonName
-    {
-        $firstName = trim((string) ($registration['first_name'] ?? ''));
-        $lastName = trim((string) ($registration['last_name'] ?? ''));
-
-        if ($firstName === '' || $lastName === '') {
-            throw new \DomainException('First name and last name are required.');
+        if (!$donationEnabled) {
+            throw new \DomainException('This event does not accept donations.');
         }
 
-        return PersonName::from($firstName, $lastName);
+        return Price::from($amountCents, $currency);
     }
 }

@@ -20,6 +20,7 @@ final class PrepareBookingResource
 		public array $bookingForm,
 		public ?array $attendeeForm,
 		public bool $couponsEnabled,
+		public bool $donationEnabled,
 		public string $token,
 	) {
 	}
@@ -40,6 +41,7 @@ final class PrepareBookingResource
 			bookingForm: $response->bookingForm->toArray(),
 			attendeeForm: $response->attendeeForm?->toArray(),
 			couponsEnabled: $response->couponsEnabled,
+			donationEnabled: $response->donationEnabled,
 			token: $response->token,
 		);
 	}
@@ -56,6 +58,7 @@ final class PrepareBookingResource
 			'bookingForm' => $this->bookingForm,
 			'attendeeForm' => $this->attendeeForm,
 			'couponsEnabled' => $this->couponsEnabled,
+			'donationEnabled' => $this->donationEnabled,
 			'token' => $this->token,
 		];
 	}

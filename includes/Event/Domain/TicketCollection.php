@@ -5,6 +5,7 @@ namespace Contexis\Events\Event\Domain;
 
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesStats;
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Shared\Domain\Abstract\Collection;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Domain\ValueObjects\PriceRange;
@@ -124,5 +125,25 @@ final readonly class TicketCollection extends Collection
 			$totalCapacity += $ticket->capacity;
 		}
 		return $totalCapacity;
+	}
+
+	public function getTicketById(TicketId $id): Ticket
+	{
+		foreach ($this->items as $ticket) {
+			if ($ticket->id->equals($id)) {
+				return $ticket;
+			}
+		}
+		throw new \DomainException("Ticket not found: {$id->toString()}");
+	}
+
+	public function getFreeSpacesForTicket(TicketId $id, TicketBookingsMap $map): ?int
+	{
+		$ticket = $this->getTicketById($id);
+		if ($ticket->capacity === null) {
+			return null;
+		}
+		$soldCount = $map->getStatsFor($ticket->id)->getBookedCount();
+		return max(0, $ticket->capacity - $soldCount);
 	}
 }

@@ -23,28 +23,28 @@ class PriceSummary
     }
 
     public static function fromValues(
-        int $bookingPrice,
-        int $donationAmount,
-        int $discountAmount,
-        string $currency
+        Price $bookingPrice,
+        Price $donationAmount,
+        Price $discountAmount,
+        Currency $currency
     ): self {
-        $finalPrice = max(0, $bookingPrice + $donationAmount - $discountAmount);
+        $finalPrice = max(0, $bookingPrice->toInt() + $donationAmount->toInt() - $discountAmount->toInt());
 
         return new self(
-            new Price($bookingPrice, Currency::fromCode($currency)),
-            new Price($donationAmount, Currency::fromCode($currency)),
-            new Price($discountAmount, Currency::fromCode($currency)),
-            new Price($finalPrice, Currency::fromCode($currency))
+            $bookingPrice,
+            $donationAmount,
+            $discountAmount,
+            new Price($finalPrice, $currency)
         );
     }
 
-	public static function free(string $currency): self
+	public static function free(Currency $currency): self
 	{
 		return new self(
-			new Price(0, Currency::fromCode($currency)),
-			new Price(0, Currency::fromCode($currency)),
-			new Price(0, Currency::fromCode($currency)),
-			new Price(0, Currency::fromCode($currency))
+			new Price(0, $currency),
+			new Price(0, $currency),
+			new Price(0, $currency),
+			new Price(0, $currency)
 		);
 	}
 

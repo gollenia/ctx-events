@@ -8,17 +8,17 @@ use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
-use Contexis\Events\Booking\Application\UseCases\UpdateBookingStatus;
 use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class BookingController implements RestController
 {
+    use BookingControllerHelpers;
+
     public function __construct(
         private CreateBooking $createBooking,
         private ListBookings $listBookings,
-        private UpdateBookingStatus $updateBookingStatus,
     ) {
     }
 
@@ -30,7 +30,7 @@ final class BookingController implements RestController
             [
                 'methods'             => \WP_REST_Server::READABLE,
                 'callback'            => [$this, 'listBookings'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
                 'args'                => [
                     'event_id' => ['type' => 'integer', 'required' => false],
                     'status'   => ['type' => 'array', 'required' => false, 'items' => ['type' => 'integer']],
@@ -62,7 +62,8 @@ final class BookingController implements RestController
                     'registration' => ['required' => true, 'type' => 'object'],
                     'attendees'    => ['required' => true, 'type' => 'array'],
                     'gateway'      => ['required' => true, 'type' => 'string'],
-                    'coupon_code'  => ['required' => false, 'type' => 'string'],
+                    'coupon_code'     => ['required' => false, 'type' => 'string'],
+                    'donation_amount' => ['required' => false, 'type' => 'integer'],
                 ],
             ],
         ]);
@@ -83,14 +84,7 @@ final class BookingController implements RestController
                     'attendees'    => ['required' => true, 'type' => 'array'],
                     'gateway'      => ['required' => true, 'type' => 'string'],
                     'coupon_code'  => ['required' => false, 'type' => 'string'],
-                ]),
-            ],
-            [
-                'methods'             => 'PATCH',
-                'callback'            => [$this, 'setBookingStatus'],
-                'permission_callback' => [$this, 'checkBookingAdminPermission'],
-                'args'                => array_merge($baseArgs, [
-                    'status' => ['required' => true, 'type' => 'string'],
+                    'donation_amount' => ['required' => false, 'type' => 'integer'],
                 ]),
             ],
         ]);
@@ -99,7 +93,7 @@ final class BookingController implements RestController
     public function listBookings(\WP_REST_Request $request): \WP_REST_Response
     {
         $eventIdParam = $request->get_param('event_id');
-        $statusParam = $request->get_param('status');
+        $statusParam  = $request->get_param('status');
 
         $query = new BookingListRequest(
             eventId: $eventIdParam !== null ? EventId::from((int) $eventIdParam) : null,
@@ -144,7 +138,8 @@ final class BookingController implements RestController
             registration: (array) ($params['registration'] ?? []),
             attendees: (array) ($params['attendees'] ?? []),
             gateway: (string) ($params['gateway'] ?? ''),
-            coupon_code: isset($params['coupon_code']) ? (string) $params['coupon_code'] : null,
+            couponCode: isset($params['coupon_code']) ? (string) $params['coupon_code'] : null,
+            donationAmount: isset($params['donation_amount']) ? (int) $params['donation_amount'] : 0,
             token: (string) ($params['token'] ?? ''),
         );
 
@@ -159,41 +154,5 @@ final class BookingController implements RestController
     public function updateBooking(\WP_REST_Request $request): \WP_REST_Response
     {
         return new \WP_REST_Response([], 200);
-    }
-
-    public function setBookingStatus(\WP_REST_Request $request): \WP_REST_Response
-    {
-        $uuid   = (string) $request->get_param('uuid');
-        $status = (string) $request->get_param('status');
-
-        try {
-            $this->updateBookingStatus->execute($uuid, $status);
-            return new \WP_REST_Response(null, 204);
-        } catch (\DomainException $exception) {
-            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
-        }
-    }
-
-    public function checkBookingAdminPermission(): bool
-    {
-        return current_user_can('manage_options');
-    }
-
-    public function isValidBookingUuid(string $value): bool
-    {
-        return preg_match('/^[A-Za-z0-9]{12}$/', $value) === 1;
-    }
-
-    private function getBaseArgs(): array
-    {
-        return [
-            'uuid' => [
-                'required'          => true,
-                'type'              => 'string',
-                'description'       => 'unique booking identifier',
-                'sanitize_callback' => 'sanitize_text_field',
-                'validate_callback' => [$this, 'isValidBookingUuid'],
-            ],
-        ];
     }
 }

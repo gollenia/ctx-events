@@ -125,7 +125,6 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'labels' => $labels,
             'menu_icon' => 'dashicons-calendar-alt'
         ];
-
         register_post_type(self::POST_TYPE, $event_post_type);
 		
 		register_post_status('cancelled', [

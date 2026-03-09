@@ -47,6 +47,7 @@ final readonly class Event
 		public ?BookingPolicy $bookingPolicy = null,
         public ?TicketCollection $tickets = null,
 		public ?TicketBookingsMap $ticketBookingsMap = null,
+		public bool $donationEnabled = false,
         public ?LocationId $locationId = null,
         public ?PersonId $personId = null,
         public ?ImageId $imageId = null,
@@ -66,7 +67,8 @@ final readonly class Event
 		Currency $currency,
 		EventForms $forms,
 		EventCoupons $eventCoupons,
-		int $overallCapacity
+		int $overallCapacity,
+		bool $donationEnabled
 
 	): self
 	{
@@ -77,7 +79,8 @@ final readonly class Event
 			'currency' => $currency,
 			'forms' => $forms,
 			'eventCoupons' => $eventCoupons,
-			'overallCapacity' => $overallCapacity
+			'overallCapacity' => $overallCapacity,
+			'donationEnabled' => $donationEnabled
 		]);
 	}
 

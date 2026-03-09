@@ -22,6 +22,7 @@ final readonly class PrepareBookingResponse
         public Form $bookingForm,
         public ?Form $attendeeForm,
         public bool $couponsEnabled,
+		public bool $donationEnabled,
 		public string $token, 
     ) {
     }
@@ -36,6 +37,7 @@ final readonly class PrepareBookingResponse
         Form $bookingForm,
         ?Form $attendeeForm,
         bool $couponsEnabled,
+		bool $donationEnabled,
         string $token
     ): self {
         return new self(
@@ -48,6 +50,7 @@ final readonly class PrepareBookingResponse
             bookingForm: $bookingForm,
             attendeeForm: $attendeeForm,
             couponsEnabled: $couponsEnabled,
+			donationEnabled: $donationEnabled,
 			token: $token,
         );
     }
@@ -64,6 +67,7 @@ final readonly class PrepareBookingResponse
             'bookingForm' => $this->bookingForm?->toArray(),
             'attendeeForm' => $this->attendeeForm?->toArray(),
             'hasCoupons' => $this->couponsEnabled,
+			'donationEnabled' => $this->donationEnabled,
 			'_token' => $this->token, 
         ];
     }

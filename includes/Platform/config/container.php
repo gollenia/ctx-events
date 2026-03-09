@@ -35,7 +35,7 @@ return [
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpSessionHashResolver::class),
 
 	Database::class => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpDatabase::class),
-
+	
     \Contexis\Events\Platform\Wordpress\PostTypeRegistrar::class => autowire()->constructor($posttypes),
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => autowire()->constructor($controllers),
     \Contexis\Events\Platform\Wordpress\DatabaseMigration::class => autowire()->constructor($migrations),

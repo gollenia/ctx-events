@@ -1,5 +1,5 @@
-import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
 import { isFieldVisible } from '../hooks/useFieldVisibility';
 import type { AttendeePayload, BookingFormData, TicketInfo } from '../types';
@@ -38,8 +38,6 @@ function buildInitialEntries(
 				index: globalIndex,
 				formData: existing
 					? {
-							first_name: existing.first_name,
-							last_name: existing.last_name,
 							...existing.metadata,
 						}
 					: {},
@@ -64,7 +62,8 @@ function validateEntry(
 		if (!f.required) continue;
 
 		const val = formData[f.name];
-		const isEmpty = val === undefined || val === null || val === '' || val === false;
+		const isEmpty =
+			val === undefined || val === null || val === '' || val === false;
 		if (isEmpty) {
 			errors[f.name] = __('This field is required.', 'ctx-events');
 		}
@@ -111,11 +110,7 @@ export function AttendeeSection({
 
 		const payloads: AttendeePayload[] = entries.map((e) => ({
 			ticket_id: e.ticketId,
-			first_name: String(e.formData.first_name ?? ''),
-			last_name: String(e.formData.last_name ?? ''),
-			metadata: Object.fromEntries(
-				Object.entries(e.formData).filter(([k]) => k !== 'first_name' && k !== 'last_name'),
-			),
+			metadata: e.formData,
 		}));
 
 		onNext(payloads);
@@ -138,7 +133,11 @@ export function AttendeeSection({
 			))}
 
 			<div className="booking-section__footer">
-				<button type="button" className="booking-btn booking-btn--primary" onClick={handleSubmit}>
+				<button
+					type="button"
+					className="booking-btn booking-btn--primary"
+					onClick={handleSubmit}
+				>
 					{__('Continue', 'ctx-events')}
 				</button>
 			</div>

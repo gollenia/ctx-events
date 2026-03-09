@@ -10,7 +10,8 @@ final class BankData implements \JsonSerializable
         public readonly string $accountHolder,
         public readonly string $iban,
         public readonly string $bic,
-        public readonly string $bankName
+        public readonly string $bankName,
+		public readonly ?string $reference = ''
     ) {
     }
 
@@ -32,6 +33,13 @@ final class BankData implements \JsonSerializable
 		);
     }
 
+	public function withReference(string $reference): self
+	{
+		return clone($this, [
+			'reference' => $reference
+		]);
+	}
+
 	private static function checkIban(string $iban): string
     {
         $result = $iban
@@ -49,7 +57,6 @@ final class BankData implements \JsonSerializable
 
         return $clean;
     }
-
 
 	private static function verifyChecksum(string $iban): void
     {

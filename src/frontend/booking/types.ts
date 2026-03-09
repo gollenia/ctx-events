@@ -11,7 +11,15 @@ export type FormField = {
 	width: 1 | 2 | 3 | 4 | 5 | 6;
 	description: string | null;
 	visibilityRule: VisibilityRule | null;
-	type: 'input' | 'textarea' | 'select' | 'checkbox' | 'html' | 'country' | 'date' | 'number';
+	type:
+		| 'input'
+		| 'textarea'
+		| 'select'
+		| 'checkbox'
+		| 'html'
+		| 'country'
+		| 'date'
+		| 'number';
 	// type-specific props merged in by backend
 	[key: string]: unknown;
 };
@@ -54,8 +62,6 @@ export type BookingData = {
 
 export type AttendeePayload = {
 	ticket_id: string;
-	first_name: string;
-	last_name: string;
 	metadata: Record<string, unknown>;
 };
 
@@ -69,7 +75,12 @@ export type BookingState = {
 	completedSections: Set<SectionId>;
 };
 
-export type SectionId = 'tickets' | 'attendees' | 'booking' | 'payment' | 'success';
+export type SectionId =
+	| 'tickets'
+	| 'attendees'
+	| 'booking'
+	| 'payment'
+	| 'success';
 
 export type SubmitResult =
 	| { type: 'mollie'; url: string }

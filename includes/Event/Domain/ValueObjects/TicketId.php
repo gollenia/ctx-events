@@ -10,10 +10,10 @@ final class TicketId
     ) {
     }
 
-    public static function from(?string $value): ?self
+    public static function from(string $value): self
     {
-        if ($value === null || $value === '') {
-            return null;
+        if ($value === '') {
+            throw new \DomainException('TicketId cannot be empty.');
         }
 
         return new static($value);

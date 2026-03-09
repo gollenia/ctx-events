@@ -35,7 +35,8 @@ class CouponMapper implements PostMapper
 			usageLimit: $usageLimit,
 			usageCount: $usageCount,
 			description: $post->post_content,
-			status: Status::from($post->post_status)
+			status: Status::from($post->post_status),
+			isGlobal: $post->getBool(CouponMeta::GLOBAL) ?? false,
 		);
 	}
 

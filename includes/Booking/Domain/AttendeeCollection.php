@@ -14,6 +14,19 @@ final readonly class AttendeeCollection extends Collection
 
 	public function getTicketIds(): array
     {
-        return array_map(fn(Attendee $a) => $a->ticketId->value, $this->items);
+        return array_map(fn(Attendee $a) => $a->ticketId->toString(), $this->items);
     }
+
+	public function countTicketsById(): array
+	{
+		$counts = [];
+		foreach ($this->items as $attendee) {
+			$ticketId = $attendee->ticketId->value;
+			if (!isset($counts[$ticketId])) {
+				$counts[$ticketId] = 0;
+			}
+			$counts[$ticketId]++;
+		}
+		return $counts;
+	}
 }

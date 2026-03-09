@@ -12,12 +12,15 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
+use Contexis\Events\Booking\Infrastructure\Mapper\AttendeeMapper;
 use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
+use Contexis\Events\Payment\Infrastructure\Mapper\TransactionMapper;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
+use Contexis\Events\Shared\Infrastructure\Enums\DatabaseOutput;
 
 class DbBookingRepository implements BookingRepository
 {
@@ -32,9 +35,11 @@ class DbBookingRepository implements BookingRepository
         $data = [
             'uuid'         => $booking->reference->toString(),
             'event_id'     => $booking->eventId->toInt(),
+            'spaces'       => $booking->countAttendees(),
             'email'        => $booking->email->toString(),
             'status'       => $booking->status->value,
             'final_price'  => $booking->priceSummary->finalPrice->amountCents,
+            'currency'     => $booking->priceSummary->finalPrice->currency->toString(),
             'donation'     => $booking->priceSummary->donationAmount->amountCents,
             'registration' => wp_json_encode($booking->registration->all()),
             'gateway'      => $booking->gateway,
@@ -54,7 +59,7 @@ class DbBookingRepository implements BookingRepository
     {
         $table = BookingMigration::getTableName();
         $sql = "SELECT * FROM $table WHERE id = %s";
-        $result = $this->db->getRow($this->db->prepare($sql, $id->toInt()));
+        $result = $this->db->getRow($this->db->prepare($sql, $id->toInt()), DatabaseOutput::ARRAY_ASSOC);
 
         if (!$result) {
             return null;
@@ -72,14 +77,14 @@ class DbBookingRepository implements BookingRepository
     {
         $table = BookingMigration::getTableName();
         $sql = "SELECT * FROM $table WHERE uuid = %s";
-        $result = $this->db->getRow($this->db->prepare($sql, $reference));
+        $result = $this->db->getRow($this->db->prepare($sql, $reference), DatabaseOutput::ARRAY_ASSOC);
 
         if (!$result) {
             return null;
         }
 
-        $attendees = $this->getBookingAttendees(BookingId::from($result['id']));
-        $transactions = $this->getBookingTransactions(BookingId::from($result['id']));
+        $attendees = $this->getBookingAttendees(BookingId::from((int) $result['id']));
+        $transactions = $this->getBookingTransactions(BookingId::from((int) $result['id']));
 
         $result['attendees'] = $attendees;
         $result['transactions'] = $transactions;
@@ -389,6 +394,7 @@ class DbBookingRepository implements BookingRepository
             status: (int) $row->status,
             finalPrice: (int) $row->final_price,
             donationAmount: (int) $row->donation,
+            spaces: (int) $row->spaces,
             gateway: isset($row->gateway) ? (string) $row->gateway : null,
             bookingTime: $bookingTime,
         );
@@ -421,16 +427,16 @@ class DbBookingRepository implements BookingRepository
     private function getBookingAttendees(BookingId $id): array
     {
         $table = AttendeeMigration::getTableName();
-        $sql = "SELECT * FROM $table WHERE booking_id = %d";
-        $result = $this->db->getResults($this->db->prepare($sql, $id->toInt()));
-        return $result;
+        $sql   = "SELECT * FROM $table WHERE booking_id = %d";
+        $rows  = $this->db->getResults($this->db->prepare($sql, $id->toInt()), DatabaseOutput::ARRAY_ASSOC);
+        return array_map(AttendeeMapper::map(...), $rows);
     }
 
     private function getBookingTransactions(BookingId $id): array
     {
         $table = TransactionMigration::getTableName();
-        $sql = "SELECT * FROM $table WHERE booking_id = %d";
-        $result = $this->db->getResults($this->db->prepare($sql, $id->toInt()));
-        return $result;
+        $sql   = "SELECT * FROM $table WHERE booking_id = %d";
+        $rows  = $this->db->getResults($this->db->prepare($sql, $id->toInt()), DatabaseOutput::ARRAY_ASSOC);
+        return array_map(TransactionMapper::map(...), $rows);
     }
 }
