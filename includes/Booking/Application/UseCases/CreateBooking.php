@@ -12,7 +12,7 @@ use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Signals\BookingCreated;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
-use Contexis\Events\Booking\Infrastructure\BookingReferenceGenerator;
+use Contexis\Events\Booking\Application\Contracts\ReferenceGeneratorContract;
 use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Payment\Domain\Coupon;
@@ -32,7 +32,7 @@ final class CreateBooking
         private EventRepository $eventRepository,
         private GatewayRepository $gatewayRepository,
         private TransactionRepository $transactionRepository,
-        private BookingReferenceGenerator $referenceGenerator,
+        private ReferenceGeneratorContract $referenceGenerator,
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
         private CheckTicketAvailibility $checkTicketAvailibility,

@@ -14,6 +14,7 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Event\Domain\Event;
@@ -198,10 +199,10 @@ final class FakeBookingRepository implements BookingRepository
                 email: new Email("booking{$this->sequence}@example.test"),
                 name: PersonName::from('Test', 'User ' . $this->sequence),
                 priceSummary: PriceSummary::fromValues(
-                    bookingPrice: $ticket->price->toInt(),
-                    donationAmount: 0,
-                    discountAmount: 0,
-                    currency: $ticket->price->currency->toString()
+                    bookingPrice: $ticket->price,
+                    donationAmount: new Price(0, $ticket->price->currency),
+                    discountAmount: new Price(0, $ticket->price->currency),
+                    currency: $ticket->price->currency,
                 ),
                 bookingTime: new \DateTimeImmutable('now'),
                 status: $status,
@@ -215,8 +216,7 @@ final class FakeBookingRepository implements BookingRepository
                     new Attendee(
                         ticketId: $ticket->id,
                         ticketPrice: $ticket->price,
-                        firstName: 'Attendee',
-                        lastName: (string) ($index + 1),
+                        name: PersonName::from('Attendee', (string) ($index + 1)),
                         birthDate: null,
                         metadata: ['attendee_form_id' => $attendeeFormId?->toInt()]
                     )

@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Infrastructure;
 
-use Contexis\Events\Booking\Application\Contracts\BookingUuidGenerator as BookingUuidGeneratorContract;
+use Contexis\Events\Booking\Application\Contracts\ReferenceGeneratorContract;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
-use Contexis\Events\Booking\Domain\ValueObjects\BookingUuid;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 
-final readonly class BookingReferenceGenerator
+final readonly class BookingReferenceGenerator implements ReferenceGeneratorContract
 {
     private const int UUID_LENGTH = 12;
     private const int MAX_ATTEMPTS = 10;

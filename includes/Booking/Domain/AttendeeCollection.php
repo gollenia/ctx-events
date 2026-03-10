@@ -21,7 +21,7 @@ final readonly class AttendeeCollection extends Collection
 	{
 		$counts = [];
 		foreach ($this->items as $attendee) {
-			$ticketId = $attendee->ticketId->value;
+			$ticketId = $attendee->ticketId->toString();
 			if (!isset($counts[$ticketId])) {
 				$counts[$ticketId] = 0;
 			}

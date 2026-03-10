@@ -94,6 +94,7 @@ final class FakeEventFactory
                 enabled: (bool) $metadata[EventMeta::ALLOW_COUPONS],
             ),
             overallCapacity: (int) $metadata[EventMeta::BOOKING_CAPACITY],
+            donationEnabled: (bool) ($metadata[EventMeta::DONATION_ENABLED] ?? false),
         );
 
         return $event;

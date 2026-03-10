@@ -17,7 +17,7 @@ final class CreateBookingRequest
 		public array $registration,
 		public array $attendees,
 		public string $gateway,
-		public string $token = '',
+		public ?string $token = null,
 		public ?string $couponCode = null,
 		public ?int $donationAmount = 0,
 	) {}
