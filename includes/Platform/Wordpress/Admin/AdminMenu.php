@@ -90,7 +90,6 @@ final class AdminMenu implements AdminServiceInterface
 			'contexis_events_gateways',
 			fn() => print('<div id="ctx-gateways-admin"></div>')
 		);
-
     }
 
     public function eventsPage(): string
