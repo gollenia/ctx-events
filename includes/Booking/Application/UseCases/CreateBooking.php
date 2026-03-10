@@ -10,9 +10,8 @@ use Contexis\Events\Booking\Application\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\Signals\BookingCreated;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
-use Contexis\Events\Booking\Application\Contracts\ReferenceGeneratorContract;
+use Contexis\Events\Booking\Infrastructure\BookingReferenceGenerator;
 use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Payment\Domain\Coupon;
@@ -22,7 +21,6 @@ use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 final class CreateBooking
 {
@@ -32,19 +30,18 @@ final class CreateBooking
         private EventRepository $eventRepository,
         private GatewayRepository $gatewayRepository,
         private TransactionRepository $transactionRepository,
-        private ReferenceGeneratorContract $referenceGenerator,
+        private BookingReferenceGenerator $referenceGenerator,
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
         private CheckTicketAvailibility $checkTicketAvailibility,
 		private CalculateBookingPrice $calculateBookingPrice,
 		private CouponRepository $couponRepository,
-		private EventDispatcher $eventDispatcher,
 		private BookingTokenValidator $tokenValidator
     ) {}
 
     public function execute(CreateBookingRequest $request): string
     {
-		if($request->token === null) {
+		if ($request->token === null) {
 			throw new \DomainException('Booking token is required.');
 		}
 
@@ -58,9 +55,7 @@ final class CreateBooking
         }
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($request->eventId);
-        $event = $event->withAvailabilitySnapshot($ticketBookingsMap);
-
-        $decision = $event->canBookAt($now);
+        $decision = $event->canBookAt($now, $ticketBookingsMap);
 
         if (!$decision->allowed) {
             throw new \DomainException('Event is not bookable: ' . $decision->reason->name);
@@ -69,7 +64,7 @@ final class CreateBooking
         $availableTickets = $event->tickets;
         $attendees = $this->attendeeFactory->fromPayload($request->attendees, $availableTickets);
 
-        $this->checkTicketAvailibility->perform($attendees, $ticketBookingsMap, $availableTickets,$now);
+        $this->checkTicketAvailibility->perform($attendees, $ticketBookingsMap, $availableTickets, $now);
 
         $currency = $event->currency ?? Currency::fromCode('EUR');
         $coupon = $this->resolveCoupon($request->couponCode);
@@ -113,12 +108,6 @@ final class CreateBooking
             $transaction = $gateway->initiatePayment($booking);
             $this->transactionRepository->save($transaction);
         }
-
-		$bookingCreated = new BookingCreated(
-			eventId: $request->eventId,
-			bookingId: $bookingId
-		);
-		$this->eventDispatcher->dispatch($bookingCreated);
 
         return $reference->toString();
     }
