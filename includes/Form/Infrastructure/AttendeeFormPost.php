@@ -20,7 +20,7 @@ class AttendeeFormPost extends PostType
             'show_in_rest' => true,
             'show_in_admin_bar' => true,
             'show_ui' => true,
-            'show_in_menu' => AdminMenu::MENU_SLUG,
+            'show_in_menu' => false,
             'show_in_nav_menus' => true,
             'can_export' => true,
             'exclude_from_search' => true,
