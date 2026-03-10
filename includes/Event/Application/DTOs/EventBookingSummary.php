@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\DTOs;
 
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Event\Domain\Enums\BookingDenyReason;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
@@ -28,21 +29,21 @@ final readonly class EventBookingSummary
 	) {
 	}
 
-	public static function fromEvent(Event $event, \DateTimeImmutable $now, bool $isPublic): self
+	public static function fromEvent(Event $event, \DateTimeImmutable $now, bool $isPublic, TicketBookingsMap $map): self
 	{
-		$bookingDecision = $event->canBookAt($now);
+		$bookingDecision = $event->canBookAt($now, $map);
 		$priceRange = $event->tickets?->getPriceRange($now) ?? PriceRange::empty();
-		$freeSpaces = $event->getFreeSpaces($now);
+		$freeSpaces = $event->getFreeSpaces($now, $map);
 		$canSeeSpaces = true; //!$isPublic || $event->eventViewConfig->showFreeSpaces($freeSpaces);
-		
+
 		return new self(
 			isBookable: $bookingDecision->allowed,
 			denyReason: $bookingDecision->reason,
-			approved: $event->ticketBookingsMap?->getTotalApprovedCount() ?? 0,
-			pending: $event->ticketBookingsMap?->getTotalPendingCount() ?? 0,
+			approved: $map->getTotalApprovedCount(),
+			pending: $map->getTotalPendingCount(),
 			available: $canSeeSpaces ? $freeSpaces : null,
 			totalCapacity: $event->getCapacity(),
-			lowestAvailablePrice: $event->getLowestAvailablePrice($now),
+			lowestAvailablePrice: $event->getLowestAvailablePrice($now, $map),
 			lowestPrice: $priceRange->min,
 			highestPrice: $priceRange->max,
 			bookingStart: $event->bookingPolicy?->start(),

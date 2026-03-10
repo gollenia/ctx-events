@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain;
 
-use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
-use Contexis\Events\Booking\Domain\ValueObjects\TicketSalesStats;
 use Contexis\Events\Event\Domain\Enums\BookingDenyReason;
 use Contexis\Events\Event\Domain\Enums\EventStatus;
 use Contexis\Events\Event\Domain\ValueObjects\BookingDecision;
@@ -13,14 +11,11 @@ use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\ValueObjects\EventCoupons;
 use Contexis\Events\Event\Domain\ValueObjects\EventForms;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
-use Contexis\Events\Event\Domain\ValueObjects\EventSpaces;
 use Contexis\Events\Event\Domain\ValueObjects\EventViewConfig;
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
-use Contexis\Events\Shared\Domain\ValueObjects\Status;
-use Contexis\Events\Shared\Domain\Traits\HasStatus;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
@@ -46,7 +41,6 @@ final readonly class Event
 		public ?Currency $currency = null,
 		public ?BookingPolicy $bookingPolicy = null,
         public ?TicketCollection $tickets = null,
-		public ?TicketBookingsMap $ticketBookingsMap = null,
 		public bool $donationEnabled = false,
         public ?LocationId $locationId = null,
         public ?PersonId $personId = null,
@@ -63,7 +57,6 @@ final readonly class Event
 	public function withBookings(
 		BookingPolicy $bookingPolicy,
 		TicketCollection $tickets,
-		TicketBookingsMap $ticketBookingsMap,	
 		Currency $currency,
 		EventForms $forms,
 		EventCoupons $eventCoupons,
@@ -75,19 +68,11 @@ final readonly class Event
 		return clone($this, [
 			'bookingPolicy' => $bookingPolicy,
 			'tickets' => $tickets,
-			'ticketBookingsMap' => $ticketBookingsMap,
 			'currency' => $currency,
 			'forms' => $forms,
 			'eventCoupons' => $eventCoupons,
 			'overallCapacity' => $overallCapacity,
 			'donationEnabled' => $donationEnabled
-		]);
-	}
-
-	public function withAvailabilitySnapshot(TicketBookingsMap $ticketBookingsMap): self
-	{
-		return clone($this, [
-			'ticketBookingsMap' => $ticketBookingsMap
 		]);
 	}
 
@@ -112,37 +97,36 @@ final readonly class Event
 		return $this->bookingPolicy->enabled();
 	}
 
-	public function getAvailableTickets(DateTimeImmutable $now): ?TicketCollection
+	public function getAvailableTickets(DateTimeImmutable $now, TicketBookingsMap $map): ?TicketCollection
 	{
-		if ($this->tickets === null || $this->ticketBookingsMap === null) {
+		if ($this->tickets === null) {
 			return null;
 		}
 
-		return $this->tickets->getAvailableTickets($this->ticketBookingsMap, $now);
+		return $this->tickets->getAvailableTickets($map, $now);
 	}
 
-	public function getLowestAvailablePrice(DateTimeImmutable $now): ?Price
+	public function getLowestAvailablePrice(DateTimeImmutable $now, TicketBookingsMap $map): ?Price
 	{
-		$availableTickets = $this->getAvailableTickets($now);
+		$availableTickets = $this->getAvailableTickets($now, $map);
 		if ($availableTickets === null) {
 			return null;
 		}
 
-		$lowestPrice = $availableTickets->getLowestAvailablePrice($now);
-		return $lowestPrice;
+		return $availableTickets->getLowestAvailablePrice($now);
 	}
 
-	public function getFreeSpaces(DateTimeImmutable $now): ?int
+	public function getFreeSpaces(DateTimeImmutable $now, TicketBookingsMap $map): ?int
 	{
-		if ($this->tickets === null || $this->ticketBookingsMap === null) {
+		if ($this->tickets === null) {
 			return null;
 		}
-		$ticketFreeSpaces = $this->tickets->getFreeSpaces($this->ticketBookingsMap);
-		$eventSoldTotal = $this->ticketBookingsMap->getTotalBookedCount(); 
+		$ticketFreeSpaces = $this->tickets->getFreeSpaces($map);
+		$eventSoldTotal = $map->getTotalBookedCount();
 		$eventFreeSpaces = ($this->overallCapacity === null) ? null : max(0, $this->overallCapacity - $eventSoldTotal);
 
 		if ($ticketFreeSpaces === null && $eventFreeSpaces === null) {
-			return null; 
+			return null;
 		}
 
 		if ($ticketFreeSpaces === null) return $eventFreeSpaces;
@@ -151,17 +135,16 @@ final readonly class Event
 		return min($ticketFreeSpaces, $eventFreeSpaces);
 	}
 
-	public function canBookAt(DateTimeImmutable $now, $ticketBookingsMap = null): BookingDecision
+	public function canBookAt(DateTimeImmutable $now, TicketBookingsMap $map): BookingDecision
 	{
-		$tb = $ticketBookingsMap ?? $this->ticketBookingsMap;
-		if( $this->tickets === null || $tb === null) {
+		if ($this->tickets === null) {
 			return BookingDecision::deny(BookingDenyReason::NO_TICKETS);
 		}
 		if ($this->bookingPolicy === null) {
 			return BookingDecision::deny(BookingDenyReason::DISABLED);
 		}
 
-		if($this->getFreeSpaces( $now) === 0) {
+		if ($this->getFreeSpaces($now, $map) === 0) {
 			return BookingDecision::deny(BookingDenyReason::SOLD_OUT);
 		}
 
@@ -178,5 +161,5 @@ final readonly class Event
 		return $this->endDate < $now;
 	}
 
-	
+
 }

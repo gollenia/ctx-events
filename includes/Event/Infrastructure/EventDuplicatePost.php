@@ -19,8 +19,6 @@ class EventDuplicatePost extends DuplicatePost
 		}
 
 		return !in_array($metaKey, [
-			EventMeta::CACHED_AVAILABLE,
-			EventMeta::CACHED_BOOKING_STATS,
 			EventMeta::CACHED_MIN_PRICE,
 			EventMeta::CACHED_MAX_PRICE,
 		], true);

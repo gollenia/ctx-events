@@ -14,7 +14,6 @@ use Contexis\Events\Payment\Domain\CouponRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\SessionHashResolver;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
@@ -61,7 +60,6 @@ function makeCreateBookingUseCase(
         checkTicketAvailibility: new CheckTicketAvailibility(),
         calculateBookingPrice: new CalculateBookingPrice(),
         couponRepository: $couponRepository,
-        eventDispatcher: new EventDispatcher(),
         tokenValidator: new BookingTokenValidator($tokenStore, $sessionHashResolver),
     );
 }
@@ -335,7 +333,6 @@ test('throws when event is completely sold out', function () {
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $formRepository = FakeFormRepository::empty();
@@ -377,6 +374,8 @@ test('throws when specific ticket is sold out', function () {
     // per-ticket check in CheckTicketAvailibility should reject the request.
     $event = FakeEventFactory::create(10, [
         EventMeta::BOOKING_CAPACITY => 100,
+        EventMeta::BOOKING_START => '2026-01-01 00:00:00',
+        EventMeta::BOOKING_END => '2027-01-01 00:00:00',
         EventMeta::TICKETS => [
             [
                 'ticket_id'          => $limitedTicketId,
@@ -407,7 +406,6 @@ test('throws when specific ticket is sold out', function () {
                 'ticket_form'        => 1,
             ],
         ],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $formRepository = FakeFormRepository::empty();
@@ -454,7 +452,6 @@ test('throws when ticket sales period has not started yet', function () {
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $token = tokenFor($event->id->toInt());
@@ -496,7 +493,6 @@ test('throws when ticket sales period has ended', function () {
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $token = tokenFor($event->id->toInt());
@@ -566,7 +562,6 @@ test('throws when payment gateway is not found for a paid booking', function () 
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $token = tokenFor($event->id->toInt());
@@ -610,7 +605,6 @@ test('throws when donation is submitted but event does not accept donations', fu
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
-        EventMeta::CACHED_BOOKING_STATS => [],
     ]);
 
     $token = tokenFor($event->id->toInt());

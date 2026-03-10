@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
-use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
-use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Booking\Infrastructure\WpBookingOptions;
 use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
 use Contexis\Events\Event\Domain\Event;
@@ -72,7 +70,6 @@ final class EventMapper implements PostMapper
 		$event = $event->withBookings(
 			bookingPolicy: $booking_policy,
 			tickets: self::ticketsFromArray($post->getArray(EventMeta::TICKETS, []), $currency),
-			ticketBookingsMap: TicketBookingsMap::fromArray($post->getArray(EventMeta::CACHED_BOOKING_STATS, [])),
 			currency: $currency,
 			forms: new EventForms(
                 bookingForm: FormId::from($post->getInt(EventMeta::BOOKING_FORM)),

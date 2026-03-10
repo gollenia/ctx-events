@@ -105,15 +105,10 @@ class WpEventRepository implements EventRepository, EventStatusRepository, Event
 
 	public function saveCache(EventCacheSnapshot $snapshot): void
 	{
-		
 		$postId = (int) $snapshot->eventId;
 
 		update_post_meta($postId, EventMeta::CACHED_MIN_PRICE, (int) $snapshot->minPriceAmountCents);
 		update_post_meta($postId, EventMeta::CACHED_MAX_PRICE, (int) $snapshot->maxPriceAmountCents);
-		update_post_meta($postId, EventMeta::CACHED_AVAILABLE, (int) $snapshot->availableSpaces);
-		update_post_meta($postId, EventMeta::CACHED_PENDING, (int) $snapshot->bookingStats->getTotalPendingCount());
-		update_post_meta($postId, EventMeta::CACHED_APPROVED, (int) $snapshot->bookingStats->getTotalApprovedCount());
-		update_post_meta($postId, EventMeta::CACHED_BOOKING_STATS, $snapshot->bookingStats->jsonSerialize());
 	}
 
 	public function saveStatus(Event $event): void

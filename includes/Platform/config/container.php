@@ -7,8 +7,6 @@ use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\Wordpress\WordpressSignalDispatcher;
 use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 use function DI\autowire;
 use function DI\create;

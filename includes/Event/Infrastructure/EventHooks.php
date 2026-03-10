@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
-use Contexis\Events\Event\Domain\Signals\EventAvailabilityChanged;
-use Contexis\Events\Event\Domain\Signals\EventCapacityChanged;
-use Contexis\Events\Event\Domain\Signals\EventTicketsChanged;
+use Contexis\Events\Event\Application\DTOs\EventCacheSnapshot;
+use Contexis\Events\Event\Domain\EventCacheRepository;
+use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
-use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
+use Contexis\Events\Shared\Domain\Contracts\Clock;
 
 class EventHooks
 {
@@ -24,7 +24,9 @@ class EventHooks
 	];
 
     public function __construct(
-        public SignalDispatcher $signalDispatcher,
+        private EventRepository $eventRepository,
+        private EventCacheRepository $eventCacheRepository,
+        private Clock $clock,
     ) {
     }
 
@@ -40,11 +42,24 @@ class EventHooks
             return;
         }
 
+		if (!in_array($meta_key, self::AVAILABILITY_KEYS, true)) {
+			return;
+		}
+
 		$eventId = EventId::from($post_id);
+		$event = $this->eventRepository->find($eventId);
 
-		if(in_array($meta_key, self::AVAILABILITY_KEYS, true)) {
-				$this->signalDispatcher->dispatch(new EventAvailabilityChanged($eventId));
-		};
+		if ($event === null) {
+			return;
+		}
 
+		$now = $this->clock->now();
+		$priceRange = $event->tickets?->getEnabledTickets()->getPriceRange($now);
+
+		$this->eventCacheRepository->saveCache(new EventCacheSnapshot(
+			eventId: $post_id,
+			minPriceAmountCents: $priceRange?->min?->amountCents,
+			maxPriceAmountCents: $priceRange?->max?->amountCents,
+		));
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Application\Service;
 
 use Contexis\Events\Booking\Domain\BookingRepository;
+use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Event\Application\DTOs\EventBookingSummary;
 use Contexis\Events\Event\Application\DTOs\EventResponse;
 use Contexis\Events\Event\Application\DTOs\EventResponseCollection;
@@ -53,9 +54,8 @@ final class EventResponseAssembler
 			}
 
 			if ($includes->bookings) {
-				$ticketBookingsMap = $ticketBookingsMaps[$event->id->toInt()] ?? null;
-				$event = $event->withAvailabilitySnapshot($ticketBookingsMap);
-				$bookingSummary = EventBookingSummary::fromEvent($event, $now, $userContext->isAnonymous());
+				$ticketBookingsMap = $ticketBookingsMaps[$event->id->toInt()] ?? TicketBookingsMap::empty();
+				$bookingSummary = EventBookingSummary::fromEvent($event, $now, $userContext->isAnonymous(), $ticketBookingsMap);
 			}
 		
             $items[] = EventResponse::fromDomainModel(

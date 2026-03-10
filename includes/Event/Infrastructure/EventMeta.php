@@ -30,10 +30,6 @@ class EventMeta extends MetaData
     public const BOOKING_MAILS     = '_booking_mails';
     public const COUPONS_ALLOWED   = '_booking_coupons';
 	public const COUPONS_ENABLED = '_coupons_enabled';
-    public const CACHED_AVAILABLE  = '_cached_available';
-	public const CACHED_PENDING = '_cached_pending';
-	public const CACHED_APPROVED = '_cached_approved';
-    public const CACHED_BOOKING_STATS = '_cached_booking_stats';
     public const CACHED_MIN_PRICE = '_cached_min_price';
     public const CACHED_MAX_PRICE = '_cached_max_price';
     public const GATEWAYS_EXCLUDED = '_gateways_excluded';
@@ -101,7 +97,18 @@ class EventMeta extends MetaData
         self::BOOKING_ENABLED  => ['type' => 'boolean'],
         self::BOOKING_CAPACITY => ['type' => 'integer'],
 		self::COUPONS_ENABLED => ['type' => 'boolean', 'default' => true],
-		self::VIEW_CONFIG => ['type' => 'array'],
+		self::VIEW_CONFIG => [
+            'type' => 'object',
+            'show_in_rest' => [
+                'schema' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'showFreeSpacesThreshold' => ['type' => 'integer', 'default' => 0],
+                        'showFreeSpaces' => ['type' => 'boolean', 'default' => true],
+                    ],
+                ],
+            ],
+        ],
         self::DONATION_ENABLED => ['type' => 'boolean'],
         self::RECURRENCE_ID    => ['type' => 'integer'],
         self::IS_DETACHED      => ['type' => 'boolean'],
@@ -126,28 +133,6 @@ class EventMeta extends MetaData
             ],
         ],
 
-        self::CACHED_AVAILABLE => ['type' => 'integer', 'readonly' => true, 'show_in_rest' => false], 
-		self::CACHED_PENDING => ['type' => 'integer', 'readonly' => true, 'show_in_rest' => false],
-		self::CACHED_APPROVED => ['type' => 'integer', 'readonly' => true, 'show_in_rest' => false],
-        self::CACHED_BOOKING_STATS => [
-			'type'         => 'array',
-			'readonly' => true,
-			'show_in_rest' => [
-				'schema' => [
-					'type'  => 'array',
-					'items' => [
-						'type'       => 'object',
-						'properties' => [
-							'pending'  => ['type' => 'integer'],
-							'approved' => ['type' => 'integer'],
-							'canceled' => ['type' => 'integer'],
-							'expired'  => ['type' => 'integer'],
-						],
-					],
-				],
-			],
-			'show_in_rest' => false
-		],
 		self::CACHED_MIN_PRICE => ['type' => 'integer', 'readonly' => true, 'show_in_rest' => false],
 		self::CACHED_MAX_PRICE => ['type' => 'integer', 'readonly' => true, 'show_in_rest' => false],
 		self::GATEWAYS_EXCLUDED => [

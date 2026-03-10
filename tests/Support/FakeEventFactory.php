@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
-use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\Enums\EventStatus;
 use Contexis\Events\Event\Domain\Ticket;
@@ -84,7 +83,6 @@ final class FakeEventFactory
                 event_start: $startDate,
             ),
             tickets: self::ticketsFromMeta((array) $metadata[EventMeta::TICKETS], $currency),
-            ticketBookingsMap: TicketBookingsMap::fromArray((array) $metadata[EventMeta::CACHED_BOOKING_STATS]),
             currency: $currency,
             forms: new EventForms(
                 bookingForm: FormId::from((int) $metadata[EventMeta::BOOKING_FORM]),
@@ -138,14 +136,6 @@ final class FakeEventFactory
                     'ticket_end' => $bookingEnd->format('Y-m-d H:i:s'),
                     'ticket_order' => 1,
                     'ticket_form' => fake()->numberBetween(1, 50),
-                ],
-            ],
-            EventMeta::CACHED_BOOKING_STATS => [
-                $ticketId => [
-                    'pending' => 2,
-                    'approved' => 4,
-                    'canceled' => 1,
-                    'expired' => 0,
                 ],
             ],
         ];
