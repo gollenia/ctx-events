@@ -1,6 +1,6 @@
 import domReady from '@wordpress/dom-ready';
 import './style.scss';
-import { initBookingsAdmin } from './bookings/index.js';
+import { initBookingsAdmin } from './bookings/index.tsx';
 import { initEventsList } from './events/index.tsx';
 import { initFormList } from './forms/index.tsx';
 import { initGatewayAdmin } from './gateways/index.tsx';
