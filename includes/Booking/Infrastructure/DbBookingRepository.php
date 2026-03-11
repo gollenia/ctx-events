@@ -10,6 +10,7 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
 use Contexis\Events\Booking\Infrastructure\Mapper\AttendeeMapper;
@@ -19,6 +20,10 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\Enums\DatabaseOutput;
 
@@ -38,9 +43,7 @@ class DbBookingRepository implements BookingRepository
             'spaces'       => $booking->countAttendees(),
             'email'        => $booking->email->toString(),
             'status'       => $booking->status->value,
-            'final_price'  => $booking->priceSummary->finalPrice->amountCents,
-            'currency'     => $booking->priceSummary->finalPrice->currency->toString(),
-            'donation'     => $booking->priceSummary->donationAmount->amountCents,
+            'price_summary'  => wp_json_encode($booking->priceSummary->toArray()),
             'registration' => wp_json_encode($booking->registration->all()),
             'gateway'      => $booking->gateway,
             'coupon_id'    => $booking->coupon?->id?->toInt(),
@@ -117,11 +120,6 @@ class DbBookingRepository implements BookingRepository
         $rows = $this->db->getResults($mainSql);
         $items = array_map([$this, 'mapRowToListItem'], $rows);
 
-        if ($items !== []) {
-            $bookingIds = array_map(static fn (BookingListItem $item): int => $item->id, $items);
-            $items = $this->enrichWithTicketBreakdown($items, $bookingIds);
-        }
-
         $countSql = $params !== []
             ? $this->db->prepare("SELECT COUNT(*) FROM {$bookingTable} b {$whereSql}", ...$params)
             : "SELECT COUNT(*) FROM {$bookingTable} b {$whereSql}";
@@ -154,6 +152,32 @@ class DbBookingRepository implements BookingRepository
     {
         $table = BookingMigration::getTableName();
         $this->db->delete($table, ['id' => $id->toInt()]);
+    }
+
+    public function update(Booking $booking): void
+    {
+        $table         = BookingMigration::getTableName();
+        $attendeeTable = AttendeeMigration::getTableName();
+
+        $this->db->update($table, [
+            'registration' => wp_json_encode($booking->registration->all()),
+            'gateway'      => $booking->gateway,
+            'donation'     => $booking->priceSummary->donationAmount->amountCents,
+            'notes'        => wp_json_encode($booking->notes->toArray()),
+            'spaces'       => $booking->countAttendees(),
+        ], ['id' => $booking->id->toInt()]);
+
+        $this->db->delete($attendeeTable, ['booking_id' => $booking->id->toInt()]);
+
+        foreach ($booking->attendees as $attendee) {
+            $this->db->insert($attendeeTable, [
+                'booking_id' => $booking->id->toInt(),
+                'ticket_id'  => $attendee->ticketId->toString(),
+                'first_name' => $attendee->name?->firstName,
+                'last_name'  => $attendee->name?->lastName,
+                'metadata'   => wp_json_encode($attendee->metadata),
+            ]);
+        }
     }
 
     public function updateStatus(BookingId $id, BookingStatus $status): void
@@ -332,46 +356,13 @@ class DbBookingRepository implements BookingRepository
         if ($query->search !== null && $query->search !== '') {
             global $wpdb; // @phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
             $escaped = $wpdb->esc_like($query->search);
-            $conditions[] = '(b.email LIKE %s OR b.registration LIKE %s)';
+            $conditions[] = '(b.email LIKE %s OR b.registration LIKE %s OR b.uuid LIKE %s)';
+            $params[] = '%' . $escaped . '%';
             $params[] = '%' . $escaped . '%';
             $params[] = '%' . $escaped . '%';
         }
 
         return [$conditions, $params];
-    }
-
-    /**
-     * @param BookingListItem[] $items
-     * @param int[]             $bookingIds
-     * @return BookingListItem[]
-     */
-    private function enrichWithTicketBreakdown(array $items, array $bookingIds): array
-    {
-        $attendeeTable = AttendeeMigration::getTableName();
-        $placeholders = implode(', ', array_fill(0, count($bookingIds), '%d'));
-
-        $sql = $this->db->prepare(
-            "SELECT booking_id, ticket_id, COUNT(*) AS count
-            FROM {$attendeeTable}
-            WHERE booking_id IN ({$placeholders})
-            GROUP BY booking_id, ticket_id",
-            ...$bookingIds
-        );
-
-        $rows = $this->db->getResults($sql);
-
-        $breakdownByBooking = [];
-        foreach ($rows as $row) {
-            $breakdownByBooking[(int) $row->booking_id][(string) $row->ticket_id] = (int) $row->count;
-        }
-
-        return array_map(
-            static fn (BookingListItem $item): BookingListItem =>
-                isset($breakdownByBooking[$item->id])
-                    ? $item->withTicketBreakdown($breakdownByBooking[$item->id])
-                    : $item,
-            $items
-        );
     }
 
     private function mapRowToListItem(object $row): BookingListItem
@@ -382,18 +373,16 @@ class DbBookingRepository implements BookingRepository
 
         $bookingTime = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $row->date)
             ?: new \DateTimeImmutable($row->date);
-
+		
         return new BookingListItem(
             id: (int) $row->id,
             reference: (string) $row->uuid,
-            email: (string) $row->email,
-            firstName: $firstName,
-            lastName: $lastName,
-            eventId: (int) $row->event_id,
+            email: Email::tryFrom((string) $row->email),
+            name: PersonName::from($firstName, $lastName),
+            eventId: EventId::from((int) $row->event_id),
             eventTitle: (string) ($row->event_title ?? ''),
             status: (int) $row->status,
-            finalPrice: (int) $row->final_price,
-            donationAmount: (int) $row->donation,
+            priceSummary: $row->price_summary ? PriceSummary::fromArray(json_decode($row->price_summary, true)) : PriceSummary::free(),
             spaces: (int) $row->spaces,
             gateway: isset($row->gateway) ? (string) $row->gateway : null,
             bookingTime: $bookingTime,

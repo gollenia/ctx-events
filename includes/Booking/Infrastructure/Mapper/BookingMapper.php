@@ -6,6 +6,8 @@ namespace Contexis\Events\Booking\Infrastructure\Mapper;
 
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingNote;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
@@ -25,11 +27,19 @@ final class BookingMapper implements DatabaseMapper
 	{
 		$registration = is_string($data['registration']) ? json_decode($data['registration'], true) : ($data['registration'] ?? []);
 
+		$rawNotes = is_string($data['notes'] ?? null)
+			? json_decode($data['notes'], true)
+			: ($data['notes'] ?? []);
+		$notes = new BookingNotesCollection(...array_map(
+			static fn(array $item): BookingNote => BookingNote::fromArray($item),
+			$rawNotes ?? [],
+		));
+
 		return new Booking(
 			reference: BookingReference::fromString($data['uuid']),
 			email: Email::tryFrom($data['email']),
 			name: PersonName::from($data['first_name'] ?? '', $data['last_name'] ?? ''),
-			priceSummary: self::priceMapper($data),
+			priceSummary: $data['price_summary'] ? PriceSummary::fromArray($data['price_summary']) : PriceSummary::free(),
 			bookingTime: \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date'])
 				?: new \DateTimeImmutable($data['date']),
 			status: BookingStatus::from((int) $data['status']),
@@ -40,17 +50,9 @@ final class BookingMapper implements DatabaseMapper
 			transactions: TransactionCollection::fromArray($data['transactions'] ?? []),
 			eventId: EventId::from((int) $data['event_id']),
 			id: BookingId::from((int) $data['id']),
+			notes: $notes,
 		);
 	}
 
-	private static function priceMapper(array $data): PriceSummary
-	{
-		$currency = Currency::fromCode($data['currency']);
-		return PriceSummary::fromValues(
-			bookingPrice: Price::from((int) $data['booking_price'], $currency),
-			donationAmount: Price::from((int) $data['donation_amount'], $currency),
-			discountAmount: Price::from((int) $data['discount_amount'], $currency),
-			currency: $currency
-		);
-	}
+
 }

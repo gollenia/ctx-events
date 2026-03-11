@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final readonly class AttendeeCollection extends Collection
 {

@@ -5,21 +5,25 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Presentation\Resources;
 
 use Contexis\Events\Booking\Application\DTOs\BookingListItem;
+use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Presentation\Contracts\Resource;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript (name: 'BookingListItem')]
 final readonly class BookingListItemResource implements Resource
 {
     public function __construct(
         public string $reference,
-        public string $email,
-        public array $name,
+        public Email $email,
+        public PersonName $name,
         public array $event,
         public int $status,
-        public int $price,
-        public int $donation,
+        public PriceSummary $priceSummary,
         public int $spaces,
         public ?array $gateway,
-        public array $tickets,
         public string $date,
     ) {
     }
@@ -30,22 +34,15 @@ final readonly class BookingListItemResource implements Resource
             ? ['slug' => $item->gateway, 'name' => $item->gatewayName ?? $item->gateway]
             : null;
 
-        $tickets = [];
-        foreach ($item->ticketBreakdown as $ticketId => $count) {
-            $tickets[] = ['ticketId' => $ticketId, 'count' => $count];
-        }
-
         return new self(
             reference: $item->reference,
             email: $item->email,
-            name: ['first' => $item->firstName, 'last' => $item->lastName],
-            event: ['id' => $item->eventId, 'title' => $item->eventTitle],
+            name: $item->name,
+            event: ['id' => $item->eventId->toInt(), 'title' => $item->eventTitle],
             status: $item->status,
-            price: $item->finalPrice,
-            donation: $item->donationAmount,
+            priceSummary: $item->priceSummary,
             spaces: $item->spaces,
             gateway: $gateway,
-            tickets: $tickets,
             date: $item->bookingTime->format(DATE_ATOM),
         );
     }
@@ -55,15 +52,13 @@ final readonly class BookingListItemResource implements Resource
         return [
 
             'reference' => $this->reference,
-            'email'     => $this->email,
-            'name'      => $this->name,
+            'email'     => $this->email->toString(),
+            'name'      => $this->name->toArray(),
             'event'     => $this->event,
             'status'    => $this->status,
-            'price'     => $this->price,
-            'donation'  => $this->donation,
+            'priceSummary' => $this->priceSummary->toArray(),
             'spaces'    => $this->spaces,
             'gateway'   => $this->gateway,
-            'tickets'   => $this->tickets,
             'date'      => $this->date,
         ];
     }

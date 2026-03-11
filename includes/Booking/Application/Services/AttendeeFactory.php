@@ -27,6 +27,9 @@ final class AttendeeFactory
             $ticketId = TicketId::from($item['ticket_id'] ?? '');
 
             $ticket = $tickets->getTicketById($ticketId);
+			if ($ticket === null) {
+                throw new \DomainException("Ticket with ID {$ticketId->toString()} not found.");
+            }
 
 			$metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
 
@@ -36,7 +39,7 @@ final class AttendeeFactory
             $attendees[] = new Attendee(
                 ticketId: $ticketId,
                 ticketPrice: $ticket->price,
-                name: $personName ? $personName : null,
+                name: $personName,
 				birthDate: $birthDate,
                 metadata: $metadata,
             );

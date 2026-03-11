@@ -6,7 +6,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
-use Contexis\Events\Booking\Application\Services\CalculateBookingPrice;
+use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
@@ -73,7 +73,7 @@ final class CreateBooking
         $priceSummary = $this->calculateBookingPrice->perform(
 			availableTickets: $availableTickets,
 			coupon: $coupon,
-			attendees: $attendees->toArray(),
+			attendees: $attendees,
 			donation: $donation,
 			currency: $currency,
 		);

@@ -6,7 +6,7 @@ namespace Contexis\Events\Booking\Domain\ValueObjects;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
-final readonly class RegistrationData implements \JsonSerializable
+final readonly class RegistrationData
 {
 	private array $data;
     public function __construct(
@@ -47,9 +47,4 @@ final readonly class RegistrationData implements \JsonSerializable
 		}
 		return new PersonName($first_name, $last_name);
 	}
-
-    public function jsonSerialize(): array
-    {
-        return $this->data;
-    }
 }

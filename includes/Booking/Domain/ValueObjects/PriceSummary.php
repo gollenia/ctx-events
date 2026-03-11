@@ -38,8 +38,9 @@ class PriceSummary
         );
     }
 
-	public static function free(Currency $currency): self
+	public static function free(): self
 	{
+		$currency = Currency::fromCode('EUR');
 		return new self(
 			new Price(0, $currency),
 			new Price(0, $currency),
@@ -48,20 +49,22 @@ class PriceSummary
 		);
 	}
 
-	public static function fromDatabase(
-		int $bookingPrice,
-        int $donationAmount,
-        int $discountAmount,
-		int $finalPrice,
-        string $currency
-	): self
+	public static function fromArray(array $data): self
 	{
+		$currency = Currency::fromCode($data['currency']);
 		return new self(
-			new Price($bookingPrice, Currency::fromCode($currency)),
-			new Price($donationAmount, Currency::fromCode($currency)),
-			new Price($discountAmount, Currency::fromCode($currency)),
-			new Price($finalPrice, Currency::fromCode($currency))
+			Price::from((int) $data['bookingPrice'], $currency),
+			Price::from((int) $data['donationAmount'], $currency),
+			Price::from((int) $data['discountAmount'], $currency),
+			Price::from((int) $data['finalPrice'], $currency)
 		);
+	}
+
+	public function withDonation(Price $donationAmount): self
+	{
+		return clone($this, [
+			'donationAmount' => $donationAmount
+		]);
 	}
 
 	public function toArray(): array

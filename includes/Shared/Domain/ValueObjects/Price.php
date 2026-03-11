@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 
 #[TypeScript(name: 'Price')]
 final class Price
 {
     public function __construct(
         public readonly int $amountCents,
+		#[LiteralTypeScriptType("string")]
         public readonly Currency $currency
     ) {
         if ($amountCents < 0) {

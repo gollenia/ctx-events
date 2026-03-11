@@ -1,26 +1,27 @@
 import { formatPrice } from '@events/i18n';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { drafts, notAllowed, pending, published, swatch } from '@wordpress/icons';
-import type { DataFieldConfig, DataFilterElement } from '../../shared/datatable/types';
-
-type Booking = {
-	reference: string;
-	email: string;
-	name: { first: string; last: string };
-	event: { id: number; title: string };
-	status: number;
-	price: number;
-	donation: number;
-	spaces: number;
-	gateway: { slug: string; name: string } | null;
-	tickets: Array<{ ticketId: string; count: number }>;
-	date: string;
-};
+import {
+	drafts,
+	notAllowed,
+	pending,
+	published,
+	swatch,
+} from '@wordpress/icons';
+import type { BookingListItem } from 'src/types/types';
+import type {
+	DataFieldConfig,
+	DataFilterElement,
+} from '../../shared/datatable/types';
 
 type FilterOptions = {
 	events: Array<DataFilterElement<string>>;
 	gateways: Array<DataFilterElement<string>>;
+};
+
+type FieldCallbacks = {
+	onEventClick: (eventId: string) => void;
+	onReferenceClick: (reference: string) => void;
 };
 
 const STATUS_ICONS: Record<number, typeof published> = {
@@ -40,23 +41,48 @@ const STATUS_LABELS: Record<number, string> = {
 };
 
 const currency = (): string =>
-	(window as any).eventBlocksLocalization?.currency ?? 'EUR';
+	(window as any).eventBlocksLocalization?.currency;
 
-export const createFields = (options: FilterOptions): Array<DataFieldConfig> => [
+export const createFields = (
+	options: FilterOptions,
+	callbacks: FieldCallbacks,
+): Array<DataFieldConfig> => [
+	{
+		id: 'reference',
+		label: __('Reference', 'ctx-events'),
+		enableHiding: false,
+		render: (booking: BookingListItem) => (
+			<a
+				href="#"
+				onClick={(event) => {
+					event.preventDefault();
+					callbacks.onReferenceClick(booking.reference);
+				}}
+			>
+				{booking.reference}
+			</a>
+		),
+	},
 	{
 		id: 'name',
 		label: __('Name', 'ctx-events'),
 		enableHiding: false,
-		render: (booking: Booking) => {
-			const full = `${booking.name.first} ${booking.name.last}`.trim();
+		render: (booking: BookingListItem) => {
+			const full = `${booking.name.firstName} ${booking.name.lastName}`.trim();
 			return <strong>{full || '—'}</strong>;
 		},
 	},
 	{
 		id: 'event',
 		label: __('Event', 'ctx-events'),
-		render: (booking: Booking) => (
-			<a href={`/wp-admin/post.php?post=${booking.event.id}&action=edit`}>
+		render: (booking: BookingListItem) => (
+			<a
+				href="#"
+				onClick={(event) => {
+					event.preventDefault();
+					callbacks.onEventClick(String(booking.event.id));
+				}}
+			>
 				{booking.event.title || '—'}
 			</a>
 		),
@@ -71,7 +97,7 @@ export const createFields = (options: FilterOptions): Array<DataFieldConfig> => 
 		id: 'date',
 		label: __('Date', 'ctx-events'),
 		enableSorting: true,
-		getValue: (booking: Booking) =>
+		getValue: (booking: BookingListItem) =>
 			new Date(booking.date).toLocaleString(undefined, {
 				dateStyle: 'medium',
 				timeStyle: 'short',
@@ -80,14 +106,14 @@ export const createFields = (options: FilterOptions): Array<DataFieldConfig> => 
 	{
 		id: 'spaces',
 		label: __('Spaces', 'ctx-events'),
-		getValue: (booking: Booking) => booking.spaces,
+		getValue: (booking: BookingListItem) => booking.spaces,
 	},
 	{
 		id: 'status',
 		label: __('Status', 'ctx-events'),
 		enableSorting: true,
 		isVisible: false,
-		render: (booking: Booking) => {
+		render: (booking: BookingListItem) => {
 			const icon = STATUS_ICONS[booking.status];
 			const label = STATUS_LABELS[booking.status] ?? String(booking.status);
 			return (
@@ -112,17 +138,17 @@ export const createFields = (options: FilterOptions): Array<DataFieldConfig> => 
 	{
 		id: 'email',
 		label: __('E-Mail', 'ctx-events'),
-		getValue: (booking: Booking) => booking.email,
+		getValue: (booking: BookingListItem) => booking.email,
 	},
 	{
 		id: 'price',
 		label: __('Price', 'ctx-events'),
-		getValue: (booking: Booking) => formatPrice(booking.price / 100, currency()),
+		getValue: (booking: BookingListItem) => formatPrice(booking.price),
 	},
 	{
 		id: 'gateway',
 		label: __('Gateway', 'ctx-events'),
-		getValue: (booking: Booking) => booking.gateway?.name ?? '—',
+		getValue: (booking: BookingListItem) => booking.gateway?.name ?? '—',
 		filterBy: {
 			id: 'gateway',
 			label: __('All Gateways', 'ctx-events'),

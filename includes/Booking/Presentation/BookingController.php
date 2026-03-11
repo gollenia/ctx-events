@@ -6,9 +6,14 @@ namespace Contexis\Events\Booking\Presentation;
 
 use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
+use Contexis\Events\Booking\Application\DTOs\UpdateBookingRequest;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
+use Contexis\Events\Booking\Application\UseCases\EditBooking;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
+use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
+use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
+use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
@@ -19,6 +24,8 @@ final class BookingController implements RestController
     public function __construct(
         private CreateBooking $createBooking,
         private ListBookings $listBookings,
+        private EditBooking $editBooking,
+        private UpdateBooking $updateBooking,
     ) {
     }
 
@@ -80,11 +87,11 @@ final class BookingController implements RestController
                 'callback'            => [$this, 'updateBooking'],
                 'permission_callback' => [$this, 'checkBookingAdminPermission'],
                 'args'                => array_merge($baseArgs, [
-                    'registration' => ['required' => true, 'type' => 'object'],
-                    'attendees'    => ['required' => true, 'type' => 'array'],
-                    'gateway'      => ['required' => true, 'type' => 'string'],
-                    'coupon_code'  => ['required' => false, 'type' => 'string'],
-                    'donation_amount' => ['required' => false, 'type' => 'integer'],
+                    'registration'  => ['required' => true, 'type' => 'object'],
+                    'attendees'     => ['required' => true, 'type' => 'array'],
+                    'notes'         => ['required' => true, 'type' => 'array'],
+                    'gateway'       => ['required' => false, 'type' => 'string'],
+                    'donation_cents' => ['required' => false, 'type' => 'integer', 'default' => 0],
                 ]),
             ],
         ]);
@@ -126,7 +133,14 @@ final class BookingController implements RestController
 
     public function editBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return new \WP_REST_Response([], 200);
+        $userContext = \Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory::createFromCurrentUser();
+        $detail = $this->editBooking->execute((string) $request->get_param('uuid'), $userContext);
+
+        if ($detail === null) {
+            return new \WP_REST_Response(['message' => 'Booking not found.'], 404);
+        }
+
+        return new \WP_REST_Response(EditBookingResource::fromDTO($detail), 200);
     }
 
     public function createBooking(\WP_REST_Request $request): \WP_REST_Response
@@ -153,6 +167,22 @@ final class BookingController implements RestController
 
     public function updateBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return new \WP_REST_Response([], 200);
+        $updateRequest = new UpdateBookingRequest(
+            uuid: (string) $request->get_param('uuid'),
+            registration: (array) $request->get_param('registration'),
+            attendees: (array) $request->get_param('attendees'),
+            donationCents: (int) $request->get_param('donation_cents'),
+            notes: (array) $request->get_param('notes'),
+            gateway: $request->get_param('gateway') !== null
+                ? (string) $request->get_param('gateway')
+                : null,
+        );
+
+        try {
+            $this->updateBooking->execute($updateRequest);
+            return new \WP_REST_Response(null, 204);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
     }
 }

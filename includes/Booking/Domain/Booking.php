@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Domain;
 
 use Contexis\Events\Booking\Domain\ValueObjects\BookingCode;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
@@ -39,6 +40,7 @@ final readonly class Booking
         public ?TransactionCollection $transactions,
         public EventId $eventId,
         public ?BookingId $id = null,
+        public BookingNotesCollection $notes = new BookingNotesCollection(),
     ) {
     }
 
@@ -88,5 +90,21 @@ final readonly class Booking
 	public function countAttendees(): int
 	{
 		return count($this->attendees);
+	}
+
+	public function update(
+		RegistrationData $registration,
+		AttendeeCollection $attendees,
+		string $gateway,
+		BookingNotesCollection $notes,
+		PriceSummary $priceSummary,
+	): self {
+		return clone($this, [
+			'registration' => $registration,
+			'attendees' => $attendees,
+			'gateway' => $gateway,
+			'notes' => $notes,
+			'priceSummary' => $priceSummary,
+		]);
 	}
 }

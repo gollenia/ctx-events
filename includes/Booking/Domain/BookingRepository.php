@@ -18,6 +18,8 @@ interface BookingRepository
 
     public function save(Booking $booking): BookingId;
 
+    public function update(Booking $booking): void;
+
     public function search(BookingListRequest $query): BookingListResponse;
 
     public function delete(BookingId $id): void;

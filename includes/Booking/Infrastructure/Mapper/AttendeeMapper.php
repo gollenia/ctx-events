@@ -21,12 +21,19 @@ final class AttendeeMapper
             $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $metadata['birth_date']) ?: null;
         }
 
+        $firstName = $metadata['first_name'] ?? null;
+        $lastName  = $metadata['last_name'] ?? null;
+        $name      = ($firstName !== null && $firstName !== '') || ($lastName !== null && $lastName !== '')
+            ? new PersonName((string) $firstName, (string) $lastName)
+            : null;
+
         return new Attendee(
-            ticketId: TicketId::from($row['ticket_id']),
+            ticketId:    TicketId::from($row['ticket_id']),
             ticketPrice: Price::from(0, Currency::fromCode('EUR')),
-            name: isset($row['first_name'], $row['last_name']) ? new PersonName($row['first_name'], $row['last_name']) : null,
-            birthDate: $birthDate,
-            metadata: $metadata,
+            name:        $name,
+            birthDate:   $birthDate,
+            metadata:    $metadata,
         );
     }
+
 }

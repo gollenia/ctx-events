@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Booking\Application\Services;
+namespace Contexis\Events\Booking\Domain\Services;
 
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
@@ -17,7 +17,7 @@ final class CalculateBookingPrice
 	public function perform(
 		TicketCollection $availableTickets,
 	    ?Coupon $coupon,
-		array $attendees,
+		AttendeeCollection $attendees,
 		?Price $donation,
 		Currency $currency
 	): PriceSummary

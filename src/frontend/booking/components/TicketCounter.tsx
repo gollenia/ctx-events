@@ -1,3 +1,4 @@
+import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { TicketInfo } from '../types';
 
@@ -6,13 +7,6 @@ type Props = {
 	count: number;
 	onChange: (count: number) => void;
 };
-
-function formatPrice(cents: number, currency: string): string {
-	return new Intl.NumberFormat(document.documentElement.lang || 'de-DE', {
-		style: 'currency',
-		currency,
-	}).format(cents / 100);
-}
 
 export function TicketCounter({ ticket, count, onChange }: Props) {
 	const max = ticket.booking_limit ?? ticket.ticket_limit_per_booking ?? 10;
@@ -32,7 +26,10 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 				<span className="booking-ticket__price">
 					{ticket.price_in_cents === 0
 						? __('Free', 'ctx-events')
-						: formatPrice(ticket.price_in_cents, ticket.currency)}
+						: formatPrice({
+								amountCents: ticket.price_in_cents,
+								currency: ticket.currency,
+							})}
 				</span>
 			</div>
 			<div className="booking-ticket__counter">

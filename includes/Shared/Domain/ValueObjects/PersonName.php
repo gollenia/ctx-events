@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript(name: 'PersonName')]
 final class PersonName
 {
     public function __construct(
@@ -38,4 +40,14 @@ final class PersonName
     {
         return $this->getFullName();
     }
+
+	public function toArray(): array
+	{
+		return [
+			'firstName' => $this->firstName,
+			'lastName' => $this->lastName,
+			'prefix' => $this->prefix,
+			'suffix' => $this->suffix,
+		];
+	}
 }

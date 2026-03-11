@@ -1,3 +1,4 @@
+import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { TicketInfo } from '../types';
 
@@ -6,20 +7,16 @@ type Props = {
 	ticketCounts: Record<string, number>;
 };
 
-function formatPrice(cents: number, currency: string): string {
-	return new Intl.NumberFormat(document.documentElement.lang || 'de-DE', {
-		style: 'currency',
-		currency,
-	}).format(cents / 100);
-}
-
 export function PriceSummary({ tickets, ticketCounts }: Props) {
 	const lines = tickets.filter((t) => (ticketCounts[t.id] ?? 0) > 0);
 
 	if (lines.length === 0) return null;
 
 	const currency = lines[0]?.currency ?? 'EUR';
-	const total = lines.reduce((sum, t) => sum + t.price_in_cents * (ticketCounts[t.id] ?? 0), 0);
+	const total = lines.reduce(
+		(sum, t) => sum + t.price_in_cents * (ticketCounts[t.id] ?? 0),
+		0,
+	);
 
 	return (
 		<div className="booking-price-summary">
@@ -33,15 +30,22 @@ export function PriceSummary({ tickets, ticketCounts }: Props) {
 						<span className="booking-price-summary__amount">
 							{ticket.price_in_cents === 0
 								? __('Free', 'ctx-events')
-								: formatPrice(ticket.price_in_cents * count, currency)}
+								: formatPrice({
+										amountCents: ticket.price_in_cents * count,
+										currency,
+									})}
 						</span>
 					</div>
 				);
 			})}
 			<div className="booking-price-summary__total">
-				<span className="booking-price-summary__label">{__('Total', 'ctx-events')}</span>
+				<span className="booking-price-summary__label">
+					{__('Total', 'ctx-events')}
+				</span>
 				<span className="booking-price-summary__amount">
-					{total === 0 ? __('Free', 'ctx-events') : formatPrice(total, currency)}
+					{total === 0
+						? __('Free', 'ctx-events')
+						: formatPrice(total, currency)}
 				</span>
 			</div>
 		</div>
