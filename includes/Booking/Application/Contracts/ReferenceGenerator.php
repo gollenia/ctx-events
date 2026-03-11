@@ -5,7 +5,7 @@ namespace Contexis\Events\Booking\Application\Contracts;
 
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 
-interface ReferenceGeneratorContract
+interface ReferenceGenerator
 {
-    public function create(): BookingReference;
+    public function create(string $prefix = '', string $suffix = ''): BookingReference;
 }

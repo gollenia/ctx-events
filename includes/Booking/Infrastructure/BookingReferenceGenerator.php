@@ -4,34 +4,35 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Infrastructure;
 
-use Contexis\Events\Booking\Application\Contracts\ReferenceGeneratorContract;
+use Contexis\Events\Booking\Application\Contracts\ReferenceGenerator;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 
-final readonly class BookingReferenceGenerator implements ReferenceGeneratorContract
+final readonly class BookingReferenceGenerator implements ReferenceGenerator
 {
-    private const int UUID_LENGTH = 12;
+    private const int UUID_LENGTH = 6;
     private const int MAX_ATTEMPTS = 10;
-    private const string ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    private const string ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
     public function __construct(private Database $database)
     {
     }
 
 
-    public function create(): BookingReference
+    public function create(string $prefix = '', string $suffix = ''): BookingReference
     {
         for ($attempt = 0; $attempt < self::MAX_ATTEMPTS; $attempt++) {
-            $uuid = BookingReference::fromString($this->generateCandidate());
+			$code = $this->generateCandidate();
+            $reference = BookingReference::fromParts($code, $prefix, $suffix);
 
-            if ($this->exists($uuid->toString())) {
+            if ($this->exists($reference->toString())) {
                 continue;
             }
 
-            return $uuid;
+            return $reference;
         }
 
-        throw new \RuntimeException('Unable to generate a unique booking UUID after multiple attempts.');
+        throw new \RuntimeException('Unable to generate a unique booking reference after multiple attempts.');
     }
 
     private function generateCandidate(): string
