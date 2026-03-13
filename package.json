@@ -3,8 +3,9 @@
 	"name": "events",
 	"description": "A WordPress plugin to manage events.",
 	"scripts": {
-		"build": "wp-scripts build --config webpack.config.js",
-		"start": "wp-scripts start --config webpack.config.js",
+		"ts:generate": "php bin/typescript-transformer.php",
+		"build": "npm run ts:generate && wp-scripts build --config webpack.config.js",
+		"start": "npm run ts:generate && wp-scripts start --config webpack.config.js",
 		"make-pot": "wp i18n make-pot . languages/events.pot --slug=events --domain=events --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
@@ -19,6 +20,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
+		"@playwright/test": "^1.58.2",
 		"@types/wordpress__block-editor": "^15.0.3",
 		"@types/wordpress__blocks": "^15.10.0",
 		"@types/wordpress__data": "^6.0.2",
