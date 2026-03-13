@@ -17,7 +17,6 @@ final class BookingMigration implements Migration
 	public const STATUS = 'status';
 	public const PRICE_SUMMARY = 'price_summary';
 	public const CURRENCY = 'currency';	
-	public const DONATION = 'donation';
 	public const REGISTRATION = 'registration';
 	public const COUPON_ID = 'coupon_id';
 	public const GATEWAY = 'gateway';
@@ -33,7 +32,6 @@ final class BookingMigration implements Migration
         self::STATUS . ' TINYINT NOT NULL DEFAULT 1',
         self::PRICE_SUMMARY . ' JSON NULL',
 		self::CURRENCY . ' VARCHAR(10) NOT NULL DEFAULT ""',
-        self::DONATION . ' BIGINT NOT NULL DEFAULT 0',
         self::REGISTRATION . ' JSON NULL',
         self::COUPON_ID . ' BIGINT UNSIGNED NULL',
         self::GATEWAY . ' VARCHAR(50) NULL',
