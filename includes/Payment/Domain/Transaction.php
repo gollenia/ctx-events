@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Domain;
 
-use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
 use Contexis\Events\Payment\Domain\ValueObjects\BankData;
@@ -19,12 +18,12 @@ final readonly class Transaction
         public Price $amount,
         public string $gateway,
         public TransactionStatus $status,
-        public ?string $externalId = null,
+        public \DateTimeImmutable $createdAt,
+        public ?string $externalId = '',
         public ?BankData $bankData = null,
 		public string $instructions = '',
         public ?Uri $checkoutUrl = null,
 		public ?Uri $gatewayUrl = null,
-        public \DateTimeImmutable $createdAt
     ) {
     }
 
@@ -89,6 +88,18 @@ final readonly class Transaction
         return clone($this, [
             "status" => TransactionStatus::PAID
         ]);
+    }
+
+    public function pend(): self
+    {
+        return clone($this, [
+            "status" => TransactionStatus::PENDING
+        ]);
+    }
+
+    public function isOffline(): bool
+    {
+        return $this->checkoutUrl === null;
     }
 
 	public function setAmount(Price $amount): self
