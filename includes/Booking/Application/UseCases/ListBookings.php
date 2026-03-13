@@ -10,19 +10,27 @@ use Contexis\Events\Booking\Application\DTOs\BookingListItem;
 use Contexis\Events\Booking\Application\Services\BookingEnrichmentService;
 
 use Contexis\Events\Booking\Domain\BookingRepository;
+use Contexis\Events\Payment\Domain\GatewayRepository;
 
 final class ListBookings
 {
     public function __construct(
         private BookingRepository $repository,
-        private BookingEnrichmentService $enrichmentService,
+		private GatewayRepository $gatewayRepository
     ) {
     }
 
     public function execute(BookingListRequest $query): BookingListResponse
     {
-        $response = $this->repository->search($query)->withEnrichment(fn(BookingListItem $item) => $this->enrichmentService->enrichListItem($item));
+        $response = $this->repository->search($query);
+		$response->map(function (BookingListItem $item) {
+			if ($item->gateway !== null) {
+				$item = $item->withGatewayName($this->gatewayRepository->find($item->gateway)->getAdminName());
+			}
 
-        return $this->enrichmentService->enrichList($response);
-    }
+			return $item;
+		});
+
+		return $response;
+	}
 }
