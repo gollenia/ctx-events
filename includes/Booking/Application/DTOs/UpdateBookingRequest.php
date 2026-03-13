@@ -11,7 +11,6 @@ final readonly class UpdateBookingRequest
         public array $registration,
         public array $attendees,
         public int $donationCents,
-        public array $notes,
         public ?string $gateway,
     ) {
     }
