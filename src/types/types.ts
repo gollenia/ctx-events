@@ -19,9 +19,9 @@ readonly approved: number
 readonly available: number | null
 readonly pending: number | null
 readonly totalCapacity: number | null
-readonly lowestAvailablePrice: undefined | null
-readonly lowestPrice: undefined | null
-readonly highestPrice: undefined | null
+readonly lowestAvailablePrice: Price | null
+readonly lowestPrice: Price | null
+readonly highestPrice: Price | null
 readonly bookingStart: string | null
 readonly bookingEnd: string | null
 };
@@ -75,6 +75,10 @@ context: string
 type: string
 id: string
 };
+export type Price = {
+readonly amountCents: number
+readonly currency: string
+};
 export type Address = {
 readonly streetAddress: string | null
 readonly addressLocality: string | null
@@ -84,36 +88,75 @@ readonly addressCountry: string | null
 };
 export type BookingEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "restored";
 export type BookingStatus = 1 | 2 | 3 | 4 | 9;
+export type PriceSummary = {
+readonly bookingPrice: Price
+readonly donationAmount: Price
+readonly discountAmount: Price
+readonly finalPrice: Price
+};
 export type BookingNoteResource = {
 readonly text: string
 readonly date: string
 readonly author: string
 };
+export type BookingTransactionResource = {
+readonly gateway: string
+readonly status: number
+readonly amount: []
+readonly externalId: string
+readonly createdAt: string
+readonly bankData: [] | null
+readonly instructions: string
+readonly checkoutUrl: string | null
+readonly gatewayUrl: string | null
+};
+export type RedirectPayment = {
+readonly gateway: string
+readonly status: number
+readonly amount: []
+readonly externalId: string
+readonly checkoutUrl: string
+readonly gatewayUrl: string | null
+readonly instructions: string
+};
 export type BookingDetail = {
 readonly reference: string
 readonly date: string
 readonly status: number
-readonly name: PersonName
-readonly email: string
 readonly gateway: string | null
 readonly event: BookingEventResource
 readonly registration: []
 readonly attendees: BookingAttendeeResource[]
-readonly price: BookingPriceSummaryResource
+readonly transactions: BookingTransactionResource[]
+readonly price: PriceSummary
+readonly bookingForm: []
+readonly attendeeForm: []
 readonly notes: BookingNoteResource[]
+readonly logEntries: BookingLogEntryResource[]
 readonly availableTickets: AvailableTicketResource[]
 };
 export type BookingListItem = {
 readonly reference: string
 readonly email: undefined
 readonly name: PersonName
-readonly event: []
+readonly event: {
+id: number
+title: string
+}
 readonly status: number
-readonly price: Price
-readonly donation: Price
+readonly priceSummary: PriceSummary
 readonly spaces: number
-readonly gateway: [] | null
+readonly gateway: {
+slug: string
+name: string
+} | null
 readonly date: string
+};
+export type BookingLogEntryResource = {
+readonly eventType: string
+readonly timestamp: string
+readonly actorId: number
+readonly actorName: string
 };
 export type AvailableTicketResource = {
 readonly id: string
@@ -129,12 +172,12 @@ readonly ticketId: string
 readonly name: PersonName | null
 readonly metadata: []
 };
-export type BookingPriceSummaryResource = {
-readonly bookingPrice: number
-readonly donationAmount: number
-readonly discountAmount: number
-readonly finalPrice: number
-readonly currency: string
+export type BankTransferPayment = {
+readonly gateway: string
+readonly status: number
+readonly amount: []
+readonly bankData: []
+readonly instructions: string
 };
 export type PaymentProvider = "offline" | "mollie";
 export type DiscountType = "percent" | "fixed";
