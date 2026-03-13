@@ -5,7 +5,7 @@ namespace Contexis\Events\Shared\Domain\Abstract;
 
 abstract class Id implements \Stringable
 {
-    public function __construct(
+    final public function __construct(
         private readonly int $value
     ) {
     }
