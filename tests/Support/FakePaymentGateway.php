@@ -13,6 +13,8 @@ final class FakePaymentGateway implements PaymentGateway
         private string $id = 'fake',
         private bool $enabled = true,
         private bool $valid = true,
+        private ?\Closure $verifyPaymentUsing = null,
+        private ?\Closure $initiatePaymentUsing = null,
     ) {
     }
 
@@ -29,11 +31,19 @@ final class FakePaymentGateway implements PaymentGateway
 
     public function initiatePayment(Booking $booking): Transaction
     {
+        if ($this->initiatePaymentUsing !== null) {
+            return ($this->initiatePaymentUsing)($booking);
+        }
+
         throw new \RuntimeException('Not implemented in FakePaymentGateway');
     }
 
     public function verifyPayment(Transaction $transaction): Transaction
     {
+        if ($this->verifyPaymentUsing !== null) {
+            return ($this->verifyPaymentUsing)($transaction);
+        }
+
         throw new \RuntimeException('Not implemented in FakePaymentGateway');
     }
 }

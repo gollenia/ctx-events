@@ -12,6 +12,7 @@ use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
@@ -77,6 +78,22 @@ final class FakeBookingRepository implements BookingRepository
         return $bookingId;
     }
 
+    public function update(Booking $booking): void
+    {
+        $bookingId = $booking->id ?? throw new \RuntimeException('Booking has no ID');
+        $this->bookingsById[$bookingId->toInt()] = $booking;
+    }
+
+    public function updateNotes(BookingId $id, \Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection $notes): void
+    {
+        if (!isset($this->bookingsById[$id->toInt()])) {
+            return;
+        }
+
+        $booking = $this->bookingsById[$id->toInt()];
+        $this->bookingsById[$id->toInt()] = $booking->withNotes($notes);
+    }
+
     public function getTicketBookingsForEvent(EventId $eventId, array $ticketIds = []): TicketBookingsMap
     {
         $this->lastEventIdArg = $eventId;
@@ -128,14 +145,16 @@ final class FakeBookingRepository implements BookingRepository
         unset($this->bookingsById[$id->toInt()]);
     }
 
-    public function updateStatus(BookingId $id, BookingStatus $status): void
+    public function updateStatus(BookingId $id, BookingStatus $status, LogEntryCollection $logEntries): void
     {
         if (!isset($this->bookingsById[$id->toInt()])) {
             return;
         }
 
         $booking = $this->bookingsById[$id->toInt()];
-        $this->bookingsById[$id->toInt()] = clone($booking, ['status' => $status]);
+        $this->bookingsById[$id->toInt()] = $booking
+            ->withBookingStatus($status)
+            ->withLogEntries($logEntries);
     }
 
 	 public function getTicketBookingsForEvents(array $eventIds): array
@@ -165,6 +184,8 @@ final class FakeBookingRepository implements BookingRepository
             $formRepository->ensureAttendeeForm($attendeeFormId);
         }
 
+		$ticketbookings = $this->getTicketBookingsForEvent($event->id);
+
         $tickets = $event->tickets?->toArray() ?? [];
         if ($tickets === []) {
             $ticketId = TicketId::from('ticket-default-1');
@@ -177,7 +198,7 @@ final class FakeBookingRepository implements BookingRepository
                     id: $ticketId,
                     name: 'Default Ticket',
                     description: null,
-                    price: $event->getLowestAvailablePrice(new \DateTimeImmutable()) ?? $this->fallbackPrice(),
+                    price: $event->getLowestAvailablePrice(new \DateTimeImmutable(), $ticketbookings) ?? $this->fallbackPrice(),
                     capacity: null,
                     enabled: true,
                     salesStart: null,
@@ -201,8 +222,7 @@ final class FakeBookingRepository implements BookingRepository
                 priceSummary: PriceSummary::fromValues(
                     bookingPrice: $ticket->price,
                     donationAmount: new Price(0, $ticket->price->currency),
-                    discountAmount: new Price(0, $ticket->price->currency),
-                    currency: $ticket->price->currency,
+                    discountAmount: new Price(0, $ticket->price->currency)
                 ),
                 bookingTime: new \DateTimeImmutable('now'),
                 status: $status,

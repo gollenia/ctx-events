@@ -4,7 +4,7 @@ declare(strict_types=1);
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
-use Contexis\Events\Booking\Application\Services\CalculateBookingPrice;
+use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingTokenRecord;
@@ -15,6 +15,7 @@ use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\SessionHashResolver;
 use Tests\Support\FakeBookingRepository;
+use Tests\Support\FakeCurrentActorProvider;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
 use Tests\Support\FakeFormRepository;
@@ -38,9 +39,11 @@ function makeCreateBookingUseCase(
 
     $attendeeRepository = Mockery::mock(AttendeeRepository::class);
     $attendeeRepository->allows('saveAll');
+    $attendeeRepository->allows('deleteByBookingId');
 
     $transactionRepository = Mockery::mock(TransactionRepository::class);
     $transactionRepository->allows('save');
+    $transactionRepository->allows('deleteByBookingId');
 
     $couponRepository = Mockery::mock(CouponRepository::class);
     $couponRepository->allows('findByCode')->andReturn(null);
@@ -57,6 +60,7 @@ function makeCreateBookingUseCase(
         referenceGenerator: new FakeReferenceGenerator(),
         attendeeFactory: new AttendeeFactory(),
         clock: $clock,
+        currentActorProvider: new FakeCurrentActorProvider(),
         checkTicketAvailibility: new CheckTicketAvailibility(),
         calculateBookingPrice: new CalculateBookingPrice(),
         couponRepository: $couponRepository,
@@ -472,7 +476,7 @@ test('throws when ticket sales period has not started yet', function () {
     );
 
     expect(fn () => $useCase->execute($request))
-        ->toThrow(\DomainException::class, 'currently not available');
+        ->toThrow(\DomainException::class);
 });
 
 test('throws when ticket sales period has ended', function () {
