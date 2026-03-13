@@ -2,7 +2,7 @@ import type { DataViewConfig } from '@events/datatable/types';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 
-export const useFetchBookings = (view: DataViewConfig, refreshKey: number) => {
+export const useFetchBookings = (view: DataViewConfig) => {
 	const [bookings, setBookings] = useState<object[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [statusItems, setStatusItems] = useState<Record<string, number>>({});
@@ -38,7 +38,7 @@ export const useFetchBookings = (view: DataViewConfig, refreshKey: number) => {
 		}
 
 		return params.toString();
-	}, [view, refreshKey]);
+	}, [view]);
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -66,7 +66,7 @@ export const useFetchBookings = (view: DataViewConfig, refreshKey: number) => {
 		};
 
 		loadData();
-	}, [urlParams]);
+	}, [urlParams, view.refreshKey]);
 
 	return { bookings, loading, statusItems, pagination };
 };

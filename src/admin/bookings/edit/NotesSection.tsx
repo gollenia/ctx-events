@@ -1,33 +1,41 @@
-import { Button, TextareaControl } from '@wordpress/components';
+import { Button, Notice, TextareaControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { BookingDetail, BookingNoteResource } from 'src/types/types';
+import type { BookingDetail } from 'src/types/types';
 
 type Props = {
 	booking: BookingDetail;
-	onChange: (notes: BookingNoteResource[]) => void;
+	isSaving: boolean;
+	onAdd: (text: string) => Promise<void>;
 };
 
-const NotesSection = ({ booking, onChange }: Props) => {
+const NotesSection = ({ booking, isSaving, onAdd }: Props) => {
 	const [text, setText] = useState('');
+	const [error, setError] = useState<string | null>(null);
 
-	const addNote = () => {
+	const addNote = async () => {
 		const trimmed = text.trim();
 		if (!trimmed) return;
 
-		const newNote: BookingNoteResource = {
-			text: trimmed,
-			date: new Date().toISOString(),
-			author: '',
-		};
+		setError(null);
 
-		onChange([...booking.notes, newNote]);
-		setText('');
+		try {
+			await onAdd(trimmed);
+			setText('');
+		} catch (err: any) {
+			setError(err?.message ?? __('Could not save note.', 'ctx-events'));
+		}
 	};
 
 	return (
-		<section className="booking-edit__section">
+			<section className="booking-edit__section">
 			<h3>{__('Notes', 'ctx-events')}</h3>
+
+			{error && (
+				<Notice status="error" isDismissible={false}>
+					{error}
+				</Notice>
+			)}
 
 			{booking.notes.length === 0 ? (
 				<p className="booking-edit__empty">{__('No notes yet.', 'ctx-events')}</p>
@@ -52,9 +60,10 @@ const NotesSection = ({ booking, onChange }: Props) => {
 				value={text}
 				onChange={setText}
 				rows={3}
+				disabled={isSaving}
 			/>
-			<Button variant="secondary" onClick={addNote} disabled={!text.trim()}>
-				{__('Add Note', 'ctx-events')}
+			<Button variant="secondary" onClick={addNote} disabled={!text.trim() || isSaving}>
+				{isSaving ? __('Saving…', 'ctx-events') : __('Add Note', 'ctx-events')}
 			</Button>
 		</section>
 	);

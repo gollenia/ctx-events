@@ -8,7 +8,7 @@ export const createActions = (refresh: () => void): Array<DataTableAction> => [
 	{
 		id: 'approve',
 		label: __('Approve', 'ctx-events'),
-		disabled: (item: Booking) => item.status === 2,
+		disabled: (item: Booking) => item.status !== 1,
 		callback: async (items, onActionPerformed) => {
 			const item = items[0] as Booking;
 			await apiFetch({
@@ -21,9 +21,25 @@ export const createActions = (refresh: () => void): Array<DataTableAction> => [
 		},
 	},
 	{
+		id: 'deny',
+		label: __('Deny', 'ctx-events'),
+		disabled: (item: Booking) => item.status !== 1,
+		callback: async (items, onActionPerformed) => {
+			const item = items[0] as Booking;
+			await apiFetch({
+				path: `/events/v3/bookings/${item.reference}/deny`,
+				method: 'POST',
+				data: { status: 'rejected' },
+			});
+			onActionPerformed?.(items);
+			refresh();
+		},
+		delete: true,
+	},
+	{
 		id: 'cancel',
 		label: __('Cancel', 'ctx-events'),
-		disabled: (item: Booking) => item.status === 3 || item.status === 4 || item.status === 9,
+		disabled: (item: Booking) => item.status !== 2,
 		callback: async (items, onActionPerformed) => {
 			const item = items[0] as Booking;
 			await apiFetch({
@@ -34,25 +50,12 @@ export const createActions = (refresh: () => void): Array<DataTableAction> => [
 			onActionPerformed?.(items);
 			refresh();
 		},
-	},
-	{
-		id: 'delete',
-		label: __('Delete', 'ctx-events'),
-		disabled: (item: Booking) => item.status !== 9,
-		callback: async (items, onActionPerformed) => {
-			const item = items[0] as Booking;
-			await apiFetch({
-				path: `/events/v3/bookings/${item.reference}/delete`,
-				method: 'DELETE',
-			});
-			onActionPerformed?.(items);
-			refresh();
-		},
+		delete: true,
 	},
 	{
 		id: 'restore',
 		label: __('Restore', 'ctx-events'),
-		disabled: (item: Booking) => item.status !== 9,
+		disabled: (item: Booking) => item.status !== 3 && item.status !== 4,
 		callback: async (items, onActionPerformed) => {
 			const item = items[0] as Booking;
 			await apiFetch({
@@ -65,18 +68,18 @@ export const createActions = (refresh: () => void): Array<DataTableAction> => [
 		},
 	},
 	{
-		id: 'cancel',
-		label: __('Cancel', 'ctx-events'),
-		disabled: (item: Booking) => item.status === 1 || item.status === 3 || item.status === 4 || item.status === 9,
+		id: 'delete',
+		label: __('Delete', 'ctx-events'),
+		disabled: (item: Booking) => item.status !== 3 && item.status !== 4,
 		callback: async (items, onActionPerformed) => {
 			const item = items[0] as Booking;
 			await apiFetch({
-				path: `/events/v3/bookings/${item.reference}/cancel`,
-				method: 'POST',
-				data: { status: 'canceled' },
+				path: `/events/v3/bookings/${item.reference}`,
+				method: 'DELETE',
 			});
 			onActionPerformed?.(items);
 			refresh();
 		},
-	}
+		delete: true,
+	},
 ];

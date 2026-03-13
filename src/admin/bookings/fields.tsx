@@ -2,7 +2,6 @@ import { formatPrice } from '@events/i18n';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
-	drafts,
 	notAllowed,
 	pending,
 	published,
@@ -11,16 +10,14 @@ import {
 import type { BookingListItem } from 'src/types/types';
 import type {
 	DataFieldConfig,
-	DataFilterElement,
 } from '../../shared/datatable/types';
+import { STATUS_LABELS } from './constants';
 
 type FilterOptions = {
-	events: Array<DataFilterElement<string>>;
-	gateways: Array<DataFilterElement<string>>;
+	gateways: Array<{ value: string; label: string }>;
 };
 
 type FieldCallbacks = {
-	onEventClick: (eventId: string) => void;
 	onReferenceClick: (reference: string) => void;
 };
 
@@ -29,19 +26,7 @@ const STATUS_ICONS: Record<number, typeof published> = {
 	2: published,
 	3: notAllowed,
 	4: swatch,
-	9: drafts,
 };
-
-const STATUS_LABELS: Record<number, string> = {
-	1: __('Pending', 'ctx-events'),
-	2: __('Approved', 'ctx-events'),
-	3: __('Canceled', 'ctx-events'),
-	4: __('Expired', 'ctx-events'),
-	9: __('Deleted', 'ctx-events'),
-};
-
-const currency = (): string =>
-	(window as any).eventBlocksLocalization?.currency;
 
 export const createFields = (
 	options: FilterOptions,
@@ -77,21 +62,11 @@ export const createFields = (
 		label: __('Event', 'ctx-events'),
 		render: (booking: BookingListItem) => (
 			<a
-				href="#"
-				onClick={(event) => {
-					event.preventDefault();
-					callbacks.onEventClick(String(booking.event.id));
-				}}
+				href={`/wp-admin/admin.php?page=contexis_events_bookings&event_id=${booking.event.id}`}
 			>
 				{booking.event.title || '—'}
 			</a>
 		),
-		filterBy: {
-			id: 'event_id',
-			label: __('All Events', 'ctx-events'),
-			type: 'text',
-			elements: options.events,
-		},
 	},
 	{
 		id: 'date',
@@ -143,7 +118,8 @@ export const createFields = (
 	{
 		id: 'price',
 		label: __('Price', 'ctx-events'),
-		getValue: (booking: BookingListItem) => formatPrice(booking.price),
+		getValue: (booking: BookingListItem) =>
+			formatPrice(booking.priceSummary.finalPrice),
 	},
 	{
 		id: 'gateway',

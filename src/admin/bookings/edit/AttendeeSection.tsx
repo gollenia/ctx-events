@@ -1,9 +1,14 @@
 import { formatPrice } from '@events/i18n';
-import { Button, SelectControl } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { plus, trash } from '@wordpress/icons';
-import type { AvailableTicketResource, BookingAttendeeResource, BookingDetail } from 'src/types/types';
+import { pencil, plus, trash } from '@wordpress/icons';
+import type {
+	AvailableTicketResource,
+	BookingAttendeeResource,
+	BookingDetail,
+} from 'src/types/types';
+import AttendeeEditModal from './AttendeeEditModal';
 
 type Props = {
 	booking: BookingDetail;
@@ -11,33 +16,38 @@ type Props = {
 };
 
 const AttendeeSection = ({ booking, onChange }: Props) => {
-	const [selectedTicketId, setSelectedTicketId] = useState<string>(
-		booking.availableTickets[0]?.id ?? '',
-	);
+	const [editingIndex, setEditingIndex] = useState<number | null>(null);
+	const [isCreating, setIsCreating] = useState(false);
 
 	const ticketById = (ticketId: string): AvailableTicketResource | undefined =>
 		booking.availableTickets.find((ticket) => ticket.id === ticketId);
-
-	const addAttendee = () => {
-		if (!selectedTicketId) return;
-
-		const newAttendee: BookingAttendeeResource = {
-			ticketId: selectedTicketId,
-			name: null,
-			metadata: {},
-		};
-
-		onChange([...booking.attendees, newAttendee]);
-	};
 
 	const removeAttendee = (index: number) => {
 		onChange(booking.attendees.filter((_, attendeeIndex) => attendeeIndex !== index));
 	};
 
-	const ticketOptions = booking.availableTickets.map((ticket) => ({
-		value: ticket.id,
-		label: `${ticket.name} (${formatPrice({ amountCents: ticket.price, currency: booking.price.currency })})`,
-	}));
+	const closeModal = () => {
+		setEditingIndex(null);
+		setIsCreating(false);
+	};
+
+	const handleCreate = (attendee: BookingAttendeeResource) => {
+		onChange([...booking.attendees, attendee]);
+		closeModal();
+	};
+
+	const handleUpdate = (attendee: BookingAttendeeResource) => {
+		if (editingIndex === null) return;
+		onChange(
+			booking.attendees.map((current, index) =>
+				index === editingIndex ? attendee : current,
+			),
+		);
+		closeModal();
+	};
+
+	const activeAttendee =
+		editingIndex === null ? null : booking.attendees[editingIndex] ?? null;
 
 	return (
 		<section className="booking-edit__section">
@@ -74,11 +84,17 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 									{ticket
 										? formatPrice({
 												amountCents: ticket.price,
-												currency: booking.price.currency,
+												currency: booking.price.finalPrice.currency,
 											})
 										: '—'}
 								</td>
-								<td>
+								<td className="booking-edit__attendee-actions">
+									<Button
+										icon={pencil}
+										variant="tertiary"
+										label={__('Edit', 'ctx-events')}
+										onClick={() => setEditingIndex(index)}
+									/>
 									<Button
 										icon={trash}
 										variant="tertiary"
@@ -93,18 +109,21 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 				</tbody>
 			</table>
 
-			{ticketOptions.length > 0 && (
+			{booking.availableTickets.length > 0 && (
 				<div className="booking-edit__add-attendee">
-					<SelectControl
-						label={__('Ticket', 'ctx-events')}
-						value={selectedTicketId}
-						options={ticketOptions}
-						onChange={setSelectedTicketId}
-					/>
-					<Button variant="secondary" icon={plus} onClick={addAttendee}>
+					<Button variant="secondary" icon={plus} onClick={() => setIsCreating(true)}>
 						{__('Add Attendee', 'ctx-events')}
 					</Button>
 				</div>
+			)}
+
+			{(isCreating || editingIndex !== null) && (
+				<AttendeeEditModal
+					attendee={isCreating ? null : activeAttendee}
+					booking={booking}
+					onClose={closeModal}
+					onSave={isCreating ? handleCreate : handleUpdate}
+				/>
 			)}
 		</section>
 	);
