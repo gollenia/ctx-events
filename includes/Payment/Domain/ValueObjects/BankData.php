@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Domain\ValueObjects;
 
-final class BankData implements \JsonSerializable
+final readonly class BankData
 {
     public function __construct(
-        public readonly string $accountHolder,
-        public readonly string $iban,
-        public readonly string $bic,
-        public readonly string $bankName,
-		public readonly ?string $reference = ''
+        public string $accountHolder,
+        public string $iban,
+        public string $bic,
+        public string $bankName,
+		public ?string $reference = ''
     ) {
     }
 
@@ -101,7 +101,7 @@ final class BankData implements \JsonSerializable
 		&& !empty(trim($this->bankName));
 	}
 
-    public function jsonSerialize(): array
+    public function toArray(): array
     {
         return [
             'accountHolder' => $this->accountHolder,
