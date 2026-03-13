@@ -61,7 +61,6 @@ final class PostSnapshot
         return null;
     }
 
-    /** @template T @param T $default @return T */
     public function getValueOr(string $key, mixed $default): mixed
     {
         $v = $this->rawValue($key);
