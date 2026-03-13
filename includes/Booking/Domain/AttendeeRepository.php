@@ -8,4 +8,6 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 interface AttendeeRepository
 {
     public function saveAll(AttendeeCollection $attendees, BookingId $bookingId): void;
+
+    public function deleteByBookingId(BookingId $bookingId): void;
 }
