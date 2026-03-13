@@ -19,10 +19,12 @@ final readonly class BookingListItemResource implements Resource
         public string $reference,
         public Email $email,
         public PersonName $name,
+		/** @var array{id: int, title: string} */
         public array $event,
         public int $status,
-        public PriceSummary $priceSummary,
+        public PriceSummaryResource $priceSummary,
         public int $spaces,
+		/** @var array{slug: string, name: string}|null */
         public ?array $gateway,
         public string $date,
     ) {
@@ -40,7 +42,7 @@ final readonly class BookingListItemResource implements Resource
             name: $item->name,
             event: ['id' => $item->eventId->toInt(), 'title' => $item->eventTitle],
             status: $item->status,
-            priceSummary: $item->priceSummary,
+            priceSummary: PriceSummaryResource::from($item->priceSummary),
             spaces: $item->spaces,
             gateway: $gateway,
             date: $item->bookingTime->format(DATE_ATOM),
@@ -56,7 +58,7 @@ final readonly class BookingListItemResource implements Resource
             'name'      => $this->name->toArray(),
             'event'     => $this->event,
             'status'    => $this->status,
-            'priceSummary' => $this->priceSummary->toArray(),
+            'priceSummary' => $this->priceSummary,
             'spaces'    => $this->spaces,
             'gateway'   => $this->gateway,
             'date'      => $this->date,
