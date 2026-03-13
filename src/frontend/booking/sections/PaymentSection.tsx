@@ -57,11 +57,6 @@ export function PaymentSection({
 			return;
 		}
 
-		if (result.type === 'mollie') {
-			window.location.replace(result.url);
-			return;
-		}
-
 		onResult(result);
 	}
 
