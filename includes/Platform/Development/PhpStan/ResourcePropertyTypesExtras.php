@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Contexis\Events\Shared\Dev\PhpStan;
+namespace Contexis\Events\Shared\Development\PhpStan;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
@@ -19,7 +19,7 @@ use PHPStan\Type\IntegerType;
 use PHPStan\Type\BooleanType;
 use PHPStan\Type\FloatType;
 
-final class ResourcePropertyTypesRule implements Rule
+final class ResourcePropertyTypesExtras implements Rule
 {
     public function __construct(
         private string $resourceInterface = \Contexis\Events\Shared\Presentation\Contracts\Resource::class,
