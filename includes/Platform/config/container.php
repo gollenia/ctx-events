@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use Contexis\Events\Platform\Demo\DumpSubscriber;
+use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
 use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
+use Contexis\Events\Shared\Infrastructure\Wordpress\CurrentWordpressActorProvider;
 use Contexis\Events\Shared\Infrastructure\Wordpress\WordpressSignalDispatcher;
 use Psr\Container\ContainerInterface;
 
@@ -24,6 +26,7 @@ return [
 
     \Contexis\Events\Shared\Domain\Contracts\Clock::class
     => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
+    CurrentActorProvider::class => autowire(CurrentWordpressActorProvider::class),
 	SignalDispatcher::class => autowire(WordpressSignalDispatcher::class),
 	\Contexis\Events\Shared\Domain\Contracts\TokenGenerator::class
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Security\RandomTokenGenerator::class),
