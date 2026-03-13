@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Domain;
 
 use Contexis\Events\Shared\Domain\Abstract\Collection;
-use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final readonly class AttendeeCollection extends Collection
 {
     public function __construct(Attendee ...$attendees)
     {
-        $this->items = $attendees;
+        parent::__construct($attendees);
     }
 
 	public function getTicketIds(): array
