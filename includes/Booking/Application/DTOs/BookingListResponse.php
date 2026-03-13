@@ -14,7 +14,7 @@ final readonly class BookingListResponse extends DtoCollection
 
     public function __construct(BookingListItem ...$items)
     {
-        $this->items = $items;
+        parent::__construct($items);
     }
 
     public function withPagination(Pagination $pagination): self
