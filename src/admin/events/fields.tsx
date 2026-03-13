@@ -1,5 +1,7 @@
 import { formatDateRange } from '@events/i18n';
+import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { error, notAllowed, pending, published } from '@wordpress/icons';
 import type {
 	DataFieldConfig,
 	DataFilterElement,
@@ -16,6 +18,9 @@ const scopeElements: DataFilterElement<TimeScope>[] = [
 	{ value: 'this-month', label: __('This Month', 'ctx-events') },
 	{ value: 'this-year', label: __('This Year', 'ctx-events') },
 ];
+
+const bookingsAdminUrl = (eventId: number): string =>
+	`/wp-admin/admin.php?page=contexis_events_bookings&event_id=${eventId}`;
 
 export const fields: Array<DataFieldConfig> = [
 	{
@@ -120,23 +125,30 @@ export const fields: Array<DataFieldConfig> = [
 	},
 	{
 		id: 'bookable',
-		label: __('Bookable', 'ctx-events'),
+		label: __('Bookings', 'ctx-events'),
 		render: (event: Event) => {
 			if (!event.bookingSummary) {
-				return <>—</>;
+				return (
+					<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+						<Icon icon={notAllowed} size={16} />
+						{__('N/A', 'ctx-events')}
+					</span>
+				);
 			}
 			if (!event.bookingSummary.isBookable) {
 				return (
-					<span className="danger">
+					<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+						<Icon icon={error} size={16} />
 						{bookingDenyReason(event.bookingSummary)}
 					</span>
 				);
 			}
 			return (
-				<span className="trashed">
-					{event.bookingSummary.isBookable
-						? __('Yes', 'ctx-events')
-						: __('No', 'ctx-events')}
+				<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+					<Icon icon={published} size={16} />
+					<a className="trashed" href={bookingsAdminUrl(event.id)}>
+						{__('View Bookings', 'ctx-events')}
+					</a>
 				</span>
 			);
 		},
@@ -153,6 +165,15 @@ export const fields: Array<DataFieldConfig> = [
 			);
 		},
 		enableSorting: true,
+	},
+	{
+		id: 'bookings',
+		label: __('Bookings', 'ctx-events'),
+		render: (event: Event) => (
+			<a href={bookingsAdminUrl(event.id)}>
+				{__('View Bookings', 'ctx-events')}
+			</a>
+		),
 	},
 	{
 		id: 'status',
