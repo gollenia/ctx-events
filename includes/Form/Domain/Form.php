@@ -29,6 +29,7 @@ abstract class Form
 		];
 	}
 
+
 	public function validate(array $formData): ValidationResult
 	{
 		$allErrors = [];
