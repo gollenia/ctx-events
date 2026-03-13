@@ -81,7 +81,66 @@ p.warning {
 
 
 
+
+body.booking-edit-open {
+	overflow: hidden;
+}
+
+.booking-edit-shell {
+	position: fixed;
+	inset: 0;
+	left: 160px;
+	top: 32px;
+	z-index: 100000;
+	display: flex;
+	align-items: stretch;
+	justify-content: stretch;
+}
+
 .booking-edit-modal {
+	position: relative;
+	padding: 24px;
+	background: #f0f0f1;
+	overflow: auto;
+	width: 100%;
+
+	.booking-edit-modal__header {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 20px;
+		border-bottom: 1px solid #e0e0e0;
+		background: #ffffff;
+	}
+
+	.booking-edit-modal__title {
+		margin: 0;
+		font-size: 20px;
+		font-weight: 600;
+	}
+
+	.booking-edit-modal__close {
+		width: 36px;
+		height: 36px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		font-size: 24px;
+		cursor: pointer;
+		line-height: 1;
+		color: #1f2937;
+
+		&:hover {
+			background: #f3f4f6;
+		}
+	}
+
 	.booking-edit__loading {
 		display: flex;
 		justify-content: center;
@@ -127,6 +186,155 @@ p.warning {
 		}
 	}
 
+	.booking-edit__empty {
+		margin: 0 0 1rem;
+		color: #646970;
+		font-size: 13px;
+	}
+
+	.booking-edit__notes,
+	.booking-edit__activity-list {
+		list-style: none;
+		margin: 0 0 1rem;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.booking-edit__transactions {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.booking-edit__transaction-card {
+		padding: 1rem;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		background: #f9fafb;
+	}
+
+	.booking-edit__transaction-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem 1rem;
+	}
+
+	.booking-edit__transaction-label {
+		display: block;
+		font-size: 12px;
+		color: #646970;
+		margin-bottom: 0.25rem;
+	}
+
+	.booking-edit__transaction-block {
+		margin-top: 1rem;
+	}
+
+	.booking-edit__transaction-block p {
+		margin: 0;
+	}
+
+	.booking-edit__transaction-link {
+		word-break: break-word;
+	}
+
+	.booking-edit__note,
+	.booking-edit__activity-item {
+		padding: 0.75rem;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		background: #f9fafb;
+	}
+
+	.booking-edit__note-date,
+	.booking-edit__note-author,
+	.booking-edit__activity-head span,
+	.booking-edit__activity-actor {
+		display: block;
+		font-size: 12px;
+		color: #646970;
+	}
+
+	.booking-edit__note-author {
+		margin-top: 0.2rem;
+		font-weight: 600;
+	}
+
+	.booking-edit__note p,
+	.booking-edit__activity-actor {
+		margin: 0.35rem 0 0;
+	}
+
+	.booking-edit__activity-head {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.75rem;
+		align-items: baseline;
+	}
+
+	.booking-edit__registration-fields {
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: 0.75rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.booking-edit__registration-grid,
+	.booking-edit__attendee-fields {
+		align-items: start;
+	}
+
+	.booking-edit__registration-field {
+		min-width: 0;
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+	}
+
+	.booking-edit__registration-grid-field,
+	.booking-edit__attendee-field {
+		.components-base-control__field {
+			gap: 0.35rem;
+		}
+	}
+
+	.booking-edit__field-input-wrap {
+		min-width: 0;
+	}
+
+	.booking-edit__registration-field--width-1 {
+		grid-column: span 1;
+	}
+
+	.booking-edit__registration-field--width-2 {
+		grid-column: span 2;
+	}
+
+	.booking-edit__registration-field--width-3 {
+		grid-column: span 3;
+	}
+
+	.booking-edit__registration-field--width-4 {
+		grid-column: span 4;
+	}
+
+	.booking-edit__registration-field--width-5 {
+		grid-column: span 5;
+	}
+
+	.booking-edit__registration-field--width-6 {
+		grid-column: span 6;
+	}
+
+	.booking-edit__field-description {
+		margin: 0 0 0.35rem;
+		font-size: 12px;
+		color: #646970;
+	}
+
 	.booking-edit__attendees {
 		width: 100%;
 		border-collapse: collapse;
@@ -168,12 +376,70 @@ p.warning {
 		}
 	}
 
+	.booking-edit__attendee-actions {
+		white-space: nowrap;
+
+		.components-button + .components-button {
+			margin-left: 0.35rem;
+		}
+	}
+
+	.booking-edit__attendee-modal {
+		max-width: 840px;
+	}
+
+	.booking-edit__attendee-modal-body {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.booking-edit__attendee-name-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.booking-edit__attendee-fields {
+		margin-bottom: 0;
+	}
+
+	.booking-edit__attendee-modal-actions {
+		padding-top: 0;
+		border-top: 0;
+		margin-top: 0.5rem;
+	}
+
 	.booking-edit__footer {
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.75rem;
 		padding-top: 1rem;
 		border-top: 1px solid #e0e0e0;
+	}
+
+	@media (max-width: 960px) {
+		margin: 8px;
+
+		.booking-edit__columns {
+			grid-template-columns: 1fr;
+		}
+
+		.booking-edit__registration-fields {
+			grid-template-columns: 1fr;
+		}
+
+		.booking-edit__registration-field[class*='booking-edit__registration-field--width-'] {
+			grid-column: span 1;
+		}
+
+		.booking-edit__attendee-name-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.booking-edit__transaction-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 }
 
