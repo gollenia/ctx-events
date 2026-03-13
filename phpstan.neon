@@ -1,13 +1,8 @@
 parameters:
-	level: 5
-	paths:
-		- classes
-		- admin
+    level: 2
+    paths:
+        - includes
+    scanFiles:
+        - events.php
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
-
-services:
-    -
-        class: Contexis\Events\Platform\Development\PhpStan\ResourcePropertyTypesRule
-        tags:
-            - phpstan.rules.rule
