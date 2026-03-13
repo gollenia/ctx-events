@@ -39,8 +39,7 @@ final class CalculateBookingPrice
 		return PriceSummary::fromValues(
 			bookingPrice: $bookingPrice,
 			donationAmount: $donation ?? new Price(0, $currency),
-			discountAmount: $discount,
-			currency: $currency
+			discountAmount: $discount
 		);
 	}
 }
