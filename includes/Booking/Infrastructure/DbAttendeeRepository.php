@@ -48,5 +48,10 @@ final class DbAttendeeRepository implements AttendeeRepository
             throw new \RuntimeException('Failed to save attendee.');
         }
     }
-}
 
+    public function deleteByBookingId(BookingId $bookingId): void
+    {
+        $table = AttendeeMigration::getTableName();
+        $this->db->delete($table, ['booking_id' => $bookingId->toInt()]);
+    }
+}
