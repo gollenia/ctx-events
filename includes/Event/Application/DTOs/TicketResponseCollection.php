@@ -15,11 +15,11 @@ use Contexis\Events\Shared\Domain\ValueObjects\Price;
 final readonly class TicketResponseCollection extends DtoCollection
 {
 	public ?Price $lowestAvailablePrice;
-    public function __construct(
-        TicketResponse ...$tickets
-    ) {
-        parent::__construct($tickets);
-    }
+    
+	public static function from(TicketResponse ...$items): self
+	{		
+		return new self($items);
+	}
 
     public static function fromDomainCollection(
         TicketCollection $collection,

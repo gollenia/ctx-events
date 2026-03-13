@@ -45,7 +45,7 @@ final class AttendeeFactory
             );
         }
 
-        return new AttendeeCollection(...$attendees);
+        return AttendeeCollection::from(...$attendees);
     }
 
 	private function getPersonName(array $metadata): ?PersonName

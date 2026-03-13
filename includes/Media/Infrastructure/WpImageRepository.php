@@ -40,6 +40,6 @@ final class WpImageRepository implements ImageRepository
             $items[] = ImageMapper::map(new PostSnapshot($post));
         }
 
-        return new ImageCollection(...$items);
+        return ImageCollection::from(...$items);
     }
 }

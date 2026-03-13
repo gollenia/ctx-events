@@ -7,8 +7,8 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class TransactionCollection extends Collection
 {
-    public function __construct(Transaction ...$transactions)
-    {
-        parent::__construct($transactions);
-    }
+    public static function from(Transaction ...$transactions): self
+	{
+		return new self($transactions);
+	}
 }

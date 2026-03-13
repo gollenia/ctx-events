@@ -13,10 +13,9 @@ final readonly class FormListResponse extends DtoCollection
 	public ?Pagination $pagination;
     public ?StatusCounts $statusCounts;
 	
-	public function __construct(
-        FormListItem ...$forms
-    ) {
-        parent::__construct($forms);
+	public static function from(FormListItem ...$forms): self
+    {
+        return new self($forms);
     }
 
 	public function withPagination(Pagination $pagination): self

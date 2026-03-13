@@ -9,10 +9,9 @@ use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
 final readonly class ImageDtoCollection extends DtoCollection
 {
-    public function __construct(
-        ImageDto ...$images
-    ) {
-        parent::__construct($images);
+    public static function from(ImageDto ...$images): self
+    {
+        return new self($images);
     }
 
     public static function fromDomainCollection(ImageCollection $collection): ImageDtoCollection
@@ -21,7 +20,7 @@ final readonly class ImageDtoCollection extends DtoCollection
         foreach ($collection as $item) {
             $items[] = ImageDto::fromDomainModel($item);
         }
-        return new ImageDtoCollection(...$items);
+        return ImageDtoCollection::from(...$items);
     }
 
     public function findById(ImageId $id): ?ImageDto

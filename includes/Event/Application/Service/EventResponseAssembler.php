@@ -71,7 +71,7 @@ final class EventResponseAssembler
 			
         }
 
-		return new EventResponseCollection(...$items);
+		return EventResponseCollection::from(...$items);
 
 	}
 }

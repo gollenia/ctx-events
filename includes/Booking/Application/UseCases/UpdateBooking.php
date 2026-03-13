@@ -44,7 +44,7 @@ final class UpdateBooking
             throw new \DomainException('Event not found.');
         }
 
-        $attendees = new AttendeeCollection(...array_map(
+        $attendees = AttendeeCollection::from(...array_map(
             static function (array $item) use ($currency): Attendee {
                 $metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
                 $nameData = $item['name'] ?? null;

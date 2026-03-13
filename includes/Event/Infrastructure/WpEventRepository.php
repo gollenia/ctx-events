@@ -60,7 +60,7 @@ class WpEventRepository implements EventRepository, EventStatusRepository, Event
             $items[] = $this->mapper->map(new PostSnapshot($post));
         }
 
-        $events = EventCollection::fromArray($items)
+        $events = EventCollection::from(...$items)
           ->withPagination($pagination);
 
         return $events;

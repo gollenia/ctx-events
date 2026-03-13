@@ -188,7 +188,7 @@ test('price summary, status counts, event status counts and event forms work as 
 });
 
 test('taxonomy collection can filter by taxonomy name', function () {
-    $collection = new TaxonomyCollection(
+    $collection = TaxonomyCollection::from(
         new Taxonomy(1, 'music', 'Music', 'event_category'),
         new Taxonomy(2, 'art', 'Art', 'event_category'),
         new Taxonomy(3, 'featured', 'Featured', 'event_tag')

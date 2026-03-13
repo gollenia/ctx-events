@@ -14,9 +14,9 @@ use Countable;
 
 final readonly class TicketCollection extends Collection
 {
-    public function __construct(Ticket ...$tickets)
+    public static function from(Ticket ...$tickets): self
     {
-        parent::__construct($tickets);
+        return new self($tickets);
     }
 
 	public function getBookableTickets(TicketBookingsMap $map, \DateTimeImmutable $now): self
@@ -35,7 +35,7 @@ final readonly class TicketCollection extends Collection
 				$availableTickets[] = $ticket;
 			}
 		}
-		return new self(...$availableTickets);
+		return self::from(...$availableTickets);
 	}
 
 	public function hasAvailableTickets(TicketBookingsMap $map): bool

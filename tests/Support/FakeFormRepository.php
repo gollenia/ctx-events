@@ -40,7 +40,7 @@ final class FakeFormRepository implements FormRepository
         $this->formsById[$formId->toInt()] = new BookingForm(
             id: $formId,
             type: FormType::BOOKING,
-            fields: new FormFieldCollection(),
+            fields: FormFieldCollection::empty(),
             name: $name ?? 'Fake Booking Form',
             description: 'Fake booking form for tests'
         );
@@ -51,7 +51,7 @@ final class FakeFormRepository implements FormRepository
         $this->formsById[$formId->toInt()] = new AttendeeForm(
             id: $formId,
             type: FormType::ATTENDEE,
-            fields: new FormFieldCollection(),
+            fields: FormFieldCollection::empty(),
             name: $name ?? 'Fake Attendee Form',
             description: 'Fake attendee form for tests'
         );

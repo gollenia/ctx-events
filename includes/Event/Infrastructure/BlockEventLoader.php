@@ -43,7 +43,7 @@ final class BlockEventLoader
         $userContext = UserContextFactory::createFromCurrentUser();
         $collection = $container
             ->get(EventResponseAssembler::class)
-            ->mapEventCollection(new EventCollection($event), $includes, $userContext);
+            ->mapEventCollection(EventCollection::from($event), $includes, $userContext);
 
         self::$cache[$postId] = $collection->first();
 

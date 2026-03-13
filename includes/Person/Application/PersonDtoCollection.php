@@ -9,10 +9,10 @@ use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
 final readonly class PersonDtoCollection extends DtoCollection
 {
-    public function __construct(
+    public static function from(
         PersonDto ...$persons
-    ) {
-        parent::__construct($persons);
+    ): self {
+        return new self($persons);
     }
 
     public static function fromDomainCollection(PersonCollection $collection): PersonDtoCollection
@@ -21,7 +21,7 @@ final readonly class PersonDtoCollection extends DtoCollection
         foreach ($collection as $item) {
             $items[] = PersonDto::fromDomainModel($item);
         }
-        return new PersonDtoCollection(...$items);
+        return PersonDtoCollection::from(...$items);
     }
 
     public function findById(int $id): ?PersonDto

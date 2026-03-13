@@ -5,7 +5,7 @@ namespace Contexis\Events\Event\Domain\ValueObjects;
 
 use Contexis\Events\Shared\Domain\ValueObjects\StatusCounts;
 
-class EventStatusCounts extends StatusCounts
+readonly class EventStatusCounts extends StatusCounts
 {
 	public function __construct(
 		int $publish = 0,

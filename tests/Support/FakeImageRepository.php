@@ -24,7 +24,7 @@ final class FakeImageRepository implements ImageRepository
 
     public function findByIds(array $ids): ImageCollection
     {
-        return new ImageCollection();
+        return ImageCollection::empty();
     }
 
     /**

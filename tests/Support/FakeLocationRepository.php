@@ -31,7 +31,7 @@ final class FakeLocationRepository implements LocationRepository
     public function search(LocationCriteria $criteria): LocationCollection
     {
         $this->lastCriteria = $criteria;
-        return new LocationCollection();
+        return LocationCollection::empty();
     }
 
     public function first(LocationCriteria $criteria): ?Location
@@ -42,7 +42,7 @@ final class FakeLocationRepository implements LocationRepository
 
     public function findByIds(array $ids): LocationCollection
     {
-        return new LocationCollection();
+        return LocationCollection::empty();
     }
 
     public function get(LocationId $id): Location

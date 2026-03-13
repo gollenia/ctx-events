@@ -11,10 +11,9 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
  */
 final readonly class FormFieldCollection extends Collection
 {
-    public function __construct(
-        FormField ...$fields
-    ) {
-        parent::__construct($fields);
+    public static function from(FormField ...$fields): self
+    {
+        return new self($fields);
     }
 
 }

@@ -8,14 +8,10 @@ use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 
 abstract readonly class Collection implements \Countable, \IteratorAggregate
 {
-    /** @var array */
-    protected array $items;
-    protected ?Pagination $pagination;
-
-    final protected function __construct(array $items, ?Pagination $pagination = null)
+    final protected function __construct(
+		protected array $items, 
+		protected ?Pagination $pagination = null)
     {
-        $this->items = $items;
-        $this->pagination = $pagination;
     }
 
     public function withPagination(Pagination $pagination): static
@@ -34,11 +30,10 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
         return $this->pagination;
     }
 
-    public static function fromArray(array $items): static
-    {
-        $collection = new static($items);
-        return $collection;
-    }
+	public static function empty() : static
+	{
+		return new static([]);
+	}
 
     public function count(): int
     {

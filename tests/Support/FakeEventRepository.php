@@ -79,7 +79,7 @@ final class FakeEventRepository implements EventRepository
     {
         $this->lastCriteria = $criteria;
 
-        $events = EventCollection::fromArray(array_values($this->eventsById));
+        $events = EventCollection::from(...array_values($this->eventsById));
 
         return $events->withPagination(Pagination::of(
             totalItems: count($this->eventsById),

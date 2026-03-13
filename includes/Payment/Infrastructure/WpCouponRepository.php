@@ -78,7 +78,7 @@ class WpCouponRepository implements CouponRepository
         $couponIds = array_values(array_unique($couponIds));
 
         if ($couponIds === []) {
-            return new CouponCollection();
+            return CouponCollection::empty();
         }
 
         $query = new \WP_Query([

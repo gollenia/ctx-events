@@ -44,7 +44,7 @@ class WpLocationRepository implements LocationRepository
             $items[] = LocationMapper::map(new PostSnapshot($post));
         }
 
-        return new LocationCollection(...$items);
+        return LocationCollection::from(...$items);
     }
 
     public function first(LocationCriteria $criteria): ?Location
@@ -79,7 +79,7 @@ class WpLocationRepository implements LocationRepository
             $items[] = LocationMapper::map(new PostSnapshot($post));
         }
 
-        return new LocationCollection(...$items)
+        return LocationCollection::from(...$items)
           ->withPagination($pagination);
     }
 

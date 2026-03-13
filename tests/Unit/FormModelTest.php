@@ -36,7 +36,7 @@ function createComprehensiveBookingForm(): BookingForm
         type: FormType::BOOKING,
         name: 'Booking Form Complete',
         description: 'Contains all field types for tests',
-        fields: new FormFieldCollection(
+        fields: FormFieldCollection::from(
             new FormField('full_name', 'Full Name', true, new InputDetails(InputType::TEXT), FieldWidth::SIX),
             new FormField('bio', 'Bio', true, new TextareaDetails(rows: 4), FieldWidth::SIX),
             new FormField(

@@ -7,9 +7,6 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 
 final class RestRegistrar implements Registrar
 {
-    /**
-     * @param iterable<RestController> $adapters
-     */
     public function __construct(
 		private readonly iterable $adapters
 	)

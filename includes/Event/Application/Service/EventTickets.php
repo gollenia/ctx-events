@@ -46,6 +46,6 @@ final class EventTickets
             $items[] = TicketResponse::fromDomainModel($ticket);
         }
 
-        return TicketResponseCollection::fromArray($items);
+        return TicketResponseCollection::from(...$items);
     }
 }

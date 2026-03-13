@@ -31,7 +31,7 @@ final class FakePersonRepository implements PersonRepository
     public function search(PersonCriteria $criteria): PersonCollection
     {
         $this->lastCriteria = $criteria;
-        return new PersonCollection();
+        return PersonCollection::from();
     }
 
     public function first(PersonCriteria $criteria): ?Person
@@ -42,7 +42,7 @@ final class FakePersonRepository implements PersonRepository
 
     public function findByIds(array $ids): PersonCollection
     {
-        return new PersonCollection();
+        return PersonCollection::empty();
     }
 
     public function get(PersonId $id): Person

@@ -42,12 +42,12 @@ final class FakeGatewayRepository implements GatewayRepository
 
     public function findAll(): GatewayCollection
     {
-        return new GatewayCollection(...$this->gateways);
+        return GatewayCollection::from(...$this->gateways);
     }
 
     public function findActive(): GatewayCollection
     {
-        return new GatewayCollection(...array_filter(
+        return GatewayCollection::from(...array_filter(
             $this->gateways,
             static fn(PaymentGateway $gateway): bool => $gateway->isEnabled()
         ));

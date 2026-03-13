@@ -44,7 +44,7 @@ function makeOfflineBooking(BookingStatus $status = BookingStatus::PENDING): Boo
             'first_name' => 'Max',
             'last_name' => 'Mustermann',
         ]),
-        attendees: new AttendeeCollection(),
+        attendees: AttendeeCollection::from(),
         gateway: 'offline',
         coupon: null,
         transactions: null,

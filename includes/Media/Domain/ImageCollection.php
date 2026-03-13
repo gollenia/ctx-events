@@ -7,9 +7,8 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class ImageCollection extends Collection
 {
-    public function __construct(
-        Image ...$images
-    ) {
-        parent::__construct($images);
+    public static function from(Image ...$images): self
+    {
+        return new self($images);
     }
 }

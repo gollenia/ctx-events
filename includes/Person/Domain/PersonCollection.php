@@ -8,8 +8,8 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 readonly class PersonCollection extends Collection
 {
-    public function __construct(Person ...$persons)
-    {
-        parent::__construct($persons);
-    }
+    public static function from(Person ...$persons): self
+	{
+		return new self($persons);
+	}
 }

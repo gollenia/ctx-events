@@ -47,7 +47,7 @@ class FormMapper implements PostMapper
 
 		$blocks = self::getFieldBlocks($content);
 
-		if(empty($blocks)) return FormFieldCollection::fromArray([]);
+		if(empty($blocks)) return FormFieldCollection::empty();
 
 		$fields = [];
 		
@@ -96,7 +96,7 @@ class FormMapper implements PostMapper
 			
 		}
 
-		return FormFieldCollection::fromArray($fields);
+		return FormFieldCollection::from(...$fields);
 	}
 
 

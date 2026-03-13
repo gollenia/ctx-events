@@ -8,9 +8,8 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 readonly class FormSummaryCollection extends Collection
 {
-    public function __construct(
-        FormSummary ...$forms
-    ) {
-        parent::__construct($forms);
+    public static function from(FormSummary ...$forms): self
+    {
+        return new self($forms);
     }
 }

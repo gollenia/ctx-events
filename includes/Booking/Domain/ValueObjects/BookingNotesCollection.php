@@ -9,10 +9,9 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class BookingNotesCollection extends Collection
 {
-	 public function __construct(
-        BookingNote ...$entries
-    ) {
-        parent::__construct($entries);
+	public static function from(BookingNote ...$entries): self
+    {
+        return new self($entries);
     }
 
     public function add(BookingNote $entry): self

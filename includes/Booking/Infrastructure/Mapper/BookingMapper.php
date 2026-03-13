@@ -30,14 +30,14 @@ final class BookingMapper implements DatabaseMapper
 		$rawNotes = is_string($data['notes'] ?? null)
 			? json_decode($data['notes'], true)
 			: ($data['notes'] ?? []);
-		$notes = new BookingNotesCollection(...array_map(
+		$notes = BookingNotesCollection::from(...array_map(
 			static fn(array $item): BookingNote => BookingNote::fromArray($item),
 			$rawNotes ?? [],
 		));
         $rawLogEntries = is_string($data['log'] ?? null)
             ? json_decode($data['log'], true)
             : ($data['log'] ?? []);
-        $logEntries = new LogEntryCollection(...array_map(
+        $logEntries = LogEntryCollection::from(...array_map(
             static fn(array $item): LogEntry => LogEntry::fromArray($item),
             $rawLogEntries ?? [],
         ));
@@ -51,10 +51,10 @@ final class BookingMapper implements DatabaseMapper
 				?: new \DateTimeImmutable($data['date']),
 			status: BookingStatus::from((int) $data['status']),
 			registration: $registration,
-			attendees: AttendeeCollection::fromArray($data['attendees'] ?? []),
+			attendees: isset($data['attendees']) ? AttendeeCollection::from(...$data['attendees']) : AttendeeCollection::empty(),
 			gateway: $data['gateway'] ?? null,
 			coupon: null,
-			transactions: TransactionCollection::fromArray($data['transactions'] ?? []),
+			transactions: isset($data['transactions']) ? TransactionCollection::from(...$data['transactions']) : TransactionCollection::empty(),
 			eventId: EventId::from((int) $data['event_id']),
 			id: BookingId::from((int) $data['id']),
 			notes: $notes,

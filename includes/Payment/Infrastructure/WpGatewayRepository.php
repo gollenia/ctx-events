@@ -40,12 +40,12 @@ final class WpGatewayRepository implements GatewayRepository
                 error_log($e->getMessage());
             }
         }
-        return new GatewayCollection(...$result);
+        return GatewayCollection::from(...$result);
     }
 
     public function findActive(): GatewayCollection
     {
-        return new GatewayCollection(...array_filter(
+        return GatewayCollection::from(...array_filter(
             $this->findAll()->toArray(),
             fn(PaymentGateway $g) => $g->isEnabled()
         ));

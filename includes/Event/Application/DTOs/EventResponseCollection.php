@@ -17,11 +17,10 @@ final readonly class EventResponseCollection extends DtoCollection
     public ?Pagination $pagination;
 	public ?EventStatusCounts $statusCounts;
 
-    public function __construct(
-        EventResponse ...$events
-    ) {
-        parent::__construct($events);
-    }
+    public static function from(EventResponse ...$items): self
+	{
+		return new self($items);
+	}
 
     public static function fromDomainCollection(
         EventCollection $collection

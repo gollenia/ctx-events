@@ -168,7 +168,7 @@ final class FakeEventFactory
             );
         }
 
-        return TicketCollection::fromArray($tickets);
+        return TicketCollection::from(...$tickets);
     }
 
     private static function toDateTime(mixed $value): DateTimeImmutable

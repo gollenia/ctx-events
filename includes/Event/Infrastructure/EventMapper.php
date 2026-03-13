@@ -93,6 +93,6 @@ final class EventMapper implements PostMapper
         foreach ($ticketsData as $ticketData) {
             $tickets[] = TicketMapper::fromArray($ticketData, $currency);
         }
-        return TicketCollection::fromArray($tickets);
+        return TicketCollection::from(...$tickets);
     }
 }

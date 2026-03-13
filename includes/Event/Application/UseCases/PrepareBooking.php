@@ -46,7 +46,7 @@ final class PrepareBooking
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($eventId);
 
-        $tickets = $event->getAvailableTickets($now, $ticketBookingsMap) ?? new TicketCollection();
+        $tickets = $event->getAvailableTickets($now, $ticketBookingsMap) ?? TicketCollection::empty();
         $ticketDtos = $this->prepareBookingTicketLimits->map($tickets, $ticketBookingsMap, $event->overallCapacity);
         $bookingForm = $this->formRepository->find($event->forms->bookingForm);
         $attendeeForm = $this->formRepository->find($event->forms->attendeeForm);

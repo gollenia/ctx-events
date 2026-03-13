@@ -232,7 +232,7 @@ final class FakeBookingRepository implements BookingRepository
                     'first_name' => 'Test',
                     'last_name' => 'User ' . $this->sequence,
                 ]),
-                attendees: new AttendeeCollection(
+                attendees: AttendeeCollection::from(
                     new Attendee(
                         ticketId: $ticket->id,
                         ticketPrice: $ticket->price,

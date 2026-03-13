@@ -48,7 +48,7 @@ function makeOnlineSyncBooking(): Booking
             'first_name' => 'Erika',
             'last_name' => 'Muster',
         ]),
-        attendees: new AttendeeCollection(),
+        attendees: AttendeeCollection::empty(),
         gateway: 'mollie',
         coupon: null,
         transactions: null,

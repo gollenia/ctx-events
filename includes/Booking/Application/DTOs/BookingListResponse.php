@@ -12,9 +12,9 @@ final readonly class BookingListResponse extends DtoCollection
     public ?Pagination $pagination;
     public ?array $statusCounts;
 
-    public function __construct(BookingListItem ...$items)
+    public static function from(BookingListItem ...$items): self
     {
-        parent::__construct($items);
+        return new self($items);
     }
 
     public function withPagination(Pagination $pagination): self

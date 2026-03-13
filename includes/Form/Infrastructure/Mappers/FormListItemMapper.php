@@ -38,7 +38,7 @@ final class FormListItemMapper
             description: $snapshot->post_excerpt,
 			createdAt: new \DateTimeImmutable($snapshot->post_date),
 			usageCount: $usageCounts[$snapshot->ID] ?? 0,
-			tags: new TaxonomyCollection(...wp_get_post_tags($snapshot->ID, ['fields' => 'all'])),
+			tags: TaxonomyCollection::from(...wp_get_post_tags($snapshot->ID, ['fields' => 'all'])),
 			status: Status::from($snapshot->post_status),
         );
 	}

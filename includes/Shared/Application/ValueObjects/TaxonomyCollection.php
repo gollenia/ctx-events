@@ -7,6 +7,11 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class TaxonomyCollection extends Collection
 {
+	public static function from(Taxonomy ...$terms): self
+	{
+		return new self($terms);
+	}
+
     public function all(): array
     {
         return $this->items;

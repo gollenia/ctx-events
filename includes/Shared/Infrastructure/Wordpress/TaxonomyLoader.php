@@ -28,6 +28,6 @@ final class TaxonomyLoader
         );
 		
 
-        return TaxonomyCollection::fromArray($terms);
+        return TaxonomyCollection::from(...$terms);
     }
 }

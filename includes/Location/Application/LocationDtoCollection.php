@@ -11,10 +11,9 @@ use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
 final readonly class LocationDtoCollection extends DtoCollection
 {
-    public function __construct(
-        LocationDto ...$locations
-    ) {
-        parent::__construct($locations);
+    public static function from(LocationDto ...$locations): self
+    {
+        return new self($locations);
     }
 
     public static function fromDomainCollection(LocationCollection $collection): LocationDtoCollection
@@ -23,7 +22,7 @@ final readonly class LocationDtoCollection extends DtoCollection
         foreach ($collection as $item) {
             $items[] = LocationDto::fromDomainModel($item);
         }
-        return new LocationDtoCollection(...$items);
+        return LocationDtoCollection::from(...$items);
     }
 
     public function findById(LocationId $id): ?LocationDto

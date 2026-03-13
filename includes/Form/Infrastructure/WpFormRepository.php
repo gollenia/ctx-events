@@ -63,7 +63,7 @@ class WpFormRepository implements FormRepository
 				usageCount: $usageCounts[$postId] ?? 0
 			);
 		}
-		return new FormSummaryCollection(...$forms);
+		return FormSummaryCollection::from(...$forms);
 	}
 
 	private function getUsageCounts(array $postIds): array

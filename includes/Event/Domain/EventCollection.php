@@ -7,10 +7,9 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class EventCollection extends Collection
 {
-    public function __construct(
-        Event ...$events
-    ) {
-        parent::__construct($events);
+    public static function from(Event ...$events): self
+    {
+        return new self($events);
     }
 
 	public function getIds(): array

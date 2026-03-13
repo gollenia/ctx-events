@@ -55,7 +55,7 @@ class WpPersonRepository implements PersonRepository
             $persons[] = PersonMapper::map(new PostSnapshot($post));
         }
 
-        return new PersonCollection(...$persons);
+        return PersonCollection::from(...$persons);
     }
 
     public function search(PersonCriteria $criteria): PersonCollection
@@ -70,7 +70,7 @@ class WpPersonRepository implements PersonRepository
             $persons[] = PersonMapper::map(new PostSnapshot($post));
         }
 
-        return new PersonCollection(...$persons);
+        return PersonCollection::from(...$persons);
     }
 
     public function count(PersonCriteria $criteria): int

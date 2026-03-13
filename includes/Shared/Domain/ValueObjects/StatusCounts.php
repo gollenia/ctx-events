@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 
-final readonly class StatusCounts
+readonly class StatusCounts
 {
 	public function __construct(
 		public int $publish = 0,

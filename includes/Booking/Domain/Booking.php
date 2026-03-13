@@ -40,8 +40,8 @@ final readonly class Booking
         public ?TransactionCollection $transactions,
         public EventId $eventId,
         public ?BookingId $id = null,
-        public BookingNotesCollection $notes = new BookingNotesCollection(),
-        public LogEntryCollection $logEntries = new LogEntryCollection(),
+        public BookingNotesCollection $notes = new BookingNotesCollection([]),
+        public LogEntryCollection $logEntries = new LogEntryCollection([]),
     ) {
     }
 

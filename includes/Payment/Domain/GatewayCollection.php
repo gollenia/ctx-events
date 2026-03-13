@@ -8,9 +8,9 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class GatewayCollection extends Collection
 {
-	public function __construct(PaymentGateway ...$gateways)
+	public static function from(PaymentGateway ...$gateways): self
 	{
-		parent::__construct($gateways);
+		return new self($gateways);
 	}
 
 	public function removeBySlug(array $slugs): self

@@ -42,6 +42,6 @@ class CouponMapper implements PostMapper
 
 	public static function mapCollection(array $posts): CouponCollection
 	{
-		return new CouponCollection(...array_map(fn(PostSnapshot $post) => self::map($post), $posts));	
+		return CouponCollection::from(...array_map(fn(PostSnapshot $post) => self::map($post), $posts));	
 	}
 }

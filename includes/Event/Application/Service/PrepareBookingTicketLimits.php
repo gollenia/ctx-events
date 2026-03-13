@@ -20,7 +20,7 @@ final class PrepareBookingTicketLimits
             $ticketResponses[] = $this->mapSingleTicket($ticket, $ticketBookingsMap, $remainingOverallCapacity);
         }
 
-        return TicketResponseCollection::fromArray($ticketResponses);
+        return TicketResponseCollection::from(...$ticketResponses);
     }
 
     private function mapSingleTicket(
