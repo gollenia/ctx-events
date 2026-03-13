@@ -1,6 +1,7 @@
-import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
+import { buildInitialFormValues } from '../formFields';
 import { isFieldVisible } from '../hooks/useFieldVisibility';
 import type { BookingFormData } from '../types';
 
@@ -21,7 +22,8 @@ function validate(
 		if (!field.required) continue;
 
 		const val = formData[field.name];
-		const isEmpty = val === undefined || val === null || val === '' || val === false;
+		const isEmpty =
+			val === undefined || val === null || val === '' || val === false;
 		if (isEmpty) {
 			errors[field.name] = __('This field is required.', 'ctx-events');
 		}
@@ -30,8 +32,15 @@ function validate(
 	return errors;
 }
 
-export function BookingFormSection({ bookingForm, initialData, onNext }: Props) {
-	const [formData, setFormData] = useState<Record<string, unknown>>(initialData);
+export function BookingFormSection({
+	bookingForm,
+	initialData,
+	onNext,
+}: Props) {
+	const [formData, setFormData] =
+		useState<Record<string, unknown>>(() =>
+			buildInitialFormValues(bookingForm.fields, initialData),
+		);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
 	function handleChange(name: string, value: unknown) {
@@ -58,7 +67,11 @@ export function BookingFormSection({ bookingForm, initialData, onNext }: Props) 
 			/>
 
 			<div className="booking-section__footer">
-				<button type="button" className="booking-btn booking-btn--primary" onClick={handleSubmit}>
+				<button
+					type="button"
+					className="booking-btn booking-btn--primary"
+					onClick={handleSubmit}
+				>
 					{__('Continue', 'ctx-events')}
 				</button>
 			</div>

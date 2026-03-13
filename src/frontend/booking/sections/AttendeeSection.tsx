@@ -1,6 +1,7 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
+import { buildInitialFormValues } from '../formFields';
 import { isFieldVisible } from '../hooks/useFieldVisibility';
 import type { AttendeePayload, BookingFormData, TicketInfo } from '../types';
 
@@ -23,6 +24,7 @@ type Props = {
 function buildInitialEntries(
 	tickets: TicketInfo[],
 	counts: Record<string, number>,
+	form: BookingFormData,
 	initial: AttendeePayload[],
 ): AttendeeEntry[] {
 	const entries: AttendeeEntry[] = [];
@@ -32,17 +34,15 @@ function buildInitialEntries(
 		const count = counts[ticket.id] ?? 0;
 		for (let i = 0; i < count; i++) {
 			const existing = initial[globalIndex];
-			entries.push({
-				ticketId: ticket.id,
-				ticketName: ticket.name,
-				index: globalIndex,
-				formData: existing
-					? {
-							...existing.metadata,
-						}
-					: {},
-				errors: {},
-			});
+				entries.push({
+					ticketId: ticket.id,
+					ticketName: ticket.name,
+					index: globalIndex,
+					formData: existing
+						? buildInitialFormValues(form.fields, existing.metadata)
+						: buildInitialFormValues(form.fields, {}),
+					errors: {},
+				});
 			globalIndex++;
 		}
 	}
@@ -80,7 +80,12 @@ export function AttendeeSection({
 	onNext,
 }: Props) {
 	const [entries, setEntries] = useState<AttendeeEntry[]>(() =>
-		buildInitialEntries(tickets, ticketCounts, initialAttendees),
+		buildInitialEntries(
+			tickets,
+			ticketCounts,
+			attendeeForm,
+			initialAttendees,
+		),
 	);
 
 	function handleChange(index: number, name: string, value: unknown) {

@@ -1,6 +1,10 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
-import type { AttendeePayload, SubmitResult } from '../types';
+import type {
+	AttendeePayload,
+	BookingCreatedResponse,
+	SubmitResult,
+} from '../types';
 
 type State = 'idle' | 'loading' | 'done';
 
@@ -20,7 +24,7 @@ export function useSubmitBooking() {
 		setStatus('loading');
 
 		try {
-			const response = await apiFetch<{ reference?: string; payment_url?: string }>({
+			const response = await apiFetch<BookingCreatedResponse>({
 				path: '/events/v3/bookings',
 				method: 'POST',
 				data: payload,
@@ -28,11 +32,11 @@ export function useSubmitBooking() {
 
 			setStatus('done');
 
-			if (response.payment_url) {
-				return { type: 'mollie', url: response.payment_url };
-			}
-
-			return { type: 'success', reference: response.reference ?? '' };
+			return {
+				type: 'success',
+				reference: response.reference ?? '',
+				payment: response.payment ?? null,
+			};
 		} catch (err: unknown) {
 			setStatus('idle');
 			const message =

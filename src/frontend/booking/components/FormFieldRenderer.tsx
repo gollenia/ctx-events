@@ -1,5 +1,6 @@
 import type { FormField as FormFieldType } from '../types';
 import { isFieldVisible } from '../../../shared/__experimentalForm';
+import { getBookingFieldValue } from '../formFields';
 import { FormField } from './FormField';
 
 type Props = {
@@ -19,7 +20,7 @@ export function FormFieldRenderer({ fields, formData, errors, onChange }: Props)
 					<FormField
 						key={field.name}
 						field={field}
-						value={formData[field.name]}
+						value={getBookingFieldValue(field, formData)}
 						error={errors[field.name]}
 						onChange={(value) => onChange(field.name, value)}
 					/>
