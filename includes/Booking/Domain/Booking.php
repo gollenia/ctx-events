@@ -9,15 +9,15 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
+use Contexis\Events\Booking\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Payment\Domain\Coupon;
 use Contexis\Events\Payment\Domain\TransactionCollection;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
-use Contexis\Events\Shared\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
-use DateTime;
 use DateTimeImmutable;
 
 /**
@@ -41,6 +41,7 @@ final readonly class Booking
         public EventId $eventId,
         public ?BookingId $id = null,
         public BookingNotesCollection $notes = new BookingNotesCollection(),
+        public LogEntryCollection $logEntries = new LogEntryCollection(),
     ) {
     }
 
@@ -82,9 +83,24 @@ final readonly class Booking
 		return clone($this, ['priceSummary' => $priceSummary]);
 	}
 
+    public function appendLogEntry(LogEntry $entry): self
+    {
+        return clone($this, ['logEntries' => $this->logEntries->add($entry)]);
+    }
+
     public function withBookingStatus(BookingStatus $status): self
     {
         return clone($this, ['status' => $status]);
+    }
+
+    public function withNotes(BookingNotesCollection $notes): self
+    {
+        return clone($this, ['notes' => $notes]);
+    }
+
+    public function withLogEntries(LogEntryCollection $logEntries): self
+    {
+        return clone($this, ['logEntries' => $logEntries]);
     }
 
 	public function countAttendees(): int
@@ -100,11 +116,15 @@ final readonly class Booking
 		PriceSummary $priceSummary,
 	): self {
 		return clone($this, [
+			'email' => $registration->requireEmail(),
+			'name' => $registration->requirePersonName(),
 			'registration' => $registration,
 			'attendees' => $attendees,
 			'gateway' => $gateway,
 			'notes' => $notes,
+            'logEntries' => $this->logEntries,
 			'priceSummary' => $priceSummary,
 		]);
 	}
+
 }
