@@ -4,14 +4,17 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
+use Contexis\Events\Booking\Application\DTOs\CreateBookingResponse;
+use Contexis\Events\Booking\Application\Contracts\ReferenceGenerator;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
 use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\Enums\BookingEvent;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
+use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
-use Contexis\Events\Booking\Infrastructure\BookingReferenceGenerator;
 use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Payment\Domain\Coupon;
@@ -19,6 +22,7 @@ use Contexis\Events\Payment\Domain\CouponRepository;
 use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
+use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
@@ -30,16 +34,17 @@ final class CreateBooking
         private EventRepository $eventRepository,
         private GatewayRepository $gatewayRepository,
         private TransactionRepository $transactionRepository,
-        private BookingReferenceGenerator $referenceGenerator,
+        private ReferenceGenerator $referenceGenerator,
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
+        private CurrentActorProvider $currentActorProvider,
         private CheckTicketAvailibility $checkTicketAvailibility,
 		private CalculateBookingPrice $calculateBookingPrice,
 		private CouponRepository $couponRepository,
 		private BookingTokenValidator $tokenValidator
     ) {}
 
-    public function execute(CreateBookingRequest $request): string
+    public function execute(CreateBookingRequest $request): CreateBookingResponse
     {
 		if ($request->token === null) {
 			throw new \DomainException('Booking token is required.');
@@ -93,7 +98,11 @@ final class CreateBooking
             attendees: $attendees,
             priceSummary: $priceSummary,
             gateway: $request->gateway,
-        );
+        )->appendLogEntry(new LogEntry(
+            eventType: BookingEvent::Created,
+            actor: $this->currentActorProvider->current(),
+            timestamp: $now,
+        ));
 
         $bookingId = $this->bookingRepository->save($booking);
         $booking = $booking->withId($bookingId);
@@ -109,7 +118,7 @@ final class CreateBooking
             $this->transactionRepository->save($transaction);
         }
 
-        return $reference->toString();
+        return CreateBookingResponse::from($reference, $transaction ?? null);
     }
 
     private function resolveCoupon(?string $couponCode): ?Coupon

@@ -4,32 +4,32 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Application\UseCases;
 
+use Contexis\Events\Booking\Application\Contracts\BookingAction;
+use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
+use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Payment\Domain\TransactionRepository;
 
-final class DeleteBooking
+final class DeleteBooking implements BookingAction
 {
     public function __construct(
         private BookingRepository $repository,
+        private AttendeeRepository $attendeeRepository,
+        private TransactionRepository $transactionRepository,
     ) {
     }
 
-    public function execute(string $reference): void
+    public function execute(BookingActionRequest $request): void
     {
-        $booking = $this->repository->findByReference($reference);
+        $booking = $this->repository->findByReference($request->reference);
 
         if ($booking === null) {
-            throw new \DomainException("Booking not found: {$reference}");
-        }
-
-        if (!$booking->status->canTransitionTo(BookingStatus::DELETED)) {
-            throw new \DomainException(
-                "Cannot transition from {$booking->status->name} to " . BookingStatus::DELETED->name
-            );
+            throw new \DomainException("Booking not found: {$request->reference}");
         }
 
         $id = $booking->id ?? throw new \RuntimeException('Booking has no ID');
-
-        $this->repository->updateStatus($id, BookingStatus::DELETED);
+        $this->transactionRepository->deleteByBookingId($id);
+        $this->attendeeRepository->deleteByBookingId($id);
+        $this->repository->delete($id);
     }
 }
