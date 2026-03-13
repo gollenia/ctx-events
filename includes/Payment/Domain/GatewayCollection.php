@@ -10,7 +10,7 @@ final readonly class GatewayCollection extends Collection
 {
 	public function __construct(PaymentGateway ...$gateways)
 	{
-		$this->items = $gateways;
+		parent::__construct($gateways);
 	}
 
 	public function removeBySlug(array $slugs): self

@@ -18,7 +18,7 @@ final readonly class TicketResponseCollection extends DtoCollection
     public function __construct(
         TicketResponse ...$tickets
     ) {
-        $this->items = $tickets;
+        parent::__construct($tickets);
     }
 
     public static function fromDomainCollection(

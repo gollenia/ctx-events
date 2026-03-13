@@ -10,6 +10,6 @@ final readonly class ImageCollection extends Collection
     public function __construct(
         Image ...$images
     ) {
-        $this->items = $images;
+        parent::__construct($images);
     }
 }

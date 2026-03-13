@@ -10,7 +10,7 @@ final readonly class EventCollection extends Collection
     public function __construct(
         Event ...$events
     ) {
-        $this->items = $events;
+        parent::__construct($events);
     }
 
 	public function getIds(): array

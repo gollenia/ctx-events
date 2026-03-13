@@ -14,7 +14,7 @@ final readonly class FormFieldCollection extends Collection
     public function __construct(
         FormField ...$fields
     ) {
-        $this->items = $fields;
+        parent::__construct($fields);
     }
 
 }

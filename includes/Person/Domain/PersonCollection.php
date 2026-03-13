@@ -10,6 +10,6 @@ readonly class PersonCollection extends Collection
 {
     public function __construct(Person ...$persons)
     {
-        $this->items = $persons;
+        parent::__construct($persons);
     }
 }

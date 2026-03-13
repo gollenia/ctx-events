@@ -8,9 +8,14 @@ use Contexis\Events\Shared\Domain\Abstract\Collection;
 
 final readonly class LogEntryCollection extends Collection
 {
-	 public function __construct(
+	public function __construct(
         LogEntry ...$entries
     ) {
-        $this->items = $entries;
+        parent::__construct($entries);
+    }
+
+    public function add(LogEntry $entry): self
+    {
+        return new self(...[...$this->items, $entry]);
     }
 }

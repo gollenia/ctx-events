@@ -16,7 +16,7 @@ final readonly class TicketCollection extends Collection
 {
     public function __construct(Ticket ...$tickets)
     {
-        $this->items = $tickets;
+        parent::__construct($tickets);
     }
 
 	public function getBookableTickets(TicketBookingsMap $map, \DateTimeImmutable $now): self

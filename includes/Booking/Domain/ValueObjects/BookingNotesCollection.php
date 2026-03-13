@@ -12,6 +12,13 @@ final readonly class BookingNotesCollection extends Collection
 	 public function __construct(
         BookingNote ...$entries
     ) {
-        $this->items = $entries;
+        parent::__construct($entries);
+    }
+
+    public function add(BookingNote $entry): self
+    {
+        $items = [...$this->items, $entry];
+
+        return new self(...$items);
     }
 }

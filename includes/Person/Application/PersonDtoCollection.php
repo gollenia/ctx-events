@@ -12,7 +12,7 @@ final readonly class PersonDtoCollection extends DtoCollection
     public function __construct(
         PersonDto ...$persons
     ) {
-        $this->items = $persons;
+        parent::__construct($persons);
     }
 
     public static function fromDomainCollection(PersonCollection $collection): PersonDtoCollection

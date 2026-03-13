@@ -11,6 +11,6 @@ readonly class FormSummaryCollection extends Collection
     public function __construct(
         FormSummary ...$forms
     ) {
-        $this->items = $forms;
+        parent::__construct($forms);
     }
 }

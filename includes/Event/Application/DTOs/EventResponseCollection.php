@@ -20,7 +20,7 @@ final readonly class EventResponseCollection extends DtoCollection
     public function __construct(
         EventResponse ...$events
     ) {
-        $this->items = $events;
+        parent::__construct($events);
     }
 
     public static function fromDomainCollection(

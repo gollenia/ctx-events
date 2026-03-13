@@ -9,6 +9,6 @@ final readonly class TransactionCollection extends Collection
 {
     public function __construct(Transaction ...$transactions)
     {
-        $this->items = $transactions;
+        parent::__construct($transactions);
     }
 }

@@ -9,6 +9,6 @@ final readonly class LocationCollection extends Collection
 {
     public function __construct(Location ...$locations)
     {
-        $this->items = $locations;
+        parent::__construct($locations);
     }
 }

@@ -12,7 +12,7 @@ final readonly class ImageDtoCollection extends DtoCollection
     public function __construct(
         ImageDto ...$images
     ) {
-        $this->items = $images;
+        parent::__construct($images);
     }
 
     public static function fromDomainCollection(ImageCollection $collection): ImageDtoCollection

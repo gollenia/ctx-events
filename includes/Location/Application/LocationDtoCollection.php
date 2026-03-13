@@ -14,7 +14,7 @@ final readonly class LocationDtoCollection extends DtoCollection
     public function __construct(
         LocationDto ...$locations
     ) {
-        $this->items = $locations;
+        parent::__construct($locations);
     }
 
     public static function fromDomainCollection(LocationCollection $collection): LocationDtoCollection

@@ -12,9 +12,10 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
     protected array $items;
     protected ?Pagination $pagination;
 
-    public function __construct(object ...$items)
+    final protected function __construct(array $items, ?Pagination $pagination = null)
     {
         $this->items = $items;
+        $this->pagination = $pagination;
     }
 
     public function withPagination(Pagination $pagination): static
@@ -35,7 +36,7 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
 
     public static function fromArray(array $items): static
     {
-        $collection = new static(...$items);
+        $collection = new static($items);
         return $collection;
     }
 
