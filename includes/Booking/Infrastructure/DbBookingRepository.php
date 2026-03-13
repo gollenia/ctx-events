@@ -9,7 +9,9 @@ use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
@@ -20,10 +22,8 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Payment\Infrastructure\TransactionMigration;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
-use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
-use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Shared\Infrastructure\Enums\DatabaseOutput;
 
@@ -47,6 +47,10 @@ class DbBookingRepository implements BookingRepository
             'registration' => wp_json_encode($booking->registration->all()),
             'gateway'      => $booking->gateway,
             'coupon_id'    => $booking->coupon?->id?->toInt(),
+            'log'          => wp_json_encode(array_map(
+                static fn ($entry): array => $entry->toArray(),
+                $booking->logEntries->toArray(),
+            )),
         ];
 
         $insertId = $this->db->insert($table, $data);
@@ -160,10 +164,15 @@ class DbBookingRepository implements BookingRepository
         $attendeeTable = AttendeeMigration::getTableName();
 
         $this->db->update($table, [
+            'email'        => $booking->email->toString(),
             'registration' => wp_json_encode($booking->registration->all()),
             'gateway'      => $booking->gateway,
-            'donation'     => $booking->priceSummary->donationAmount->amountCents,
+            'price_summary' => wp_json_encode($booking->priceSummary->toArray()),
             'notes'        => wp_json_encode($booking->notes->toArray()),
+            'log'          => wp_json_encode(array_map(
+                static fn ($entry): array => $entry->toArray(),
+                $booking->logEntries->toArray(),
+            )),
             'spaces'       => $booking->countAttendees(),
         ], ['id' => $booking->id->toInt()]);
 
@@ -180,12 +189,25 @@ class DbBookingRepository implements BookingRepository
         }
     }
 
-    public function updateStatus(BookingId $id, BookingStatus $status): void
+    public function updateNotes(BookingId $id, BookingNotesCollection $notes): void
+    {
+        $table = BookingMigration::getTableName();
+
+        $this->db->update($table, [
+            'notes' => wp_json_encode($notes->toArray()),
+        ], ['id' => $id->toInt()]);
+    }
+
+    public function updateStatus(BookingId $id, BookingStatus $status, LogEntryCollection $logEntries): void
     {
         $table = BookingMigration::getTableName();
         $sql = $this->db->prepare(
-            "UPDATE {$table} SET status = %d WHERE id = %d",
+            "UPDATE {$table} SET status = %d, log = %s WHERE id = %d",
             $status->value,
+            wp_json_encode(array_map(
+                static fn ($entry): array => $entry->toArray(),
+                $logEntries->toArray(),
+            )),
             $id->toInt()
         );
         $this->db->query($sql);
