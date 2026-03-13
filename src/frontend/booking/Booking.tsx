@@ -1,9 +1,15 @@
-import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { BookingAccordion } from './BookingAccordion';
 import { useBookingData } from './hooks/useBookingData';
 import { useSubmitBooking } from './hooks/useSubmitBooking';
-import type { AttendeePayload, BookingState, SectionId, SubmitResult } from './types';
+import type {
+	AttendeePayload,
+	BookingPayment,
+	BookingState,
+	SectionId,
+	SubmitResult,
+} from './types';
 
 type Props = {
 	postId: number;
@@ -25,6 +31,7 @@ export default function Booking({ postId }: Props) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [bookingState, setBookingState] = useState<BookingState>(initialState);
 	const [successRef, setSuccessRef] = useState<string | null>(null);
+	const [successPayment, setSuccessPayment] = useState<BookingPayment | null>(null);
 	const { state: dataState, load } = useBookingData(postId);
 	const { status: submitStatus, submit } = useSubmitBooking();
 
@@ -46,6 +53,7 @@ export default function Booking({ postId }: Props) {
 		setIsOpen(false);
 		setBookingState(initialState());
 		setSuccessRef(null);
+		setSuccessPayment(null);
 	}
 
 	function handleToggleSection(id: SectionId) {
@@ -71,7 +79,8 @@ export default function Booking({ postId }: Props) {
 		const data = dataState.status === 'loaded' ? dataState.data : null;
 		if (!data) return;
 
-		const hasAttendees = data.attendeeForm !== null && data.attendeeForm.fields.length > 0;
+		const hasAttendees =
+			data.attendeeForm !== null && data.attendeeForm.fields.length > 0;
 		advanceTo(hasAttendees ? 'attendees' : 'booking', 'tickets');
 	}
 
@@ -87,20 +96,31 @@ export default function Booking({ postId }: Props) {
 		setBookingState((prev) => {
 			const completedSections = new Set(prev.completedSections);
 			completedSections.add('booking');
-			return { ...prev, registration, openSection: 'payment', completedSections };
+			return {
+				...prev,
+				registration,
+				openSection: 'payment',
+				completedSections,
+			};
 		});
 	}
 
 	function handleResult(result: SubmitResult) {
 		if (result.type === 'success') {
 			setSuccessRef(result.reference);
+			setSuccessPayment(result.payment);
 		}
 	}
 
 	if (!isOpen) return null;
 
 	return (
-		<div className="booking-modal" role="dialog" aria-modal="true" aria-label={__('Book event', 'ctx-events')}>
+		<div
+			className="booking-modal"
+			role="dialog"
+			aria-modal="true"
+			aria-label={__('Book event', 'ctx-events')}
+		>
 			<div className="booking-modal__backdrop" onClick={handleClose} />
 			<div className="booking-modal__dialog">
 				<div className="booking-modal__header">
@@ -131,6 +151,7 @@ export default function Booking({ postId }: Props) {
 							postId={postId}
 							isSubmitting={submitStatus === 'loading'}
 							successRef={successRef}
+							successPayment={successPayment}
 							onTicketChange={handleTicketChange}
 							onTicketsDone={handleTicketsDone}
 							onAttendeesDone={handleAttendeesDone}

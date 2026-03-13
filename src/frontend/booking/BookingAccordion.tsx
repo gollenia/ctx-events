@@ -1,11 +1,18 @@
 import { __ } from '@wordpress/i18n';
 import { AccordionSection } from './AccordionSection';
-import { TicketSection } from './sections/TicketSection';
 import { AttendeeSection } from './sections/AttendeeSection';
 import { BookingFormSection } from './sections/BookingFormSection';
 import { PaymentSection } from './sections/PaymentSection';
 import { SuccessSection } from './sections/SuccessSection';
-import type { AttendeePayload, BookingData, BookingState, SectionId, SubmitResult } from './types';
+import { TicketSection } from './sections/TicketSection';
+import type {
+	AttendeePayload,
+	BookingData,
+	BookingPayment,
+	BookingState,
+	SectionId,
+	SubmitResult,
+} from './types';
 
 type Props = {
 	data: BookingData;
@@ -13,6 +20,7 @@ type Props = {
 	postId: number;
 	isSubmitting: boolean;
 	successRef: string | null;
+	successPayment: BookingPayment | null;
 	onTicketChange: (ticketId: string, count: number) => void;
 	onTicketsDone: () => void;
 	onAttendeesDone: (attendees: AttendeePayload[]) => void;
@@ -47,6 +55,7 @@ export function BookingAccordion({
 	postId,
 	isSubmitting,
 	successRef,
+	successPayment,
 	onTicketChange,
 	onTicketsDone,
 	onAttendeesDone,
@@ -57,9 +66,15 @@ export function BookingAccordion({
 	onClose,
 }: Props) {
 	if (successRef !== null) {
-		return <SuccessSection reference={successRef} eventName={data.eventName} onClose={onClose} />;
+		return (
+			<SuccessSection
+				reference={successRef}
+				eventName={data.eventName}
+				payment={successPayment}
+				onClose={onClose}
+			/>
+		);
 	}
-
 	const sections = getSections(data);
 	const totalSelected = Object.values(state.tickets).reduce((a, b) => a + b, 0);
 

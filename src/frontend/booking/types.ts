@@ -65,6 +65,43 @@ export type AttendeePayload = {
 	metadata: Record<string, unknown>;
 };
 
+export type PaymentAmount = {
+	amountCents: number;
+	currency: string;
+};
+
+export type PaymentBankData = {
+	accountHolder: string;
+	iban: string;
+	bic: string;
+	bankName: string;
+};
+
+export type RedirectPayment = {
+	gateway: string;
+	status: number;
+	amount: PaymentAmount;
+	externalId: string;
+	checkoutUrl: string;
+	gatewayUrl: string | null;
+	instructions: string;
+};
+
+export type BankTransferPayment = {
+	gateway: string;
+	status: number;
+	amount: PaymentAmount;
+	bankData: PaymentBankData;
+	instructions: string;
+};
+
+export type BookingPayment = RedirectPayment | BankTransferPayment;
+
+export type BookingCreatedResponse = {
+	reference: string;
+	payment: BookingPayment | null;
+};
+
 export type BookingState = {
 	tickets: Record<string, number>;
 	attendees: AttendeePayload[];
@@ -83,6 +120,5 @@ export type SectionId =
 	| 'success';
 
 export type SubmitResult =
-	| { type: 'mollie'; url: string }
-	| { type: 'success'; reference: string }
+	| { type: 'success'; reference: string; payment: BookingPayment | null }
 	| { type: 'error'; message: string };
