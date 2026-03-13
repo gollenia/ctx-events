@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Presentation;
 
+use Contexis\Events\Booking\Application\Contracts\BookingAction;
+use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
 use Contexis\Events\Booking\Application\UseCases\ApproveBooking;
 use Contexis\Events\Booking\Application\UseCases\CancelBooking;
 use Contexis\Events\Booking\Application\UseCases\DeleteBooking;
@@ -14,6 +16,8 @@ use Contexis\Events\Shared\Presentation\Contracts\RestController;
 final class BookingActionController implements RestController
 {
     use BookingControllerHelpers;
+
+    private const string UUID_PATTERN = '[A-Za-z0-9-]{6,64}';
 
     public function __construct(
         private ApproveBooking $approveBooking,
@@ -31,35 +35,35 @@ final class BookingActionController implements RestController
             'sendmail' => ['required' => false, 'type' => 'boolean', 'default' => true],
         ]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})/approve', [[
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/approve', [[
             'methods'             => 'POST',
             'callback'            => [$this, 'approveBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
             'args'                => $baseWithSendmail,
         ]]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})/deny', [[
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/deny', [[
             'methods'             => 'POST',
             'callback'            => [$this, 'denyBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
             'args'                => $baseWithSendmail,
         ]]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})/cancel', [[
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/cancel', [[
             'methods'             => 'POST',
             'callback'            => [$this, 'cancelBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
             'args'                => $baseWithSendmail,
         ]]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})/restore', [[
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/restore', [[
             'methods'             => 'POST',
             'callback'            => [$this, 'restoreBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
             'args'                => $baseWithSendmail,
         ]]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})', [[
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')', [[
             'methods'             => 'DELETE',
             'callback'            => [$this, 'deleteBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
@@ -67,10 +71,15 @@ final class BookingActionController implements RestController
         ]]);
     }
 
-    private function executeAction(callable $fn, \WP_REST_Request $request): \WP_REST_Response
+    private function executeAction(BookingAction $action, \WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            $fn((string) $request->get_param('uuid'));
+            $sendMail = $request->get_param('sendmail');
+
+            $action->execute(new BookingActionRequest(
+                reference: (string) $request->get_param('uuid'),
+                sendMail: $sendMail === null ? true : (bool) $sendMail,
+            ));
             return new \WP_REST_Response(null, 204);
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
@@ -79,26 +88,26 @@ final class BookingActionController implements RestController
 
     public function approveBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return $this->executeAction(fn($uuid) => $this->approveBooking->execute($uuid), $request);
+        return $this->executeAction($this->approveBooking, $request);
     }
 
     public function denyBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return $this->executeAction(fn($uuid) => $this->denyBooking->execute($uuid), $request);
+        return $this->executeAction($this->denyBooking, $request);
     }
 
     public function cancelBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return $this->executeAction(fn($uuid) => $this->cancelBooking->execute($uuid), $request);
+        return $this->executeAction($this->cancelBooking, $request);
     }
 
     public function restoreBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return $this->executeAction(fn($uuid) => $this->restoreBooking->execute($uuid), $request);
+        return $this->executeAction($this->restoreBooking, $request);
     }
 
     public function deleteBooking(\WP_REST_Request $request): \WP_REST_Response
     {
-        return $this->executeAction(fn($uuid) => $this->deleteBooking->execute($uuid), $request);
+        return $this->executeAction($this->deleteBooking, $request);
     }
 }

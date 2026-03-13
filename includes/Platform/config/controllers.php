@@ -13,5 +13,7 @@ return [
     get(\Contexis\Events\Payment\Presentation\CouponController::class),
 	get(\Contexis\Events\Form\Presentation\FormController::class),
 	get(\Contexis\Events\Booking\Presentation\BookingController::class),
+	get(\Contexis\Events\Booking\Presentation\BookingNoteController::class),
 	get(\Contexis\Events\Booking\Presentation\BookingActionController::class),
+    get(\Contexis\Events\Booking\Presentation\BookingPaymentController::class),
 ];

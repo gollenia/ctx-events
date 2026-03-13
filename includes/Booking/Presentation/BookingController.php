@@ -75,11 +75,11 @@ final class BookingController implements RestController
             ],
         ]);
 
-        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9]{12})', [
+        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9-]{6,64})', [
             [
                 'methods'             => \WP_REST_Server::READABLE,
                 'callback'            => [$this, 'editBooking'],
-                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'permission_callback' => '__return_true',
                 'args'                => $baseArgs,
             ],
             [
@@ -89,12 +89,12 @@ final class BookingController implements RestController
                 'args'                => array_merge($baseArgs, [
                     'registration'  => ['required' => true, 'type' => 'object'],
                     'attendees'     => ['required' => true, 'type' => 'array'],
-                    'notes'         => ['required' => true, 'type' => 'array'],
                     'gateway'       => ['required' => false, 'type' => 'string'],
                     'donation_cents' => ['required' => false, 'type' => 'integer', 'default' => 0],
                 ]),
             ],
         ]);
+
     }
 
     public function listBookings(\WP_REST_Request $request): \WP_REST_Response
@@ -172,7 +172,6 @@ final class BookingController implements RestController
             registration: (array) $request->get_param('registration'),
             attendees: (array) $request->get_param('attendees'),
             donationCents: (int) $request->get_param('donation_cents'),
-            notes: (array) $request->get_param('notes'),
             gateway: $request->get_param('gateway') !== null
                 ? (string) $request->get_param('gateway')
                 : null,

@@ -13,7 +13,7 @@ trait BookingControllerHelpers
 
     public function isValidBookingUuid(string $value): bool
     {
-        return preg_match('/^[A-Za-z0-9]{12}$/', $value) === 1;
+        return preg_match('/^[A-Za-z0-9-]{6,64}$/', $value) === 1;
     }
 
     private function getBaseArgs(): array
