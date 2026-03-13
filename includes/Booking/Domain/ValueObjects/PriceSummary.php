@@ -15,6 +15,7 @@ class PriceSummary
         public readonly Price $discountAmount,
         public readonly Price $finalPrice
     ) {
+		$this->validateCurrencyConsistency();
     }
 
     public function isFree(): bool
@@ -25,8 +26,7 @@ class PriceSummary
     public static function fromValues(
         Price $bookingPrice,
         Price $donationAmount,
-        Price $discountAmount,
-        Currency $currency
+        Price $discountAmount
     ): self {
         $finalPrice = max(0, $bookingPrice->toInt() + $donationAmount->toInt() - $discountAmount->toInt());
 
@@ -34,7 +34,7 @@ class PriceSummary
             $bookingPrice,
             $donationAmount,
             $discountAmount,
-            new Price($finalPrice, $currency)
+            new Price($finalPrice, $bookingPrice->currency)
         );
     }
 
@@ -65,6 +65,14 @@ class PriceSummary
 		return clone($this, [
 			'donationAmount' => $donationAmount
 		]);
+	}
+
+	private function validateCurrencyConsistency(): void
+	{
+		$currency = $this->bookingPrice->currency;
+		if (!$this->donationAmount->currency->equals($currency) || !$this->discountAmount->currency->equals($currency) || !$this->finalPrice->currency->equals($currency)) {
+			throw new \DomainException('All prices in PriceSummary must have the same currency.');
+		}
 	}
 
 	public function toArray(): array

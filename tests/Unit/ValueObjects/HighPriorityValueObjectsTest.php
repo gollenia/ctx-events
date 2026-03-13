@@ -92,7 +92,9 @@ test('booking status transition matrix is enforced', function () {
     expect(BookingStatus::PENDING->canTransitionTo(BookingStatus::DELETED))->toBeTrue();
     expect(BookingStatus::APPROVED->canTransitionTo(BookingStatus::EXPIRED))->toBeFalse();
     expect(BookingStatus::CANCELED->canTransitionTo(BookingStatus::DELETED))->toBeTrue();
+    expect(BookingStatus::CANCELED->canTransitionTo(BookingStatus::PENDING))->toBeTrue();
     expect(BookingStatus::EXPIRED->canTransitionTo(BookingStatus::APPROVED))->toBeFalse();
+    expect(BookingStatus::EXPIRED->canTransitionTo(BookingStatus::PENDING))->toBeTrue();
     expect(BookingStatus::DELETED->canTransitionTo(BookingStatus::PENDING))->toBeFalse();
 });
 
@@ -103,7 +105,7 @@ test('price supports arithmetic, rounding and guards currency mismatch', functio
     $base = Price::fromFloat(10.005, $eur);
     expect($base->toInt())->toBe(1001);
     expect($base->percentageOf(10))->toBe(100);
-    expect($base->minus(2000)->toInt())->toBe(0);
+    expect($base->subtract(new Price(2000, $eur))->toInt())->toBe(0);
     expect($base->add(new Price(99, $eur))->toInt())->toBe(1100);
 
     expect(static fn () => $base->add(new Price(1, $usd)))->toThrow(InvalidArgumentException::class);

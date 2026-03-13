@@ -16,9 +16,11 @@ use Contexis\Events\Shared\Application\ValueObjects\Taxonomy;
 use Contexis\Events\Shared\Application\ValueObjects\TaxonomyCollection;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Domain\ValueObjects\Address;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\Link;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusCounts;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
@@ -156,10 +158,14 @@ test('person name and user context helper methods work', function () {
 });
 
 test('price summary, status counts, event status counts and event forms work as expected', function () {
-    $summary = PriceSummary::fromValues(bookingPrice: 1000, donationAmount: 200, discountAmount: 300, currency: 'EUR');
+    $summary = PriceSummary::fromValues(
+		new Price(1000, Currency::fromCode('EUR')), 
+		new Price(200, Currency::fromCode('EUR')), 
+		new Price(300, Currency::fromCode('EUR')),
+	);
     expect($summary->finalPrice->toInt())->toBe(900);
     expect($summary->isFree())->toBeFalse();
-    expect(PriceSummary::free('EUR')->isFree())->toBeTrue();
+    expect(PriceSummary::free(Currency::fromCode('EUR'))->isFree())->toBeTrue();
 
     $counts = StatusCounts::fromArray(['publish' => '2', 'draft' => 1]);
     expect($counts->toArray()['publish'])->toBe(2);
