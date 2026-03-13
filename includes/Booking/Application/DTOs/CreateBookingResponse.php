@@ -14,4 +14,9 @@ final readonly class CreateBookingResponse
 		public Transaction $transaction
 	) {
 	}
+
+	public static function from(BookingReference $reference, Transaction $transaction): self
+	{
+		return new self($reference, $transaction);
+	}
 }
