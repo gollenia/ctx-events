@@ -89,13 +89,15 @@ test('price range can be built from prices and empty state', function () {
 
 test('booking status transition matrix is enforced', function () {
     expect(BookingStatus::PENDING->canTransitionTo(BookingStatus::APPROVED))->toBeTrue();
-    expect(BookingStatus::PENDING->canTransitionTo(BookingStatus::DELETED))->toBeTrue();
+    expect(BookingStatus::PENDING->canTransitionTo(BookingStatus::CANCELED))->toBeTrue();
+    expect(BookingStatus::PENDING->canTransitionTo(BookingStatus::EXPIRED))->toBeTrue();
     expect(BookingStatus::APPROVED->canTransitionTo(BookingStatus::EXPIRED))->toBeFalse();
-    expect(BookingStatus::CANCELED->canTransitionTo(BookingStatus::DELETED))->toBeTrue();
     expect(BookingStatus::CANCELED->canTransitionTo(BookingStatus::PENDING))->toBeTrue();
     expect(BookingStatus::EXPIRED->canTransitionTo(BookingStatus::APPROVED))->toBeFalse();
     expect(BookingStatus::EXPIRED->canTransitionTo(BookingStatus::PENDING))->toBeTrue();
-    expect(BookingStatus::DELETED->canTransitionTo(BookingStatus::PENDING))->toBeFalse();
+    expect(BookingStatus::CANCELED->mayBeDeleted())->toBeTrue();
+    expect(BookingStatus::EXPIRED->mayBeDeleted())->toBeTrue();
+    expect(BookingStatus::PENDING->mayBeDeleted())->toBeFalse();
 });
 
 test('price supports arithmetic, rounding and guards currency mismatch', function () {

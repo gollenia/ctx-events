@@ -8,10 +8,12 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Payment\Application\Services\SyncBookingFromTransaction;
 use Contexis\Events\Payment\Application\UseCases\SyncTransactionStatus;
 use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
 use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
+use Contexis\Events\Shared\Domain\ValueObjects\Actor;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
@@ -78,15 +80,15 @@ test('paid online transaction approves the booking', function () {
     $useCase = new SyncTransactionStatus(
         transactionRepository: $transactionRepository,
         gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
-        bookingRepository: $bookingRepository,
-        clock: makeSyncClock(),
+        syncBookingFromTransaction: new SyncBookingFromTransaction($bookingRepository, makeSyncClock()),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
 
     $useCase->execute('tr_paid_1');
 
     expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::APPROVED)
-        ->and($transactionRepository->findByExternalId('tr_paid_1')?->status)->toBe(TransactionStatus::PAID);
+        ->and($transactionRepository->findByExternalId('tr_paid_1')?->status)->toBe(TransactionStatus::PAID)
+        ->and($bookingRepository->find($bookingId)?->logEntries?->first()?->actor->name)->toBe('Mollie webhook');
 });
 
 test('expired online transaction expires the booking', function () {
@@ -111,8 +113,7 @@ test('expired online transaction expires the booking', function () {
     $useCase = new SyncTransactionStatus(
         transactionRepository: $transactionRepository,
         gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
-        bookingRepository: $bookingRepository,
-        clock: makeSyncClock(),
+        syncBookingFromTransaction: new SyncBookingFromTransaction($bookingRepository, makeSyncClock()),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
 
@@ -120,4 +121,35 @@ test('expired online transaction expires the booking', function () {
 
     expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED)
         ->and($transactionRepository->findByExternalId('tr_expired_1')?->status)->toBe(TransactionStatus::EXPIRED);
+});
+
+test('manual sync can use an explicit actor', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $transactionRepository = FakeTransactionRepository::withTransactions(
+        Transaction::forPaymentService(
+            bookingId: $bookingId,
+            amount: Price::from(5000, Currency::fromCode('EUR')),
+            externalId: 'tr_paid_manual',
+            checkoutUrl: \Uri\Rfc3986\Uri::parse('https://checkout.example.test/pay'),
+            gateway: 'mollie',
+            gatewayUrl: \Uri\Rfc3986\Uri::parse('https://gateway.example.test/pay/tr_paid_manual'),
+        )
+    );
+
+    $gateway = new FakePaymentGateway(
+        id: 'mollie',
+        verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->complete(),
+    );
+
+    $useCase = new SyncTransactionStatus(
+        transactionRepository: $transactionRepository,
+        gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
+        syncBookingFromTransaction: new SyncBookingFromTransaction($bookingRepository, makeSyncClock()),
+        currentActorProvider: new FakeCurrentActorProvider(),
+    );
+
+    $useCase->execute('tr_paid_manual', Actor::system('Admin sync'));
+
+    expect($bookingRepository->find($bookingId)?->logEntries?->first()?->actor->name)->toBe('Admin sync');
 });

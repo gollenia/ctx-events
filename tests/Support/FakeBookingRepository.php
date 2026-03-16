@@ -69,6 +69,13 @@ final class FakeBookingRepository implements BookingRepository
         return null;
     }
 
+    public function findByEventId(EventId $eventId): array
+    {
+        $this->lastEventIdArg = $eventId;
+
+        return $this->bookingsForEvent($eventId);
+    }
+
     public function save(Booking $booking): BookingId
     {
         $bookingId = BookingId::from($this->sequence) ?? throw new \RuntimeException('Invalid id');
@@ -137,7 +144,7 @@ final class FakeBookingRepository implements BookingRepository
 
     public function search(BookingListRequest $query): BookingListResponse
     {
-        return new BookingListResponse();
+        return BookingListResponse::empty();
     }
 
     public function delete(BookingId $id): void
@@ -309,7 +316,6 @@ final class FakeBookingRepository implements BookingRepository
             BookingStatus::APPROVED => 'approved',
             BookingStatus::CANCELED => 'canceled',
             BookingStatus::EXPIRED => 'expired',
-            BookingStatus::DELETED => 'expired',
         };
     }
 

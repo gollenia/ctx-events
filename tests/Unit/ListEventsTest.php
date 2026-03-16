@@ -51,7 +51,6 @@ test('lists events with pagination and status counts', function () {
         locations: EventLocations::create(new FakeLocationRepository()),
         images: EventImages::create(new FakeImageRepository()),
         persons: EventPersons::create(new FakePersonRepository()),
-        tickets: EventTickets::onlyBookable(),
         taxonomyLoader: new TaxonomyLoader(),
         clock: $clock,
         bookingRepository: FakeBookingRepository::empty(),
@@ -61,7 +60,6 @@ test('lists events with pagination and status counts', function () {
         eventRepository: $eventRepository,
         eventStatusRepository: $statusRepository,
         eventResponseAssembler: $assembler,
-        userContext: new UserContext(0, false, false, false),
     );
 
     $criteria = new EventCriteria(
@@ -71,15 +69,15 @@ test('lists events with pagination and status counts', function () {
         orderBy: OrderBy::default(),
     );
 
-    $response = $useCase->execute($criteria, new EventIncludeRequest());
+    $response = $useCase->execute($criteria, new EventIncludeRequest(), new UserContext(0, false, false, false));
 
     expect($response)->toBeInstanceOf(EventResponseCollection::class);
     expect($response->count())->toBe(2);
-    expect($response->pagination)->not->toBeNull();
-    expect($response->pagination->currentPage)->toBe(2);
-    expect($response->pagination->perPage)->toBe(5);
-    expect($response->pagination->totalItems)->toBe(2);
-    expect($response->statusCounts)->toBe($statusCounts);
-    expect($response->statusCounts->publish)->toBe(2);
-    expect($response->statusCounts->cancelled)->toBe(1);
+    expect($response->pagination())->not->toBeNull();
+    expect($response->pagination()->currentPage)->toBe(2);
+    expect($response->pagination()->perPage)->toBe(5);
+    expect($response->pagination()->totalItems)->toBe(2);
+    expect($response->statusCounts())->toBe($statusCounts);
+    expect($response->statusCounts()?->publish)->toBe(2);
+    expect($response->statusCounts()?->cancelled)->toBe(1);
 });

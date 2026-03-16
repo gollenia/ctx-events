@@ -5,6 +5,7 @@ namespace Tests\Support;
 
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Payment\Domain\TransactionCollection;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 
 final class FakeTransactionRepository implements TransactionRepository
@@ -62,9 +63,14 @@ final class FakeTransactionRepository implements TransactionRepository
         return $this->transactionsByExternalId[$externalId] ?? null;
     }
 
+    public function findByBookingId(BookingId $bookingId): TransactionCollection
+    {
+        return TransactionCollection::from(...($this->transactionsByBookingId[$bookingId->toInt()] ?? []));
+    }
+
     public function findLatestByBookingId(BookingId $bookingId): ?Transaction
     {
-        $transactions = $this->transactionsByBookingId[$bookingId->toInt()] ?? [];
+        $transactions = $this->findByBookingId($bookingId)->toArray();
 
         if ($transactions === []) {
             return null;

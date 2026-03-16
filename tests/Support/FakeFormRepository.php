@@ -12,6 +12,7 @@ use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
 use Contexis\Events\Form\Domain\Form;
 use Contexis\Events\Form\Domain\FormId;
 use Contexis\Events\Form\Domain\FormRepository;
+use Contexis\Events\Shared\Domain\Contracts\StatusCountsInterface;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusCounts;
 
@@ -68,7 +69,7 @@ final class FakeFormRepository implements FormRepository
     {
         $this->lastCriteria = $criteria;
 
-        return new FormListResponse();
+        return FormListResponse::empty();
     }
 
     public function saveStatus(FormId $formId, Status $status): void
@@ -107,7 +108,7 @@ final class FakeFormRepository implements FormRepository
         return $newId;
     }
 
-    public function getCountsByStatus(): StatusCounts
+    public function getCountsByStatus(): StatusCountsInterface
     {
         return new StatusCounts(publish: count($this->formsById));
     }

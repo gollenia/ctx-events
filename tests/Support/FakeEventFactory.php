@@ -100,10 +100,11 @@ final class FakeEventFactory
 
     private static function defaultMetadata(): array
     {
-        $startDate = DateHelpers::toImmutable(fake()->dateTimeBetween('now', '+1 month'));
-        $endDate = DateHelpers::toImmutable(fake()->dateTimeBetween('+1 month', '+2 months'));
-        $bookingStart = DateHelpers::toImmutable(fake()->dateTimeBetween('-1 month', 'now'));
-        $bookingEnd = DateHelpers::toImmutable(fake()->dateTimeBetween('now', '+1 month'));
+        $referenceDate = new DateTimeImmutable('2026-03-10 10:00:00');
+        $startDate = $referenceDate->modify('+14 days');
+        $endDate = $referenceDate->modify('+15 days');
+        $bookingStart = $referenceDate->modify('-14 days');
+        $bookingEnd = $referenceDate->modify('+7 days');
         $ticketId = 'ticket-main-' . fake()->numberBetween(1000, 9999);
 
         return [

@@ -95,7 +95,6 @@ test('denying an offline booking leaves its transaction unchanged', function () 
 
     $useCase = new DenyBooking(
         repository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeActionClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
