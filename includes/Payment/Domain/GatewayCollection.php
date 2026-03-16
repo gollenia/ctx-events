@@ -12,12 +12,4 @@ final readonly class GatewayCollection extends Collection
 	{
 		return new self($gateways);
 	}
-
-	public function removeBySlug(array $slugs): self
-	{
-		$filtered = array_filter($this->items, function (PaymentGateway $gateway) use ($slugs) {
-			return !in_array($gateway->slug, $slugs, true);
-		});
-		return new self(...$filtered);
-	}
 }

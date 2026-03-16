@@ -48,7 +48,7 @@ final class MollieGateway implements PaymentGateway
 		return $transaction->complete();
 	}
 
-    private function getClient(): ?MollieApiClient
+    private function getClient(): MollieApiClient
     {
         if ($this->client !== null) {
             return $this->client;
@@ -81,7 +81,7 @@ final class MollieGateway implements PaymentGateway
                 'metadata' => [
                     'booking_uuid' => $reference,
                     'customer_name' => $booking->name->toString(),
-                    'customer_email' => (string) $booking->email,
+                    'customer_email' => $booking->email->toString(),
                 ],
                 'sequenceType' => 'oneoff',
             ]
@@ -93,8 +93,34 @@ final class MollieGateway implements PaymentGateway
             externalId: $molliePayment->id,
             checkoutUrl: Uri::parse($molliePayment->getCheckoutUrl()),
 			gatewayUrl: Uri::parse('https://www.mollie.com/dashboard/payments/' . $molliePayment->id),
-            gateway: 'mollie'
+            gateway: 'mollie',
+            expiresAt: $this->resolveExpiresAt($molliePayment),
         );
+    }
+
+    private function resolveExpiresAt(object $molliePayment): ?\DateTimeImmutable
+    {
+        $value = null;
+
+        if (method_exists($molliePayment, 'getExpiresAt')) {
+            $value = $molliePayment->getExpiresAt();
+        } elseif (isset($molliePayment->expiresAt)) {
+            $value = $molliePayment->expiresAt;
+        }
+
+        if ($value instanceof \DateTimeImmutable) {
+            return $value;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return \DateTimeImmutable::createFromInterface($value);
+        }
+
+        if (is_string($value) && $value !== '') {
+            return new \DateTimeImmutable($value);
+        }
+
+        return null;
     }
 
 	public function updateSettings(array $settings): void {

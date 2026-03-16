@@ -110,7 +110,6 @@ final class GatewayController implements RestController
 
 	public function checkGatewayPermission(): bool
 	{
-		return true;
 		return current_user_can('manage_options');
 	}
 }

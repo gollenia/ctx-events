@@ -24,6 +24,7 @@ final readonly class Transaction
 		public string $instructions = '',
         public ?Uri $checkoutUrl = null,
 		public ?Uri $gatewayUrl = null,
+        public ?\DateTimeImmutable $expiresAt = null,
     ) {
     }
 
@@ -33,6 +34,7 @@ final readonly class Transaction
         string $gateway,
         ?BankData $bankData = null,
 		string $instructions = '',
+        ?\DateTimeImmutable $expiresAt = null,
     ): self {
         return new self(
             id: null, 
@@ -42,7 +44,8 @@ final readonly class Transaction
             status: TransactionStatus::PENDING,
             bankData: $bankData,
 			instructions: $instructions,
-            createdAt: new \DateTimeImmutable()
+            createdAt: new \DateTimeImmutable(),
+            expiresAt: $expiresAt,
         );
     }
 
@@ -54,6 +57,7 @@ final readonly class Transaction
         string $gateway,
 		Uri $gatewayUrl,
 		string $instructions = '',
+        ?\DateTimeImmutable $expiresAt = null,
     ): self {
         return new self(
             id: null,
@@ -65,7 +69,8 @@ final readonly class Transaction
             checkoutUrl: $checkoutUrl,
 			gatewayUrl: $gatewayUrl,
 			instructions: $instructions,
-            createdAt: new \DateTimeImmutable()
+            createdAt: new \DateTimeImmutable(),
+            expiresAt: $expiresAt,
         );
     }
 
@@ -108,4 +113,23 @@ final readonly class Transaction
 			"amount" => $amount
 		]);
 	}
+
+    public function withExpiresAt(?\DateTimeImmutable $expiresAt): self
+    {
+        return clone($this, [
+            "expiresAt" => $expiresAt
+        ]);
+    }
+
+    public function withCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        return clone($this, [
+            "createdAt" => $createdAt
+        ]);
+    }
+
+    public function hasExpiredAt(\DateTimeImmutable $now): bool
+    {
+        return $this->expiresAt !== null && $this->expiresAt <= $now;
+    }
 }

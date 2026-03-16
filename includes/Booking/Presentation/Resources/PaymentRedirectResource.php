@@ -30,8 +30,8 @@ final readonly class PaymentRedirectResource implements Resource
 				status: $transaction->status->value,
 				amount: $transaction->amount->toArray(),
 				externalId: $transaction->externalId,
-				checkoutUrl: (string) $transaction->checkoutUrl,
-				gatewayUrl: $transaction->gatewayUrl ? (string) $transaction->gatewayUrl : null,
+				checkoutUrl: $transaction->checkoutUrl->toString(),
+				gatewayUrl: $transaction->gatewayUrl ? $transaction->gatewayUrl->toString() : null,
 				instructions: $transaction->instructions,
 			);
 		}

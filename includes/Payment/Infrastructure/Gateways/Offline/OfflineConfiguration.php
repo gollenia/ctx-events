@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Infrastructure\Gateways\Offline;
 
+use Contexis\Events\Payment\Domain\OfflinePaymentConfiguration;
 use Contexis\Events\Payment\Infrastructure\Contracts\GatewayConfiguration;
 use Contexis\Events\Payment\Domain\ValueObjects\BankData;
 use Contexis\Events\Shared\Domain\ValueObjects\MalfunctionException;
 
-final class OfflineConfiguration implements GatewayConfiguration
+final class OfflineConfiguration implements GatewayConfiguration, OfflinePaymentConfiguration
 {
 
 	private const string OPTION_KEY = 'ctx_events_gateway_offline';
@@ -39,13 +40,17 @@ final class OfflineConfiguration implements GatewayConfiguration
         $this->instructions = (string) ($data['instructions'] ?? $this->instructions ?? '');
 
         $this->bankData = BankData::fromValues(
-            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData?->accountHolder ?? ''),
-            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData?->iban ?? ''),
-            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData?->bic ?? ''),
-            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData?->bankName ?? '')
+            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData->accountHolder ?? ''),
+            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData->iban ?? ''),
+            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData->bic ?? ''),
+            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData->bankName ?? '')
         );
 
-		if($this->isEnabled && (!$this->bankData || !$this->bankData->isValid())) {
+		if (!$this->isEnabled) {
+			return;
+		}
+
+		if (!$this->bankData->isValid()) {
             $this->isEnabled = false;
         }
     }
@@ -68,10 +73,10 @@ final class OfflineConfiguration implements GatewayConfiguration
 			'description' => sanitize_text_field($data['description'] ?? $this->description),	
 			'paymentTerm' => isset($data['paymentTerm']) ? (int) $data['paymentTerm'] : $this->paymentTerm,
 			'instructions' => wp_kses_post($data['instructions'] ?? $this->instructions),
-			'accountHolder' => sanitize_text_field($data['accountHolder'] ?? $this->bankData?->accountHolder ?? ''),
-			'iban' => sanitize_text_field($data['iban'] ?? $this->bankData?->iban ?? ''),
-			'bic' => sanitize_text_field($data['bic'] ?? $this->bankData?->bic ?? ''),
-			'bankName' => sanitize_text_field($data['bankName'] ?? $this->bankData?->bankName ?? '')
+			'accountHolder' => sanitize_text_field($data['accountHolder'] ?? $this->bankData->accountHolder ?? ''),
+			'iban' => sanitize_text_field($data['iban'] ?? $this->bankData->iban ?? ''),
+			'bic' => sanitize_text_field($data['bic'] ?? $this->bankData->bic ?? ''),
+			'bankName' => sanitize_text_field($data['bankName'] ?? $this->bankData->bankName ?? '')
 		];
 
 		$this->mapDataToProperties($cleanData);
@@ -198,4 +203,9 @@ final class OfflineConfiguration implements GatewayConfiguration
 			return false;
 		}
 	}
+
+    public function paymentTermInDays(): int
+    {
+        return max(0, $this->paymentTerm);
+    }
 }

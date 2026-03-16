@@ -11,6 +11,8 @@ interface TransactionRepository
 
     public function findByExternalId(string $externalId): ?Transaction;
 
+    public function findByBookingId(BookingId $bookingId): TransactionCollection;
+
     public function findLatestByBookingId(BookingId $bookingId): ?Transaction;
 
     public function deleteByBookingId(BookingId $bookingId): void;

@@ -22,8 +22,8 @@ final class DbTransactionRepository implements TransactionRepository
         $details = [
             'bankData' => $transaction->bankData?->toArray(),
             'instructions' => $transaction->instructions !== '' ? $transaction->instructions : null,
-            'checkoutUrl' => $transaction->checkoutUrl ? (string) $transaction->checkoutUrl : null,
-            'gatewayUrl' => $transaction->gatewayUrl ? (string) $transaction->gatewayUrl : null,
+            'checkoutUrl' => $transaction->checkoutUrl ? $transaction->checkoutUrl->toString() : null,
+            'gatewayUrl' => $transaction->gatewayUrl ? $transaction->gatewayUrl->toString() : null,
         ];
 
         $data = [
@@ -34,6 +34,7 @@ final class DbTransactionRepository implements TransactionRepository
             'gateway'          => $transaction->gateway,
             'status'           => $transaction->status->value,
             'transaction_date' => $transaction->createdAt->format('Y-m-d H:i:s'),
+            'expires_at'       => $transaction->expiresAt?->format('Y-m-d H:i:s'),
             'details'          => wp_json_encode($details),
         ];
 
@@ -61,7 +62,7 @@ final class DbTransactionRepository implements TransactionRepository
             $externalId
         );
 
-        $row = $this->db->getRow($query, DatabaseOutput::ARRAY_A);
+        $row = $this->db->getRow($query, DatabaseOutput::ARRAY_ASSOC);
 
         if (!is_array($row)) {
             return null;
@@ -70,21 +71,31 @@ final class DbTransactionRepository implements TransactionRepository
         return TransactionMapper::map($row);
     }
 
-    public function findLatestByBookingId(BookingId $bookingId): ?Transaction
+    public function findByBookingId(BookingId $bookingId): \Contexis\Events\Payment\Domain\TransactionCollection
     {
         $table = TransactionMigration::getTableName();
         $query = $this->db->prepare(
-            "SELECT * FROM {$table} WHERE booking_id = %d ORDER BY created_at DESC, id DESC LIMIT 1",
+            "SELECT * FROM {$table} WHERE booking_id = %d ORDER BY transaction_date DESC, id DESC",
             $bookingId->toInt()
         );
 
-        $row = $this->db->getRow($query, DatabaseOutput::ARRAY_A);
+        $rows = $this->db->getResults($query, DatabaseOutput::ARRAY_ASSOC);
 
-        if (!is_array($row)) {
+        return \Contexis\Events\Payment\Domain\TransactionCollection::from(
+            ...array_map(TransactionMapper::map(...), $rows)
+        );
+    }
+
+    public function findLatestByBookingId(BookingId $bookingId): ?Transaction
+    {
+        $transactions = $this->findByBookingId($bookingId);
+        $items = $transactions->toArray();
+
+        if ($items === []) {
             return null;
         }
 
-        return TransactionMapper::map($row);
+        return $items[0];
     }
 
     public function deleteByBookingId(BookingId $bookingId): void

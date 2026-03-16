@@ -32,6 +32,7 @@ final class TransactionMapper
             instructions: (string) ($details['instructions'] ?? ''),
             checkoutUrl: !empty($details['checkoutUrl']) ? Uri::parse((string) $details['checkoutUrl']) : null,
             gatewayUrl: !empty($details['gatewayUrl']) ? Uri::parse((string) $details['gatewayUrl']) : null,
+            expiresAt: !empty($row['expires_at']) ? new \DateTimeImmutable((string) $row['expires_at']) : null,
         );
     }
 

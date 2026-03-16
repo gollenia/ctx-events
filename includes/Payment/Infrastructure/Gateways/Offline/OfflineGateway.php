@@ -57,11 +57,17 @@ final class OfflineGateway implements PaymentGateway
 
     public function initiatePayment(Booking $booking): Transaction
     {
+        $paymentTermDays = $this->config->paymentTermInDays();
+        $expiresAt = $paymentTermDays > 0
+            ? new \DateTimeImmutable(sprintf('+%d days', $paymentTermDays))
+            : null;
+
         return Transaction::forBankTransfer(
             bookingId: $booking->id,
             amount: $booking->priceSummary->finalPrice,
             gateway: 'offline',
-            bankData: $this->config->bankData
+            bankData: $this->config->bankData,
+            expiresAt: $expiresAt,
         );
     }
 
