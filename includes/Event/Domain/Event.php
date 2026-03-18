@@ -137,6 +137,10 @@ final readonly class Event
 
 	public function canBookAt(DateTimeImmutable $now, TicketBookingsMap $map): BookingDecision
 	{
+		if($this->bookingPolicy === null || $this->bookingPolicy->enabled() === false) {
+			return BookingDecision::deny(BookingDenyReason::DISABLED);
+		}
+
 		if ($this->tickets === null) {
 			return BookingDecision::deny(BookingDenyReason::NO_TICKETS);
 		}
