@@ -68,6 +68,17 @@ final class FakeTransactionRepository implements TransactionRepository
         return TransactionCollection::from(...($this->transactionsByBookingId[$bookingId->toInt()] ?? []));
     }
 
+    public function findByBookingIds(array $bookingIds): array
+    {
+        $result = [];
+
+        foreach ($bookingIds as $bookingId) {
+            $result[$bookingId->toInt()] = $this->findByBookingId($bookingId);
+        }
+
+        return $result;
+    }
+
     public function findLatestByBookingId(BookingId $bookingId): ?Transaction
     {
         $transactions = $this->findByBookingId($bookingId)->toArray();

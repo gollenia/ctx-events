@@ -13,12 +13,12 @@ final class FakeReconcilableTransactionFinder implements FindReconcilableTransac
     {
     }
 
-    public function findPendingForReconciliation(\DateTimeImmutable $now, \DateTimeImmutable $staleBefore): array
+    public function findPendingForReconciliation(\DateTimeImmutable $now): array
     {
         return array_values(array_filter(
             $this->transactions,
             static fn(Transaction $transaction): bool => $transaction->status === \Contexis\Events\Payment\Domain\Enums\TransactionStatus::PENDING
-                && ($transaction->hasExpiredAt($now) || $transaction->createdAt <= $staleBefore)
+                && $transaction->hasExpiredAt($now)
         ));
     }
 }
