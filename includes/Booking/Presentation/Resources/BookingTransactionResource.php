@@ -34,8 +34,8 @@ final readonly class BookingTransactionResource implements Resource
             createdAt: $transaction->createdAt->format(DATE_ATOM),
             bankData: $transaction->bankData?->toArray(),
             instructions: $transaction->instructions,
-            checkoutUrl: $transaction->checkoutUrl ? (string) $transaction->checkoutUrl : null,
-            gatewayUrl: $transaction->gatewayUrl ? (string) $transaction->gatewayUrl : null,
+            checkoutUrl: $transaction->checkoutUrl ? $transaction->checkoutUrl->toString() : null,
+            gatewayUrl: $transaction->gatewayUrl ? $transaction->gatewayUrl->toString() : null,
         );
     }
 
