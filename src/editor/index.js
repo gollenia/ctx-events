@@ -9,23 +9,23 @@ import './editor.scss';
 /**
  * Blocks dependencies.
  */
-import * as booking from './blocks/booking/index.js';
+import * as booking from './blocks/booking/index.ts';
 
 /**
  * Form dependencies.
  */
 import * as couponEditor from './blocks/coupon-editor/index.js';
 import * as details from './blocks/details/index.js';
-import * as detailsAudience from './blocks/details-audience/index.js';
-import * as detailsDate from './blocks/details-date/index.js';
-import * as detailsItem from './blocks/details-item/index.js';
-import * as detailsLocation from './blocks/details-location/index.js';
-import * as detailsPerson from './blocks/details-person/index.js';
-import * as detailsPrice from './blocks/details-price/index.js';
-import * as detailsShutdown from './blocks/details-shutdown/index.js';
-import * as detailsSpaces from './blocks/details-spaces/index.js';
-import * as detailsTime from './blocks/details-time/index.js';
-import * as featured from './blocks/featured/index.js';
+import * as detailsAudience from './blocks/details-audience/index.ts';
+import * as detailsDate from './blocks/details-date/index.ts';
+import * as detailsItem from './blocks/details-item/index.ts';
+import * as detailsLocation from './blocks/details-location/index.ts';
+import * as detailsPerson from './blocks/details-person/index.ts';
+import * as detailsPrice from './blocks/details-price/index.ts';
+import * as detailsShutdown from './blocks/details-shutdown/index.ts';
+import * as detailsSpaces from './blocks/details-spaces/index.ts';
+import * as detailsTime from './blocks/details-time/index.ts';
+import * as hero from './blocks/hero/index.ts';
 import * as formCheckbox from './blocks/form/checkbox/index.ts';
 import * as formContainer from './blocks/form/container/index.js';
 import * as formCountry from './blocks/form/country/index.ts';
@@ -37,9 +37,9 @@ import * as formRadio from './blocks/form/radio/index.ts';
 import * as formSelect from './blocks/form/select/index.ts';
 import * as formText from './blocks/form/text/index.ts';
 import * as formTextarea from './blocks/form/textarea/index.ts';
-import * as locationEditor from './blocks/location-editor/index.js';
-import * as personEditor from './blocks/person-editor/index.js';
-import * as upcoming from './blocks/upcoming/index.js';
+import * as locationEditor from './blocks/location-editor/index.ts';
+import * as personEditor from './blocks/person-editor/index.ts';
+import * as upcoming from './blocks/upcoming/index.ts';
 import bookingSidebar from './plugins/event/BookingSidebar.js';
 /**
  * Plugin dependencies.
@@ -56,7 +56,7 @@ import personalData from './plugins/person/personal.js';
 const blocks = [
 	upcoming,
 	booking,
-	featured,
+	hero,
 	formContainer,
 	formText,
 	formEmail,

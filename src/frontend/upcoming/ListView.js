@@ -20,7 +20,7 @@ function EventCards(props) {
 			excerptLength,
 			textAlignment,
 			showAudience,
-			showSpeaker,
+			showPerson,
 		},
 		events,
 	} = props;
@@ -34,7 +34,7 @@ function EventCards(props) {
 						: '';
 
 				const bookingWarning = () => {
-					if (!showBookedUp || !item.bookings.has_bookings) return null;
+					if (!showBookedUp || !item.bookings?.hasBookings) return null;
 					if (item.bookings?.spaces > bookedUpWarningThreshold) return null;
 
 					if (item.bookings?.spaces > 0) {
@@ -54,16 +54,19 @@ function EventCards(props) {
 
 				return (
 					<div className="event-card" key={index}>
-						{showImages && (
+						{showImages && item.image?.url && (
 							<a href={item.link} className="event-card-image">
-								<img src={item.image?.sizes?.large?.url} />
+								<img
+									src={item.image?.sizes?.large?.url || item.image?.url}
+									alt={item.image?.altText || item.title}
+								/>
 							</a>
 						)}
 						<div className="event-card-content">
 							{item.category && showCategory && (
-								<span class="event-card-label">{item.category.name}</span>
+								<span className="event-card-label">{item.category.name}</span>
 							)}
-							<h5 class="event-card-subtitle">
+							<h5 className="event-card-subtitle">
 								{formatDateRange(item.start, item.end)}
 							</h5>
 							<a href={item.link}>
@@ -74,21 +77,21 @@ function EventCards(props) {
 								{truncate(item.excerpt, excerptLength)}
 							</p>
 							{(showAudience ||
-								showSpeaker ||
+								showPerson ||
 								showLocation ||
 								showBookedUp) && (
-								<div class="card__footer card__subtitle pills pills--small">
+								<div className="card__footer card__subtitle pills pills--small">
 									{showAudience && item.audience?.length > 0 && (
 										<span className="pills__item event__audience">
 											{item.audience}
 										</span>
 									)}
-									{showSpeaker == 'name' && item.speaker?.id && (
+									{showPerson === 'name' && item.person?.id && (
 										<span className="pills__item event__speaker">
-											{item.speaker.name}
+											{item.person.name}
 										</span>
 									)}
-									{showLocation && item.location?.ID && (
+									{showLocation && item.location?.id && (
 										<span className="pills__item event__location">
 											{location}
 										</span>

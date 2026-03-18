@@ -19,7 +19,7 @@ function EventCards(props) {
 			bookedUpWarningThreshold,
 			excerptLength,
 			showAudience,
-			showSpeaker,
+			showPerson,
 			animateOnScroll,
 			animationType,
 		},
@@ -42,7 +42,7 @@ function EventCards(props) {
 						: '';
 
 				const bookingWarning = () => {
-					if (!showBookedUp || !item.bookings.has_bookings) return null;
+					if (!showBookedUp || !item.bookings?.hasBookings) return null;
 					if (item.bookings?.spaces > bookedUpWarningThreshold) return null;
 
 					if (item.bookings?.spaces > 0) {
@@ -62,42 +62,40 @@ function EventCards(props) {
 
 				return (
 					<li className="event-card" key={index}>
-						{showSpeaker && item.speaker?.image?.sizes?.thumbnail && (
+						{showPerson === 'image' && item.person && (
 							<div className="event-card-speaker">
-								<img src={item.speaker?.image?.sizes?.thumbnail?.url} />
 								<div>
-									<div>{item.speaker.name}</div>
-									<div>{item.speaker.role}</div>
+									<div>{item.person.name}</div>
 								</div>
 							</div>
 						)}
-						{showImages && item.image.attachment_id !== 0 && (
+						{showImages && item.image?.url && (
 							<a href={item.link} className="event-card-image">
 								<img
-									src={item.image.sizes?.large?.url}
-									alt={item.image.alt || item.title}
+									src={item.image.sizes?.large?.url || item.image.url}
+									alt={item.image.altText || item.title}
 								/>
 							</a>
 						)}
 						<div className="event-card-content">
 							{item.category && showCategory && (
-								<span class="event-card-label">{item.category.name}</span>
+								<span className="event-card-label">{item.category.name}</span>
 							)}
 							<a href={item.link}>
 								<h2 className="event-card-title">{item.title}</h2>
 							</a>
-							<h4 class="event-card-subtitle">
+							<h4 className="event-card-subtitle">
 								{formatDateRange(item.start, item.end)}
 							</h4>
 							<p className="event-card-text">
 								{truncate(item.excerpt, excerptLength)}
 							</p>
 							{(showAudience ||
-								showSpeaker ||
+								showPerson ||
 								showLocation ||
 								showBookedUp) && (
-								<div class="event-card-footer">
-									<div class="event-card-footer-details">
+								<div className="event-card-footer">
+									<div className="event-card-footer-details">
 										<div className="event-card-footer-details-text">
 											{showLocation && item.location?.id && (
 												<div className="event-card-detail">
@@ -107,7 +105,7 @@ function EventCards(props) {
 											)}
 											{showAudience && item.audience?.length > 0 && (
 												<div className="event-card-detail">
-													<i className="material-icons">place</i>{' '}
+													<i className="material-icons">groups</i>{' '}
 													<span>{item.audience}</span>
 												</div>
 											)}

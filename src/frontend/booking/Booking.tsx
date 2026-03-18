@@ -11,7 +11,9 @@ import type {
 	SubmitResult,
 } from './types';
 
-type Props = {
+const BOOKING_OPEN_EVENT = 'ctx:booking:open';
+
+type BookingOpenDetail = {
 	postId: number;
 };
 
@@ -27,7 +29,8 @@ function initialState(): BookingState {
 	};
 }
 
-export default function Booking({ postId }: Props) {
+export default function Booking() {
+	const [postId, setPostId] = useState<number | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [bookingState, setBookingState] = useState<BookingState>(initialState);
 	const [successRef, setSuccessRef] = useState<string | null>(null);
@@ -36,18 +39,39 @@ export default function Booking({ postId }: Props) {
 	const { status: submitStatus, submit } = useSubmitBooking();
 
 	useEffect(() => {
-		function onShow() {
+		const handleOpen = (event: Event) => {
+			const customEvent = event as CustomEvent<BookingOpenDetail>;
+			const nextPostId = Number(customEvent.detail?.postId ?? 0);
+
+			if (!nextPostId) {
+				return;
+			}
+
+			setPostId(nextPostId);
 			setIsOpen(true);
-		}
-		document.addEventListener('showBooking', onShow);
-		return () => document.removeEventListener('showBooking', onShow);
+		};
+
+		document.addEventListener(BOOKING_OPEN_EVENT, handleOpen as EventListener);
+
+		return () => {
+			document.removeEventListener(
+				BOOKING_OPEN_EVENT,
+				handleOpen as EventListener,
+			);
+		};
 	}, []);
 
 	useEffect(() => {
-		if (isOpen && dataState.status === 'idle') {
+		setBookingState(initialState());
+		setSuccessRef(null);
+		setSuccessPayment(null);
+	}, [postId]);
+
+	useEffect(() => {
+		if (postId && isOpen && dataState.status === 'idle') {
 			load();
 		}
-	}, [isOpen, dataState.status, load]);
+	}, [postId, isOpen, dataState.status, load]);
 
 	function handleClose() {
 		setIsOpen(false);
@@ -112,7 +136,7 @@ export default function Booking({ postId }: Props) {
 		}
 	}
 
-	if (!isOpen) return null;
+	if (!postId || !isOpen) return null;
 
 	return (
 		<div

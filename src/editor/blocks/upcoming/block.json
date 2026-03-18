@@ -62,7 +62,7 @@
 			"type": "boolean",
 			"default": false
 		},
-		"showSpeaker": {
+		"showPerson": {
 			"type": "string",
 			"default": ""
 		},

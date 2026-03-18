@@ -1,5 +1,5 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import type { BookingData } from '../types';
 
 type State =
@@ -8,10 +8,15 @@ type State =
 	| { status: 'loaded'; data: BookingData }
 	| { status: 'error'; message: string };
 
-export function useBookingData(postId: number) {
+export function useBookingData(postId: number | null) {
 	const [state, setState] = useState<State>({ status: 'idle' });
 
+	useEffect(() => {
+		setState({ status: 'idle' });
+	}, [postId]);
+
 	const load = useCallback(async () => {
+		if (!postId) return;
 		if (state.status === 'loading' || state.status === 'loaded') return;
 
 		setState({ status: 'loading' });

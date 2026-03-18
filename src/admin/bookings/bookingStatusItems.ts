@@ -9,5 +9,10 @@ const STATUSES = [
 ];
 
 export const bookingStatusItems = (apiCounts: Record<string, number>) => {
-	return mapStatusItems(STATUSES, apiCounts);
+	return mapStatusItems(STATUSES, {
+		'1': apiCounts['1'] ?? apiCounts.pending ?? 0,
+		'2': apiCounts['2'] ?? apiCounts.approved ?? 0,
+		'3': apiCounts['3'] ?? apiCounts.canceled ?? 0,
+		'4': apiCounts['4'] ?? apiCounts.expired ?? 0,
+	});
 };

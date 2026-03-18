@@ -20,7 +20,7 @@ function Table(props) {
 			excerptLength,
 			textAlignment,
 			showAudience,
-			showSpeaker,
+			showPerson,
 		},
 		events,
 	} = props;
@@ -34,7 +34,7 @@ function Table(props) {
 						: '';
 
 				const bookingWarning = () => {
-					if (!showBookedUp || !item.bookings.has_bookings) return null;
+					if (!showBookedUp || !item.bookings?.hasBookings) return null;
 					if (item.bookings?.spaces > bookedUpWarningThreshold) return null;
 
 					if (item.bookings?.spaces > 0) {
@@ -57,10 +57,10 @@ function Table(props) {
 						className="event-row"
 						key={index}
 						onClick={() => {
-							window.location = item.link;
+							window.location.href = item.link;
 						}}
 					>
-						<td class="event-table-date">
+						<td className="event-table-date">
 							<div className="description__date">
 								<span className="date__day--numeric">
 									{formatDate(item.start, { day: 'numeric' })}
@@ -83,7 +83,7 @@ function Table(props) {
 							</div>
 						</td>
 
-						<td class="event-table-title">
+						<td className="event-table-title">
 							<a href={item.link}>
 								<b className="event-table-title">{item.title}</b>
 							</a>
@@ -92,7 +92,7 @@ function Table(props) {
 							</div>
 						</td>
 						{showCategory && (
-							<td class="event-table-label">{item.category.name}</td>
+							<td className="event-table-label">{item.category?.name}</td>
 						)}
 
 						<td className="event-table-text">
@@ -104,9 +104,9 @@ function Table(props) {
 								{item.audience}
 							</td>
 						)}
-						{showSpeaker && (
+						{showPerson && (
 							<td className="event-table-text event-table-speaker">
-								{item.speaker.name}
+								{item.person?.name}
 							</td>
 						)}
 						{showLocation && (

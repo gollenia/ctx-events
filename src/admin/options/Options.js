@@ -3,19 +3,17 @@
 import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
-	Card,
-	CardBody,
-	CardHeader,
 	Notice,
+	SelectControl,
 	Spinner,
 	TabPanel,
+	TextareaControl,
+	TextControl,
+	ToggleControl,
 } from '@wordpress/components';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Helper: simple groupBy
- */
 const groupBy = (items, keyFn) => {
 	return items.reduce((acc, item) => {
 		const key = keyFn(item);
@@ -27,9 +25,6 @@ const groupBy = (items, keyFn) => {
 	}, {});
 };
 
-/**
- * Optional: schöner Name für Domains/Tabs
- */
 const domainLabel = (domain) => {
 	switch (domain) {
 		case 'events':
@@ -47,16 +42,12 @@ const domainLabel = (domain) => {
 	}
 };
 
-/**
- * Rendert ein einzelnes Feld anhand seines Typs
- */
 const renderFieldControl = (field, onChange) => {
 	const { type, label, description, value } = field;
 
 	switch (type) {
 		case 'bool':
 		case 'boolean': {
-			const { ToggleControl } = wp.components;
 			return (
 				<ToggleControl
 					label={label}
@@ -70,7 +61,6 @@ const renderFieldControl = (field, onChange) => {
 		case 'int':
 		case 'integer':
 		case 'number': {
-			const { TextControl } = wp.components;
 			return (
 				<TextControl
 					type="number"
@@ -83,7 +73,6 @@ const renderFieldControl = (field, onChange) => {
 		}
 
 		case 'text': {
-			const { TextareaControl } = wp.components;
 			return (
 				<TextareaControl
 					label={label}
@@ -95,7 +84,6 @@ const renderFieldControl = (field, onChange) => {
 		}
 
 		case 'select': {
-			const { SelectControl } = wp.components;
 			const options = field.options || [];
 			return (
 				<SelectControl
@@ -113,7 +101,6 @@ const renderFieldControl = (field, onChange) => {
 		}
 
 		default: {
-			const { TextControl } = wp.components;
 			return (
 				<TextControl
 					label={label}
@@ -126,9 +113,6 @@ const renderFieldControl = (field, onChange) => {
 	}
 };
 
-/**
- * Hauptkomponente für die Options-Seite
- */
 const Options = () => {
 	const [fields, setFields] = useState([]);
 
@@ -137,27 +121,20 @@ const Options = () => {
 	const [notice, setNotice] = useState(null);
 	const [error, setError] = useState(null);
 
-	// Initial laden
 	useEffect(() => {
 		setLoading(true);
 		setError(null);
 
 		apiFetch({ path: '/events/v3/options' })
 			.then((response) => {
-				console.log('Loaded options:', response);
-				// Wir erwarten ein Array von Field-Objekten
 				setFields(response || []);
 			})
 			.catch((err) => {
-				// simple error handling
-				// eslint-disable-next-line no-console
-				console.error('Failed to load options', err);
 				setError(__('Fehler beim Laden der Einstellungen.', 'ctx-events'));
 			})
 			.finally(() => setLoading(false));
 	}, []);
 
-	// Domains/Tabs bestimmen
 	const domains = useMemo(() => {
 		const names = new Set(fields.map((f) => f.domain || 'general'));
 		return Array.from(names);
@@ -182,7 +159,6 @@ const Options = () => {
 		setNotice(null);
 		setError(null);
 
-		// Werte in ein key => value Objekt schaufeln
 		const values = fields.reduce((acc, field) => {
 			acc[field.key] = field.value;
 			return acc;
@@ -197,8 +173,6 @@ const Options = () => {
 				setNotice(__('Einstellungen wurden gespeichert.', 'ctx-events'));
 			})
 			.catch((err) => {
-				// eslint-disable-next-line no-console
-				console.error('Failed to save options', err);
 				setError(__('Fehler beim Speichern der Einstellungen.', 'ctx-events'));
 			})
 			.finally(() => setSaving(false));
@@ -272,7 +246,7 @@ const Options = () => {
 					isBusy={saving}
 					onClick={handleSave}
 					style={{ marginTop: '20px' }}
-					isPrimary
+					variant="primary"
 				>
 					{__('Änderungen speichern', 'ctx-events')}
 				</Button>

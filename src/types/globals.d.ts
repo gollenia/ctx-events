@@ -10,6 +10,10 @@ declare global {
 		eventBlocksLocalization?: {
 			locale: string;
 		};
+		eventEditorLocalization: {
+			bookingEnabled: boolean;
+			currency: string;
+		};
 	}
 }
 

@@ -1,5 +1,6 @@
 import DataTable from '@events/datatable/DataTable';
 import type { DataFilterField, DataViewConfig } from '@events/datatable/types';
+import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { createActions } from './actions';
@@ -10,6 +11,19 @@ import { useFetchBookings } from './useFetchBookings';
 import { useFilterOptions } from './useFilterOptions';
 
 const BookingsList = () => {
+	const getActiveEventId = (filters: Array<DataFilterField>): string | null => {
+		const eventFilter = filters.find((filter) => filter.field === 'event_id');
+		if (
+			eventFilter?.value === undefined ||
+			eventFilter.value === null ||
+			eventFilter.value === ''
+		) {
+			return null;
+		}
+
+		return String(eventFilter.value);
+	};
+
 	const getInitialFilters = (): Array<DataFilterField> => {
 		const params = new URLSearchParams(window.location.search);
 		const eventId = params.get('event_id');
@@ -68,7 +82,9 @@ const BookingsList = () => {
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
-		const eventFilter = view.filters?.find((filter) => filter.field === 'event_id');
+		const eventFilter = view.filters?.find(
+			(filter) => filter.field === 'event_id',
+		);
 
 		if (eventFilter?.value) {
 			params.set('event_id', String(eventFilter.value));
@@ -98,6 +114,114 @@ const BookingsList = () => {
 	const { bookings, loading, statusItems, pagination } = useFetchBookings(view);
 
 	const actions = useMemo(() => createActions(refresh), []);
+	const activeEventId = getActiveEventId(view.filters);
+
+	const buildExportPath = (includeAttendees: boolean): string | null => {
+		if (!activeEventId) {
+			return null;
+		}
+
+		const searchParams = new URLSearchParams();
+		searchParams.set('event_id', activeEventId);
+		if (includeAttendees) {
+			searchParams.set('include_attendees', '1');
+		}
+
+		return `/events/v3/bookings/export?${searchParams.toString()}`;
+	};
+
+	const handleExport = (includeAttendees: boolean) => {
+		const path = buildExportPath(includeAttendees);
+		if (!path) {
+			return;
+		}
+
+		void apiFetch({
+			path,
+			method: 'GET',
+			parse: false,
+		})
+			.then(async (response) => {
+				if (!(response instanceof Response) || !response.ok) {
+					let errorMessage = __('The export could not be downloaded.', 'ctx-events');
+
+					if (response instanceof Response) {
+						const contentType = response.headers.get('content-type') ?? '';
+
+						if (contentType.includes('application/json')) {
+							const payload = (await response.json()) as {
+								message?: string;
+								code?: string;
+							};
+							errorMessage = payload.message ?? payload.code ?? errorMessage;
+						} else {
+							const text = await response.text();
+							if (text.trim() !== '') {
+								errorMessage = text;
+							}
+						}
+					}
+
+					throw new Error(errorMessage);
+				}
+
+				const blob = await response.blob();
+				const disposition = response.headers.get('content-disposition');
+				const fileNameMatch = disposition?.match(/filename="?([^"]+)"?/i);
+				const fileName = fileNameMatch?.[1] ?? 'bookings-export.xlsx';
+				const objectUrl = window.URL.createObjectURL(blob);
+				const anchor = document.createElement('a');
+				anchor.href = objectUrl;
+				anchor.download = fileName;
+				document.body.append(anchor);
+				anchor.click();
+				anchor.remove();
+				window.URL.revokeObjectURL(objectUrl);
+			})
+			.catch((error: unknown) => {
+				const message = (() => {
+					if (
+						typeof error === 'object' &&
+						error !== null &&
+						'message' in error &&
+						typeof error.message === 'string' &&
+						error.message.trim() !== ''
+					) {
+						const code =
+							'code' in error && typeof error.code === 'string'
+								? error.code
+								: null;
+						const status =
+							'data' in error &&
+							typeof error.data === 'object' &&
+							error.data !== null &&
+							'status' in error.data &&
+							typeof error.data.status === 'number'
+								? error.data.status
+								: null;
+
+						if (code && status) {
+							return `${error.message} (${code}, ${status})`;
+						}
+
+						if (code) {
+							return `${error.message} (${code})`;
+						}
+
+						return error.message;
+					}
+
+					return __(
+						'The export could not be downloaded. Please check your permissions and try again.',
+						'ctx-events',
+					);
+				})();
+
+				window.alert(
+					message,
+				);
+			});
+	};
 
 	return (
 		<>
@@ -113,7 +237,31 @@ const BookingsList = () => {
 				searchLabel={__('Search Bookings…', 'ctx-events')}
 				availableStatusItems={bookingStatusItems(statusItems)}
 				title={__('Bookings', 'ctx-events')}
-			/>
+			>
+				<DataTable.Header />
+				<div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+					<button
+						type="button"
+						className="page-title-action"
+						onClick={() => handleExport(false)}
+						disabled={!activeEventId}
+					>
+						{__('Export Excel', 'ctx-events')}
+					</button>
+					<button
+						type="button"
+						className="page-title-action"
+						onClick={() => handleExport(true)}
+						disabled={!activeEventId}
+					>
+						{__('Export Excel + Attendees', 'ctx-events')}
+					</button>
+				</div>
+				<DataTable.StatusSelect />
+				<DataTable.Filter />
+				<DataTable.Table />
+				<DataTable.Pagination />
+			</DataTable>
 
 			<BookingEditModal
 				reference={editingReference}

@@ -1,0 +1,67 @@
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+import { useEntityProp } from '@wordpress/core-data';
+import { select } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+import { formatDateRange } from '@events/i18n';
+import type {
+	DetailsDateAttributes,
+	DetailBlockProps,
+	EventDateMeta,
+} from '@events/details/types';
+import Inspector from './inspector';
+
+const edit = (props: DetailBlockProps<DetailsDateAttributes>) => {
+	const postType = (select('core/editor') as { getCurrentPostType: () => string })
+		.getCurrentPostType();
+
+	if (postType !== 'ctx-event') {
+		return null;
+	}
+
+	const [meta, setMeta] = useEntityProp('postType', postType, 'meta') as [
+		EventDateMeta,
+		(value: EventDateMeta) => void,
+	];
+	const {
+		attributes: { description },
+		setAttributes,
+	} = props;
+
+	const blockProps = useBlockProps({ className: 'event-details-item' });
+
+	const startFormatted = () => {
+		if (!meta?._event_start || !meta?._event_end) {
+			return '';
+		}
+
+		return formatDateRange(meta._event_start, meta._event_end);
+	};
+
+	return (
+		<div {...blockProps}>
+			<Inspector {...props} meta={meta} setMeta={setMeta} />
+
+			<div className="event-details__item">
+				<div className="event-details__icon">
+					<i className="material-icons material-symbols-outlined">event</i>
+				</div>
+				<div>
+					<RichText
+						tagName="h4"
+						className="event-details_title description-editable"
+						placeholder={__('Date', 'ctx-events')}
+						value={description}
+						onChange={(value) => {
+							setAttributes({ description: value });
+						}}
+					/>
+					<span className="event-details_audience description-editable">
+						{startFormatted()}
+					</span>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default edit;

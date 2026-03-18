@@ -41,6 +41,7 @@ token: string
 export type EventIncludes = {
 image: undefined | null
 location: Location | null
+person: undefined | null
 categories: [] | null
 tags: [] | null
 };
@@ -87,7 +88,7 @@ readonly addressRegion: string | null
 readonly addressCountry: string | null
 };
 export type BookingEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "restored";
-export type BookingStatus = 1 | 2 | 3 | 4 | 9;
+export type BookingStatus = 1 | 2 | 3 | 4;
 export type PriceSummary = {
 readonly bookingPrice: Price
 readonly donationAmount: Price
@@ -187,7 +188,7 @@ readonly slug: string
 readonly title: string
 readonly adminName: string
 readonly enabled: boolean
-readonly settings: []
+readonly settings: any[]
 };
 export type Location = {
 id: number
@@ -196,6 +197,8 @@ name: string
 address: Address
 geoCoordinates: Record<string, number> | null
 };
+export type EmailTrigger = "booking_pending" | "booking_confirmed" | "booking_cancelled" | "booking_reminder" | "booking_payment_received" | "booking_payment_failed";
+export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";
 export type ValidationError = "required" | "invalid_format" | "too_low" | "too_high" | "empty";
 export type FieldType = "input" | "textarea" | "select" | "checkbox" | "html" | "country" | "date" | "number";
 export type SelectVariant = "radio" | "select" | "combobox";
@@ -210,7 +213,7 @@ readonly title: string
 readonly description: string | null
 readonly type: string
 readonly createdAt: string
-readonly usageCount: number
 readonly tags: undefined
 readonly status: string
+readonly usageCount: number
 };

@@ -1,40 +1,73 @@
 <?php
+
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Platform\Bootstrap;
 
+$post_id = get_the_ID();
+
 $repository = Bootstrap::container()->get(EventRepository::class);
-$event = $repository->find(EventId::from(get_the_ID()));
+$event = $repository->find(EventId::from($post_id));
 
 if (!$event) {
     return;
 }
+
 if (!$event->acceptsBookings()) {
     return;
 }
 
+$button_title = isset($attributes['buttonTitle']) && is_string($attributes['buttonTitle'])
+	? $attributes['buttonTitle']
+	: '';
+$button_icon = isset($attributes['buttonIcon']) && is_string($attributes['buttonIcon'])
+	? $attributes['buttonIcon']
+	: '';
+$icon_only = filter_var(
+	$attributes['iconOnly'] ?? false,
+	FILTER_VALIDATE_BOOLEAN,
+);
+$icon_right = filter_var(
+	$attributes['iconRight'] ?? false,
+	FILTER_VALIDATE_BOOLEAN,
+);
+
 $classNames = [
     'ctx__button',
-    $attributes['iconOnly'] ? 'ctx__button--icon-only' : '',
-    $attributes['iconRight'] ? 'ctx__button--reverse' : '',
+    $icon_only ? 'ctx__button--icon-only' : '',
+    $icon_right ? 'ctx__button--reverse' : '',
 ];
 
-$block_attributes = get_block_wrapper_attributes(['class' => join(" ", $classNames)]);
+$block_attributes = get_block_wrapper_attributes([
+	'class' => implode(' ', array_filter($classNames)),
+	'data-ctx-booking-trigger' => 'true',
+	'data-ctx-event-id' => (string) $post_id,
+]);
 
 ?>
 
-<button <?php echo $block_attributes; ?> id="booking_button">
+<button <?php echo $block_attributes; ?> type="button">
 <?php
-if ($attributes['buttonIcon']) {
-    echo "<i class=\"material-icons material-symbols-outlined\">{$attributes['buttonIcon']}</i>";
+if ($button_icon !== '') {
+    printf(
+		'<i class="material-icons material-symbols-outlined">%s</i>',
+		esc_html($button_icon),
+	);
 }
-if (!$attributes['iconOnly']) {
-    echo $attributes['buttonTitle'] ?: __("Register", "ctx-events");
+
+if (!$icon_only) {
+    echo esc_html($button_title ?: __('Register', 'ctx-events'));
 }
 ?>
 </button>
 
 <?php
-add_action('wp_footer', function () {
-    echo "<div id=\"booking_app\" data-post=\"" . get_the_ID() . "\"></div>";
-});
+static $booking_app_rendered = false;
+
+if (!$booking_app_rendered) {
+	$booking_app_rendered = true;
+
+	add_action('wp_footer', static function () use ($post_id): void {
+		echo '<div id="booking_app"></div>';
+	});
+}

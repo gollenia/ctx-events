@@ -2,21 +2,40 @@ import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
 import Booking from './Booking';
 
-function publish(eventName: string, data: unknown): void {
-	document.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+const BOOKING_OPEN_EVENT = 'ctx:booking:open';
+
+type BookingOpenDetail = {
+	postId: number;
+};
+
+function publishBookingOpen(detail: BookingOpenDetail): void {
+	document.dispatchEvent(
+		new CustomEvent<BookingOpenDetail>(BOOKING_OPEN_EVENT, { detail }),
+	);
 }
 
 domReady(() => {
 	const rootElement = document.getElementById('booking_app');
 	if (!rootElement) return;
 
-	const postId = parseInt(rootElement.dataset.post ?? '0', 10);
-	if (!postId) return;
-
 	const root = createRoot(rootElement);
-	root.render(<Booking postId={postId} />);
+	root.render(<Booking />);
 
-	for (const button of document.getElementsByClassName('wp-block-ctx-events-booking')) {
-		button.addEventListener('click', () => publish('showBooking', true));
+	const triggerButtons = document.querySelectorAll<HTMLElement>(
+		'[data-ctx-booking-trigger="true"]',
+	);
+
+	const handleClick = (event: Event) => {
+		const button = event.currentTarget as HTMLElement | null;
+		const postId = Number(button?.dataset.ctxEventId ?? '0');
+		if (!postId) {
+			return;
+		}
+
+		publishBookingOpen({ postId });
+	};
+
+	for (const button of triggerButtons) {
+		button.addEventListener('click', handleClick);
 	}
 });

@@ -19,7 +19,7 @@ const BookingStatus = () => {
 		dispatch('core/edit-post').openGeneralSidebar('event-booking-sidebar');
 	};
 
-	const isEnabled = meta._event_rsvp;
+	const isEnabled = meta._booking_enabled;
 
 	return (
 		<PluginPostStatusInfo>
