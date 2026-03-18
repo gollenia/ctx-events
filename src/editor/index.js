@@ -38,6 +38,7 @@ import * as formSelect from './blocks/form/select/index.ts';
 import * as formText from './blocks/form/text/index.ts';
 import * as formTextarea from './blocks/form/textarea/index.ts';
 import * as locationEditor from './blocks/location-editor/index.ts';
+import * as programPdfExport from './blocks/program-pdf-export/index.ts';
 import * as personEditor from './blocks/person-editor/index.ts';
 import * as upcoming from './blocks/upcoming/index.ts';
 import bookingSidebar from './plugins/event/BookingSidebar.js';
@@ -69,6 +70,7 @@ const blocks = [
 	formRadio,
 	formHTML,
 	locationEditor,
+	programPdfExport,
 	couponEditor,
 	details,
 	detailsAudience,
