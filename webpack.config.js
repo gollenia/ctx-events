@@ -21,9 +21,9 @@ module.exports = {
 	},
 
 	entry: {
-		admin: path.resolve(__dirname, 'src/admin/index.js'),
-		frontend: path.resolve(__dirname, 'src/frontend/index.js'),
-		editor: path.resolve(__dirname, 'src/editor/index.js'),
+		admin: path.resolve(__dirname, 'src/admin/index.ts'),
+		frontend: path.resolve(__dirname, 'src/frontend/index.ts'),
+		editor: path.resolve(__dirname, 'src/editor/index.ts'),
 	},
 
 	output: {
