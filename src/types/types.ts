@@ -102,6 +102,7 @@ export type CheckboxVariant = "default" | "switch";
 export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
 export type DiscountType = "percent" | "fixed";
 export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";
+export type EmailTemplateKey = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "admin_booking_pending_manual" | "admin_booking_created_online";
 export type EmailTrigger = "booking_pending" | "booking_confirmed" | "booking_cancelled" | "booking_reminder" | "booking_payment_received" | "booking_payment_failed";
 export type ErrorType = "ERROR" | "WARNING" | "INFO";
 export type Event = {
@@ -166,6 +167,26 @@ link: undefined,
 name: string,
 address: Address,
 geoCoordinates: Record<string, number> | null,
+};
+export type MailTemplate = {
+readonly key: string,
+readonly label: string,
+readonly description: string,
+readonly trigger: string,
+readonly target: string,
+readonly source: string,
+readonly isCustomized: boolean,
+readonly enabled: boolean,
+readonly subject: string | null,
+readonly body: string,
+readonly replyTo: string | null,
+readonly recipientConfig: {
+sendToEventContact: boolean,
+sendToEventPerson: boolean,
+sendToBookingAdmin: boolean,
+sendToWpAdmin: boolean,
+customRecipients: string[],
+} | null,
 };
 export type NumberVariant = "input" | "slider";
 export type Order = "asc" | "desc";

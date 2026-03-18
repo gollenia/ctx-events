@@ -14,6 +14,9 @@ export type UpcomingAttributes = {
 	excerptLength: number;
 	showAudience: boolean;
 	showPerson?: '' | 'name' | 'image';
+	textAlignment?: string;
+	animateOnScroll?: boolean;
+	animationType?: string;
 	showCategoryFilter: boolean;
 	showTagFilter: boolean;
 	showSearch: boolean;
@@ -62,4 +65,10 @@ export type UpcomingViewEvent = {
 		id: number;
 		name: string;
 	} | null;
+};
+
+export type UpcomingViewProps = {
+	attributes: UpcomingAttributes;
+	events: UpcomingViewEvent[];
+	status: 'LOADING' | 'LOADED' | 'ERROR';
 };
