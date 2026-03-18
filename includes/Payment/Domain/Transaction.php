@@ -88,6 +88,20 @@ final readonly class Transaction
         ]);
     }
 
+    public function fail()
+    {
+        return clone($this, [
+            "status" => TransactionStatus::FAILED
+        ]);
+    }
+
+    public function refund()
+    {
+        return clone($this, [
+            "status" => TransactionStatus::REFUNDED
+        ]);
+    }
+
     public function complete()
     {
         return clone($this, [
