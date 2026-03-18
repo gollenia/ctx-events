@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { BookingAttendeeResource, BookingDetail } from 'src/types/types';
+import type { BookingTransactionResource } from 'src/types/types';
 import { STATUS_LABELS } from '../constants';
 import AttendeeSection from './AttendeeSection';
 import DynamicFieldsGrid from './DynamicFieldsGrid';
@@ -51,6 +52,8 @@ const BookingEditModal = ({
 		save,
 		addingNote,
 		addNote,
+		resolvingPaymentLink,
+		resolvePaymentLink,
 	} = useBookingDetail(reference);
 
 	const [booking, setBooking] = useState<BookingDetail | null>(null);
@@ -66,6 +69,20 @@ const BookingEditModal = ({
 
 	const patch = (fields: Partial<BookingDetail>) =>
 		setBooking((prev) => (prev ? { ...prev, ...fields } : prev));
+
+	const mergeTransaction = (
+		currentTransactions: BookingDetail['transactions'],
+		transaction: BookingTransactionResource,
+	): BookingDetail['transactions'] => {
+		const withoutCurrent = currentTransactions.filter(
+			(item) => item.externalId !== transaction.externalId,
+		);
+
+		return [transaction, ...withoutCurrent].sort(
+			(left, right) =>
+				new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+		);
+	};
 
 	const patchBookingPrice = (
 		currentBooking: BookingDetail,
@@ -244,7 +261,23 @@ const BookingEditModal = ({
 										patchBookingPrice(booking, { attendees })
 									}
 								/>
-								<TransactionSection booking={booking} />
+								<TransactionSection
+									booking={booking}
+									isResolvingPaymentLink={resolvingPaymentLink}
+									onResolvePaymentLink={async () => {
+										const transaction = await resolvePaymentLink(
+											booking.reference,
+										);
+										patch({
+											transactions: mergeTransaction(
+												booking.transactions,
+												transaction,
+											),
+										});
+
+										return transaction;
+									}}
+								/>
 							</div>
 						</div>
 

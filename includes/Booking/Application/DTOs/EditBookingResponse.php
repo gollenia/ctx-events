@@ -30,6 +30,7 @@ final readonly class EditBookingResponse
 		public Form $registrationForm,
 		public Form $attendeeForm,
 		public GatewayCollection $availableGateways,
+        public bool $currentGatewaySupportsCheckoutLink,
         public BookingNotesCollection $notes,
         public TicketResponseCollection $availableTickets,
     ) {
@@ -41,6 +42,7 @@ final readonly class EditBookingResponse
 		Form $registrationForm,
 		Form $attendeeForm,
 		GatewayCollection $availableGateways,
+        bool $currentGatewaySupportsCheckoutLink,
 		BookingNotesCollection $notes,
 		TicketResponseCollection $availableTickets,
 	): self {
@@ -51,6 +53,7 @@ final readonly class EditBookingResponse
 			registrationForm: $registrationForm,
 			attendeeForm: $attendeeForm,
 			availableGateways: $availableGateways,
+            currentGatewaySupportsCheckoutLink: $currentGatewaySupportsCheckoutLink,
 			notes: $notes,
 			availableTickets: $availableTickets,
 		);

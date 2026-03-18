@@ -20,6 +20,7 @@ final readonly class EditBookingResource implements Resource
         public string $date,
         public int $status,
         public ?string $gateway,
+        public bool $gatewaySupportsCheckoutLink,
         public BookingEventResource $event,
         public array $registration,
         /** @var BookingAttendeeResource[] */
@@ -45,6 +46,7 @@ final readonly class EditBookingResource implements Resource
             date: $response->booking->bookingTime->format(DATE_ATOM),
             status: $response->booking->status->value,
             gateway: $response->booking->gateway,
+            gatewaySupportsCheckoutLink: $response->currentGatewaySupportsCheckoutLink,
             event: new BookingEventResource($response->eventId->toInt(), $response->eventTitle),
             registration: $response->booking->registration->all(),
             attendees: array_map(
@@ -80,6 +82,7 @@ final readonly class EditBookingResource implements Resource
             'date'             => $this->date,
             'status'           => $this->status,
             'gateway'          => $this->gateway,
+            'gatewaySupportsCheckoutLink' => $this->gatewaySupportsCheckoutLink,
             'event'            => $this->event,
             'registration'     => $this->registration,
             'attendees'        => $this->attendees,

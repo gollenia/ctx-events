@@ -20,5 +20,6 @@ interface PaymentGateway
     public function setEnabled(bool $active): void;
     public function isEnabled(): bool;
 	public function isValid(): bool;
+    public function supportsCheckoutLink(): bool;
     public function save(): void;
 }

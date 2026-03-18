@@ -11,9 +11,11 @@ use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Application\UseCases\EditBooking;
 use Contexis\Events\Booking\Application\UseCases\ExportEventBookings;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
+use Contexis\Events\Booking\Application\UseCases\ResolveBookingPaymentLink;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
+use Contexis\Events\Booking\Presentation\Resources\BookingTransactionResource;
 use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
@@ -29,6 +31,7 @@ final class BookingController implements RestController
         private EditBooking $editBooking,
         private UpdateBooking $updateBooking,
         private ExportEventBookings $exportEventBookings,
+        private ResolveBookingPaymentLink $resolveBookingPaymentLink,
     ) {
     }
 
@@ -107,6 +110,15 @@ final class BookingController implements RestController
                     'gateway'       => ['required' => false, 'type' => 'string'],
                     'donation_cents' => ['required' => false, 'type' => 'integer', 'default' => 0],
                 ]),
+            ],
+        ]);
+
+        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9-]{6,64})/payment-link', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'resolvePaymentLink'],
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'args'                => $baseArgs,
             ],
         ]);
 
@@ -191,6 +203,17 @@ final class BookingController implements RestController
         try {
             $this->updateBooking->execute($updateRequest);
             return new \WP_REST_Response(null, 204);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
+    }
+
+    public function resolvePaymentLink(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $transaction = $this->resolveBookingPaymentLink->execute((string) $request->get_param('uuid'));
+
+            return new \WP_REST_Response(BookingTransactionResource::fromTransaction($transaction), 200);
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }

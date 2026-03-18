@@ -50,12 +50,14 @@ final class EditBooking
         $bookingForm = $this->formRepository->find($event->forms->bookingForm);
         $attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
         $availableGateways = $this->gatewayRepository->findActive();
+        $currentGateway = $booking->gateway !== null ? $this->gatewayRepository->find($booking->gateway) : null;
         return EditBookingResponse::from(
 			booking: $booking,
 			event: $event,
 			registrationForm: $bookingForm,
 			attendeeForm: $attendeeForm,
 			availableGateways: $availableGateways,
+            currentGatewaySupportsCheckoutLink: $currentGateway?->supportsCheckoutLink() ?? false,
 			notes: $booking->notes,
 			availableTickets: TicketResponseCollection::from(...$ticketDtos),
 		);

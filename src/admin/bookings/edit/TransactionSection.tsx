@@ -1,3 +1,5 @@
+import { Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { BookingDetail, BookingTransactionResource } from 'src/types/types';
@@ -13,6 +15,8 @@ const STATUS_LABELS: Record<number, string> = {
 
 type Props = {
 	booking: BookingDetail;
+	isResolvingPaymentLink: boolean;
+	onResolvePaymentLink: () => Promise<BookingTransactionResource>;
 };
 
 function renderValue(value: string | null | undefined) {
@@ -96,9 +100,72 @@ function TransactionCard({
 	);
 }
 
-const TransactionSection = ({ booking }: Props) => (
+const TransactionSection = ({
+	booking,
+	isResolvingPaymentLink,
+	onResolvePaymentLink,
+}: Props) => {
+	const [paymentLinkError, setPaymentLinkError] = useState<string | null>(null);
+	const [paymentLinkMessage, setPaymentLinkMessage] = useState<string | null>(null);
+
+	const canResolvePaymentLink =
+		booking.gatewaySupportsCheckoutLink &&
+		booking.price.finalPrice.amountCents > 0;
+
+	const handleResolvePaymentLink = async () => {
+		setPaymentLinkError(null);
+		setPaymentLinkMessage(null);
+
+		try {
+			const transaction = await onResolvePaymentLink();
+			if (!transaction.checkoutUrl) {
+				throw new Error(__('No checkout URL was returned.', 'ctx-events'));
+			}
+
+			let message = __('Payment link generated.', 'ctx-events');
+
+			if (navigator.clipboard?.writeText) {
+				await navigator.clipboard.writeText(transaction.checkoutUrl);
+				message = __('Payment link copied to clipboard.', 'ctx-events');
+			}
+
+			setPaymentLinkMessage(message);
+		} catch (error: any) {
+			setPaymentLinkError(
+				error?.message ?? __('Could not resolve payment link.', 'ctx-events'),
+			);
+		}
+	};
+
+	return (
 	<section className="booking-edit__section">
-		<h3>{__('Transactions', 'ctx-events')}</h3>
+		<div className="booking-edit__section-header">
+			<h3>{__('Transactions', 'ctx-events')}</h3>
+			{canResolvePaymentLink && (
+				<button
+					type="button"
+					className="components-button is-secondary"
+					onClick={handleResolvePaymentLink}
+					disabled={isResolvingPaymentLink}
+				>
+					{isResolvingPaymentLink
+						? __('Resolving…', 'ctx-events')
+						: __('Get payment link', 'ctx-events')}
+				</button>
+			)}
+		</div>
+
+		{paymentLinkMessage && (
+			<Notice status="success" isDismissible={false}>
+				{paymentLinkMessage}
+			</Notice>
+		)}
+
+		{paymentLinkError && (
+			<Notice status="error" isDismissible={false}>
+				{paymentLinkError}
+			</Notice>
+		)}
 
 		{booking.transactions.length === 0 ? (
 			<p className="booking-edit__empty">{__('No transactions recorded.', 'ctx-events')}</p>
@@ -113,6 +180,7 @@ const TransactionSection = ({ booking }: Props) => (
 			</div>
 		)}
 	</section>
-);
+	);
+};
 
 export default TransactionSection;

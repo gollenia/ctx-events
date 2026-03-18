@@ -14,7 +14,8 @@ final class GatewayListItemDto
         public string $title,
 		public ?string $description,
         public bool $active,
-		public bool $isValid
+		public bool $isValid,
+        public bool $supportsCheckoutLink,
     ) {}
 
 	static function fromPaymentGateway(PaymentGateway $gateway): self
@@ -25,7 +26,8 @@ final class GatewayListItemDto
 			$gateway->getTitle(),
 			$gateway->getDescription(),
 			$gateway->isEnabled(),
-			$gateway->isValid()
+			$gateway->isValid(),
+            $gateway->supportsCheckoutLink()
 		);
 	}
 
@@ -37,7 +39,8 @@ final class GatewayListItemDto
             'title' => $this->title,
 			'description' => $this->description,
             'active' => $this->active,
-			'isValid' => $this->isValid
+			'isValid' => $this->isValid,
+            'supportsCheckoutLink' => $this->supportsCheckoutLink,
         ];
     }
 }

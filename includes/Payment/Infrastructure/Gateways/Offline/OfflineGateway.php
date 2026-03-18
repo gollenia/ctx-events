@@ -86,6 +86,11 @@ final class OfflineGateway implements PaymentGateway
 		return $this->config->isValid();
 	}
 
+    public function supportsCheckoutLink(): bool
+    {
+        return false;
+    }
+
     public function paymentTermInDays(): int
     {
         return max(0, $this->config->paymentTerm);

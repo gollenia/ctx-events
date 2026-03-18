@@ -24,6 +24,7 @@ final class FakePaymentGateway implements PaymentGateway
     public function getDescription(): ?string { return null; }
     public function isEnabled(): bool { return $this->enabled; }
     public function isValid(): bool { return $this->valid; }
+    public function supportsCheckoutLink(): bool { return $this->id !== 'offline'; }
     public function setEnabled(bool $active): void { $this->enabled = $active; }
     public function save(): void {}
     public function getSettingsSchema(): array { return []; }

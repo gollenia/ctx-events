@@ -17,6 +17,7 @@ final readonly class GatewayResource implements Resource
 		public string $title,
 		public string $adminName,
 		public bool $enabled,
+        public bool $supportsCheckoutLink,
 		public array $settings,
 	) {
 	}
@@ -28,6 +29,7 @@ final readonly class GatewayResource implements Resource
 			title: $dto->title,
 			adminName: $dto->adminName,
 			enabled: $dto->active,
+            supportsCheckoutLink: $dto->supportsCheckoutLink,
 			settings: [
 				'description' => $dto->description,
 			],
@@ -41,8 +43,8 @@ final readonly class GatewayResource implements Resource
 			'title' => $this->title,
 			'adminName' => $this->adminName,
 			'enabled' => $this->enabled,
+            'supportsCheckoutLink' => $this->supportsCheckoutLink,
 			'settings' => $this->settings,
 		];
 	}
 }
-

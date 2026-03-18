@@ -180,4 +180,9 @@ final class MollieGateway implements PaymentGateway
 	public function isValid(): bool {
 		return $this->config->isValid();
 	}
+
+    public function supportsCheckoutLink(): bool
+    {
+        return true;
+    }
 }
