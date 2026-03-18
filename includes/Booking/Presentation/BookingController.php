@@ -9,6 +9,7 @@ use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\DTOs\UpdateBookingRequest;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Application\UseCases\EditBooking;
+use Contexis\Events\Booking\Application\UseCases\ExportEventBookings;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
@@ -16,6 +17,7 @@ use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
 use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
+use Shuchkin\SimpleXLSXGen;
 
 final class BookingController implements RestController
 {
@@ -26,6 +28,7 @@ final class BookingController implements RestController
         private ListBookings $listBookings,
         private EditBooking $editBooking,
         private UpdateBooking $updateBooking,
+        private ExportEventBookings $exportEventBookings,
     ) {
     }
 
@@ -71,6 +74,18 @@ final class BookingController implements RestController
                     'gateway'      => ['required' => true, 'type' => 'string'],
                     'coupon_code'     => ['required' => false, 'type' => 'string'],
                     'donation_amount' => ['required' => false, 'type' => 'integer'],
+                ],
+            ],
+        ]);
+
+        register_rest_route('events/v3', '/bookings/export', [
+            [
+                'methods'             => \WP_REST_Server::READABLE,
+                'callback'            => [$this, 'downloadEventBookingsExport'],
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'args'                => [
+                    'event_id' => ['type' => 'integer', 'required' => true],
+                    'include_attendees' => ['type' => 'boolean', 'required' => false, 'default' => false],
                 ],
             ],
         ]);
@@ -121,11 +136,11 @@ final class BookingController implements RestController
         );
 
         $response = new \WP_REST_Response($items, 200);
-        $response->header('X-WP-Total', (string) $result->pagination->totalItems);
-        $response->header('X-WP-TotalPages', (string) $result->pagination->totalPages());
+        $response->header('X-WP-Total', (string) $result->pagination()->totalItems);
+        $response->header('X-WP-TotalPages', (string) $result->pagination()->totalPages());
 
         if ($result->hasStatusCounts()) {
-            $response->header('X-WP-StatusCounts', (string) json_encode($result->statusCounts));
+            $response->header('X-WP-StatusCounts', (string) json_encode($result->statusCounts()?->toArray()));
         }
 
         return $response;
@@ -135,10 +150,6 @@ final class BookingController implements RestController
     {
         $userContext = \Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory::createFromCurrentUser();
         $detail = $this->editBooking->execute((string) $request->get_param('uuid'), $userContext);
-
-        if ($detail === null) {
-            return new \WP_REST_Response(['message' => 'Booking not found.'], 404);
-        }
 
         return new \WP_REST_Response(EditBookingResource::fromDTO($detail), 200);
     }
@@ -183,5 +194,39 @@ final class BookingController implements RestController
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }
+    }
+
+    public function downloadEventBookingsExport(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $eventId = EventId::from((int) $request->get_param('event_id'));
+
+        if ($eventId === null) {
+            return new \WP_REST_Response(['message' => 'Invalid event ID.'], 400);
+        }
+
+        try {
+            $export = $this->exportEventBookings->execute(
+                $eventId,
+                (bool) $request->get_param('include_attendees'),
+            );
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 404);
+        }
+
+        $sheets = $export->sheets;
+        $firstSheet = array_shift($sheets);
+
+        if ($firstSheet === null) {
+            return new \WP_REST_Response(['message' => 'Export contains no sheets.'], 500);
+        }
+
+        $xlsx = SimpleXLSXGen::fromArray($firstSheet->rows, $firstSheet->name);
+
+        foreach ($sheets as $sheet) {
+            $xlsx->addSheet($sheet->rows, $sheet->name);
+        }
+
+        $xlsx->downloadAs(sanitize_file_name($export->fileName . '.xlsx'));
+        exit;
     }
 }
