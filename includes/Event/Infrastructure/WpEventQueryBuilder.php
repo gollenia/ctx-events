@@ -38,7 +38,6 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->person);
         }
 
-        
 		foreach (self::dateScopeToMetaQuery($criteria->scope) as $cond) {
 			$builder->args['meta_query'][] = $cond;
 		}
@@ -179,4 +178,5 @@ final class WpEventQueryBuilder extends WpQueryBuilder
 
         };
     }
+
 }
