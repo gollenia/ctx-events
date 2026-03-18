@@ -1,0 +1,51 @@
+.ctx-email-cell {
+	p {
+		margin: 4px 0 0;
+		color: #50575e;
+	}
+}
+
+.ctx-email-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.ctx-email-badge--preset {
+	background: #e8f2ff;
+	color: #0b57d0;
+}
+
+.ctx-email-badge--database {
+	background: #eef7ea;
+	color: #2f6f1e;
+}
+
+.ctx-email-admin__loading {
+	padding: 32px 0;
+}
+
+.ctx-email-modal {
+	display: grid;
+	gap: 16px;
+}
+
+.ctx-email-modal__description {
+	margin: 0;
+	color: #50575e;
+}
+
+.ctx-email-modal__meta {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+.ctx-email-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+}

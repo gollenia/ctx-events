@@ -2,6 +2,7 @@ import domReady from '@wordpress/dom-ready';
 import './style.scss';
 import { initBookingsAdmin } from './bookings/index.tsx';
 import { initEventsList } from './events/index.tsx';
+import { initEmailAdmin } from './emails/index.tsx';
 import { initFormList } from './forms/index.tsx';
 import { initGatewayAdmin } from './gateways/index.tsx';
 import { initOptionsAdmin } from './options/index.js';
@@ -11,6 +12,7 @@ domReady(() => {
 	const mounts = [
 		{ id: 'ctx-bookings-admin', init: initBookingsAdmin },
 		{ id: 'ctx-gateways-admin', init: initGatewayAdmin },
+		{ id: 'ctx-email-admin', init: initEmailAdmin },
 		{ id: 'ctx-options-admin', init: initOptionsAdmin },
 		{ id: 'ctx-events-list', init: initEventsList },
 		{ id: 'ctx-forms-admin', init: initFormList },
