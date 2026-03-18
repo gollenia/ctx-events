@@ -7,6 +7,8 @@ use function DI\get;
 
 return [
     \Contexis\Events\Event\Infrastructure\WpEventRepository::class => autowire(),
+    \Contexis\Events\Event\Application\Contracts\EventCalendarRepository::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpEventCalendarRepository::class),
     \Contexis\Events\Event\Domain\EventRepository::class
     => get(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
     \Contexis\Events\Event\Domain\EventStatusRepository::class
