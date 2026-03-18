@@ -23,7 +23,7 @@ final class EventController implements RestController
         private GetEvent $getEvent,
         private ListEvents $listEvents,
 		private CancelEvent $cancelEvent,
-		private PrepareBooking $prepareBooking
+		private PrepareBooking $prepareBooking,
     ) {
         $this->route = RestRoute::forType('events');
     }
