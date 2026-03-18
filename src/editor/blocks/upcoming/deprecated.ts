@@ -31,6 +31,10 @@ const deprecated = [
 		},
 		migrate: (attributes: Record<string, unknown>) => ({
 			...attributes,
+			order:
+				typeof attributes.order === 'string'
+					? attributes.order.toLowerCase()
+					: 'asc',
 			showPerson:
 				typeof attributes.showSpeaker === 'string' ? attributes.showSpeaker : '',
 		}),

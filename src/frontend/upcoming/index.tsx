@@ -1,9 +1,8 @@
 import { createRoot } from '@wordpress/element';
 import Upcoming from './upcoming';
 
-function initUpcoming(className: string) {
+function initUpcoming(className = 'events-upcoming-block') {
 	const upcomingBlocks = document.getElementsByClassName(className);
-	if (!upcomingBlocks) return;
 
 	Array.from(upcomingBlocks).forEach((element) => {
 		const rawAttributes = element.getAttribute('data-attributes');

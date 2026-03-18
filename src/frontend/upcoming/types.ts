@@ -7,7 +7,7 @@ export type UpcomingAttributes = {
 	filterPosition: 'top' | 'side';
 	view: 'cards' | 'list' | 'mini';
 	limit: number;
-	order: 'ASC' | 'DESC';
+	order: 'asc' | 'desc';
 	selectedCategory: number[];
 	selectedLocation: number;
 	selectedTags: number[];

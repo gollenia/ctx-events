@@ -40,7 +40,7 @@
 		},
 		"order": {
 			"type": "string",
-			"default": "ASC"
+			"default": "asc"
 		},
 		"selectedCategory": {
 			"type": "array",

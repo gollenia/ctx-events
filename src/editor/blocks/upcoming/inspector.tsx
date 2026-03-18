@@ -29,7 +29,7 @@ type UpcomingAttributes = {
 	excerptLength: number;
 	selectedCategory: number[];
 	selectedLocation: number;
-	order: string;
+	order: 'asc' | 'desc';
 	userStylePicker: boolean;
 	showAudience: boolean;
 	showPerson?: string;
@@ -124,8 +124,8 @@ const Inspector = (props: InspectorProps) => {
 	];
 
 	const orderListViewOptions = [
-		{ value: 'ASC', label: __('Ascending', 'ctx-events') },
-		{ value: 'DESC', label: __('Descending', 'ctx-events') },
+		{ value: 'asc', label: __('Ascending', 'ctx-events') },
+		{ value: 'desc', label: __('Descending', 'ctx-events') },
 	];
 
 	const filteredCategories = useMemo(() => {

@@ -30,6 +30,7 @@ function Upcoming({ attributes }: Props) {
 		showPerson,
 	} = attributes;
 	const personView = showPerson || '';
+	const normalizedOrder = order === 'desc' ? 'desc' : 'asc';
 
 	const [events, setEvents] = useState<UpcomingViewEvent[]>([]);
 	const [status, setStatus] = useState<'LOADING' | 'LOADED' | 'ERROR'>('LOADING');
@@ -68,7 +69,7 @@ function Upcoming({ attributes }: Props) {
 		const params = new URLSearchParams({
 			include: 'location,image,categories,tags,bookings,persons',
 			per_page: String(limit),
-			order,
+			order: normalizedOrder,
 			scope,
 		});
 
@@ -100,7 +101,7 @@ function Upcoming({ attributes }: Props) {
 						: __('Failed to load events', 'ctx-events'),
 				);
 			});
-	}, [limit, order, selectedCategory, selectedLocation, selectedTags, scope]);
+	}, [limit, normalizedOrder, selectedCategory, selectedLocation, selectedTags, scope]);
 
 	const changeFilter = (
 		key: 'category' | 'tags' | 'string',
@@ -143,7 +144,7 @@ function Upcoming({ attributes }: Props) {
 		}
 
 		filtered.sort((a, b) =>
-			order === 'ASC'
+			normalizedOrder === 'asc'
 				? new Date(a.start).getTime() - new Date(b.start).getTime()
 				: new Date(b.start).getTime() - new Date(a.start).getTime(),
 		);
