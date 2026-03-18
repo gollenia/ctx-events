@@ -45,7 +45,7 @@ function ctx_register_blocks(): void
 {
     $blocks = [
         'upcoming',
-        'monthly-pdf-export',
+        'program-pdf-export',
         'details',
         'details-audience',
         'details-date',
@@ -63,4 +63,3 @@ function ctx_register_blocks(): void
 }
 
 add_action('init', 'ctx_register_blocks');
-
