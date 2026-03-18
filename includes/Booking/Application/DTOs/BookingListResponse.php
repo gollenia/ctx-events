@@ -9,26 +9,11 @@ use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 
 final readonly class BookingListResponse extends DtoCollection
 {
-    public ?Pagination $pagination;
-    public ?array $statusCounts;
-
     public static function from(BookingListItem ...$items): self
     {
         return new self($items);
     }
 
-    public function withPagination(Pagination $pagination): self
-    {
-        return clone($this, ['pagination' => $pagination]);
-    }
 
-    public function withStatusCounts(array $statusCounts): self
-    {
-        return clone($this, ['statusCounts' => $statusCounts]);
-    }
-
-    public function hasStatusCounts(): bool
-    {
-        return $this->statusCounts !== null;
-    }
+    
 }
