@@ -1,0 +1,21 @@
+.ctx-program-pdf-export__preview {
+	border: 1px dashed #94a3b8;
+	border-radius: 8px;
+	padding: 16px;
+	background: #f8fafc;
+}
+
+.ctx-program-pdf-export__title {
+	font-weight: 600;
+	margin-bottom: 12px;
+}
+
+.ctx-program-pdf-export__controls {
+	display: flex;
+	gap: 8px;
+}
+
+.ctx-program-pdf-export__controls select,
+.ctx-program-pdf-export__button {
+	height: 40px;
+}

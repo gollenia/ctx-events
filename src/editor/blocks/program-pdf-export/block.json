@@ -1,0 +1,45 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/program-pdf-export",
+	"title": "Program PDF Export",
+	"description": "Render a public selector for weekly, monthly, or yearly event PDF exports.",
+	"apiVersion": 3,
+	"category": "widgets",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": "Monatsprogramm als PDF"
+		},
+		"buttonText": {
+			"type": "string",
+			"default": "PDF herunterladen"
+		},
+		"exportMode": {
+			"type": "string",
+			"default": "month"
+		},
+		"periodsAhead": {
+			"type": "number",
+			"default": 12
+		},
+		"showEmptyDays": {
+			"type": "boolean",
+			"default": true
+		},
+		"category": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"spacing": {
+			"margin": ["top", "bottom"],
+			"padding": ["top", "bottom", "left", "right"],
+			"blockGap": true
+		}
+	},
+	"render": "file:./render.php",
+	"editorStyle": "events-block-editor-style",
+	"style": "events-block-style"
+}

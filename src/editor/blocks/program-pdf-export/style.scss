@@ -1,0 +1,22 @@
+.ctx-program-pdf-export__form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.ctx-program-pdf-export__title {
+	margin-bottom: 10px;
+	font-weight: 600;
+}
+
+.ctx-program-pdf-export__select {
+	min-width: 220px;
+	padding: 0.65rem 0.8rem;
+}
+
+.ctx-program-pdf-export__button {
+	padding: 0.7rem 1rem;
+	border: 0;
+	cursor: pointer;
+}
