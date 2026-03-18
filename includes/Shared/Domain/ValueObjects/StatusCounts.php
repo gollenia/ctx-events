@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 
-readonly class StatusCounts
+use Contexis\Events\Shared\Domain\Contracts\StatusCountsInterface;
+final readonly class StatusCounts implements StatusCountsInterface
 {
 	public function __construct(
 		public int $publish = 0,
@@ -15,6 +17,9 @@ readonly class StatusCounts
 	) {
 	}
 
+	/**
+	 * @param array<string, int> $data
+	 */
 	public static function fromArray(array $data): static
 	{
 		return new static(
@@ -27,6 +32,9 @@ readonly class StatusCounts
 		);
 	}
 
+	/**
+	 * @return array<string, int>
+	 */
 	public function toArray(): array
 	{
 		return [

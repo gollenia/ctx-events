@@ -6,21 +6,20 @@ namespace Contexis\Events\Booking\Infrastructure;
 use Contexis\Events\Booking\Application\DTOs\BookingListItem;
 use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
+use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingStatusCounts;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntryCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookings;
 use Contexis\Events\Booking\Domain\ValueObjects\TicketBookingsMap;
-use Contexis\Events\Booking\Infrastructure\Mapper\AttendeeMapper;
-use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
-use Contexis\Events\Payment\Infrastructure\Mapper\TransactionMapper;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
-use Contexis\Events\Payment\Infrastructure\TransactionMigration;
+use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
@@ -30,7 +29,11 @@ use Contexis\Events\Shared\Infrastructure\Enums\DatabaseOutput;
 class DbBookingRepository implements BookingRepository
 {
     public function __construct(
-        private Database $db
+        private Database $db,
+        private AttendeeRepository $attendeeRepository,
+        private TransactionRepository $transactionRepository,
+        private BookingHydrator $bookingHydrator,
+        private BookingCollectionHydrator $bookingCollectionHydrator,
     ) {
     }
 
@@ -72,12 +75,7 @@ class DbBookingRepository implements BookingRepository
             return null;
         }
 
-        $attendees = $this->getBookingAttendees($id);
-        $transactions = $this->getBookingTransactions($id);
-
-        $result['attendees'] = $attendees;
-        $result['transactions'] = $transactions;
-        return BookingMapper::map($result);
+        return $this->bookingHydrator->hydrate($result);
     }
 
     public function findByReference(string $reference): ?Booking
@@ -90,12 +88,16 @@ class DbBookingRepository implements BookingRepository
             return null;
         }
 
-        $attendees = $this->getBookingAttendees(BookingId::from((int) $result['id']));
-        $transactions = $this->getBookingTransactions(BookingId::from((int) $result['id']));
+        return $this->bookingHydrator->hydrate($result);
+    }
 
-        $result['attendees'] = $attendees;
-        $result['transactions'] = $transactions;
-        return BookingMapper::map($result);
+	public function findByEventId(EventId $eventId): array
+	{
+		$table = BookingMigration::getTableName();
+		$sql = "SELECT * FROM $table WHERE event_id = %d";
+		$results = $this->db->getResults($this->db->prepare($sql, $eventId->toInt()), DatabaseOutput::ARRAY_ASSOC);
+
+		return $this->bookingCollectionHydrator->hydrate($results);
     }
 
     public function search(BookingListRequest $query): BookingListResponse
@@ -138,7 +140,7 @@ class DbBookingRepository implements BookingRepository
         $statusRows = $this->db->getResults($statusCountSql);
         $statusCounts = [];
         foreach ($statusRows as $statusRow) {
-            $statusCounts[(int) $statusRow->status] = (int) $statusRow->cnt;
+            $statusCounts[$this->rowInt($statusRow, 'status')] = $this->rowInt($statusRow, 'cnt');
         }
 
         $pagination = Pagination::of(
@@ -147,9 +149,14 @@ class DbBookingRepository implements BookingRepository
             perPage: $query->perPage,
         );
 
-        return (new BookingListResponse(...$items))
+        return (BookingListResponse::from(...$items))
             ->withPagination($pagination)
-            ->withStatusCounts($statusCounts);
+            ->withStatusCounts(new BookingStatusCounts(
+                pending: $statusCounts[BookingStatus::PENDING->value] ?? 0,
+                approved: $statusCounts[BookingStatus::APPROVED->value] ?? 0,
+                canceled: $statusCounts[BookingStatus::CANCELED->value] ?? 0,
+                expired: $statusCounts[BookingStatus::EXPIRED->value] ?? 0,
+            ));
     }
 
     public function delete(BookingId $id): void
@@ -253,23 +260,27 @@ class DbBookingRepository implements BookingRepository
         if ($ticketIds === []) {
             foreach ($rows as $row) {
                 $result[] = new TicketBookings(
-                    ticketId: TicketId::from($row->ticket_id),
-                    pending: (int) $row->pending,
-                    approved: (int) $row->approved,
-                    canceled: (int) $row->canceled,
-                    expired: (int) $row->expired
+                    ticketId: TicketId::from($this->rowString($row, 'ticket_id')),
+                    pending: $this->rowInt($row, 'pending'),
+                    approved: $this->rowInt($row, 'approved'),
+                    canceled: $this->rowInt($row, 'canceled'),
+                    expired: $this->rowInt($row, 'expired')
                 );
             }
         } else {
-            $rowsByTicket = array_column($rows, null, 'ticket_id');
+            $rowsByTicket = [];
+            foreach ($rows as $row) {
+                $rowsByTicket[$this->rowString($row, 'ticket_id')] = $row;
+            }
+
             foreach ($ticketIds as $ticketId) {
                 $row = $rowsByTicket[$ticketId] ?? null;
                 $result[] = new TicketBookings(
                     ticketId: TicketId::from($ticketId),
-                    pending: $row !== null ? (int) $row->pending : 0,
-                    approved: $row !== null ? (int) $row->approved : 0,
-                    canceled: $row !== null ? (int) $row->canceled : 0,
-                    expired: $row !== null ? (int) $row->expired : 0
+                    pending: $row !== null ? $this->rowInt($row, 'pending') : 0,
+                    approved: $row !== null ? $this->rowInt($row, 'approved') : 0,
+                    canceled: $row !== null ? $this->rowInt($row, 'canceled') : 0,
+                    expired: $row !== null ? $this->rowInt($row, 'expired') : 0
                 );
             }
         }
@@ -315,14 +326,14 @@ class DbBookingRepository implements BookingRepository
         }
 
         foreach ($rows as $row) {
-            $eventKey = (int) $row->event_id;
+            $eventKey = $this->rowInt($row, 'event_id');
 
             $result[$eventKey][] = new TicketBookings(
-                ticketId: TicketId::from($row->ticket_id),
-                pending: (int) $row->pending,
-                approved: (int) $row->approved,
-                canceled: (int) $row->canceled,
-                expired: (int) $row->expired
+                ticketId: TicketId::from($this->rowString($row, 'ticket_id')),
+                pending: $this->rowInt($row, 'pending'),
+                approved: $this->rowInt($row, 'approved'),
+                canceled: $this->rowInt($row, 'canceled'),
+                expired: $this->rowInt($row, 'expired')
             );
         }
 
@@ -412,7 +423,7 @@ class DbBookingRepository implements BookingRepository
     }
 
     /**
-     * @param string[] $ticketIds
+     * @param array<int, mixed> $ticketIds
      * @return TicketId[]
      */
     private function normalizeTicketIds(array $ticketIds): array
@@ -425,29 +436,29 @@ class DbBookingRepository implements BookingRepository
             }
 
             $resolvedTicketId = TicketId::from($ticketId);
-            if ($resolvedTicketId === null) {
-                continue;
-            }
-
             $normalized[$resolvedTicketId->toString()] = $resolvedTicketId;
         }
 
         return array_values($normalized);
     }
 
-    private function getBookingAttendees(BookingId $id): array
+    private function rowValue(array|object $row, string $key): mixed
     {
-        $table = AttendeeMigration::getTableName();
-        $sql   = "SELECT * FROM $table WHERE booking_id = %d";
-        $rows  = $this->db->getResults($this->db->prepare($sql, $id->toInt()), DatabaseOutput::ARRAY_ASSOC);
-        return array_map(AttendeeMapper::map(...), $rows);
+        if (is_array($row)) {
+            return $row[$key] ?? null;
+        }
+
+        return $row->{$key} ?? null;
     }
 
-    private function getBookingTransactions(BookingId $id): array
+    private function rowInt(array|object $row, string $key): int
     {
-        $table = TransactionMigration::getTableName();
-        $sql   = "SELECT * FROM $table WHERE booking_id = %d";
-        $rows  = $this->db->getResults($this->db->prepare($sql, $id->toInt()), DatabaseOutput::ARRAY_ASSOC);
-        return array_map(TransactionMapper::map(...), $rows);
+        return (int) $this->rowValue($row, $key);
     }
+
+    private function rowString(array|object $row, string $key): string
+    {
+        return (string) $this->rowValue($row, $key);
+    }
+
 }

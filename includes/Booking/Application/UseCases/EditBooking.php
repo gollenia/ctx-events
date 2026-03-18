@@ -28,7 +28,7 @@ final class EditBooking
     ) {
     }
 
-    public function execute(string $uuid, UserContext $userContext): ?EditBookingResponse
+    public function execute(string $uuid, UserContext $userContext): EditBookingResponse
     {
         $booking = $this->bookingRepository->findByReference($uuid);
 

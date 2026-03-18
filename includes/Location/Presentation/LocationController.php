@@ -13,11 +13,9 @@ use Contexis\Events\Shared\Presentation\Contracts\RestController;
 final class LocationController implements RestController
 {
     public function __construct(
-        private GetLocation $getLocation,
-        private ListLocations $listLocations
+        private GetLocation $getLocation
     ) {
         $this->getLocation = $getLocation;
-        $this->listLocations = $listLocations;
     }
 
 

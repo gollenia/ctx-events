@@ -27,6 +27,7 @@ final class ImageMapper
     private static function getImageSizes(int $attachmentId): ImageSizes
     {
         $sizes = wp_get_registered_image_subsizes();
+		$imageSizes = [];
         foreach ($sizes as $sizeName => $sizeData) {
             $imageSrc = wp_get_attachment_image_src($attachmentId, $sizeName);
             if ($imageSrc) {

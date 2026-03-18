@@ -57,7 +57,7 @@ final class OfflineGateway implements PaymentGateway
 
     public function initiatePayment(Booking $booking): Transaction
     {
-        $paymentTermDays = $this->config->paymentTermInDays();
+        $paymentTermDays = $this->paymentTermInDays();
         $expiresAt = $paymentTermDays > 0
             ? new \DateTimeImmutable(sprintf('+%d days', $paymentTermDays))
             : null;
@@ -85,4 +85,9 @@ final class OfflineGateway implements PaymentGateway
 	{
 		return $this->config->isValid();
 	}
+
+    public function paymentTermInDays(): int
+    {
+        return max(0, $this->config->paymentTerm);
+    }
 }

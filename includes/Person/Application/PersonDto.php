@@ -8,6 +8,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Email;
 
 final class PersonDto
 {
+	/** @param array<mixed> $sameAs */
     public function __construct(
         public readonly int $id,
         public readonly ?string $givenName,

@@ -9,10 +9,25 @@ use WP_Post;
 
 final class PostSnapshot
 {
+	public int $id;
+	public string $post_title;
+	public string $post_content;
+	public string $post_excerpt;
+	public string $post_type;
+	public string $post_status;
+	public string $post_date;
+	/** @var array<string, mixed> */
     private array $meta;
 
     public function __construct(private readonly WP_Post $post)
     {
+		$this->id = $post->ID;
+		$this->post_title = $post->post_title;
+		$this->post_content = $post->post_content;
+		$this->post_excerpt = $post->post_excerpt;
+		$this->post_type = $post->post_type;
+		$this->post_status = $post->post_status;
+		$this->post_date = $post->post_date;
         $this->meta = get_post_meta($post->ID);
     }
 
@@ -32,15 +47,6 @@ final class PostSnapshot
         }
 
         return new PostSnapshot($post);
-    }
-
-
-    public function __get(string $key): mixed
-    {
-        if ($key === 'id') {
-            return $this->post->ID;
-        }
-        return $this->post->$key ?? null;
     }
 
     public function has(string $key): bool
@@ -124,6 +130,9 @@ final class PostSnapshot
         return $default;
     }
 
+	/** 
+	 * @param array<string, mixed>|null $default
+	 * @return array<string>|null */
     public function getArray(string $key, ?array $default = null): ?array
     {
         $v = $this->rawValue($key);

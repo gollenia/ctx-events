@@ -64,7 +64,7 @@ final readonly class PrepareBookingResponse
             'eventDescription' => $this->eventDescription,
             'tickets' => $this->tickets->toArray(),
             'gatewaysAvailable' => $this->gateways->toArray(),
-            'bookingForm' => $this->bookingForm?->toArray(),
+            'bookingForm' => $this->bookingForm->toArray(),
             'attendeeForm' => $this->attendeeForm?->toArray(),
             'hasCoupons' => $this->couponsEnabled,
 			'donationEnabled' => $this->donationEnabled,

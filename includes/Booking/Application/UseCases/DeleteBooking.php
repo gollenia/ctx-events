@@ -27,6 +27,10 @@ final class DeleteBooking implements BookingAction
             throw new \DomainException("Booking not found: {$request->reference}");
         }
 
+		if($booking->status->mayBeDeleted() === false) {
+			throw new \DomainException("Only canceled or expired bookings can be deleted.");
+		}
+
         $id = $booking->id ?? throw new \RuntimeException('Booking has no ID');
         $this->transactionRepository->deleteByBookingId($id);
         $this->attendeeRepository->deleteByBookingId($id);

@@ -5,8 +5,14 @@ namespace Contexis\Events\Shared\Infrastructure\Abstracts;
 
 abstract class MetaData
 {
+	/**
+	 * @var array<string, array<string, mixed>>
+	 */
     protected static array $metadata = [];
 
+	/**
+	 * @return array<string, mixed>
+	 */
     public static function baseArgs(): array
     {
         return [
@@ -17,6 +23,9 @@ abstract class MetaData
         ];
     }
 
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
     public static function getRegisterArgs(): array
     {
         $base = static::baseArgs();

@@ -11,6 +11,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript(name: 'Gateway')]
 final readonly class GatewayResource implements Resource
 {
+	/** @param array<mixed> $settings */
 	public function __construct(
 		public string $slug,
 		public string $title,

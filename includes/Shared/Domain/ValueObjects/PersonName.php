@@ -41,6 +41,9 @@ final class PersonName
         return $this->getFullName();
     }
 
+	/**
+	 * @return array<string, string|null>
+	 */
 	public function toArray(): array
 	{
 		return [

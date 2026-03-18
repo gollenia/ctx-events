@@ -20,14 +20,18 @@ class WpDatabase implements Database
 		return $this->db->query($query);
 	}
 
+	/**
+	 * @return array<mixed>
+	 */
     public function getResults(string $query, DatabaseOutput $output = DatabaseOutput::OBJECT): array 
     {
         return $this->db->get_results($query, $output->value);
     }
-	/*
-	*  @param string      $query   Query statement with placeholders. Use %s for strings, %d for integers, and %f for floats. Example: $db->prepare("SELECT * FROM table WHERE id = %d", $id);
-	 * @param mixed       ...$args Variables to substitute into the query's placeholders
-	 * @return string|void Sanitized query string, if there is a query to prepare.
+
+	/**
+	 * @param literal-string $query
+	 * @param mixed ...$args
+	 * @return string
 	 */
     public function prepare(string $query, ...$args): string 
     {
@@ -49,11 +53,22 @@ class WpDatabase implements Database
 		return (int)$this->db->get_var($query, $x, $y);
 	}
 
+	/**
+	 *  @param string|null $query
+	 *  @param DatabaseOutput $output
+	 *  @param int<0, max> $y
+	 *  @return array<mixed> | object | null
+	 */
 	public function getRow(string|null $query, DatabaseOutput $output = DatabaseOutput::OBJECT, int $y = 0): array|object|null
 	{
 		return $this->db->get_row($query, $output->value, $y);
 	}
 
+	/**
+	 * @param string|null $query
+	 * @param int<0, max> $x
+	 * @return array<mixed>
+	 */
 	public function getCol(string|null $query, int $x = 0): array
 	{
 		return $this->db->get_col($query, $x);

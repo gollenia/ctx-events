@@ -12,4 +12,13 @@ final readonly class CouponCheckResponse
         public int $discountValue,
         public int $discountAmount,
     ) {}
+
+	public static function from(
+		string $name,
+		string $discountType,
+		int $discountValue,
+		int $discountAmount,
+	): self {
+		return new self($name, $discountType, $discountValue, $discountAmount);
+	}
 }

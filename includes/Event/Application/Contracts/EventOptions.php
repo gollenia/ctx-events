@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\Contracts;
 
-interface EventOptions
+use Contexis\Events\Shared\Domain\Contracts\Options;
+
+interface EventOptions extends Options
 {
     public function publicShowPastEvents(): bool;
 

@@ -29,7 +29,7 @@ class FormMapper implements PostMapper
 		
 			
         $args = [
-            'id' => FormId::from($snapshot->ID),
+            'id' => FormId::from($snapshot->id),
 			'type' => $type,
             'name' => $snapshot->post_title,
             'description' => $snapshot->post_excerpt,
@@ -118,7 +118,6 @@ class FormMapper implements PostMapper
 		$blocks = parse_blocks( $content );
 		
 		if(count($blocks) == 0) return [];
-		if(!array_key_exists('innerBlocks', $blocks[0])) return [];
 
 		return $blocks[0]['innerBlocks'];
 	}
@@ -130,7 +129,6 @@ class FormMapper implements PostMapper
 	public static function getBlockDefaults(string $type): array {
 		$defaults = [];
 		$file = PluginInfo::getPluginDir() . "/src/blocks/form/" . $type . "/block.json";
-		if(!$file) return $defaults;
 		$block_data = json_decode( file_get_contents($file) );
 		foreach($block_data->attributes as $key => $value) {
 			if(!property_exists($value, 'default')) continue;

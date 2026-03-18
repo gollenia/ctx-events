@@ -24,7 +24,6 @@ final class EventResponseAssembler
 		private EventLocations $locations,
 		private EventImages $images,
 		private EventPersons $persons,
-		private EventTickets $tickets,
 		private TaxonomyLoader $taxonomyLoader,
 		private Clock $clock,
 		private BookingRepository $bookingRepository,

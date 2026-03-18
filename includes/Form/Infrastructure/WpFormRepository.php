@@ -16,8 +16,8 @@ use Contexis\Events\Form\Domain\Enums\FormType;
 use Contexis\Events\Form\Infrastructure\Mappers\FormListItemMapper;
 use Contexis\Events\Form\Infrastructure\Mappers\FormMapper;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
+use Contexis\Events\Shared\Domain\Contracts\StatusCountsInterface;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
-use Contexis\Events\Shared\Domain\ValueObjects\StatusCounts;
 use Contexis\Events\Shared\Infrastructure\Wordpress\InteractsWithStatusCounts;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 use WP_Query;
@@ -116,7 +116,7 @@ class WpFormRepository implements FormRepository
             perPage: $criteria->perPage
         );
 
-		return new FormListResponse(
+		return FormListResponse::from(
 			...$forms
 		)->withPagination($pagination);
 		
@@ -150,7 +150,7 @@ class WpFormRepository implements FormRepository
 		return FormId::from($newPostId);
 	}
 
-	public function getCountsByStatus(): StatusCounts
+	public function getCountsByStatus(): StatusCountsInterface
 	{
 		$bookingCounts = wp_count_posts(BookingFormPost::POST_TYPE);
 		$attendeeCounts = wp_count_posts(AttendeeFormPost::POST_TYPE);

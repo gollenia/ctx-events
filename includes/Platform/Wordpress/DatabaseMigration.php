@@ -5,14 +5,15 @@ namespace Contexis\Events\Platform\Wordpress;
 
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
+use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 
 final class DatabaseMigration implements Registrar
 {
 
 	private const VERSION = '1.0.4';
 
-	/*
-	 * @var Migration[]
+	/**
+	 * @param iterable<Migration> $migrations
 	 */
     public function __construct(
 		private readonly iterable $migrations,
@@ -23,11 +24,6 @@ final class DatabaseMigration implements Registrar
     public function hook(): void
     {
         $this->migrate();
-    }
-
-    public function all(): array
-    {
-        return $this->migrations;
     }
 
 	public function migrate(): void

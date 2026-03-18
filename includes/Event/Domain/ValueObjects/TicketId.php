@@ -26,7 +26,6 @@ final class TicketId
 
     public function equals(self $other): bool
     {
-        return $other::class === static::class && $this->value === $other->value;
+        return $this->value === $other->value;
     }
 }
-

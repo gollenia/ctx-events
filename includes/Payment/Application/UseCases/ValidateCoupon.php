@@ -49,7 +49,7 @@ final class ValidateCoupon
         $currency = Currency::fromCode($currencyCode);
         $discountAmount = $coupon->getDiscountAmount(Price::from($bookingPriceCents, $currency));
 
-        return new CouponCheckResponse(
+        return CouponCheckResponse::from(
             name: $coupon->name,
             discountType: $coupon->getDiscountType()->value,
             discountValue: $coupon->value,

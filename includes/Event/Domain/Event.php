@@ -51,7 +51,7 @@ final readonly class Event
 
 	public function allowsCoupons(): bool
 	{
-		return $this->eventCoupons?->enabled ?? false;
+		return $this->eventCoupons->enabled ?? false;
 	}
 
 	public function withBookings(
@@ -103,7 +103,7 @@ final readonly class Event
 			return null;
 		}
 
-		return $this->tickets->getAvailableTickets($map, $now);
+		return $this->tickets->getAvailableTickets($map);
 	}
 
 	public function getLowestAvailablePrice(DateTimeImmutable $now, TicketBookingsMap $map): ?Price
@@ -161,5 +161,8 @@ final readonly class Event
 		return $this->endDate < $now;
 	}
 
-
+	public function isOngoing(DateTimeImmutable $now): bool
+	{
+		return $this->startDate <= $now && $this->endDate >= $now;
+	}
 }

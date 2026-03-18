@@ -40,6 +40,9 @@ class WpPersonRepository implements PersonRepository
             : null;
     }
 
+	/*
+	 * @param array<PersonId> $ids
+	 */
     public function findByIds(array $ids): PersonCollection
     {
         $builder = WpPersonQueryBuilder::fromCriteria(new PersonCriteria())

@@ -5,6 +5,7 @@ namespace Contexis\Events\Location\Application;
 
 use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Location\Domain\LocationRepository;
+use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 
 final class GetLocation
 {
@@ -12,7 +13,7 @@ final class GetLocation
 	{
 	}
 
-	public function execute(int $id): ?LocationDto
+	public function execute(int $id, LocationIncludes $includes, UserContext $context ): ?LocationDto
 	{
 		$location = $this->locationRepository->find(LocationId::from($id));
 		if ($location === null) {

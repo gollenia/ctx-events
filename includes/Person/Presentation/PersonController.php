@@ -35,7 +35,7 @@ final class PersonController implements RestController
         ));
     }
 
-    public function getItem(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
+    public function getItem(\WP_REST_Request $request): \WP_REST_Response
     {
         $person_id = (int) $request->get_param('id');
         $include = PersonIncludes::fromArray(explode(',', $request->get_param('include') ?? ''));

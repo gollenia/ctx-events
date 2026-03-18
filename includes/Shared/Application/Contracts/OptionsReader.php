@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Application\Contracts;
 
-interface Options
+interface OptionsReader
 {
     public function getBool(string $key, bool $default = false): bool;
 

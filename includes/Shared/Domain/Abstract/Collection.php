@@ -5,18 +5,37 @@ declare(strict_types=1);
 namespace Contexis\Events\Shared\Domain\Abstract;
 
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
+use Contexis\Events\Shared\Domain\Contracts\StatusCountsInterface;
 
+/** @phpstan-ignore missingType.generics */
 abstract readonly class Collection implements \Countable, \IteratorAggregate
 {
+	/**
+	 * @param array<mixed> $items
+	 * @param StatusCountsInterface|null $statusCounts
+	 * @param Pagination|null $pagination
+	 */
     final protected function __construct(
 		protected array $items, 
-		protected ?Pagination $pagination = null)
+		protected ?Pagination $pagination = null,
+		protected ?StatusCountsInterface $statusCounts = null
+	)
     {
     }
 
     public function withPagination(Pagination $pagination): static
     {
         return clone($this, ['pagination' => $pagination]);
+    }
+
+	public function withStatusCounts(StatusCountsInterface $statusCounts): static
+    {
+        return clone($this, ['statusCounts' => $statusCounts]);
+    }
+
+	public function hasStatusCounts(): bool
+    {
+        return $this->statusCounts !== null;
     }
 
     public function withEnrichment(\Closure $enrichmentCallback): static
@@ -29,6 +48,11 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
     {
         return $this->pagination;
     }
+
+	public function statusCounts(): ?StatusCountsInterface
+	{
+		return $this->statusCounts;
+	}
 
 	public static function empty() : static
 	{
@@ -55,11 +79,17 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
         return $this->items[0] ?? null;
     }
 
+	/**
+	 * @return array<mixed>
+	 */
     public function map(callable $callback): array
     {
         return array_map($callback, $this->items);
     }
 
+	/**
+	 * @return array<mixed>
+	 */
     public function toArray(): array
     {
         return $this->items;

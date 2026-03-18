@@ -36,7 +36,7 @@ final readonly class EventResource implements Resource
 			description: $eventResponse->description,
 			status: $eventResponse->status->value,
 			startDate: $eventResponse->startDate->format(DATE_ATOM),
-			endDate: $eventResponse->endDate?->format(DATE_ATOM),
+			endDate: $eventResponse->endDate->format(DATE_ATOM),
 			audience: $eventResponse->audience,
 			bookingSummary: $eventResponse->bookingSummary ? EventBookingSummaryResource::from($eventResponse->bookingSummary) : null,
 			includes: EventIncludeResource::fromDto($eventResponse),

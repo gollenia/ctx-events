@@ -18,6 +18,8 @@ interface BookingRepository
 
     public function findByReference(string $reference): ?Booking;
 
+	public function findByEventId(EventId $eventId): array;
+
     public function save(Booking $booking): BookingId;
 
     public function update(Booking $booking): void;

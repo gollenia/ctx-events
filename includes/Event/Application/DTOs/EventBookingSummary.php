@@ -17,12 +17,12 @@ final readonly class EventBookingSummary
 		public bool $isBookable,
 		public BookingDenyReason|null $denyReason,
 		public int $approved,
-		public ?int $available = null,
-		public ?int $totalCapacity = null,
-		public ?int $pending = null,
 		public ?Price $lowestAvailablePrice,
 		public ?Price $lowestPrice,
 		public ?Price $highestPrice,
+		public ?int $available = null,
+		public ?int $totalCapacity = null,
+		public ?int $pending = null,
 		public ?\DateTimeImmutable $bookingStart = null,
 		public ?\DateTimeImmutable $bookingEnd = null
 
@@ -34,7 +34,7 @@ final readonly class EventBookingSummary
 		$bookingDecision = $event->canBookAt($now, $map);
 		$priceRange = $event->tickets?->getPriceRange($now) ?? PriceRange::empty();
 		$freeSpaces = $event->getFreeSpaces($now, $map);
-		$canSeeSpaces = true; //!$isPublic || $event->eventViewConfig->showFreeSpaces($freeSpaces);
+		$canSeeSpaces = !$isPublic || $event->eventViewConfig->showFreeSpaces($freeSpaces);
 
 		return new self(
 			isBookable: $bookingDecision->allowed,

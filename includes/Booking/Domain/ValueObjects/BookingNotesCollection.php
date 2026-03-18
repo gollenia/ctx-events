@@ -18,6 +18,6 @@ final readonly class BookingNotesCollection extends Collection
     {
         $items = [...$this->items, $entry];
 
-        return new self(...$items);
+        return self::from(...$items);
     }
 }

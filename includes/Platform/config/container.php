@@ -21,6 +21,7 @@ $options = require_once __DIR__ . '/options.php';
 $repositories = require_once __DIR__ . '/repositories.php';
 $admin = require_once __DIR__ . '/admin.php';
 $events = require_once __DIR__ . '/events.php';
+$hooks = require_once __DIR__ . '/hooks.php';
 
 return [
 
@@ -41,6 +42,7 @@ return [
     \Contexis\Events\Platform\Wordpress\RestRegistrar::class   => autowire()->constructor($controllers),
     \Contexis\Events\Platform\Wordpress\DatabaseMigration::class => autowire()->constructor($migrations),
     \Contexis\Events\Platform\Wordpress\AdminRegistrar::class => create()->constructor($admin),
+    \Contexis\Events\Platform\Wordpress\HookRegistrar::class => create()->constructor($hooks),
 
 	...$options,
 	...$repositories,

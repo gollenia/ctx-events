@@ -25,14 +25,11 @@ final class CalculateBookingPrice
 		$bookingPrice = new Price(0, $currency);
 		foreach ($attendees as $attendee) {
 			$ticket = $availableTickets->getTicketById($attendee->ticketId);
-			if ($ticket === null) {
-				throw new \DomainException('Invalid ticket ID: ' . $attendee->ticketId->toString());
-			}
 
 			$bookingPrice = $bookingPrice->add($ticket->price);
 		}
 
-		if($bookingPrice->isFree()) return PriceSummary::free($currency);
+		if($bookingPrice->isFree()) return PriceSummary::free();
 
 		$discount = $coupon?->getDiscountAmount($bookingPrice) ?? new Price(0, $currency);
 		

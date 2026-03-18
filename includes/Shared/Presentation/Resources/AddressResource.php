@@ -29,6 +29,9 @@ final readonly class AddressResource implements Resource
 		);
 	}
 
+	/**
+	 * @return array<string, string>
+	 */ 
 	public function jsonSerialize(): array
 	{
 		return [

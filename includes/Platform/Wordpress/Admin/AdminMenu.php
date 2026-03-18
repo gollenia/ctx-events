@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress\Admin;
 
-use Mpdf\Tag\A;
-
 final class AdminMenu implements AdminServiceInterface
 {
     public const MENU_SLUG = 'ctx_events_admin_menu';
@@ -17,14 +15,10 @@ final class AdminMenu implements AdminServiceInterface
         add_filter('parent_file', [$this, 'parent_file']);
     }
 
-
-    public function parent_file($parent_file)
+    public function parent_file(string $parent_file): string
     {
         global $current_screen;
-
-        // Check, ob wir im CPT "event" sind (Edit oder New Screen)
         if ($current_screen && $current_screen->post_type === 'ctx-event') {
-            // Wir zwingen WP, dein Menü als aktiv zu markieren
             return AdminMenu::MENU_SLUG;
         }
 
@@ -80,6 +74,15 @@ final class AdminMenu implements AdminServiceInterface
 			'manage_options',
 			'contexis_events_forms',
 			fn() => print('<div id="ctx-forms-admin"></div>')
+		);
+
+		add_submenu_page(
+			self::MENU_SLUG,
+			__('Email', 'ctx-events'),
+			__('Email', 'ctx-events'),
+			'manage_options',
+			'contexis_events_email',
+			fn() => print('<div id="ctx-email-admin"></div>')
 		);
 
 		add_submenu_page(

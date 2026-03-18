@@ -55,6 +55,9 @@ final class TicketResponse implements DTO
         return $limit;
     }
 
+	/**
+	 * @return array<string, mixed>
+	 */
     public function toArray(): array
     {
         return [

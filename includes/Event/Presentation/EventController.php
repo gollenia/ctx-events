@@ -23,16 +23,16 @@ final class EventController implements RestController
         private GetEvent $getEvent,
         private ListEvents $listEvents,
 		private CancelEvent $cancelEvent,
-		private PrepareBooking $prepareBooking,
-		private \Contexis\Events\Shared\Domain\Contracts\Clock $clock
+		private PrepareBooking $prepareBooking
     ) {
         $this->route = RestRoute::forType('events');
     }
 
     public function register(): void
     {
+		$args = $this->route->getForSingle();
 
-        register_rest_route(...$this->route->getForSingle(), args: [
+        register_rest_route($args->namespace, $args->route, args: [
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
@@ -52,7 +52,7 @@ final class EventController implements RestController
             ],
         ]);
 
-		register_rest_route(...$this->route->getForSingle(), args: [
+		register_rest_route($args->namespace, $args->route, args: [
 			[
 				'methods'   => \WP_REST_Server::DELETABLE,
 				'callback'  => [$this, 'deleteEvent'],
@@ -67,7 +67,8 @@ final class EventController implements RestController
 			],
 		]);
 
-		register_rest_route(...$this->route->getForSingle('/cancel'), args: [
+		$args = $this->route->getForSingle('/cancel');
+		register_rest_route($args->namespace, $args->route, args: [
 			[
 				'methods'   => 'POST',
 				'callback'  => [$this, 'cancelEvent'],
@@ -95,7 +96,8 @@ final class EventController implements RestController
 			],
 		]);
 
-        register_rest_route(...$this->route->getForCollection(), args: [
+        $args = $this->route->getForCollection();
+        register_rest_route($args->namespace, $args->route, args: [
             [
                 'methods'   => 'GET',
                 'callback'  => [$this, 'getEventPage'],
@@ -170,7 +172,8 @@ final class EventController implements RestController
             ],
         ]);
 
-		register_rest_route(...$this->route->getForSingle('/prepare-booking'), args: [
+		$args = $this->route->getForSingle('/prepare-booking');
+		register_rest_route($args->namespace, $args->route, args: [
 			[
 				'methods'   => 'GET',
 				'callback'  => [$this, 'prepareBooking'],
@@ -216,9 +219,9 @@ final class EventController implements RestController
         }
 
         $response = new \WP_REST_Response($result, 200);
-        $response->header('X-WP-Total', $page->pagination()->totalItems);
-        $response->header('X-WP-TotalPages', $page->pagination()->totalPages());
-		$response->header('X-WP-StatusCounts', json_encode($page->statusCounts));
+        $response->header('X-WP-Total', (string) $page->pagination()->totalItems);
+        $response->header('X-WP-TotalPages', (string) $page->pagination()->totalPages());
+		$response->header('X-WP-StatusCounts', json_encode($page->statusCounts()?->toArray()));
 		
         return $response;
     }

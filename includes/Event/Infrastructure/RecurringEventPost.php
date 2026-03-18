@@ -8,13 +8,13 @@ use Contexis\Events\Event\Infrastructure\EventPost;
 
 class RecurringEventPost extends PostType
 {
-    public const POST_TYPE = 'event-recurring';
+    public const POST_TYPE = 'ctx-event-recurring';
 
     public static function init(): self
     {
         $instance = new self();
-        add_action('init', array($instance, 'register_post_type'));
-        add_action('init', array($instance, 'register_meta'));
+        add_action('init', [$instance, 'registerPostType'], 10);
+        add_action('init', [$instance, 'registerMeta'], 10);
         return $instance;
     }
 
@@ -80,7 +80,6 @@ class RecurringEventPost extends PostType
             register_post_meta(self::POST_TYPE, $meta['name'], [
                 'type' => $meta['type'],
                 'single'       => true,
-                'sanitize_callback' => null,
                 'auth_callback' => function () {
                     return current_user_can('edit_posts');
                 },

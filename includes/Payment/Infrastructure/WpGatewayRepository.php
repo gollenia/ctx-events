@@ -11,6 +11,7 @@ use Contexis\Events\Payment\Infrastructure\Enums\PaymentProvider;
 
 final class WpGatewayRepository implements GatewayRepository
 {
+	/** @var array<string, PaymentGateway> */
     private array $instances = [];
 
     public function find(string $id): ?PaymentGateway

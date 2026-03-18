@@ -54,7 +54,7 @@ final readonly class TicketCollection extends Collection
         $valid_tickets = array_filter($this->items, function (Ticket $ticket) {
             return $ticket->enabled === true;
         });
-        return new self(...$valid_tickets);
+        return self::from(...$valid_tickets);
     }
 
 	public function getValidTicketsForDate(\DateTimeImmutable $now): self
@@ -62,7 +62,7 @@ final readonly class TicketCollection extends Collection
         $valid_tickets = array_filter($this->items, function (Ticket $ticket) use ($now) {
             return $ticket->isCurrentlyAvailable($now);
         });
-        return new self(...$valid_tickets);
+        return self::from(...$valid_tickets);
     }
 
     public function getLowestAvailablePrice(\DateTimeImmutable $now): ?Price

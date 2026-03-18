@@ -22,7 +22,7 @@ final class Assets implements Registrar
         add_action('enqueue_block_editor_assets', [$this, 'editorScript']);
     }
 
-    public function frontendScript()
+    public function frontendScript(): void
     {
 
         $script_asset = $this->getAssetData('frontend');
@@ -53,7 +53,7 @@ final class Assets implements Registrar
         ]);
     }
 
-    public function adminScript()
+    public function adminScript(): void
     {
         if (!is_admin()) {
             return;
@@ -81,7 +81,7 @@ final class Assets implements Registrar
         );
     }
 
-    public function editorScript()
+    public function editorScript(): void
     {
         $script_asset = $this->getAssetData('editor');
         if (!$script_asset) {
@@ -117,7 +117,10 @@ final class Assets implements Registrar
         ]);
     }
 
-    private function getAssetData($asset)
+	/**
+	 * @return array<string, mixed>|null
+	 */
+    private function getAssetData(string $asset): ?array
     {
         $asset_path = PluginInfo::getPluginDir(self::ASSET_PATH . "/{$asset}.asset.php");
         if (!file_exists($asset_path)) {

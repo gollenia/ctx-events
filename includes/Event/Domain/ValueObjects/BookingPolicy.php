@@ -83,8 +83,8 @@ final class BookingPolicy
 		return [
 			'enabled' => $this->enabled,
 			'canBook' => $this->canBookAt($now),
-			'start'   => $this->start()?->format(DATE_ATOM),
-			'end'     => $this->end()?->format(DATE_ATOM),
+			'start'   => $this->start()->format(DATE_ATOM),
+			'end'     => $this->end()->format(DATE_ATOM),
 		];
 	}
 }

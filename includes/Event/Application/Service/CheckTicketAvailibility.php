@@ -12,10 +12,6 @@ use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 
 final class CheckTicketAvailibility
 {
-    /**
-     * @param array<string, int> $requestedCounts ticketId-String → number of requested spots
-     * @throws \DomainException
-     */
     public function perform(
         AttendeeCollection $attendees,
         TicketBookingsMap $bookingsMap,
@@ -28,15 +24,11 @@ final class CheckTicketAvailibility
             $ticketId = TicketId::from($ticketIdString);
             $ticket = $ticketCollection->getTicketById($ticketId);
 
-            if ($ticket === null) {
-                throw new \DomainException("Ticket not found: {$ticketIdString}");
-            }
-
             if (!$ticket->isBookable($now)) {
                 throw new \DomainException("Ticket '{$ticket->name}' is currently not available.");
             }
 			
-            $free = $ticketCollection->getFreeSpacesForTicket($ticketId, $bookingsMap, $now);
+            $free = $ticketCollection->getFreeSpacesForTicket($ticketId, $bookingsMap);
 
 			if ($free < $requestedCount) {
 				throw new \DomainException(

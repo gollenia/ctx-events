@@ -12,11 +12,9 @@ final readonly class TaxonomyCollection extends Collection
 		return new self($terms);
 	}
 
-    public function all(): array
-    {
-        return $this->items;
-    }
-
+	/**
+	 * @return array<mixed>
+	 */
     public function forTaxonomy(string $taxonomy): array
     {
         return array_values(
@@ -26,9 +24,4 @@ final readonly class TaxonomyCollection extends Collection
             )
         );
     }
-
-	public function toArray(): array
-	{
-		return parent::toArray();
-	}
 }

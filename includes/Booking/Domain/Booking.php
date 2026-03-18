@@ -40,8 +40,8 @@ final readonly class Booking
         public ?TransactionCollection $transactions,
         public EventId $eventId,
         public ?BookingId $id = null,
-        public BookingNotesCollection $notes = new BookingNotesCollection([]),
-        public LogEntryCollection $logEntries = new LogEntryCollection([]),
+        public ?BookingNotesCollection $notes = null,
+        public ?LogEntryCollection $logEntries = null,
     ) {
     }
 
@@ -85,7 +85,9 @@ final readonly class Booking
 
     public function appendLogEntry(LogEntry $entry): self
     {
-        return clone($this, ['logEntries' => $this->logEntries->add($entry)]);
+        $logEntries = $this->logEntries ?? LogEntryCollection::empty();
+
+        return clone($this, ['logEntries' => $logEntries->add($entry)]);
     }
 
     public function withBookingStatus(BookingStatus $status): self

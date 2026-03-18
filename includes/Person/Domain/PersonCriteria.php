@@ -4,17 +4,19 @@ declare(strict_types=1);
 namespace Contexis\Events\Person\Domain;
 
 use Contexis\Events\Shared\Application\Contracts\Criteria;
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 
-final class PersonCriteria implements Criteria
+final readonly class PersonCriteria implements Criteria
 {
+
     public function __construct(
-        public readonly int $page = 0,
-        public readonly int $perPage = 10,
-        public readonly array $status = ['publish'],
-        public readonly array $include = [],
-        public readonly array $categories = [],
-        public readonly array $tags = [],
-        public readonly ?string $search = null
+        public int $page = 0,
+        public int $perPage = 10,
+        public ?StatusList $status = null,
+        public array $include = [],
+		public array $categories = [],
+        public array $tags = [],
+        public ?string $search = null
     ) {
     }
 }

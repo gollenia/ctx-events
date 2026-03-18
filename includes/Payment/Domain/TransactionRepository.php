@@ -13,6 +13,9 @@ interface TransactionRepository
 
     public function findByBookingId(BookingId $bookingId): TransactionCollection;
 
+    /** @param BookingId[] $bookingIds @return array<int, TransactionCollection> */
+    public function findByBookingIds(array $bookingIds): array;
+
     public function findLatestByBookingId(BookingId $bookingId): ?Transaction;
 
     public function deleteByBookingId(BookingId $bookingId): void;

@@ -30,8 +30,7 @@ final class GetEvent
 		private ImageRepository $imageRepository,
 		private LocationRepository $locationRepository,
 		private EventPolicy $eventPolicy,
-		private TaxonomyLoader $taxonomyLoader,
-		private FormRepository $formRepository,
+		private TaxonomyLoader $taxonomyLoader
 	) {
 	}
 
@@ -53,7 +52,6 @@ final class GetEvent
 		$image = $includes->image ? $this->imageRepository->find($event->imageId) : null;
 		$categories = $includes->categories ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES) : null;
 		$tags = $includes->tags ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::TAGS) : null;
-		$tickets = $includes->tickets ? EventTickets::onlyBookable()->getAllowedTickets($event, $userContext->isAdmin() ? TicketScope::ALL : TicketScope::BOOKABLE_ONLY) : null;
 		// Missing: Available Coupons -really?
 		// Missing: Booking Info
 		

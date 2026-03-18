@@ -14,35 +14,8 @@ use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 
 final readonly class EventResponseCollection extends DtoCollection
 {
-    public ?Pagination $pagination;
-	public ?EventStatusCounts $statusCounts;
-
     public static function from(EventResponse ...$items): self
 	{
 		return new self($items);
-	}
-
-    public static function fromDomainCollection(
-        EventCollection $collection
-    ): EventResponseCollection {
-		return new self(...array_map(
-			fn(Event $event) => EventResponse::fromDomainModel($event),
-			$collection->toArray()
-		));
-    }
-
-    public function withPagination(Pagination $pagination): self
-    {
-        return clone($this, ['pagination' => $pagination]);
-    }
-
-	public function withStatusCounts(EventStatusCounts $statusCounts): self
-	{
-		return clone($this, ['statusCounts' => $statusCounts]);
-	}
-
-	public function hasStatusCounts(): bool
-	{
-		return $this->statusCounts !== null;
 	}
 }

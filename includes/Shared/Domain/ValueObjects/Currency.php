@@ -23,7 +23,7 @@ final readonly class Currency
 		return $this->code === $other->code;
 	}
 
-	public function toString()
+	public function toString(): string
 	{
 		return $this->code;
 	}

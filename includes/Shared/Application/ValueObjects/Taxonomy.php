@@ -14,6 +14,9 @@ final class Taxonomy
     ) {
     }
 
+	/**
+	 * @return array<string, mixed>
+	 */
 	public function toArray(): array
 	{
 		return [

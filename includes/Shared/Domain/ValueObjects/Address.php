@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Domain\ValueObjects;
 
-final class Address implements \JsonSerializable
+final readonly class Address
 {
     public function __construct(
-        public readonly ?string $streetAddress,
-        public readonly ?string $addressLocality,
-        public readonly ?string $extendedAddress,
-        public readonly ?string $addressRegion,
-        public readonly ?string $postalCode,
-        public readonly ?string $addressCountry
+        public ?string $streetAddress,
+        public ?string $addressLocality,
+        public ?string $extendedAddress,
+        public ?string $addressRegion,
+        public ?string $postalCode,
+        public ?string $addressCountry
     ) {
     }
 
@@ -45,8 +45,4 @@ final class Address implements \JsonSerializable
         && empty($this->addressCountry);
     }
 
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
-    }
 }

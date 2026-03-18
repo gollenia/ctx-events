@@ -28,6 +28,9 @@ final class SchemaResource implements \JsonSerializable
 		);
 	}
 
+	/** 
+	* @return array<string, string>
+	*/
 	public function toArray(): array
 	{
 		return [
@@ -37,6 +40,9 @@ final class SchemaResource implements \JsonSerializable
 		];
 	}
 
+	/**
+	* @return array<string, string>
+	*/
 	public function jsonSerialize(): array
 	{
 		return $this->toArray();

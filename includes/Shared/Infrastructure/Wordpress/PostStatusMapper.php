@@ -14,6 +14,7 @@ final class PostStatusMapper
             'private' => Status::Private,
             'trash'   => Status::Trash,
             'draft'   => Status::Draft,
+			'future'  => Status::Future,
             default   => Status::Draft,
         };
     }
@@ -24,6 +25,7 @@ final class PostStatusMapper
             Status::Published      => 'publish',
             Status::Private        => 'private',
             Status::Trash        => 'trash',
+			Status::Future       => 'future',
             Status::Draft          => 'draft',
         };
     }

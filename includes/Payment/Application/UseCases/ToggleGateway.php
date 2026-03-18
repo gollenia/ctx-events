@@ -21,7 +21,7 @@ final class ToggleGateway
         }
 
         $gateway->setEnabled($enabled);
-        $gateway->save($gateway);
+        $gateway->save();
         return GatewayListItemDto::fromPaymentGateway($gateway);
     }
 }

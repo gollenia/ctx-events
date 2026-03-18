@@ -24,6 +24,7 @@ class DateDetails implements FieldDetails
         return FieldType::DATE;
     }
 
+	/** @return array<string, string|null> */
     public function toArray(): array
     {
         return [

@@ -25,8 +25,7 @@ final class Discount
     {
         return match ($this->type) {
             DiscountType::PERCENTAGE => max(0, (int) round($amountCents * (1 - $this->amount / 100))),
-            DiscountType::FIXED   => max(0, (int) round($amountCents - $this->amount)),
-            default   => $amountCents,
+            DiscountType::FIXED   => max(0, (int) round($amountCents - $this->amount))
         };
     }
 }

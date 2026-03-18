@@ -20,9 +20,9 @@ final readonly class FormListItemResource implements Resource
 		public ?string $description,
 		public string $type,
 		public string $createdAt,
-		public int $usageCount = 0,
 		public TaxonomyCollection $tags,
-		public string $status
+		public string $status,
+		public int $usageCount = 0,
 	) {
 	}
 
@@ -34,9 +34,9 @@ final readonly class FormListItemResource implements Resource
 			description: $item->description,
 			type: $item->type->value,
 			createdAt: $item->createdAt->format(DATE_ATOM),
-			usageCount: $item->usageCount,
 			tags: $item->tags,
-			status: $item->status->value
+			status: $item->status->value,
+			usageCount: $item->usageCount,
 		);
 	}
 
@@ -48,9 +48,9 @@ final readonly class FormListItemResource implements Resource
 			'description' => $this->description,
 			'type' => $this->type,
 			'createdAt' => $this->createdAt,
-			'usageCount' => $this->usageCount,
 			'tags' => $this->tags->toArray(),
 			'status' => $this->status,
+			'usageCount' => $this->usageCount
 		];
 	}
 }

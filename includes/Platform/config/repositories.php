@@ -35,4 +35,8 @@ return [
 	=> autowire(\Contexis\Events\Booking\Infrastructure\WpBookingTokenStore::class),
 	\Contexis\Events\Payment\Domain\TransactionRepository::class
 	=> autowire(\Contexis\Events\Payment\Infrastructure\DbTransactionRepository::class),
+    \Contexis\Events\Payment\Application\Contracts\FindReconcilableTransactions::class
+    => autowire(\Contexis\Events\Payment\Infrastructure\DbReconcilableTransactionFinder::class),
+    \Contexis\Events\Communication\Domain\EmailDefinitionRepository::class
+    => autowire(\Contexis\Events\Communication\Infrastructure\DbEmailDefinitionRepository::class),
 ];

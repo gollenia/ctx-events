@@ -5,6 +5,9 @@ namespace Contexis\Events\Shared\Domain\ValueObjects;
 
 final class StatusList
 {
+	/**
+	 * @var array<Status>
+	 */
     private array $statuses;
 
     private function __construct(Status ...$statuses)
@@ -32,6 +35,9 @@ final class StatusList
         return new self(Status::Published, Status::Future, Status::Draft, Status::Private);
     }
 
+	/**
+	 * @param list<string> $statuses
+	 */
     public static function fromStrings(array $statuses): self
     {
         $statusEnums = array_map(fn(string $s) => Status::from($s), $statuses);
@@ -43,11 +49,17 @@ final class StatusList
         return new self(Status::Published, Status::Future, Status::Draft, Status::Private);
     }
 
+	/**
+	 * @return array<Status>
+	 */
     public function allStatuses(): array
     {
         return $this->statuses;
     }
 
+	/**
+	 * @return array<string>
+	 */
     public function toArray(): array
     {
         return array_map(fn(Status $s) => $s->value, $this->statuses);

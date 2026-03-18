@@ -12,6 +12,9 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 {
     public const BOOKING_ENABLED = 'ctx_events_booking_enabled';
 	public const BOOKING_CURRENCY = 'ctx_events_booking_currency';
+	public const BOOKING_DENY_EXPIRED = 'ctx_events_booking_deny_expired';
+    public const BOOKING_EXPIRATION_SYNC_MODE = 'ctx_events_booking_expiration_sync_mode';
+    public const BOOKING_EXPIRATION_SYNC_TOKEN = 'ctx_events_booking_expiration_sync_token';
 
     public function fields(): array
     {
@@ -32,7 +35,43 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 				'label'       => __('Booking currency', 'ctx-events'),
 				'description' => __('Currency used for bookings.', 'ctx-events'),
 				'domain'      => 'booking',
-			]
+			],
+				self::BOOKING_DENY_EXPIRED => [
+					'type'        => 'bool',
+					'default'     => true,
+					'label'       => __('Deny expired bookings', 'ctx-events'),
+					'description' => __('Automatically deny bookings when their pending payment transaction expires.', 'ctx-events'),
+					'domain'      => 'booking',
+                    'section'     => 'booking_expiration',
+                    'section_label' => __('Expiration automation', 'ctx-events'),
+                    'order'       => 10,
+				],
+                self::BOOKING_EXPIRATION_SYNC_MODE => [
+                    'type'        => 'select',
+                    'default'     => BookingOptions::EXPIRATION_SYNC_MODE_WP_CRON,
+                    'label'       => __('Expiration check trigger', 'ctx-events'),
+                    'description' => __('Use WordPress-Cron for simple setups or an external HTTPS cron from your hoster for more reliable execution.', 'ctx-events'),
+                    'options'     => [
+                        ['label' => __('WordPress-Cron', 'ctx-events'), 'value' => BookingOptions::EXPIRATION_SYNC_MODE_WP_CRON],
+                        ['label' => __('External HTTPS cron', 'ctx-events'), 'value' => BookingOptions::EXPIRATION_SYNC_MODE_EXTERNAL],
+                    ],
+                    'domain'      => 'booking',
+                    'section'     => 'booking_expiration',
+                    'order'       => 20,
+                ],
+                self::BOOKING_EXPIRATION_SYNC_TOKEN => [
+                    'type'        => 'string',
+                    'default'     => $this->externalExpirationSyncToken(),
+                    'label'       => __('External cron token', 'ctx-events'),
+                    'description' => sprintf(
+                        __('If you use an external cron, call %1$s every 15 minutes. Example: %2$s', 'ctx-events'),
+                        $this->externalExpirationSyncUrl(),
+                        $this->externalExpirationSyncExampleUrl()
+                    ),
+                    'domain'      => 'booking',
+                    'section'     => 'booking_expiration',
+                    'order'       => 30,
+                ],
         ];
     }
 
@@ -46,4 +85,41 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 		// This could be extended to allow setting a custom currency in the future
 		return $this->getString(self::BOOKING_CURRENCY);
 	}
+
+	public function denyExpiredBookings(): bool
+	{
+		return $this->getBool(self::BOOKING_DENY_EXPIRED);
+	}
+
+    public function expirationSyncMode(): string
+    {
+        $mode = $this->getString(self::BOOKING_EXPIRATION_SYNC_MODE, BookingOptions::EXPIRATION_SYNC_MODE_WP_CRON);
+
+        return in_array($mode, [BookingOptions::EXPIRATION_SYNC_MODE_WP_CRON, BookingOptions::EXPIRATION_SYNC_MODE_EXTERNAL], true)
+            ? $mode
+            : BookingOptions::EXPIRATION_SYNC_MODE_WP_CRON;
+    }
+
+    public function externalExpirationSyncToken(): string
+    {
+        $token = $this->getString(self::BOOKING_EXPIRATION_SYNC_TOKEN, '');
+        if (is_string($token) && $token !== '') {
+            return $token;
+        }
+
+        $token = bin2hex(random_bytes(16));
+        update_option(self::BOOKING_EXPIRATION_SYNC_TOKEN, $token);
+
+        return $token;
+    }
+
+    private function externalExpirationSyncUrl(): string
+    {
+        return (string) rest_url('events/v3/payments/reconcile');
+    }
+
+    private function externalExpirationSyncExampleUrl(): string
+    {
+        return $this->externalExpirationSyncUrl() . '?token=' . rawurlencode($this->externalExpirationSyncToken());
+    }
 }

@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Infrastructure\Gateways\Offline;
 
-use Contexis\Events\Payment\Domain\OfflinePaymentConfiguration;
 use Contexis\Events\Payment\Infrastructure\Contracts\GatewayConfiguration;
 use Contexis\Events\Payment\Domain\ValueObjects\BankData;
 use Contexis\Events\Shared\Domain\ValueObjects\MalfunctionException;
 
-final class OfflineConfiguration implements GatewayConfiguration, OfflinePaymentConfiguration
+final class OfflineConfiguration implements GatewayConfiguration
 {
 
 	private const string OPTION_KEY = 'ctx_events_gateway_offline';
@@ -204,8 +203,4 @@ final class OfflineConfiguration implements GatewayConfiguration, OfflinePayment
 		}
 	}
 
-    public function paymentTermInDays(): int
-    {
-        return max(0, $this->paymentTerm);
-    }
 }

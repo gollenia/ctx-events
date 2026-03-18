@@ -10,9 +10,9 @@ abstract class Id implements \Stringable
     ) {
     }
 
-    public static function from(?int $value): ?self
+    public static function from(?int $value): ?static
     {
-        if ($value === null || $value === '') {
+        if ($value === null) {
             return null;
         }
 

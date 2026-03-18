@@ -26,9 +26,6 @@ class WpCouponRepository implements CouponRepository
 		}
 
 		$wpPost = $post->next_post();
-        if (!$wpPost instanceof \WP_Post) {
-            return null;
-        }
 
 		return CouponMapper::map(PostSnapshot::fromWpPost($wpPost));
 	}
@@ -64,10 +61,7 @@ class WpCouponRepository implements CouponRepository
 		}
 
 		$wpPost = $post->next_post();
-        if (!$wpPost instanceof \WP_Post) {
-            return null;
-        }
-
+        
 		return CouponMapper::map(PostSnapshot::fromWpPost($wpPost));
 	}
 

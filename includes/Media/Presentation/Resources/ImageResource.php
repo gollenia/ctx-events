@@ -21,13 +21,16 @@ class ImageResource implements Resource
     }
 
 	public static function fromDto(ImageDto $imageDto, bool $includeSchema = false): self
-	{		return new self(
+	{
+		return new self(
 			url: $imageDto->url,
 			altText: $imageDto->altText,
 			width: $imageDto->width,
 			height: $imageDto->height,
 			mimeType: $imageDto->mimeType,
-			sizes: array_map(fn(ImageSizes $imageSizes) => ImageSizeResource::fromImageSizes($imageSizes), $imageDto->sizes ?? [])
+			sizes: $imageDto->sizes !== null
+				? ImageSizeResource::fromImageSizes($imageDto->sizes)
+				: []
 		);
 	}
 

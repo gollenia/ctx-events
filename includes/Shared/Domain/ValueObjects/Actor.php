@@ -17,6 +17,25 @@ final readonly class Actor
         return new self(0, '');
     }
 
+    public static function system(string $name, int $id = 0): self
+    {
+        return new self($id, $name);
+    }
+
+    public static function gateway(string $gateway): self
+    {
+        $normalizedGateway = trim($gateway);
+
+        if ($normalizedGateway === '') {
+            return self::system('Gateway webhook');
+        }
+
+        return self::system(sprintf('%s webhook', ucfirst($normalizedGateway)));
+    }
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -25,6 +44,9 @@ final readonly class Actor
         );
     }
 
+	/**
+	 * @return array{id: int, name: string}
+	 */
     public function toArray(): array
     {
         return [

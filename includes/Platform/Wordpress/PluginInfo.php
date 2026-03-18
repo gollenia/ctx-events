@@ -5,9 +5,9 @@ namespace Contexis\Events\Platform\Wordpress;
 
 use Contexis\Events\Event\Infrastructure\EventPost;
 
-class PluginInfo
+final class PluginInfo
 {
-    public static function getPluginVersion()
+    public static function getPluginVersion(): string
     {
         if (!function_exists('get_plugin_data')) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -18,7 +18,7 @@ class PluginInfo
         return $plugin_data['Version'];
     }
 
-    public static function getInstalledVersion()
+    public static function getInstalledVersion(): mixed
     {
         $stored_version = get_option('dbem_version', '7.0.0');
 
@@ -31,7 +31,7 @@ class PluginInfo
         return $stored_version;
     }
 
-    public static function setInstalledVersion($version)
+    public static function setInstalledVersion(string $version): void
     {
         if (preg_match('/^(\d)\.(\d{2})$/', $version, $matches)) {
             $version = "{$matches[1]}.{$matches[2][0]}.{$matches[2][1]}";

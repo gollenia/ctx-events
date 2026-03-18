@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace Contexis\Events\Platform\Wordpress;
 
 use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
+use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class RestRegistrar implements Registrar
 {
+	/** @param iterable<RestController> $adapters */
     public function __construct(
 		private readonly iterable $adapters
 	)

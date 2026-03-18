@@ -15,6 +15,6 @@ final readonly class LogEntryCollection extends Collection
 
     public function add(LogEntry $entry): self
     {
-        return new self(...[...$this->items, $entry]);
+        return self::from(...[...$this->items, $entry]);
     }
 }

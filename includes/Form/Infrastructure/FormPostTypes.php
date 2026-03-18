@@ -26,6 +26,7 @@ class FormPostTypes
 		return match ($postType) {
 			BookingFormPost::POST_TYPE => FormType::BOOKING,
 			AttendeeFormPost::POST_TYPE => FormType::ATTENDEE,
+			default => throw new \InvalidArgumentException("Invalid form post type: " . $postType)
 		};
 	}
 }

@@ -18,7 +18,6 @@ final class DenyBooking implements BookingAction
 {
     public function __construct(
         private BookingRepository $repository,
-        private SyncOfflineTransactionForBookingAction $transactionSync,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
     ) {

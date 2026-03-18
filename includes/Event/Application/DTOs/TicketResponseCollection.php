@@ -13,31 +13,10 @@ use Contexis\Events\Shared\Domain\Abstract\DtoCollection;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final readonly class TicketResponseCollection extends DtoCollection
-{
-	public ?Price $lowestAvailablePrice;
-    
+{    
 	public static function from(TicketResponse ...$items): self
 	{		
 		return new self($items);
-	}
-
-    public static function fromDomainCollection(
-        TicketCollection $collection,
-    ): TicketResponseCollection {
-		
-        $tickets = array_map(
-			fn($ticket) => TicketResponse::fromDomainModel($ticket),
-			$collection->items
-		);
-
-		return new self(...$tickets);
-    }
-
-	public function withLowestAvailablePrice(?Price $price): self
-	{
-		return clone($this, [
-			'lowestAvailablePrice' => $price
-		]);
 	}
 }
 	

@@ -102,11 +102,11 @@ final class FormController implements RestController
 	public function getForms(\WP_REST_Request $request): \WP_REST_Response
 	{
 		$criteria = new FormCriteria(
+			orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date', Order::from($request->get_param('order') ?? 'desc')),
 			type: $request->get_param('type') ? FormType::from($request->get_param('type')) : null,
 			search: $request->get_param('search'),
-			page: (int) $request->get_param('page', 0),
-			perPage: (int) $request->get_param('per_page', -1),
-			orderBy: OrderBy::fromField($request->get_param('order_by') ?? 'date', Order::from($request->get_param('order') ?? 'desc')),
+			page: (int) $request->get_param('page'),
+			perPage: (int) $request->get_param('per_page'),
 			status: $request->get_param('status') ? StatusList::fromStrings($request->get_param('status')) : null,
 			tags: $request->get_param('tags') ?? [],
 		);
@@ -116,10 +116,10 @@ final class FormController implements RestController
 		$response = array_map(fn($item) => FormListItemResource::fromDTO($item), $page->toArray());
 
 		$response = new \WP_REST_Response($response, 200);
-        $response->header('X-WP-Total', $page->pagination()->totalItems);
-        $response->header('X-WP-TotalPages', $page->pagination()->totalPages());
+        $response->header('X-WP-Total', (string) $page->pagination()->totalItems);
+        $response->header('X-WP-TotalPages', (string) $page->pagination()->totalPages());
 		if ($page->hasStatusCounts()) {
-			$response->header('X-WP-StatusCounts', json_encode($page->statusCounts?->toArray()));
+			$response->header('X-WP-StatusCounts', json_encode($page->statusCounts()?->toArray()));
 		}
 
 		return $response;

@@ -6,8 +6,14 @@ namespace Contexis\Events\Shared\Infrastructure\Wordpress;
 
 class BlockAttributesResolver
 {
+	/**
+	 * @var array<string, array<string, mixed>>
+	 */
     private static array $cache = [];
 
+	/**
+	 * @return array<string, mixed>
+	 */
     public static function getDefaults(string $blockName): array
     {
         if (isset(self::$cache[$blockName])) {

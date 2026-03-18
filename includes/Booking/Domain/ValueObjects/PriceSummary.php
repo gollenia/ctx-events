@@ -75,6 +75,9 @@ class PriceSummary
 		}
 	}
 
+	/**
+	 * @return array<string, int>
+	 */
 	public function toArray(): array
 	{
 		return [

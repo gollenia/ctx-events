@@ -8,6 +8,9 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 
 final class GatewayRegistrar implements Registrar
 {
+	/**
+	 * @param iterable<object> $gateways
+	 */
     public function __construct(private readonly iterable $gateways)
     {
     }

@@ -3,29 +3,25 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Domain\ValueObjects;
 
-use Contexis\Events\Shared\Domain\ValueObjects\StatusCounts;
+use Contexis\Events\Shared\Domain\Contracts\StatusCountsInterface;
 
-readonly class EventStatusCounts extends StatusCounts
+final readonly class EventStatusCounts implements StatusCountsInterface
 {
 	public function __construct(
-		int $publish = 0,
-		int $future = 0,
-		int $draft = 0,
-		int $private = 0,
-		int $pending = 0,
-		int $trash = 0,
+		public int $publish = 0,
+		public int $future = 0,
+		public int $draft = 0,
+		public int $private = 0,
+		public int $pending = 0,
+		public int $trash = 0,
 		public int $cancelled = 0,
 	) {
-		parent::__construct(
-			publish: $publish,
-			future: $future,
-			draft: $draft,
-			private: $private,
-			pending: $pending,
-			trash: $trash,
-		);
+
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 */
 	public static function fromArray(array $data): static
 	{
 		return new static(
@@ -39,10 +35,18 @@ readonly class EventStatusCounts extends StatusCounts
 		);
 	}
 
+	/**
+	 * @return array<string, int>
+	 */
 	public function toArray(): array
 	{
 		return [
-			...parent::toArray(),
+			'publish' => $this->publish,
+			'future' => $this->future,
+			'draft' => $this->draft,
+			'private' => $this->private,
+			'pending' => $this->pending,
+			'trash' => $this->trash,
 			'cancelled' => $this->cancelled,
 		];
 	}

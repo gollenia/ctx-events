@@ -75,6 +75,9 @@ final class Price
 		return $this->withAmount($this->amountCents + $other->amountCents);
 	}
 
+	/**
+	 * @return array{amountCents: int, currency: string}
+	 */
 	public function toArray(): array
 	{
 		return [

@@ -12,9 +12,6 @@ use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final class AttendeeFactory
 {
-    /**
-     * @param array<int, array{ticket_id: string, first_name?: string, last_name?: string, metadata?: array}> $payload
-     */
     public function fromPayload(array $payload, TicketCollection $tickets): AttendeeCollection
     {
         if ($payload === []) {
@@ -24,12 +21,9 @@ final class AttendeeFactory
         $attendees = [];
 
         foreach ($payload as $item) {
-            $ticketId = TicketId::from($item['ticket_id'] ?? '');
+            $ticketId = TicketId::from($item['ticket_id']);
 
             $ticket = $tickets->getTicketById($ticketId);
-			if ($ticket === null) {
-                throw new \DomainException("Ticket with ID {$ticketId->toString()} not found.");
-            }
 
 			$metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
 

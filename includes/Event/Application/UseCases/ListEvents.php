@@ -17,14 +17,13 @@ final class ListEvents
         private EventRepository $eventRepository,
 		private EventStatusRepository $eventStatusRepository,
 		private EventResponseAssembler $eventResponseAssembler,
-		private UserContext $userContext
     ) {
     }
 
-    public function execute(EventCriteria $criteria, EventIncludeRequest $includes): EventResponseCollection
+    public function execute(EventCriteria $criteria, EventIncludeRequest $includes, UserContext $context): EventResponseCollection
     {
-        $events = $this->eventRepository->search($criteria);
-		$eventListDto = $this->eventResponseAssembler->mapEventCollection($events, $includes, $this->userContext)->withPagination($events->pagination());
+		$events = $this->eventRepository->search($criteria);
+		$eventListDto = $this->eventResponseAssembler->mapEventCollection($events, $includes, $context)->withPagination($events->pagination());
 
 		$statusCounts = $this->eventStatusRepository->getCountsByStatus();
 		return $eventListDto->withStatusCounts($statusCounts);

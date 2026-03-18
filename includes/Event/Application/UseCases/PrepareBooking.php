@@ -52,7 +52,7 @@ final class PrepareBooking
         $attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
         $availableGateways = $this->gatewayRepository->findActive();
 
-		if($availableGateways->isEmpty() && $tickets->getLowestAvailablePrice($now) > 0) {
+		if($availableGateways->isEmpty() && $tickets->getLowestAvailablePrice($now)?->toInt() > 0) {
 			throw new DomainException("No active payment gateways available");
 		}
 		

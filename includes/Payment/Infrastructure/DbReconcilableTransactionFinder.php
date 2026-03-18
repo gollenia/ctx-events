@@ -16,20 +16,17 @@ final class DbReconcilableTransactionFinder implements FindReconcilableTransacti
     {
     }
 
-    public function findPendingForReconciliation(\DateTimeImmutable $now, \DateTimeImmutable $staleBefore): array
+    public function findPendingForReconciliation(\DateTimeImmutable $now): array
     {
         $table = TransactionMigration::getTableName();
         $sql = $this->db->prepare(
             "SELECT * FROM {$table}
              WHERE status = %d
-               AND (
-                    (expires_at IS NOT NULL AND expires_at <= %s)
-                    OR created_at <= %s
-               )
-             ORDER BY created_at ASC, id ASC",
+               AND expires_at IS NOT NULL
+               AND expires_at <= %s
+             ORDER BY expires_at ASC, id ASC",
             TransactionStatus::PENDING->value,
-            $now->format('Y-m-d H:i:s'),
-            $staleBefore->format('Y-m-d H:i:s')
+            $now->format('Y-m-d H:i:s')
         );
 
         $rows = $this->db->getResults($sql, DatabaseOutput::ARRAY_ASSOC);

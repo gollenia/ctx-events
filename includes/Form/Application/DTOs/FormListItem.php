@@ -18,9 +18,9 @@ final readonly class FormListItem
 		public ?string $description,
 		public FormType $type,
 		public \DateTimeImmutable $createdAt,
-		public int $usageCount = 0,
 		public TaxonomyCollection $tags,
-		public Status $status
+		public Status $status,
+		public int $usageCount = 0,
 	) {
 	}
 

@@ -20,6 +20,9 @@ final class WpImageRepository implements ImageRepository
     public function find(?ImageId $id): ?Image
     {
         $snapshot = PostSnapshot::fromWpPostId($id?->toInt());
+		if($snapshot === null) {
+			return null;
+		}
         return ImageMapper::map($snapshot);
     }
 

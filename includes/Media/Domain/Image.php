@@ -18,7 +18,7 @@ final class Image implements \JsonSerializable
 
     public function url(string $size = 'original'): string
     {
-        return $this->sizes?->getSize($size)?->url ?? $this->url ?? '';
+        return $this->sizes?->getSize($size)->url ?? $this->url ?? '';
     }
 
     public function jsonSerialize(): array

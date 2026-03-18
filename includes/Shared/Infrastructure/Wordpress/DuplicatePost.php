@@ -39,6 +39,9 @@ abstract class DuplicatePost
 
 	abstract protected function supportsPostType(string $postType): bool;
 
+	/**
+	 * @return array<string, mixed>
+	 */
 	protected function buildPostData(\WP_Post $sourcePost): array
 	{
 		return [
@@ -85,12 +88,12 @@ abstract class DuplicatePost
 	private function duplicateTaxonomies(int $sourcePostId, int $newPostId, string $postType): void
 	{
 		$taxonomies = get_object_taxonomies($postType, 'names');
-		if (!is_array($taxonomies)) {
+		if (empty($taxonomies)) {
 			return;
 		}
 
 		foreach ($taxonomies as $taxonomy) {
-			if (!is_string($taxonomy) || !$this->shouldDuplicateTaxonomy($taxonomy)) {
+			if (!$this->shouldDuplicateTaxonomy($taxonomy)) {
 				continue;
 			}
 

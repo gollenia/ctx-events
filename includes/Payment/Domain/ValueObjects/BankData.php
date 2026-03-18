@@ -20,7 +20,7 @@ final readonly class BankData
 		string $iban,
 		string $bic,
 		string $bankName
-	): ?self
+	): self
     {
 		$cleanIban = !empty($iban) ? self::checkIban($iban) : '';
 		$cleanBic = !empty($bic) ? self::checkBic($bic) : '';

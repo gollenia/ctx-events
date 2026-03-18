@@ -22,15 +22,12 @@ final class SelectOption
                 value: isset($option['value']) ? (string)$option['value'] : null
             );
 		}
-
-		if(is_string($option)) {
-			return new self(
-				label: (string)$option,
-				value: null
-			);
-		}
-
-		throw new \InvalidArgumentException('Option must be string or array');
+		
+		return new self(
+			label: (string)$option,
+			value: null
+		);
+		
 	}
 
 	public function getEffectiveValue(): string

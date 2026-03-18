@@ -13,12 +13,14 @@ final class PersonResource implements \JsonSerializable
     ) {
     }
 
+	/**
+	 * @return array<string, mixed>
+	 */
     private function getJsonLd(): array
     {
         $jsonLd = [
             "@context" => "https://schema.org/Person",
-            "@type" => "Person",
-            "@id" => Links::iri('person', $this->personDto->id)
+            "@type" => "Person"
         ];
 
         return $jsonLd;

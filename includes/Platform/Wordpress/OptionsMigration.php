@@ -4,14 +4,18 @@ declare(strict_types=1);
 namespace Contexis\Events\Platform\Wordpress;
 
 use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
+use Contexis\Events\Shared\Infrastructure\Wordpress\WpOptions;
 
 final class OptionsMigration implements Registrar
 {
     private const EVENT_OPTIONS_VERSION = '1.0.0';
+	/**
+	 * @var array<string, array<string, mixed>>
+	 */
 	private array $definedOptions = [];
 
-	/*
-	 * @var iterable<OptionProvider>
+	/**
+	 * @param iterable<object> $providers
 	 */
 	public function __construct(
 		private readonly iterable $providers,
@@ -79,6 +83,9 @@ final class OptionsMigration implements Registrar
         delete_option('ctx_events_options_version');
     }
 
+	/**
+	 * @return array<string, mixed>
+	 */
     private function getAllFromDatabase(): array
     {
         $all = wp_load_alloptions();
@@ -92,6 +99,9 @@ final class OptionsMigration implements Registrar
         return $result;
     }
 
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
 	public function all(): array
     {
         return $this->definedOptions;

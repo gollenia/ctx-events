@@ -86,6 +86,40 @@ final class DbTransactionRepository implements TransactionRepository
         );
     }
 
+    public function findByBookingIds(array $bookingIds): array
+    {
+        if ($bookingIds === []) {
+            return [];
+        }
+
+        $ids = array_values(array_unique(array_map(
+            static fn(BookingId $bookingId): int => $bookingId->toInt(),
+            $bookingIds
+        )));
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '%d'));
+        $table = TransactionMigration::getTableName();
+        $query = $this->db->prepare(
+            "SELECT * FROM {$table} WHERE booking_id IN ($placeholders) ORDER BY booking_id ASC, transaction_date DESC, id DESC",
+            ...$ids
+        );
+
+        $rows = $this->db->getResults($query, DatabaseOutput::ARRAY_ASSOC);
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $bookingId = (int) ($row['booking_id'] ?? 0);
+            $grouped[$bookingId][] = TransactionMapper::map($row);
+        }
+
+        $result = [];
+        foreach ($ids as $id) {
+            $result[$id] = \Contexis\Events\Payment\Domain\TransactionCollection::from(...($grouped[$id] ?? []));
+        }
+
+        return $result;
+    }
+
     public function findLatestByBookingId(BookingId $bookingId): ?Transaction
     {
         $transactions = $this->findByBookingId($bookingId);
