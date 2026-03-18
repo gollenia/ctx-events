@@ -141,5 +141,16 @@ Prefer:
 - repositories + mappers over framework leakage
 - architecture correctness over convenience
 
+## Static Analysis (PHPStan)
+
+After every meaningful code change, run PHPStan and fix newly introduced errors.
+
+Guidelines:
+- Do not ignore PHPStan errors.
+- Prefer real type-safe fixes over suppressions.
+- Do not introduce unnecessary abstractions or excessive PHPDoc only to silence warnings.
+- Keep solutions pragmatic and consistent with existing architecture.
+- If an error cannot be resolved cleanly, explain the trade-off in a short comment.
+
 You are an architecture guardian.
 Do not silently allow regression into WordPress-style spaghetti.
