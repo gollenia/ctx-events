@@ -1,6 +1,3 @@
-/**
- * Wordpress dependencies
- */
 import { useBlockProps } from '@wordpress/block-editor';
 import {
 	Button,
@@ -11,25 +8,38 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
+type CouponMeta = {
+	_coupon_code?: string;
+	_coupon_description?: string;
+	_coupon_limit?: number | string;
+	_coupon_expiry?: string;
+	_coupon_type?: 'percentage' | 'fixed';
+	_coupon_value?: number | string;
+	_coupon_global?: boolean;
+};
 
-/**
- * @param {Props} props
- * @return {JSX.Element} Element
- */
-const edit = (props) => {
+type EditProps = {
+	context?: {
+		postType?: string;
+	};
+};
 
-	const postType = props.context.postType;
-	if (postType !== 'ctx-event-coupon') return null;
-	const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
+export default function Edit(props: EditProps) {
+	const postType = props.context?.postType;
+	if (postType !== 'ctx-event-coupon') {
+		return null;
+	}
+
+	const [meta, setMeta] = useEntityProp<CouponMeta>(
+		'postType',
+		postType,
+		'meta',
+	);
 
 	const blockProps = useBlockProps({
-		className: ['coupon-edit'].filter(Boolean).join(' '),
+		className: 'coupon-edit',
 	});
 
 	return (
@@ -41,7 +51,7 @@ const edit = (props) => {
 						<TextControl
 							label={__('Coupon Code', 'ctx-events')}
 							__next40pxDefaultSize
-							value={meta._coupon_code}
+							value={meta?._coupon_code ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
@@ -73,7 +83,7 @@ const edit = (props) => {
 				<TextControl
 					label={__('Description', 'ctx-events')}
 					__next40pxDefaultSize
-					value={meta._coupon_description}
+					value={meta?._coupon_description ?? ''}
 					onChange={(value) => {
 						setMeta({
 							...meta,
@@ -88,7 +98,7 @@ const edit = (props) => {
 							label={__('Total Coupons', 'ctx-events')}
 							type="number"
 							__next40pxDefaultSize
-							value={meta._coupon_limit}
+							value={meta?._coupon_limit ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
@@ -102,7 +112,7 @@ const edit = (props) => {
 							label={__('Expiry date', 'ctx-events')}
 							type="date"
 							__next40pxDefaultSize
-							value={meta._coupon_expiry}
+							value={meta?._coupon_expiry ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
@@ -118,12 +128,12 @@ const edit = (props) => {
 						<TextControl
 							label={__('Discount Amount', 'ctx-events')}
 							type="number"
-							max={meta._coupon_type === 'percentage' ? 100 : undefined}
+							max={meta?._coupon_type === 'percentage' ? 100 : undefined}
 							min={0}
 							__next40pxDefaultSize
-							placeholder={meta._coupon_type === 'percentage' ? '0' : '0.00'}
-							step={meta._coupon_type === 'percentage' ? 1 : 0.01}
-							value={meta._coupon_value}
+							placeholder={meta?._coupon_type === 'percentage' ? '0' : '0.00'}
+							step={meta?._coupon_type === 'percentage' ? 1 : 0.01}
+							value={meta?._coupon_value ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
@@ -145,12 +155,12 @@ const edit = (props) => {
 								},
 							]}
 							label={__('Discount Type', 'ctx-events')}
-							value={meta._coupon_type}
+							value={meta?._coupon_type ?? 'percentage'}
 							__next40pxDefaultSize
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_type: value,
+									_coupon_type: value as CouponMeta['_coupon_type'],
 								});
 							}}
 						/>
@@ -158,7 +168,7 @@ const edit = (props) => {
 				</Flex>
 				<CheckboxControl
 					label={__('Activate for all events', 'ctx-events')}
-					checked={meta._coupon_global}
+					checked={meta?._coupon_global ?? false}
 					onChange={(value) => {
 						setMeta({
 							...meta,
@@ -170,6 +180,4 @@ const edit = (props) => {
 			</div>
 		</div>
 	);
-};
-
-export default edit;
+}

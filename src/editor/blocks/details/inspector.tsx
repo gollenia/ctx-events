@@ -2,24 +2,27 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, PanelRow, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const Inspector = (props) => {
-	const { attributes, setAttributes } = props;
+type DetailsAttributes = {
+	dividers: boolean;
+};
 
-	const { dividers } = attributes;
+type InspectorProps = {
+	attributes: DetailsAttributes;
+	setAttributes: (attributes: Partial<DetailsAttributes>) => void;
+};
 
+export default function Inspector({ attributes, setAttributes }: InspectorProps) {
 	return (
 		<InspectorControls>
 			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<PanelRow>
 					<ToggleControl
 						label={__('Lines as separators', 'ctx-events')}
-						checked={dividers}
-						onChange={(event) => setAttributes({ dividers: event })}
+						checked={attributes.dividers}
+						onChange={(value) => setAttributes({ dividers: value })}
 					/>
 				</PanelRow>
 			</PanelBody>
 		</InspectorControls>
 	);
-};
-
-export default Inspector;
+}

@@ -1,14 +1,7 @@
-/**
- * Internal dependencies
- */
+import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import './editor.scss';
-
-/**
- * Wordpress dependencies
- */
-import { __ } from '@wordpress/i18n';
 import icons from './icons';
 
 const { name, title } = metadata;
@@ -18,9 +11,7 @@ const settings = {
 	title: __(title, 'ctx-events'),
 	icon: icons.posts,
 	edit: Edit,
-	save: () => {
-		return null;
-	},
+	save: () => null,
 };
 
 export { name, settings };

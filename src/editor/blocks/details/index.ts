@@ -1,17 +1,10 @@
-/**
- * Internal dependencies
- */
+import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import './editor.scss';
 import icon from './icon';
 import save from './save';
 import './style.scss';
-
-/**
- * Wordpress dependencies
- */
-import { __ } from '@wordpress/i18n';
 
 const { name, title, description } = metadata;
 

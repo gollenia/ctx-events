@@ -14,8 +14,8 @@ import * as booking from './blocks/booking/index.ts';
 /**
  * Form dependencies.
  */
-import * as couponEditor from './blocks/coupon-editor/index.js';
-import * as details from './blocks/details/index.js';
+import * as couponEditor from './blocks/coupon-editor/index.ts';
+import * as details from './blocks/details/index.ts';
 import * as detailsAudience from './blocks/details-audience/index.ts';
 import * as detailsDate from './blocks/details-date/index.ts';
 import * as detailsItem from './blocks/details-item/index.ts';
