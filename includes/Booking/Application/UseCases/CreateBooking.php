@@ -10,6 +10,8 @@ use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
 use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\Signals\BookingCreatedOnlineSignal;
+use Contexis\Events\Booking\Domain\Signals\BookingPendingManualSignal;
 use Contexis\Events\Booking\Domain\Enums\BookingEvent;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
@@ -23,6 +25,7 @@ use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
+use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
@@ -38,6 +41,7 @@ final class CreateBooking
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
+        private SignalDispatcher $signalDispatcher,
         private CheckTicketAvailibility $checkTicketAvailibility,
 		private CalculateBookingPrice $calculateBookingPrice,
 		private CouponRepository $couponRepository,
@@ -117,6 +121,12 @@ final class CreateBooking
             $transaction = $gateway->initiatePayment($booking);
             $this->transactionRepository->save($transaction);
         }
+
+        $this->signalDispatcher->dispatch(
+            $priceSummary->isFree() || $request->gateway === 'offline'
+                ? new BookingPendingManualSignal($bookingId)
+                : new BookingCreatedOnlineSignal($bookingId)
+        );
 
         return CreateBookingResponse::from($reference, $transaction ?? null);
     }

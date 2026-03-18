@@ -6,13 +6,14 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
-use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Enums\BookingEvent;
+use Contexis\Events\Booking\Domain\Signals\BookingDeniedSignal;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
+use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 final class DenyBooking implements BookingAction
 {
@@ -20,6 +21,7 @@ final class DenyBooking implements BookingAction
         private BookingRepository $repository,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
+        private SignalDispatcher $signalDispatcher,
     ) {
     }
 
@@ -47,5 +49,6 @@ final class DenyBooking implements BookingAction
             ));
 
         $this->repository->updateStatus($id, BookingStatus::CANCELED, $updatedBooking->logEntries);
+        $this->signalDispatcher->dispatch(new BookingDeniedSignal($id));
     }
 }

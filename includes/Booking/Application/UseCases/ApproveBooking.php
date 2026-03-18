@@ -9,10 +9,12 @@ use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
 use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Enums\BookingEvent;
+use Contexis\Events\Booking\Domain\Signals\BookingConfirmedManualSignal;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
+use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 final class ApproveBooking implements BookingAction
 {
@@ -21,6 +23,7 @@ final class ApproveBooking implements BookingAction
         private SyncOfflineTransactionForBookingAction $transactionSync,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
+        private SignalDispatcher $signalDispatcher,
     ) {
     }
 
@@ -49,5 +52,6 @@ final class ApproveBooking implements BookingAction
 
         $this->repository->updateStatus($id, BookingStatus::APPROVED, $updatedBooking->logEntries);
         $this->transactionSync->markPaid($booking);
+        $this->signalDispatcher->dispatch(new BookingConfirmedManualSignal($id));
     }
 }
