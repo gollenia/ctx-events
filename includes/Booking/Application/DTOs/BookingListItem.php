@@ -23,8 +23,8 @@ final readonly class BookingListItem
         public int $status,
         public PriceSummary $priceSummary,
         public \DateTimeImmutable $bookingTime,
-        public int $spaces = 0,
 		public ?string $gateway,
+        public int $spaces = 0,
         public ?string $gatewayName = null,
     ) {
     }
