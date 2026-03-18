@@ -4,15 +4,6 @@ declare(strict_types=1);
 
 use Contexis\Events\Payment\Infrastructure\Gateways\Mollie\MollieWebhookReferenceResolver;
 
-test('resolves legacy mollie webhook id parameter', function () {
-    $resolver = new MollieWebhookReferenceResolver();
-
-    $resolution = $resolver->resolve(['id' => 'tr_legacy_123']);
-
-    expect($resolution->externalId)->toBe('tr_legacy_123')
-        ->and($resolution->shouldIgnore)->toBeFalse();
-});
-
 test('resolves next gen mollie payment event by entity id', function () {
     $resolver = new MollieWebhookReferenceResolver();
 

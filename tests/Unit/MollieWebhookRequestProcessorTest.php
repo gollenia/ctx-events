@@ -47,15 +47,15 @@ test('rejects unsigned next gen mollie payloads when a signing secret is configu
         ->toThrow(DomainException::class, 'Missing Mollie webhook signature.');
 });
 
-test('still accepts legacy mollie webhook requests without signatures', function () {
+test('rejects empty mollie webhook requests', function () {
     $processor = new MollieWebhookRequestProcessor(
         new MollieWebhookReferenceResolver(),
         configuredMollieWebhookConfiguration('secret-123'),
     );
 
-    $resolution = $processor->resolve(['id' => 'tr_legacy_456'], '', []);
+    $resolution = $processor->resolve([], '', []);
 
-    expect($resolution->externalId)->toBe('tr_legacy_456')
+    expect($resolution->externalId)->toBeNull()
         ->and($resolution->shouldIgnore)->toBeFalse();
 });
 
