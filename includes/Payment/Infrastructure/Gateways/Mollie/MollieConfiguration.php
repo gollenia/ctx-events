@@ -18,11 +18,10 @@ final class MollieConfiguration implements GatewayConfiguration
 	public private(set) string $apiKeyLive;
 	public private(set) string $apiKeyTest;
 	public private(set) string $returnUrl;
+	public private(set) string $webhookSigningSecret;
 	public private(set) string $instructions;
-    public function __construct(
-       
-    ) {
-        $data = get_option(self::OPTION_KEY, []);
+    public function __construct(?array $data = null) {
+        $data ??= get_option(self::OPTION_KEY, []);
         $this->mapDataToProperties($data);
     }
 
@@ -45,6 +44,7 @@ final class MollieConfiguration implements GatewayConfiguration
             'api_key_live' => sanitize_text_field($data['api_key_live'] ?? ''),
             'api_key_test' => sanitize_text_field($data['api_key_test'] ?? ''),
             'return_url' => esc_url_raw($data['return_url'] ?? ''),
+            'webhook_signing_secret' => sanitize_text_field($data['webhookSigningSecret'] ?? $data['webhook_signing_secret'] ?? ''),
             'instructions' => wp_kses_post($data['instructions'] ?? ''),
             'description' => sanitize_text_field($data['description'] ?? ''),
         ];
@@ -59,6 +59,7 @@ final class MollieConfiguration implements GatewayConfiguration
         $this->apiKeyLive = (string) ($data['api_key_live'] ?? '');
         $this->apiKeyTest = (string) ($data['api_key_test'] ?? '');
         $this->returnUrl = (string) ($data['return_url'] ?? '');
+        $this->webhookSigningSecret = (string) ($data['webhook_signing_secret'] ?? '');
 		$this->description = (string) ($data['description'] ?? '');
         $this->instructions = (string) ($data['instructions'] ?? '');
     }
@@ -71,6 +72,7 @@ final class MollieConfiguration implements GatewayConfiguration
             'api_key_live' => $this->apiKeyLive,
             'api_key_test' => $this->apiKeyTest,
             'return_url' => $this->returnUrl,
+            'webhook_signing_secret' => $this->webhookSigningSecret,
 			'instructions' => $this->instructions,
 			'description' => $this->description,
 			'title' => $this->title,
@@ -110,6 +112,13 @@ final class MollieConfiguration implements GatewayConfiguration
                 'description' => __('URL to redirect to after payment.', 'ctx-events'),
 				'value' => $this->returnUrl,
 			],
+            [
+                'name' => 'webhookSigningSecret',
+                'type' => 'password',
+                'label' => __('Webhook signing secret (optional)', 'ctx-events'),
+                'description' => __('Used to verify signed Mollie next-gen webhooks.', 'ctx-events'),
+                'value' => $this->webhookSigningSecret,
+            ],
 			[
 				'type' => 'textarea',
 				'name' => 'description',

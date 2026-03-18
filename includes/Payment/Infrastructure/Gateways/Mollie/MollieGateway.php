@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Infrastructure\Gateways\Mollie;
 
 use Contexis\Events\Booking\Domain\Booking;
-use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
 
 use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Payment as MolliePayment;
 use Uri\Rfc3986\Uri;
 
 final class MollieGateway implements PaymentGateway
@@ -45,7 +45,15 @@ final class MollieGateway implements PaymentGateway
 
     public function verifyPayment(Transaction $transaction): Transaction
 	{
-		return $transaction->complete();
+        $externalId = (string) $transaction->externalId;
+        if ($externalId === '') {
+            throw new \DomainException('Cannot verify Mollie payment without external ID.');
+        }
+
+        $payment = $this->getClient()->payments->get($externalId);
+
+        return $this->mapMolliePaymentToTransaction($transaction, $payment)
+            ->withExpiresAt($this->resolveExpiresAt($payment));
 	}
 
     private function getClient(): MollieApiClient
@@ -75,8 +83,9 @@ final class MollieGateway implements PaymentGateway
                     'value' => $booking->priceSummary->finalPrice->toFloat(),
                 ],
                 'description' => sprintf('Booking #%s', $reference),
-                'redirectUrl' => site_url('/wp-json/events/v3/bookings/return?booking_uuid=' . $reference),
-                'webhookUrl' => site_url('/wp-json/events/v3/bookings/webhook'),
+                'redirectUrl' => $this->config->returnUrl !== ''
+                    ? $this->config->returnUrl
+                    : site_url('/wp-json/events/v3/bookings/return?booking_uuid=' . $reference),
                 'locale' => get_locale(),
                 'metadata' => [
                     'booking_uuid' => $reference,
@@ -121,6 +130,31 @@ final class MollieGateway implements PaymentGateway
         }
 
         return null;
+    }
+
+    private function mapMolliePaymentToTransaction(Transaction $transaction, MolliePayment $payment): Transaction
+    {
+        if ($payment->hasChargebacks() || $payment->hasRefunds()) {
+            return $transaction->refund();
+        }
+
+        if ($payment->isPaid()) {
+            return $transaction->complete();
+        }
+
+        if ($payment->isExpired()) {
+            return $transaction->expire();
+        }
+
+        if ($payment->isCanceled()) {
+            return $transaction->cancel();
+        }
+
+        if ($payment->isFailed()) {
+            return $transaction->fail();
+        }
+
+        return $transaction->pend();
     }
 
 	public function updateSettings(array $settings): void {
