@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Infrastructure;
 
 use Contexis\Events\Booking\Application\Contracts\BookingOptions;
 
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Infrastructure\Wordpress\WpOptions;
 
 final class WpBookingOptions extends WpOptions implements BookingOptions
@@ -15,6 +16,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 	public const BOOKING_DENY_EXPIRED = 'ctx_events_booking_deny_expired';
     public const BOOKING_EXPIRATION_SYNC_MODE = 'ctx_events_booking_expiration_sync_mode';
     public const BOOKING_EXPIRATION_SYNC_TOKEN = 'ctx_events_booking_expiration_sync_token';
+    public const BOOKING_ADMIN_EMAIL = 'ctx_events_booking_admin_email';
 
     public function fields(): array
     {
@@ -72,6 +74,16 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
                     'section'     => 'booking_expiration',
                     'order'       => 30,
                 ],
+                self::BOOKING_ADMIN_EMAIL => [
+                    'type'        => 'string',
+                    'default'     => '',
+                    'label'       => __('Booking admin email', 'ctx-events'),
+                    'description' => __('Optional fallback email address for booking-related admin notifications.', 'ctx-events'),
+                    'domain'      => 'booking',
+                    'section'     => 'booking_notifications',
+                    'section_label' => __('Notification recipients', 'ctx-events'),
+                    'order'       => 40,
+                ],
         ];
     }
 
@@ -111,6 +123,11 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
         update_option(self::BOOKING_EXPIRATION_SYNC_TOKEN, $token);
 
         return $token;
+    }
+
+    public function adminNotificationEmail(): ?Email
+    {
+        return Email::tryFrom($this->getString(self::BOOKING_ADMIN_EMAIL, ''));
     }
 
     private function externalExpirationSyncUrl(): string

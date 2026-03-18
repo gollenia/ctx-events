@@ -3,6 +3,7 @@
 namespace Contexis\Events\Booking\Application\Contracts;
 
 use Contexis\Events\Shared\Domain\Contracts\Options;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
 
 interface BookingOptions extends Options
 {
@@ -14,4 +15,5 @@ interface BookingOptions extends Options
 	public function denyExpiredBookings(): bool;
     public function expirationSyncMode(): string;
     public function externalExpirationSyncToken(): string;
+    public function adminNotificationEmail(): ?Email;
 }
