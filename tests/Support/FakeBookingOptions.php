@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tests\Support;
 
 use Contexis\Events\Booking\Application\Contracts\BookingOptions;
+use Contexis\Events\Shared\Domain\ValueObjects\Email;
 
 final class FakeBookingOptions implements BookingOptions
 {
@@ -13,6 +14,8 @@ final class FakeBookingOptions implements BookingOptions
         private bool $denyExpiredBookings = true,
         private string $expirationSyncMode = 'wp_cron',
         private string $externalExpirationSyncToken = 'test-cron-token',
+        private ?Email $adminNotificationEmail = null,
+        private bool $attachIcalToBookingEmail = false,
     ) {
     }
 
@@ -51,5 +54,15 @@ final class FakeBookingOptions implements BookingOptions
     public function externalExpirationSyncToken(): string
     {
         return $this->externalExpirationSyncToken;
+    }
+
+    public function adminNotificationEmail(): ?Email
+    {
+        return $this->adminNotificationEmail;
+    }
+
+    public function attachIcalToBookingEmail(): bool
+    {
+        return $this->attachIcalToBookingEmail;
     }
 }

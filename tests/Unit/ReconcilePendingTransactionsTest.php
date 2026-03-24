@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Payment\Application\Services\SyncBookingFromTransaction;
@@ -20,6 +21,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Tests\Support\FakeBookingEmailTrigger;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeBookingOptions;
 use Tests\Support\FakeEventFactory;
@@ -73,6 +75,7 @@ test('reconciliation expires offline transactions that passed their deadline and
         expiresAt: new DateTimeImmutable('2026-03-15 11:00:00'),
     );
     $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $useCase = new ReconcilePendingTransactions(
         findReconcilableTransactions: new FakeReconcilableTransactionFinder([$transaction]),
@@ -82,14 +85,16 @@ test('reconciliation expires offline transactions that passed their deadline and
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(1)),
             $transactionRepository,
-            makeReconcileClock()
+            makeReconcileClock(),
+            $bookingEmailTrigger,
         ),
         clock: makeReconcileClock(),
     );
 
     expect($useCase->execute())->toBe(1)
         ->and($transactionRepository->findLatestByBookingId($bookingId)?->status)->toBe(TransactionStatus::EXPIRED)
-        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED);
+        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED)
+        ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_OFFLINE_EXPIRED);
 });
 
 test('reconciliation expires online transactions via expiresAt and expires the booking', function () {
@@ -105,6 +110,7 @@ test('reconciliation expires online transactions via expiresAt and expires the b
         expiresAt: new DateTimeImmutable('2026-03-16 11:45:00'),
     );
     $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $gateway = new FakePaymentGateway(
         id: 'mollie',
@@ -119,7 +125,8 @@ test('reconciliation expires online transactions via expiresAt and expires the b
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(2)),
             $transactionRepository,
-            makeReconcileClock()
+            makeReconcileClock(),
+            $bookingEmailTrigger,
         ),
         clock: makeReconcileClock(),
     );
@@ -154,6 +161,7 @@ test('reconciliation does not expire a booking when a newer pending transaction 
         ->withExpiresAt(new DateTimeImmutable('2026-03-16 12:30:00'));
 
     $transactionRepository = FakeTransactionRepository::withTransactions($expiredCandidate, $replacement);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $gateway = new FakePaymentGateway(
         id: 'mollie',
@@ -168,7 +176,8 @@ test('reconciliation does not expire a booking when a newer pending transaction 
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(2)),
             $transactionRepository,
-            makeReconcileClock()
+            makeReconcileClock(),
+            $bookingEmailTrigger,
         ),
         clock: makeReconcileClock(),
     );
@@ -176,7 +185,8 @@ test('reconciliation does not expire a booking when a newer pending transaction 
     expect($useCase->execute())->toBe(1)
         ->and($transactionRepository->findByExternalId('tr_old_expiring')?->status)->toBe(TransactionStatus::EXPIRED)
         ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING)
-        ->and($transactionRepository->findByExternalId('tr_new_pending')?->status)->toBe(TransactionStatus::PENDING);
+        ->and($transactionRepository->findByExternalId('tr_new_pending')?->status)->toBe(TransactionStatus::PENDING)
+        ->and($bookingEmailTrigger->calls)->toBe([]);
 });
 
 test('reconciliation leaves past-event bookings untouched even when the transaction expires', function () {
@@ -193,6 +203,7 @@ test('reconciliation leaves past-event bookings untouched even when the transact
         expiresAt: new DateTimeImmutable('2026-03-16 11:00:00'),
     );
     $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $pastEvent = FakeEventFactory::create(2, [
         EventMeta::EVENT_START => '2026-03-01 10:00:00',
@@ -207,14 +218,16 @@ test('reconciliation leaves past-event bookings untouched even when the transact
             $bookingRepository,
             FakeEventRepository::one($pastEvent),
             $transactionRepository,
-            makeReconcileClock()
+            makeReconcileClock(),
+            $bookingEmailTrigger,
         ),
         clock: makeReconcileClock(),
     );
 
     expect($useCase->execute())->toBe(1)
         ->and($transactionRepository->findByExternalId('tr_past_event_expired')?->status)->toBe(TransactionStatus::EXPIRED)
-        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING);
+        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING)
+        ->and($bookingEmailTrigger->calls)->toBe([]);
 });
 
 test('cron does not reconcile expired bookings automatically when the setting is disabled', function () {
@@ -227,6 +240,7 @@ test('cron does not reconcile expired bookings automatically when the setting is
         expiresAt: new DateTimeImmutable('2026-03-15 11:00:00'),
     );
     $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $cron = new ReconcilePendingTransactionsCron(
         reconcilePendingTransactions: new ReconcilePendingTransactions(
@@ -237,7 +251,8 @@ test('cron does not reconcile expired bookings automatically when the setting is
                 $bookingRepository,
                 FakeEventRepository::one(FakeEventFactory::create(1)),
                 $transactionRepository,
-                makeReconcileClock()
+                makeReconcileClock(),
+                $bookingEmailTrigger,
             ),
             clock: makeReconcileClock(),
         ),
@@ -260,6 +275,7 @@ test('wordpress cron does not run when external reconciliation mode is enabled',
         expiresAt: new DateTimeImmutable('2026-03-15 11:00:00'),
     );
     $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $cron = new ReconcilePendingTransactionsCron(
         reconcilePendingTransactions: new ReconcilePendingTransactions(
@@ -270,7 +286,8 @@ test('wordpress cron does not run when external reconciliation mode is enabled',
                 $bookingRepository,
                 FakeEventRepository::one(FakeEventFactory::create(1)),
                 $transactionRepository,
-                makeReconcileClock()
+                makeReconcileClock(),
+                $bookingEmailTrigger,
             ),
             clock: makeReconcileClock(),
         ),

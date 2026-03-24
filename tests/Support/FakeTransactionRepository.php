@@ -16,6 +16,8 @@ final class FakeTransactionRepository implements TransactionRepository
     /** @var array<int, Transaction[]> */
     private array $transactionsByBookingId = [];
 
+    public ?BookingId $lastFindArg = null;
+
     public static function empty(): self
     {
         return new self();
@@ -65,9 +67,15 @@ final class FakeTransactionRepository implements TransactionRepository
 
     public function findByBookingId(BookingId $bookingId): TransactionCollection
     {
+        $this->lastFindArg = $bookingId;
+
         return TransactionCollection::from(...($this->transactionsByBookingId[$bookingId->toInt()] ?? []));
     }
 
+    /**
+     * @param BookingId[] $bookingIds
+     * @return array<int, TransactionCollection>
+     */
     public function findByBookingIds(array $bookingIds): array
     {
         $result = [];

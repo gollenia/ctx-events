@@ -7,6 +7,7 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Payment\Application\Services\SyncBookingFromTransaction;
@@ -19,6 +20,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Tests\Support\FakeBookingEmailTrigger;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeCurrentActorProvider;
 use Tests\Support\FakeEventFactory;
@@ -79,6 +81,7 @@ test('paid online transaction approves the booking', function () {
         id: 'mollie',
         verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->complete(),
     );
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $useCase = new SyncTransactionStatus(
         transactionRepository: $transactionRepository,
@@ -87,7 +90,8 @@ test('paid online transaction approves the booking', function () {
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(2)),
             $transactionRepository,
-            makeSyncClock()
+            makeSyncClock(),
+            $bookingEmailTrigger,
         ),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
@@ -96,7 +100,8 @@ test('paid online transaction approves the booking', function () {
 
     expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::APPROVED)
         ->and($transactionRepository->findByExternalId('tr_paid_1')?->status)->toBe(TransactionStatus::PAID)
-        ->and($bookingRepository->find($bookingId)?->logEntries?->first()?->actor->name)->toBe('Mollie webhook');
+        ->and($bookingRepository->find($bookingId)?->logEntries?->first()?->actor->name)->toBe('Mollie webhook')
+        ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CONFIRMED_ONLINE);
 });
 
 test('expired online transaction expires the booking', function () {
@@ -115,8 +120,9 @@ test('expired online transaction expires the booking', function () {
 
     $gateway = new FakePaymentGateway(
         id: 'mollie',
-        verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->expire(),
+        verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->fail(),
     );
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $useCase = new SyncTransactionStatus(
         transactionRepository: $transactionRepository,
@@ -125,7 +131,8 @@ test('expired online transaction expires the booking', function () {
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(2)),
             $transactionRepository,
-            makeSyncClock()
+            makeSyncClock(),
+            $bookingEmailTrigger,
         ),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
@@ -133,7 +140,8 @@ test('expired online transaction expires the booking', function () {
     $useCase->execute('tr_expired_1');
 
     expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED)
-        ->and($transactionRepository->findByExternalId('tr_expired_1')?->status)->toBe(TransactionStatus::EXPIRED);
+        ->and($transactionRepository->findByExternalId('tr_expired_1')?->status)->toBe(TransactionStatus::FAILED)
+        ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_PAYMENT_FAILED);
 });
 
 test('manual sync can use an explicit actor', function () {
@@ -154,6 +162,7 @@ test('manual sync can use an explicit actor', function () {
         id: 'mollie',
         verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->complete(),
     );
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $useCase = new SyncTransactionStatus(
         transactionRepository: $transactionRepository,
@@ -162,7 +171,8 @@ test('manual sync can use an explicit actor', function () {
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(2)),
             $transactionRepository,
-            makeSyncClock()
+            makeSyncClock(),
+            $bookingEmailTrigger,
         ),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
@@ -190,6 +200,7 @@ test('paid online transaction does not change booking when the event is already 
         id: 'mollie',
         verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->complete(),
     );
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
 
     $pastEvent = FakeEventFactory::create(2, [
         EventMeta::EVENT_START => '2026-03-01 10:00:00',
@@ -203,7 +214,8 @@ test('paid online transaction does not change booking when the event is already 
             $bookingRepository,
             FakeEventRepository::one($pastEvent),
             $transactionRepository,
-            makeSyncClock()
+            makeSyncClock(),
+            $bookingEmailTrigger,
         ),
         currentActorProvider: new FakeCurrentActorProvider(),
     );
@@ -211,5 +223,6 @@ test('paid online transaction does not change booking when the event is already 
     $useCase->execute('tr_paid_past_event');
 
     expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING)
-        ->and($transactionRepository->findByExternalId('tr_paid_past_event')?->status)->toBe(TransactionStatus::PAID);
+        ->and($transactionRepository->findByExternalId('tr_paid_past_event')?->status)->toBe(TransactionStatus::PAID)
+        ->and($bookingEmailTrigger->calls)->toBe([]);
 });

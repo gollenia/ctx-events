@@ -8,20 +8,27 @@ use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingTokenRecord;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Payment\Domain\CouponRepository;
+use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\SessionHashResolver;
+use Contexis\Events\Shared\Domain\ValueObjects\Currency;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Tests\Support\FakeBookingEmailTrigger;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeCurrentActorProvider;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
 use Tests\Support\FakeFormRepository;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeGatewayRepository;
 use Tests\Support\FakeReferenceGenerator;
 use Tests\Support\FakeTokenStore;
+use Uri\Rfc3986\Uri;
 
 // ---------------------------------------------------------------------------
 // Helper: builds a fully-wired CreateBooking use-case
@@ -33,6 +40,7 @@ function makeCreateBookingUseCase(
     FakeTokenStore $tokenStore,
     string $sessionHash = 'test-session-hash',
     ?FakeGatewayRepository $gatewayRepository = null,
+    ?FakeBookingEmailTrigger $bookingEmailTrigger = null,
 ): CreateBooking {
     $sessionHashResolver = Mockery::mock(SessionHashResolver::class);
     $sessionHashResolver->allows('resolve')->andReturn($sessionHash);
@@ -61,6 +69,7 @@ function makeCreateBookingUseCase(
         attendeeFactory: new AttendeeFactory(),
         clock: $clock,
         currentActorProvider: new FakeCurrentActorProvider(),
+        bookingEmailTrigger: $bookingEmailTrigger ?? new FakeBookingEmailTrigger(),
         checkTicketAvailibility: new CheckTicketAvailibility(),
         calculateBookingPrice: new CalculateBookingPrice(),
         couponRepository: $couponRepository,
@@ -257,6 +266,91 @@ test('throws when bookings are disabled for the event', function () {
 
     expect(fn () => $useCase->execute($request))
         ->toThrow(\DomainException::class, 'Event is not bookable:');
+});
+
+test('triggers pending manual emails for offline bookings', function () {
+    $event = FakeEventFactory::create(7);
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
+    $tokenStore = FakeTokenStore::withToken(tokenFor($event->id->toInt()));
+    $ticketId = $event->tickets?->toArray()[0]?->id->toString() ?? 'ticket-1';
+    $gatewayRepository = FakeGatewayRepository::withGateways([
+        new FakePaymentGateway(
+            id: 'offline',
+            initiatePaymentUsing: static fn(\Contexis\Events\Booking\Domain\Booking $booking): Transaction => Transaction::forBankTransfer(
+                bookingId: $booking->id ?? throw new RuntimeException('Booking has no ID'),
+                amount: $booking->priceSummary->finalPrice,
+                gateway: 'offline',
+            ),
+        ),
+    ]);
+
+    $useCase = makeCreateBookingUseCase(
+        FakeEventRepository::one($event),
+        $bookingRepository,
+        $tokenStore,
+        gatewayRepository: $gatewayRepository,
+        bookingEmailTrigger: $bookingEmailTrigger,
+    );
+
+    $response = $useCase->execute(new CreateBookingRequest(
+        eventId: $event->id,
+        registration: registrationPayload(),
+        attendees: attendeePayload($ticketId),
+        gateway: 'offline',
+        token: 'valid-token',
+    ));
+
+    $call = $bookingEmailTrigger->lastCall();
+    $bookingId = $bookingRepository->findByReference($response->reference->toString())?->id;
+
+    expect($call['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_PENDING_MANUAL);
+    expect($bookingId)->not->toBeNull();
+    expect($call['bookingId'] ?? null)->toEqual($bookingId);
+});
+
+test('triggers created online emails for paid online bookings', function () {
+    $event = FakeEventFactory::create(8);
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
+    $tokenStore = FakeTokenStore::withToken(tokenFor($event->id->toInt()));
+    $ticketId = $event->tickets?->toArray()[0]?->id->toString() ?? 'ticket-1';
+    $gatewayRepository = FakeGatewayRepository::withGateways([
+        new FakePaymentGateway(
+            id: 'mollie',
+            initiatePaymentUsing: static fn(\Contexis\Events\Booking\Domain\Booking $booking): Transaction => Transaction::forPaymentService(
+                bookingId: $booking->id ?? throw new RuntimeException('Booking has no ID'),
+                amount: $booking->priceSummary->finalPrice,
+                externalId: 'tr_create_booking',
+                checkoutUrl: Uri::parse('https://checkout.example.test/pay'),
+                gateway: 'mollie',
+                gatewayUrl: Uri::parse('https://gateway.example.test/pay/tr_create_booking'),
+            ),
+        ),
+    ]);
+
+    $useCase = makeCreateBookingUseCase(
+        FakeEventRepository::one($event),
+        $bookingRepository,
+        $tokenStore,
+        gatewayRepository: $gatewayRepository,
+        bookingEmailTrigger: $bookingEmailTrigger,
+    );
+
+    $response = $useCase->execute(new CreateBookingRequest(
+        eventId: $event->id,
+        registration: registrationPayload(),
+        attendees: attendeePayload($ticketId),
+        gateway: 'mollie',
+        token: 'valid-token',
+    ));
+
+    $call = $bookingEmailTrigger->lastCall();
+    $bookingId = $bookingRepository->findByReference($response->reference->toString())?->id;
+
+    expect($call['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CREATED_ONLINE);
+    expect($bookingId)->not->toBeNull();
+    expect($call['bookingId'] ?? null)->toEqual($bookingId);
 });
 
 test('throws when booking window has not started yet', function () {
@@ -492,8 +586,8 @@ test('throws when ticket sales period has ended', function () {
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('-3 months'))->format('Y-m-d H:i:s'),
-            'ticket_end'         => (new DateTimeImmutable('-1 week'))->format('Y-m-d H:i:s'), // in the past
+            'ticket_start'       => '2025-12-01 00:00:00',
+            'ticket_end'         => '2026-03-09 23:59:59',
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],

@@ -10,11 +10,13 @@ use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Communication\Application\ResolveEmailRecipient;
 use Contexis\Events\Communication\Domain\Enums\EmailTarget;
+use Contexis\Events\Communication\Domain\ValueObjects\AdminEmailRecipientConfig;
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
+use Tests\Support\FakeBookingOptions;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
 use Tests\Support\FakePersonRepository;
@@ -24,6 +26,7 @@ test('resolves customer recipient from booking email', function () {
     $resolver = new ResolveEmailRecipient(
         FakeEventRepository::empty(),
         new FakePersonRepository(),
+        new FakeBookingOptions(),
     );
 
     $recipient = $resolver->execute(EmailTarget::CUSTOMER, $booking);
@@ -38,6 +41,7 @@ test('resolves billing contact from registration data', function () {
     $resolver = new ResolveEmailRecipient(
         FakeEventRepository::empty(),
         new FakePersonRepository(),
+        new FakeBookingOptions(),
     );
 
     $recipient = $resolver->execute(EmailTarget::BILLING_CONTACT, $booking);
@@ -60,6 +64,7 @@ test('resolves event contact from linked person email', function () {
     $resolver = new ResolveEmailRecipient(
         FakeEventRepository::one($event),
         new FakePersonRepository($person),
+        new FakeBookingOptions(),
     );
 
     $recipient = $resolver->execute(EmailTarget::EVENT_CONTACT, $booking);
@@ -72,9 +77,49 @@ test('returns null when admin recipient source is not defined yet', function () 
     $resolver = new ResolveEmailRecipient(
         FakeEventRepository::empty(),
         new FakePersonRepository(),
+        new FakeBookingOptions(),
     );
 
     expect($resolver->execute(EmailTarget::ADMIN, $booking))->toBeNull();
+});
+
+test('resolves configured admin recipients and deduplicates them', function () {
+    $event = FakeEventFactory::create(43);
+    $personId = $event->personId ?? PersonId::from(100);
+    $person = new Person(
+        id: $personId,
+        status: Status::Draft,
+        givenName: 'Grace',
+        familyName: 'Hopper',
+        email: Email::tryFrom('speaker@example.com'),
+    );
+
+    $booking = testBooking($event->id->toInt());
+    $resolver = new ResolveEmailRecipient(
+        FakeEventRepository::one($event),
+        new FakePersonRepository($person),
+        new FakeBookingOptions(adminNotificationEmail: Email::tryFrom('booking-admin@example.com')),
+    );
+
+    $recipients = $resolver->executeMany(
+        EmailTarget::ADMIN,
+        $booking,
+        $event,
+        new AdminEmailRecipientConfig(
+            sendToEventContact: true,
+            sendToEventPerson: true,
+            sendToBookingAdmin: true,
+            sendToWpAdmin: false,
+            customRecipients: ['custom@example.com', 'speaker@example.com'],
+        ),
+    );
+
+    expect(array_map(static fn (Email $email): string => $email->toString(), $recipients))
+        ->toEqualCanonicalizing([
+            'speaker@example.com',
+            'booking-admin@example.com',
+            'custom@example.com',
+        ]);
 });
 
 /**
