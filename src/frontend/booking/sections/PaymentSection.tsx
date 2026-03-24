@@ -1,12 +1,23 @@
-import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { CouponField } from '../components/CouponField';
+import { PaymentGatewaySelect } from '../components/PaymentGatewaySelect';
 import { PriceSummary } from '../components/PriceSummary';
-import type { AttendeePayload, BookingData, BookingState, SubmitResult } from '../types';
+import { useCouponPreflight } from '../hooks/useCouponPreflight';
+import { calculateBookingTotal, calculateCouponDiscount } from '../pricing';
+import type {
+	AttendeePayload,
+	BookingData,
+	BookingState,
+	PaymentStateUpdates,
+	SubmitResult,
+} from '../types';
 
 type Props = {
 	data: BookingData;
 	bookingState: BookingState;
 	onResult: (result: SubmitResult) => void;
+	onPaymentStateChange: (updates: PaymentStateUpdates) => void;
 	onSubmit: (payload: {
 		token: string;
 		event_id: number;
@@ -23,17 +34,44 @@ export function PaymentSection({
 	data,
 	bookingState,
 	onResult,
+	onPaymentStateChange,
 	onSubmit,
 	postId,
 	isSubmitting,
 }: Props) {
-	const [gateway, setGateway] = useState<string>(
-		bookingState.gateway || (data.gateways[0]?.id ?? ''),
-	);
-	const [couponCode, setCouponCode] = useState<string>(bookingState.couponCode);
 	const [consent, setConsent] = useState(false);
 	const [consentError, setConsentError] = useState('');
 	const [submitError, setSubmitError] = useState('');
+	const {
+		status: couponStatus,
+		result: couponResult,
+		message: couponMessage,
+		check: checkCoupon,
+		reset: resetCouponCheck,
+	} = useCouponPreflight();
+	const gateway = bookingState.gateway || (data.gateways[0]?.id ?? '');
+	const couponCode = bookingState.couponCode;
+	const appliedCoupon = bookingState.couponCheckResult;
+	const totalPrice = calculateBookingTotal(data.tickets, bookingState.tickets);
+	const currency = data.tickets[0]?.currency ?? 'EUR';
+	const liveDiscountAmount = calculateCouponDiscount(totalPrice, appliedCoupon);
+
+	async function handleCouponCheck() {
+		if (!couponCode.trim()) {
+			resetCouponCheck();
+			onPaymentStateChange({ couponCheckResult: null });
+			return;
+		}
+
+		const result = await checkCoupon({
+			code: couponCode.trim(),
+			eventId: postId,
+			bookingPrice: totalPrice,
+			currency,
+		});
+
+		onPaymentStateChange({ couponCheckResult: result });
+	}
 
 	async function handleSubmit() {
 		if (!consent) {
@@ -49,7 +87,7 @@ export function PaymentSection({
 			registration: bookingState.registration,
 			attendees: bookingState.attendees,
 			gateway,
-			coupon_code: couponCode || undefined,
+			coupon_code: couponCode.trim() || undefined,
 		});
 
 		if (result.type === 'error') {
@@ -62,42 +100,37 @@ export function PaymentSection({
 
 	return (
 		<div className="booking-section booking-section--payment">
-			<PriceSummary tickets={data.tickets} ticketCounts={bookingState.tickets} />
+			<PriceSummary
+				tickets={data.tickets}
+				ticketCounts={bookingState.tickets}
+				coupon={appliedCoupon}
+			/>
 
-			{data.gateways.length > 1 && (
-				<fieldset className="booking-gateway-select">
-					<legend className="booking-gateway-select__legend">
-						{__('Payment method', 'ctx-events')}
-					</legend>
-					{data.gateways.map((gw) => (
-						<label key={gw.id} className="booking-gateway-select__option">
-							<input
-								type="radio"
-								name="gateway"
-								value={gw.id}
-								checked={gateway === gw.id}
-								onChange={() => setGateway(gw.id)}
-							/>
-							{gw.title}
-						</label>
-					))}
-				</fieldset>
-			)}
+			<PaymentGatewaySelect
+				gateways={data.gateways}
+				selectedGateway={gateway}
+				onChange={(nextGateway) =>
+					onPaymentStateChange({ gateway: nextGateway })
+				}
+			/>
 
 			{data.couponsEnabled && (
-				<div className="booking-coupon">
-					<label className="booking-coupon__label" htmlFor="booking-coupon-code">
-						{__('Coupon code', 'ctx-events')}
-					</label>
-					<input
-						id="booking-coupon-code"
-						type="text"
-						className="booking-coupon__input"
-						value={couponCode}
-						onChange={(e) => setCouponCode(e.target.value)}
-						placeholder={__('Optional', 'ctx-events')}
-					/>
-				</div>
+				<CouponField
+					code={couponCode}
+					currency={currency}
+					couponStatus={couponStatus}
+					couponResult={couponResult}
+					appliedCoupon={appliedCoupon}
+					couponMessage={couponMessage}
+					liveDiscountAmount={liveDiscountAmount}
+					onCodeChange={(nextCode) =>
+						onPaymentStateChange({
+							couponCode: nextCode,
+							couponCheckResult: null,
+						})
+					}
+					onCheck={handleCouponCheck}
+				/>
 			)}
 
 			<label className="booking-consent">
@@ -113,7 +146,10 @@ export function PaymentSection({
 					dangerouslySetInnerHTML={{
 						__html: sprintf(
 							// translators: %s is linked text
-							__('I agree to the <a href="/privacy" target="_blank">privacy policy</a>.', 'ctx-events'),
+							__(
+								'I agree to the <a href="/privacy" target="_blank">privacy policy</a>.',
+								'ctx-events',
+							),
 						),
 					}}
 				/>
@@ -138,7 +174,9 @@ export function PaymentSection({
 					onClick={handleSubmit}
 					disabled={isSubmitting}
 				>
-					{isSubmitting ? __('Processing…', 'ctx-events') : __('Book now', 'ctx-events')}
+					{isSubmitting
+						? __('Processing…', 'ctx-events')
+						: __('Book now', 'ctx-events')}
 				</button>
 			</div>
 		</div>
