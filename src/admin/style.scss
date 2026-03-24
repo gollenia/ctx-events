@@ -248,6 +248,16 @@ body.booking-edit-open {
 		background: #f9fafb;
 	}
 
+	.booking-edit__activity-item[data-level='warning'] {
+		border-color: #e0b03f;
+		background: #fff8e1;
+	}
+
+	.booking-edit__activity-item[data-level='error'] {
+		border-color: #d63638;
+		background: #fbeaea;
+	}
+
 	.booking-edit__note-date,
 	.booking-edit__note-author,
 	.booking-edit__activity-head span,
@@ -272,6 +282,36 @@ body.booking-edit-open {
 		justify-content: space-between;
 		gap: 0.75rem;
 		align-items: baseline;
+	}
+
+	.booking-edit__activity-title {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.booking-edit__activity-level {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.1rem 0.45rem;
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		background: #e8eaeb;
+		color: #50575e;
+	}
+
+	.booking-edit__activity-item[data-level='warning'] .booking-edit__activity-level {
+		background: #f6d675;
+		color: #5f4b00;
+	}
+
+	.booking-edit__activity-item[data-level='error'] .booking-edit__activity-level {
+		background: #f0b8b9;
+		color: #6a0d0f;
 	}
 
 	.booking-edit__registration-fields {
