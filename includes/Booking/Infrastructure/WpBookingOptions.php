@@ -17,6 +17,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
     public const BOOKING_EXPIRATION_SYNC_MODE = 'ctx_events_booking_expiration_sync_mode';
     public const BOOKING_EXPIRATION_SYNC_TOKEN = 'ctx_events_booking_expiration_sync_token';
     public const BOOKING_ADMIN_EMAIL = 'ctx_events_booking_admin_email';
+	public const BOOKING_ATTACH_ICAL = 'ctx_events_booking_attach_ical';
 
     public function fields(): array
     {
@@ -74,6 +75,16 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
                     'section'     => 'booking_expiration',
                     'order'       => 30,
                 ],
+                self::BOOKING_ATTACH_ICAL => [
+                    'type'        => 'boolean',
+                    'default'     => false,
+                    'label'       => __('Attach iCal to booking email', 'ctx-events'),
+                    'description' => __('If enabled, an iCal file will be attached to booking confirmation emails.', 'ctx-events'),
+                    'domain'      => 'booking',
+                    'section'     => 'booking_notifications',
+                    'section_label' => __('Notification recipients', 'ctx-events'),
+                    'order'       => 35,
+                ],
                 self::BOOKING_ADMIN_EMAIL => [
                     'type'        => 'string',
                     'default'     => '',
@@ -129,6 +140,11 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
     {
         return Email::tryFrom($this->getString(self::BOOKING_ADMIN_EMAIL, ''));
     }
+
+	public function attachIcalToBookingEmail(): bool
+	{
+		return $this->getBool(self::BOOKING_ATTACH_ICAL);
+	}
 
     private function externalExpirationSyncUrl(): string
     {
