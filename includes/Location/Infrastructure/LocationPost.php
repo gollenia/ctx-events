@@ -6,9 +6,10 @@ namespace Contexis\Events\Location\Infrastructure;
 use Contexis\Events\Event\Infrastructure\EventPost;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasHooks;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
-class LocationPost extends PostType implements HasMetaData
+class LocationPost extends PostType implements HasMetaData, HasHooks
 {
     public const POST_TYPE = 'ctx-event-location';
 
@@ -65,5 +66,59 @@ class LocationPost extends PostType implements HasMetaData
     public function registerMeta(): void
     {
         LocationMeta::registerAll(self::POST_TYPE);
+    }
+
+    public function registerHooks(): void
+    {
+        add_filter('manage_' . self::POST_TYPE . '_posts_columns', [$this, 'filterColumns']);
+        add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderColumn'], 10, 2);
+    }
+
+    /**
+     * @param array<string, string> $columns
+     * @return array<string, string>
+     */
+    public function filterColumns(array $columns): array
+    {
+        $date = $columns['date'] ?? __('Date', 'ctx-events');
+
+        return [
+            'cb' => $columns['cb'] ?? '<input type="checkbox" />',
+            'photo' => __('Photo', 'ctx-events'),
+            'title' => $columns['title'] ?? __('Title', 'ctx-events'),
+            'address' => __('Address', 'ctx-events'),
+            'city' => __('City', 'ctx-events'),
+            'country' => __('Country', 'ctx-events'),
+            'date' => $date,
+        ];
+    }
+
+    public function renderColumn(string $column, int $postId): void
+    {
+        switch ($column) {
+            case 'photo':
+                $thumbnail = get_the_post_thumbnail(
+                    $postId,
+                    [48, 48],
+                    [
+                        'style' => 'width:48px;height:48px;object-fit:cover;border-radius:4px;',
+                    ]
+                );
+
+                echo $thumbnail ?: '&#8212;';
+                break;
+
+            case 'address':
+                echo esc_html((string) get_post_meta($postId, LocationMeta::ADDRESS, true) ?: '—');
+                break;
+
+            case 'city':
+                echo esc_html((string) get_post_meta($postId, LocationMeta::CITY, true) ?: '—');
+                break;
+
+            case 'country':
+                echo esc_html((string) get_post_meta($postId, LocationMeta::COUNTRY, true) ?: '—');
+                break;
+        }
     }
 }
