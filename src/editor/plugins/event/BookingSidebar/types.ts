@@ -1,3 +1,5 @@
+import type { EventMailTemplateOverride } from '@events/emails';
+
 export type BookingMeta = {
 	_booking_enabled?: boolean | number;
 	_booking_start?: string;
@@ -7,8 +9,9 @@ export type BookingMeta = {
 	_booking_form?: string | number;
 	_attendee_form?: string | number;
 	_booking_currency?: string;
+	_booking_coupons?: number[];
+	_booking_mails?: EventMailTemplateOverride[];
 	_event_rsvp_donation?: boolean | number;
-	_event_coupons?: number[];
 	_event_tickets?: BookingTicket[];
 };
 

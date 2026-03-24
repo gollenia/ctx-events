@@ -100,6 +100,21 @@ export type BookingPayment = RedirectPayment | BankTransferPayment;
 export type BookingCreatedResponse = {
 	reference: string;
 	payment: BookingPayment | null;
+	customerEmailStatus?: 'sent' | 'failed' | 'skipped' | 'unknown';
+};
+
+export type PaymentQrResponse = {
+	gateway: string;
+	format: 'svg' | 'png';
+	mimeType: string;
+	dataUri: string;
+};
+
+export type CouponCheckResult = {
+	name: string;
+	discountType: string;
+	discountValue: number;
+	discountAmount: number;
 };
 
 export type BookingState = {
@@ -108,9 +123,14 @@ export type BookingState = {
 	registration: Record<string, unknown>;
 	gateway: string;
 	couponCode: string;
+	couponCheckResult: CouponCheckResult | null;
 	openSection: SectionId;
 	completedSections: Set<SectionId>;
 };
+
+export type PaymentStateUpdates = Partial<
+	Pick<BookingState, 'gateway' | 'couponCode' | 'couponCheckResult'>
+>;
 
 export type SectionId =
 	| 'tickets'
@@ -120,5 +140,10 @@ export type SectionId =
 	| 'success';
 
 export type SubmitResult =
-	| { type: 'success'; reference: string; payment: BookingPayment | null }
+	| {
+			type: 'success';
+			reference: string;
+			payment: BookingPayment | null;
+			customerEmailStatus: 'sent' | 'failed' | 'skipped' | 'unknown';
+	  }
 	| { type: 'error'; message: string };

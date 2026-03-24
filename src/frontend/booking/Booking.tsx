@@ -7,6 +7,7 @@ import type {
 	AttendeePayload,
 	BookingPayment,
 	BookingState,
+	PaymentStateUpdates,
 	SectionId,
 	SubmitResult,
 } from './types';
@@ -24,6 +25,7 @@ function initialState(): BookingState {
 		registration: {},
 		gateway: '',
 		couponCode: '',
+		couponCheckResult: null,
 		openSection: 'tickets',
 		completedSections: new Set(),
 	};
@@ -35,6 +37,9 @@ export default function Booking() {
 	const [bookingState, setBookingState] = useState<BookingState>(initialState);
 	const [successRef, setSuccessRef] = useState<string | null>(null);
 	const [successPayment, setSuccessPayment] = useState<BookingPayment | null>(null);
+	const [successCustomerEmailStatus, setSuccessCustomerEmailStatus] = useState<
+		'sent' | 'failed' | 'skipped' | 'unknown'
+	>('unknown');
 	const { state: dataState, load } = useBookingData(postId);
 	const { status: submitStatus, submit } = useSubmitBooking();
 
@@ -65,6 +70,7 @@ export default function Booking() {
 		setBookingState(initialState());
 		setSuccessRef(null);
 		setSuccessPayment(null);
+		setSuccessCustomerEmailStatus('unknown');
 	}, [postId]);
 
 	useEffect(() => {
@@ -78,6 +84,7 @@ export default function Booking() {
 		setBookingState(initialState());
 		setSuccessRef(null);
 		setSuccessPayment(null);
+		setSuccessCustomerEmailStatus('unknown');
 	}
 
 	function handleToggleSection(id: SectionId) {
@@ -88,6 +95,13 @@ export default function Booking() {
 		setBookingState((prev) => ({
 			...prev,
 			tickets: { ...prev.tickets, [ticketId]: count },
+		}));
+	}
+
+	function handlePaymentStateChange(updates: PaymentStateUpdates) {
+		setBookingState((prev) => ({
+			...prev,
+			...updates,
 		}));
 	}
 
@@ -133,6 +147,7 @@ export default function Booking() {
 		if (result.type === 'success') {
 			setSuccessRef(result.reference);
 			setSuccessPayment(result.payment);
+			setSuccessCustomerEmailStatus(result.customerEmailStatus);
 		}
 	}
 
@@ -176,12 +191,14 @@ export default function Booking() {
 							isSubmitting={submitStatus === 'loading'}
 							successRef={successRef}
 							successPayment={successPayment}
+							successCustomerEmailStatus={successCustomerEmailStatus}
 							onTicketChange={handleTicketChange}
 							onTicketsDone={handleTicketsDone}
 							onAttendeesDone={handleAttendeesDone}
 							onRegistrationDone={handleRegistrationDone}
 							onSubmit={submit}
 							onResult={handleResult}
+							onPaymentStateChange={handlePaymentStateChange}
 							onToggleSection={handleToggleSection}
 							onClose={handleClose}
 						/>

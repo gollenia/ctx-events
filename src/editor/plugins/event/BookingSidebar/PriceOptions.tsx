@@ -15,7 +15,7 @@ const PriceAdjustments = ({ meta, updateMeta, postId, postType }: BookingSidebar
 	const [showCoupons, setShowCoupons] = useState(false);
 	const [showTickets, setShowTickets] = useState(false);
 	const enabled = isBookingEnabled(meta);
-	const selectedCoupons = meta._event_coupons?.length ?? 0;
+	const selectedCoupons = meta._booking_coupons?.length ?? 0;
 
 	return (
 		<PanelBody title={__('Price Options', 'ctx-events')} initialOpen={true}>

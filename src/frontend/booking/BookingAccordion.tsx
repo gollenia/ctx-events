@@ -10,6 +10,7 @@ import type {
 	BookingData,
 	BookingPayment,
 	BookingState,
+	PaymentStateUpdates,
 	SectionId,
 	SubmitResult,
 } from './types';
@@ -21,6 +22,7 @@ type Props = {
 	isSubmitting: boolean;
 	successRef: string | null;
 	successPayment: BookingPayment | null;
+	successCustomerEmailStatus: 'sent' | 'failed' | 'skipped' | 'unknown';
 	onTicketChange: (ticketId: string, count: number) => void;
 	onTicketsDone: () => void;
 	onAttendeesDone: (attendees: AttendeePayload[]) => void;
@@ -34,6 +36,7 @@ type Props = {
 		coupon_code?: string;
 	}) => Promise<SubmitResult>;
 	onResult: (result: SubmitResult) => void;
+	onPaymentStateChange: (updates: PaymentStateUpdates) => void;
 	onToggleSection: (id: SectionId) => void;
 	onClose: () => void;
 };
@@ -56,12 +59,14 @@ export function BookingAccordion({
 	isSubmitting,
 	successRef,
 	successPayment,
+	successCustomerEmailStatus,
 	onTicketChange,
 	onTicketsDone,
 	onAttendeesDone,
 	onRegistrationDone,
 	onSubmit,
 	onResult,
+	onPaymentStateChange,
 	onToggleSection,
 	onClose,
 }: Props) {
@@ -71,6 +76,7 @@ export function BookingAccordion({
 				reference={successRef}
 				eventName={data.eventName}
 				payment={successPayment}
+				customerEmailStatus={successCustomerEmailStatus}
 				onClose={onClose}
 			/>
 		);
@@ -155,6 +161,7 @@ export function BookingAccordion({
 					data={data}
 					bookingState={state}
 					onResult={onResult}
+					onPaymentStateChange={onPaymentStateChange}
 					onSubmit={onSubmit}
 					postId={postId}
 					isSubmitting={isSubmitting}

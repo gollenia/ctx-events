@@ -36,6 +36,7 @@ export function useSubmitBooking() {
 				type: 'success',
 				reference: response.reference ?? '',
 				payment: response.payment ?? null,
+				customerEmailStatus: response.customerEmailStatus ?? 'unknown',
 			};
 		} catch (err: unknown) {
 			setStatus('idle');

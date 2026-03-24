@@ -1,22 +1,23 @@
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
-import type { TicketInfo } from '../types';
+import { calculateBookingTotal, calculateCouponDiscount } from '../pricing';
+import type { CouponCheckResult, TicketInfo } from '../types';
 
 type Props = {
 	tickets: TicketInfo[];
 	ticketCounts: Record<string, number>;
+	coupon?: CouponCheckResult | null;
 };
 
-export function PriceSummary({ tickets, ticketCounts }: Props) {
+export function PriceSummary({ tickets, ticketCounts, coupon }: Props) {
 	const lines = tickets.filter((t) => (ticketCounts[t.id] ?? 0) > 0);
 
 	if (lines.length === 0) return null;
 
 	const currency = lines[0]?.currency ?? 'EUR';
-	const total = lines.reduce(
-		(sum, t) => sum + t.price_in_cents * (ticketCounts[t.id] ?? 0),
-		0,
-	);
+	const total = calculateBookingTotal(lines, ticketCounts);
+	const discount = calculateCouponDiscount(total, coupon);
+	const totalAfterDiscount = Math.max(0, total - discount);
 
 	return (
 		<div className="booking-price-summary">
@@ -40,12 +41,32 @@ export function PriceSummary({ tickets, ticketCounts }: Props) {
 			})}
 			<div className="booking-price-summary__total">
 				<span className="booking-price-summary__label">
-					{__('Total', 'ctx-events')}
+					{__('Subtotal', 'ctx-events')}
 				</span>
 				<span className="booking-price-summary__amount">
 					{total === 0
 						? __('Free', 'ctx-events')
-						: formatPrice(total, currency)}
+						: formatPrice({ amountCents: total, currency })}
+				</span>
+			</div>
+			{discount > 0 && coupon && (
+				<div className="booking-price-summary__line booking-price-summary__line--discount">
+					<span className="booking-price-summary__label">
+						{__('Coupon discount', 'ctx-events')}
+					</span>
+					<span className="booking-price-summary__amount">
+						-{formatPrice({ amountCents: discount, currency })}
+					</span>
+				</div>
+			)}
+			<div className="booking-price-summary__total">
+				<span className="booking-price-summary__label">
+					{__('Total due', 'ctx-events')}
+				</span>
+				<span className="booking-price-summary__amount">
+					{totalAfterDiscount === 0
+						? __('Free', 'ctx-events')
+						: formatPrice({ amountCents: totalAfterDiscount, currency })}
 				</span>
 			</div>
 		</div>
