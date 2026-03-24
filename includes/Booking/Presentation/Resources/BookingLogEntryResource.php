@@ -13,9 +13,11 @@ final readonly class BookingLogEntryResource implements Resource
 {
     public function __construct(
         public string $eventType,
+        public string $level,
         public string $timestamp,
         public int $actorId,
         public string $actorName,
+        public ?string $message,
     ) {
     }
 
@@ -23,9 +25,11 @@ final readonly class BookingLogEntryResource implements Resource
     {
         return new self(
             eventType: $entry->eventType->value,
+            level: $entry->level->value,
             timestamp: $entry->timestamp->format(DATE_ATOM),
             actorId: $entry->actor->id,
             actorName: $entry->actor->name,
+            message: $entry->message,
         );
     }
 
@@ -33,9 +37,11 @@ final readonly class BookingLogEntryResource implements Resource
     {
         return [
             'eventType' => $this->eventType,
+            'level' => $this->level,
             'timestamp' => $this->timestamp,
             'actorId' => $this->actorId,
             'actorName' => $this->actorName,
+            'message' => $this->message,
         ];
     }
 }
