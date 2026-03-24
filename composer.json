@@ -44,7 +44,7 @@
 		"symfony/http-foundation": "^7.2",
 		"php-di/php-di": "^7.1",
 		"psr/clock": "^1.0.0",
-		"symfony/event-dispatcher": "^8.0"
+		"ueberdosis/tiptap-php": "^2.1"
 	},
 	"autoload": {
 		"psr-4": {
