@@ -11,6 +11,7 @@ use Contexis\Events\Booking\Application\UseCases\CancelBooking;
 use Contexis\Events\Booking\Application\UseCases\DeleteBooking;
 use Contexis\Events\Booking\Application\UseCases\DenyBooking;
 use Contexis\Events\Booking\Application\UseCases\RestoreBooking;
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 
 final class BookingActionController implements RestController
@@ -76,11 +77,17 @@ final class BookingActionController implements RestController
         try {
             $sendMail = $request->get_param('sendmail');
 
-            $action->execute(new BookingActionRequest(
+            $emailResult = $action->execute(new BookingActionRequest(
                 reference: (string) $request->get_param('uuid'),
                 sendMail: $sendMail === null ? true : (bool) $sendMail,
             ));
-            return new \WP_REST_Response(null, 204);
+            $warnings = BookingEmailWarnings::messages($emailResult);
+
+            if ($warnings === []) {
+                return new \WP_REST_Response(null, 204);
+            }
+
+            return new \WP_REST_Response(['warnings' => $warnings], 200);
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }
