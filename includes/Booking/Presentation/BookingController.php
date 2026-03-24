@@ -14,6 +14,7 @@ use Contexis\Events\Booking\Application\UseCases\ListBookings;
 use Contexis\Events\Booking\Application\UseCases\ResolveBookingPaymentLink;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
+use Contexis\Events\Booking\Presentation\Resources\BookingCreatedResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingTransactionResource;
 use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
@@ -181,8 +182,16 @@ final class BookingController implements RestController
         );
 
         try {
-            $reference = $this->createBooking->execute($bookingRequest);
-            return new \WP_REST_Response(['reference' => $reference], 201);
+            $response = $this->createBooking->execute($bookingRequest);
+
+            return new \WP_REST_Response(
+                BookingCreatedResource::from(
+                    $response->reference->toString(),
+                    $response->transaction,
+                    $response->emailResult,
+                ),
+                201
+            );
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }
