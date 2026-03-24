@@ -13,6 +13,13 @@ const EVENT_LABELS: Record<BookingLogEntryResource['eventType'], string> = {
 	rejected: __('Rejected', 'ctx-events'),
 	cancelled: __('Cancelled', 'ctx-events'),
 	restored: __('Restored', 'ctx-events'),
+	email_warning: __('Email warning', 'ctx-events'),
+};
+
+const LEVEL_LABELS: Record<BookingLogEntryResource['level'], string> = {
+	info: __('Info', 'ctx-events'),
+	warning: __('Warning', 'ctx-events'),
+	error: __('Error', 'ctx-events'),
 };
 
 const LogEntriesSection = ({ booking }: Props) => {
@@ -30,14 +37,23 @@ const LogEntriesSection = ({ booking }: Props) => {
 						<li
 							key={`${entry.timestamp}-${entry.eventType}-${index}`}
 							className="booking-edit__activity-item"
+							data-level={entry.level}
 						>
 							<div className="booking-edit__activity-head">
-								<strong>{EVENT_LABELS[entry.eventType] ?? entry.eventType}</strong>
+								<div className="booking-edit__activity-title">
+									<strong>{EVENT_LABELS[entry.eventType] ?? entry.eventType}</strong>
+									<span className="booking-edit__activity-level">
+										{LEVEL_LABELS[entry.level] ?? entry.level}
+									</span>
+								</div>
 								<span>{new Date(entry.timestamp).toLocaleString()}</span>
 							</div>
 							<p className="booking-edit__activity-actor">
 								{entry.actorName || __('Guest', 'ctx-events')}
 							</p>
+							{entry.message ? (
+								<p className="booking-edit__activity-actor">{entry.message}</p>
+							) : null}
 						</li>
 					))}
 				</ul>
