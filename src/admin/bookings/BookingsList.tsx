@@ -1,8 +1,11 @@
 import DataTable from '@events/datatable/DataTable';
 import type { DataFilterField, DataViewConfig } from '@events/datatable/types';
 import apiFetch from '@wordpress/api-fetch';
+import { SnackbarList } from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
 import { createActions } from './actions';
 import { bookingStatusItems } from './bookingStatusItems';
 import BookingEditModal from './edit/BookingEditModal';
@@ -67,6 +70,8 @@ const BookingsList = () => {
 	});
 
 	const [editingReference, setEditingReference] = useState<string | null>(null);
+	const { createWarningNotice, removeNotice } = useDispatch(noticesStore);
+	const notices = useSelect((select) => select(noticesStore).getNotices(), []);
 
 	const filterOptions = useFilterOptions();
 
@@ -113,7 +118,15 @@ const BookingsList = () => {
 
 	const { bookings, loading, statusItems, pagination } = useFetchBookings(view);
 
-	const actions = useMemo(() => createActions(refresh), []);
+	const actions = useMemo(
+		() =>
+			createActions((warnings) => {
+				warnings.forEach((warning) => {
+					createWarningNotice(warning, { type: 'snackbar' });
+				});
+			}),
+		[createWarningNotice],
+	);
 	const activeEventId = getActiveEventId(view.filters);
 
 	const buildExportPath = (includeAttendees: boolean): string | null => {
@@ -225,6 +238,7 @@ const BookingsList = () => {
 
 	return (
 		<>
+			<SnackbarList notices={notices} onRemove={removeNotice} />
 			<DataTable
 				data={bookings}
 				fields={fields}
