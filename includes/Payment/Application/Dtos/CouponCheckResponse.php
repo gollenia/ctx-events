@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Payment\Application\DTOs;
+namespace Contexis\Events\Payment\Application\Dtos;
 
 final readonly class CouponCheckResponse
 {

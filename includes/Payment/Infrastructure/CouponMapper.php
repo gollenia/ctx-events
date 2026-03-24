@@ -16,13 +16,13 @@ class CouponMapper implements PostMapper
 {
 	public static function map(PostSnapshot $post): Coupon
 	{
-		$code = $post->getString(CouponMeta::CODE) ?? $post->getString('_coupon_code', '');
-		$type = $post->getString(CouponMeta::TYPE) ?? $post->getString('_coupon_type', 'fixed');
-		$value = $post->getInt(CouponMeta::VALUE) ?? $post->getInt('_coupon_value', 0);
-		$validFrom = $post->getDateTime(CouponMeta::VALID_FROM) ?? $post->getDateTime('_coupon_valid_from');
-		$expiresAt = $post->getDateTime(CouponMeta::EXPIRES_AT) ?? $post->getDateTime('_coupon_expiry');
-		$usageLimit = $post->getInt(CouponMeta::LIMIT) ?? $post->getInt('_coupon_limit');
-		$usageCount = $post->getInt(CouponMeta::USED) ?? $post->getInt('_coupon_used');
+		$code = $post->getString(CouponMeta::CODE, '');
+		$type = $post->getString(CouponMeta::TYPE, 'percent');
+		$value = $post->getInt(CouponMeta::VALUE, 0);
+		$validFrom = $post->getDateTime(CouponMeta::VALID_FROM);
+		$expiresAt = $post->getDateTime(CouponMeta::EXPIRES_AT);
+		$usageLimit = $post->getInt(CouponMeta::LIMIT);
+		$usageCount = $post->getInt(CouponMeta::USED);
 
 		return new Coupon(
 			id: new CouponId($post->id),

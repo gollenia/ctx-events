@@ -11,7 +11,7 @@ enum DiscountType: string
     public static function fromString(string $value): static
     {
         return match ($value) {
-            'percent' => self::PERCENTAGE,
+            '', 'percentage', 'percent' => self::PERCENTAGE,
             'fixed' => self::FIXED,
             default => throw new \Exception('Invalid discount type'),
         };

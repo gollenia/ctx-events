@@ -6,7 +6,7 @@ namespace Contexis\Events\Payment\Application\UseCases;
 
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
-use Contexis\Events\Payment\Application\DTOs\CouponCheckResponse;
+use Contexis\Events\Payment\Application\Dtos\CouponCheckResponse;
 use Contexis\Events\Payment\Domain\CouponRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
