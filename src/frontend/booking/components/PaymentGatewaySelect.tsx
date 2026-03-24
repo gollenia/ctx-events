@@ -18,7 +18,10 @@ export function PaymentGatewaySelect({
 	}
 
 	return (
-		<fieldset className="booking-gateway-select">
+		<fieldset
+			className="booking-gateway-select"
+			data-testid="booking-payment-gateways"
+		>
 			<legend className="booking-gateway-select__legend">
 				{__('Payment method', 'ctx-events')}
 			</legend>

@@ -14,7 +14,10 @@ export function FormField({ field, value, error, onChange }: Props) {
 	const definition = getBookingFieldDefinition(field);
 
 	return (
-		<div className={`booking-form__field booking-form__field--width-${field.width}`}>
+		<div
+			className={`booking-form__field booking-form__field--width-${field.width}`}
+			data-testid={`booking-field-${field.name}`}
+		>
 			{field.description && (
 				<p className="booking-form__field-description">{field.description}</p>
 			)}

@@ -122,9 +122,16 @@ export function AttendeeSection({
 	}
 
 	return (
-		<div className="booking-section booking-section--attendees">
+		<div
+			className="booking-section booking-section--attendees"
+			data-testid="booking-section-attendees"
+		>
 			{entries.map((entry) => (
-				<div key={entry.index} className="booking-attendee">
+				<div
+					key={entry.index}
+					className="booking-attendee"
+					data-testid={`booking-attendee-${entry.index}`}
+				>
 					<h3 className="booking-attendee__title">
 						{entry.ticketName} #{entry.index + 1}
 					</h3>
@@ -142,6 +149,7 @@ export function AttendeeSection({
 					type="button"
 					className="booking-btn booking-btn--primary"
 					onClick={handleSubmit}
+					data-testid="booking-attendees-continue"
 				>
 					{__('Continue', 'ctx-events')}
 				</button>

@@ -159,6 +159,7 @@ export default function Booking() {
 			role="dialog"
 			aria-modal="true"
 			aria-label={__('Book event', 'ctx-events')}
+			data-testid="booking-modal"
 		>
 			<div className="booking-modal__backdrop" onClick={handleClose} />
 			<div className="booking-modal__dialog">

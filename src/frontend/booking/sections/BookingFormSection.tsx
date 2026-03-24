@@ -58,7 +58,10 @@ export function BookingFormSection({
 	}
 
 	return (
-		<div className="booking-section booking-section--booking-form">
+		<div
+			className="booking-section booking-section--booking-form"
+			data-testid="booking-section-registration"
+		>
 			<FormFieldRenderer
 				fields={bookingForm.fields}
 				formData={formData}
@@ -71,6 +74,7 @@ export function BookingFormSection({
 					type="button"
 					className="booking-btn booking-btn--primary"
 					onClick={handleSubmit}
+					data-testid="booking-registration-continue"
 				>
 					{__('Continue', 'ctx-events')}
 				</button>

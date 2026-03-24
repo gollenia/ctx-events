@@ -20,7 +20,7 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 	}
 
 	return (
-		<div className="booking-ticket">
+		<div className="booking-ticket" data-testid={`booking-ticket-${ticket.id}`}>
 			<div className="booking-ticket__info">
 				<span className="booking-ticket__name">{ticket.name}</span>
 				<span className="booking-ticket__price">
@@ -39,6 +39,7 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 					onClick={decrement}
 					disabled={count === 0}
 					aria-label={__('Remove one', 'ctx-events')}
+					data-testid={`booking-ticket-${ticket.id}-decrement`}
 				>
 					–
 				</button>
@@ -51,6 +52,7 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 					onClick={increment}
 					disabled={count >= max}
 					aria-label={__('Add one', 'ctx-events')}
+					data-testid={`booking-ticket-${ticket.id}-increment`}
 				>
 					+
 				</button>

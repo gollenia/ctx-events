@@ -99,7 +99,10 @@ export function SuccessSection({
 	const paymentQr = usePaymentQr(reference, showOfflineQr);
 
 	return (
-		<div className="booking-section booking-section--success">
+		<div
+			className="booking-section booking-section--success"
+			data-testid="booking-section-success"
+		>
 			<div className="booking-success">
 				<span className="booking-success__icon" aria-hidden="true">
 					✓

@@ -20,7 +20,7 @@ export function PriceSummary({ tickets, ticketCounts, coupon }: Props) {
 	const totalAfterDiscount = Math.max(0, total - discount);
 
 	return (
-		<div className="booking-price-summary">
+		<div className="booking-price-summary" data-testid="booking-price-summary">
 			{lines.map((ticket) => {
 				const count = ticketCounts[ticket.id] ?? 0;
 				return (

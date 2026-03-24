@@ -13,7 +13,10 @@ export function TicketSection({ tickets, counts, onChange, onNext }: Props) {
 	const totalSelected = Object.values(counts).reduce((a, b) => a + b, 0);
 
 	return (
-		<div className="booking-section booking-section--tickets">
+		<div
+			className="booking-section booking-section--tickets"
+			data-testid="booking-section-tickets"
+		>
 			<div className="booking-ticket-list">
 				{tickets.map((ticket) => (
 					<TicketCounter
@@ -31,6 +34,7 @@ export function TicketSection({ tickets, counts, onChange, onNext }: Props) {
 					className="booking-btn booking-btn--primary"
 					onClick={onNext}
 					disabled={totalSelected === 0}
+					data-testid="booking-tickets-continue"
 				>
 					{__('Continue', 'ctx-events')}
 				</button>

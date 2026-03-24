@@ -27,7 +27,7 @@ export function CouponField({
 	onCheck,
 }: Props) {
 	return (
-		<div className="booking-coupon">
+		<div className="booking-coupon" data-testid="booking-coupon">
 			<label className="booking-coupon__label" htmlFor="booking-coupon-code">
 				{__('Coupon code', 'ctx-events')}
 			</label>

@@ -99,7 +99,10 @@ export function PaymentSection({
 	}
 
 	return (
-		<div className="booking-section booking-section--payment">
+		<div
+			className="booking-section booking-section--payment"
+			data-testid="booking-section-payment"
+		>
 			<PriceSummary
 				tickets={data.tickets}
 				ticketCounts={bookingState.tickets}
@@ -173,6 +176,7 @@ export function PaymentSection({
 					className="booking-btn booking-btn--primary"
 					onClick={handleSubmit}
 					disabled={isSubmitting}
+					data-testid="booking-submit"
 				>
 					{isSubmitting
 						? __('Processing…', 'ctx-events')
