@@ -7,7 +7,7 @@ export function calculateBookingTotal(
 	return tickets.reduce(
 		(sum, ticket) =>
 			sum +
-			Number(ticket.price_in_cents || 0) *
+			Number(ticket.price.amountCents || 0) *
 				Number(ticketCounts[ticket.id] ?? 0),
 		0,
 	);

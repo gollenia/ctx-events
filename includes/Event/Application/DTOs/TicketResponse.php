@@ -63,7 +63,7 @@ final class TicketResponse implements DTO
         return [
             'id' => $this->id,
             'name' => $this->name,
-			'price' => $this->price,
+			'price' => $this->price->toArray(),
             'available_quantity' => $this->availableQuantity,
             'ticket_limit_per_booking' => $this->ticketLimitPerBooking,
             'remaining_tickets' => $this->remainingTickets,

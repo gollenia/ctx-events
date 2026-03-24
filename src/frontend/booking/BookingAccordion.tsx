@@ -147,7 +147,7 @@ export function BookingAccordion({
 				title={
 					totalSelected > 0 &&
 					data.tickets.some(
-						(t) => (state.tickets[t.id] ?? 0) > 0 && t.price_in_cents > 0,
+						(t) => (state.tickets[t.id] ?? 0) > 0 && t.price.amountCents > 0,
 					)
 						? __('Payment', 'ctx-events')
 						: __('Confirm booking', 'ctx-events')

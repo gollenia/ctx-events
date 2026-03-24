@@ -35,8 +35,10 @@ export type BookingFormData = {
 export type TicketInfo = {
 	id: string;
 	name: string;
-	price_in_cents: number;
-	currency: string;
+	price: {
+		amountCents: number;
+		currency: string;
+	};
 	available_quantity: number;
 	ticket_limit_per_booking: number | null;
 	booking_limit: number | null;

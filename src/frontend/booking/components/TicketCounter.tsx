@@ -24,11 +24,11 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 			<div className="booking-ticket__info">
 				<span className="booking-ticket__name">{ticket.name}</span>
 				<span className="booking-ticket__price">
-					{ticket.price_in_cents === 0
+					{ticket.price.amountCents === 0
 						? __('Free', 'ctx-events')
 						: formatPrice({
-								amountCents: ticket.price_in_cents,
-								currency: ticket.currency,
+								amountCents: ticket.price.amountCents,
+								currency: ticket.price.currency,
 							})}
 				</span>
 			</div>

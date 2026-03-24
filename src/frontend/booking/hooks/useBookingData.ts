@@ -40,12 +40,18 @@ function mapTicket(raw: unknown): TicketInfo | null {
 	}
 
 	const ticket = raw as Record<string, unknown>;
+	const price =
+		typeof ticket.price === 'object' && ticket.price !== null
+			? (ticket.price as Record<string, unknown>)
+			: {};
 
 	return {
 		id: String(ticket.id ?? ''),
 		name: String(ticket.name ?? ''),
-		price_in_cents: toNumber(ticket.price_in_cents),
-		currency: String(ticket.currency ?? 'EUR'),
+		price: {
+			amountCents: toNumber(price.amountCents),
+			currency: String(price.currency ?? 'EUR'),
+		},
 		available_quantity: toNumber(ticket.available_quantity),
 		ticket_limit_per_booking: toNullableNumber(ticket.ticket_limit_per_booking),
 		booking_limit: toNullableNumber(ticket.booking_limit),

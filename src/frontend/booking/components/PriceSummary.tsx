@@ -14,7 +14,7 @@ export function PriceSummary({ tickets, ticketCounts, coupon }: Props) {
 
 	if (lines.length === 0) return null;
 
-	const currency = lines[0]?.currency ?? 'EUR';
+	const currency = lines[0]?.price.currency ?? 'EUR';
 	const total = calculateBookingTotal(lines, ticketCounts);
 	const discount = calculateCouponDiscount(total, coupon);
 	const totalAfterDiscount = Math.max(0, total - discount);
@@ -29,11 +29,11 @@ export function PriceSummary({ tickets, ticketCounts, coupon }: Props) {
 							{count}× {ticket.name}
 						</span>
 						<span className="booking-price-summary__amount">
-							{ticket.price_in_cents === 0
+							{ticket.price.amountCents === 0
 								? __('Free', 'ctx-events')
 								: formatPrice({
-										amountCents: ticket.price_in_cents * count,
-										currency,
+										amountCents: ticket.price.amountCents * count,
+										currency: ticket.price.currency,
 									})}
 						</span>
 					</div>
