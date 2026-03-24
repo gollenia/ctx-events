@@ -10,19 +10,7 @@ import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import EmailModal from './EmailModal';
 
-type MailTemplate = {
-	key: string;
-	label: string;
-	description: string;
-	trigger: string;
-	target: string;
-	source: string;
-	isCustomized: boolean;
-	enabled: boolean;
-	subject: string | null;
-	body: string;
-	replyTo: string | null;
-};
+import type { MailTemplate } from '../../types/types';
 
 const targetLabels: Record<string, string> = {
 	customer: __('Customer', 'ctx-events'),
