@@ -22,6 +22,9 @@
 			"@events/adminfields": ["src/shared/adminfields"],
 			"@events/adminfields/*": ["src/shared/adminfields/*"],
 
+			"@events/emails": ["src/shared/emails"],
+			"@events/emails/*": ["src/shared/emails/*"],
+
 			"@events/i18n": ["src/shared/i18n"],
 			"@events/i18n/*": ["src/shared/i18n/*"],
 
