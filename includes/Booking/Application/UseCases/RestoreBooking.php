@@ -7,8 +7,10 @@ namespace Contexis\Events\Booking\Application\UseCases;
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
 use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
+use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\Enums\BookingEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
@@ -24,7 +26,7 @@ final class RestoreBooking implements BookingAction
     ) {
     }
 
-    public function execute(BookingActionRequest $request): void
+    public function execute(BookingActionRequest $request): BookingEmailResult
     {
         $booking = $this->repository->findByReference($request->reference);
 
@@ -42,12 +44,15 @@ final class RestoreBooking implements BookingAction
         $updatedBooking = $booking
             ->withBookingStatus(BookingStatus::PENDING)
             ->appendLogEntry(new LogEntry(
-                eventType: BookingEvent::Restored,
+                eventType: BookingLogEvent::Restored,
+                level: BookingLogLevel::Info,
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
             ));
 
         $this->repository->updateStatus($id, BookingStatus::PENDING, $updatedBooking->logEntries);
         $this->transactionSync->markPending($booking);
+
+        return BookingEmailResult::empty();
     }
 }

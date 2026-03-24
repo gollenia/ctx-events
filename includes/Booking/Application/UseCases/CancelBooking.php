@@ -7,14 +7,17 @@ namespace Contexis\Events\Booking\Application\UseCases;
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
 use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
+use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
+use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\Enums\BookingEvent;
-use Contexis\Events\Booking\Domain\Signals\BookingCancelledSignal;
+use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
-use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 final class CancelBooking implements BookingAction
 {
@@ -23,11 +26,11 @@ final class CancelBooking implements BookingAction
         private SyncOfflineTransactionForBookingAction $transactionSync,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
-        private SignalDispatcher $signalDispatcher,
+        private BookingEmailTrigger $bookingEmailTrigger,
     ) {
     }
 
-    public function execute(BookingActionRequest $request): void
+    public function execute(BookingActionRequest $request): BookingEmailResult
     {
         $booking = $this->repository->findByReference($request->reference);
 
@@ -45,13 +48,30 @@ final class CancelBooking implements BookingAction
         $updatedBooking = $booking
             ->withBookingStatus(BookingStatus::CANCELED)
             ->appendLogEntry(new LogEntry(
-                eventType: BookingEvent::Cancelled,
+                eventType: BookingLogEvent::Cancelled,
+                level: BookingLogLevel::Info,
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
             ));
 
         $this->repository->updateStatus($id, BookingStatus::CANCELED, $updatedBooking->logEntries);
         $this->transactionSync->markCanceled($booking);
-        $this->signalDispatcher->dispatch(new BookingCancelledSignal($id));
+
+        if (!$request->sendMail) {
+            return BookingEmailResult::empty();
+        }
+
+        $emailResult = $this->bookingEmailTrigger->trigger(EmailTrigger::BOOKING_CANCELLED, $id);
+        $logEntries = BookingEmailWarnings::appendToLogEntries(
+            $updatedBooking->logEntries,
+            $emailResult,
+            $this->clock->now(),
+        );
+
+        if ($logEntries !== $updatedBooking->logEntries) {
+            $this->repository->updateStatus($id, BookingStatus::CANCELED, $logEntries);
+        }
+
+        return $emailResult;
     }
 }

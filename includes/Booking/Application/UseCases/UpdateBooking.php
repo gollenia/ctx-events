@@ -9,7 +9,8 @@ use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\Enums\BookingEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Domain\EventRepository;
@@ -77,7 +78,8 @@ final class UpdateBooking
             $booking->notes,
             $priceSummary,
         )->appendLogEntry(new LogEntry(
-            eventType: BookingEvent::Updated,
+            eventType: BookingLogEvent::Updated,
+            level: BookingLogLevel::Info,
             actor: $this->currentActorProvider->current(),
             timestamp: $this->clock->now(),
         ));

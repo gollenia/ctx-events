@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
+use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
@@ -19,7 +20,7 @@ final class DeleteBooking implements BookingAction
     ) {
     }
 
-    public function execute(BookingActionRequest $request): void
+    public function execute(BookingActionRequest $request): BookingEmailResult
     {
         $booking = $this->repository->findByReference($request->reference);
 
@@ -35,5 +36,7 @@ final class DeleteBooking implements BookingAction
         $this->transactionRepository->deleteByBookingId($id);
         $this->attendeeRepository->deleteByBookingId($id);
         $this->repository->delete($id);
+
+        return BookingEmailResult::empty();
     }
 }

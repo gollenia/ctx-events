@@ -7,14 +7,17 @@ namespace Contexis\Events\Booking\Application\UseCases;
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
 use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
+use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
+use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Booking\Domain\BookingRepository;
-use Contexis\Events\Booking\Domain\Enums\BookingEvent;
-use Contexis\Events\Booking\Domain\Signals\BookingConfirmedManualSignal;
+use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
-use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 
 final class ApproveBooking implements BookingAction
 {
@@ -23,11 +26,11 @@ final class ApproveBooking implements BookingAction
         private SyncOfflineTransactionForBookingAction $transactionSync,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
-        private SignalDispatcher $signalDispatcher,
+        private BookingEmailTrigger $bookingEmailTrigger,
     ) {
     }
 
-    public function execute(BookingActionRequest $request): void
+    public function execute(BookingActionRequest $request): BookingEmailResult
     {
         $booking = $this->repository->findByReference($request->reference);
 
@@ -45,13 +48,30 @@ final class ApproveBooking implements BookingAction
         $updatedBooking = $booking
             ->withBookingStatus(BookingStatus::APPROVED)
             ->appendLogEntry(new LogEntry(
-                eventType: BookingEvent::Approved,
+                eventType: BookingLogEvent::Approved,
+                level: BookingLogLevel::Info,
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
             ));
 
         $this->repository->updateStatus($id, BookingStatus::APPROVED, $updatedBooking->logEntries);
         $this->transactionSync->markPaid($booking);
-        $this->signalDispatcher->dispatch(new BookingConfirmedManualSignal($id));
+
+        if (!$request->sendMail) {
+            return BookingEmailResult::empty();
+        }
+
+        $emailResult = $this->bookingEmailTrigger->trigger(EmailTrigger::BOOKING_CONFIRMED_MANUAL, $id);
+        $logEntries = BookingEmailWarnings::appendToLogEntries(
+            $updatedBooking->logEntries,
+            $emailResult,
+            $this->clock->now(),
+        );
+
+        if ($logEntries !== $updatedBooking->logEntries) {
+            $this->repository->updateStatus($id, BookingStatus::APPROVED, $logEntries);
+        }
+
+        return $emailResult;
     }
 }

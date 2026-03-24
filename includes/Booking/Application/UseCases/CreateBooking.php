@@ -8,11 +8,14 @@ use Contexis\Events\Booking\Application\DTOs\CreateBookingResponse;
 use Contexis\Events\Booking\Application\Contracts\ReferenceGenerator;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
+use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
+use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\Booking;
-use Contexis\Events\Booking\Domain\Signals\BookingCreatedOnlineSignal;
-use Contexis\Events\Booking\Domain\Signals\BookingPendingManualSignal;
-use Contexis\Events\Booking\Domain\Enums\BookingEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
@@ -25,7 +28,6 @@ use Contexis\Events\Payment\Domain\GatewayRepository;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
-use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
@@ -41,7 +43,7 @@ final class CreateBooking
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
-        private SignalDispatcher $signalDispatcher,
+        private BookingEmailTrigger $bookingEmailTrigger,
         private CheckTicketAvailibility $checkTicketAvailibility,
 		private CalculateBookingPrice $calculateBookingPrice,
 		private CouponRepository $couponRepository,
@@ -103,7 +105,8 @@ final class CreateBooking
             priceSummary: $priceSummary,
             gateway: $request->gateway,
         )->appendLogEntry(new LogEntry(
-            eventType: BookingEvent::Created,
+            eventType: BookingLogEvent::Created,
+            level: BookingLogLevel::Info,
             actor: $this->currentActorProvider->current(),
             timestamp: $now,
         ));
@@ -122,13 +125,24 @@ final class CreateBooking
             $this->transactionRepository->save($transaction);
         }
 
-        $this->signalDispatcher->dispatch(
+        $emailResult = $this->bookingEmailTrigger->trigger(
             $priceSummary->isFree() || $request->gateway === 'offline'
-                ? new BookingPendingManualSignal($bookingId)
-                : new BookingCreatedOnlineSignal($bookingId)
+                ? EmailTrigger::BOOKING_PENDING_MANUAL
+                : EmailTrigger::BOOKING_CREATED_ONLINE,
+            $bookingId,
         );
 
-        return CreateBookingResponse::from($reference, $transaction ?? null);
+        $logEntries = BookingEmailWarnings::appendToLogEntries(
+            $booking->logEntries,
+            $emailResult,
+            $now,
+        );
+
+        if ($logEntries !== $booking->logEntries) {
+            $this->bookingRepository->updateStatus($bookingId, $booking->status, $logEntries);
+        }
+
+        return CreateBookingResponse::from($reference, $transaction ?? null, $emailResult);
     }
 
     private function resolveCoupon(?string $couponCode): ?Coupon
