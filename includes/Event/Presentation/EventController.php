@@ -247,7 +247,8 @@ final class EventController implements RestController
 	public function cancelEvent(\WP_REST_Request $request): \WP_REST_Response
 	{
 		$event_id = (int) $request->get_param('id');
-		$inform_attendees = (bool) $request->get_param('informAttendees');
+		$notify_attendees = (bool) $request->get_param('notifyAttendees');
+		$attendee_message = (string) $request->get_param('attendee_message');
 		$result = $this->cancelEvent->execute($event_id);
 
 
