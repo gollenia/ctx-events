@@ -3,12 +3,22 @@
 declare(strict_types=1);
 
 use Contexis\Events\Platform\Demo\DumpSubscriber;
+use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
+use Contexis\Events\Communication\Application\Contracts\EmailBodyRenderer;
+use Contexis\Events\Communication\Application\Contracts\EmailTemplatePresetProvider;
+use Contexis\Events\Communication\Application\Contracts\EventMailTemplateOverrideStore;
+use Contexis\Events\Communication\Application\Contracts\EmailSender;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
-use Contexis\Events\Shared\Domain\Contracts\SignalDispatcher;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
+use Contexis\Events\Communication\Infrastructure\DefaultEmailTemplatePresetProvider;
+use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
+use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
+use Contexis\Events\Communication\Infrastructure\WpEventMailTemplateOverrideStore;
+use Contexis\Events\Communication\Infrastructure\WpEmailSender;
+use Contexis\Events\Communication\Application\Services\SendBookingEmails;
+use Contexis\Events\Event\Application\Contracts\EventCalendarExporter;
+use Contexis\Events\Event\Application\Service\IcalEventCalendarExporter;
 use Contexis\Events\Shared\Infrastructure\Wordpress\CurrentWordpressActorProvider;
-use Contexis\Events\Shared\Infrastructure\Wordpress\WordpressSignalDispatcher;
-use Psr\Container\ContainerInterface;
 
 use function DI\autowire;
 use function DI\create;
@@ -28,13 +38,19 @@ return [
     \Contexis\Events\Shared\Domain\Contracts\Clock::class
     => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\SystemClock::class),
     CurrentActorProvider::class => autowire(CurrentWordpressActorProvider::class),
-	SignalDispatcher::class => autowire(WordpressSignalDispatcher::class),
 	\Contexis\Events\Shared\Domain\Contracts\TokenGenerator::class
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Security\RandomTokenGenerator::class),
 	\Contexis\Events\Shared\Domain\Contracts\HashGenerator::class
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Security\WpHashGenerator::class),
-	\Contexis\Events\Shared\Domain\Contracts\SessionHashResolver::class
+    \Contexis\Events\Shared\Domain\Contracts\SessionHashResolver::class
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpSessionHashResolver::class),
+    EmailTemplatePresetProvider::class => autowire(DefaultEmailTemplatePresetProvider::class),
+    EmailTemplateTokenReplacer::class => autowire(),
+    EmailBodyRenderer::class => autowire(TiptapEmailBodyRenderer::class),
+    EventMailTemplateOverrideStore::class => autowire(WpEventMailTemplateOverrideStore::class),
+    EventCalendarExporter::class => autowire(IcalEventCalendarExporter::class),
+    EmailSender::class => autowire(WpEmailSender::class),
+    BookingEmailTrigger::class => autowire(SendBookingEmails::class),
 
 	Database::class => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpDatabase::class),
 	

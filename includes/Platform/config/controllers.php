@@ -12,10 +12,12 @@ return [
     get(\Contexis\Events\Shared\Presentation\OptionController::class),
     get(\Contexis\Events\Payment\Presentation\GatewayController::class),
     get(\Contexis\Events\Payment\Presentation\CouponController::class),
+    get(\Contexis\Events\Payment\Presentation\PaymentQrController::class),
     get(\Contexis\Events\Payment\Presentation\PaymentReconciliationController::class),
     get(\Contexis\Events\Payment\Presentation\PaymentWebhookController::class),
 	get(\Contexis\Events\Form\Presentation\FormController::class),
 	get(\Contexis\Events\Booking\Presentation\BookingController::class),
 	get(\Contexis\Events\Booking\Presentation\BookingNoteController::class),
 	get(\Contexis\Events\Booking\Presentation\BookingActionController::class),
+    get(\Contexis\Events\Communication\Presentation\EmailController::class),
 ];
