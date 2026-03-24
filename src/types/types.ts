@@ -40,7 +40,6 @@ readonly notes: BookingNoteResource[],
 readonly logEntries: BookingLogEntryResource[],
 readonly availableTickets: AvailableTicketResource[],
 };
-export type BookingEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "restored";
 export type BookingEventResource = {
 readonly id: number,
 readonly title: string,
@@ -77,10 +76,14 @@ readonly date: string,
 };
 export type BookingLogEntryResource = {
 readonly eventType: string,
+readonly level: string,
 readonly timestamp: string,
 readonly actorId: number,
 readonly actorName: string,
+readonly message: string | null,
 };
+export type BookingLogEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "restored" | "email_warning";
+export type BookingLogLevel = "info" | "warning" | "error";
 export type BookingNoteResource = {
 readonly text: string,
 readonly date: string,
@@ -103,7 +106,7 @@ export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
 export type DiscountType = "percent" | "fixed";
 export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";
 export type EmailTemplateKey = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "admin_booking_pending_manual" | "admin_booking_created_online";
-export type EmailTrigger = "booking_pending" | "booking_confirmed" | "booking_cancelled" | "booking_reminder" | "booking_payment_received" | "booking_payment_failed";
+export type EmailTrigger = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled";
 export type ErrorType = "ERROR" | "WARNING" | "INFO";
 export type Event = {
 readonly id: number,
