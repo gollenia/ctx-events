@@ -6,6 +6,7 @@
 		"ts:generate": "php bin/typescript-transformer.php",
 		"build": "npm run ts:generate && wp-scripts build --config webpack.config.js",
 		"start": "npm run ts:generate && wp-scripts start --config webpack.config.js",
+		"test:e2e": "playwright test",
 		"make-pot": "wp i18n make-pot . languages/events.pot --slug=events --domain=events --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
