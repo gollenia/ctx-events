@@ -11,14 +11,15 @@ import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 
 type CouponMeta = {
-	_coupon_code?: string;
-	_coupon_description?: string;
-	_coupon_limit?: number | string;
-	_coupon_expiry?: string;
-	_coupon_type?: 'percentage' | 'fixed';
-	_coupon_value?: number | string;
-	_coupon_global?: boolean;
+	_code?: string;
+	_limit?: number | string;
+	_expires_at?: string;
+	_type?: 'percent' | 'fixed';
+	_value?: number | string;
+	_is_global?: boolean;
 };
+
+type PostContent = string | { raw?: string };
 
 type EditProps = {
 	context?: {
@@ -37,10 +38,18 @@ export default function Edit(props: EditProps) {
 		postType,
 		'meta',
 	);
+	const [content, setContent] = useEntityProp<PostContent>(
+		'postType',
+		postType,
+		'content',
+	);
 
 	const blockProps = useBlockProps({
 		className: 'coupon-edit',
 	});
+
+	const description = typeof content === 'string' ? content : (content?.raw ?? '');
+	const discountType = meta?._type ?? 'percent';
 
 	return (
 		<div {...blockProps}>
@@ -51,11 +60,11 @@ export default function Edit(props: EditProps) {
 						<TextControl
 							label={__('Coupon Code', 'ctx-events')}
 							__next40pxDefaultSize
-							value={meta?._coupon_code ?? ''}
+							value={meta?._code ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_code: value,
+									_code: value,
 								});
 							}}
 							className="code"
@@ -68,7 +77,7 @@ export default function Edit(props: EditProps) {
 							onClick={() => {
 								setMeta({
 									...meta,
-									_coupon_code: Math.random()
+									_code: Math.random()
 										.toString(36)
 										.slice(2, 12)
 										.toUpperCase(),
@@ -83,12 +92,13 @@ export default function Edit(props: EditProps) {
 				<TextControl
 					label={__('Description', 'ctx-events')}
 					__next40pxDefaultSize
-					value={meta?._coupon_description ?? ''}
+					value={description}
 					onChange={(value) => {
-						setMeta({
-							...meta,
-							_coupon_description: value,
-						});
+						setContent(
+							typeof content === 'string'
+								? value
+								: { ...(content ?? {}), raw: value },
+						);
 					}}
 				/>
 				<h3>{__('Coupon Limits', 'ctx-events')}</h3>
@@ -98,11 +108,11 @@ export default function Edit(props: EditProps) {
 							label={__('Total Coupons', 'ctx-events')}
 							type="number"
 							__next40pxDefaultSize
-							value={meta?._coupon_limit ?? ''}
+							value={meta?._limit ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_limit: value,
+									_limit: value,
 								});
 							}}
 						/>
@@ -112,11 +122,11 @@ export default function Edit(props: EditProps) {
 							label={__('Expiry date', 'ctx-events')}
 							type="date"
 							__next40pxDefaultSize
-							value={meta?._coupon_expiry ?? ''}
+							value={meta?._expires_at ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_expiry: value,
+									_expires_at: value,
 								});
 							}}
 						/>
@@ -128,16 +138,16 @@ export default function Edit(props: EditProps) {
 						<TextControl
 							label={__('Discount Amount', 'ctx-events')}
 							type="number"
-							max={meta?._coupon_type === 'percentage' ? 100 : undefined}
+							max={discountType === 'percent' ? 100 : undefined}
 							min={0}
 							__next40pxDefaultSize
-							placeholder={meta?._coupon_type === 'percentage' ? '0' : '0.00'}
-							step={meta?._coupon_type === 'percentage' ? 1 : 0.01}
-							value={meta?._coupon_value ?? ''}
+							placeholder={discountType === 'percent' ? '0' : '0.00'}
+							step={discountType === 'percent' ? 1 : 0.01}
+							value={meta?._value ?? ''}
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_value: value,
+									_value: value,
 								});
 							}}
 						/>
@@ -147,7 +157,7 @@ export default function Edit(props: EditProps) {
 							options={[
 								{
 									label: __('Percentage', 'ctx-events'),
-									value: 'percentage',
+									value: 'percent',
 								},
 								{
 									label: __('Fixed Amount', 'ctx-events'),
@@ -155,12 +165,12 @@ export default function Edit(props: EditProps) {
 								},
 							]}
 							label={__('Discount Type', 'ctx-events')}
-							value={meta?._coupon_type ?? 'percentage'}
+							value={discountType}
 							__next40pxDefaultSize
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_coupon_type: value as CouponMeta['_coupon_type'],
+									_type: value as CouponMeta['_type'],
 								});
 							}}
 						/>
@@ -168,11 +178,11 @@ export default function Edit(props: EditProps) {
 				</Flex>
 				<CheckboxControl
 					label={__('Activate for all events', 'ctx-events')}
-					checked={meta?._coupon_global ?? false}
+					checked={meta?._is_global ?? false}
 					onChange={(value) => {
 						setMeta({
 							...meta,
-							_coupon_global: value,
+							_is_global: value,
 						});
 					}}
 					__next40pxDefaultSize
