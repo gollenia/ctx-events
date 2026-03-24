@@ -41,7 +41,7 @@ final readonly class Event
 		public ?Currency $currency = null,
 		public ?BookingPolicy $bookingPolicy = null,
         public ?TicketCollection $tickets = null,
-		public bool $donationEnabled = false,
+        public bool $donationEnabled = false,
         public ?LocationId $locationId = null,
         public ?PersonId $personId = null,
         public ?ImageId $imageId = null,
