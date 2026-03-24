@@ -3,6 +3,7 @@ import domReady from '@wordpress/dom-ready';
 import { registerPlugin } from '@wordpress/plugins';
 
 import './editor.scss';
+import '@events/emails/style.scss';
 
 import * as booking from './blocks/booking/index.ts';
 import * as couponEditor from './blocks/coupon-editor/index.ts';
