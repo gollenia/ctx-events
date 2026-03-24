@@ -18,11 +18,18 @@ type CouponRecord = {
 	title: {
 		raw?: string;
 	};
-	_coupon_type?: string;
-	_coupon_code?: string;
-	_coupon_expiry?: string;
-	_coupon_value?: string | number;
-	_coupon_global?: boolean;
+	meta?: {
+		_code?: string;
+		_type?: string;
+		_value?: string | number;
+		_expires_at?: string;
+		_is_global?: boolean;
+		_coupon_code?: string;
+		_coupon_type?: string;
+		_coupon_value?: string | number;
+		_coupon_expiry?: string;
+		_coupon_global?: boolean;
+	};
 };
 
 type Coupon = {
@@ -50,7 +57,7 @@ const CouponModal = ({
 
 	const availableCoupons = useSelect((select) => {
 		const { getEntityRecords } = select(coreStore);
-		const result = (getEntityRecords('postType', 'coupon', {
+		const result = (getEntityRecords('postType', 'ctx-event-coupon', {
 			per_page: -1,
 			_embed: true,
 		}) ?? []) as CouponRecord[];
@@ -58,11 +65,13 @@ const CouponModal = ({
 		return result.map((coupon) => ({
 			id: coupon.id,
 			title: coupon.title?.raw ?? '',
-			type: coupon._coupon_type ?? '',
-			code: coupon._coupon_code ?? '',
-			expiry: coupon._coupon_expiry ?? '',
-			amount: coupon._coupon_value ?? '',
-			fixed: Boolean(coupon._coupon_global),
+			type: coupon.meta?._type ?? coupon.meta?._coupon_type ?? '',
+			code: coupon.meta?._code ?? coupon.meta?._coupon_code ?? '',
+			expiry: coupon.meta?._expires_at ?? coupon.meta?._coupon_expiry ?? '',
+			amount: coupon.meta?._value ?? coupon.meta?._coupon_value ?? '',
+			fixed: Boolean(
+				coupon.meta?._is_global ?? coupon.meta?._coupon_global ?? false,
+			),
 		}));
 	}, []);
 
@@ -70,14 +79,14 @@ const CouponModal = ({
 		coupon.title.toLowerCase().includes(searchTerm.toLowerCase()),
 	);
 
-	const selectedCoupons = meta._event_coupons ?? [];
+	const selectedCoupons = meta._booking_coupons ?? [];
 
 	const onToggle = (value: boolean, couponId: number) => {
 		const coupons = value
 			? Array.from(new Set([...selectedCoupons, couponId]))
 			: selectedCoupons.filter((id) => id !== couponId);
 
-		updateMeta({ _event_coupons: coupons });
+		updateMeta({ _booking_coupons: coupons });
 	};
 
 	if (!showCoupons) {
