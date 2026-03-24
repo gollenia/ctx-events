@@ -64,13 +64,13 @@ class EventMeta extends MetaData
             'items' => [
                 'type'       => 'object',
                 'properties' => [
-                    'status'  => ['type' => 'string'],
-                    'subject' => ['type' => 'string'],
+                    'key'     => ['type' => 'string'],
+                    'subject' => ['type' => ['string', 'null']],
                     'body'    => ['type' => 'string'],
                     'enabled' => ['type' => 'boolean'],
-                    'gateway' => ['type' => 'string'],
+                    'replyTo' => ['type' => ['string', 'null']],
                 ],
-                'required' => ['status','subject','body'],
+                'required' => ['key','body','enabled'],
             ],
         ],
     ];
@@ -128,7 +128,7 @@ class EventMeta extends MetaData
             'show_in_rest' => [
                 'schema' => [
                     'type'  => 'array',
-                    'items' => ['type' => 'string'],
+                    'items' => ['type' => 'integer'],
                 ],
             ],
         ],
