@@ -87,10 +87,13 @@ export type DataTableAction = {
 	callback: (
 		items: Array<any>,
 		onActionPerformed?: (items: Array<any>) => void,
+		options?: Record<string, unknown>,
 	) => void;
 	RenderModal?: React.ComponentType<{
 		action: DataTableAction;
+		item: any;
 		onClose: () => void;
+		onActionPerformed?: (items: Array<any>) => void;
 	}>;
 	modalHeader?: string | (() => string);
 	modalSize?: 'small' | 'medium' | 'large';
