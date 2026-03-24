@@ -15,6 +15,7 @@ module.exports = {
 			),
 			'@events/datatable': path.resolve(__dirname, 'src/shared/datatable'),
 			'@events/adminfields': path.resolve(__dirname, 'src/shared/adminfields'),
+			'@events/emails': path.resolve(__dirname, 'src/shared/emails'),
 			'@events/i18n': path.resolve(__dirname, 'src/shared/i18n'),
 			'@events/utilities': path.resolve(__dirname, 'src/shared/utilities'),
 		},

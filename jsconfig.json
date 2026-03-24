@@ -6,6 +6,7 @@
 			"@events/details/*": ["src/editor/blocks/details/_shared/*"],
 			"@events/datatable/*": ["src/shared/datatable/*"],
 			"@events/adminfields/*": ["src/shared/adminfields/*"],
+			"@events/emails/*": ["src/shared/emails/*"],
 			"@events/i18n/*": ["src/shared/i18n/*"]
 		},
 		"jsx": "react"
