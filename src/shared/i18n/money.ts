@@ -24,8 +24,15 @@ const formatPrice = (price: Price): string => {
 	}
 };
 
-const fromatPriceRange: (min: Price, max: Price, currency?: string) => string =
-	(min: Price, max: Price): string => {
+const formatPriceRange: (min: Price, max?: Price, currency?: string) => string =
+	(min: Price, max?: Price): string => {
+		if (
+			!max ||
+			(min.amountCents === max.amountCents && min.currency === max.currency)
+		) {
+			return formatPrice(min);
+		}
+
 		const minValue = Number(min.amountCents) / 100;
 		const maxValue = Number(max.amountCents) / 100;
 		if (Number.isNaN(minValue) || Number.isNaN(maxValue)) {
@@ -54,4 +61,4 @@ const fromatPriceRange: (min: Price, max: Price, currency?: string) => string =
 		}
 	};
 
-export { formatPrice, fromatPriceRange };
+export { formatPrice, formatPriceRange };

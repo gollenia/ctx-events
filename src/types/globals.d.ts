@@ -17,6 +17,18 @@ declare global {
 	}
 }
 
-export {};
-
 declare module '@wordpress/block-editor';
+
+export type Embedded = {
+	_embedded: {
+		'wp:featuredmedia'?: Array<{
+			media_details?: {
+				sizes?: {
+					thumbnail?: {
+						source_url?: string;
+					};
+				};
+			};
+		}>;
+	};
+};

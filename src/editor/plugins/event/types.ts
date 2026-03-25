@@ -4,7 +4,7 @@ export type EventMeta = {
 	_event_end?: string;
 	_event_all_day?: boolean | number | string;
 	_location_id?: number | string;
-	_speaker_id?: number | string;
+	_person_id?: number | string;
 	_event_audience?: string;
 	_event_start_date?: string;
 	_event_end_date?: string;

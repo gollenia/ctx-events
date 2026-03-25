@@ -1,6 +1,21 @@
-import { formatPrice, fromatPriceRange } from './money';
 import { getCountries, getCountriesByRegion } from './countries';
-import { formatDate, formatDateRange, formatTime, formatTimeRange } from './datetime';
+import {
+	formatDate,
+	formatDateRange,
+	formatTime,
+	formatTimeRange,
+} from './datetime';
 import getLocale from './locale';
+import { formatPrice, formatPriceRange } from './money';
 
-export { formatPrice, fromatPriceRange, getCountries, getCountriesByRegion, formatDate, formatDateRange, formatTime, formatTimeRange, getLocale };
+export {
+	formatPrice,
+	formatPriceRange,
+	getCountries,
+	getCountriesByRegion,
+	formatDate,
+	formatDateRange,
+	formatTime,
+	formatTimeRange,
+	getLocale,
+};
