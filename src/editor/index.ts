@@ -73,8 +73,8 @@ const blocks = [
 ];
 
 const plugins = [
-	{ name: 'event-select-location', component: locationSelector },
 	{ name: 'event-select-datetime', component: datetimeSelector },
+	{ name: 'event-select-location', component: locationSelector },
 	{ name: 'event-select-people', component: peopleSelector },
 	{ name: 'event-recurrence-settings', component: recurrenceSettings },
 	{ name: 'event-booking-sidebar', component: bookingSidebar },
