@@ -1,8 +1,8 @@
 import type { DataTableAction } from '@events/datatable/types';
-import type { Event } from '../../types/types';
-import { CheckboxControl, Modal } from '@wordpress/components';
+import { CheckboxControl, Flex, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { Event } from '../../types/types';
 
 type EventCancelAction = DataTableAction & {
 	confirmText: (item: Event) => string;
@@ -49,17 +49,19 @@ const EventCancelConfirmModal = ({
 			shouldCloseOnClickOutside={!isSubmitting}
 			className="booking-action-confirm-modal"
 		>
-			<div className="booking-action-confirm-modal__body">
-				<p>{cancelAction.confirmText(item)}</p>
+			<Flex direction="column" gap="1rem">
+				<Flex direction="column" justify="center" gap="1rem">
+					<p>{cancelAction.confirmText(item)}</p>
 
-				<CheckboxControl
-					label={__('Notify attendees by email', 'ctx-events')}
-					checked={notifyAttendees}
-					onChange={setNotifyAttendees}
-					disabled={isSubmitting}
-				/>
+					<CheckboxControl
+						label={__('Notify attendees by email', 'ctx-events')}
+						checked={notifyAttendees}
+						onChange={setNotifyAttendees}
+						disabled={isSubmitting}
+					/>
+				</Flex>
 
-				<div className="booking-edit__footer booking-action-confirm-modal__actions">
+				<Flex justify="flex-end" gap="1rem">
 					<button
 						type="button"
 						className="components-button is-secondary"
@@ -76,8 +78,8 @@ const EventCancelConfirmModal = ({
 					>
 						{cancelAction.confirmLabel}
 					</button>
-				</div>
-			</div>
+				</Flex>
+			</Flex>
 		</Modal>
 	);
 };

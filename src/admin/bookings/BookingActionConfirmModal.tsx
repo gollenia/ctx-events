@@ -1,5 +1,5 @@
 import type { DataTableAction } from '@events/datatable/types';
-import { CheckboxControl, Modal } from '@wordpress/components';
+import { CheckboxControl, Flex, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -47,19 +47,29 @@ const BookingActionConfirmModal = ({
 			shouldCloseOnClickOutside={!isSubmitting}
 			className="booking-action-confirm-modal"
 		>
-			<div className="booking-action-confirm-modal__body">
-				<p>{bookingAction.confirmText}</p>
+			<Flex direction="column" gap="1rem">
+				<Flex
+					direction="column"
+					justify="center"
+					className="booking-action-confirm-modal__icon"
+				>
+					<p>{bookingAction.confirmText}</p>
 
-				{bookingAction.supportsMail ? (
-					<CheckboxControl
-						label={__('Send email notification', 'ctx-events')}
-						checked={sendMail}
-						onChange={setSendMail}
-						disabled={isSubmitting}
-					/>
-				) : null}
+					{bookingAction.supportsMail ? (
+						<CheckboxControl
+							label={__('Send email notification', 'ctx-events')}
+							checked={sendMail}
+							onChange={setSendMail}
+							disabled={isSubmitting}
+						/>
+					) : null}
+				</Flex>
 
-				<div className="booking-edit__footer booking-action-confirm-modal__actions">
+				<Flex
+					justify="flex-end"
+					gap="1rem"
+					className="booking-action-confirm-modal__footer"
+				>
 					<button
 						type="button"
 						className="components-button is-secondary"
@@ -76,8 +86,8 @@ const BookingActionConfirmModal = ({
 					>
 						{bookingAction.confirmLabel}
 					</button>
-				</div>
-			</div>
+				</Flex>
+			</Flex>
 		</Modal>
 	);
 };
