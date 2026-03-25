@@ -5,21 +5,17 @@ declare(strict_types=1);
 /*
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/events
-Description: Event registration and booking management for WordPress. Recurring events, locations, ical, booking registration and more!
-Version: 7.0.0
+Description: Modern event and booking management for WordPress. Easily create events, manage attendees, track availability and handle payments
+Version: 1.0.0
 Requires at least: 6.8.0
 Requires PHP: 8.5
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Author: Thomas Gollenia
 Author URI: https://github.com/gollenia/events
-Text Domain: events
+Text Domain: ctx-events
 Domain Path: /languages
 */
-
-// In memoriam. Once huge. Once everywhere.
-// May it rest in peace, besides global $EM_Event.
-define('EM_OBJECT', null);
 
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
@@ -35,10 +31,8 @@ add_action('init', function () {
 	
 }, 10);
 
-
-
 /**
- * Register Gutenberg blocks for the Events plugin. This function must be at root level, otherwise
+ * Register Gutenberg blocks for the plugin. This function must be at root level, otherwise
  * the blocks won't be registered correctly.
  */
 function ctx_register_blocks(): void

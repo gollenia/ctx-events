@@ -1,7 +1,12 @@
 {
-	"version": "7.0.0",
+	"version": "1.0.0",
 	"name": "events",
 	"description": "A WordPress plugin to manage events.",
+	"author": {
+		"email": "thomas@kids-team.at",
+		"name": "Thomas Gollenia"
+	},
+	"license": "GPL-3.0",
 	"scripts": {
 		"ts:generate": "php bin/typescript-transformer.php",
 		"build": "npm run ts:generate && wp-scripts build --config webpack.config.js",
