@@ -129,7 +129,7 @@ const paidBookingData = createBookingData({
 });
 
 async function registerBookingApiMocks(page) {
-	await page.route('**/events/v3/events/*/prepare-booking', async (route) => {
+	await page.route('**/wp-json/events/v3/events/*/prepare-booking**', async (route) => {
 		const url = new URL(route.request().url());
 		const match = url.pathname.match(/\/events\/v3\/events\/(\d+)\/prepare-booking$/);
 		const postId = Number(match?.[1] ?? 0);
@@ -147,7 +147,7 @@ async function registerBookingApiMocks(page) {
 		await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ message: 'Unknown test event.' }) });
 	});
 
-	await page.route('**/events/v3/bookings', async (route) => {
+	await page.route('**/wp-json/events/v3/bookings**', async (route) => {
 		const payload = route.request().postDataJSON();
 
 		if (payload.event_id === FREE_POST_ID) {
@@ -193,7 +193,7 @@ async function registerBookingApiMocks(page) {
 		await route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'Unexpected booking payload.' }) });
 	});
 
-	await page.route('**/events/v3/coupons/check**', async (route) => {
+	await page.route('**/wp-json/events/v3/coupons/check**', async (route) => {
 		const url = new URL(route.request().url());
 		const code = url.searchParams.get('code');
 
@@ -308,16 +308,17 @@ test.describe('booking app', () => {
 		await fillAttendees(page);
 		await fillRegistration(page);
 
-		await expect(page.getByText('Payment')).toBeVisible();
-		await expect(page.getByTestId('booking-price-summary')).toBeVisible();
+		await expect(page.getByTestId('booking-section-payment')).toBeVisible();
+		const priceSummary = page.getByTestId('booking-price-summary');
+		await expect(priceSummary).toBeVisible();
 		await expect(page.getByTestId('booking-payment-gateways')).toBeVisible();
 		await expect(page.getByLabel('Credit Card')).toBeVisible();
-		await expect(page.getByText('49.00')).toBeVisible();
+		await expect(priceSummary.getByText(/49[,.]00/).first()).toBeVisible();
 		await page.locator('.booking-consent__checkbox').check();
 		await page.getByTestId('booking-submit').click();
 
 		await expect(page.getByTestId('booking-section-success')).toBeVisible();
-		await expect(page.getByText('PAID-98765')).toBeVisible();
+		await expect(page.getByText('PAID-98765', { exact: true })).toBeVisible();
 		await expect(page.getByText('Please transfer the amount within 7 days.')).toBeVisible();
 	});
 
