@@ -2,14 +2,15 @@ import {
 	CheckboxControl,
 	Flex,
 	FlexItem,
+	Icon,
 	TextControl,
 } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { __ } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-
+import { __ } from '@wordpress/i18n';
+import icons from './icons';
 import type { EditorSelection, EventMeta } from './types';
 
 const splitDateTime = (dateTime?: string) => {
@@ -129,77 +130,121 @@ const DatetimeSelector = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="events-datetime-settings"
-			title={__('Date and Time', 'ctx-events')}
+			title={
+				<Flex align="center" gap="0.5rem" justify="flex-start">
+					<Icon
+						icon={icons.date}
+						width={20}
+						height={20}
+						color="rgb(117, 117, 117)"
+					/>
+					{__('Date and Time', 'ctx-events')}
+				</Flex>
+			}
 		>
-			<p>
-				<strong>{__('Start', 'ctx-events')}</strong>
-			</p>
-			<Flex>
-				<FlexItem isBlock>
-					<TextControl
-						type="date"
-						value={start.date}
-						onChange={(value) => {
-							const newStart = combineDateTime(value, start.time);
-							const updates: Partial<EventMeta> = { _event_start: newStart };
-							if (!meta._event_end || newStart >= meta._event_end) {
-								updates._event_end = addOneHour(newStart);
-							}
-							setMeta(updates);
+			<Flex direction="column" gap="16px">
+				<div>
+					<p
+						style={{
+							marginBottom: '8px',
+							fontSize: '11px',
+							textTransform: 'uppercase',
 						}}
-					/>
-				</FlexItem>
-				{!isAllDay ? (
-					<FlexItem>
-						<TextControl
-							type="time"
-							value={start.time}
-							onChange={(value) => {
-								const newStart = combineDateTime(start.date, value);
-								const updates: Partial<EventMeta> = { _event_start: newStart };
-								if (!meta._event_end || newStart >= meta._event_end) {
-									updates._event_end = addOneHour(newStart);
+					>
+						<strong>{__('Start of the event', 'ctx-events')}</strong>
+					</p>
+					<Flex>
+						<FlexItem isBlock>
+							<TextControl
+								type="date"
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
+								value={start.date}
+								onChange={(value) => {
+									const newStart = combineDateTime(value, start.time);
+									const updates: Partial<EventMeta> = {
+										_event_start: newStart,
+									};
+									if (!meta._event_end || newStart >= meta._event_end) {
+										updates._event_end = addOneHour(newStart);
+									}
+									setMeta(updates);
+								}}
+							/>
+						</FlexItem>
+						{!isAllDay ? (
+							<FlexItem>
+								<TextControl
+									type="time"
+									__next40pxDefaultSize
+									__nextHasNoMarginBottom
+									value={start.time}
+									onChange={(value) => {
+										const newStart = combineDateTime(start.date, value);
+										const updates: Partial<EventMeta> = {
+											_event_start: newStart,
+										};
+										if (!meta._event_end || newStart >= meta._event_end) {
+											updates._event_end = addOneHour(newStart);
+										}
+										setMeta(updates);
+									}}
+								/>
+							</FlexItem>
+						) : null}
+					</Flex>
+				</div>
+				<div>
+					<p
+						style={{
+							marginTop: '10px',
+							marginBottom: '8px',
+							fontSize: '11px',
+							textTransform: 'uppercase',
+						}}
+					>
+						<strong>{__('End of the event', 'ctx-events')}</strong>
+					</p>
+					<Flex>
+						<FlexItem isBlock>
+							<TextControl
+								type="date"
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
+								value={end.date}
+								min={start.date}
+								onChange={(value) =>
+									setMeta({ _event_end: combineDateTime(value, end.time) })
 								}
-								setMeta(updates);
-							}}
-						/>
-					</FlexItem>
-				) : null}
+							/>
+						</FlexItem>
+						{!isAllDay ? (
+							<FlexItem>
+								<TextControl
+									type="time"
+									__next40pxDefaultSize
+									__nextHasNoMarginBottom
+									value={end.time}
+									min={
+										start.date && end.date === start.date
+											? start.time
+											: undefined
+									}
+									onChange={(value) =>
+										setMeta({ _event_end: combineDateTime(end.date, value) })
+									}
+								/>
+							</FlexItem>
+						) : null}
+					</Flex>
+				</div>
+				<CheckboxControl
+					label={__('All Day', 'ctx-events')}
+					__nextHasNoMarginBottom
+					checked={isAllDay}
+					onChange={(value) => setMeta({ _event_all_day: value ? 1 : 0 })}
+				/>
 			</Flex>
-
-			<p style={{ marginTop: '10px' }}>
-				<strong>{__('End', 'ctx-events')}</strong>
-			</p>
-			<Flex>
-				<FlexItem isBlock>
-					<TextControl
-						type="date"
-						value={end.date}
-						min={start.date}
-						onChange={(value) =>
-							setMeta({ _event_end: combineDateTime(value, end.time) })
-						}
-					/>
-				</FlexItem>
-				{!isAllDay ? (
-					<FlexItem>
-						<TextControl
-							type="time"
-							value={end.time}
-							min={start.date && end.date === start.date ? start.time : undefined}
-							onChange={(value) =>
-								setMeta({ _event_end: combineDateTime(end.date, value) })
-							}
-						/>
-					</FlexItem>
-				) : null}
-			</Flex>
-
-			<CheckboxControl
-				label={__('All Day', 'ctx-events')}
-				checked={isAllDay}
-				onChange={(value) => setMeta({ _event_all_day: value ? 1 : 0 })}
-			/>
 		</PluginDocumentSettingPanel>
 	);
 };

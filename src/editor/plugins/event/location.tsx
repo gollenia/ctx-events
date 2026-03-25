@@ -1,9 +1,9 @@
-import { ComboboxControl, Icon } from '@wordpress/components';
+import { ComboboxControl, Flex, Icon } from '@wordpress/components';
+import type { ComboboxControlOption } from '@wordpress/components/build-types/combobox-control/types';
 import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
-
 import icons from './icons';
 import type { EditorSelection, EventMeta, MediaOption } from './types';
 
@@ -43,13 +43,16 @@ const LocationSelector = () => {
 			_embed: true,
 		}) ?? []) as LocationRecord[];
 
-		return result.map((location) => ({
-			value: location.id,
-			label: location.title?.raw ?? '',
-			media:
-				location._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes
-					?.thumbnail?.source_url,
-		})) as MediaOption[];
+		return result.map(
+			(location): ComboboxControlOption => ({
+				key: location.id,
+				value: String(location.id),
+				label: location.title?.raw ?? '',
+				media:
+					location._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes
+						?.thumbnail?.source_url,
+			}),
+		) as ComboboxControlOption[];
 	}, []);
 
 	if (!allowedPostTypes.includes(postType)) {
@@ -59,11 +62,23 @@ const LocationSelector = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="events-location-settings"
-			title={__('Location', 'ctx-events')}
+			title={
+				<Flex align="center" gap="0.5rem" justify="flex-start">
+					<Icon
+						icon={icons.location}
+						width={20}
+						height={20}
+						color="rgb(117, 117, 117)"
+					/>
+					{__('Location', 'ctx-events')}
+				</Flex>
+			}
 			className="events-location-settings"
 		>
 			<ComboboxControl
 				label={__('Select a location', 'ctx-events')}
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				value={String(meta._location_id ?? '')}
 				onChange={(value) => {
 					setMeta({ _location_id: Number(value || 0) });
