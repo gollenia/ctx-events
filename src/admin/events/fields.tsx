@@ -1,4 +1,4 @@
-import { formatDateRange } from '@events/i18n';
+import { formatDateRange, formatPrice, formatPriceRange } from '@events/i18n';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { error, notAllowed, pending, published } from '@wordpress/icons';
@@ -110,13 +110,10 @@ export const fields: Array<DataFieldConfig> = [
 				event.bookingSummary.lowestPrice &&
 				event.bookingSummary.highestPrice
 			) {
-				if (
-					event.bookingSummary.lowestPrice.amountCents ===
-					event.bookingSummary.highestPrice.amountCents
-				) {
-					return `${(event.bookingSummary.lowestPrice.amountCents / 100).toFixed(2)} ${event.bookingSummary.lowestPrice.currency}`;
-				}
-				return `${(event.bookingSummary.lowestPrice.amountCents / 100).toFixed(2)} - ${(event.bookingSummary.highestPrice.amountCents / 100).toFixed(2)} ${event.bookingSummary.lowestPrice.currency}`;
+				return `${formatPriceRange(
+					event.bookingSummary.lowestPrice,
+					event.bookingSummary.highestPrice,
+				)}`;
 			}
 
 			return __('N/A', 'ctx-events');
