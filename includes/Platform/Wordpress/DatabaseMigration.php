@@ -10,7 +10,7 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 final class DatabaseMigration implements Registrar
 {
 
-	private const VERSION = '1.0.4';
+	private const VERSION = '1.0.6';
 
 	/**
 	 * @param iterable<Migration> $migrations
@@ -59,7 +59,16 @@ final class DatabaseMigration implements Registrar
 
     private function runAlterations(): void
     {
-        // Future alterations here
+        global $wpdb;
+
+        $transactionTable = $wpdb->prefix . 'ctx_event_transactions';
+        $tableExists = $wpdb->get_var("SHOW TABLES LIKE '{$transactionTable}'") === $transactionTable;
+
+        if ($tableExists) {
+            $wpdb->query(
+                "ALTER TABLE `{$transactionTable}` MODIFY `external_id` VARCHAR(100) NULL"
+            );
+        }
     }
 
     private function runDbDelta(): void

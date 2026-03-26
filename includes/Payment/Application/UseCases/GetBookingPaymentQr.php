@@ -36,8 +36,7 @@ final class GetBookingPaymentQr
             throw new \DomainException('Payment QR is only available for offline payments.');
         }
 
-        $reference = trim((string) ($transaction->bankData?->reference ?? ''));
-        $reference = $reference !== '' ? $reference : $booking->reference->toString();
+        $reference = $booking->reference->toString();
 
         return PaymentQrResponse::from(
             gateway: $transaction->gateway,

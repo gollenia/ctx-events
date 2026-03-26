@@ -19,7 +19,7 @@ final readonly class Transaction
         public string $gateway,
         public TransactionStatus $status,
         public \DateTimeImmutable $createdAt,
-        public ?string $externalId = '',
+        public ?string $externalId = null,
         public ?BankData $bankData = null,
 		public string $instructions = '',
         public ?Uri $checkoutUrl = null,

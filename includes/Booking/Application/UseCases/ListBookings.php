@@ -23,14 +23,15 @@ final class ListBookings
     public function execute(BookingListRequest $query): BookingListResponse
     {
         $response = $this->repository->search($query);
-		$response->map(function (BookingListItem $item) {
+		return $response->withEnrichment(function (BookingListItem $item) {
 			if ($item->gateway !== null) {
-				$item = $item->withGatewayName($this->gatewayRepository->find($item->gateway)->getAdminName());
+				$gateway = $this->gatewayRepository->find($item->gateway);
+				if ($gateway !== null) {
+					$item = $item->withGatewayName($gateway->getAdminName());
+				}
 			}
 
 			return $item;
 		});
-
-		return $response;
 	}
 }

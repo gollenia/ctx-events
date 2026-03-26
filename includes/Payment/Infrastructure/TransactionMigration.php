@@ -23,7 +23,7 @@ final class TransactionMigration implements Migration
 
     private array $columns = [
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-        self::EXTERNAL_ID . ' VARCHAR(100) NOT NULL',
+        self::EXTERNAL_ID . ' VARCHAR(100) NULL',
         self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
         self::AMOUNT . ' BIGINT NOT NULL DEFAULT 0',
         self::CURRENCY . ' VARCHAR(3) NOT NULL',

@@ -5,6 +5,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingResponse;
+use Contexis\Events\Booking\Application\Contracts\BookingReferenceSettingsProvider;
 use Contexis\Events\Booking\Application\Contracts\ReferenceGenerator;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
@@ -40,6 +41,7 @@ final class CreateBooking
         private GatewayRepository $gatewayRepository,
         private TransactionRepository $transactionRepository,
         private ReferenceGenerator $referenceGenerator,
+        private BookingReferenceSettingsProvider $bookingReferenceSettingsProvider,
         private AttendeeFactory $attendeeFactory,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
@@ -92,7 +94,11 @@ final class CreateBooking
         $registration = new RegistrationData($request->registration);
         $email = $registration->requireEmail();
         $name = $registration->requirePersonName();
-        $reference = $this->referenceGenerator->create();
+        $referenceSettings = $this->bookingReferenceSettingsProvider->forEvent($request->eventId);
+        $reference = $this->referenceGenerator->create(
+            $referenceSettings->prefix,
+            $referenceSettings->suffix,
+        );
 
         $booking = Booking::createPending(
             reference: $reference,

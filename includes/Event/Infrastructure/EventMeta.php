@@ -22,6 +22,8 @@ class EventMeta extends MetaData
     public const BOOKING_CAPACITY  = '_booking_capacity';
 	public const ALLOW_COUPONS    = '_booking_allow_coupons';
 	public const BOOKING_CURRENCY  = '_booking_currency';
+    public const BOOKING_REFERENCE_PREFIX = '_booking_reference_prefix';
+    public const BOOKING_REFERENCE_SUFFIX = '_booking_reference_suffix';
     public const DONATION_ENABLED  = '_donation_enabled';
 	public const VIEW_CONFIG		  = '_view_config';
     public const RECURRENCE_ID     = '_recurrence_id';
@@ -79,6 +81,8 @@ class EventMeta extends MetaData
         self::BOOKING_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
         self::BOOKING_CURRENCY => ['type' => 'string', 'default' => 'EUR'],
+        self::BOOKING_REFERENCE_PREFIX => ['type' => 'string', 'default' => ''],
+        self::BOOKING_REFERENCE_SUFFIX => ['type' => 'string', 'default' => ''],
         self::PERSON_ID           => [
             'type'         => 'array',
             'show_in_rest' => [

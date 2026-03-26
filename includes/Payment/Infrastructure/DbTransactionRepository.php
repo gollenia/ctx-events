@@ -18,7 +18,9 @@ final class DbTransactionRepository implements TransactionRepository
     public function save(Transaction $transaction): void
     {
         $table = TransactionMigration::getTableName();
-        $externalId = $transaction->externalId ?? 'offline-' . $transaction->bookingId->toInt() . '-' . time();
+        $externalId = $transaction->externalId;
+        $hasExternalId = $externalId !== null && $externalId !== '';
+
         $details = [
             'bankData' => $transaction->bankData?->toArray(),
             'instructions' => $transaction->instructions !== '' ? $transaction->instructions : null,
@@ -27,7 +29,7 @@ final class DbTransactionRepository implements TransactionRepository
         ];
 
         $data = [
-            'external_id'      => $externalId,
+            'external_id'      => $hasExternalId ? $externalId : null,
             'booking_id'       => $transaction->bookingId->toInt(),
             'amount'           => $transaction->amount->amountCents,
             'currency'         => $transaction->amount->currency->toString(),
@@ -44,18 +46,28 @@ final class DbTransactionRepository implements TransactionRepository
             return;
         }
 
-        $existing = $this->findByExternalId($externalId);
-        if ($existing !== null && $existing->id !== null) {
-            $this->db->update($table, $data, ['id' => $existing->id->toInt()]);
+        if ($hasExternalId) {
+            $existing = $this->findByExternalId($externalId);
+            if ($existing !== null && $existing->id !== null) {
+                $this->db->update($table, $data, ['id' => $existing->id->toInt()]);
 
-            return;
+                return;
+            }
         }
 
-        $this->db->insert($table, $data);
+        $inserted = $this->db->insert($table, $data);
+
+        if ($inserted === false) {
+            throw new \RuntimeException('Failed to save transaction.');
+        }
     }
 
     public function findByExternalId(string $externalId): ?Transaction
     {
+        if ($externalId === '') {
+            return null;
+        }
+
         $table = TransactionMigration::getTableName();
         $query = $this->db->prepare(
             "SELECT * FROM {$table} WHERE external_id = %s LIMIT 1",

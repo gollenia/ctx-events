@@ -10,8 +10,7 @@ final readonly class BankData
         public string $accountHolder,
         public string $iban,
         public string $bic,
-        public string $bankName,
-		public ?string $reference = ''
+        public string $bankName
     ) {
     }
 
@@ -32,13 +31,6 @@ final readonly class BankData
 			$bankName
 		);
     }
-
-	public function withReference(string $reference): self
-	{
-		return clone($this, [
-			'reference' => $reference
-		]);
-	}
 
 	private static function checkIban(string $iban): string
     {

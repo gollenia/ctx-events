@@ -31,6 +31,8 @@ return [
 	=> autowire(\Contexis\Events\Booking\Infrastructure\DbBookingRepository::class),
 	\Contexis\Events\Booking\Application\Contracts\ReferenceGenerator::class
 	=> autowire(\Contexis\Events\Booking\Infrastructure\BookingReferenceGenerator::class),
+    \Contexis\Events\Booking\Application\Contracts\BookingReferenceSettingsProvider::class
+    => autowire(\Contexis\Events\Booking\Infrastructure\WpBookingReferenceSettingsProvider::class),
 	\Contexis\Events\Booking\Domain\AttendeeRepository::class
 	=> autowire(\Contexis\Events\Booking\Infrastructure\DbAttendeeRepository::class),
 	\Contexis\Events\Booking\Domain\BookingTokenStore::class
