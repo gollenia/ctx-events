@@ -7,8 +7,11 @@ import {
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { BookingAttendeeResource, BookingDetail } from 'src/types/types';
-import type { BookingTransactionResource } from 'src/types/types';
+import type {
+	BookingAttendeeResource,
+	BookingDetail,
+	BookingTransactionResource,
+} from 'src/types/types';
 import { STATUS_LABELS } from '../constants';
 import AttendeeSection from './AttendeeSection';
 import DynamicFieldsGrid from './DynamicFieldsGrid';
@@ -80,7 +83,8 @@ const BookingEditModal = ({
 
 		return [transaction, ...withoutCurrent].sort(
 			(left, right) =>
-				new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+				new Date(right.createdAt).getTime() -
+				new Date(left.createdAt).getTime(),
 		);
 	};
 
@@ -241,17 +245,6 @@ const BookingEditModal = ({
 										}}
 									/>
 								</section>
-
-								<NotesSection
-									booking={booking}
-									isSaving={addingNote}
-									onAdd={async (text: string) => {
-										const note = await addNote(booking.reference, text);
-										patch({ notes: [...booking.notes, note] });
-									}}
-								/>
-
-								<LogEntriesSection booking={booking} />
 							</div>
 
 							<div className="booking-edit__attendees-col">
@@ -278,6 +271,17 @@ const BookingEditModal = ({
 										return transaction;
 									}}
 								/>
+
+								<NotesSection
+									booking={booking}
+									isSaving={addingNote}
+									onAdd={async (text: string) => {
+										const note = await addNote(booking.reference, text);
+										patch({ notes: [...booking.notes, note] });
+									}}
+								/>
+
+								<LogEntriesSection booking={booking} />
 							</div>
 						</div>
 

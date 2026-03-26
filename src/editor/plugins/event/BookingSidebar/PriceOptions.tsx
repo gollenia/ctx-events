@@ -3,6 +3,7 @@ import {
 	CheckboxControl,
 	PanelBody,
 	SelectControl,
+	TextControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -18,7 +19,7 @@ const PriceAdjustments = ({ meta, updateMeta, postId, postType }: BookingSidebar
 	const selectedCoupons = meta._booking_coupons?.length ?? 0;
 
 	return (
-		<PanelBody title={__('Price Options', 'ctx-events')} initialOpen={true}>
+		<PanelBody title={__('Payment', 'ctx-events')} initialOpen={true}>
 			<SelectControl
 				label={__('Currency', 'ctx-events')}
 				value={meta._booking_currency ?? 'USD'}
@@ -42,6 +43,18 @@ const PriceAdjustments = ({ meta, updateMeta, postId, postType }: BookingSidebar
 				onChange={(value) => {
 					updateMeta({ _event_rsvp_donation: value });
 				}}
+				disabled={!enabled}
+			/>
+			<TextControl
+				label={__('Booking reference prefix', 'ctx-events')}
+				value={meta._booking_reference_prefix ?? ''}
+				onChange={(value) => updateMeta({ _booking_reference_prefix: value })}
+				disabled={!enabled}
+			/>
+			<TextControl
+				label={__('Booking reference suffix', 'ctx-events')}
+				value={meta._booking_reference_suffix ?? ''}
+				onChange={(value) => updateMeta({ _booking_reference_suffix: value })}
 				disabled={!enabled}
 			/>
 			<Button

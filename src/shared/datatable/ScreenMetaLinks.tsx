@@ -1,10 +1,12 @@
+import { __ } from '@wordpress/i18n';
 import { useDataTable } from './DataTableContext';
 
 interface ScreenMetaProps {
 	setScreenMeta: (context: string) => void;
+	screenMeta: string;
 }
 
-const ScreenMetaLinks = ({ setScreenMeta }: ScreenMetaProps) => {
+const ScreenMetaLinks = ({ setScreenMeta, screenMeta }: ScreenMetaProps) => {
 	return (
 		<div id="screen-meta-links">
 			<div
@@ -16,10 +18,16 @@ const ScreenMetaLinks = ({ setScreenMeta }: ScreenMetaProps) => {
 					id="show-settings-link"
 					className="button show-settings"
 					aria-controls="screen-options-wrap"
-					aria-expanded="false"
-					onClick={() => setScreenMeta('options')}
+					aria-expanded={screenMeta === 'options'}
+					onClick={() => {
+						if (screenMeta !== 'options') {
+							setScreenMeta('options');
+						} else {
+							setScreenMeta('');
+						}
+					}}
 				>
-					Ansicht anpassen
+					{__('Screen Options', 'ctx-events')}
 				</button>
 			</div>
 			<div
@@ -35,7 +43,7 @@ const ScreenMetaLinks = ({ setScreenMeta }: ScreenMetaProps) => {
 					aria-expanded="false"
 					onClick={() => setScreenMeta('help')}
 				>
-					Hilfe
+					{__('Help', 'ctx-events')}
 				</button>
 			</div>
 		</div>
@@ -43,8 +51,13 @@ const ScreenMetaLinks = ({ setScreenMeta }: ScreenMetaProps) => {
 };
 
 const DataTableScreenMetaLinks = () => {
-	const { setScreenMetaContext } = useDataTable();
-	return <ScreenMetaLinks setScreenMeta={setScreenMetaContext} />;
+	const { setScreenMetaContext, screenMetaContext } = useDataTable();
+	return (
+		<ScreenMetaLinks
+			setScreenMeta={setScreenMetaContext}
+			screenMeta={screenMetaContext}
+		/>
+	);
 };
 
 export default ScreenMetaLinks;

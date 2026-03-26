@@ -1,29 +1,34 @@
 import { formatDate } from '@events/i18n';
-import { EventBookingSummary } from '../../types/types';
 import { __ } from '@wordpress/i18n';
+import type { EventBookingSummary } from '../../types/types';
 
 enum BookingDenyReason {
 	DISABLED = 'disabled',
 	NO_TICKETS = 'no_tickets',
 	ENDED = 'ended',
 	NOT_STARTED = 'not_started',
-	SOLD_OUT = 'sold_out'
+	SOLD_OUT = 'sold_out',
 }
 
 export function bookingDenyReason(bookingSummary: EventBookingSummary): string {
-
-	const $reason = bookingSummary?.denyReason;	
+	const $reason = bookingSummary?.denyReason;
 	switch ($reason) {
 		case BookingDenyReason.DISABLED:
-			return __('Bookings are disabled.', 'ctx-events');
+			return '—';
 		case BookingDenyReason.NO_TICKETS:
 			return __('No tickets available.', 'ctx-events');
 		case BookingDenyReason.ENDED:
-			return __('Booking period has ended on ', 'ctx-events') + formatDate(bookingSummary.bookingEnd || '');
+			return (
+				__('Booking ended on ', 'ctx-events') +
+				formatDate(bookingSummary.bookingEnd || '')
+			);
 		case BookingDenyReason.NOT_STARTED:
-			return __('Booking will start on ', 'ctx-events') + formatDate(bookingSummary.bookingStart || '');
+			return (
+				__('Booking starts on ', 'ctx-events') +
+				formatDate(bookingSummary.bookingStart || '')
+			);
 		case BookingDenyReason.SOLD_OUT:
-			return __('The event is sold out.', 'ctx-events');
+			return __('Sold out.', 'ctx-events');
 		default:
 			return __('Unknown reason', 'ctx-events');
 	}

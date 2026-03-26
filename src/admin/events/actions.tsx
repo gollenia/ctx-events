@@ -47,6 +47,14 @@ const cancelEvent = async (
 
 const ACTIONS: Array<EventActionConfig> = [
 	{
+		id: 'view_bookings',
+		label: __('Bookings', 'ctx-events'),
+		callback: (items) => {
+			window.location.href = `/wp-admin/admin.php?page=contexis_events_bookings&event_id=${items[0].id}`;
+		},
+		disabled: (event) => !event.bookingSummary.isBookable,
+	},
+	{
 		id: 'duplicate',
 		label: __('Duplicate', 'ctx-events'),
 		callback: (items) => {
@@ -73,6 +81,5 @@ const ACTIONS: Array<EventActionConfig> = [
 	},
 ];
 
-export const actions: Array<DataTableAction> = ACTIONS as Array<
-	DataTableAction
->;
+export const actions: Array<DataTableAction> =
+	ACTIONS as Array<DataTableAction>;

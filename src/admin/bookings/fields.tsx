@@ -1,16 +1,9 @@
 import { formatPrice } from '@events/i18n';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-	notAllowed,
-	pending,
-	published,
-	swatch,
-} from '@wordpress/icons';
+import { notAllowed, pending, published, swatch } from '@wordpress/icons';
 import type { BookingListItem } from 'src/types/types';
-import type {
-	DataFieldConfig,
-} from '../../shared/datatable/types';
+import type { DataFieldConfig } from '../../shared/datatable/types';
 import { STATUS_LABELS } from './constants';
 
 type FilterOptions = {
@@ -18,6 +11,7 @@ type FilterOptions = {
 };
 
 type FieldCallbacks = {
+	onReferenceCopy: (reference: string) => void;
 	onReferenceClick: (reference: string) => void;
 };
 
@@ -41,7 +35,7 @@ export const createFields = (
 				href="#"
 				onClick={(event) => {
 					event.preventDefault();
-					callbacks.onReferenceClick(booking.reference);
+					callbacks.onReferenceCopy(booking.reference);
 				}}
 			>
 				{booking.reference}
@@ -54,7 +48,17 @@ export const createFields = (
 		enableHiding: false,
 		render: (booking: BookingListItem) => {
 			const full = `${booking.name.firstName} ${booking.name.lastName}`.trim();
-			return <strong>{full || '—'}</strong>;
+			return (
+				<a
+					href="#"
+					onClick={(event) => {
+						event.preventDefault();
+						callbacks.onReferenceClick(booking.reference);
+					}}
+				>
+					{full}
+				</a>
+			);
 		},
 	},
 	{
@@ -113,7 +117,9 @@ export const createFields = (
 	{
 		id: 'email',
 		label: __('E-Mail', 'ctx-events'),
-		getValue: (booking: BookingListItem) => booking.email,
+		render: (booking: BookingListItem) => (
+			<a href={`mailto:${booking.email}`}>{booking.email}</a>
+		),
 	},
 	{
 		id: 'price',

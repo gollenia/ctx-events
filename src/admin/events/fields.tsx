@@ -82,7 +82,8 @@ export const fields: Array<DataFieldConfig> = [
 		label: __('Tags', 'ctx-events'),
 		id: 'tags',
 		getValue: (event: Event) =>
-			event.includes?.tags?.map((t: { name: string }) => t.name).join(', '),
+			event.includes?.tags?.map((t: { name: string }) => t.name).join(', ') ||
+			'—',
 		enableSorting: true,
 	},
 	{
@@ -91,7 +92,7 @@ export const fields: Array<DataFieldConfig> = [
 		getValue: (event: Event) =>
 			event.includes?.categories
 				?.map((c: { name: string }) => c.name)
-				.join(', '),
+				.join(', ') || '—',
 		enableSorting: true,
 	},
 	{
@@ -116,7 +117,7 @@ export const fields: Array<DataFieldConfig> = [
 				)}`;
 			}
 
-			return __('N/A', 'ctx-events');
+			return '—';
 		},
 		enableSorting: true,
 	},
@@ -127,7 +128,6 @@ export const fields: Array<DataFieldConfig> = [
 			if (!event.bookingSummary) {
 				return (
 					<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-						<Icon icon={notAllowed} size={16} />
 						{__('N/A', 'ctx-events')}
 					</span>
 				);
@@ -135,17 +135,14 @@ export const fields: Array<DataFieldConfig> = [
 			if (!event.bookingSummary.isBookable) {
 				return (
 					<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-						<Icon icon={error} size={16} />
 						{bookingDenyReason(event.bookingSummary)}
 					</span>
 				);
 			}
 			return (
 				<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-					<Icon icon={published} size={16} />
-					<a className="trashed" href={bookingsAdminUrl(event.id)}>
-						{__('View Bookings', 'ctx-events')}
-					</a>
+					{__('Bookable until ', 'ctx-events') +
+						formatDateRange(event.bookingSummary.bookingEnd, false)}
 				</span>
 			);
 		},

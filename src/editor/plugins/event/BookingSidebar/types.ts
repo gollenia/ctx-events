@@ -9,6 +9,8 @@ export type BookingMeta = {
 	_booking_form?: string | number;
 	_attendee_form?: string | number;
 	_booking_currency?: string;
+	_booking_reference_prefix?: string;
+	_booking_reference_suffix?: string;
 	_booking_coupons?: number[];
 	_booking_mails?: EventMailTemplateOverride[];
 	_event_rsvp_donation?: boolean | number;

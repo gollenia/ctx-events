@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
+use Contexis\Events\Booking\Application\DTOs\BookingReferenceSettings;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
 use Contexis\Events\Booking\Application\Services\BookingTokenValidator;
 use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
@@ -20,6 +21,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tests\Support\FakeBookingEmailTrigger;
 use Tests\Support\FakeBookingRepository;
+use Tests\Support\FakeBookingReferenceSettingsProvider;
 use Tests\Support\FakeCurrentActorProvider;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
@@ -41,6 +43,7 @@ function makeCreateBookingUseCase(
     string $sessionHash = 'test-session-hash',
     ?FakeGatewayRepository $gatewayRepository = null,
     ?FakeBookingEmailTrigger $bookingEmailTrigger = null,
+    ?FakeBookingReferenceSettingsProvider $bookingReferenceSettingsProvider = null,
 ): CreateBooking {
     $sessionHashResolver = Mockery::mock(SessionHashResolver::class);
     $sessionHashResolver->allows('resolve')->andReturn($sessionHash);
@@ -66,6 +69,7 @@ function makeCreateBookingUseCase(
         gatewayRepository: $gatewayRepository ?? FakeGatewayRepository::withActiveGateway(),
         transactionRepository: $transactionRepository,
         referenceGenerator: new FakeReferenceGenerator(),
+        bookingReferenceSettingsProvider: $bookingReferenceSettingsProvider ?? new FakeBookingReferenceSettingsProvider(),
         attendeeFactory: new AttendeeFactory(),
         clock: $clock,
         currentActorProvider: new FakeCurrentActorProvider(),
@@ -132,7 +136,7 @@ test('throws when token is null', function () {
         eventId: $event->id,
         registration: registrationPayload(),
         attendees: attendeePayload('ticket-abc-0001'),
-        gateway: 'manual',
+        gateway: 'offline',
         token: null,
     );
 
@@ -260,7 +264,7 @@ test('throws when bookings are disabled for the event', function () {
         eventId: $event->id,
         registration: registrationPayload(),
         attendees: attendeePayload($ticketId),
-        gateway: 'manual',
+        gateway: 'offline',
         token: 'valid-token',
     );
 
@@ -374,7 +378,7 @@ test('throws when booking window has not started yet', function () {
         eventId: $event->id,
         registration: registrationPayload(),
         attendees: attendeePayload($ticketId),
-        gateway: 'manual',
+        gateway: 'offline',
         token: 'valid-token',
     );
 
@@ -725,4 +729,48 @@ test('throws when donation is submitted but event does not accept donations', fu
 
     expect(fn () => $useCase->execute($request))
         ->toThrow(\DomainException::class, 'does not accept donations');
+});
+
+test('uses booking reference prefix and suffix from settings provider', function () {
+    $event = FakeEventFactory::create(16, [
+        EventMeta::TICKETS => [[
+            'ticket_id'          => 'ticket-prefix-001',
+            'ticket_name'        => 'Free Ticket',
+            'ticket_description' => '',
+            'ticket_price'       => 0,
+            'ticket_spaces'      => 50,
+            'ticket_max'         => 5,
+            'ticket_min'         => 1,
+            'ticket_enabled'     => true,
+            'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
+            'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+            'ticket_order'       => 1,
+            'ticket_form'        => 1,
+        ]],
+    ]);
+    $token = tokenFor($event->id->toInt());
+    $tokenStore = FakeTokenStore::withToken($token);
+    $ticketId = $event->tickets?->first()?->id->toString() ?? 'ticket-missing';
+
+    $useCase = makeCreateBookingUseCase(
+        FakeEventRepository::one($event),
+        FakeBookingRepository::empty(),
+        $tokenStore,
+        bookingReferenceSettingsProvider: new FakeBookingReferenceSettingsProvider(
+            new BookingReferenceSettings(prefix: 'TEEN-', suffix: '-AT'),
+        ),
+    );
+
+    $request = new CreateBookingRequest(
+        eventId: $event->id,
+        registration: registrationPayload(),
+        attendees: attendeePayload($ticketId),
+        gateway: 'manual',
+        token: 'valid-token',
+    );
+
+    $response = $useCase->execute($request);
+
+    expect($response->reference->toString())->toStartWith('TEEN-')
+        ->and($response->reference->toString())->toEndWith('-AT');
 });

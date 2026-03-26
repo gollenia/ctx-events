@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { createActions } from './actions';
+import BookingExportModal from './BookingExportModal';
 import { bookingStatusItems } from './bookingStatusItems';
 import BookingEditModal from './edit/BookingEditModal';
 import { createFields } from './fields';
@@ -70,7 +71,9 @@ const BookingsList = () => {
 	});
 
 	const [editingReference, setEditingReference] = useState<string | null>(null);
-	const { createWarningNotice, removeNotice } = useDispatch(noticesStore);
+	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+	const { createSuccessNotice, createWarningNotice, removeNotice } =
+		useDispatch(noticesStore);
 	const notices = useSelect((select) => select(noticesStore).getNotices(), []);
 
 	const filterOptions = useFilterOptions();
@@ -111,9 +114,50 @@ const BookingsList = () => {
 	const fields = useMemo(
 		() =>
 			createFields(filterOptions, {
+				onReferenceCopy: (reference) => {
+					const fallbackCopy = () => {
+						const input = document.createElement('input');
+						input.value = reference;
+						document.body.append(input);
+						input.select();
+						document.execCommand('copy');
+						input.remove();
+					};
+
+					try {
+						if (navigator.clipboard?.writeText) {
+							void navigator.clipboard.writeText(reference).then(
+								() =>
+									createSuccessNotice(
+										__('Reference copied to clipboard.', 'ctx-events'),
+										{ type: 'snackbar' },
+									),
+								() => {
+									fallbackCopy();
+									createSuccessNotice(
+										__('Reference copied to clipboard.', 'ctx-events'),
+										{ type: 'snackbar' },
+									);
+								},
+							);
+							return;
+						}
+
+						fallbackCopy();
+						createSuccessNotice(
+							__('Reference copied to clipboard.', 'ctx-events'),
+							{ type: 'snackbar' },
+						);
+					} catch {
+						createWarningNotice(
+							__('The reference could not be copied.', 'ctx-events'),
+							{ type: 'snackbar' },
+						);
+					}
+				},
 				onReferenceClick: setEditingReference,
 			}),
-		[filterOptions],
+		[createSuccessNotice, createWarningNotice, filterOptions],
 	);
 
 	const { bookings, loading, statusItems, pagination } = useFetchBookings(view);
@@ -156,7 +200,10 @@ const BookingsList = () => {
 		})
 			.then(async (response) => {
 				if (!(response instanceof Response) || !response.ok) {
-					let errorMessage = __('The export could not be downloaded.', 'ctx-events');
+					let errorMessage = __(
+						'The export could not be downloaded.',
+						'ctx-events',
+					);
 
 					if (response instanceof Response) {
 						const contentType = response.headers.get('content-type') ?? '';
@@ -230,9 +277,7 @@ const BookingsList = () => {
 					);
 				})();
 
-				window.alert(
-					message,
-				);
+				window.alert(message);
 			});
 	};
 
@@ -252,25 +297,18 @@ const BookingsList = () => {
 				availableStatusItems={bookingStatusItems(statusItems)}
 				title={__('Bookings', 'ctx-events')}
 			>
-				<DataTable.Header />
-				<div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+				<h1 className="wp-heading-inline">{__('Bookings', 'ctx-events')}</h1>
+				{activeEventId && (
 					<button
 						type="button"
 						className="page-title-action"
-						onClick={() => handleExport(false)}
-						disabled={!activeEventId}
+						onClick={() => setIsExportModalOpen(true)}
 					>
-						{__('Export Excel', 'ctx-events')}
+						{__('Export', 'ctx-events')}
 					</button>
-					<button
-						type="button"
-						className="page-title-action"
-						onClick={() => handleExport(true)}
-						disabled={!activeEventId}
-					>
-						{__('Export Excel + Attendees', 'ctx-events')}
-					</button>
-				</div>
+				)}
+
+				<hr className="wp-header-end" />
 				<DataTable.StatusSelect />
 				<DataTable.Filter />
 				<DataTable.Table />
@@ -283,6 +321,12 @@ const BookingsList = () => {
 				onClose={() => setEditingReference(null)}
 				onSaved={refresh}
 			/>
+			{isExportModalOpen ? (
+				<BookingExportModal
+					onClose={() => setIsExportModalOpen(false)}
+					onExport={handleExport}
+				/>
+			) : null}
 		</>
 	);
 };
