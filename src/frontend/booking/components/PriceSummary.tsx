@@ -1,21 +1,25 @@
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import { calculateBookingTotal, calculateCouponDiscount } from '../pricing';
-import type { CouponCheckResult, TicketInfo } from '../types';
+import type { AttendeePayload, CouponCheckResult, TicketInfo } from '../types';
 
 type Props = {
 	tickets: TicketInfo[];
-	ticketCounts: Record<string, number>;
+	attendees: AttendeePayload[];
 	coupon?: CouponCheckResult | null;
 };
 
-export function PriceSummary({ tickets, ticketCounts, coupon }: Props) {
+export function PriceSummary({ tickets, attendees, coupon }: Props) {
+	const ticketCounts = attendees.reduce<Record<string, number>>((counts, attendee) => {
+		counts[attendee.ticket_id] = (counts[attendee.ticket_id] ?? 0) + 1;
+		return counts;
+	}, {});
 	const lines = tickets.filter((t) => (ticketCounts[t.id] ?? 0) > 0);
 
 	if (lines.length === 0) return null;
 
 	const currency = lines[0]?.price.currency ?? 'EUR';
-	const total = calculateBookingTotal(lines, ticketCounts);
+	const total = calculateBookingTotal(lines, attendees);
 	const discount = calculateCouponDiscount(total, coupon);
 	const totalAfterDiscount = Math.max(0, total - discount);
 

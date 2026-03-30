@@ -120,7 +120,6 @@ export type CouponCheckResult = {
 };
 
 export type BookingState = {
-	tickets: Record<string, number>;
 	attendees: AttendeePayload[];
 	registration: Record<string, unknown>;
 	gateway: string;

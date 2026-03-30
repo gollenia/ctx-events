@@ -1,9 +1,14 @@
-import type { CouponCheckResult, TicketInfo } from './types';
+import type { AttendeePayload, CouponCheckResult, TicketInfo } from './types';
 
 export function calculateBookingTotal(
 	tickets: TicketInfo[],
-	ticketCounts: Record<string, number>,
+	attendees: AttendeePayload[],
 ): number {
+	const ticketCounts = attendees.reduce<Record<string, number>>((counts, attendee) => {
+		counts[attendee.ticket_id] = (counts[attendee.ticket_id] ?? 0) + 1;
+		return counts;
+	}, {});
+
 	return tickets.reduce(
 		(sum, ticket) =>
 			sum +

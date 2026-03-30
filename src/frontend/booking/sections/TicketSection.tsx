@@ -1,16 +1,20 @@
 import { __ } from '@wordpress/i18n';
 import { TicketCounter } from '../components/TicketCounter';
-import type { TicketInfo } from '../types';
+import type { AttendeePayload, TicketInfo } from '../types';
 
 type Props = {
 	tickets: TicketInfo[];
-	counts: Record<string, number>;
+	attendees: AttendeePayload[];
 	onChange: (ticketId: string, count: number) => void;
 	onNext: () => void;
 };
 
-export function TicketSection({ tickets, counts, onChange, onNext }: Props) {
-	const totalSelected = Object.values(counts).reduce((a, b) => a + b, 0);
+export function TicketSection({ tickets, attendees, onChange, onNext }: Props) {
+	const counts = attendees.reduce<Record<string, number>>((result, attendee) => {
+		result[attendee.ticket_id] = (result[attendee.ticket_id] ?? 0) + 1;
+		return result;
+	}, {});
+	const totalSelected = attendees.length;
 
 	return (
 		<div

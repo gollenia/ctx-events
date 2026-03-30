@@ -16,36 +16,32 @@ type AttendeeEntry = {
 type Props = {
 	attendeeForm: BookingFormData;
 	tickets: TicketInfo[];
-	ticketCounts: Record<string, number>;
 	initialAttendees: AttendeePayload[];
 	onNext: (attendees: AttendeePayload[]) => void;
 };
 
 function buildInitialEntries(
 	tickets: TicketInfo[],
-	counts: Record<string, number>,
 	form: BookingFormData,
 	initial: AttendeePayload[],
 ): AttendeeEntry[] {
 	const entries: AttendeeEntry[] = [];
-	let globalIndex = 0;
 
-	for (const ticket of tickets) {
-		const count = counts[ticket.id] ?? 0;
-		for (let i = 0; i < count; i++) {
-			const existing = initial[globalIndex];
-				entries.push({
-					ticketId: ticket.id,
-					ticketName: ticket.name,
-					index: globalIndex,
-					formData: existing
-						? buildInitialFormValues(form.fields, existing.metadata)
-						: buildInitialFormValues(form.fields, {}),
-					errors: {},
-				});
-			globalIndex++;
+	initial.forEach((existing, index) => {
+		const ticket = tickets.find((item) => item.id === existing.ticket_id);
+
+		if (!ticket) {
+			return;
 		}
-	}
+
+		entries.push({
+			ticketId: ticket.id,
+			ticketName: ticket.name,
+			index,
+			formData: buildInitialFormValues(form.fields, existing.metadata),
+			errors: {},
+		});
+	});
 
 	return entries;
 }
@@ -75,17 +71,11 @@ function validateEntry(
 export function AttendeeSection({
 	attendeeForm,
 	tickets,
-	ticketCounts,
 	initialAttendees,
 	onNext,
 }: Props) {
 	const [entries, setEntries] = useState<AttendeeEntry[]>(() =>
-		buildInitialEntries(
-			tickets,
-			ticketCounts,
-			attendeeForm,
-			initialAttendees,
-		),
+		buildInitialEntries(tickets, attendeeForm, initialAttendees),
 	);
 
 	function handleChange(index: number, name: string, value: unknown) {

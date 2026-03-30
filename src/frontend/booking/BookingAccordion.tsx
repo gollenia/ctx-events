@@ -82,7 +82,7 @@ export function BookingAccordion({
 		);
 	}
 	const sections = getSections(data);
-	const totalSelected = Object.values(state.tickets).reduce((a, b) => a + b, 0);
+	const totalSelected = state.attendees.length;
 
 	function isSectionDisabled(id: SectionId): boolean {
 		const idx = sections.indexOf(id);
@@ -102,7 +102,7 @@ export function BookingAccordion({
 			>
 				<TicketSection
 					tickets={data.tickets}
-					counts={state.tickets}
+					attendees={state.attendees}
 					onChange={onTicketChange}
 					onNext={onTicketsDone}
 				/>
@@ -120,7 +120,6 @@ export function BookingAccordion({
 					<AttendeeSection
 						attendeeForm={data.attendeeForm!}
 						tickets={data.tickets}
-						ticketCounts={state.tickets}
 						initialAttendees={state.attendees}
 						onNext={onAttendeesDone}
 					/>
@@ -147,7 +146,9 @@ export function BookingAccordion({
 				title={
 					totalSelected > 0 &&
 					data.tickets.some(
-						(t) => (state.tickets[t.id] ?? 0) > 0 && t.price.amountCents > 0,
+						(t) =>
+							t.price.amountCents > 0 &&
+							state.attendees.some((attendee) => attendee.ticket_id === t.id),
 					)
 						? __('Payment', 'ctx-events')
 						: __('Confirm booking', 'ctx-events')

@@ -20,7 +20,6 @@ type BookingOpenDetail = {
 
 function initialState(): BookingState {
 	return {
-		tickets: {},
 		attendees: [],
 		registration: {},
 		gateway: '',
@@ -29,6 +28,29 @@ function initialState(): BookingState {
 		openSection: 'tickets',
 		completedSections: new Set(),
 	};
+}
+
+function buildAttendeesFromTickets(
+	ticketId: string,
+	count: number,
+	existingAttendees: AttendeePayload[],
+): AttendeePayload[] {
+	const normalizedCount = Math.max(0, count);
+	const matchingAttendees = existingAttendees.filter(
+		(attendee) => attendee.ticket_id === ticketId,
+	);
+	const nonMatchingAttendees = existingAttendees.filter(
+		(attendee) => attendee.ticket_id !== ticketId,
+	);
+	const nextAttendees = [...nonMatchingAttendees];
+
+	for (let index = 0; index < normalizedCount; index++) {
+		nextAttendees.push(
+			matchingAttendees[index] ?? { ticket_id: ticketId, metadata: {} },
+		);
+	}
+
+	return nextAttendees;
 }
 
 export default function Booking() {
@@ -94,7 +116,7 @@ export default function Booking() {
 	function handleTicketChange(ticketId: string, count: number) {
 		setBookingState((prev) => ({
 			...prev,
-			tickets: { ...prev.tickets, [ticketId]: count },
+			attendees: buildAttendeesFromTickets(ticketId, count, prev.attendees),
 		}));
 	}
 
@@ -126,7 +148,12 @@ export default function Booking() {
 		setBookingState((prev) => {
 			const completedSections = new Set(prev.completedSections);
 			completedSections.add('attendees');
-			return { ...prev, attendees, openSection: 'booking', completedSections };
+			return {
+				...prev,
+				attendees,
+				openSection: 'booking',
+				completedSections,
+			};
 		});
 	}
 

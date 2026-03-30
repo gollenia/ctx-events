@@ -52,7 +52,7 @@ export function PaymentSection({
 	const gateway = bookingState.gateway || (data.gateways[0]?.id ?? '');
 	const couponCode = bookingState.couponCode;
 	const appliedCoupon = bookingState.couponCheckResult;
-	const totalPrice = calculateBookingTotal(data.tickets, bookingState.tickets);
+	const totalPrice = calculateBookingTotal(data.tickets, bookingState.attendees);
 	const currency = data.tickets[0]?.price.currency ?? 'EUR';
 	const liveDiscountAmount = calculateCouponDiscount(totalPrice, appliedCoupon);
 
@@ -105,7 +105,7 @@ export function PaymentSection({
 		>
 			<PriceSummary
 				tickets={data.tickets}
-				ticketCounts={bookingState.tickets}
+				attendees={bookingState.attendees}
 				coupon={appliedCoupon}
 			/>
 
