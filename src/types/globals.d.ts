@@ -7,6 +7,7 @@ declare module '@events/i18n' {
 
 declare global {
 	interface Window {
+		ctxIcons?: Record<string, string>;
 		eventBlocksLocalization?: {
 			locale: string;
 		};
