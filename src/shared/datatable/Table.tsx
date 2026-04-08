@@ -34,7 +34,7 @@ const Table = ({
 	view,
 	actions,
 	loading,
-	variant = 'posts',
+	variant,
 	onChangeView,
 	noItemsMessage = __('No items found.', 'ctx-events'),
 }: DataTableProps) => {
@@ -48,13 +48,18 @@ const Table = ({
 			{loading && <p>{__('Loading...', 'ctx-events')}</p>}
 
 			{!loading && (
-				<table className={`wp-list-table widefat fixed striped ${variant}`}>
+				<table
+					className={clsx(
+						'wp-list-table widefat',
+						variant === 'plugins' ? 'plugins' : 'fixed striped',
+					)}
+				>
 					<thead>
 						<tr>
 							<td
 								id="cb"
 								style={{ width: '1%' }}
-								className="manage-field field-cb check-field"
+								className="manage-field column-cb check-column field-cb check-field"
 							>
 								<input id="cb-select-all-1" type="checkbox" />
 							</td>
@@ -123,7 +128,7 @@ const Table = ({
 										pluginStatusField && item[pluginStatusField] ? 'active' : ''
 									}
 								>
-									<th className="cb field-cb check-field">
+									<th className="check-column field-cb check-field" scope="row">
 										<input type="checkbox" />
 									</th>
 
@@ -179,7 +184,7 @@ const Table = ({
 };
 
 const DataTableTable = () => {
-	const { data, fields, view, actions, onChangeView, isLoading } =
+	const { data, fields, view, actions, onChangeView, isLoading, variant } =
 		useDataTable();
 	return (
 		<Table
@@ -188,6 +193,7 @@ const DataTableTable = () => {
 			fields={view.fields}
 			view={view}
 			actions={actions}
+			variant={variant}
 			onChangeView={onChangeView}
 			loading={isLoading}
 		/>

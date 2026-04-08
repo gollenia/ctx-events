@@ -62,7 +62,7 @@ const DataTable: DataTableComponent = <T extends object>({
 	fields,
 	view,
 	onChangeView,
-	variant = 'default',
+	variant,
 	actions,
 	paginationInfo,
 	searchLabel,
@@ -107,7 +107,6 @@ const DataTable: DataTableComponent = <T extends object>({
 			<div
 				className={clsx(
 					'wrap ctx-datatable',
-					variant === 'plugins' && 'datatable--plugins',
 					isLoading && 'datatable--loading',
 				)}
 				style={{ padding: '10px 20px 0 2px', margin: 0 }}
