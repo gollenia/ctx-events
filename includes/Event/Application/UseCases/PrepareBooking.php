@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\UseCases;
 
+use Contexis\Events\Booking\Application\Contracts\BookingOptions;
 use Contexis\Events\Booking\Application\Services\IssueBookingToken;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Event\Application\DTOs\PrepareBookingResponse;
@@ -26,6 +27,7 @@ final class PrepareBooking
         private \Contexis\Events\Form\Domain\FormRepository $formRepository,
         private IssueBookingToken $issueBookingToken,
         private PrepareBookingTicketLimits $prepareBookingTicketLimits,
+        private BookingOptions $bookingOptions,
         private Clock $clock,
     ) {
     }
@@ -69,6 +71,7 @@ final class PrepareBooking
             attendeeForm: $attendeeForm,
             couponsEnabled: $event->allowsCoupons(),
 			donationEnabled: $event->donationEnabled,
+			donationAdvertisement: $event->donationEnabled ? $this->bookingOptions->donationAdvertisement() : null,
             token: $token,
         );
     }
