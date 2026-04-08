@@ -1,12 +1,17 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import EventIcon from '../../shared/icons/EventIcon';
 import CardView from './CardView';
 import ListView from './ListView';
 import { mapUpcomingEvent } from './mappers';
 import TableView from './Table';
 import './style.scss';
-import type { UpcomingAttributes, UpcomingTerm, UpcomingViewEvent } from './types';
+import type {
+	UpcomingAttributes,
+	UpcomingTerm,
+	UpcomingViewEvent,
+} from './types';
 
 type Props = {
 	attributes: UpcomingAttributes;
@@ -33,9 +38,13 @@ function Upcoming({ attributes }: Props) {
 	const normalizedOrder = order === 'desc' ? 'desc' : 'asc';
 
 	const [events, setEvents] = useState<UpcomingViewEvent[]>([]);
-	const [status, setStatus] = useState<'LOADING' | 'LOADED' | 'ERROR'>('LOADING');
+	const [status, setStatus] = useState<'LOADING' | 'LOADED' | 'ERROR'>(
+		'LOADING',
+	);
 	const [filterMobileVisible, setFilterMobileVisible] = useState(false);
-	const [customView, setCustomView] = useState<'cards' | 'list' | 'mini' | ''>('');
+	const [customView, setCustomView] = useState<'cards' | 'list' | 'mini' | ''>(
+		'',
+	);
 	const [filter, setFilter] = useState<{
 		category: number;
 		tags: number[];
@@ -101,7 +110,14 @@ function Upcoming({ attributes }: Props) {
 						: __('Failed to load events', 'ctx-events'),
 				);
 			});
-	}, [limit, normalizedOrder, selectedCategory, selectedLocation, selectedTags, scope]);
+	}, [
+		limit,
+		normalizedOrder,
+		selectedCategory,
+		selectedLocation,
+		selectedTags,
+		scope,
+	]);
 
 	const changeFilter = (
 		key: 'category' | 'tags' | 'string',
@@ -194,29 +210,29 @@ function Upcoming({ attributes }: Props) {
 								<button
 									type="button"
 									onClick={() => setCustomView('cards')}
-									className={currentView === 'cards' ? 'button active' : 'button'}
+									className={
+										currentView === 'cards' ? 'button active' : 'button'
+									}
 								>
-									<i className="material-icons material-symbols-outlined">
-										grid_view
-									</i>
+									<EventIcon name="date" />
 								</button>
 								<button
 									type="button"
 									onClick={() => setCustomView('list')}
-									className={currentView === 'list' ? 'button active' : 'button'}
+									className={
+										currentView === 'list' ? 'button active' : 'button'
+									}
 								>
-									<i className="material-icons material-symbols-outlined">
-										view_agenda
-									</i>
+									<EventIcon name="time" />
 								</button>
 								<button
 									type="button"
 									onClick={() => setCustomView('mini')}
-									className={currentView === 'mini' ? 'button active' : 'button'}
+									className={
+										currentView === 'mini' ? 'button active' : 'button'
+									}
 								>
-									<i className="material-icons material-symbols-outlined">
-										format_list_bulleted
-									</i>
+									<EventIcon name="audience" />
 								</button>
 							</div>
 						)}
@@ -227,9 +243,7 @@ function Upcoming({ attributes }: Props) {
 								className="button"
 								onClick={() => setFilterMobileVisible(!filterMobileVisible)}
 							>
-								<i className="material-icons material-symbols-outlined">
-									filter_list
-								</i>
+								<EventIcon name="warning" />
 							</button>
 						</div>
 					</div>

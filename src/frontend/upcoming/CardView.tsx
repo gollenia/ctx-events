@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 
 import { formatDateRange } from '@events/i18n';
+import EventIcon from '../../shared/icons/EventIcon';
 
 import truncate from './truncate';
 import type { UpcomingViewEvent, UpcomingViewProps } from './types';
@@ -108,13 +109,13 @@ function EventCards({
 										<div className="event-card-footer-details-text">
 											{showLocation && item.location?.id ? (
 												<div className="event-card-detail">
-													<i className="material-icons">place</i>{' '}
+													<EventIcon name="location" />{' '}
 													<span>{location}</span>
 												</div>
 											) : null}
 											{showAudience && item.audience?.length ? (
 												<div className="event-card-detail">
-													<i className="material-icons">groups</i>{' '}
+													<EventIcon name="audience" />{' '}
 													<span>{item.audience}</span>
 												</div>
 											) : null}
