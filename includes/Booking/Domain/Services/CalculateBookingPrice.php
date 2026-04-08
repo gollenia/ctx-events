@@ -25,7 +25,6 @@ final class CalculateBookingPrice
 		$bookingPrice = new Price(0, $currency);
 		foreach ($attendees as $attendee) {
 			$ticket = $availableTickets->getTicketById($attendee->ticketId);
-
 			$bookingPrice = $bookingPrice->add($ticket->price);
 		}
 
