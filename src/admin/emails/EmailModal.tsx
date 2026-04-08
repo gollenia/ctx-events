@@ -86,6 +86,7 @@ const EmailModal = ({ template, onSaved, onReset, onClose }: Props) => {
 					onClose={onClose}
 					saving={saving}
 					error={error}
+					showEnabledToggle={false}
 				/>
 			</Suspense>
 		</Modal>

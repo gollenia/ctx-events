@@ -8,9 +8,8 @@ import apiFetch from '@wordpress/api-fetch';
 import { Spinner } from '@wordpress/components';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import EmailModal from './EmailModal';
-
 import type { MailTemplate } from '../../types/types';
+import EmailModal from './EmailModal';
 
 const targetLabels: Record<string, string> = {
 	customer: __('Customer', 'ctx-events'),
@@ -23,6 +22,22 @@ const sourceLabels: Record<string, string> = {
 	preset: __('Preset', 'ctx-events'),
 	database: __('Customized', 'ctx-events'),
 };
+
+const updateTemplateEnabled = async (
+	template: MailTemplate,
+	enabled: boolean,
+): Promise<MailTemplate> =>
+	apiFetch<MailTemplate>({
+		path: `/events/v3/emails/${template.key}`,
+		method: 'PUT',
+		data: {
+			enabled,
+			subject: template.subject ?? '',
+			body: template.body,
+			replyTo: template.replyTo ?? '',
+			recipientConfig: template.recipientConfig,
+		},
+	});
 
 const EmailsTable = () => {
 	const [emails, setEmails] = useState<MailTemplate[]>([]);
@@ -147,6 +162,7 @@ const EmailsTable = () => {
 				id: 'enabled',
 				label: __('Enabled', 'ctx-events'),
 				enableSorting: true,
+				isPluginStatus: true,
 				render: (item: MailTemplate) =>
 					item.enabled ? __('Yes', 'ctx-events') : __('No', 'ctx-events'),
 			},
@@ -160,6 +176,29 @@ const EmailsTable = () => {
 				id: 'edit',
 				label: __('Edit', 'ctx-events'),
 				callback: (items) => setActiveKey(items[0]?.key ?? null),
+			},
+			{
+				id: 'toggle-enabled',
+				delete: (item: MailTemplate) => !item.enabled,
+				label: (item: MailTemplate) =>
+					item.enabled
+						? __('Disable', 'ctx-events')
+						: __('Enable', 'ctx-events'),
+				callback: (items) => {
+					const template = items[0] as MailTemplate | undefined;
+
+					if (!template) {
+						return;
+					}
+
+					updateTemplateEnabled(template, !template.enabled).then((updated) => {
+						setEmails((current) =>
+							current.map((item) =>
+								item.key === updated.key ? updated : item,
+							),
+						);
+					});
+				},
 			},
 		],
 		[],
@@ -189,6 +228,7 @@ const EmailsTable = () => {
 				title={__('Emails', 'ctx-events')}
 				fields={fields}
 				view={view}
+				variant="plugins"
 				actions={actions}
 				search={true}
 				onChangeView={(updates) => setView((prev) => ({ ...prev, ...updates }))}
