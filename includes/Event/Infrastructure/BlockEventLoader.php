@@ -12,6 +12,7 @@ use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Platform\Bootstrap;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Contexis\Events\Shared\Infrastructure\Icons\IconRenderer;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 
 final class BlockEventLoader
@@ -79,21 +80,6 @@ final class BlockEventLoader
 
     public static function renderIcon(string $name): string
     {
-        static $svgCache = [];
-        static $variant = null;
-
-        $variant ??= (string) get_option(WpEventOptions::EVENT_ICON_VARIANT, 'default');
-
-        if ($variant === 'material') {
-            $html = '<i class="material-icons material-symbols-outlined">' . esc_html($name) . '</i>';
-            return (string) apply_filters('ctx_events_block_icon', $html, $name);
-        }
-
-        if (!array_key_exists($name, $svgCache)) {
-            $file = dirname(__FILE__, 4) . '/assets/icons/' . $name . '.svg';
-            $svgCache[$name] = is_file($file) ? (string) file_get_contents($file) : '';
-        }
-
-        return (string) apply_filters('ctx_events_block_icon', $svgCache[$name], $name);
+        return Bootstrap::container()->get(IconRenderer::class)->render($name);
     }
 }
