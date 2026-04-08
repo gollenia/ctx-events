@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-04-07 06:50+0000\n"
+"PO-Revision-Date: 2026-04-07 06:33+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Language: de_AT\n"
@@ -40,10 +40,7 @@ msgstr "https://github.com/gollenia/events"
 msgid ""
 "Modern event and booking management for WordPress. Easily create events, "
 "manage attendees, track availability and handle payments"
-msgstr ""
-"Moderne Veranstaltungs- und Buchungsverwaltung für WordPress. Erstellen Sie "
-"einfach Veranstaltungen, verwalten Sie Teilnehmer, verfolgen Sie "
-"Verfügbarkeiten und wickeln Sie Zahlungen ab"
+msgstr "Moderne Veranstaltungs- und Buchungsverwaltung für WordPress. Erstellen Sie einfach Veranstaltungen, verwalten Sie Teilnehmende, verfolgen Sie Verfügbarkeiten und wickeln Sie Zahlungen ab"
 
 #. Author of the plugin
 #: events.php
@@ -178,9 +175,7 @@ msgstr "Abgelaufene Buchungen ablehnen"
 #: includes/Booking/Infrastructure/WpBookingOptions.php:47
 msgid ""
 "Automatically deny bookings when their pending payment transaction expires."
-msgstr ""
-"Buchungen automatisch ablehnen, wenn ihre ausstehende Zahlungstransaktion "
-"abläuft."
+msgstr "Buchungen automatisch ablehnen, wenn ihre ausstehende Zahlungstransaktion abläuft."
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:50
 msgid "Expiration automation"
@@ -194,9 +189,7 @@ msgstr "Auslöser für die Ablaufprüfung"
 msgid ""
 "Use WordPress-Cron for simple setups or an external HTTPS cron from your "
 "hoster for more reliable execution."
-msgstr ""
-"Verwenden Sie WordPress-Cron für einfache Setups oder einen externen HTTPS-"
-"Cron Ihres Hosters für eine zuverlässigere Ausführung."
+msgstr "Verwenden Sie WordPress-Cron für einfache Setups oder einen externen HTTPS-Cron Ihres Hosters für eine zuverlässigere Ausführung."
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:59
 msgid "WordPress-Cron"
@@ -213,9 +206,7 @@ msgstr "Token für externen Cron"
 #: includes/Booking/Infrastructure/WpBookingOptions.php:71
 #, php-format
 msgid "If you use an external cron, call %1$s every 15 minutes. Example: %2$s"
-msgstr ""
-"Wenn Sie einen externen Cron verwenden, rufen Sie %1$s alle 15 Minuten auf. "
-"Beispiel: %2$s"
+msgstr "Wenn Sie einen externen Cron verwenden, rufen Sie %1$s alle 15 Minuten auf. Beispiel: %2$s"
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:82
 msgid "Attach iCal to booking email"
@@ -224,9 +215,7 @@ msgstr "iCal an Buchungs-E-Mail anhängen"
 #: includes/Booking/Infrastructure/WpBookingOptions.php:83
 msgid ""
 "If enabled, an iCal file will be attached to booking confirmation emails."
-msgstr ""
-"Wenn aktiviert, wird den Buchungsbestätigungs-E-Mails eine iCal-Datei "
-"angehängt."
+msgstr "Wenn aktiviert, wird den Buchungsbestätigungs-E-Mails eine iCal-Datei angehängt."
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:86
 #: includes/Booking/Infrastructure/WpBookingOptions.php:96
@@ -241,9 +230,7 @@ msgstr "Admin-E-Mail für Buchungen"
 #: includes/Booking/Infrastructure/WpBookingOptions.php:93
 msgid ""
 "Optional fallback email address for booking-related admin notifications."
-msgstr ""
-"Optionale Fallback-E-Mail-Adresse für buchungsbezogene Admin-"
-"Benachrichtigungen."
+msgstr "Optionale Fallback-E-Mail-Adresse für buchungsbezogene Admin-Benachrichtigungen."
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:102
 msgid "Donation advertisement"
@@ -253,9 +240,7 @@ msgstr "Spendenhinweis"
 msgid ""
 "Optional HTML content to advertise donations in the booking confirmation "
 "email."
-msgstr ""
-"Optionaler HTML-Inhalt, um Spenden in der Buchungsbestätigungs-E-Mail zu "
-"bewerben."
+msgstr "Optionaler HTML-Inhalt, um Spenden in der Buchungsbestätigungs-E-Mail zu bewerben."
 
 #: includes/Event/Infrastructure/EventPost.php:46
 msgid "Event Tags"
@@ -486,9 +471,7 @@ msgstr "Vergangene Veranstaltungen in öffentlichen Ansichten anzeigen"
 
 #: includes/Event/Infrastructure/WpEventOptions.php:23
 msgid "If enabled, past events will be visible to all users in public views."
-msgstr ""
-"Wenn aktiviert, sind vergangene Veranstaltungen in öffentlichen Ansichten "
-"für alle Nutzer sichtbar."
+msgstr "Wenn aktiviert, sind vergangene Veranstaltungen in öffentlichen Ansichten für alle Nutzer sichtbar."
 
 #: includes/Event/Infrastructure/WpEventOptions.php:29
 msgid "Consider ongoing events as past"
@@ -497,9 +480,7 @@ msgstr "Laufende Veranstaltungen als vergangen behandeln"
 #: includes/Event/Infrastructure/WpEventOptions.php:30
 msgid ""
 "If enabled, events that are currently ongoing will be treated as past events."
-msgstr ""
-"Wenn aktiviert, werden aktuell laufende Veranstaltungen als vergangene "
-"Veranstaltungen behandelt."
+msgstr "Wenn aktiviert, werden aktuell laufende Veranstaltungen als vergangene Veranstaltungen behandelt."
 
 #: includes/Event/Infrastructure/WpEventOptions.php:36
 msgid "Event slug"
@@ -509,9 +490,7 @@ msgstr "Veranstaltungs-Slug"
 msgid ""
 "The slug for the event post type. This is used in the URL to access the "
 "event (e.g. `example.com/events/concert`)."
-msgstr ""
-"Der Slug für den Veranstaltungspost-Typ. Er wird in der URL verwendet, um "
-"auf die Veranstaltung zuzugreifen (z. B. `example.com/events/concert`)."
+msgstr "Der Slug für den Veranstaltungspost-Typ. Er wird in der URL verwendet, um auf die Veranstaltung zuzugreifen (z. B. `example.com/events/concert`)."
 
 #: includes/Event/Presentation/EventProgramPdfRenderer.php:156
 #, php-format
@@ -859,9 +838,7 @@ msgstr "Live"
 
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:105
 msgid "Select whether to use the test or live environment for payments."
-msgstr ""
-"Wählen Sie, ob für Zahlungen die Test- oder Live-Umgebung verwendet werden "
-"soll."
+msgstr "Wählen Sie, ob für Zahlungen die Test- oder Live-Umgebung verwendet werden soll."
 
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:111
 msgid "Return URL after payment (optional)"
@@ -890,8 +867,7 @@ msgstr "Beschreibung"
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:126
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:140
 msgid "A brief description shown when the user selects the gateway"
-msgstr ""
-"Kurze Beschreibung, die angezeigt wird, wenn der Nutzer das Gateway auswählt"
+msgstr "Kurze Beschreibung, die angezeigt wird, wenn der Nutzer das Gateway auswählt"
 
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:132
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:189
@@ -903,9 +879,7 @@ msgstr "Anweisungen"
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:190
 msgid ""
 "Write a text that the user sees when the bank transfer information is shown"
-msgstr ""
-"Schreiben Sie einen Text, den der Benutzer sieht, wenn die "
-"Banküberweisungsinformationen angezeigt werden"
+msgstr "Schreiben Sie einen Text, den der Benutzer sieht, wenn die Banküberweisungsinformationen angezeigt werden"
 
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:140
 msgid "Custom title for the payment gateway."
@@ -927,9 +901,7 @@ msgstr "Banküberweisung"
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:64
 msgid "No valid data provided to update the offline gateway configuration."
-msgstr ""
-"Es wurden keine gültigen Daten zum Aktualisieren der Offline-Gateway-"
-"Konfiguration übergeben."
+msgstr "Es wurden keine gültigen Daten zum Aktualisieren der Offline-Gateway-Konfiguration übergeben."
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:111
 msgid "Bank data is missing"
@@ -959,9 +931,7 @@ msgstr "Zahlungsziel"
 msgid ""
 "The payment term in days. Please not that bookings will automatically expire "
 "after this period"
-msgstr ""
-"Die Zahlungsfrist in Tagen. Bitte beachten Sie, dass Buchungen nach diesem "
-"Zeitraum automatisch ablaufen"
+msgstr "Die Zahlungsfrist in Tagen. Bitte beachten Sie, dass Buchungen nach diesem Zeitraum automatisch ablaufen"
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:153
 msgid "Banking Details"
@@ -1137,9 +1107,7 @@ msgstr "Gateways"
 #: includes/Platform/Wordpress/Assets.php:45
 msgid ""
 "I consent to my personal data being stored and used as per the Privacy Policy"
-msgstr ""
-"Ich stimme zu, dass meine personenbezogenen Daten gemäß der "
-"Datenschutzerklärung gespeichert und verwendet werden"
+msgstr "Ich stimme zu, dass meine personenbezogenen Daten gemäß der Datenschutzerklärung gespeichert und verwendet werden"
 
 #: includes/Platform/Wordpress/Assets.php:46
 msgid "I would like to support the event with a donation"
@@ -1253,7 +1221,7 @@ msgstr "Wählen Sie, welche Buchungsdaten im Export enthalten sein sollen."
 
 #: build/admin.js:335
 msgid "Include attendees"
-msgstr "Teilnehmer einschließen"
+msgstr "Teilnehmende einschließen"
 
 #: build/admin.js:478 build/admin.js:482 build/admin.js:489
 msgid "Reference copied to clipboard."
@@ -1271,9 +1239,7 @@ msgstr "Der Export konnte nicht heruntergeladen werden."
 msgid ""
 "The export could not be downloaded. Please check your permissions and try "
 "again."
-msgstr ""
-"Der Export konnte nicht heruntergeladen werden. Bitte prüfen Sie Ihre "
-"Berechtigungen und versuchen Sie es erneut."
+msgstr "Der Export konnte nicht heruntergeladen werden. Bitte prüfen Sie Ihre Berechtigungen und versuchen Sie es erneut."
 
 #: build/admin.js:594
 msgid "Search Bookings…"
@@ -1378,7 +1344,7 @@ msgstr "Teilnehmer speichern"
 
 #: build/admin.js:975 build/frontend.js:7
 msgid "Attendees"
-msgstr "Teilnehmer"
+msgstr "Teilnehmende"
 
 #: build/admin.js:984 build/admin.js:2102 build/admin.js:3152
 #: build/editor.js:8670 build/editor.js:9491 build/editor.js:9930
@@ -1387,7 +1353,7 @@ msgstr "Name"
 
 #: build/admin.js:997
 msgid "No attendees."
-msgstr "Keine Teilnehmer."
+msgstr "Keine Teilnehmenden."
 
 #: build/admin.js:1022
 msgid "Remove"
@@ -1706,7 +1672,7 @@ msgstr "Veranstaltung beibehalten"
 
 #: build/admin.js:2861
 msgid "Notify attendees by email"
-msgstr "Teilnehmer per E-Mail benachrichtigen"
+msgstr "Teilnehmende per E-Mail benachrichtigen"
 
 #: build/admin.js:2951
 msgid "Search Events..."
@@ -2260,8 +2226,7 @@ msgstr "Systemfeld: Kann nicht geändert werden."
 
 #: build/editor.js:3789
 msgid "Locked: Used by another field as visibility condition."
-msgstr ""
-"Gesperrt: Wird von einem anderen Feld als Sichtbarkeitsbedingung verwendet."
+msgstr "Gesperrt: Wird von einem anderen Feld als Sichtbarkeitsbedingung verwendet."
 
 #: build/editor.js:3804
 msgid "Enter label here..."
@@ -2793,10 +2758,7 @@ msgstr "Vorlage"
 msgid ""
 "Changes here are saved as event-specific mail overrides and apply only to "
 "this event after the post is updated."
-msgstr ""
-"Änderungen hier werden als veranstaltungsspezifische E-Mail-Überschreibungen "
-"gespeichert und gelten erst nach dem Aktualisieren des Beitrags nur für "
-"diese Veranstaltung."
+msgstr "Änderungen hier werden als veranstaltungsspezifische E-Mail-Überschreibungen gespeichert und gelten erst nach dem Aktualisieren des Beitrags nur für diese Veranstaltung."
 
 #: build/editor.js:9769
 msgid "Use for this event"
@@ -2820,8 +2782,7 @@ msgstr "Spenden erlauben"
 
 #: build/editor.js:9845
 msgid "Allow attendees to donate for other attendees when booking."
-msgstr ""
-"Teilnehmer erlauben, bei der Buchung für andere Teilnehmer zu spenden."
+msgstr "Teilnehmenden erlauben, bei der Buchung für andere Teilnehmende zu spenden."
 
 #: build/editor.js:9854
 msgid "Booking reference prefix"
@@ -3147,9 +3108,7 @@ msgstr "Zahlungsmethode"
 #: build/frontend.js:7
 msgid ""
 "I agree to the <a href=\"/privacy\" target=\"_blank\">privacy policy</a>."
-msgstr ""
-"Ich stimme der <a href=\"/privacy\" target=\"_blank\">"
-"Datenschutzerklärung</a> zu."
+msgstr "Ich stimme der <a href=\"/privacy\" target=\"_blank\">Datenschutzerklärung</a> zu."
 
 #: build/frontend.js:7
 msgid "Please accept the terms to continue."
@@ -3177,8 +3136,7 @@ msgstr "Details zur Banküberweisung"
 
 #: build/frontend.js:7
 msgid "Please transfer the amount using the following bank details."
-msgstr ""
-"Bitte überweisen Sie den Betrag unter Verwendung der folgenden Bankdaten."
+msgstr "Bitte überweisen Sie den Betrag unter Verwendung der folgenden Bankdaten."
 
 #: build/frontend.js:7
 msgid "Booking completed"
@@ -3200,9 +3158,7 @@ msgstr "Wie geht es weiter"
 msgid ""
 "There was a problem sending your confirmation email. Please contact us if "
 "you do not hear from us shortly."
-msgstr ""
-"Beim Senden Ihrer Bestätigungs-E-Mail ist ein Problem aufgetreten. Bitte "
-"kontaktieren Sie uns, wenn Sie nicht in Kürze von uns hören."
+msgstr "Beim Senden Ihrer Bestätigungs-E-Mail ist ein Problem aufgetreten. Bitte kontaktieren Sie uns, wenn Sie nicht in Kürze von uns hören."
 
 #: build/frontend.js:7
 msgid "You will receive a confirmation email shortly."
@@ -3212,9 +3168,7 @@ msgstr "Sie erhalten in Kürze eine Bestätigungs-E-Mail."
 msgid ""
 "There was a problem sending your confirmation email. Please keep your "
 "booking reference and contact us if needed."
-msgstr ""
-"Beim Senden Ihrer Bestätigungs-E-Mail ist ein Problem aufgetreten. Bitte "
-"bewahren Sie Ihre Buchungsreferenz auf und kontaktieren Sie uns bei Bedarf."
+msgstr "Beim Senden Ihrer Bestätigungs-E-Mail ist ein Problem aufgetreten. Bitte bewahren Sie Ihre Buchungsreferenz auf und kontaktieren Sie uns bei Bedarf."
 
 #: build/frontend.js:7
 msgid "Scan payment QR"
@@ -3280,9 +3234,9 @@ msgstr "Veranstaltungsbuchung"
 #: build/editor/blocks/booking/block.json
 msgctxt "block description"
 msgid "Add a button that allows the user to book tickets for an event."
-msgstr ""
-"Fügt einen Button hinzu, mit dem der Benutzer Tickets für eine Veranstaltung "
-"buchen kann"
+msgstr "Fügt einen Button hinzu, mit dem der Benutzer Tickets für eine Veranstaltung buchen kann."
+"Button einfügen, der dem Besucher die Buchung dieser Veranstaltung "
+"ermöglichst"
 
 #: build/editor/blocks/booking/block.json
 msgctxt "block style label"
@@ -3549,9 +3503,7 @@ msgstr "Programm-PDF-Export"
 msgctxt "block description"
 msgid ""
 "Render a public selector for weekly, monthly, or yearly event PDF exports."
-msgstr ""
-"Rendert eine öffentliche Auswahl für wöchentliche, monatliche oder jährliche "
-"Veranstaltungs-PDF-Exporte."
+msgstr "Rendert eine öffentliche Auswahl für wöchentliche, monatliche oder jährliche Veranstaltungs-PDF-Exporte."
 
 #: build/editor/blocks/upcoming/block.json
 msgctxt "block title"
