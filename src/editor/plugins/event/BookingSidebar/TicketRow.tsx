@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 import { formatPrice } from '@events/i18n';
 
-import { getEventEditorLocalization, type BookingTicket } from './types';
+import { getDefaultCurrency, type BookingTicket } from './types';
 
 type TicketRowProps = {
 	ticket: BookingTicket;
@@ -22,7 +22,7 @@ const TicketRow = ({
 	onSelect,
 	onDuplicate,
 }: TicketRowProps) => {
-	const currency = getEventEditorLocalization().currency ?? 'USD';
+	const currency = getDefaultCurrency();
 
 	return (
 		<tr>

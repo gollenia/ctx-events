@@ -1,18 +1,37 @@
-import apiFetch from '@wordpress/api-fetch';
-import { Notice, PanelBody, SelectControl, Spinner } from '@wordpress/components';
-import { lazy, Suspense, useEffect, useMemo, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import PanelTitle from '@events/adminfields/PanelTitle';
 import {
 	applyMailTemplateOverrides,
 	createMailTemplateOverride,
 } from '@events/emails';
-
-import type { BookingSidebarProps } from './types';
+import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	Flex,
+	FlexItem,
+	Modal,
+	Notice,
+	PanelBody,
+	SelectControl,
+	Spinner,
+} from '@wordpress/components';
+import {
+	lazy,
+	Suspense,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { MailTemplate } from '../../../../types/types';
+import icons from '../icons';
+import type { BookingSidebarProps } from './types';
 
-const EmailTemplateEditor = lazy(() => import('@events/emails/EmailTemplateEditor'));
+const EmailTemplateEditor = lazy(
+	() => import('@events/emails/EmailTemplateEditor'),
+);
 
 const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
+	const [isOpen, setIsOpen] = useState(false);
 	const [baseTemplates, setBaseTemplates] = useState<MailTemplate[]>([]);
 	const [activeKey, setActiveKey] = useState<string>('');
 	const [loading, setLoading] = useState(true);
@@ -55,7 +74,9 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 	const updateOverride = (template: MailTemplate) => {
 		const nextOverride = createMailTemplateOverride(template);
 		const currentOverrides = meta._booking_mails ?? [];
-		const otherOverrides = currentOverrides.filter((item) => item.key !== template.key);
+		const otherOverrides = currentOverrides.filter(
+			(item) => item.key !== template.key,
+		);
 
 		updateMeta({
 			_booking_mails: [...otherOverrides, nextOverride],
@@ -83,52 +104,87 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 	};
 
 	return (
-		<PanelBody
-			title={__('Mail Settings', 'ctx-events')}
-			initialOpen={true}
-			className="events-booking-settings"
-		>
-			{loading ? <Spinner /> : null}
-			{!loading && error && !form ? (
-				<Notice status="error" isDismissible={false}>
-					{error}
-				</Notice>
-			) : null}
-			{!loading && !error && !templates.length ? (
-				<Notice status="info" isDismissible={false}>
-					{__('No email templates found.', 'ctx-events')}
-				</Notice>
-			) : null}
-			{options.length ? (
-				<SelectControl
-					label={__('Template', 'ctx-events')}
-					value={activeKey}
-					options={options}
-					onChange={setActiveKey}
-				/>
-			) : null}
-			{form ? (
-				<Notice status="info" isDismissible={false}>
+		<>
+			<PanelBody
+				title={
+					<PanelTitle
+						icon={icons.mail}
+						title={__('Mail Settings', 'ctx-events')}
+					/>
+				}
+				initialOpen={true}
+				className="events-booking-settings"
+			>
+				<p className="events-booking-mail-settings__description">
 					{__(
-						'Changes here are saved as event-specific mail overrides and apply only to this event after the post is updated.',
+						'Edit event-specific email overrides in a separate dialog.',
 						'ctx-events',
 					)}
-				</Notice>
+				</p>
+				<Button variant="secondary" onClick={() => setIsOpen(true)}>
+					{__('Open Mail Settings', 'ctx-events')}
+				</Button>
+			</PanelBody>
+
+			{isOpen ? (
+				<Modal
+					title={__('Mail Settings', 'ctx-events')}
+					onRequestClose={() => setIsOpen(false)}
+					size="large"
+				>
+					<div className="events-booking-mail-settings-modal">
+						{loading ? <Spinner /> : null}
+						{!loading && error && !form ? (
+							<Notice status="error" isDismissible={false}>
+								{error}
+							</Notice>
+						) : null}
+						{!loading && !error && !templates.length ? (
+							<Notice status="info" isDismissible={false}>
+								{__('No email templates found.', 'ctx-events')}
+							</Notice>
+						) : null}
+						{options.length ? (
+							<SelectControl
+								label={__('Template', 'ctx-events')}
+								value={activeKey}
+								options={options}
+								onChange={setActiveKey}
+							/>
+						) : null}
+						{form ? (
+							<Notice status="info" isDismissible={false}>
+								{__(
+									'Changes here are saved as event-specific mail overrides and apply only to this event after the post is updated.',
+									'ctx-events',
+								)}
+							</Notice>
+						) : null}
+						{form ? (
+							<Suspense fallback={<Spinner />}>
+								<EmailTemplateEditor
+									template={form}
+									onChange={setForm}
+									onSave={handleSave}
+									onReset={handleReset}
+									onClose={() => setIsOpen(false)}
+									error={error}
+									saveLabel={__('Use for this event', 'ctx-events')}
+									resetLabel={__('Use global template', 'ctx-events')}
+								/>
+							</Suspense>
+						) : null}
+						<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
+							<FlexItem>
+								<Button variant="secondary" onClick={() => setIsOpen(false)}>
+									{__('Close', 'ctx-events')}
+								</Button>
+							</FlexItem>
+						</Flex>
+					</div>
+				</Modal>
 			) : null}
-			{form ? (
-				<Suspense fallback={<Spinner />}>
-					<EmailTemplateEditor
-						template={form}
-						onChange={setForm}
-						onSave={handleSave}
-						onReset={handleReset}
-						error={error}
-						saveLabel={__('Use for this event', 'ctx-events')}
-						resetLabel={__('Use global template', 'ctx-events')}
-					/>
-				</Suspense>
-			) : null}
-		</PanelBody>
+		</>
 	);
 };
 

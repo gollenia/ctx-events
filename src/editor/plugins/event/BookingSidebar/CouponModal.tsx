@@ -104,6 +104,8 @@ const CouponModal = ({
 				value={searchTerm}
 				onChange={(value) => setSearchTerm(value)}
 				placeholder={__('Search coupons', 'ctx-events')}
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 			/>
 			<table className="wp-list-table widefat striped table-view-list posts">
 				<thead>

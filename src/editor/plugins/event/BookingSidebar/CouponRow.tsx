@@ -2,7 +2,7 @@ import { CheckboxControl, Disabled } from '@wordpress/components';
 
 import { formatPrice } from '@events/i18n';
 
-import { getEventEditorLocalization } from './types';
+import { getDefaultCurrency } from './types';
 
 type Coupon = {
 	id: number;
@@ -21,7 +21,7 @@ type CouponRowProps = {
 };
 
 const CouponRow = ({ coupon, isSelected, onToggle }: CouponRowProps) => {
-	const currency = getEventEditorLocalization().currency ?? 'USD';
+	const currency = getDefaultCurrency();
 	const price =
 		coupon.type === 'fixed'
 			? formatPrice(coupon.amount, currency)
