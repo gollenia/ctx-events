@@ -27,6 +27,8 @@ final readonly class BookingListItemResource implements Resource
 		/** @var array{slug: string, name: string}|null */
         public ?array $gateway,
         public string $date,
+        public ?string $transactionId,
+        public ?string $transactionExpiresAt,
     ) {
     }
 
@@ -46,6 +48,8 @@ final readonly class BookingListItemResource implements Resource
             spaces: $item->spaces,
             gateway: $gateway,
             date: $item->bookingTime->format(DATE_ATOM),
+            transactionId: $item->transactionId,
+            transactionExpiresAt: $item->transactionExpiresAt?->format(DATE_ATOM),
         );
     }
 
@@ -62,6 +66,8 @@ final readonly class BookingListItemResource implements Resource
             'spaces'    => $this->spaces,
             'gateway'   => $this->gateway,
             'date'      => $this->date,
+            'transactionId' => $this->transactionId,
+            'transactionExpiresAt' => $this->transactionExpiresAt,
         ];
     }
 }

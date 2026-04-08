@@ -26,6 +26,9 @@ final readonly class BookingListItem
 		public ?string $gateway,
         public int $spaces = 0,
         public ?string $gatewayName = null,
+        public ?string $transactionId = null,
+        public ?\DateTimeImmutable $transactionExpiresAt = null
+
     ) {
     }
 
@@ -33,4 +36,12 @@ final readonly class BookingListItem
     {
         return clone($this, ['gatewayName' => $gatewayName]);
     }
+
+	public function withTransactionDetails(?string $transactionId, ?\DateTimeImmutable $transactionExpiresAt): self
+	{
+		return clone($this, [
+			'transactionId' => $transactionId,
+			'transactionExpiresAt' => $transactionExpiresAt,
+		]);
+	}
 }
