@@ -1,0 +1,75 @@
+.ctx-events-icon {
+	--ctx-icon-size: 2rem;
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	line-height: 1;
+	color: inherit;
+	overflow: visible;
+
+	svg {
+		display: block;
+		width: var(--ctx-icon-size);
+		height: var(--ctx-icon-size);
+		stroke: currentColor;
+		fill: none;
+		overflow: visible;
+	}
+}
+
+.ctx-chevron {
+	display: inline-block;
+	width: 0.55rem;
+	height: 0.55rem;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transition: transform 160ms ease;
+
+	&--down {
+		transform: rotate(45deg) translateY(-1px);
+	}
+
+	&--right {
+		transform: rotate(-45deg);
+	}
+
+	&--down.ctx-chevron--open {
+		transform: rotate(225deg) translateY(-1px);
+	}
+
+	&--right.ctx-chevron--open {
+		transform: rotate(135deg);
+	}
+}
+
+.ctx-plus-icon {
+	--ctx-plus-size: 0.875rem;
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	line-height: 1;
+
+	svg {
+		display: block;
+		width: var(--ctx-plus-size);
+		height: var(--ctx-plus-size);
+	}
+}
+
+.ctx-close-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	line-height: 1;
+
+	svg {
+		display: block;
+		width: 1em;
+		height: 1em;
+	}
+}
