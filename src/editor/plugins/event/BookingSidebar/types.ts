@@ -13,7 +13,7 @@ export type BookingMeta = {
 	_booking_reference_suffix?: string;
 	_booking_coupons?: number[];
 	_booking_mails?: EventMailTemplateOverride[];
-	_event_rsvp_donation?: boolean | number;
+	_donation_enabled?: boolean | number;
 	_event_tickets?: BookingTicket[];
 };
 
@@ -56,6 +56,10 @@ export const getEventEditorLocalization = (): EditorLocalization => {
 			eventEditorLocalization?: EditorLocalization;
 		}).eventEditorLocalization ?? {}
 	);
+};
+
+export const getDefaultCurrency = (): string => {
+	return getEventEditorLocalization().currency ?? 'EUR';
 };
 
 export const isBookingEnabled = (meta: BookingMeta): boolean => {
