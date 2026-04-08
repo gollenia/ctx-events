@@ -17,7 +17,7 @@ final class TicketMapper
             id: $data['id'],
             name: $data['name'],
             description: $data['description'] ?? null,
-            price: new Price($data['price'], Currency::fromCode(get_option(WpBookingOptions::BOOKING_CURRENCY, 'USD'))),
+            price: new Price($data['price'], Currency::fromCode(get_option(WpBookingOptions::BOOKING_CURRENCY, 'EUR'))),
             capacity: isset($data['capacity']) ? (int)$data['capacity'] : null,
             min: isset($data['min_per_booking']) ? (int)$data['min_per_booking'] : null,
             max: isset($data['max_per_booking']) ? (int)$data['max_per_booking'] : null,
