@@ -19,6 +19,7 @@ final readonly class GatewayResource implements Resource
 		public bool $enabled,
         public bool $supportsCheckoutLink,
 		public array $settings,
+		public bool $isValid,
 	) {
 	}
 
@@ -33,6 +34,7 @@ final readonly class GatewayResource implements Resource
 			settings: [
 				'description' => $dto->description,
 			],
+			isValid: $dto->isValid,
 		);
 	}
 
@@ -45,6 +47,7 @@ final readonly class GatewayResource implements Resource
 			'enabled' => $this->enabled,
             'supportsCheckoutLink' => $this->supportsCheckoutLink,
 			'settings' => $this->settings,
+			'isValid' => $this->isValid,
 		];
 	}
 }

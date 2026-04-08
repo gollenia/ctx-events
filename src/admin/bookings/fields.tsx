@@ -1,6 +1,6 @@
 import { formatPrice } from '@events/i18n';
 import { Icon } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { notAllowed, pending, published, swatch } from '@wordpress/icons';
 import type { BookingListItem } from 'src/types/types';
 import type { DataFieldConfig } from '../../shared/datatable/types';
@@ -20,6 +20,57 @@ const STATUS_ICONS: Record<number, typeof published> = {
 	2: published,
 	3: notAllowed,
 	4: swatch,
+};
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const HOUR_IN_MS = 60 * 60 * 1000;
+const MINUTE_IN_MS = 60 * 1000;
+const WARNING_COLOR = '#b32d2e';
+
+const getExpiresCountdown = (
+	value: string,
+): { label: string; isWarning: boolean } => {
+	const expiresAt = new Date(value).getTime();
+	const remainingMs = expiresAt - Date.now();
+
+	if (Number.isNaN(expiresAt)) {
+		return { label: '—', isWarning: false };
+	}
+
+	if (remainingMs <= 0) {
+		return {
+			label: __('Expired', 'ctx-events'),
+			isWarning: true,
+		};
+	}
+
+	if (remainingMs <= DAY_IN_MS) {
+		const hours = Math.floor(remainingMs / HOUR_IN_MS);
+		const minutes = Math.floor((remainingMs % HOUR_IN_MS) / MINUTE_IN_MS);
+
+		if (hours <= 0) {
+			return {
+				label: sprintf(__('%d min', 'ctx-events'), Math.max(1, minutes)),
+				isWarning: true,
+			};
+		}
+
+		return {
+			label: sprintf(__('%d h %d min', 'ctx-events'), hours, minutes),
+			isWarning: true,
+		};
+	}
+
+	const days = Math.ceil(remainingMs / DAY_IN_MS);
+
+	return {
+		label: sprintf(
+			/* translators: %d: remaining days until expiration */
+			__('%d days', 'ctx-events'),
+			days,
+		),
+		isWarning: days <= 2,
+	};
 };
 
 export const createFields = (
@@ -130,7 +181,48 @@ export const createFields = (
 	{
 		id: 'gateway',
 		label: __('Gateway', 'ctx-events'),
-		getValue: (booking: BookingListItem) => booking.gateway?.name ?? '—',
+		render: (booking: BookingListItem) => {
+			const countdown = booking.transactionExpiresAt
+				? getExpiresCountdown(booking.transactionExpiresAt)
+				: null;
+
+			return (
+				<div>
+					<div>{booking.gateway?.name ?? '—'}</div>
+					{booking.transactionId ? (
+						<div
+							style={{
+								fontSize: '12px',
+								color: 'var(--wp-admin-theme-color-darker-20)',
+							}}
+						>
+							{__('Transaction', 'ctx-events')}: {booking.transactionId}
+						</div>
+					) : null}
+					{countdown ? (
+						<div
+							style={{
+								fontSize: '12px',
+								fontWeight: countdown.isWarning ? 'bold' : 'normal',
+								color: countdown.isWarning
+									? WARNING_COLOR
+									: 'var(--wp-admin-theme-color-darker-20)',
+							}}
+						>
+							{__('Expires', 'ctx-events')}: {countdown.label}
+						</div>
+					) : null}
+				</div>
+			);
+		},
+		getValue: (booking: BookingListItem) =>
+			[
+				booking.gateway?.name ?? '',
+				booking.transactionId ?? '',
+				booking.transactionExpiresAt ?? '',
+			]
+				.filter(Boolean)
+				.join(' '),
 		filterBy: {
 			id: 'gateway',
 			label: __('All Gateways', 'ctx-events'),
