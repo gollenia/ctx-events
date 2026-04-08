@@ -29,7 +29,7 @@ final readonly class EditBookingResource implements Resource
         public array $transactions,
         public PriceSummaryResource $price,
 		public array $bookingForm,
-		public array $attendeeForm,
+		public ?array $attendeeForm = null,
         /** @var BookingNoteResource[] */
         public array $notes,
         /** @var BookingLogEntryResource[] */
@@ -59,7 +59,7 @@ final readonly class EditBookingResource implements Resource
             ),
             price: PriceSummaryResource::from($response->booking->priceSummary),
 			bookingForm: $response->registrationForm->toArray(),
-			attendeeForm: $response->attendeeForm->toArray(),
+			attendeeForm: $response->attendeeForm?->toArray(),
             notes: array_map(
                 static fn(BookingNote $n) => new BookingNoteResource($n->text, $n->date, $n->author),
                 iterator_to_array($response->notes),
