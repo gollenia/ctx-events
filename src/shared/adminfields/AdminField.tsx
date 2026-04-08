@@ -72,7 +72,11 @@ const AdminField = ({
 	});
 
 	if (type === 'heading') {
-		return <Heading level={(props.level as number | undefined) ?? 2}>{label}</Heading>;
+		return (
+			<Heading level={(props.level as number | undefined) ?? 2}>
+				{label}
+			</Heading>
+		);
 	}
 
 	if (type === 'textarea') {
@@ -88,12 +92,12 @@ const AdminField = ({
 	}
 
 	if (type === 'select' || type === 'radio') {
-		const mappedOptions = Object.entries(props.options as OptionMap | undefined).map(
-			([optionLabel, optionValue]) => ({
-				label: optionLabel,
-				value: String(optionValue),
-			}),
-		);
+		const mappedOptions = Object.entries(
+			props.options as OptionMap | undefined,
+		).map(([optionLabel, optionValue]) => ({
+			label: optionLabel,
+			value: String(optionValue),
+		}));
 
 		return (
 			<SelectControl
@@ -158,6 +162,10 @@ const AdminField = ({
 			onChange={onChange}
 			help={help}
 			type={type}
+			data-bwignore="true"
+			data-lpignore="true"
+			data-1p-ignore
+			data-protonpass-ignore="true"
 			required={required}
 			__nextHasNoMarginBottom
 		/>
