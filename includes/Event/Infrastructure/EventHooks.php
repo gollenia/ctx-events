@@ -12,17 +12,6 @@ use Contexis\Events\Shared\Domain\Contracts\Clock;
 
 class EventHooks
 {
-
-	private const AVAILABILITY_KEYS = [
-		EventMeta::TICKETS,
-		EventMeta::BOOKING_CAPACITY,
-		EventMeta::BOOKING_ENABLED,
-		EventMeta::BOOKING_START,
-		EventMeta::BOOKING_END,
-		EventMeta::EVENT_START,
-		EventMeta::BOOKING_CURRENCY,
-	];
-
     public function __construct(
         private EventRepository $eventRepository,
         private EventCacheRepository $eventCacheRepository,
@@ -32,20 +21,34 @@ class EventHooks
 
     public function register(): void
     {
-        add_action('updated_post_meta', [$this, 'saveMetaData'], 10, 4);
-		add_action('added_post_meta', [$this, 'saveMetaData'], 10, 4);
+        add_action('save_post_' . EventPost::POST_TYPE, [$this, 'savePost'], 10, 3);
+        add_action('rest_after_insert_' . EventPost::POST_TYPE, [$this, 'saveRestPost'], 10, 3);
     }
 
-    public function saveMetaData(int $meta_id, int $post_id, string $meta_key, mixed $meta_value): void
+    public function savePost(int $post_id, \WP_Post $post, bool $update): void
     {
-        if (get_post_type($post_id) !== 'ctx-event') {
+        if ($post->post_type !== EventPost::POST_TYPE) {
             return;
         }
 
-		if (!in_array($meta_key, self::AVAILABILITY_KEYS, true)) {
-			return;
-		}
+        if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
+            return;
+        }
 
+        $this->refreshCache($post_id);
+    }
+
+    public function saveRestPost(\WP_Post $post, \WP_REST_Request $request, bool $creating): void
+    {
+        if ($post->post_type !== EventPost::POST_TYPE) {
+            return;
+        }
+
+        $this->refreshCache((int) $post->ID);
+    }
+
+    private function refreshCache(int $post_id): void
+    {
 		$eventId = EventId::from($post_id);
 		$event = $this->eventRepository->find($eventId);
 

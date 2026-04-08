@@ -60,7 +60,7 @@ final readonly class Event
 		Currency $currency,
 		EventForms $forms,
 		EventCoupons $eventCoupons,
-		int $overallCapacity,
+		?int $overallCapacity,
 		bool $donationEnabled
 
 	): self
@@ -157,7 +157,17 @@ final readonly class Event
 
 	public function getCapacity(): ?int
 	{
-		return min($this->overallCapacity, $this->tickets?->getEnabledTickets()->getCapacity());
+		$ticketCapacity = $this->tickets?->getEnabledTickets()->getCapacity();
+
+		if ($this->overallCapacity === null) {
+			return $ticketCapacity;
+		}
+
+		if ($ticketCapacity === null) {
+			return $this->overallCapacity;
+		}
+
+		return min($this->overallCapacity, $ticketCapacity);
 	}
 
 	public function isPast(DateTimeImmutable $now): bool
