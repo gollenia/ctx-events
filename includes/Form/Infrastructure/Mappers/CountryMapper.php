@@ -14,10 +14,10 @@ class CountryMapper implements DetailsMapper
     public function map(array $attributes): FieldDetails
     {
         return new CountryDetails(
-            defaultValue: $attributes['defaultValue'] ?? null,
+            defaultValue: $attributes['defaultValue'] ?? '',
 			placeholder: $attributes['placeholder'] ?? '',
 			hasNullOption: $attributes['hasNullOption'] ?? false,
-			countryCodes: CountryCodes::of($attributes['allowedCountries'] ?? [])
+			countryCodes: CountryCodes::of(...($attributes['allowedCountries']))
         );
     }
 }

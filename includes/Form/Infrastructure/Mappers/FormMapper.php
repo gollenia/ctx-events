@@ -107,6 +107,7 @@ class FormMapper implements PostMapper
             'textarea' => new TextareaMapper(),
             'checkbox' => new CheckboxMapper(),
             'select'   => new SelectMapper(),
+			'country'  => new CountryMapper(),
             'html'     => new HtmlMapper(),
             default    => null
         };
