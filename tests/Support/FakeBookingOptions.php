@@ -10,7 +10,7 @@ final class FakeBookingOptions implements BookingOptions
 {
     public function __construct(
         private bool $enabled = true,
-        private string $currency = 'CHF',
+        private string $currency = 'EUR',
         private bool $denyExpiredBookings = true,
         private string $expirationSyncMode = 'wp_cron',
         private string $externalExpirationSyncToken = 'test-cron-token',
@@ -64,5 +64,10 @@ final class FakeBookingOptions implements BookingOptions
     public function attachIcalToBookingEmail(): bool
     {
         return $this->attachIcalToBookingEmail;
+    }
+
+    public function donationAdvertisement(): ?string
+    {
+        return null;
     }
 }
