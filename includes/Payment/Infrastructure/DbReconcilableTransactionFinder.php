@@ -30,7 +30,6 @@ final class DbReconcilableTransactionFinder implements FindReconcilableTransacti
         );
 
         $rows = $this->db->getResults($sql, DatabaseOutput::ARRAY_ASSOC);
-
         return array_map(TransactionMapper::map(...), $rows);
     }
 }
