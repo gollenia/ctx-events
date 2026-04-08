@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
-use Contexis\Events\Booking\Infrastructure\WpBookingOptions;
 use Contexis\Events\Shared\Infrastructure\Abstracts\MetaData;
 
 class EventMeta extends MetaData
@@ -80,7 +79,7 @@ class EventMeta extends MetaData
     public static array $metadata = [
         self::BOOKING_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
-        self::BOOKING_CURRENCY => ['type' => 'string', 'default' => 'EUR'],
+        self::BOOKING_CURRENCY => ['type' => 'string'],
         self::BOOKING_REFERENCE_PREFIX => ['type' => 'string', 'default' => ''],
         self::BOOKING_REFERENCE_SUFFIX => ['type' => 'string', 'default' => ''],
         self::PERSON_ID           => [

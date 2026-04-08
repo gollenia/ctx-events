@@ -57,7 +57,7 @@ final class EventMapper implements PostMapper
 			return $event;
 		}
 
-		$currency_string = $post->getString(EventMeta::BOOKING_CURRENCY) ?? get_option(WpBookingOptions::BOOKING_CURRENCY, 'USD');
+		$currency_string = $post->getString(EventMeta::BOOKING_CURRENCY) ?? get_option(WpBookingOptions::BOOKING_CURRENCY, 'EUR');
 		$currency = Currency::fromCode($currency_string);
 		$booking_policy = $post->getBool('_booking_enabled') ? BookingPolicy::create(
             enabled: true,
