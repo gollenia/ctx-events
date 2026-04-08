@@ -18,6 +18,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
     public const BOOKING_EXPIRATION_SYNC_TOKEN = 'ctx_events_booking_expiration_sync_token';
     public const BOOKING_ADMIN_EMAIL = 'ctx_events_booking_admin_email';
 	public const BOOKING_ATTACH_ICAL = 'ctx_events_booking_attach_ical';
+	public const BOOKING_DONATION_ADVERTISEMENT = 'ctx_events_booking_donation_advertisement';
 
     public function fields(): array
     {
@@ -31,7 +32,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
             ],
 			self::BOOKING_CURRENCY => [
 				'type'        => 'select',
-				'default'     => 'CHF',
+				'default'     => 'EUR',
 				'options'     => [
 					'EUR', 'CHF', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'NZD', 'SEK', 'NOK', 'DKK', 'ZAR', 'HKD', 'SGD', 'MXN', 'BRL', 'INR', 'RUB', 'TRY', 'KRW', 'PLN'
 				],
@@ -95,6 +96,16 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
                     'section_label' => __('Notification recipients', 'ctx-events'),
                     'order'       => 40,
                 ],
+				self::BOOKING_DONATION_ADVERTISEMENT => [
+					'type'        => 'string',
+					'default'     => '',
+					'label'       => __('Donation advertisement', 'ctx-events'),
+					'description' => __('Optional HTML content to advertise donations in the booking confirmation email.', 'ctx-events'),
+					'domain'      => 'booking',
+					'section'     => 'booking_notifications',
+					'section_label' => __('Notification recipients', 'ctx-events'),
+					'order'       => 50,
+				],
         ];
     }
 
@@ -155,4 +166,10 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
     {
         return $this->externalExpirationSyncUrl() . '?token=' . rawurlencode($this->externalExpirationSyncToken());
     }
+
+	public function donationAdvertisement(): ?string
+	{
+		$advertisement = $this->getString(self::BOOKING_DONATION_ADVERTISEMENT, '');
+		return $advertisement !== '' ? $advertisement : null;
+	}
 }

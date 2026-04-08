@@ -17,4 +17,5 @@ interface BookingOptions extends Options
     public function externalExpirationSyncToken(): string;
     public function adminNotificationEmail(): ?Email;
 	public function attachIcalToBookingEmail(): bool;
+	public function donationAdvertisement(): ?string;
 }
