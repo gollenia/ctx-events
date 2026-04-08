@@ -18,13 +18,4 @@ final readonly class Attendee
         public array $metadata = []
     ) {
     }
-
-    public function ageOn(DateTimeImmutable $reference): ?int
-    {
-        if (!$this->birthDate) {
-            return null;
-        }
-
-        return $this->birthDate->diff($reference)->y;
-    }
 }
