@@ -28,11 +28,11 @@ final readonly class EditBookingResponse
         public EventId $eventId,
         public string $eventTitle,
 		public Form $registrationForm,
-		public Form $attendeeForm,
 		public GatewayCollection $availableGateways,
         public bool $currentGatewaySupportsCheckoutLink,
         public BookingNotesCollection $notes,
         public TicketResponseCollection $availableTickets,
+		public ?Form $attendeeForm = null,
     ) {
     }
 
@@ -40,22 +40,22 @@ final readonly class EditBookingResponse
 		Booking $booking,
 		Event $event,
 		Form $registrationForm,
-		Form $attendeeForm,
 		GatewayCollection $availableGateways,
         bool $currentGatewaySupportsCheckoutLink,
 		BookingNotesCollection $notes,
 		TicketResponseCollection $availableTickets,
+		?Form $attendeeForm = null,
 	): self {
 		return new self(
 			booking: $booking,
 			eventId: $booking->eventId,
 			eventTitle: $event->name,
 			registrationForm: $registrationForm,
-			attendeeForm: $attendeeForm,
 			availableGateways: $availableGateways,
             currentGatewaySupportsCheckoutLink: $currentGatewaySupportsCheckoutLink,
 			notes: $notes,
 			availableTickets: $availableTickets,
+			attendeeForm: $attendeeForm,
 		);
 	}
 }
