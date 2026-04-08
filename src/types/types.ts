@@ -35,7 +35,7 @@ readonly attendees: BookingAttendeeResource[],
 readonly transactions: BookingTransactionResource[],
 readonly price: PriceSummary,
 readonly bookingForm: Array<any>,
-readonly attendeeForm: Array<any>,
+readonly attendeeForm: Array<any> | null,
 readonly notes: BookingNoteResource[],
 readonly logEntries: BookingLogEntryResource[],
 readonly availableTickets: AvailableTicketResource[],
@@ -55,6 +55,7 @@ bookingForm: Array<any>,
 attendeeForm: Array<any> | null,
 couponsEnabled: boolean,
 donationEnabled: boolean,
+donationAdvertisement: string | null,
 token: string,
 };
 export type BookingListItem = {
@@ -73,6 +74,8 @@ slug: string,
 name: string,
 } | null,
 readonly date: string,
+readonly transactionId: string | null,
+readonly transactionExpiresAt: string | null,
 };
 export type BookingLogEntryResource = {
 readonly eventType: string,
@@ -162,6 +165,7 @@ readonly adminName: string,
 readonly enabled: boolean,
 readonly supportsCheckoutLink: boolean,
 readonly settings: any[],
+readonly isValid: boolean,
 };
 export type InputType = "email" | "tel" | "url" | "text" | "number" | "date";
 export type Location = {
