@@ -8,6 +8,7 @@ import type {
 	DetailBlockProps,
 	EventDateMeta,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsTimeAttributes>) => {
@@ -39,7 +40,7 @@ const edit = (props: DetailBlockProps<DetailsTimeAttributes>) => {
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
-					<i className="material-icons material-symbols-outlined">schedule</i>
+					<EventIcon name="time" />
 				</div>
 				<div>
 					<RichText

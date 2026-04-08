@@ -8,6 +8,7 @@ import type {
 	EventLocationMeta,
 	LocationRecord,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
@@ -69,7 +70,7 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 							alt=""
 						/>
 					) : (
-						<i className="material-icons material-symbols-outlined">place</i>
+						<EventIcon name="location" />
 					)}
 				</div>
 				<div>

@@ -8,7 +8,7 @@
 	"attributes": {
 		"icon": {
 			"type": "string",
-			"default": "euro"
+			"default": "spaces_available"
 		},
 		"description": {
 			"type": "string",

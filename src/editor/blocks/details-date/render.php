@@ -16,7 +16,7 @@ $ical = $attributes['iCalLink'] ?? false;
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'calendar_today') ?>
+		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'date') ?>
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Date', 'ctx-events')) ?></h4>

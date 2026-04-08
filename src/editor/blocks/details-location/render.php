@@ -25,7 +25,7 @@ $photo = get_the_post_thumbnail_url($location->id, 'post-thumbnail');
 		<?php if ($hasPhoto && $photo) : ?>
 			<img class="event-details-image" src="<?= esc_url($photo) ?>" alt="<?= esc_attr($location->name) ?>">
 		<?php else : ?>
-			<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'place') ?>
+			<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'location') ?>
 		<?php endif; ?>
 	</div>
 	<div class="event-details-text">
@@ -47,7 +47,7 @@ $photo = get_the_post_thumbnail_url($location->id, 'post-thumbnail');
 	<?php if ($attributes['showLink'] ?? false) : ?>
 		<div class="event-details-action">
 			<a target="_blank" href="<?= esc_url($attributes['url'] ?: $location->externalUrl) ?>">
-				<?= BlockEventLoader::renderIcon('navigation') ?>
+				<?= BlockEventLoader::renderIcon('directions') ?>
 			</a>
 		</div>
 	<?php endif; ?>

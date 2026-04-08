@@ -28,20 +28,15 @@ $url = match ($linkTo) {
 $linkIcon = $linkTo;
 if ($linkTo === 'custom') {
     $linkIcon = 'link';
-    $socialPlatforms = ['facebook', 'instagram', 'linkedin', 'twitter', 'xing', 'youtube', 'vimeo'];
-    foreach ($socialPlatforms as $platform) {
-        if (str_contains($attributes['url'] ?: '', $platform)) {
-            $linkIcon = $platform;
-            break;
-        }
-    }
+} elseif ($linkTo === 'public') {
+    $linkIcon = 'link';
 }
 
 ?>
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'person') ?>
+		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'speaker') ?>
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Speaker', 'ctx-events')) ?></h4>

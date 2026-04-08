@@ -3,6 +3,7 @@ import domReady from '@wordpress/dom-ready';
 import { registerPlugin } from '@wordpress/plugins';
 
 import './editor.scss';
+import '../shared/icons/style.scss';
 import '@events/emails/style.scss';
 
 import * as booking from './blocks/booking/index.ts';
@@ -79,8 +80,16 @@ const plugins = [
 	{ name: 'event-recurrence-settings', component: recurrenceSettings },
 	{ name: 'event-booking-sidebar', component: bookingSidebar },
 	{ name: 'event-booking-status', component: BookingStatus },
-	{ name: 'event-dashboard-button', component: DashboardButton },
 ];
+
+const currentType = (window as Window & { typenow?: string }).typenow;
+
+if (currentType === 'ctx-event') {
+	plugins.push({
+		name: 'event-dashboard-button',
+		component: DashboardButton,
+	});
+}
 
 plugins.forEach((plugin) => {
 	registerPlugin(plugin.name, {
@@ -97,8 +106,6 @@ blocks.forEach((block) => {
 	const { name, settings } = block;
 	registerBlockType(name, settings);
 });
-
-const currentType = (window as Window & { typenow?: string }).typenow;
 
 domReady(() => {
 	if (currentType !== 'ctx-event') {

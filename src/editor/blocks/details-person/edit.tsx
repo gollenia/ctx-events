@@ -8,6 +8,7 @@ import type {
 	EventSpeakerMeta,
 	SpeakerRecord,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
@@ -78,7 +79,7 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 			}
 		}
 
-		return linkTo === 'custom' ? 'link' : linkTo;
+		return linkTo === 'custom' || linkTo === 'public' ? 'link' : linkTo;
 	})();
 
 	const image = speaker?._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null;
@@ -92,9 +93,7 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 				{showPortrait && image ? (
 					<img src={image} alt="" />
 				) : (
-					<i className="material-icons material-symbols-outlined">
-						{speaker?.gender ?? 'male'}
-					</i>
+					<EventIcon name={speaker?.gender ?? 'male'} />
 				)}
 			</div>
 			<div className="event-details-text">
@@ -114,9 +113,7 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 			{showLink && link && (
 				<div className="event-details-action">
 					<a href={link}>
-						<i className="material-icons material-symbols-outlined">
-							{linkIcon}
-						</i>
+						<EventIcon name={linkIcon} />
 					</a>
 				</div>
 			)}

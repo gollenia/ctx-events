@@ -27,7 +27,7 @@ if (!$isFree && $lowestPrice !== null) {
 <?php if ($isFree) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<?= BlockEventLoader::renderIcon('savings') ?>
+			<?= BlockEventLoader::renderIcon('price') ?>
 		</div>
 		<div class="event-details-text">
 			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
@@ -37,7 +37,7 @@ if (!$isFree && $lowestPrice !== null) {
 <?php elseif ($overwritePrice || isset($priceDisplay)) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<?= BlockEventLoader::renderIcon('payments') ?>
+			<?= BlockEventLoader::renderIcon('payment') ?>
 		</div>
 		<div class="event-details-text">
 			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>

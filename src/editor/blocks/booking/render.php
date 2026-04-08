@@ -1,5 +1,6 @@
 <?php
 
+use Contexis\Events\Event\Infrastructure\BlockEventLoader;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Platform\Bootstrap;
@@ -49,10 +50,7 @@ $block_attributes = get_block_wrapper_attributes([
 <button <?php echo $block_attributes; ?> type="button">
 <?php
 if ($button_icon !== '') {
-    printf(
-		'<i class="material-icons material-symbols-outlined">%s</i>',
-		esc_html($button_icon),
-	);
+    echo BlockEventLoader::renderIcon($button_icon);
 }
 
 if (!$icon_only) {

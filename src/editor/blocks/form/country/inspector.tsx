@@ -8,11 +8,12 @@ import {
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, error, region, help },
+		attributes: { width, required, error, region, help, allowedCountries },
 		setAttributes,
 	} = props;
 

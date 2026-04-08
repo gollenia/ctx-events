@@ -15,7 +15,7 @@ $time = BlockEventLoader::formatTimeRange($event->startDate, $event->endDate);
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($attributes['icon'] ?? 'schedule') ?>
+		<?= BlockEventLoader::renderIcon($attributes['icon'] ?? 'time') ?>
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Time', 'ctx-events')) ?></h4>

@@ -11,6 +11,7 @@ import type {
 	ColorValue,
 	DetailsItemAttributes,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 import Toolbar from './toolbar';
 
@@ -120,18 +121,14 @@ function ItemEdit(props: DetailsItemEditProps) {
 				{imageUrl ? (
 					<img src={imageUrl} ref={imageRef} alt="" />
 				) : (
-					<i className="material-icons material-symbols-outlined">{icon}</i>
+					<EventIcon name={icon} />
 				)}
 			</div>
 
 			<div className="event-details__item-content" {...innerBlockProps} />
 			{url && (
 				<div className="event-details__item-action">
-					<b>
-						<i className="material-icons material-symbols-outlined">
-							{urlIcon}
-						</i>
-					</b>
+					<b><EventIcon name={urlIcon} /></b>
 				</div>
 			)}
 		</div>

@@ -16,7 +16,7 @@ if ($summary->available === null) {
 
 $spaces = $summary->available;
 $warningThreshold = $attributes['warningThreshold'] ?? 5;
-$icon = $spaces === 0 ? 'sentiment_dissatisfied' : ($warningThreshold < $spaces ? 'done' : 'report_problem');
+$icon = $spaces === 0 ? 'spaces_full' : ($warningThreshold < $spaces ? 'done' : 'warning');
 
 ?>
 

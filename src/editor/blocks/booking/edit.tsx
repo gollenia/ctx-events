@@ -2,6 +2,7 @@ import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 import Toolbar from './toolbar';
 
@@ -69,11 +70,7 @@ const edit = (props: BookingEditProps) => {
 			<Inspector {...props} />
 			<Toolbar {...props} />
 			<span style={style} className={buttonClasses} aria-disabled={!meta._booking_enabled}>
-				{buttonIcon && (
-					<i className="material-icons material-symbols-outlined">
-						{buttonIcon}
-					</i>
-				)}
+				{buttonIcon && <EventIcon name={buttonIcon} />}
 				<RichText
 					disabled={!meta._booking_enabled}
 					tagName="span"

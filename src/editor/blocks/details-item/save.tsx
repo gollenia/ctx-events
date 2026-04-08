@@ -5,6 +5,7 @@ import {
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import type { DetailsItemAttributes } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 
 type DetailsItemSaveProps = {
 	attributes: DetailsItemAttributes & Record<string, unknown>;
@@ -53,7 +54,7 @@ export default function Save(props: DetailsItemSaveProps) {
 				{imageUrl ? (
 					<img src={imageUrl} alt="" />
 				) : (
-					<i className="material-icons material-symbols-outlined">{icon}</i>
+					<EventIcon name={icon} />
 				)}
 			</div>
 
@@ -66,11 +67,7 @@ export default function Save(props: DetailsItemSaveProps) {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{urlIcon && (
-						<i className="material-icons material-symbols-outlined">
-							{urlIcon}
-						</i>
-					)}
+					{urlIcon && <EventIcon name={urlIcon} />}
 				</a>
 			)}
 		</li>

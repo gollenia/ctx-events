@@ -22,7 +22,7 @@
 		},
 		"icon": {
 			"type": "string",
-			"default": "label"
+			"default": "link"
 		},
 		"styleVariation": {
 			"type": "string",
@@ -38,7 +38,7 @@
 		},
 		"urlIcon": {
 			"type": "string",
-			"default": "more_horiz"
+			"default": "link"
 		},
 		"roundImage": {
 			"type": "boolean",

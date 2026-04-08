@@ -7,6 +7,7 @@ import type {
 	DetailBlockProps,
 	EventAudienceMeta,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
@@ -33,9 +34,7 @@ const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
-					<i className="material-icons material-symbols-outlined">
-						family_restroom
-					</i>
+					<EventIcon name="audience" />
 				</div>
 				<div>
 					<RichText

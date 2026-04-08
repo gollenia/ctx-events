@@ -15,7 +15,7 @@ if (!$audience) {
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'male') ?>
+		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'audience') ?>
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Audience', 'ctx-events')) ?></h4>

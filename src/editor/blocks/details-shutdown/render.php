@@ -32,7 +32,7 @@ if ($summary->bookingStart && $now < $summary->bookingStart->getTimestamp()) {
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon('event_busy') ?>
+		<?= BlockEventLoader::renderIcon('booking_closed') ?>
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($description) ?></h4>

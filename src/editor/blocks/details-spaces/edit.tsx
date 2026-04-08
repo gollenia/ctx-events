@@ -1,12 +1,13 @@
+import type {
+	DetailBlockContext,
+	DetailBlockProps,
+	DetailsSpacesAttributes,
+	SpacesRecord,
+} from '@events/details/types';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityRecord } from '@wordpress/core-data';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import type {
-	DetailsSpacesAttributes,
-	DetailBlockContext,
-	DetailBlockProps,
-	SpacesRecord,
-} from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 type SpacesBlockProps = DetailBlockProps<DetailsSpacesAttributes> & {
@@ -31,11 +32,9 @@ const edit = (props: SpacesBlockProps) => {
 		return null;
 	}
 
-	const { record } = useEntityRecord(
-		'postType',
-		postType,
-		postId,
-	) as { record?: SpacesRecord };
+	const { record } = useEntityRecord('postType', postType, postId) as {
+		record?: SpacesRecord;
+	};
 	const spaces = record?.extras?.spaces || 0;
 	const blockProps = useBlockProps({ className: 'event-details-item' });
 
@@ -45,13 +44,15 @@ const edit = (props: SpacesBlockProps) => {
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
-					<i className="material-icons material-symbols-outlined">
-						{spaces === 0
-							? 'sentiment_dissatisfied'
-							: spaces > warningThreshold
-								? 'groups'
-								: 'report_problem'}
-					</i>
+					<EventIcon
+						name={
+							spaces === 0
+								? 'spaces_full'
+								: spaces > warningThreshold
+									? 'spaces_available'
+									: 'warning'
+						}
+					/>
 				</div>
 				<div>
 					<RichText

@@ -8,6 +8,7 @@ import type {
 	DetailBlockProps,
 	EventTicketsMeta,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 type PriceBlockProps = DetailBlockProps<DetailsPriceAttributes> & {
@@ -52,7 +53,7 @@ const edit = (props: PriceBlockProps) => {
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
-					<i className="material-icons material-symbols-outlined">savings</i>
+					<EventIcon name="price" />
 				</div>
 				<div>
 					<RichText

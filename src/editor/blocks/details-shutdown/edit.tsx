@@ -8,6 +8,7 @@ import type {
 	DetailBlockProps,
 	EventRsvpMeta,
 } from '@events/details/types';
+import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 type ShutdownBlockProps = DetailBlockProps<DetailsShutdownAttributes> & {
@@ -49,9 +50,7 @@ const edit = (props: ShutdownBlockProps) => {
 
 			<div className="event-details__item">
 				<div className="event-details__icon">
-					<i className="material-icons material-symbols-outlined">
-						event_busy
-					</i>
+					<EventIcon name="booking_closed" />
 				</div>
 				<div>
 					<h4 className="event-details_title">
