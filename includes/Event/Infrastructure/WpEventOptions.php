@@ -12,7 +12,6 @@ final class WpEventOptions extends WpOptions implements EventOptions
     public const EVENT_PUBLIC_SHOW_PAST = 'ctx_events_show_past_events';
     public const EVENT_ONGOING_IS_PAST = 'ctx_events_ongoing_events_are_past';
     public const EVENT_SLUG = 'ctx_events_event_slug';
-	public const EVENT_ICON_VARIANT = 'ctx_events_icon_variant';
 
     public function fields(): array
     {
@@ -38,17 +37,6 @@ final class WpEventOptions extends WpOptions implements EventOptions
                 'description' => __('The slug for the event post type. This is used in the URL to access the event (e.g. `example.com/events/concert`).', 'ctx-events'),
                 'domain'      => 'events',
             ],
-			self::EVENT_ICON_VARIANT => [
-				'type'        => 'select',
-				'default'     => 'default',
-				'label'       => __('Event icon variant', 'ctx-events'),
-				'description' => __('Choose the icon variant for events. This can be used to switch between different icon sets or styles.', 'ctx-events'),
-				'options'     => [
-					["value" => 'default', "label" => __('Internal Icons', 'ctx-events')],
-					["value" => 'material', "label" => __('Material Icons', 'ctx-events')],	
-				],
-				'domain'      => 'events',
-			],
         ];
     }
 
@@ -65,10 +53,5 @@ final class WpEventOptions extends WpOptions implements EventOptions
 	public function getEventsSlug(): string
 	{
 		return $this->getString(self::EVENT_SLUG);
-	}
-
-	public function getIconVariant(): string
-	{
-		return $this->getString(self::EVENT_ICON_VARIANT);
 	}
 }

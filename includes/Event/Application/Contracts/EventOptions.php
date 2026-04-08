@@ -13,5 +13,4 @@ interface EventOptions extends Options
     public function ongoingEventsArePast(): bool;
 
 	public function getEventsSlug(): string;
-	public function getIconVariant(): string;
 }
