@@ -8,6 +8,8 @@ use Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext;
 use Contexis\Events\Communication\Infrastructure\Tiptap\AttendeeTableNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\MailTokenNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\RegistrationDataNode;
+use Contexis\Events\Communication\Infrastructure\Tiptap\TextColorMark;
+use Contexis\Events\Communication\Infrastructure\Tiptap\UnderlineMark;
 use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
 
@@ -35,6 +37,8 @@ final class TiptapDocumentRenderer
                     'horizontalRule' => false,
                     'strike' => false,
                 ]),
+                new UnderlineMark(),
+                new TextColorMark(),
                 new MailTokenNode([
                     'resolveToken' => function (string $token) use ($context): string {
                         return (new EmailTemplateTokenReplacer())->replaceHtml($token, $context);

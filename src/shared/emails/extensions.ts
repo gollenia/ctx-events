@@ -1,4 +1,79 @@
-import { mergeAttributes, Node } from '@tiptap/core';
+import { Mark, mergeAttributes, Node } from '@tiptap/core';
+
+export const UnderlineMark = Mark.create({
+	name: 'underline',
+
+	parseHTML() {
+		return [
+			{ tag: 'u' },
+			{
+				tag: 'span[style]',
+				getAttrs: (element) =>
+					(element as HTMLElement).style.textDecoration.includes('underline')
+						? {}
+						: false,
+			},
+		];
+	},
+
+	renderHTML({ HTMLAttributes }) {
+		return ['u', mergeAttributes(HTMLAttributes), 0];
+	},
+
+	addCommands() {
+		return {
+			toggleUnderline:
+				() =>
+				({ commands }) =>
+					commands.toggleMark(this.name),
+		};
+	},
+});
+
+export const TextColorMark = Mark.create({
+	name: 'textColor',
+
+	addAttributes() {
+		return {
+			color: {
+				default: null,
+				parseHTML: (element) =>
+					element.getAttribute('data-color') || element.style.color || null,
+				renderHTML: (attributes) => {
+					if (!attributes.color) {
+						return {};
+					}
+
+					return {
+						'data-color': attributes.color,
+						style: `color: ${attributes.color}`,
+					};
+				},
+			},
+		};
+	},
+
+	parseHTML() {
+		return [{ tag: 'span[data-color]' }, { tag: 'span[style*="color"]' }];
+	},
+
+	renderHTML({ HTMLAttributes }) {
+		return ['span', mergeAttributes(HTMLAttributes), 0];
+	},
+
+	addCommands() {
+		return {
+			setTextColor:
+				(color: string) =>
+				({ commands }) =>
+					commands.setMark(this.name, { color }),
+			unsetTextColor:
+				() =>
+				({ commands }) =>
+					commands.unsetMark(this.name),
+		};
+	},
+});
 
 export const MailTokenNode = Node.create({
 	name: 'mailToken',

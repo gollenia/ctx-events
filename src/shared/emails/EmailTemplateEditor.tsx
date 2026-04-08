@@ -1,40 +1,15 @@
-import {
-	Button,
-	Flex,
-	Notice,
-	TextControl,
-	ToggleControl,
-} from '@wordpress/components';
-import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { useEffect } from '@wordpress/element';
+import { EditorContent } from '@tiptap/react';
+import { Button, Flex, Notice, TextControl, ToggleControl } from '@wordpress/components';
+import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import type { MailTemplate } from '../../types/types';
-import {
-	EMAIL_TEMPLATE_BLOCKS,
-	EMAIL_TEMPLATE_TOKENS,
-	parseEmailBodyDocument,
-	serializeTiptapDocument,
-} from './tiptap';
-import {
-	AttendeeTableNode,
-	MailTokenNode,
-	RegistrationDataNode,
-} from './extensions';
-
-type Props = {
-	template: MailTemplate;
-	onChange: (template: MailTemplate) => void;
-	onSave: () => void;
-	onReset?: () => void;
-	onClose?: () => void;
-	saving?: boolean;
-	error?: string | null;
-	resetLabel?: string;
-	saveLabel?: string;
-	closeLabel?: string;
-};
+import type { EmailTemplateEditorProps } from './editorTypes';
+import BodyToolbar from './BodyToolbar';
+import MentionPopover from './MentionPopover';
+import SubjectField from './SubjectField';
+import { getThemeTextColors } from './themeColors';
+import useBodyEditor from './useBodyEditor';
+import useSubjectMentions from './useSubjectMentions';
 
 const EmailTemplateEditor = ({
 	template,
@@ -47,177 +22,72 @@ const EmailTemplateEditor = ({
 	resetLabel = __('Reset to preset', 'ctx-events'),
 	saveLabel = __('Save changes', 'ctx-events'),
 	closeLabel = __('Close', 'ctx-events'),
-}: Props) => {
-	const editor = useEditor({
-		immediatelyRender: false,
-		extensions: [
-			StarterKit.configure({
-				heading: false,
-				blockquote: false,
-				codeBlock: false,
-				hardBreak: true,
-				horizontalRule: false,
-				strike: false,
-			}),
-			MailTokenNode,
-			RegistrationDataNode,
-			AttendeeTableNode,
-		],
-		content: parseEmailBodyDocument(template.body),
-		onUpdate: ({ editor: currentEditor }) => {
-			const body = serializeTiptapDocument(currentEditor.getJSON());
-
-			if (body === template.body) {
-				return;
-			}
-
-			onChange({ ...template, body });
-		},
+	showEnabledToggle = true,
+}: EmailTemplateEditorProps) => {
+	const editorSurfaceRef = useRef<HTMLDivElement | null>(null);
+	const subjectInputRef = useRef<HTMLInputElement | null>(null);
+	const bodyEditor = useBodyEditor({ template, onChange });
+	const subjectMentions = useSubjectMentions({
+		template,
+		onChange,
+		inputRef: subjectInputRef,
 	});
-
-	useEffect(() => {
-		if (!editor) {
-			return;
-		}
-
-		const nextContent = parseEmailBodyDocument(template.body);
-		const currentContent = serializeTiptapDocument(editor.getJSON());
-		const nextSerialized = serializeTiptapDocument(nextContent);
-
-		if (currentContent === nextSerialized) {
-			return;
-		}
-
-		editor.commands.setContent(nextContent, false);
-	}, [editor, template.body]);
-
-	const insertSubjectToken = (token: string) => {
-		const subject = template.subject ?? '';
-		onChange({ ...template, subject: `${subject}${token}` || token });
-	};
+	const themeTextColors = getThemeTextColors();
 
 	return (
 		<div className="ctx-email-editor">
 			<p className="ctx-email-editor__description">{template.description}</p>
-			<Notice status="info" isDismissible={false}>
-				{__(
-					'This template is edited as a Tiptap document and rendered server-side for outgoing mails.',
-					'ctx-events',
-				)}
-			</Notice>
 			{error ? (
 				<Notice status="error" isDismissible={false}>
 					{error}
 				</Notice>
 			) : null}
 
-			<ToggleControl
-				label={__('Enabled', 'ctx-events')}
-				checked={template.enabled}
-				onChange={(enabled) => onChange({ ...template, enabled })}
-			/>
+			{showEnabledToggle ? (
+				<ToggleControl
+					label={__('Enabled', 'ctx-events')}
+					checked={template.enabled}
+					onChange={(enabled) => onChange({ ...template, enabled })}
+				/>
+			) : null}
 
 			<TextControl
 				label={__('Reply-To', 'ctx-events')}
 				value={template.replyTo ?? ''}
-				onChange={(replyTo) =>
-					onChange({ ...template, replyTo: replyTo || null })
-				}
+				onChange={(replyTo) => onChange({ ...template, replyTo: replyTo || null })}
 			/>
 
-			<TextControl
-				label={__('Subject', 'ctx-events')}
+			<SubjectField
 				value={template.subject ?? ''}
-				onChange={(subject) => onChange({ ...template, subject: subject || null })}
+				inputRef={subjectInputRef}
+				commandOpen={
+					Boolean(subjectMentions.commandState) && subjectMentions.items.length > 0
+				}
+				items={subjectMentions.items}
+				selectedIndex={subjectMentions.selectedIndex}
+				onChange={subjectMentions.handleChange}
+				onCursorChange={subjectMentions.updateCommandState}
+				onKeyDown={subjectMentions.handleKeyDown}
+				onSelectItem={subjectMentions.insertMention}
 			/>
-			<div className="ctx-email-editor__tokens">
-				<span className="ctx-email-editor__tokens-label">
-					{__('Insert subject token:', 'ctx-events')}
-				</span>
-				{EMAIL_TEMPLATE_TOKENS.map((token) => (
-					<Button
-						key={`subject-${token.token}`}
-						variant="tertiary"
-						onClick={() => insertSubjectToken(token.token)}
-					>
-						{token.label}
-					</Button>
-				))}
-			</div>
 
 			<div className="ctx-email-editor__field">
 				<label className="ctx-email-editor__label">{__('Body', 'ctx-events')}</label>
-				<div className="ctx-email-editor__toolbar">
-					<Button
-						variant="secondary"
-						onClick={() => editor?.chain().focus().toggleBold().run()}
-						pressed={editor?.isActive('bold')}
-					>
-						{__('Bold', 'ctx-events')}
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={() => editor?.chain().focus().toggleItalic().run()}
-						pressed={editor?.isActive('italic')}
-					>
-						{__('Italic', 'ctx-events')}
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={() => editor?.chain().focus().toggleBulletList().run()}
-						pressed={editor?.isActive('bulletList')}
-					>
-						{__('Bullets', 'ctx-events')}
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-						pressed={editor?.isActive('orderedList')}
-					>
-						{__('Numbers', 'ctx-events')}
-					</Button>
-				</div>
-				<div className="ctx-email-editor__tokens">
-					<span className="ctx-email-editor__tokens-label">
-						{__('Insert token:', 'ctx-events')}
-					</span>
-					{EMAIL_TEMPLATE_TOKENS.map((token) => (
-						<Button
-							key={token.token}
-							variant="tertiary"
-							onClick={() =>
-								editor
-									?.chain()
-									.focus()
-									.insertContent({
-										type: 'mailToken',
-										attrs: token,
-									})
-									.run()
-							}
-						>
-							{token.label}
-						</Button>
-					))}
-				</div>
-				<div className="ctx-email-editor__tokens">
-					<span className="ctx-email-editor__tokens-label">
-						{__('Insert block:', 'ctx-events')}
-					</span>
-					{EMAIL_TEMPLATE_BLOCKS.map((block) => (
-						<Button
-							key={block.type}
-							variant="tertiary"
-							onClick={() =>
-								editor?.chain().focus().insertContent({ type: block.type }).run()
-							}
-						>
-							{block.label}
-						</Button>
-					))}
-				</div>
-				<div className="ctx-email-editor__surface">
-					<EditorContent editor={editor} />
+				<p className="ctx-email-editor__hint">
+					{__('Type @ for tokens and / for block inserts in the body.', 'ctx-events')}
+				</p>
+				<BodyToolbar editor={bodyEditor.editor} colors={themeTextColors} />
+				<div className="ctx-email-editor__surface" ref={editorSurfaceRef}>
+					<EditorContent editor={bodyEditor.editor} />
+					{bodyEditor.commandState ? (
+						<MentionPopover
+							anchor={editorSurfaceRef.current}
+							items={bodyEditor.items}
+							selectedIndex={bodyEditor.selectedIndex}
+							popoverClassName="ctx-email-editor__mentions-popover"
+							onSelect={bodyEditor.insertMention}
+						/>
+					) : null}
 				</div>
 			</div>
 
@@ -236,12 +106,7 @@ const EmailTemplateEditor = ({
 								{closeLabel}
 							</Button>
 						) : null}
-						<Button
-							variant="primary"
-							onClick={onSave}
-							isBusy={saving}
-							disabled={saving}
-						>
+						<Button variant="primary" onClick={onSave} isBusy={saving} disabled={saving}>
 							{saveLabel}
 						</Button>
 					</Flex>
