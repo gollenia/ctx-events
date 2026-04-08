@@ -59,6 +59,8 @@ export type BookingData = {
 	bookingForm: BookingFormData;
 	attendeeForm: BookingFormData | null;
 	couponsEnabled: boolean;
+	donationEnabled: boolean;
+	donationAdvertisement: string | null;
 	token: string;
 };
 
@@ -125,12 +127,16 @@ export type BookingState = {
 	gateway: string;
 	couponCode: string;
 	couponCheckResult: CouponCheckResult | null;
+	donationAmount: number;
 	openSection: SectionId;
 	completedSections: Set<SectionId>;
 };
 
 export type PaymentStateUpdates = Partial<
-	Pick<BookingState, 'gateway' | 'couponCode' | 'couponCheckResult'>
+	Pick<
+		BookingState,
+		'gateway' | 'couponCode' | 'couponCheckResult' | 'donationAmount'
+	>
 >;
 
 export type SectionId =

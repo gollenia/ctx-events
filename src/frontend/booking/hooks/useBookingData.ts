@@ -65,6 +65,10 @@ export function useBookingData(postId: number | null) {
 		setState({ status: 'idle' });
 	}, [postId]);
 
+	const reset = useCallback(() => {
+		setState({ status: 'idle' });
+	}, []);
+
 	const load = useCallback(async () => {
 		if (!postId) return;
 		if (state.status === 'loading' || state.status === 'loaded') return;
@@ -90,6 +94,11 @@ export function useBookingData(postId: number | null) {
 				bookingForm: (raw.bookingForm as BookingData['bookingForm']) ?? { id: 0, type: 'booking', name: '', description: null, fields: [] },
 				attendeeForm: (raw.attendeeForm as BookingData['attendeeForm']) ?? null,
 				couponsEnabled: Boolean(raw.couponsEnabled),
+				donationEnabled: Boolean(raw.donationEnabled),
+				donationAdvertisement:
+					typeof raw.donationAdvertisement === 'string'
+						? raw.donationAdvertisement
+						: null,
 				token: String(raw.token ?? ''),
 			};
 
@@ -105,5 +114,5 @@ export function useBookingData(postId: number | null) {
 		}
 	}, [postId, state.status]);
 
-	return { state, load };
+	return { state, load, reset };
 }

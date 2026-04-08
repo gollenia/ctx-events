@@ -1,0 +1,87 @@
+.booking-ticket-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.booking-ticket {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	&__name {
+		font-weight: 500;
+	}
+
+	&__price {
+		font-size: 0.875rem;
+		color: var(--wp--custom--ctx-events--booking--text-muted);
+	}
+
+	&__counter {
+		--wp--custom--ctx-forms--stepper--gap: 0.5rem;
+		--wp--custom--ctx-forms--stepper--padding: 3px;
+		--wp--custom--ctx-forms--stepper--value-min-width: var(--wp--custom--ctx-events--booking--ticket-count-min-width);
+	}
+}
+
+.booking-attendee {
+	margin-bottom: 1.5rem;
+	padding: 1.125rem 1.125rem 1.25rem;
+	border-style: solid;
+	border-color: var(--wp--custom--ctx-events--booking--attendee-accent);
+	border-width: var(--wp--custom--ctx-events--booking--section-border-width);
+	border-radius: var(--wp--custom--ctx-events--booking--section-radius);
+	position: relative;
+	background-color: var(--wp--custom--ctx-events--booking--attendee-bg);
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1rem;
+		padding-bottom: 0.875rem;
+	}
+
+	&__title {
+		font-size: 0.95rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+		margin: 0;
+	}
+
+	&__remove {
+		--ctx-icon-size: 1.25rem;
+
+		border: none;
+		background: none;
+		padding: 0.125rem;
+		color: var(--wp--custom--ctx-events--booking--danger-strong);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+		cursor: pointer;
+		border-radius: 999px;
+
+		&:hover {
+			color: var(--wp--custom--ctx-events--booking--danger-hover);
+			background: color-mix(in srgb, var(--wp--custom--ctx-events--booking--danger) 10%, transparent);
+		}
+	}
+}

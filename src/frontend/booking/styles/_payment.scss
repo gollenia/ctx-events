@@ -1,0 +1,104 @@
+.booking-donation-advertisement {
+	margin: 1rem 0 1.25rem;
+	padding: 1rem 1.125rem;
+	border: 1px solid var(--wp--custom--ctx-events--booking--donation-border);
+	border-radius: calc(var(--wp--custom--ctx-events--booking--section-radius) + 0.5rem);
+	background: var(--wp--custom--ctx-events--booking--donation-bg);
+
+	&__eyebrow {
+		margin: 0 0 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--wp--custom--ctx-events--booking--donation-eyebrow);
+	}
+
+	&__content {
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+
+		> :first-child {
+			margin-top: 0;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+
+		a {
+			color: var(--wp--custom--ctx-events--booking--accent);
+		}
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+	}
+
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	&__chevron {
+		flex: 0 0 auto;
+	}
+
+	&__clear {
+		border: none;
+		background: none;
+		padding: 0;
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	&__panel {
+		margin-top: 1rem;
+		padding: 1rem;
+		border-radius: 0.875rem;
+		background: var(--wp--custom--ctx-events--booking--donation-panel-bg);
+	}
+
+	&__presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.625rem;
+		margin-bottom: 0.875rem;
+	}
+
+	&__preset {
+		border: 1px solid var(--wp--custom--ctx-events--booking--donation-preset-border);
+		background: var(--wp--custom--ctx-events--booking--donation-preset-bg);
+		color: var(--wp--custom--ctx-events--booking--text);
+		border-radius: 999px;
+		padding: 0.5rem 0.875rem;
+		font: inherit;
+		cursor: pointer;
+
+		&--active {
+			border-color: var(--wp--custom--ctx-events--booking--accent);
+			background: color-mix(
+				in srgb,
+				var(--wp--custom--ctx-events--booking--accent) 10%,
+				white
+			);
+			color: var(--wp--custom--ctx-events--booking--accent);
+		}
+	}
+
+	&__field {
+		display: block;
+		--wp--custom--ctx-forms--field--gap: 0.5rem;
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 1rem;
+	}
+}

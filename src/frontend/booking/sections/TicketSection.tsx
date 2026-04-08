@@ -1,4 +1,6 @@
+import { Button } from '../../../shared/__experimentalForm';
 import { __ } from '@wordpress/i18n';
+import { SectionFooter } from '../components/SectionFooter';
 import { TicketCounter } from '../components/TicketCounter';
 import type { AttendeePayload, TicketInfo } from '../types';
 
@@ -32,17 +34,15 @@ export function TicketSection({ tickets, attendees, onChange, onNext }: Props) {
 				))}
 			</div>
 
-			<div className="booking-section__footer">
-				<button
-					type="button"
-					className="booking-btn booking-btn--primary"
+			<SectionFooter>
+				<Button
 					onClick={onNext}
 					disabled={totalSelected === 0}
 					data-testid="booking-tickets-continue"
 				>
 					{__('Continue', 'ctx-events')}
-				</button>
-			</div>
+				</Button>
+			</SectionFooter>
 		</div>
 	);
 }

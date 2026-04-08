@@ -1,5 +1,6 @@
 import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
+import { ensureIcons } from '../../shared/icons/ensureIcons';
 import Booking from './Booking';
 
 const BOOKING_OPEN_EVENT = 'ctx:booking:open';
@@ -19,7 +20,9 @@ domReady(() => {
 	if (!rootElement) return;
 
 	const root = createRoot(rootElement);
-	root.render(<Booking />);
+	ensureIcons(['delete']).finally(() => {
+		root.render(<Booking />);
+	});
 
 	const triggerButtons = document.querySelectorAll<HTMLElement>(
 		'[data-ctx-booking-trigger="true"]',

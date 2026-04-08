@@ -1,5 +1,7 @@
+import { Accordion } from '@base-ui/react/accordion';
 import { __ } from '@wordpress/i18n';
 import { AccordionSection } from './AccordionSection';
+import { BookingSummarySlot } from './components/BookingSummarySlot';
 import { AttendeeSection } from './sections/AttendeeSection';
 import { BookingFormSection } from './sections/BookingFormSection';
 import { PaymentSection } from './sections/PaymentSection';
@@ -26,6 +28,7 @@ type Props = {
 	onTicketChange: (ticketId: string, count: number) => void;
 	onTicketsDone: () => void;
 	onAttendeesDone: (attendees: AttendeePayload[]) => void;
+	onAttendeeRemove: (index: number) => void;
 	onRegistrationDone: (registration: Record<string, unknown>) => void;
 	onSubmit: (payload: {
 		token: string;
@@ -34,6 +37,7 @@ type Props = {
 		attendees: AttendeePayload[];
 		gateway: string;
 		coupon_code?: string;
+		donation_amount?: number;
 	}) => Promise<SubmitResult>;
 	onResult: (result: SubmitResult) => void;
 	onPaymentStateChange: (updates: PaymentStateUpdates) => void;
@@ -52,6 +56,29 @@ function getSections(data: BookingData): SectionId[] {
 	return base;
 }
 
+function isSectionDisabled(
+	sections: SectionId[],
+	completedSections: Set<SectionId>,
+	id: SectionId,
+): boolean {
+	const idx = sections.indexOf(id);
+	if (idx <= 0) return false;
+	const prev = sections[idx - 1];
+	return !completedSections.has(prev);
+}
+
+function getPaymentSectionTitle(data: BookingData, state: BookingState): string {
+	const hasPaidTickets = data.tickets.some(
+		(ticket) =>
+			ticket.price.amountCents > 0 &&
+			state.attendees.some((attendee) => attendee.ticket_id === ticket.id),
+	);
+
+	return hasPaidTickets
+		? __('Payment', 'ctx-events')
+		: __('Confirm booking', 'ctx-events');
+}
+
 export function BookingAccordion({
 	data,
 	state,
@@ -63,6 +90,7 @@ export function BookingAccordion({
 	onTicketChange,
 	onTicketsDone,
 	onAttendeesDone,
+	onAttendeeRemove,
 	onRegistrationDone,
 	onSubmit,
 	onResult,
@@ -82,92 +110,114 @@ export function BookingAccordion({
 		);
 	}
 	const sections = getSections(data);
-	const totalSelected = state.attendees.length;
-
-	function isSectionDisabled(id: SectionId): boolean {
-		const idx = sections.indexOf(id);
-		if (idx <= 0) return false;
-		const prev = sections[idx - 1];
-		return !state.completedSections.has(prev);
-	}
+	const paymentSectionDisabled = isSectionDisabled(
+		sections,
+		state.completedSections,
+		'payment',
+	);
+	const attendeesSectionDisabled = isSectionDisabled(
+		sections,
+		state.completedSections,
+		'attendees',
+	);
+	const bookingSectionDisabled = isSectionDisabled(
+		sections,
+		state.completedSections,
+		'booking',
+	);
+	const paymentSectionTitle = getPaymentSectionTitle(data, state);
 
 	return (
-		<div className="booking-accordion">
-			<AccordionSection
-				id="tickets"
-				title={__('Tickets', 'ctx-events')}
-				isOpen={state.openSection === 'tickets'}
-				isCompleted={state.completedSections.has('tickets')}
-				onToggle={onToggleSection}
-			>
-				<TicketSection
-					tickets={data.tickets}
-					attendees={state.attendees}
-					onChange={onTicketChange}
-					onNext={onTicketsDone}
-				/>
-			</AccordionSection>
-
-			{hasAttendees(data) && (
-				<AccordionSection
-					id="attendees"
-					title={__('Attendees', 'ctx-events')}
-					isOpen={state.openSection === 'attendees'}
-					isCompleted={state.completedSections.has('attendees')}
-					isDisabled={isSectionDisabled('attendees')}
-					onToggle={onToggleSection}
+		<div className="booking-layout">
+			<div className="booking-layout__main">
+				<Accordion.Root
+					className="booking-accordion"
+					value={[state.openSection]}
+					onValueChange={(value) => {
+						const [nextSection] = value;
+						if (nextSection) {
+							onToggleSection(nextSection as SectionId);
+						}
+					}}
 				>
-					<AttendeeSection
-						attendeeForm={data.attendeeForm!}
-						tickets={data.tickets}
-						initialAttendees={state.attendees}
-						onNext={onAttendeesDone}
+					<AccordionSection
+						id="tickets"
+						title={__('Tickets', 'ctx-events')}
+						isCompleted={state.completedSections.has('tickets')}
+					>
+						<TicketSection
+							tickets={data.tickets}
+							attendees={state.attendees}
+							onChange={onTicketChange}
+							onNext={onTicketsDone}
+						/>
+					</AccordionSection>
+
+					{hasAttendees(data) && (
+						<AccordionSection
+							id="attendees"
+							title={__('Attendees', 'ctx-events')}
+							isCompleted={state.completedSections.has('attendees')}
+							isDisabled={attendeesSectionDisabled}
+						>
+							<AttendeeSection
+								attendeeForm={data.attendeeForm!}
+								tickets={data.tickets}
+								initialAttendees={state.attendees}
+								onRemove={onAttendeeRemove}
+								onNext={onAttendeesDone}
+							/>
+						</AccordionSection>
+					)}
+
+					<AccordionSection
+						id="booking"
+						title={__('Your details', 'ctx-events')}
+						isCompleted={state.completedSections.has('booking')}
+						isDisabled={bookingSectionDisabled}
+					>
+						<BookingFormSection
+							bookingForm={data.bookingForm}
+							initialData={state.registration}
+							onNext={onRegistrationDone}
+						/>
+					</AccordionSection>
+					<BookingSummarySlot
+						data={data}
+						state={state}
+						postId={postId}
+						onPaymentStateChange={onPaymentStateChange}
+						visible={!paymentSectionDisabled}
+						className="booking-summary-panel--mobile"
+						couponClassName="booking-coupon-slot"
 					/>
-				</AccordionSection>
-			)}
+					<AccordionSection
+						id="payment"
+						title={paymentSectionTitle}
+						isCompleted={state.completedSections.has('payment')}
+						isDisabled={paymentSectionDisabled}
+					>
+						<PaymentSection
+							data={data}
+							bookingState={state}
+							onResult={onResult}
+							onPaymentStateChange={onPaymentStateChange}
+							onSubmit={onSubmit}
+							postId={postId}
+							isSubmitting={isSubmitting}
+						/>
+					</AccordionSection>
+				</Accordion.Root>
+			</div>
 
-			<AccordionSection
-				id="booking"
-				title={__('Your details', 'ctx-events')}
-				isOpen={state.openSection === 'booking'}
-				isCompleted={state.completedSections.has('booking')}
-				isDisabled={isSectionDisabled('booking')}
-				onToggle={onToggleSection}
-			>
-				<BookingFormSection
-					bookingForm={data.bookingForm}
-					initialData={state.registration}
-					onNext={onRegistrationDone}
-				/>
-			</AccordionSection>
-
-			<AccordionSection
-				id="payment"
-				title={
-					totalSelected > 0 &&
-					data.tickets.some(
-						(t) =>
-							t.price.amountCents > 0 &&
-							state.attendees.some((attendee) => attendee.ticket_id === t.id),
-					)
-						? __('Payment', 'ctx-events')
-						: __('Confirm booking', 'ctx-events')
-				}
-				isOpen={state.openSection === 'payment'}
-				isCompleted={state.completedSections.has('payment')}
-				isDisabled={isSectionDisabled('payment')}
-				onToggle={onToggleSection}
-			>
-				<PaymentSection
-					data={data}
-					bookingState={state}
-					onResult={onResult}
-					onPaymentStateChange={onPaymentStateChange}
-					onSubmit={onSubmit}
-					postId={postId}
-					isSubmitting={isSubmitting}
-				/>
-			</AccordionSection>
+			<BookingSummarySlot
+				data={data}
+				state={state}
+				postId={postId}
+				onPaymentStateChange={onPaymentStateChange}
+				className="booking-summary-panel--desktop"
+				couponClassName="booking-coupon-slot booking-coupon-slot--desktop"
+			/>
 		</div>
 	);
 }

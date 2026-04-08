@@ -1,0 +1,39 @@
+.booking-price-summary {
+	background: var(--wp--custom--ctx-events--booking--price-summary-bg);
+	border-radius: var(--wp--custom--ctx-events--booking--price-summary-radius);
+	margin-top: 1rem;
+	border: 1px solid var(--wp--custom--ctx-events--booking--price-summary-border);
+
+	&__line,
+	&__total {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		padding: 0.25rem 0;
+	}
+
+	&__total {
+		border-top: 1px solid var(--wp--custom--ctx-events--booking--price-summary-border);
+		margin-top: 0.5rem;
+		padding-top: 0.75rem;
+		font-weight: 600;
+	}
+
+	&__label {
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+		font-size: 0.9375rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	&__amount,
+	&__count {
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__separator {
+		font-size: 0.875em;
+		color: var(--wp--custom--ctx-events--booking--text-faint);
+	}
+}

@@ -1,0 +1,17 @@
+.booking-section {
+	padding: 0.25rem 0;
+
+	&__footer {
+		margin-top: 1.25rem;
+		display: flex;
+		justify-content: flex-end;
+	}
+}
+
+.booking-section-heading__title {
+	margin: 0;
+	font-size: 1.25rem;
+	line-height: 1.25;
+	font-weight: 700;
+	color: var(--wp--custom--ctx-events--booking--text);
+}

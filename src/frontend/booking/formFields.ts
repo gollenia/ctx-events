@@ -38,10 +38,12 @@ export const getBookingFieldDefinition = (
 	const definition: FormFieldDefinition = {
 		name: field.name,
 		label: field.label,
+		description: field.description,
 		type: getBookingFieldInputType(field),
 		required: field.required,
 		width: field.width,
 		visibilityRule: field.visibilityRule,
+		testId: `booking-field-${field.name}`,
 		placeholder: typeof field.placeholder === 'string' ? field.placeholder : '',
 		pattern: typeof field.pattern === 'string' ? field.pattern : null,
 		min: typeof field.min === 'number' ? field.min : undefined,
@@ -88,50 +90,6 @@ export const getBookingFieldInitialValue = (field: FormField): FieldValue => {
 	}
 	if (field.type === 'number') return 0;
 	return '';
-};
-
-export const getBookingFieldValue = (
-	field: FormField,
-	values: BookingFormValues,
-): FieldValue => {
-	const rawValue = values[field.name];
-
-	if (field.type === 'checkbox') {
-		if (typeof rawValue === 'boolean') return rawValue;
-		if (
-			rawValue === 'checked' ||
-			rawValue === 'on' ||
-			rawValue === '1' ||
-			rawValue === 1
-		) {
-			return true;
-		}
-		if (
-			rawValue === 'unchecked' ||
-			rawValue === 'off' ||
-			rawValue === '0' ||
-			rawValue === 0
-		) {
-			return false;
-		}
-		return getBookingFieldInitialValue(field);
-	}
-
-	if (field.type === 'number') {
-		if (typeof rawValue === 'number') return rawValue;
-		if (typeof rawValue === 'string' && rawValue.trim() !== '') {
-			const parsedValue = Number(rawValue);
-			if (!Number.isNaN(parsedValue)) return parsedValue;
-		}
-		return getBookingFieldInitialValue(field);
-	}
-
-	if (typeof rawValue === 'string') return rawValue;
-	if (typeof rawValue === 'number') return String(rawValue);
-	if (typeof rawValue === 'boolean') return rawValue ? '1' : '0';
-
-	const initialValue = getBookingFieldInitialValue(field);
-	return typeof initialValue === 'number' ? String(initialValue) : initialValue;
 };
 
 export const buildInitialFormValues = (

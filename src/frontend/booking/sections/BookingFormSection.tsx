@@ -1,36 +1,17 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Button } from '../../../shared/__experimentalForm';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
+import { SectionFooter } from '../components/SectionFooter';
 import { buildInitialFormValues } from '../formFields';
-import { isFieldVisible } from '../hooks/useFieldVisibility';
 import type { BookingFormData } from '../types';
+import { isBookingFormComplete, validateBookingFormData } from '../validation';
 
 type Props = {
 	bookingForm: BookingFormData;
 	initialData: Record<string, unknown>;
 	onNext: (data: Record<string, unknown>) => void;
 };
-
-function validate(
-	form: BookingFormData,
-	formData: Record<string, unknown>,
-): Record<string, string> {
-	const errors: Record<string, string> = {};
-
-	for (const field of form.fields) {
-		if (!isFieldVisible(field.visibilityRule, formData)) continue;
-		if (!field.required) continue;
-
-		const val = formData[field.name];
-		const isEmpty =
-			val === undefined || val === null || val === '' || val === false;
-		if (isEmpty) {
-			errors[field.name] = __('This field is required.', 'ctx-events');
-		}
-	}
-
-	return errors;
-}
 
 export function BookingFormSection({
 	bookingForm,
@@ -49,13 +30,15 @@ export function BookingFormSection({
 	}
 
 	function handleSubmit() {
-		const errs = validate(bookingForm, formData);
+		const errs = validateBookingFormData(bookingForm, formData);
 		if (Object.keys(errs).length > 0) {
 			setErrors(errs);
 			return;
 		}
 		onNext(formData);
 	}
+
+	const canContinue = isBookingFormComplete(bookingForm, formData);
 
 	return (
 		<div
@@ -69,16 +52,15 @@ export function BookingFormSection({
 				onChange={handleChange}
 			/>
 
-			<div className="booking-section__footer">
-				<button
-					type="button"
-					className="booking-btn booking-btn--primary"
+			<SectionFooter>
+				<Button
 					onClick={handleSubmit}
+					disabled={!canContinue}
 					data-testid="booking-registration-continue"
 				>
 					{__('Continue', 'ctx-events')}
-				</button>
-			</div>
+				</Button>
+			</SectionFooter>
 		</div>
 	);
 }

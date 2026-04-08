@@ -1,0 +1,193 @@
+.booking-section--success {
+	padding: 0.25rem 0;
+}
+
+.booking-success {
+	display: grid;
+	gap: 1rem;
+	max-width: 1120px;
+	margin: 0 auto;
+
+	&__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+		align-items: start;
+	}
+
+	&__main,
+	&__aside {
+		min-width: 0;
+	}
+
+	&__hero {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 1.25rem;
+		align-items: start;
+	}
+
+	&__hero-copy {
+		min-width: 0;
+	}
+
+	&__eyebrow {
+		margin: 0 0 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--wp--custom--ctx-events--booking--accent);
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 4rem;
+		height: 4rem;
+		font-size: 3rem;
+		color: var(--wp--custom--ctx-events--color--success);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--wp--custom--ctx-events--color--success) 12%, white);
+	}
+
+	&__title {
+		font-size: 1.75rem;
+		line-height: 1.15;
+		font-weight: 700;
+		margin: 0;
+		color: var(--wp--custom--ctx-events--booking--text);
+	}
+
+	&__event {
+		font-size: 1rem;
+		color: var(--wp--custom--ctx-events--booking--text-muted);
+		margin: 0.5rem 0 0;
+	}
+
+	&__reference-card {
+		display: inline-flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		margin-top: 1rem;
+		padding: 0.9rem 1rem;
+		border: 1px solid var(--wp--custom--ctx-events--booking--price-summary-border);
+		background: var(--wp--custom--ctx-events--booking--price-summary-bg);
+		font-weight: 600;
+		text-align: left;
+	}
+
+	&__reference-card span {
+		font-size: 0.8rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+	}
+
+	&__reference-card code {
+		font-size: 1rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		color: var(--wp--custom--ctx-events--booking--text);
+		word-break: break-word;
+	}
+
+	&__note {
+		font-size: 0.875rem;
+		color: var(--wp--custom--ctx-events--booking--text-muted);
+		margin: 0;
+	}
+
+	&__payment {
+		display: grid;
+		gap: 1rem;
+	}
+
+	&__qr {
+		display: grid;
+		gap: 1rem;
+	}
+
+	&__card-title {
+		font-size: 1rem;
+		font-weight: 700;
+		margin: 0 0 1rem;
+		color: var(--wp--custom--ctx-events--booking--text);
+	}
+
+	&__qr-image {
+		display: block;
+		width: min(100%, 260px);
+		height: auto;
+		margin: 0 auto;
+		padding: 1rem;
+		border: 1px solid var(--wp--custom--ctx-events--booking--qr-border);
+		border-radius: 0.75rem;
+		background: var(--wp--custom--ctx-events--booking--qr-bg);
+	}
+
+	&__instructions {
+		font-size: 0.95rem;
+		line-height: 1.6;
+		margin: 0;
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+	}
+
+	&__details {
+		text-align: left;
+		display: grid;
+		gap: 0.75rem;
+		padding: 1rem;
+		border: 1px solid var(--wp--custom--ctx-events--booking--success-card-border);
+		border-radius: 0.75rem;
+		background: var(--wp--custom--ctx-events--booking--success-card-bg);
+	}
+
+	&__detail {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: baseline;
+		font-size: 0.95rem;
+	}
+
+	&__detail span {
+		color: var(--wp--custom--ctx-events--booking--text-muted);
+	}
+
+	&__detail strong {
+		text-align: right;
+		word-break: break-word;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-start;
+	}
+}
+
+@media (min-width: 1024px) {
+	.booking-success__layout {
+		grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.booking-success__card {
+		padding: 1rem;
+	}
+
+	.booking-success__hero {
+		grid-template-columns: 1fr;
+	}
+
+	.booking-success__icon {
+		width: 3.25rem;
+		height: 3.25rem;
+		font-size: 2.25rem;
+	}
+
+	.booking-success__title {
+		font-size: 1.375rem;
+	}
+}

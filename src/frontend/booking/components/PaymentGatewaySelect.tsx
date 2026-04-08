@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { InputField } from '../../../shared/__experimentalForm';
 
 import type { GatewayInfo } from '../types';
 
@@ -18,25 +19,24 @@ export function PaymentGatewaySelect({
 	}
 
 	return (
-		<fieldset
+		<div
 			className="booking-gateway-select"
 			data-testid="booking-payment-gateways"
 		>
-			<legend className="booking-gateway-select__legend">
-				{__('Payment method', 'ctx-events')}
-			</legend>
-			{gateways.map((gateway) => (
-				<label key={gateway.id} className="booking-gateway-select__option">
-					<input
-						type="radio"
-						name="gateway"
-						value={gateway.id}
-						checked={selectedGateway === gateway.id}
-						onChange={() => onChange(gateway.id)}
-					/>
-					{gateway.title}
-				</label>
-			))}
-		</fieldset>
+			<InputField
+				type="radio"
+				name="gateway"
+				label={__('Payment method', 'ctx-events')}
+				width={6}
+				options={Object.fromEntries(
+					gateways.map((gateway) => [gateway.id, gateway.title]),
+				)}
+				value={selectedGateway}
+				status="LOADED"
+				formTouched={false}
+				disabled={false}
+				onChange={(value) => onChange(String(value))}
+			/>
+		</div>
 	);
 }

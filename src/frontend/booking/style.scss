@@ -1,83 +1,197 @@
+@use '../../shared/__experimentalForm/style.scss';
+@use './styles/cards';
+@use './styles/sections';
+@use './styles/tickets';
+@use './styles/pricing';
+@use './styles/payment';
+@use './styles/success';
+
+:root,
+:where(.ctx-form, .ctx-form-field, .ctx-content-block, .ctx-stepper) {
+	--wp--custom--ctx-events--booking--section-radius: 0px;
+	--wp--custom--ctx-events--booking--padding-x: 1.25rem;
+	--wp--custom--ctx-events--booking--section-border: 0px solid rgba(229, 231, 235, 0.95);
+	--wp--custom--ctx-events--booking--section-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+	--wp--custom--ctx-events--booking--surface: rgba(255, 255, 255, 0.96);
+	--wp--custom--ctx-events--booking--surface-muted: #f8fafc;
+	--wp--custom--ctx-events--booking--page-bg: #f5f5f5;
+	--wp--custom--ctx-events--booking--border-subtle: #e5e7eb;
+	--wp--custom--ctx-events--booking--border-strong: #e2e8f0;
+	--wp--custom--ctx-events--booking--text: var(--wp--preset-color-contrast, #0f172a);
+	--wp--custom--ctx-events--booking--text-muted: #6b7280;
+	--wp--custom--ctx-events--booking--text-soft: #475569;
+	--wp--custom--ctx-events--booking--text-faint: #64748b;
+	--wp--custom--ctx-events--booking--accent: var(--wp--preset-color-primary, #2563eb);
+	--wp--custom--ctx-events--booking--danger: #dc2626;
+	--wp--custom--ctx-events--booking--danger-strong: #b91c1c;
+	--wp--custom--ctx-events--booking--danger-hover: #991b1b;
+	--wp--custom--ctx-events--booking--summary-bg: var(--wp--custom--ctx-events--booking--surface);
+	--wp--custom--ctx-events--booking--summary-border: var(--wp--custom--ctx-events--booking--section-border);
+	--wp--custom--ctx-events--booking--summary-shadow: var(--wp--custom--ctx-events--booking--section-shadow);
+	--wp--custom--ctx-events--booking--attendee-accent: var(--wp--custom--ctx-events--booking--accent);
+	--wp--custom--ctx-events--booking--section-border-width: 0px 0px 0px 2px;
+	--wp--custom--ctx-events--booking--attendee-bg: rgba(37, 99, 235, .06);
+	--wp--custom--ctx-events--booking--price-summary-bg: none;
+	--wp--custom--ctx-events--booking--price-summary-border: none;
+	--wp--custom--ctx-events--booking--price-summary-radius: 0rem;
+	--wp--custom--ctx-events--booking--success-card-bg: #f9fafb;
+	--wp--custom--ctx-events--booking--success-card-border: var(--wp--custom--ctx-events--booking--border-subtle);
+	--wp--custom--ctx-events--booking--qr-bg: #fff;
+	--wp--custom--ctx-events--booking--qr-border: var(--wp--custom--ctx-events--booking--border-subtle);
+	--wp--custom--ctx-events--booking--coupon-trigger-bg: transparent;
+	--wp--custom--ctx-events--booking--coupon-trigger-icon-bg: rgba(37, 99, 235, 0.08);
+	--wp--custom--ctx-events--booking--coupon-trigger-icon-color: var(--wp--custom--ctx-events--booking--accent);
+	--wp--custom--ctx-events--booking--donation-bg: rgba(37, 99, 235, 0.06);
+	--wp--custom--ctx-events--booking--donation-border: rgba(37, 99, 235, 0.22);
+	--wp--custom--ctx-events--booking--donation-eyebrow: var(--wp--custom--ctx-events--booking--accent);
+	--wp--custom--ctx-events--booking--donation-panel-bg: rgba(255, 255, 255, 0.72);
+	--wp--custom--ctx-events--booking--donation-preset-bg: rgba(255, 255, 255, 0.86);
+	--wp--custom--ctx-events--booking--donation-preset-border: rgba(37, 99, 235, 0.18);
+	--wp--custom--ctx-events--color--primary: #2563eb;
+	--wp--custom--ctx-events--color--primary-hover: #1d4ed8;
+	--wp--custom--ctx-events--color--success: #16a34a;
+	--wp--custom--ctx-forms--field--border-color-focus: var(--wp--custom--ctx-events--booking--accent);
+	--wp--custom--ctx-forms--field--background: #fff;
+	--wp--custom--ctx-forms--field--text-color: var(--wp--custom--ctx-events--booking--text);
+	--wp--custom--ctx-forms--field--muted-color: var(--wp--custom--ctx-events--booking--text-muted);
+	--wp--custom--ctx-forms--field--error-color: var(--wp--custom--ctx-events--booking--danger);
+	--wp--custom--ctx-forms--field--radius: 6px;
+	--wp--custom--ctx-forms--field--label-color: var(--wp--custom--ctx-events--booking--text-soft);
+	--wp--custom--ctx-forms--field--description-color: var(--wp--custom--ctx-events--booking--text-muted);
+	--wp--custom--ctx-forms--field--link-color: var(--wp--custom--ctx-events--color--primary);
+	--wp--custom--ctx-forms--content-block--text-color: var(--wp--custom--ctx-events--booking--text-soft);
+	--wp--custom--ctx-forms--radio--label-padding: 0.4rem 0;
+	--wp--custom--ctx-forms--radio--label-font-size: 0.9375rem;
+	--wp--custom--ctx-forms--stepper--button-size: 1.75rem;
+	--wp--custom--ctx-forms--stepper--radius: 999px;
+	--wp--custom--ctx-forms--stepper--button-background: var(--wp--custom--ctx-forms--field--background);
+	--wp--custom--ctx-forms--stepper--button-border-color: 0px solid var(--wp--custom--ctx-forms--field--border-color);
+	--wp--custom--ctx-forms--stepper--outer-border: 1px solid var(--wp--custom--ctx-forms--field--border-color);
+	--wp--custom--ctx-forms--stepper--button-text-color: var(--wp--custom--ctx-forms--field--text-color, inherit);
+	--wp--custom--ctx-forms--stepper--button-hover-background: var(--wp--custom--ctx-forms--button--secondary-hover-background);
+	--wp--custom--ctx-forms--stepper--focus-ring: var(--wp--custom--ctx-forms--field--focus-ring);
+	--wp--custom--ctx-forms--stepper--disabled-opacity: var(--wp--custom--ctx-forms--button--disabled-opacity);
+	--wp--custom--ctx-events--booking--ticket-count-min-width: 1.75rem;
+}
+
 // Booking Modal + Accordion
 
-// ----- Modal -----
-
-.booking-modal {
+.booking-modal__backdrop {
 	position: fixed;
 	inset: 0;
 	z-index: 100000;
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.booking-modal__dialog {
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	transform: none;
+	background: #fff;
+	border-radius: 0;
+	box-shadow: none;
+	width: 100vw;
+	height: 100dvh;
+	max-height: 100dvh;
 	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.booking-modal__header {
+	display: flex;
+	align-items: center;
+	padding: max(1rem, env(safe-area-inset-top)) max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-right))
+		max(1rem, env(safe-area-inset-bottom))
+		max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-left));
+	border-bottom: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
+	gap: 1rem;
+	background: #fff;
+}
+
+.booking-modal__title {
+	flex: 1;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+.booking-modal__close {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	color: #6b7280;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 
-	&__backdrop {
-		position: absolute;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.55);
+	&:hover {
+		color: #111;
+		background: #f3f4f6;
 	}
+}
 
-	&__dialog {
-		position: relative;
-		background: #fff;
-		border-radius: 8px;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-		width: 100%;
-		max-width: 640px;
-		max-height: 90dvh;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
+.booking-modal__body {
+	overflow-y: auto;
+	flex: 1;
+	padding: 1.25rem max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-right))
+		max(1.25rem, env(safe-area-inset-bottom))
+		max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-left));
+	background: var(--wp--custom--ctx-events--booking--page-bg);
+}
 
-	&__header {
-		display: flex;
-		align-items: center;
-		padding: 1.25rem 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
-		gap: 1rem;
-	}
+.booking-layout {
+	width: min(100%, 1360px);
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1.5rem;
+	align-items: start;
+}
 
-	&__title {
-		flex: 1;
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-	}
+.booking-layout__main {
+	min-width: 0;
+}
 
-	&__close {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		line-height: 1;
-		cursor: pointer;
-		color: #6b7280;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
+.booking-summary-panel--desktop {
+	display: none;
+}
 
-		&:hover {
-			color: #111;
-			background: #f3f4f6;
-		}
-	}
-
-	&__body {
-		overflow-y: auto;
-		flex: 1;
-		padding: 0;
-	}
+.booking-check-icon {
+	color: var(--wp--custom--ctx-events--color--success);
 }
 
 // ----- Accordion -----
 
 .booking-accordion {
+	display: grid;
+	gap: 1rem;
+
 	&__section {
-		border-bottom: 1px solid #e5e7eb;
+		border: var(--wp--custom--ctx-events--booking--section-border);
+		border-radius: var(--wp--custom--ctx-events--booking--section-radius);
+		background: var(--wp--custom--ctx-events--booking--surface);
+		box-shadow: var(--wp--custom--ctx-events--booking--section-shadow);
+		overflow: hidden;
 
 		&:last-child {
 			border-bottom: none;
 		}
 	}
 
+	&__header-wrap {
+		margin: 0;
+
+		&--open {
+			display: none;
+		}
+	}
+
 	&__header {
 		width: 100%;
 		background: none;
@@ -85,20 +199,20 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 1rem 1.5rem;
+		padding: 1.25rem 1.5rem;
 		cursor: pointer;
 		text-align: left;
 		font-size: 1rem;
 		font-weight: 500;
-		color: #111827;
+		color: var(--wp--custom--ctx-events--booking--text);
 
-		&:disabled {
-			color: #9ca3af;
+		&[data-disabled] {
+			color: color-mix(in srgb, var(--wp--custom--ctx-events--booking--text-muted) 55%, white);
 			cursor: default;
 		}
 
-		&:not(:disabled):hover {
-			background: #f9fafb;
+		&:not([data-disabled]):hover {
+			background: var(--wp--custom--ctx-events--booking--surface-muted);
 		}
 	}
 
@@ -106,261 +220,267 @@
 		flex: 1;
 	}
 
-	&__check {
-		color: #16a34a;
-		font-weight: 700;
-	}
-
-	&__chevron {
-		color: #6b7280;
-		font-size: 0.75rem;
-	}
-
 	&__content {
-		padding: 0 1.5rem 1.5rem;
-	}
-}
+		box-sizing: border-box;
+		height: var(--accordion-panel-height);
+		overflow: hidden;
+		transition: height 200ms cubic-bezier(0.2, 0, 0, 1);
 
-// ----- Sections -----
-
-.booking-section {
-	&__footer {
-		margin-top: 1.25rem;
-		display: flex;
-		justify-content: flex-end;
-	}
-}
-
-// ----- Ticket counter -----
-
-.booking-ticket-list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-}
-
-.booking-ticket {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.75rem 0;
-	border-bottom: 1px solid #f3f4f6;
-
-	&:last-child {
-		border-bottom: none;
-	}
-
-	&__info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	&__name {
-		font-weight: 500;
-	}
-
-	&__price {
-		font-size: 0.875rem;
-		color: #6b7280;
-	}
-
-	&__counter {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	&__btn {
-		width: 2rem;
-		height: 2rem;
-		border: 1px solid #d1d5db;
-		border-radius: 50%;
-		background: #fff;
-		cursor: pointer;
-		font-size: 1.125rem;
-		line-height: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		&:disabled {
-			opacity: 0.4;
-			cursor: default;
-		}
-
-		&:not(:disabled):hover {
-			background: #f3f4f6;
+		&[data-starting-style],
+		&[data-ending-style] {
+			height: 0;
 		}
 	}
 
-	&__count {
-		min-width: 1.5rem;
-		text-align: center;
-		font-weight: 600;
+	&__content-inner {
+		padding: 1.5rem;
+		opacity: 1;
+		transform: translateY(0);
+		transition:
+			opacity 140ms ease-out,
+			transform 180ms ease-out;
+	}
+
+	&__content[data-starting-style] &__content-inner,
+	&__content[data-ending-style] &__content-inner {
+		opacity: 0;
+		transform: translateY(-0.125rem);
 	}
 }
 
-// ----- Attendees -----
+// ----- Summary panel -----
 
-.booking-attendee {
-	margin-bottom: 1.5rem;
+.booking-summary-panel {
+	min-width: 0;
+
+	&__eyebrow {
+		margin: 0 0 0.5rem;
+		font-size: var(--wp--custom--ctx-forms--field--font-size);
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--wp--custom--ctx-events--color--primary);
+	}
 
 	&__title {
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: #6b7280;
-		margin: 0 0 0.75rem;
-	}
-}
-
-// ----- Form fields -----
-
-.booking-form__fields {
-	display: grid;
-	grid-template-columns: repeat(6, 1fr);
-	gap: 0.75rem 1rem;
-}
-
-.booking-form__field {
-	@for $w from 1 through 6 {
-		&--width-#{$w} {
-			grid-column: span $w;
-		}
+		margin: 0;
+		font-size: var(--wp--custom--ctx-forms--field--font-size);
+		line-height: 1.3;
+		color: var(--wp--custom--ctx-events--booking--text);
 	}
 
-	&-label {
-		display: block;
-		font-size: 0.875rem;
-		font-weight: 500;
-		margin-bottom: 0.3rem;
-		color: #374151;
+	&__date {
+		margin: 0.5rem 0 0;
+		font-size: var(--wp--custom--ctx-forms--field--font-size);
+		color: var(--wp--custom--ctx-events--booking--text-soft);
 	}
 
-	&-description {
-		font-size: 0.8rem;
-		color: #6b7280;
-		margin: 0 0 0.3rem;
+	&__meta {
+		display: grid;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
 	}
 
-	&-error {
-		display: block;
-		font-size: 0.8rem;
-		color: #dc2626;
-		margin-top: 0.25rem;
-	}
-}
-
-.booking-form__input,
-.booking-form__textarea,
-.booking-form__select {
-	width: 100%;
-	border: 1px solid #d1d5db;
-	border-radius: 4px;
-	padding: 0.5rem 0.625rem;
-	font-size: 0.9375rem;
-	color: #111827;
-	background: #fff;
-	box-sizing: border-box;
-
-	&:focus {
-		outline: none;
-		border-color: #2563eb;
-		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-	}
-}
-
-.booking-form__textarea {
-	resize: vertical;
-	min-height: 5rem;
-}
-
-.booking-form__checkbox-label {
-	display: flex;
-	align-items: flex-start;
-	gap: 0.5rem;
-	cursor: pointer;
-	font-size: 0.9375rem;
-}
-
-.booking-form__checkbox {
-	margin-top: 0.125rem;
-	flex-shrink: 0;
-}
-
-.booking-form__html {
-	font-size: 0.9375rem;
-	line-height: 1.5;
-	color: #374151;
-}
-
-// ----- Price summary -----
-
-.booking-price-summary {
-	background: #f9fafb;
-	border-radius: 6px;
-	padding: 1rem;
-	margin-bottom: 1.25rem;
-
-	&__line,
-	&__total {
+	&__meta-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: baseline;
-		padding: 0.25rem 0;
-	}
-
-	&__total {
-		border-top: 1px solid #e5e7eb;
-		margin-top: 0.5rem;
-		padding-top: 0.75rem;
-		font-weight: 600;
-	}
-
-	&__label {
-		color: #374151;
+		gap: 1rem;
 		font-size: 0.9375rem;
+		color: var(--wp--custom--ctx-events--booking--text-soft);
 	}
 
-	&__amount {
-		font-variant-numeric: tabular-nums;
+	&__meta-row strong {
+		color: var(--wp--custom--ctx-events--booking--text);
+		text-align: right;
+	}
+
+	&__empty {
+		margin: 1rem 0 0;
+		padding-top: 1rem;
+		border-top: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
+		font-size: 0.9375rem;
+		line-height: 1.5;
+		color: var(--wp--custom--ctx-events--booking--text-faint);
+	}
+}
+
+.booking-coupon-slot {
+	.booking-coupon {
+		margin-bottom: 0;
+	}
+}
+
+@media (min-width: 1024px) {
+	.booking-modal__header {
+		padding-right: max(2rem, env(safe-area-inset-right));
+		padding-left: max(2rem, env(safe-area-inset-left));
+	}
+
+	.booking-modal__body {
+		padding: 2rem max(2rem, env(safe-area-inset-right))
+			max(2rem, env(safe-area-inset-bottom)) max(2rem, env(safe-area-inset-left));
+	}
+
+	.booking-layout {
+		grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.9fr);
+		gap: 2rem;
+	}
+
+	.booking-summary-panel--mobile {
+		display: none;
+	}
+
+	.booking-summary-panel--desktop {
+		display: block;
+		position: sticky;
+		top: 0;
+	}
+
+	.booking-summary-panel__card {
+		padding: 1.5rem;
+	}
+
+	.booking-coupon-slot--desktop {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
+	}
+
+	.booking-coupon-slot--desktop .booking-coupon__input {
+		width: 100%;
+	}
+}
+
+@media (max-width: 640px) {
+	.booking-section-heading {
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+	}
+
+	.booking-section-heading__title {
+		font-size: 1.125rem;
+	}
+
+	.booking-attendee {
+		padding: 1rem;
+	}
+
+	.booking-modal__title {
+		font-size: 1.125rem;
+	}
+
+	.booking-modal__body {
+		padding-top: 1rem;
+	}
+
+	.booking-accordion__header {
+		padding: 1rem 1rem 1rem 1.125rem;
+	}
+
+	.booking-accordion__content-inner {
+		padding: 0 1rem 1rem;
+	}
+
+	.booking-summary-panel__card {
+		padding: 1rem;
+	}
+
+	.booking-coupon__controls {
+		flex-direction: column;
+		align-items: stretch !important;
+	}
+
+	.booking-coupon__input-field {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.booking-coupon__button {
+		width: 100%;
 	}
 }
 
 // ----- Gateway -----
 
 .booking-gateway-select {
-	border: 1px solid #e5e7eb;
+	--wp--custom--ctx-forms--field--gap: 0.75rem;
+	border: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
 	border-radius: 6px;
 	padding: 0.75rem 1rem;
 	margin-bottom: 1rem;
-
-	&__legend {
-		font-size: 0.875rem;
-		font-weight: 500;
-		padding: 0 0.25rem;
-	}
-
-	&__option {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.4rem 0;
-		cursor: pointer;
-		font-size: 0.9375rem;
-	}
 }
 
 // ----- Coupon -----
 
 .booking-coupon {
 	margin-bottom: 1rem;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: end;
-	gap: 0.75rem;
+
+	&__trigger {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		border: none;
+		background: var(--wp--custom--ctx-events--booking--coupon-trigger-bg);
+		padding: 0.5rem 0;
+		cursor: pointer;
+		text-align: left;
+		color: var(--wp--custom--ctx-events--booking--text);
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--wp--custom--ctx-forms--field--focus-ring);
+		}
+	}
+
+	&__trigger-title-wrap {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-width: 0;
+	}
+
+	&__trigger-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 999px;
+		background: var(--wp--custom--ctx-events--booking--coupon-trigger-icon-bg);
+		color: var(--wp--custom--ctx-events--booking--coupon-trigger-icon-color);
+		flex-shrink: 0;
+	}
+
+	&__trigger-title {
+		font-size: 0.95rem;
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	&__trigger-chevron {
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+		flex: 0 0 auto;
+	}
+
+	&__panel {
+		height: var(--collapsible-panel-height);
+		overflow: hidden;
+		transition: height 200ms cubic-bezier(0.2, 0, 0, 1);
+
+		&[data-starting-style],
+		&[data-ending-style] {
+			height: 0;
+		}
+	}
+
+	&__panel-inner {
+		padding-top: 0.875rem;
+		display: block;
+	}
 
 	&__label {
 		display: block;
@@ -370,18 +490,13 @@
 		width: 100%;
 	}
 
-	&__input {
-		width: 14rem;
-		border: 1px solid #d1d5db;
-		border-radius: 4px;
-		padding: 0.5rem 0.625rem;
-		font-size: 0.9375rem;
+	&__controls {
+		width: 100%;
+	}
 
-		&:focus {
-			outline: none;
-			border-color: #2563eb;
-			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-		}
+	&__input-field {
+		flex: 1 1 14rem;
+		max-width: 100%;
 	}
 
 	&__button {
@@ -395,70 +510,18 @@
 	}
 
 	&__message--success {
-		color: #15803d;
+		color: var(--wp--custom--ctx-events--color--success);
 	}
 
 	&__message--error {
-		color: #dc2626;
+		color: var(--wp--custom--ctx-events--booking--danger);
 	}
 }
 
 // ----- Consent -----
 
 .booking-consent {
-	display: flex;
-	align-items: flex-start;
-	gap: 0.5rem;
 	margin-bottom: 1rem;
-	cursor: pointer;
-	font-size: 0.9375rem;
-
-	&__checkbox {
-		margin-top: 0.125rem;
-		flex-shrink: 0;
-	}
-
-	&__label a {
-		color: #2563eb;
-	}
-}
-
-// ----- Buttons -----
-
-.booking-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.625rem 1.5rem;
-	border-radius: 6px;
-	font-size: 0.9375rem;
-	font-weight: 500;
-	cursor: pointer;
-	border: none;
-	transition: background 0.15s, opacity 0.15s;
-
-	&--primary {
-		background: #2563eb;
-		color: #fff;
-
-		&:hover:not(:disabled) {
-			background: #1d4ed8;
-		}
-
-		&:disabled {
-			opacity: 0.5;
-			cursor: default;
-		}
-	}
-
-	&--secondary {
-		background: #f3f4f6;
-		color: #374151;
-
-		&:hover {
-			background: #e5e7eb;
-		}
-	}
 }
 
 // ----- State messages -----
@@ -466,110 +529,11 @@
 .booking-loading {
 	padding: 2rem;
 	text-align: center;
-	color: #6b7280;
+	color: var(--wp--custom--ctx-events--booking--text-muted);
 }
 
 .booking-error {
-	color: #dc2626;
+	color: var(--wp--custom--ctx-events--booking--danger);
 	font-size: 0.875rem;
 	margin: 0.5rem 0;
-}
-
-// ----- Success -----
-
-.booking-section--success {
-	padding: 2rem 1.5rem;
-}
-
-.booking-success {
-	text-align: center;
-	max-width: 560px;
-	margin: 0 auto;
-
-	&__icon {
-		display: block;
-		font-size: 3rem;
-		color: #16a34a;
-		margin-bottom: 1rem;
-	}
-
-	&__title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem;
-	}
-
-	&__event {
-		color: #6b7280;
-		margin: 0 0 0.75rem;
-	}
-
-	&__reference {
-		font-weight: 600;
-		margin: 0 0 0.5rem;
-	}
-
-	&__note {
-		font-size: 0.875rem;
-		color: #6b7280;
-		margin: 0 0 1.5rem;
-	}
-
-	&__payment {
-		margin: 1.5rem 0;
-	}
-
-	&__qr {
-		margin: 1.5rem 0;
-	}
-
-	&__qr-title {
-		font-size: 1rem;
-		font-weight: 600;
-		margin: 0 0 0.75rem;
-	}
-
-	&__qr-image {
-		display: block;
-		width: min(100%, 220px);
-		height: auto;
-		margin: 0 auto;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.75rem;
-		background: #fff;
-	}
-
-	&__instructions {
-		font-size: 0.95rem;
-		line-height: 1.6;
-		margin: 0 0 1rem;
-	}
-
-	&__details {
-		text-align: left;
-		display: grid;
-		gap: 0.75rem;
-		padding: 1rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.75rem;
-		background: #f9fafb;
-	}
-
-	&__detail {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		align-items: baseline;
-		font-size: 0.95rem;
-	}
-
-	&__detail span {
-		color: #6b7280;
-	}
-
-	&__detail strong {
-		text-align: right;
-		word-break: break-word;
-	}
 }

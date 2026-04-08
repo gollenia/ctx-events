@@ -1,10 +1,9 @@
 import { useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-import { CouponField } from '../components/CouponField';
+import { __ } from '@wordpress/i18n';
+import { Button, Checkbox } from '../../../shared/__experimentalForm';
+import { DonationAdvertisement } from '../components/DonationAdvertisement';
 import { PaymentGatewaySelect } from '../components/PaymentGatewaySelect';
-import { PriceSummary } from '../components/PriceSummary';
-import { useCouponPreflight } from '../hooks/useCouponPreflight';
-import { calculateBookingTotal, calculateCouponDiscount } from '../pricing';
+import { SectionFooter } from '../components/SectionFooter';
 import type {
 	AttendeePayload,
 	BookingData,
@@ -25,6 +24,7 @@ type Props = {
 		attendees: AttendeePayload[];
 		gateway: string;
 		coupon_code?: string;
+		donation_amount?: number;
 	}) => Promise<SubmitResult>;
 	postId: number;
 	isSubmitting: boolean;
@@ -42,36 +42,9 @@ export function PaymentSection({
 	const [consent, setConsent] = useState(false);
 	const [consentError, setConsentError] = useState('');
 	const [submitError, setSubmitError] = useState('');
-	const {
-		status: couponStatus,
-		result: couponResult,
-		message: couponMessage,
-		check: checkCoupon,
-		reset: resetCouponCheck,
-	} = useCouponPreflight();
 	const gateway = bookingState.gateway || (data.gateways[0]?.id ?? '');
-	const couponCode = bookingState.couponCode;
-	const appliedCoupon = bookingState.couponCheckResult;
-	const totalPrice = calculateBookingTotal(data.tickets, bookingState.attendees);
+	const donationAmount = Math.max(0, bookingState.donationAmount || 0);
 	const currency = data.tickets[0]?.price.currency ?? 'EUR';
-	const liveDiscountAmount = calculateCouponDiscount(totalPrice, appliedCoupon);
-
-	async function handleCouponCheck() {
-		if (!couponCode.trim()) {
-			resetCouponCheck();
-			onPaymentStateChange({ couponCheckResult: null });
-			return;
-		}
-
-		const result = await checkCoupon({
-			code: couponCode.trim(),
-			eventId: postId,
-			bookingPrice: totalPrice,
-			currency,
-		});
-
-		onPaymentStateChange({ couponCheckResult: result });
-	}
 
 	async function handleSubmit() {
 		if (!consent) {
@@ -87,7 +60,8 @@ export function PaymentSection({
 			registration: bookingState.registration,
 			attendees: bookingState.attendees,
 			gateway,
-			coupon_code: couponCode.trim() || undefined,
+			coupon_code: bookingState.couponCode.trim() || undefined,
+			donation_amount: donationAmount > 0 ? donationAmount : undefined,
 		});
 
 		if (result.type === 'error') {
@@ -103,12 +77,6 @@ export function PaymentSection({
 			className="booking-section booking-section--payment"
 			data-testid="booking-section-payment"
 		>
-			<PriceSummary
-				tickets={data.tickets}
-				attendees={bookingState.attendees}
-				coupon={appliedCoupon}
-			/>
-
 			<PaymentGatewaySelect
 				gateways={data.gateways}
 				selectedGateway={gateway}
@@ -117,52 +85,33 @@ export function PaymentSection({
 				}
 			/>
 
-			{data.couponsEnabled && (
-				<CouponField
-					code={couponCode}
+			{data.donationEnabled && data.donationAdvertisement && (
+				<DonationAdvertisement
+					content={data.donationAdvertisement}
 					currency={currency}
-					couponStatus={couponStatus}
-					couponResult={couponResult}
-					appliedCoupon={appliedCoupon}
-					couponMessage={couponMessage}
-					liveDiscountAmount={liveDiscountAmount}
-					onCodeChange={(nextCode) =>
-						onPaymentStateChange({
-							couponCode: nextCode,
-							couponCheckResult: null,
-						})
+					donationAmount={donationAmount}
+					onChange={(nextDonationAmount) =>
+						onPaymentStateChange({ donationAmount: nextDonationAmount })
 					}
-					onCheck={handleCouponCheck}
 				/>
 			)}
 
-			<label className="booking-consent">
-				<input
-					type="checkbox"
-					className="booking-consent__checkbox"
-					checked={consent}
-					onChange={(e) => setConsent(e.target.checked)}
-				/>
-				<span
-					className="booking-consent__label"
-					// eslint-disable-next-line react/no-danger
-					dangerouslySetInnerHTML={{
-						__html: sprintf(
-							// translators: %s is linked text
-							__(
-								'I agree to the <a href="/privacy" target="_blank">privacy policy</a>.',
-								'ctx-events',
-							),
-						),
+			<div className="booking-consent">
+				<Checkbox
+					name="privacy-consent"
+					width={6}
+					value={consent}
+					error={consentError || undefined}
+					label={__(
+						'I agree to the <a href="/privacy" target="_blank">privacy policy</a>.',
+						'ctx-events',
+					)}
+					onChange={(value) => {
+						setConsent(Boolean(value));
+						setConsentError('');
 					}}
 				/>
-			</label>
-
-			{consentError && (
-				<p className="booking-error" role="alert">
-					{consentError}
-				</p>
-			)}
+			</div>
 
 			{submitError && (
 				<p className="booking-error" role="alert">
@@ -170,10 +119,8 @@ export function PaymentSection({
 				</p>
 			)}
 
-			<div className="booking-section__footer">
-				<button
-					type="button"
-					className="booking-btn booking-btn--primary"
+			<SectionFooter>
+				<Button
 					onClick={handleSubmit}
 					disabled={isSubmitting}
 					data-testid="booking-submit"
@@ -181,8 +128,8 @@ export function PaymentSection({
 					{isSubmitting
 						? __('Processing…', 'ctx-events')
 						: __('Book now', 'ctx-events')}
-				</button>
-			</div>
+				</Button>
+			</SectionFooter>
 		</div>
 	);
 }

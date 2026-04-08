@@ -15,6 +15,7 @@ type SubmitPayload = {
 	attendees: AttendeePayload[];
 	gateway: string;
 	coupon_code?: string;
+	donation_amount?: number;
 };
 
 export function useSubmitBooking() {

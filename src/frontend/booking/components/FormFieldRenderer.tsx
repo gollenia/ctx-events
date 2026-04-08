@@ -1,7 +1,6 @@
 import type { FormField as FormFieldType } from '../types';
-import { isFieldVisible } from '../../../shared/__experimentalForm';
-import { getBookingFieldValue } from '../formFields';
-import { FormField } from './FormField';
+import { FormFields } from '../../../shared/__experimentalForm';
+import { getBookingFieldDefinition } from '../formFields';
 
 type Props = {
 	fields: FormFieldType[];
@@ -12,20 +11,11 @@ type Props = {
 
 export function FormFieldRenderer({ fields, formData, errors, onChange }: Props) {
 	return (
-		<div className="booking-form__fields">
-			{fields.map((field) => {
-				if (!isFieldVisible(field.visibilityRule, formData)) return null;
-
-				return (
-					<FormField
-						key={field.name}
-						field={field}
-						value={getBookingFieldValue(field, formData)}
-						error={errors[field.name]}
-						onChange={(value) => onChange(field.name, value)}
-					/>
-				);
-			})}
-		</div>
+		<FormFields
+			fields={fields.map(getBookingFieldDefinition)}
+			formData={formData}
+			errors={errors}
+			onChange={(name, value) => onChange(name, value)}
+		/>
 	);
 }

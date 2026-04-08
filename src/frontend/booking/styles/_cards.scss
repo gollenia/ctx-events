@@ -1,0 +1,17 @@
+.booking-card {
+	border-radius: var(--wp--custom--ctx-events--booking--section-radius);
+}
+
+.booking-card--summary {
+	background: var(--wp--custom--ctx-events--booking--summary-bg);
+	box-shadow: var(--wp--custom--ctx-events--booking--summary-shadow);
+	border: var(--wp--custom--ctx-events--booking--summary-border);
+	padding: 1.25rem;
+}
+
+.booking-card--surface {
+	border: var(--wp--custom--ctx-events--booking--section-border);
+	background: var(--wp--custom--ctx-events--booking--surface);
+	box-shadow: var(--wp--custom--ctx-events--booking--section-shadow);
+	padding: 1.5rem;
+}

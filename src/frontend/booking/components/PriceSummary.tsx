@@ -7,9 +7,15 @@ type Props = {
 	tickets: TicketInfo[];
 	attendees: AttendeePayload[];
 	coupon?: CouponCheckResult | null;
+	donationAmount?: number;
 };
 
-export function PriceSummary({ tickets, attendees, coupon }: Props) {
+export function PriceSummary({
+	tickets,
+	attendees,
+	coupon,
+	donationAmount = 0,
+}: Props) {
 	const ticketCounts = attendees.reduce<Record<string, number>>((counts, attendee) => {
 		counts[attendee.ticket_id] = (counts[attendee.ticket_id] ?? 0) + 1;
 		return counts;
@@ -21,7 +27,9 @@ export function PriceSummary({ tickets, attendees, coupon }: Props) {
 	const currency = lines[0]?.price.currency ?? 'EUR';
 	const total = calculateBookingTotal(lines, attendees);
 	const discount = calculateCouponDiscount(total, coupon);
+	const normalizedDonationAmount = Math.max(0, donationAmount);
 	const totalAfterDiscount = Math.max(0, total - discount);
+	const finalTotal = totalAfterDiscount + normalizedDonationAmount;
 
 	return (
 		<div className="booking-price-summary" data-testid="booking-price-summary">
@@ -30,7 +38,9 @@ export function PriceSummary({ tickets, attendees, coupon }: Props) {
 				return (
 					<div key={ticket.id} className="booking-price-summary__line">
 						<span className="booking-price-summary__label">
-							{count}× {ticket.name}
+							<span className="booking-price-summary__count">{count}</span>
+							<span className="booking-price-summary__separator">x</span>
+							<span>{ticket.name}</span>
 						</span>
 						<span className="booking-price-summary__amount">
 							{ticket.price.amountCents === 0
@@ -63,14 +73,24 @@ export function PriceSummary({ tickets, attendees, coupon }: Props) {
 					</span>
 				</div>
 			)}
+			{normalizedDonationAmount > 0 && (
+				<div className="booking-price-summary__line booking-price-summary__line--donation">
+					<span className="booking-price-summary__label">
+						{__('Contribution', 'ctx-events')}
+					</span>
+					<span className="booking-price-summary__amount">
+						{formatPrice({ amountCents: normalizedDonationAmount, currency })}
+					</span>
+				</div>
+			)}
 			<div className="booking-price-summary__total">
 				<span className="booking-price-summary__label">
 					{__('Total due', 'ctx-events')}
 				</span>
 				<span className="booking-price-summary__amount">
-					{totalAfterDiscount === 0
+					{finalTotal === 0
 						? __('Free', 'ctx-events')
-						: formatPrice({ amountCents: totalAfterDiscount, currency })}
+						: formatPrice({ amountCents: finalTotal, currency })}
 				</span>
 			</div>
 		</div>

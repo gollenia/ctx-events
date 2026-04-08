@@ -1,9 +1,12 @@
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Button } from '../../../shared/__experimentalForm';
+import EventIcon from '../../../shared/icons/EventIcon';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
+import { SectionFooter } from '../components/SectionFooter';
 import { buildInitialFormValues } from '../formFields';
-import { isFieldVisible } from '../hooks/useFieldVisibility';
 import type { AttendeePayload, BookingFormData, TicketInfo } from '../types';
+import { isBookingFormComplete, validateBookingFormData } from '../validation';
 
 type AttendeeEntry = {
 	ticketId: string;
@@ -17,6 +20,7 @@ type Props = {
 	attendeeForm: BookingFormData;
 	tickets: TicketInfo[];
 	initialAttendees: AttendeePayload[];
+	onRemove: (index: number) => void;
 	onNext: (attendees: AttendeePayload[]) => void;
 };
 
@@ -46,37 +50,20 @@ function buildInitialEntries(
 	return entries;
 }
 
-function validateEntry(
-	entry: AttendeeEntry,
-	form: BookingFormData,
-	formData: Record<string, unknown>,
-): Record<string, string> {
-	const errors: Record<string, string> = {};
-
-	for (const f of form.fields) {
-		if (!isFieldVisible(f.visibilityRule, formData)) continue;
-		if (!f.required) continue;
-
-		const val = formData[f.name];
-		const isEmpty =
-			val === undefined || val === null || val === '' || val === false;
-		if (isEmpty) {
-			errors[f.name] = __('This field is required.', 'ctx-events');
-		}
-	}
-
-	return errors;
-}
-
 export function AttendeeSection({
 	attendeeForm,
 	tickets,
 	initialAttendees,
+	onRemove,
 	onNext,
 }: Props) {
 	const [entries, setEntries] = useState<AttendeeEntry[]>(() =>
 		buildInitialEntries(tickets, attendeeForm, initialAttendees),
 	);
+
+	useEffect(() => {
+		setEntries(buildInitialEntries(tickets, attendeeForm, initialAttendees));
+	}, [tickets, attendeeForm, initialAttendees]);
 
 	function handleChange(index: number, name: string, value: unknown) {
 		setEntries((prev) =>
@@ -89,13 +76,18 @@ export function AttendeeSection({
 						}
 					: e,
 			),
-		);
+			);
+	}
+
+	function handleRemove(index: number) {
+		setEntries((prev) => prev.filter((entry) => entry.index !== index));
+		onRemove(index);
 	}
 
 	function handleSubmit() {
 		let hasErrors = false;
 		const updated = entries.map((e) => {
-			const errs = validateEntry(e, attendeeForm, e.formData);
+			const errs = validateBookingFormData(attendeeForm, e.formData);
 			if (Object.keys(errs).length > 0) hasErrors = true;
 			return { ...e, errors: errs };
 		});
@@ -111,39 +103,54 @@ export function AttendeeSection({
 		onNext(payloads);
 	}
 
+	const canContinue = entries.every(
+		(entry) => isBookingFormComplete(attendeeForm, entry.formData),
+	);
+
 	return (
 		<div
 			className="booking-section booking-section--attendees"
 			data-testid="booking-section-attendees"
 		>
-			{entries.map((entry) => (
-				<div
-					key={entry.index}
-					className="booking-attendee"
-					data-testid={`booking-attendee-${entry.index}`}
-				>
-					<h3 className="booking-attendee__title">
-						{entry.ticketName} #{entry.index + 1}
-					</h3>
-					<FormFieldRenderer
-						fields={attendeeForm.fields}
-						formData={entry.formData}
+				{entries.map((entry) => (
+					<div
+						key={entry.index}
+						className="booking-attendee"
+						data-testid={`booking-attendee-${entry.index}`}
+					>
+						<div className="booking-attendee__header">
+							<h3 className="booking-attendee__title">
+								{entry.ticketName} #{entry.index + 1}
+							</h3>
+							<button
+								type="button"
+								className="booking-attendee__remove"
+								onClick={() => handleRemove(entry.index)}
+								data-testid={`booking-attendee-remove-${entry.index}`}
+								aria-label={__('Remove attendee', 'ctx-events')}
+								title={__('Remove attendee', 'ctx-events')}
+							>
+								<EventIcon name="delete" />
+							</button>
+						</div>
+						<FormFieldRenderer
+							fields={attendeeForm.fields}
+							formData={entry.formData}
 						errors={entry.errors}
 						onChange={(name, value) => handleChange(entry.index, name, value)}
 					/>
 				</div>
 			))}
 
-			<div className="booking-section__footer">
-				<button
-					type="button"
-					className="booking-btn booking-btn--primary"
+			<SectionFooter>
+				<Button
 					onClick={handleSubmit}
+					disabled={!canContinue}
 					data-testid="booking-attendees-continue"
 				>
 					{__('Continue', 'ctx-events')}
-				</button>
-			</div>
+				</Button>
+			</SectionFooter>
 		</div>
 	);
 }

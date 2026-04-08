@@ -1,5 +1,6 @@
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
+import { Stepper } from '../../../shared/__experimentalForm';
 import type { TicketInfo } from '../types';
 
 type Props = {
@@ -10,14 +11,6 @@ type Props = {
 
 export function TicketCounter({ ticket, count, onChange }: Props) {
 	const max = ticket.booking_limit ?? ticket.ticket_limit_per_booking ?? 10;
-
-	function decrement() {
-		onChange(Math.max(0, count - 1));
-	}
-
-	function increment() {
-		onChange(Math.min(max, count + 1));
-	}
 
 	return (
 		<div className="booking-ticket" data-testid={`booking-ticket-${ticket.id}`}>
@@ -32,31 +25,17 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 							})}
 				</span>
 			</div>
-			<div className="booking-ticket__counter">
-				<button
-					type="button"
-					className="booking-ticket__btn"
-					onClick={decrement}
-					disabled={count === 0}
-					aria-label={__('Remove one', 'ctx-events')}
-					data-testid={`booking-ticket-${ticket.id}-decrement`}
-				>
-					–
-				</button>
-				<span className="booking-ticket__count" aria-live="polite">
-					{count}
-				</span>
-				<button
-					type="button"
-					className="booking-ticket__btn"
-					onClick={increment}
-					disabled={count >= max}
-					aria-label={__('Add one', 'ctx-events')}
-					data-testid={`booking-ticket-${ticket.id}-increment`}
-				>
-					+
-				</button>
-			</div>
+			<Stepper
+				className="booking-ticket__counter"
+				value={count}
+				min={0}
+				max={max}
+				onChange={onChange}
+				decrementLabel={__('Remove one', 'ctx-events')}
+				incrementLabel={__('Add one', 'ctx-events')}
+				decrementTestId={`booking-ticket-${ticket.id}-decrement`}
+				incrementTestId={`booking-ticket-${ticket.id}-increment`}
+			/>
 		</div>
 	);
 }
