@@ -322,6 +322,18 @@ test.describe('booking app', () => {
 		await expect(page.getByText('Please transfer the amount within 7 days.')).toBeVisible();
 	});
 
+	test('returns to tickets when the last attendee is removed', async ({ page }) => {
+		await openBooking(page, PAID_POST_ID);
+		await selectTicket(page, 'paid-ticket');
+
+		const attendeeSection = page.getByTestId('booking-section-attendees');
+		await attendeeSection.getByTestId('booking-attendee-remove-0').click();
+
+		await expect(page.getByTestId('booking-section-tickets')).toBeVisible();
+		await expect(page.getByTestId('booking-ticket-paid-ticket')).toContainText('0');
+		await expect(page.getByTestId('booking-tickets-continue')).toBeDisabled();
+	});
+
 	test('applies a coupon discount in the paid booking flow', async ({ page }) => {
 		await openBooking(page, PAID_POST_ID);
 		await selectTicket(page, 'paid-ticket');
