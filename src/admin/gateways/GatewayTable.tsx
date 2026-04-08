@@ -67,7 +67,7 @@ const GatewayTable = () => {
 
 			callback: (items) => {
 				const gateway = items[0];
-				onToggle(gateway.slug, gateway.active);
+				onToggle(gateway.slug, gateway.enabled);
 				removeNotice(gateway.slug);
 			},
 		},
@@ -103,15 +103,15 @@ const GatewayTable = () => {
 			label: __('Configured', 'ctx-events'),
 			id: 'isValid',
 			enableSorting: true,
-			render: (item) => {
-				return item.isValid ? (
-					<Flex justify="left" gap={2}>
-						<Icon icon={check} />
-						{item.active ? (
-							<span className="is-configured">
-								{__('Configured and active', 'ctx-events')}
-							</span>
-						) : (
+				render: (item) => {
+					return item.isValid ? (
+						<Flex justify="left" gap={2}>
+							<Icon icon={check} />
+							{item.enabled ? (
+								<span className="is-configured">
+									{__('Configured and active', 'ctx-events')}
+								</span>
+							) : (
 							<span className="is-configured">
 								{__('Configured for activation', 'ctx-events')}
 							</span>
@@ -158,14 +158,14 @@ const GatewayTable = () => {
 			.then((data: Gateway) => {
 				console.log(data);
 				setGateways((prev) => {
-					const updatedGateways = prev.map((gateway) => {
-						if (gateway.slug === slug) {
-							return {
-								...gateway,
-								active: !isActive,
-							};
-						}
-						return gateway;
+						const updatedGateways = prev.map((gateway) => {
+							if (gateway.slug === slug) {
+								return {
+									...gateway,
+									enabled: !isActive,
+								};
+							}
+							return gateway;
 					});
 					return updatedGateways;
 				});
