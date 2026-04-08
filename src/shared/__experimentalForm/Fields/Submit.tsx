@@ -1,3 +1,5 @@
+import { Flex } from '../Flex';
+
 type SubmitProps = {
 	label: string;
 	width: number;
@@ -8,28 +10,35 @@ type SubmitProps = {
 };
 
 const Submit = (props: SubmitProps) => {
-	const { label, width, alignment, disabled, placeholder } = props;
+	const {
+		label,
+		width,
+		alignment,
+		disabled,
+		placeholder,
+	} = props;
 
-	const classes = [
-		'ctx-form-field',
-		'flex',
-		'input--width-' + width,
-		'flex--align-center',
-		alignment === 'right' ? 'flex--justify-end' : '',
-	].join(' ');
+	const className = 'ctx-form-field';
 
 	return (
-		<div
-			className={classes}
-			style={{ gridColumn: `span ${width}` }}
+		<Flex
+			className={className}
+			align="center"
+			justify={
+				alignment === 'right'
+					? 'flex-end'
+					: alignment === 'center'
+						? 'center'
+						: 'flex-start'
+			}
 		>
 			<input
-				className="button button--primary"
-				type="submit"
+				className="ctx-button"
+				type={props.type ?? 'submit'}
 				value={label || placeholder}
 				disabled={disabled}
 			/>
-		</div>
+		</Flex>
 	);
 };
 

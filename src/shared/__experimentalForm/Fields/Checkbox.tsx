@@ -1,93 +1,136 @@
+import { useId, useRef, useState } from '@wordpress/element';
 import type { ChangeEvent, InvalidEvent } from 'react';
-import { useRef, useState } from '@wordpress/element';
-import type { FieldValue } from '../types';
 import { sanitizeInlineHtml } from '../sanitize';
+import type { FieldValue } from '../types';
+import { FieldMessages } from './FieldShell';
 
-type Props = {
-	label: string;
-	name: string;
-	width: number;
-	disabled: boolean;
-	required: boolean;
-	defaultChecked: boolean;
-	type: 'checkbox' | 'toggle';
+type CheckboxVariant = 'checkbox' | 'toggle';
+
+type CheckboxProps = {
+	label?: string;
+	name?: string;
+	width?: number;
+	disabled?: boolean;
+	required?: boolean;
 	customErrorMessage?: string;
 	error?: string;
 	value: boolean;
 	help?: string;
-	toggle?: boolean;
-	formTouched: boolean;
+	formTouched?: boolean;
+	variant?: CheckboxVariant;
 	onChange: (value: FieldValue) => void;
 };
 
-const Checkbox = (props: Props) => {
-	const { label, name, width = 6, onChange, type, value, help = '', toggle = false, customErrorMessage, error } = props;
+const Checkbox = (props: CheckboxProps) => {
+	const {
+		label = '',
+		name = '',
+		width = 6,
+		disabled = false,
+		required = false,
+		customErrorMessage,
+		error,
+		value,
+		help,
+		formTouched = false,
+		variant = 'checkbox',
+		onChange,
+	} = props;
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [touched, setTouched] = useState(false);
+	const reactId = useId();
 
-	const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-		onChange(event.target.checked);
-	};
+	const inputId = name || `checkbox-${reactId}`;
+	const helpId = help ? `${inputId}-help` : undefined;
+	const errorId = `${inputId}-error`;
 
-	const setInvalidity = (event: InvalidEvent<HTMLInputElement>) => {
-		if (!props.customErrorMessage) return;
-		event.target.setCustomValidity(props.customErrorMessage);
-	};
+	const isTouched = formTouched || touched;
+	const nativeInvalid = !!inputRef.current && !inputRef.current.validity.valid;
+	const hasError = !!error || (nativeInvalid && isTouched);
+	const errorMessage =
+		error ??
+		customErrorMessage ??
+		(isTouched ? inputRef.current?.validationMessage : undefined);
 
-	const isTouched = props.formTouched || touched;
-	const hasError = !!error || (!inputRef?.current?.validity.valid && isTouched);
-	const errorMessage = error ?? customErrorMessage ?? inputRef.current?.validationMessage;
-	const errorId = `${name}-error`;
-	const labelText = help || label;
+	const describedBy =
+		[helpId, hasError && errorMessage ? errorId : undefined]
+			.filter(Boolean)
+			.join(' ') || undefined;
 
 	const classes = [
 		'ctx-form-field',
-		toggle ? 'toggle' : 'checkbox',
+		variant === 'toggle' ? 'toggle' : 'checkbox',
 		hasError ? 'error' : '',
-	].join(' ');
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		if (customErrorMessage) {
+			event.currentTarget.setCustomValidity('');
+		}
+		onChange(event.currentTarget.checked);
+	};
+
+	const handleInvalid = (event: InvalidEvent<HTMLInputElement>) => {
+		if (!customErrorMessage) return;
+		event.currentTarget.setCustomValidity(customErrorMessage);
+	};
 
 	return (
-		<div className={classes} style={{ gridColumn: `span ${width}` }}>
-			<label>
-				<div className="toggle__control">
+		<div className={classes}>
+			<label htmlFor={inputId} className="ctx-form-checkbox-label">
+				<span className="toggle__control">
 					<input
-						id={name}
-						name={name}
-						disabled={props.disabled}
-						required={props.required}
-						aria-required={props.required}
-						aria-invalid={hasError || undefined}
-						aria-describedby={hasError && errorMessage ? errorId : undefined}
 						ref={inputRef}
-						onClick={() => setTouched(true)}
-						checked={value}
+						id={inputId}
+						name={name || undefined}
 						type="checkbox"
-						onChange={onChangeHandler}
-						onInvalid={setInvalidity}
+						checked={value}
+						disabled={disabled}
+						required={required}
+						aria-required={required || undefined}
+						aria-invalid={hasError || undefined}
+						aria-describedby={describedBy}
+						aria-errormessage={hasError && errorMessage ? errorId : undefined}
+						onChange={handleChange}
+						onBlur={() => setTouched(true)}
+						onInvalid={handleInvalid}
 					/>
-					{toggle && <span className="toggle__switch" aria-hidden="true" />}
-				</div>
-				<span dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(labelText) }} />
-			</label>
-			{hasError && errorMessage && (
-				<span id={errorId} role="alert" className="error-message">
-					{errorMessage}
+					{variant === 'toggle' && (
+						<span className="toggle__switch" aria-hidden="true" />
+					)}
 				</span>
+
+				{label && (
+					<>
+						<span
+							className="ctx-form-checkbox-label__text"
+							dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(label) }}
+						/>
+						{required && (
+							<span
+								className="ctx-form-label__required"
+								aria-hidden="true"
+							/>
+						)}
+					</>
+				)}
+			</label>
+
+			{help && (
+				<FieldMessages
+					helpHtml={sanitizeInlineHtml(help)}
+					helpId={helpId}
+					errorMessage={errorMessage}
+					errorId={errorId}
+					hasError={hasError}
+				/>
 			)}
 		</div>
 	);
 };
 
-Checkbox.defaultProps = {
-	label: '',
-	help: '',
-	width: 6,
-	disabled: false,
-	required: false,
-	defaultChecked: false,
-	type: 'checkbox',
-};
-
 export default Checkbox;
-export type { Props as CheckboxProps };
+export type { CheckboxProps, CheckboxVariant };

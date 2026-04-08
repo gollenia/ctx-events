@@ -3,23 +3,22 @@ import { sanitizeHtml } from '../sanitize';
 export type HTMLBlockProps = {
 	content?: string;
 	width?: number;
+	role?: 'note' | 'region' | 'presentation';
 };
 
-const HTMLBlock = (props: HTMLBlockProps) => {
-	const { content = '', width = 6 } = props;
-	const classes = [
-		'ctx-form-field',
-		'core-block',
-		'ctx-form-field-w' + width,
-	].join(' ');
+const HTMLBlock = ({
+	content = '',
+	role,
+}: HTMLBlockProps) => {
+	const classes = ['ctx-content-block', 'core-block'].join(' ');
 
 	return (
 		<div
 			className={classes}
-			style={{
-				gridColumn: `span ${width}`,
+			role={role}
+			dangerouslySetInnerHTML={{
+				__html: sanitizeHtml(content),
 			}}
-			dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
 		/>
 	);
 };

@@ -5,7 +5,7 @@ import Country from './Fields/Country';
 import Hidden from './Fields/Hidden';
 import HTMLBlock from './Fields/HtmlBlock';
 import Input from './Fields/Input';
-import NumberInput from './Fields/Number';
+import RangeInput from './Fields/Range';
 import Radio from './Fields/Radio';
 import Select from './Fields/Select';
 import Submit from './Fields/Submit';
@@ -104,7 +104,7 @@ const InputField = (props: FieldRenderProps): JSX.Element | null => {
 		case 'range':
 		case 'numberpicker':
 			return (
-				<NumberInput
+				<RangeInput
 					{...base}
 					type={type}
 					min={props.min ?? 0}

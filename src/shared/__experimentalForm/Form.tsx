@@ -1,10 +1,15 @@
-import type { CSSProperties, FormEvent, ChangeEvent } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
 import { useEffect, useRef, useState } from '@wordpress/element';
-import InputField from './InputField';
-import useMediaQueries from './useMediaQueries';
-import type { FormFieldDefinition, FormResponse, FormState, FormValues } from './types';
+import {
+	getDefaultFormValues,
+	isFieldVisible,
+	type FormFieldDefinition,
+	type FormResponse,
+	type FormState,
+	type FormValues,
+} from '../form-core';
+import { FormFields } from './FormFields';
 import { sanitizeHtml } from './sanitize';
-import { isFieldVisible } from './useFieldVisibility';
 
 type FormProps = {
 	data?: FormFieldDefinition[];
@@ -36,8 +41,6 @@ const Form = (props: FormProps) => {
 	const [response, setResponse] = useState<FormResponse>();
 	const [touched, setTouched] = useState(false);
 
-	const { md, lg } = useMediaQueries();
-
 	useEffect(() => {
 		onStateChange?.(status);
 	}, [status]);
@@ -55,15 +58,7 @@ const Form = (props: FormProps) => {
 			.then((json: { fields: FormFieldDefinition[] }) => {
 				setFields(json.fields);
 				setStatus('LOADED');
-
-				const fieldTemplate: FormValues = {};
-				json.fields.forEach((field) => {
-					if (field.defaultValue !== undefined) {
-						fieldTemplate[field.name] = field.defaultValue;
-					}
-				});
-
-				setForm(fieldTemplate);
+				setForm(getDefaultFormValues(json.fields));
 			});
 	}, [data, formUrl]);
 
@@ -113,29 +108,13 @@ const Form = (props: FormProps) => {
 
 	const resetForm = () => {
 		setStatus('LOADED');
-		const fieldTemplate: FormValues = {};
-		fields.forEach((field) => {
-			if (field.defaultValue !== undefined) {
-				fieldTemplate[field.name] = field.defaultValue;
-			}
-		});
-		setForm(fieldTemplate);
+		setForm(getDefaultFormValues(fields));
 	};
 
 	if (status === 'LOADING') return null;
 
 	const onFormChange = (_event: ChangeEvent<HTMLFormElement>) => {
 		onChange?.(form);
-	};
-
-	const style: CSSProperties = {
-		display: md ? 'grid' : 'flex',
-		gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
-		gridGap: '2rem',
-		gap: '2rem',
-		flexDirection: lg ? 'row' : 'column',
-		position: 'relative',
-		paddingTop: '1rem',
 	};
 
 	const classes = [
@@ -151,7 +130,6 @@ const Form = (props: FormProps) => {
 			<form
 				className={classes}
 				ref={formRef}
-				style={style}
 				onSubmit={handleSubmit}
 				onInvalid={() => setTouched(true)}
 				onChange={onFormChange}
@@ -185,19 +163,16 @@ const Form = (props: FormProps) => {
 					}}
 				/>
 
-				{visibleFields.map((field, index) => (
-					<InputField
-						{...field}
-						status={status}
-						disabled={status === 'SUBMITTING'}
-						formTouched={touched}
-						key={index}
-						value={form[field.name] ?? field.defaultValue ?? ''}
-						onChange={(value) => {
-							setForm((prev) => ({ ...prev, [field.name]: value }));
-						}}
-					/>
-				))}
+				<FormFields
+					fields={visibleFields}
+					formData={form}
+					status={status}
+					disabled={status === 'SUBMITTING'}
+					formTouched={touched}
+					onChange={(name, value) => {
+						setForm((prev) => ({ ...prev, [name]: value }));
+					}}
+				/>
 			</form>
 		</>
 	);

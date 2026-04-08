@@ -1,104 +1,163 @@
+import { useId, useMemo, useRef, useState } from '@wordpress/element';
 import type { ChangeEvent } from 'react';
-import { useRef, useState } from '@wordpress/element';
 import type { FieldValue, SelectOptions } from '../types';
+import FieldShell from './FieldShell';
 
 export type SelectProps = {
-	label: string;
-	placeholder: string;
-	name: string;
-	required: boolean;
-	width: number;
+	label?: string;
+	name?: string;
+	required?: boolean;
+	width?: number;
 	options?: SelectOptions;
 	hasEmptyOption?: boolean;
 	help?: string;
 	hint?: string;
-	disabled: boolean;
-	multiple?: boolean;
+	disabled?: boolean;
 	customError?: string;
 	formTouched?: boolean;
 	customErrorMessage?: string;
 	error?: string;
 	onChange: (value: FieldValue) => void;
+	value: string | string[];
+	emptyOptionLabel?: string;
+};
+
+type NormalizedOption = {
 	value: string;
+	label: string;
 };
 
 const Select = (props: SelectProps) => {
 	const {
-		onChange, options, hasEmptyOption, help, hint, disabled, placeholder,
-		multiple, required, label, name, customErrorMessage, error, width, value,
+		onChange,
+		options,
+		hasEmptyOption = false,
+		help,
+		hint,
+		disabled = false,
+		required = false,
+		label = '',
+		name = '',
+		customError,
+		customErrorMessage,
+		error,
+		width = 6,
+		value,
+		formTouched = false,
+		emptyOptionLabel = 'Make a selection',
 	} = props;
 
 	const [touched, setTouched] = useState(false);
-	const inputRef = useRef<HTMLSelectElement>(null);
+	const selectRef = useRef<HTMLSelectElement>(null);
+	const reactId = useId();
 
-	const onChangeHandler = (event: ChangeEvent<HTMLSelectElement>) => {
-		onChange(event.target.value);
-	};
+	const selectId = name || `select-${reactId}`;
+	const helpId = help ? `${selectId}-help` : undefined;
+	const hintId = hint ? `${selectId}-hint` : undefined;
+	const errorId = `${selectId}-error`;
 
-	const isTouched = props.formTouched || touched;
-	const hasError = !!error || (!inputRef?.current?.validity.valid && isTouched);
-	const errorMessage = error ?? customErrorMessage ?? inputRef.current?.validationMessage;
-	const errorId = `${name}-error`;
+	const isTouched = formTouched || touched;
+	const nativeInvalid =
+		!!selectRef.current && !selectRef.current.validity.valid;
+	const hasError = !!error || (nativeInvalid && isTouched);
+	const errorMessage =
+		error ??
+		customErrorMessage ??
+		(isTouched ? selectRef.current?.validationMessage : undefined);
+
+	const describedBy =
+		[hintId, helpId, hasError && errorMessage ? errorId : undefined]
+			.filter(Boolean)
+			.join(' ') || undefined;
 
 	const classes = [
 		'ctx-form-field',
 		'select',
-		'input--width-' + width,
 		required ? 'select--required' : '',
 		hasError ? 'error' : '',
-	].join(' ');
+	]
+		.filter(Boolean)
+		.join(' ');
 
-	const renderOptions = () => {
-		if (!options) return null;
+	const normalizedOptions = useMemo<NormalizedOption[]>(() => {
+		if (!options) return [];
+
 		if (Array.isArray(options)) {
-			return options.map((option) => <option key={option}>{option}</option>);
+			return options.map((option) => ({
+				value: option,
+				label: option,
+			}));
 		}
-		return Object.entries(options).map(([key, optionLabel]) => (
-			<option key={key} value={key}>{optionLabel}</option>
-		));
+
+		return Object.entries(options).map(([key, optionLabel]) => ({
+			value: key,
+			label: optionLabel,
+		}));
+	}, [options]);
+
+	const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+		if (customError) {
+			event.currentTarget.setCustomValidity('');
+		}
+
+		onChange(event.currentTarget.value);
+	};
+
+	const handleBlur = () => {
+		setTouched(true);
+	};
+
+	const handleInvalid = (event: ChangeEvent<HTMLSelectElement>) => {
+		if (customError) {
+			event.currentTarget.setCustomValidity(customError);
+		}
 	};
 
 	return (
-		<div className={classes} style={{ gridColumn: `span ${width}` }}>
-			<label htmlFor={name}>{label}</label>
+		<FieldShell
+			className={classes}
+			label={label}
+			required={required}
+			labelFor={selectId}
+			hint={hint}
+			hintId={hintId}
+			help={help}
+			helpId={helpId}
+			errorMessage={errorMessage}
+			errorId={errorId}
+			hasError={hasError}
+		>
 			<select
-				id={name}
-				name={name}
+				ref={selectRef}
+				id={selectId}
+				name={name || undefined}
 				required={required}
-				aria-required={required}
-				aria-invalid={hasError || undefined}
-				aria-describedby={hasError && errorMessage ? errorId : undefined}
-				onChange={onChangeHandler}
-				onBlur={() => setTouched(true)}
-				ref={inputRef}
-				autoComplete={hint}
 				disabled={disabled}
-				multiple={multiple}
-				defaultValue={placeholder}
 				value={value}
+				aria-required={required || undefined}
+				aria-invalid={hasError || undefined}
+				aria-describedby={describedBy}
+				aria-errormessage={hasError && errorMessage ? errorId : undefined}
+				onChange={handleChange}
+				onBlur={handleBlur}
+				onInvalid={
+					handleInvalid as unknown as React.FormEventHandler<HTMLSelectElement>
+				}
 			>
 				{hasEmptyOption && (
-					<option value="" disabled>
-						{help ?? 'Make a selection'}
+					<option value="" disabled={required}>
+						{emptyOptionLabel}
 					</option>
 				)}
-				{renderOptions()}
-			</select>
-			{hasError && errorMessage && (
-				<span id={errorId} role="alert" className="error-message">
-					{errorMessage}
-				</span>
-			)}
-		</div>
-	);
-};
 
-Select.defaultProps = {
-	label: '',
-	placeholder: '',
-	name: '',
-	required: false,
-	width: 6,
+				{normalizedOptions.map((option) => (
+					<option key={option.value} value={option.value}>
+						{option.label}
+					</option>
+				))}
+			</select>
+		</FieldShell>
+	);
 };
 
 export default Select;

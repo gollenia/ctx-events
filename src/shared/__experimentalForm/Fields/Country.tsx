@@ -1,7 +1,7 @@
-import type { ChangeEvent } from 'react';
-import { useRef, useState } from '@wordpress/element';
-import type { CountryRegion, FieldValue } from '../types';
+import { useMemo } from '@wordpress/element';
 import { getCountryOptions } from '../countries';
+import type { CountryRegion, FieldValue } from '../types';
+import Combobox from './Combobox';
 
 type CountryProps = {
 	label: string;
@@ -23,61 +23,66 @@ type CountryProps = {
 const browserLocale = navigator.language;
 
 const Country = (props: CountryProps) => {
-	const { onChange, disabled, required, name, label, width, region, help, customErrorMessage, error, value } = props;
+	const {
+		onChange,
+		disabled,
+		required,
+		name,
+		label,
+		width,
+		region,
+		help,
+		customErrorMessage,
+		error,
+		value,
+		placeholder,
+		formTouched,
+	} = props;
 
-	const inputRef = useRef<HTMLSelectElement>(null);
-	const [touched, setTouched] = useState(false);
+	const countries = useMemo(
+		() => getCountryOptions(region, browserLocale),
+		[region],
+	);
 
-	const countries = getCountryOptions(region, browserLocale);
+	const labelToValueMap = useMemo(() => {
+		return new Map(countries.map((country) => [country.label, country.value]));
+	}, [countries]);
 
-	const onChangeHandler = (event: ChangeEvent<HTMLSelectElement>) => {
-		onChange(event.target.value);
+	const valueToLabelMap = useMemo(() => {
+		return new Map(countries.map((country) => [country.value, country.label]));
+	}, [countries]);
+
+	const selectedLabel = value ? (valueToLabelMap.get(value) ?? '') : '';
+
+	const handleChange = (selectedLabel: FieldValue) => {
+		if (typeof selectedLabel !== 'string') {
+			onChange('');
+			return;
+		}
+
+		const selectedValue = labelToValueMap.get(selectedLabel) ?? '';
+		onChange(selectedValue);
 	};
 
-	const isTouched = props.formTouched || touched;
-	const hasError = !!error || (!inputRef?.current?.validity.valid && isTouched);
-	const errorMessage = error ?? customErrorMessage ?? inputRef.current?.validationMessage;
-	const errorId = `${name}-error`;
-
-	const classes = [
-		'ctx-form-field',
-		'select',
-		'input--width-' + width,
-		required ? 'select--required' : '',
-		hasError ? 'error' : '',
-	].join(' ');
-
 	return (
-		<div className={classes} style={{ gridColumn: `span ${width}` }}>
-			<label htmlFor={name}>{label}</label>
-			<select
-				id={name}
-				name={name}
-				required={required}
-				aria-required={required}
-				aria-invalid={hasError || undefined}
-				aria-describedby={hasError && errorMessage ? errorId : undefined}
-				disabled={disabled}
-				onBlur={() => setTouched(true)}
-				onChange={onChangeHandler}
-				ref={inputRef}
-				value={value}
-			>
-				<option value="" disabled>
-					{help ?? 'Make a selection'}
-				</option>
-				{countries.map((country) => (
-					<option key={country.value} value={country.value}>
-						{country.label}
-					</option>
-				))}
-			</select>
-			{hasError && errorMessage && (
-				<span id={errorId} role="alert" className="error-message">
-					{errorMessage}
-				</span>
-			)}
-		</div>
+		<Combobox
+			label={label}
+			name={name}
+			required={required}
+			width={width}
+			options={countries.map((country) => country.label)}
+			help={help ?? 'Make a selection'}
+			disabled={disabled}
+			formTouched={formTouched}
+			customErrorMessage={customErrorMessage}
+			error={error}
+			placeholder={placeholder}
+			value={selectedLabel}
+			onChange={handleChange}
+			allowClear={!required}
+			clearLabel={help ?? 'Make a selection'}
+			noResultsLabel="No matching country"
+		/>
 	);
 };
 

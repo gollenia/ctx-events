@@ -1,6 +1,7 @@
+import { useId, useMemo, useRef, useState } from '@wordpress/element';
 import type { ChangeEvent, FormEvent, InvalidEvent } from 'react';
-import { useRef, useState } from '@wordpress/element';
 import type { FieldValue } from '../types';
+import FieldShell from './FieldShell';
 
 type InputFieldTypes =
 	| 'text'
@@ -14,116 +15,179 @@ type InputFieldTypes =
 	| 'date'
 	| 'week'
 	| 'month'
-	| 'number'
-	| 'year';
+	| 'number';
 
 type InputProps = {
-	label: string;
-	placeholder: string;
-	name: string;
-	required: boolean;
-	autoComplete: string;
-	pattern: string | null;
-	width: number;
-	disabled: boolean;
-	customError: string;
-	defaultValue: string;
-	min?: number;
-	max?: number;
+	label?: string;
+	placeholder?: string;
+	name?: string;
+	required?: boolean;
+	autoComplete?: string;
+	pattern?: string | null;
+	width?: number;
+	disabled?: boolean;
+	customError?: string;
+	min?: number | string;
+	max?: number | string;
 	customErrorMessage?: string;
 	error?: string;
-	type: InputFieldTypes;
+	type?: InputFieldTypes;
 	help?: string;
-	formTouched: boolean;
+	formTouched?: boolean;
 	onChange: (value: FieldValue) => void;
 	value: string;
 };
 
 const TextInput = (props: InputProps) => {
+	const {
+		label = '',
+		placeholder = '',
+		name = '',
+		required = false,
+		autoComplete = '',
+		pattern = null,
+		width = 6,
+		disabled = false,
+		customError = '',
+		min,
+		max,
+		customErrorMessage,
+		error,
+		type = 'text',
+		help,
+		formTouched = false,
+		onChange,
+		value,
+	} = props;
+
 	const [touched, setTouched] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const reactId = useId();
 
-	const { label, required, width, onChange, pattern, min, max, customErrorMessage, error, value, name } = props;
+	const inputId = name || `input-${reactId}`;
+	const helpId = help ? `${inputId}-help` : undefined;
+	const errorId = `${inputId}-error`;
 
-	const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-		onChange(event.target.value);
-	};
+	const isTouched = formTouched || touched;
+	const nativeInvalid = !!inputRef.current && !inputRef.current.validity.valid;
+	const hasError = !!error || (nativeInvalid && isTouched);
 
-	const onKeyPressHandler = (event: FormEvent<HTMLInputElement>) => {
-		if (!pattern) return;
-		const inputEvent = event.nativeEvent as InputEvent;
-		const regex = new RegExp(pattern, 'gu');
-		if (inputEvent.data !== null && !regex.test(inputEvent.data ?? '')) {
-			event.preventDefault();
-		}
-	};
+	const errorMessage =
+		error ??
+		customErrorMessage ??
+		(isTouched ? inputRef.current?.validationMessage : undefined);
 
-	const setInvalidity = (event: InvalidEvent<HTMLInputElement>) => {
-		if (!props.customError) return;
-		event.target.setCustomValidity(props.customError);
-	};
-
-	const isTouched = props.formTouched || touched;
-	const hasError = !!error || (!inputRef?.current?.validity.valid && isTouched);
-	const errorMessage = error ?? customErrorMessage ?? inputRef.current?.validationMessage;
-	const errorId = `${name}-error`;
+	const describedBy =
+		[helpId, hasError && errorMessage ? errorId : undefined]
+			.filter(Boolean)
+			.join(' ') || undefined;
 
 	const classes = [
 		'ctx-form-field',
 		'input',
-		'input--width-' + width,
 		required ? 'input--required' : '',
 		hasError ? 'error' : '',
-	].join(' ');
+	]
+		.filter(Boolean)
+		.join(' ');
 
-	const minMax = {
-		minLength: min && props.type === 'text' ? min : undefined,
-		maxLength: max && props.type === 'text' ? max : undefined,
-		min: min && props.type === 'date' ? min : undefined,
-		max: max && props.type === 'date' ? max : undefined,
+	const inputConstraints = useMemo(() => {
+		const constraints: Record<string, number | string | undefined> = {};
+
+		if (
+			type === 'text' ||
+			type === 'email' ||
+			type === 'password' ||
+			type === 'search' ||
+			type === 'tel' ||
+			type === 'url'
+		) {
+			if (typeof min === 'number') constraints.minLength = min;
+			if (typeof max === 'number') constraints.maxLength = max;
+		}
+
+		if (
+			type === 'number' ||
+			type === 'date' ||
+			type === 'datetime-local' ||
+			type === 'week' ||
+			type === 'month'
+		) {
+			if (min !== undefined) constraints.min = min;
+			if (max !== undefined) constraints.max = max;
+		}
+
+		return constraints;
+	}, [min, max, type]);
+
+	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		if (customError) {
+			event.currentTarget.setCustomValidity('');
+		}
+		onChange(event.target.value);
+	};
+
+	const handleBlur = () => {
+		setTouched(true);
+	};
+
+	const handleInvalid = (event: InvalidEvent<HTMLInputElement>) => {
+		if (customError) {
+			event.currentTarget.setCustomValidity(customError);
+		}
+	};
+
+	const handleBeforeInput = (event: FormEvent<HTMLInputElement>) => {
+		if (!pattern) return;
+
+		const nativeEvent = event.nativeEvent as InputEvent;
+		if (nativeEvent.data == null) return;
+
+		try {
+			const regex = new RegExp(pattern, 'u');
+			if (!regex.test(nativeEvent.data)) {
+				event.preventDefault();
+			}
+		} catch {
+			// Invalid regex pattern: ignore silently to avoid breaking input.
+		}
 	};
 
 	return (
-		<div className={classes} style={{ gridColumn: `span ${width}` }}>
-			<label htmlFor={name}>{label}</label>
+		<FieldShell
+			className={classes}
+			label={label}
+			required={required}
+			labelFor={inputId}
+			help={help}
+			helpId={helpId}
+			errorMessage={errorMessage}
+			errorId={errorId}
+			hasError={hasError}
+		>
 			<input
-				{...minMax}
-				id={name}
-				name={name}
-				placeholder={props.placeholder}
-				required={required}
-				aria-required={required}
-				aria-invalid={hasError || undefined}
-				aria-describedby={hasError && errorMessage ? errorId : undefined}
-				onBlur={() => setTouched(true)}
-				type={props.type}
-				autoComplete={props.autoComplete}
-				disabled={props.disabled}
-				pattern={props.pattern ?? undefined}
-				defaultValue={props.defaultValue}
-				value={value}
+				{...inputConstraints}
 				ref={inputRef}
-				onInvalid={setInvalidity}
-				onChange={onChangeHandler}
-				onBeforeInput={onKeyPressHandler}
+				id={inputId}
+				name={name || undefined}
+				type={type}
+				value={value}
+				placeholder={placeholder}
+				required={required}
+				disabled={disabled}
+				autoComplete={autoComplete || undefined}
+				pattern={pattern ?? undefined}
+				aria-required={required || undefined}
+				aria-invalid={hasError || undefined}
+				aria-describedby={describedBy}
+				aria-errormessage={hasError && errorMessage ? errorId : undefined}
+				onChange={handleChange}
+				onBlur={handleBlur}
+				onInvalid={handleInvalid}
+				onBeforeInput={handleBeforeInput}
 			/>
-			{hasError && errorMessage && (
-				<span id={errorId} role="alert" className="error-message">
-					{errorMessage}
-				</span>
-			)}
-		</div>
+		</FieldShell>
 	);
-};
-
-TextInput.defaultProps = {
-	label: '',
-	placeholder: '',
-	name: '',
-	required: false,
-	width: 6,
-	type: 'text',
-	pattern: null,
 };
 
 export default TextInput;

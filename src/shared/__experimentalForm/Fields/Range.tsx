@@ -1,8 +1,8 @@
-import type { ChangeEvent } from 'react';
 import { useRef } from '@wordpress/element';
+import type { ChangeEvent } from 'react';
 import type { FieldValue } from '../types';
 
-export type NumberInputProps = {
+export type RangeInputProps = {
 	label: string;
 	placeholder: string;
 	name: string;
@@ -18,8 +18,20 @@ export type NumberInputProps = {
 	value: string;
 };
 
-const NumberInput = (props: NumberInputProps) => {
-	const { label, name, required, width, min, max, disabled, hasTicks, hasLabels, onChange, value } = props;
+const RangeInput = (props: RangeInputProps) => {
+	const {
+		label,
+		name,
+		required,
+		width,
+		min,
+		max,
+		disabled,
+		hasTicks,
+		hasLabels,
+		onChange,
+		value,
+	} = props;
 
 	const rangeRef = useRef<HTMLInputElement>(null);
 	const valueDisplayId = `${name}-value`;
@@ -34,12 +46,13 @@ const NumberInput = (props: NumberInputProps) => {
 		'ctx-form-field',
 		'range',
 		'range--ticks',
-		'input--width-' + width,
 		required ? 'input--required' : '',
-	].join(' ');
+	]
+		.filter(Boolean)
+		.join(' ');
 
 	return (
-		<div className={classes} style={{ gridColumn: `span ${width}` }}>
+		<div className={classes}>
 			<label htmlFor={name}>{label}</label>
 			<div className="range__set">
 				<div className="range__control">
@@ -47,7 +60,6 @@ const NumberInput = (props: NumberInputProps) => {
 						id={name}
 						name={name}
 						required={required}
-						aria-required={required}
 						aria-valuemin={min}
 						aria-valuemax={max}
 						aria-valuenow={rangeValue}
@@ -56,7 +68,10 @@ const NumberInput = (props: NumberInputProps) => {
 						type="range"
 						max={max}
 						min={min}
-						style={{ backgroundSize: ((rangeValue - min) * 100) / (max - min) + '% 100%' }}
+						style={{
+							backgroundSize:
+								((rangeValue - min) * 100) / (max - min) + '% 100%',
+						}}
 						ref={rangeRef}
 						onChange={onChangeHandler}
 						value={value}
@@ -83,7 +98,7 @@ const NumberInput = (props: NumberInputProps) => {
 	);
 };
 
-NumberInput.defaultProps = {
+RangeInput.defaultProps = {
 	label: '',
 	placeholder: '0',
 	name: '',
@@ -95,4 +110,4 @@ NumberInput.defaultProps = {
 	hasTicks: false,
 };
 
-export default NumberInput;
+export default RangeInput;
