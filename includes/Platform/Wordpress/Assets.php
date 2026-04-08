@@ -5,6 +5,7 @@ namespace Contexis\Events\Platform\Wordpress;
 
 use Contexis\Events\Booking\Application\Contracts\BookingOptions;
 use Contexis\Events\Platform\Wordpress\PluginInfo;
+use Contexis\Events\Shared\Infrastructure\Icons\IconRegistry;
 use Contexis\Events\Shared\Infrastructure\Contracts\Registrar;
 
 final class Assets implements Registrar
@@ -12,19 +13,20 @@ final class Assets implements Registrar
 	private const ASSET_PATH = '/build';
 
 	public function __construct(
-		private readonly BookingOptions $bookingOptions
+		private readonly BookingOptions $bookingOptions,
+		private readonly IconRegistry $iconRegistry,
 	) {}
 
-	public function hook() : void
+    public function hook() : void
     {
         add_action('wp_enqueue_scripts', [$this, 'frontendScript']);
+        add_action('enqueue_block_assets', [$this, 'frontendStyle']);
         add_action('admin_enqueue_scripts', [$this, 'adminScript']);
         add_action('enqueue_block_editor_assets', [$this, 'editorScript']);
     }
 
     public function frontendScript(): void
     {
-
         $script_asset = $this->getAssetData('frontend');
         if (!$script_asset) {
             return;
@@ -37,6 +39,25 @@ final class Assets implements Registrar
             $script_asset['version']
         );
 
+        wp_set_script_translations('ctx-events-frontend', 'events', PluginInfo::getPluginDir('/languages'));
+
+        wp_localize_script('ctx-events-frontend', 'eventBlocksLocalization', [
+            "consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'ctx-events')),
+            "donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'ctx-events')),
+        ]);
+    }
+
+    public function frontendStyle(): void
+    {
+        if (is_admin()) {
+            return;
+        }
+
+        $script_asset = $this->getAssetData('frontend');
+        if (!$script_asset) {
+            return;
+        }
+
         wp_enqueue_style(
             'events-frontend-style',
             PluginInfo::getPluginUrl(self::ASSET_PATH . '/style-frontend.css'),
@@ -44,13 +65,6 @@ final class Assets implements Registrar
             $script_asset['version'],
             'all'
         );
-
-        wp_set_script_translations('ctx-events-frontend', 'events', PluginInfo::getPluginDir('/languages'));
-
-        wp_localize_script('ctx-events-frontend', 'eventBlocksLocalization', [
-            "consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'ctx-events')),
-            "donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'ctx-events'))
-        ]);
     }
 
     public function adminScript(): void
@@ -70,7 +84,7 @@ final class Assets implements Registrar
             true
         );
 
-        wp_set_script_translations('ctx-events-admin', 'events', PluginInfo::getPluginDir('/languages'));
+        wp_set_script_translations('ctx-events-admin', 'ctx-events', PluginInfo::getPluginDir('/languages'));
 
         wp_enqueue_style(
             'ctx-events-admin-style',
@@ -94,8 +108,9 @@ final class Assets implements Registrar
             $script_asset['dependencies'],
             $script_asset['version']
         );
+        $this->addIconConfig('ctx-events-editor');
 
-        wp_set_script_translations('ctx-events-editor', 'events', PluginInfo::getPluginDir('/languages'));
+        wp_set_script_translations('ctx-events-editor', 'ctx-events', PluginInfo::getPluginDir('/languages'));
 
         wp_register_style(
             'ctx-events-editor-style',
@@ -115,6 +130,21 @@ final class Assets implements Registrar
             "bookingEnabled" => $this->bookingOptions->enabled(),
 			"currency" => $this->bookingOptions->currency(),
         ]);
+    }
+
+    private function addIconConfig(string $handle): void
+    {
+        $icons = wp_json_encode($this->iconRegistry->getEditorIcons());
+
+        if (!$icons) {
+            return;
+        }
+
+        wp_add_inline_script(
+            $handle,
+            "window.ctxIcons = Object.assign({}, window.ctxIcons || {}, {$icons});",
+            'before'
+        );
     }
 
 	/**

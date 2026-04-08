@@ -7,6 +7,7 @@ use function DI\get;
 return [
     get(\Contexis\Events\Event\Presentation\EventController::class),
     get(\Contexis\Events\Event\Presentation\EventExportController::class),
+    get(\Contexis\Events\Event\Presentation\IconsController::class),
     get(\Contexis\Events\Location\Presentation\LocationController::class),
     get(\Contexis\Events\Person\Presentation\PersonController::class),
     get(\Contexis\Events\Shared\Presentation\OptionController::class),
