@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress\Admin;
 
+use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
+use Contexis\Events\Booking\Infrastructure\BookingMigration;
+
 final class AdminMenu implements AdminServiceInterface
 {
     public const MENU_SLUG = 'ctx_events_admin_menu';
@@ -27,13 +30,15 @@ final class AdminMenu implements AdminServiceInterface
 
     public function register(): void
     {
+        $pendingBookings = $this->pendingBookingCount();
+
         add_menu_page(
             __('Events', 'ctx-events'),
-            __('Events', 'ctx-events'),
+            $this->withCounter(__('Events', 'ctx-events'), $pendingBookings),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'eventsPage'],
-            'dashicons-calendar-alt',
+            'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgLTk2MCA5NjAgOTYwIiB3aWR0aD0iMjRweCIgZmlsbD0iIzFmMWYxZiI+PHBhdGggZD0iTTUwOS0yNjlxLTI5LTI5LTI5LTcxdDI5LTcxcTI5LTI5IDcxLTI5dDcxIDI5cTI5IDI5IDI5IDcxdC0yOSA3MXEtMjkgMjktNzEgMjl0LTcxLTI5Wk0yMDAtODBxLTMzIDAtNTYuNS0yMy41VDEyMC0xNjB2LTU2MHEwLTMzIDIzLjUtNTYuNVQyMDAtODAwaDQwdi04MGg4MHY4MGgzMjB2LTgwaDgwdjgwaDQwcTMzIDAgNTYuNSAyMy41VDg0MC03MjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC04MEgyMDBabTAtODBoNTYwdi00MDBIMjAwdjQwMFptMC00ODBoNTYwdi04MEgyMDB2ODBabTAgMHYtODAgODBaIi8+PC9zdmc+',
             6
         );
 
@@ -61,7 +66,7 @@ final class AdminMenu implements AdminServiceInterface
         add_submenu_page(
             self::MENU_SLUG,
             __('Bookings', 'ctx-events'),
-            __('Bookings', 'ctx-events'),
+            $this->withCounter(__('Bookings', 'ctx-events'), $pendingBookings),
             'manage_options',
             'contexis_events_bookings',
             fn() => print('<div id="ctx-bookings-admin"></div>')
@@ -99,6 +104,34 @@ final class AdminMenu implements AdminServiceInterface
     {
 		echo "<div id='ctx-events-list'></div>";
         return '';
+    }
+
+    private function pendingBookingCount(): int
+    {
+        global $wpdb;
+
+        $table = BookingMigration::getTableName();
+        $sql = $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE status = %d",
+            BookingStatus::PENDING->value
+        );
+
+        return (int) $wpdb->get_var($sql);
+    }
+
+    private function withCounter(string $label, int $count): string
+    {
+        if ($count < 1) {
+            return $label;
+        }
+
+        $countLabel = number_format_i18n($count);
+
+        return sprintf(
+            '%s <span class="awaiting-mod"><span class="pending-count">%s</span></span>',
+            esc_html($label),
+            esc_html($countLabel)
+        );
     }
 
 	
