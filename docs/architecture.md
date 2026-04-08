@@ -1,5 +1,9 @@
 # Architecture
 
+See also:
+
+- `docs/icons.md` for the shared icon registry and cross-plugin icon registration model
+
 ## Domain
 
 ```mermaid
