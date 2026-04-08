@@ -1,6 +1,10 @@
 import { formatPrice } from '@events/i18n';
 import {
+	Flex,
 	Notice,
+	Panel,
+	PanelBody,
+	PanelHeader,
 	SelectControl,
 	Spinner,
 	TextControl,
@@ -62,7 +66,7 @@ const BookingEditModal = ({
 	const [booking, setBooking] = useState<BookingDetail | null>(null);
 	const [registration, setRegistration] = useState<BookingFormValues>({});
 	const [saveError, setSaveError] = useState<string | null>(null);
-	console.log(booking);
+
 	useEffect(() => {
 		if (fetchedBooking) {
 			setBooking(fetchedBooking);
@@ -157,14 +161,24 @@ const BookingEditModal = ({
 			<div className="booking-edit-modal">
 				<div className="booking-edit-modal__header">
 					<h2 className="booking-edit-modal__title">{title}</h2>
-					<button
-						type="button"
-						className="booking-edit-modal__close"
-						onClick={onClose}
-						aria-label={__('Close', 'ctx-events')}
-					>
-						×
-					</button>
+					<div className="booking-edit__footer">
+						<button
+							type="button"
+							className="components-button is-secondary"
+							onClick={onClose}
+						>
+							{__('Cancel', 'ctx-events')}
+						</button>
+						<button
+							type="button"
+							className="components-button is-primary"
+							onClick={handleSave}
+							disabled={saving}
+							aria-busy={saving}
+						>
+							{saving ? __('Saving…', 'ctx-events') : __('Save', 'ctx-events')}
+						</button>
+					</div>
 				</div>
 				{loading && (
 					<div className="booking-edit__loading">
@@ -182,72 +196,80 @@ const BookingEditModal = ({
 					<div className="booking-edit__body">
 						<div className="booking-edit__columns">
 							<div className="booking-edit__info">
-								<section className="booking-edit__section">
-									<h3>{__('Booking Info', 'ctx-events')}</h3>
+								<Panel header={__('Booking Info', 'ctx-events')}>
+									<PanelBody>
+										<div className="booking-edit__meta">
+											<span>
+												<strong>{__('Status', 'ctx-events')}:</strong>{' '}
+												{STATUS_LABELS[booking.status] ?? booking.status}
+											</span>
+											<span>
+												<strong>{__('Date', 'ctx-events')}:</strong>{' '}
+												{new Date(booking.date).toLocaleString()}
+											</span>
+											<span>
+												<strong>{__('Total', 'ctx-events')}:</strong>{' '}
+												{formatPrice(booking.price.finalPrice)}
+											</span>
+										</div>
 
-									<div className="booking-edit__meta">
-										<span>
-											<strong>{__('Status', 'ctx-events')}:</strong>{' '}
-											{STATUS_LABELS[booking.status] ?? booking.status}
-										</span>
-										<span>
-											<strong>{__('Date', 'ctx-events')}:</strong>{' '}
-											{new Date(booking.date).toLocaleString()}
-										</span>
-										<span>
-											<strong>{__('Total', 'ctx-events')}:</strong>{' '}
-											{formatPrice(booking.price.finalPrice)}
-										</span>
-									</div>
+										<DynamicFieldsGrid
+											fields={registrationFields}
+											values={registration}
+											onChange={patchRegistration}
+											gridClassName="booking-edit__registration-grid"
+											fieldClassName="booking-edit__registration-grid-field"
+											inputWrapClassName="booking-edit__field-input-wrap"
+										/>
 
-									<DynamicFieldsGrid
-										fields={registrationFields}
-										values={registration}
-										onChange={patchRegistration}
-										gridClassName="booking-edit__registration-grid"
-										fieldClassName="booking-edit__registration-grid-field"
-										inputWrapClassName="booking-edit__field-input-wrap"
-									/>
+										<SelectControl
+											label={__('Gateway', 'ctx-events')}
+											value={booking.gateway ?? ''}
+											options={[
+												{ value: '', label: __('— None —', 'ctx-events') },
+												...availableGateways,
+											]}
+											onChange={(value) => patch({ gateway: value || null })}
+											__nextHasNoMarginBottom
+											__next40pxDefaultSize
+										/>
 
-									<SelectControl
-										label={__('Gateway', 'ctx-events')}
-										value={booking.gateway ?? ''}
-										options={[
-											{ value: '', label: __('— None —', 'ctx-events') },
-											...availableGateways,
-										]}
-										onChange={(value) => patch({ gateway: value || null })}
-									/>
+										<TextControl
+											label={__('Donation', 'ctx-events')}
+											type="number"
+											value={String(
+												(booking.price.donationAmount.amountCents ?? 0) / 100,
+											)}
+											__nextHasNoMarginBottom
+											__next40pxDefaultSize
+											onChange={(value) => {
+												if (!booking) return;
 
-									<TextControl
-										label={__('Donation', 'ctx-events')}
-										type="number"
-										value={String(
-											(booking.price.donationAmount.amountCents ?? 0) / 100,
-										)}
-										onChange={(value) => {
-											if (!booking) return;
+												const amount = Number.parseFloat(value);
+												const donationCents = Number.isFinite(amount)
+													? Math.round(amount * 100)
+													: 0;
 
-											const amount = Number.parseFloat(value);
-											const donationCents = Number.isFinite(amount)
-												? Math.round(amount * 100)
-												: 0;
-
-											patchBookingPrice(booking, {
-												price: {
-													...booking.price,
-													donationAmount: {
-														...booking.price.donationAmount,
-														amountCents: donationCents,
+												patchBookingPrice(booking, {
+													price: {
+														...booking.price,
+														donationAmount: {
+															...booking.price.donationAmount,
+															amountCents: donationCents,
+														},
 													},
-												},
-											});
-										}}
-									/>
-								</section>
+												});
+											}}
+										/>
+									</PanelBody>
+								</Panel>
 							</div>
 
-							<div className="booking-edit__attendees-col">
+							<Flex
+								direction="column"
+								gap={4}
+								className="booking-edit__details"
+							>
 								<AttendeeSection
 									booking={booking}
 									onChange={(attendees: BookingAttendeeResource[]) =>
@@ -282,7 +304,7 @@ const BookingEditModal = ({
 								/>
 
 								<LogEntriesSection booking={booking} />
-							</div>
+							</Flex>
 						</div>
 
 						{saveError && (
@@ -290,27 +312,6 @@ const BookingEditModal = ({
 								{saveError}
 							</Notice>
 						)}
-
-						<div className="booking-edit__footer">
-							<button
-								type="button"
-								className="components-button is-secondary"
-								onClick={onClose}
-							>
-								{__('Cancel', 'ctx-events')}
-							</button>
-							<button
-								type="button"
-								className="components-button is-primary"
-								onClick={handleSave}
-								disabled={saving}
-								aria-busy={saving}
-							>
-								{saving
-									? __('Saving…', 'ctx-events')
-									: __('Save', 'ctx-events')}
-							</button>
-						</div>
 					</div>
 				)}
 			</div>

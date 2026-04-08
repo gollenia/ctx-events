@@ -1,4 +1,10 @@
-import { Button, Notice, TextareaControl } from '@wordpress/components';
+import {
+	Button,
+	Notice,
+	Panel,
+	PanelBody,
+	TextareaControl,
+} from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { BookingDetail } from 'src/types/types';
@@ -28,44 +34,54 @@ const NotesSection = ({ booking, isSaving, onAdd }: Props) => {
 	};
 
 	return (
-			<section className="booking-edit__section">
-			<h3>{__('Notes', 'ctx-events')}</h3>
+		<Panel header={__('Notes', 'ctx-events')}>
+			<PanelBody>
+				{error && (
+					<Notice status="error" isDismissible={false}>
+						{error}
+					</Notice>
+				)}
 
-			{error && (
-				<Notice status="error" isDismissible={false}>
-					{error}
-				</Notice>
-			)}
+				{booking.notes.length === 0 ? (
+					<p className="booking-edit__empty">
+						{__('No notes yet.', 'ctx-events')}
+					</p>
+				) : (
+					<ul className="booking-edit__notes">
+						{booking.notes.map((note, index) => (
+							<li key={index} className="booking-edit__note">
+								<span className="booking-edit__note-date">
+									{new Date(note.date).toLocaleString()}
+								</span>
+								{note.author && (
+									<span className="booking-edit__note-author">
+										{note.author}
+									</span>
+								)}
+								<p>{note.text}</p>
+							</li>
+						))}
+					</ul>
+				)}
 
-			{booking.notes.length === 0 ? (
-				<p className="booking-edit__empty">{__('No notes yet.', 'ctx-events')}</p>
-			) : (
-				<ul className="booking-edit__notes">
-					{booking.notes.map((note, index) => (
-						<li key={index} className="booking-edit__note">
-							<span className="booking-edit__note-date">
-								{new Date(note.date).toLocaleString()}
-							</span>
-							{note.author && (
-								<span className="booking-edit__note-author">{note.author}</span>
-							)}
-							<p>{note.text}</p>
-						</li>
-					))}
-				</ul>
-			)}
-
-			<TextareaControl
-				label={__('Add note', 'ctx-events')}
-				value={text}
-				onChange={setText}
-				rows={3}
-				disabled={isSaving}
-			/>
-			<Button variant="secondary" onClick={addNote} disabled={!text.trim() || isSaving}>
-				{isSaving ? __('Saving…', 'ctx-events') : __('Add Note', 'ctx-events')}
-			</Button>
-		</section>
+				<TextareaControl
+					label={__('Add note', 'ctx-events')}
+					value={text}
+					onChange={setText}
+					rows={3}
+					disabled={isSaving}
+				/>
+				<Button
+					variant="secondary"
+					onClick={addNote}
+					disabled={!text.trim() || isSaving}
+				>
+					{isSaving
+						? __('Saving…', 'ctx-events')
+						: __('Add Note', 'ctx-events')}
+				</Button>
+			</PanelBody>
+		</Panel>
 	);
 };
 

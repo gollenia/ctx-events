@@ -1,3 +1,4 @@
+import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { BookingDetail, BookingLogEntryResource } from 'src/types/types';
 
@@ -26,39 +27,45 @@ const LogEntriesSection = ({ booking }: Props) => {
 	const logEntries = [...booking.logEntries].reverse();
 
 	return (
-		<section className="booking-edit__section">
-			<h3>{__('Activity', 'ctx-events')}</h3>
-
-			{logEntries.length === 0 ? (
-				<p className="booking-edit__empty">{__('No activity yet.', 'ctx-events')}</p>
-			) : (
-				<ul className="booking-edit__activity-list">
-					{logEntries.map((entry, index) => (
-						<li
-							key={`${entry.timestamp}-${entry.eventType}-${index}`}
-							className="booking-edit__activity-item"
-							data-level={entry.level}
-						>
-							<div className="booking-edit__activity-head">
-								<div className="booking-edit__activity-title">
-									<strong>{EVENT_LABELS[entry.eventType] ?? entry.eventType}</strong>
-									<span className="booking-edit__activity-level">
-										{LEVEL_LABELS[entry.level] ?? entry.level}
-									</span>
+		<Panel header={__('Activity', 'ctx-events')}>
+			<PanelBody>
+				{logEntries.length === 0 ? (
+					<p className="booking-edit__empty">
+						{__('No activity yet.', 'ctx-events')}
+					</p>
+				) : (
+					<ul className="booking-edit__activity-list">
+						{logEntries.map((entry, index) => (
+							<li
+								key={`${entry.timestamp}-${entry.eventType}-${index}`}
+								className="booking-edit__activity-item"
+								data-level={entry.level}
+							>
+								<div className="booking-edit__activity-head">
+									<div className="booking-edit__activity-title">
+										<strong>
+											{EVENT_LABELS[entry.eventType] ?? entry.eventType}
+										</strong>
+										<span className="booking-edit__activity-level">
+											{LEVEL_LABELS[entry.level] ?? entry.level}
+										</span>
+									</div>
+									<span>{new Date(entry.timestamp).toLocaleString()}</span>
 								</div>
-								<span>{new Date(entry.timestamp).toLocaleString()}</span>
-							</div>
-							<p className="booking-edit__activity-actor">
-								{entry.actorName || __('Guest', 'ctx-events')}
-							</p>
-							{entry.message ? (
-								<p className="booking-edit__activity-actor">{entry.message}</p>
-							) : null}
-						</li>
-					))}
-				</ul>
-			)}
-		</section>
+								<p className="booking-edit__activity-actor">
+									{entry.actorName || __('Guest', 'ctx-events')}
+								</p>
+								{entry.message ? (
+									<p className="booking-edit__activity-actor">
+										{entry.message}
+									</p>
+								) : null}
+							</li>
+						))}
+					</ul>
+				)}
+			</PanelBody>
+		</Panel>
 	);
 };
 

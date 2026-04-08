@@ -1,4 +1,4 @@
-import { Modal, SelectControl, TextControl } from '@wordpress/components';
+import { Modal, SelectControl } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type {
@@ -41,12 +41,13 @@ const createInitialMetadata = (
 };
 
 const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
+	const attendeeFields = booking.attendeeForm?.fields ?? [];
 	const [ticketId, setTicketId] = useState<string>(
 		attendee?.ticketId ?? booking.availableTickets[0]?.id ?? '',
 	);
 	const [metadata, setMetadata] = useState<BookingFormValues>(
 		createInitialMetadata(
-			booking.attendeeForm?.fields ?? [],
+			attendeeFields,
 			attendee?.metadata ?? {},
 			attendee?.name ?? null,
 		),
@@ -56,12 +57,12 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 		setTicketId(attendee?.ticketId ?? booking.availableTickets[0]?.id ?? '');
 		setMetadata(
 			createInitialMetadata(
-				booking.attendeeForm?.fields ?? [],
+				attendeeFields,
 				attendee?.metadata ?? {},
 				attendee?.name ?? null,
 			),
 		);
-	}, [attendee, booking.attendeeForm, booking.availableTickets]);
+	}, [attendee, attendeeFields, booking.availableTickets]);
 
 	const ticketOptions = booking.availableTickets.map((ticket) => ({
 		value: ticket.id,
@@ -114,9 +115,9 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 					onChange={setTicketId}
 				/>
 
-				{booking.attendeeForm.fields.length > 0 && (
+				{attendeeFields.length > 0 && (
 					<DynamicFieldsGrid
-						fields={booking.attendeeForm.fields}
+						fields={attendeeFields}
 						values={metadata}
 						onChange={patchMetadata}
 						gridClassName="booking-edit__attendee-fields"

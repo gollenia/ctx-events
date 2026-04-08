@@ -4,7 +4,7 @@ import type {
 	FieldValue,
 	FormFieldDefinition,
 	InputType,
-} from '../../../shared/__experimentalForm';
+} from '../../../shared/form-core';
 
 export type BookingFormValues = Record<string, unknown>;
 

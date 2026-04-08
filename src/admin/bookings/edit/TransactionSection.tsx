@@ -1,5 +1,5 @@
 import { formatPrice } from '@events/i18n';
-import { Notice, Panel } from '@wordpress/components';
+import { ExternalLink, Notice, Panel, PanelBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type {
@@ -33,104 +33,140 @@ function formatIban(iban: string): string {
 		.trim();
 }
 
+function formatTransactionDate(value: string): string {
+	return new Date(value).toLocaleString(undefined, {
+		dateStyle: 'medium',
+		timeStyle: 'short',
+	});
+}
+
 function TransactionCard({
 	transaction,
+	index,
 }: {
 	transaction: BookingTransactionResource;
+	index: number;
 }) {
+	const hasBankData =
+		transaction.bankData &&
+		(transaction.bankData.accountHolder ||
+			transaction.bankData.bankName ||
+			transaction.bankData.iban ||
+			transaction.bankData.bic);
+
+	const summaryId = renderValue(transaction.externalId);
+
 	return (
-		<Panel header="My panel" className="booking-edit__transaction-card">
-			<div className="booking-edit__transaction-grid">
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('Gateway', 'ctx-events')}
-					</span>
+		<PanelBody
+			className="booking-edit__transaction-card"
+			title={
+				<div className="booking-edit__transaction-summary">
 					<strong>{transaction.gateway}</strong>
-				</div>
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('Status', 'ctx-events')}
+					<span className="booking-edit__transaction-summary-id">
+						{__('Transaction', 'ctx-events')}: {summaryId}
 					</span>
-					<strong>
-						{STATUS_LABELS[transaction.status] ?? String(transaction.status)}
-					</strong>
 				</div>
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('Amount', 'ctx-events')}
-					</span>
-					<strong>{formatPrice(transaction.amount)}</strong>
+			}
+			initialOpen={false}
+		>
+			<div className="booking-edit__transaction-content">
+				<div className="booking-edit__transaction-list">
+					<div className="booking-edit__transaction-row">
+						<span className="booking-edit__transaction-label">
+							{__('Status', 'ctx-events')}
+						</span>
+						<strong>
+							{STATUS_LABELS[transaction.status] ?? String(transaction.status)}
+						</strong>
+					</div>
+					<div className="booking-edit__transaction-row">
+						<span className="booking-edit__transaction-label">
+							{__('Amount', 'ctx-events')}
+						</span>
+						<strong>{formatPrice(transaction.amount)}</strong>
+					</div>
+					<div className="booking-edit__transaction-row">
+						<span className="booking-edit__transaction-label">
+							{__('Date', 'ctx-events')}
+						</span>
+						<strong>{formatTransactionDate(transaction.createdAt)}</strong>
+					</div>
+					<div className="booking-edit__transaction-row">
+						<span className="booking-edit__transaction-label">
+							{__('External ID', 'ctx-events')}
+						</span>
+						<strong>{renderValue(transaction.externalId)}</strong>
+					</div>
+					{transaction.checkoutUrl ? (
+						<div className="booking-edit__transaction-row">
+							<span className="booking-edit__transaction-label">
+								{__('Payment link', 'ctx-events')}
+							</span>
+							<ExternalLink href={transaction.checkoutUrl}>
+								{__('Open payment', 'ctx-events')}
+							</ExternalLink>
+						</div>
+					) : null}
+					{hasBankData ? (
+						<div className="booking-edit__transaction-row">
+							<span className="booking-edit__transaction-label">
+								{__('Bank transfer', 'ctx-events')}
+							</span>
+							<strong>
+								{transaction.bankData.accountHolder ||
+									transaction.bankData.bankName ||
+									formatIban(transaction.bankData.iban ?? '') ||
+									__('Details available', 'ctx-events')}
+							</strong>
+						</div>
+					) : null}
 				</div>
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('Date', 'ctx-events')}
-					</span>
-					<strong>{new Date(transaction.createdAt).toLocaleString()}</strong>
-				</div>
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('External ID', 'ctx-events')}
-					</span>
-					<strong>{renderValue(transaction.externalId)}</strong>
-				</div>
-				<div>
-					<span className="booking-edit__transaction-label">
-						{__('Checkout URL', 'ctx-events')}
-					</span>
-					<strong className="booking-edit__transaction-link">
-						{transaction.checkoutUrl ? (
-							<a
-								href={transaction.checkoutUrl}
-								target="_blank"
-								rel="noreferrer"
-							>
-								{transaction.checkoutUrl}
-							</a>
-						) : (
-							'—'
-						)}
-					</strong>
-				</div>
+
+				{transaction.instructions ? (
+					<div className="booking-edit__transaction-block">
+						<span className="booking-edit__transaction-label">
+							{__('Instructions', 'ctx-events')}
+						</span>
+						<p>{transaction.instructions}</p>
+					</div>
+				) : null}
+
+				{hasBankData ? (
+					<div className="booking-edit__transaction-block">
+						<div className="booking-edit__transaction-list">
+							<div className="booking-edit__transaction-row">
+								<span className="booking-edit__transaction-label">
+									{__('Account Holder', 'ctx-events')}
+								</span>
+								<strong>
+									{renderValue(transaction.bankData.accountHolder)}
+								</strong>
+							</div>
+							<div className="booking-edit__transaction-row">
+								<span className="booking-edit__transaction-label">
+									{__('Bank', 'ctx-events')}
+								</span>
+								<strong>{renderValue(transaction.bankData.bankName)}</strong>
+							</div>
+							<div className="booking-edit__transaction-row">
+								<span className="booking-edit__transaction-label">
+									{__('IBAN', 'ctx-events')}
+								</span>
+								<strong>
+									{renderValue(formatIban(transaction.bankData.iban ?? ''))}
+								</strong>
+							</div>
+							<div className="booking-edit__transaction-row">
+								<span className="booking-edit__transaction-label">
+									{__('BIC', 'ctx-events')}
+								</span>
+								<strong>{renderValue(transaction.bankData.bic)}</strong>
+							</div>
+						</div>
+					</div>
+				) : null}
 			</div>
-
-			{transaction.instructions && (
-				<div className="booking-edit__transaction-block">
-					<span className="booking-edit__transaction-label">
-						{__('Instructions', 'ctx-events')}
-					</span>
-					<p>{transaction.instructions}</p>
-				</div>
-			)}
-
-			{transaction.bankData && (
-				<div className="booking-edit__transaction-grid">
-					<div>
-						<span className="booking-edit__transaction-label">
-							{__('Account holder', 'ctx-events')}
-						</span>
-						<strong>{transaction.bankData.accountHolder}</strong>
-					</div>
-					<div>
-						<span className="booking-edit__transaction-label">
-							{__('Bank', 'ctx-events')}
-						</span>
-						<strong>{transaction.bankData.bankName}</strong>
-					</div>
-					<div>
-						<span className="booking-edit__transaction-label">
-							{__('IBAN', 'ctx-events')}
-						</span>
-						<strong>{formatIban(transaction.bankData.iban)}</strong>
-					</div>
-					<div>
-						<span className="booking-edit__transaction-label">
-							{__('BIC', 'ctx-events')}
-						</span>
-						<strong>{transaction.bankData.bic}</strong>
-					</div>
-				</div>
-			)}
-		</Panel>
+		</PanelBody>
 	);
 }
 
@@ -174,50 +210,53 @@ const TransactionSection = ({
 	};
 
 	return (
-		<section className="booking-edit__section">
-			<div className="booking-edit__section-header">
-				<h3>{__('Transactions', 'ctx-events')}</h3>
-				{canResolvePaymentLink && (
-					<button
-						type="button"
-						className="components-button is-secondary"
-						onClick={handleResolvePaymentLink}
-						disabled={isResolvingPaymentLink}
-					>
-						{isResolvingPaymentLink
-							? __('Resolving…', 'ctx-events')
-							: __('Get payment link', 'ctx-events')}
-					</button>
-				)}
-			</div>
-
-			{paymentLinkMessage && (
-				<Notice status="success" isDismissible={false}>
-					{paymentLinkMessage}
-				</Notice>
-			)}
-
-			{paymentLinkError && (
-				<Notice status="error" isDismissible={false}>
-					{paymentLinkError}
-				</Notice>
-			)}
-
-			{booking.transactions.length === 0 ? (
-				<p className="booking-edit__empty">
-					{__('No transactions recorded.', 'ctx-events')}
-				</p>
-			) : (
-				<div className="booking-edit__transactions">
-					{booking.transactions.map((transaction, index) => (
-						<TransactionCard
-							key={`${transaction.externalId || transaction.createdAt}-${index}`}
-							transaction={transaction}
-						/>
-					))}
+		<Panel header={__('Transactions', 'ctx-events')}>
+			<PanelBody>
+				<div className="booking-edit__section-header">
+					<h3>{__('Transactions', 'ctx-events')}</h3>
+					{canResolvePaymentLink && (
+						<button
+							type="button"
+							className="components-button is-secondary"
+							onClick={handleResolvePaymentLink}
+							disabled={isResolvingPaymentLink}
+						>
+							{isResolvingPaymentLink
+								? __('Resolving…', 'ctx-events')
+								: __('Get payment link', 'ctx-events')}
+						</button>
+					)}
 				</div>
-			)}
-		</section>
+
+				{paymentLinkMessage && (
+					<Notice status="success" isDismissible={false}>
+						{paymentLinkMessage}
+					</Notice>
+				)}
+
+				{paymentLinkError && (
+					<Notice status="error" isDismissible={false}>
+						{paymentLinkError}
+					</Notice>
+				)}
+
+				{booking.transactions.length === 0 ? (
+					<p className="booking-edit__empty">
+						{__('No transactions recorded.', 'ctx-events')}
+					</p>
+				) : (
+					<div className="booking-edit__transactions">
+						{booking.transactions.map((transaction, index) => (
+							<TransactionCard
+								key={`${transaction.externalId || transaction.createdAt}-${index}`}
+								index={index}
+								transaction={transaction}
+							/>
+						))}
+					</div>
+				)}
+			</PanelBody>
+		</Panel>
 	);
 };
 

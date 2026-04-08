@@ -2,7 +2,7 @@ import { formatPrice } from '@events/i18n';
 import { Button, Panel, PanelBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { pencil, plus, trash } from '@wordpress/icons';
+import { plus } from '@wordpress/icons';
 import type {
 	AvailableTicketResource,
 	BookingAttendeeResource,
@@ -18,6 +18,8 @@ type Props = {
 const AttendeeSection = ({ booking, onChange }: Props) => {
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
+	const discountAmountCents = booking.price.discountAmount.amountCents ?? 0;
+	const currency = booking.price.finalPrice.currency;
 
 	const ticketById = (ticketId: string): AvailableTicketResource | undefined =>
 		booking.availableTickets.find((ticket) => ticket.id === ticketId);
@@ -91,23 +93,47 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 									</td>
 									<td className="booking-edit__attendee-actions">
 										<Button
-											icon={pencil}
-											variant="tertiary"
-											label={__('Edit', 'ctx-events')}
+											variant="link"
 											onClick={() => setEditingIndex(index)}
-										/>
+										>
+											{__('Edit', 'ctx-events')}
+										</Button>
 										<Button
-											icon={trash}
-											variant="tertiary"
+											variant="link"
 											isDestructive
-											label={__('Remove', 'ctx-events')}
 											onClick={() => removeAttendee(index)}
-										/>
+										>
+											{__('Remove', 'ctx-events')}
+										</Button>
 									</td>
 								</tr>
 							);
 						})}
 					</tbody>
+					<tfoot>
+						<tr className="booking-edit__attendees-summary">
+							<th colSpan={2}>{__('Booking price', 'ctx-events')}</th>
+							<td>{formatPrice(booking.price.bookingPrice)}</td>
+							<td></td>
+						</tr>
+						<tr className="booking-edit__attendees-summary">
+							<th colSpan={2}>{__('Donation', 'ctx-events')}</th>
+							<td>{formatPrice(booking.price.donationAmount)}</td>
+							<td></td>
+						</tr>
+						<tr className="booking-edit__attendees-summary">
+							<th colSpan={2}>{__('Coupon / Discount', 'ctx-events')}</th>
+							<td>
+								-{formatPrice({ amountCents: discountAmountCents, currency })}
+							</td>
+							<td></td>
+						</tr>
+						<tr className="booking-edit__attendees-summary booking-edit__attendees-summary--total">
+							<th colSpan={2}>{__('Final price', 'ctx-events')}</th>
+							<td>{formatPrice(booking.price.finalPrice)}</td>
+							<td></td>
+						</tr>
+					</tfoot>
 				</table>
 
 				{booking.availableTickets.length > 0 && (

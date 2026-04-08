@@ -1,5 +1,6 @@
 import type { BookingFormField } from 'src/types/types';
-import { InputField, isFieldVisible } from '../../../shared/__experimentalForm';
+import { InputField } from '../../../shared/admin-form';
+import { isFieldVisible } from '../../../shared/form-core';
 import {
 	type BookingFormValues,
 	getBookingFieldDefinition,
