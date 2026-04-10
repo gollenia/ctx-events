@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\BookingCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingNotesCollection;
@@ -91,7 +92,7 @@ class DbBookingRepository implements BookingRepository
         return $this->bookingHydrator->hydrate($result);
     }
 
-	public function findByEventId(EventId $eventId): array
+	public function findByEventId(EventId $eventId): BookingCollection
 	{
 		$table = BookingMigration::getTableName();
 		$sql = "SELECT * FROM $table WHERE event_id = %d";
@@ -344,7 +345,7 @@ class DbBookingRepository implements BookingRepository
         return $result;
     }
 
-    /** @return array{string, array} */
+    /** @return array{string, array<string, mixed>} */
     private function buildWhereClause(BookingListRequest $query): array
     {
         [$conditions, $params] = $this->buildBaseConditions($query);
@@ -360,7 +361,7 @@ class DbBookingRepository implements BookingRepository
         return [$whereSql, $params];
     }
 
-    /** @return array{string, array} */
+    /** @return array{string, array<string, mixed>} */
     private function buildStatusCountWhereClause(BookingListRequest $query): array
     {
         [$conditions, $params] = $this->buildBaseConditions($query);
@@ -370,7 +371,7 @@ class DbBookingRepository implements BookingRepository
         return [$whereSql, $params];
     }
 
-    /** @return array{array<string>, array} */
+    /** @return array{array<string>, array<string, mixed>} */
     private function buildBaseConditions(BookingListRequest $query): array
     {
         $conditions = [];

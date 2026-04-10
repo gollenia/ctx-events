@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Application\DTOs\BookingExportData;
 use Contexis\Events\Booking\Application\DTOs\BookingExportSheet;
 use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\BookingCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Event\Domain\Event;
@@ -49,16 +50,12 @@ final class ExportEventBookings
     }
 
     /**
-     * @param Booking[] $bookings
      * @param array<string, string> $fieldLabels
      */
-    private function buildBookingsSheet(Event $event, array $bookings, array $fieldLabels): BookingExportSheet
+    private function buildBookingsSheet(Event $event, BookingCollection $bookings, array $fieldLabels): BookingExportSheet
     {
         $metadataKeys = $this->collectMetadataKeys(
-            array_map(
-                static fn (Booking $booking): array => $booking->registration->all(),
-                $bookings,
-            ),
+            $bookings->registrationEntries(),
             ['booking_form_id', 'email', 'first_name', 'last_name'],
             $fieldLabels,
         );
@@ -113,29 +110,25 @@ final class ExportEventBookings
     }
 
     /**
-     * @param Booking[] $bookings
      * @param array<string, string> $ticketNames
      * @param array<string, string> $bookingFieldLabels
      * @param array<string, string> $attendeeFieldLabels
      */
     private function buildAttendeesSheet(
         Event $event,
-        array $bookings,
+        BookingCollection $bookings,
         array $ticketNames,
         array $bookingFieldLabels,
         array $attendeeFieldLabels,
     ): BookingExportSheet {
         $bookingMetadataKeys = $this->collectMetadataKeys(
-            array_map(
-                static fn (Booking $booking): array => $booking->registration->all(),
-                $bookings,
-            ),
+            $bookings->registrationEntries(),
             ['booking_form_id', 'email', 'first_name', 'last_name'],
             $bookingFieldLabels,
         );
 
         $attendeeMetadataKeys = $this->collectMetadataKeys(
-            $this->collectAttendeeMetadata($bookings),
+            $bookings->attendeeMetadataEntries(),
             ['attendee_form_id'],
             $attendeeFieldLabels,
         );
@@ -267,23 +260,6 @@ final class ExportEventBookings
         sort($remaining, SORT_NATURAL | SORT_FLAG_CASE);
 
         return [...$orderedKeys, ...$remaining];
-    }
-
-    /**
-     * @param Booking[] $bookings
-     * @return array<int, array<string, mixed>>
-     */
-    private function collectAttendeeMetadata(array $bookings): array
-    {
-        $metadata = [];
-
-        foreach ($bookings as $booking) {
-            foreach ($booking->attendees as $attendee) {
-                $metadata[] = $attendee->metadata;
-            }
-        }
-
-        return $metadata;
     }
 
     /**

@@ -17,8 +17,7 @@ interface BookingRepository
     public function find(BookingId $id): ?Booking;
 
     public function findByReference(string $reference): ?Booking;
-
-	public function findByEventId(EventId $eventId): array;
+	public function findByEventId(EventId $eventId): BookingCollection;
 
     public function save(Booking $booking): BookingId;
 
@@ -35,5 +34,9 @@ interface BookingRepository
     /** @param string[] $ticketIds */
     public function getTicketBookingsForEvent(EventId $eventId, array $ticketIds = []): TicketBookingsMap;
 
+	 /** 
+	  * @param array<EventId> $eventIds 
+	  * @return array<EventId, TicketBookingsMap>
+	  */
     public function getTicketBookingsForEvents(array $eventIds): array;
 }
