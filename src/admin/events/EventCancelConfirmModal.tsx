@@ -1,5 +1,5 @@
 import type { DataTableAction } from '@events/datatable/types';
-import { CheckboxControl } from '@wordpress/components';
+import { CheckboxControl, TextareaControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { Event } from '../../types/types';
@@ -25,6 +25,7 @@ const EventCancelConfirmModal = ({
 }: Props) => {
 	const cancelAction = action as EventCancelAction;
 	const [notifyAttendees, setNotifyAttendees] = useState(true);
+	const [cancellationReason, setCancellationReason] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleConfirm = async () => {
@@ -32,6 +33,7 @@ const EventCancelConfirmModal = ({
 		try {
 			await cancelAction.callback([item], onActionPerformed, {
 				notifyAttendees,
+				cancellationReason,
 			});
 			onClose();
 		} finally {
@@ -76,6 +78,17 @@ const EventCancelConfirmModal = ({
 				label={__('Notify attendees by email', 'ctx-events')}
 				checked={notifyAttendees}
 				onChange={setNotifyAttendees}
+				disabled={isSubmitting}
+			/>
+
+			<TextareaControl
+				label={__('Cancellation reason', 'ctx-events')}
+				help={__(
+					'Optional. Available in email templates via {{booking.cancellation_reason}}.',
+					'ctx-events',
+				)}
+				value={cancellationReason}
+				onChange={setCancellationReason}
 				disabled={isSubmitting}
 			/>
 		</ActionModal>

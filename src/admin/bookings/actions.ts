@@ -7,6 +7,7 @@ type Booking = { reference: string; status: number };
 type ActionResponse = { warnings?: string[] } | null;
 type BookingActionOptions = {
 	sendMail?: boolean;
+	cancellationReason?: string;
 };
 
 type BookingActionConfig = {
@@ -139,6 +140,9 @@ export const executeBookingAction = async (
 		data: {
 			...(action.data ?? {}),
 			...(action.supportsMail ? { sendmail: options?.sendMail ?? true } : {}),
+			...(action.id === 'cancel'
+				? { cancellation_reason: options?.cancellationReason ?? '' }
+				: {}),
 		},
 	})) as ActionResponse;
 

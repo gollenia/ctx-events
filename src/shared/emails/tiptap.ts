@@ -8,6 +8,7 @@ export const EMAIL_TEMPLATE_TOKENS = [
 	{ token: '{{booking.email}}', label: 'Booking email' },
 	{ token: '{{booking.first_name}}', label: 'Booking first name' },
 	{ token: '{{booking.last_name}}', label: 'Booking last name' },
+	{ token: '{{booking.cancellation_reason}}', label: 'Cancellation reason' },
 	{ token: '{{event.name}}', label: 'Event name' },
 	{ token: '{{event.start}}', label: 'Event start' },
 	{ token: '{{event.end}}', label: 'Event end' },

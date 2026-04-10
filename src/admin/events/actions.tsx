@@ -6,6 +6,7 @@ import EventCancelConfirmModal from './EventCancelConfirmModal';
 
 type EventCancelOptions = {
 	notifyAttendees?: boolean;
+	cancellationReason?: string;
 };
 
 type EventActionConfig = {
@@ -41,6 +42,8 @@ const cancelEvent = async (
 		method: 'POST',
 		data: {
 			notifyAttendees: options?.notifyAttendees ?? true,
+			attendee_message: options?.cancellationReason ?? '',
+			cancellation_reason: options?.cancellationReason ?? '',
 		},
 	});
 };
