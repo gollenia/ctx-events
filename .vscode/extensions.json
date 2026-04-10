@@ -1,0 +1,8 @@
+{
+	"recommendations": [
+		"johnbillion.vscode-wordpress-hooks",
+		"bmewburn.vscode-intelephense-client",
+		"junstyle.php-cs-fixer",
+		"biomejs.biome"
+	]
+}
