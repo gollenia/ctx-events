@@ -12,11 +12,13 @@ final readonly class AttendeeCollection extends Collection
         return new self($attendees);
     }
 
+	/** @return string[] */
 	public function getTicketIds(): array
     {
         return array_map(fn(Attendee $a) => $a->ticketId->toString(), $this->items);
     }
 
+	/** @return array<string, int> */
 	public function countTicketsById(): array
 	{
 		$counts = [];

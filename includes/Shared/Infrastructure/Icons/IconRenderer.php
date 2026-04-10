@@ -10,6 +10,9 @@ final class IconRenderer
         private readonly IconRegistry $registry
     ) {}
 
+	/**
+	 * @param array<string, mixed> $attributes
+	 */
     public function render(string $icon, array $attributes = []): string
     {
         $resolvedIcon = $this->registry->resolveSlot($icon);
@@ -135,6 +138,9 @@ final class IconRenderer
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     */
     private function buildAttributes(array $attributes): string
     {
         $parts = [];

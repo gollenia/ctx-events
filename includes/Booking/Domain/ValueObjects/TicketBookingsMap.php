@@ -11,6 +11,9 @@ final class TicketBookingsMap implements \JsonSerializable
 	/** @var array<string, TicketBookings> */
 	private array $keyedItems;
 	
+	/**
+	 * @param TicketBookings[] $items
+	 */
 	public function __construct(
 		array $items
 	) {
@@ -20,6 +23,7 @@ final class TicketBookingsMap implements \JsonSerializable
         }
 	}
 
+	/** @param array<string, array{ pending?: int, approved?: int, canceled?: int, expired?: int }> $data */
 	public static function fromArray(array $data): self
 	{
 		$items = [];
@@ -84,6 +88,7 @@ final class TicketBookingsMap implements \JsonSerializable
 		return $total;
 	}
 
+	/** @return array<string, array{ pending: int, approved: int, canceled: int, expired: int }> */
 	public function jsonSerialize(): array
 	{
 		$result = [];

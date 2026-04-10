@@ -10,16 +10,18 @@ use Contexis\Events\Payment\Domain\PaymentGateway;
 
 final class ListGateways
 {
-    public function __construct(private GatewayRepository $repository) {}
+    public function __construct(private GatewayRepository $repository)
+    {
+    }
 
-	/**
-	 * @return array<GatewayListItemDto>
-	 */
+    /**
+    * @return array<GatewayListItemDto>
+    */
     public function execute(): array
     {
         $list = $this->repository->findAll();
-		return array_map(function (PaymentGateway $gateway) {
-			return GatewayListItemDto::fromPaymentGateway($gateway);
-		}, $list->toArray());
+        return array_map(function (PaymentGateway $gateway) {
+            return GatewayListItemDto::fromPaymentGateway($gateway);
+        }, $list->toArray());
     }
 }

@@ -11,7 +11,7 @@ use Contexis\Events\Payment\Infrastructure\Enums\PaymentProvider;
 
 final class WpGatewayRepository implements GatewayRepository
 {
-	/** @var array<string, PaymentGateway> */
+    /** @var array<string, PaymentGateway> */
     private array $instances = [];
 
     public function find(string $id): ?PaymentGateway
@@ -19,19 +19,18 @@ final class WpGatewayRepository implements GatewayRepository
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
         }
-		
-		foreach (PaymentProvider::cases() as $provider) {
-			$className = $provider->getGatewayClass();
-			$gateway = new $className();
-			$this->instances[$provider->value] = $gateway;
-    	}
+
+        foreach (PaymentProvider::cases() as $provider) {
+            $className = $provider->getGatewayClass();
+            $gateway = new $className();
+            $this->instances[$provider->value] = $gateway;
+        }
 
         return $this->instances[$id] ?? null;
     }
 
     public function findAll(): GatewayCollection
     {
-		
         $allIds = array_map(fn($case) => $case->value, PaymentProvider::cases());
         $result = [];
         foreach ($allIds as $id) {
@@ -50,6 +49,5 @@ final class WpGatewayRepository implements GatewayRepository
             $this->findAll()->toArray(),
             fn(PaymentGateway $g) => $g->isEnabled()
         ));
-
     }
 }

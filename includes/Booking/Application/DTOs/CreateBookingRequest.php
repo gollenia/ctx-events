@@ -12,6 +12,10 @@ use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final class CreateBookingRequest
 {
+	/**
+	 * @param array<string, mixed> $registration
+	 * @param array<array<string, mixed>> $attendees
+	 */
 	public function __construct(
 		public EventId $eventId,
 		public array $registration,

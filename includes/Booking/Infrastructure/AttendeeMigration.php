@@ -17,6 +17,7 @@ final class AttendeeMigration implements Migration
 	public const METADATA = 'metadata';
 	public const CHECKIN_AT = 'checkin_at';
 
+	/** @var array<string> */
     private array $columns = [
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
         self::TICKET_ID . ' VARCHAR(100) NOT NULL',

@@ -21,6 +21,7 @@ final class TransactionMigration implements Migration
 	public const CREATED_AT = 'created_at';
 	public const DETAILS = 'details';
 
+	/** @var non-empty-list<non-empty-string> */
     private array $columns = [
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
         self::EXTERNAL_ID . ' VARCHAR(100) NULL',

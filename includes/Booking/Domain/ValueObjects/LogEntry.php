@@ -8,6 +8,16 @@ use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
 use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Shared\Domain\ValueObjects\Actor;
 
+/**
+ * @phpstan-type LogEntryData array{
+ *     eventType?: string,
+ *     level?: string,
+ *     actor?: array<string, mixed>,
+ *     timestamp?: string,
+ *     message?: string
+ * }
+ */
+
 final readonly class LogEntry
 {
     public function __construct(
@@ -19,10 +29,11 @@ final readonly class LogEntry
     ) {
     }
 
+	 /** @phpstan-param LogEntryData $data */
     public static function fromArray(array $data): self
     {
         return new self(
-            eventType: BookingLogEvent::from((string) ($data['eventType'] ?? $data['event_type'] ?? BookingLogEvent::Updated->value)),
+            eventType: BookingLogEvent::from((string) ($data['eventType'] ?? $data['eventType'] ?? BookingLogEvent::Updated->value)),
             level: BookingLogLevel::from((string) ($data['level'] ?? BookingLogLevel::Info->value)),
             actor: Actor::fromArray((array) ($data['actor'] ?? [])),
             timestamp: new \DateTimeImmutable((string) ($data['timestamp'] ?? 'now')),
@@ -30,6 +41,9 @@ final readonly class LogEntry
         );
     }
 
+	/**
+	 * @return LogEntryData
+	 */
     public function toArray(): array
     {
         return [

@@ -34,6 +34,7 @@ final class BookingActionController implements RestController
         $baseArgs        = $this->getBaseArgs();
         $baseWithSendmail = array_merge($baseArgs, [
             'sendmail' => ['required' => false, 'type' => 'boolean', 'default' => true],
+            'cancellation_reason' => ['required' => false, 'type' => 'string', 'default' => ''],
         ]);
 
         register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/approve', [[
@@ -80,6 +81,7 @@ final class BookingActionController implements RestController
             $emailResult = $action->execute(new BookingActionRequest(
                 reference: (string) $request->get_param('uuid'),
                 sendMail: $sendMail === null ? true : (bool) $sendMail,
+                cancellationReason: $this->sanitizeOptionalReason($request->get_param('cancellation_reason')),
             ));
             $warnings = BookingEmailWarnings::messages($emailResult);
 
@@ -116,5 +118,16 @@ final class BookingActionController implements RestController
     public function deleteBooking(\WP_REST_Request $request): \WP_REST_Response
     {
         return $this->executeAction($this->deleteBooking, $request);
+    }
+
+    private function sanitizeOptionalReason(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $reason = trim(sanitize_textarea_field($value));
+
+        return $reason === '' ? null : $reason;
     }
 }

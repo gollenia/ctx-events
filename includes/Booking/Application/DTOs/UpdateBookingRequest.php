@@ -6,6 +6,10 @@ namespace Contexis\Events\Booking\Application\DTOs;
 
 final readonly class UpdateBookingRequest
 {
+	/**
+	 * @param array<string, mixed> $registration
+	 * @param array<array<string, mixed>> $attendees
+	 */
     public function __construct(
         public string $uuid,
         public array $registration,

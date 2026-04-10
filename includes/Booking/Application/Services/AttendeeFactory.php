@@ -12,6 +12,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final class AttendeeFactory
 {
+	/** @param array<string, mixed> $payload */
     public function fromPayload(array $payload, TicketCollection $tickets): AttendeeCollection
     {
         if ($payload === []) {
@@ -42,6 +43,7 @@ final class AttendeeFactory
         return AttendeeCollection::from(...$attendees);
     }
 
+	/** @param array<string, mixed> $metadata */
 	private function getPersonName(array $metadata): ?PersonName
 	{
 		$firstName = $metadata['first_name'] ?? null;
@@ -54,6 +56,7 @@ final class AttendeeFactory
 		return new PersonName($firstName, $lastName);
 	}
 
+	/** @param array<string, mixed> $metadata */
 	private function getBithdate(array $metadata): ?\DateTimeImmutable
 	{
 		if (!isset($metadata['birth_date']) || !is_string($metadata['birth_date'])) {

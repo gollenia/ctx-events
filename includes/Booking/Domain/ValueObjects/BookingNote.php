@@ -22,6 +22,7 @@ final readonly class BookingNote
         );
     }
 
+	 /** @param array{ text?: string, date?: string, author?: string } $data */
     public static function fromArray(array $data): self
     {
         return new self(

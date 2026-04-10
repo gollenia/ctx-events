@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Domain;
@@ -15,15 +16,15 @@ enum DiscountType: string
             'fixed' => self::FIXED,
             default => throw new \Exception('Invalid discount type'),
         };
-    }	
+    }
 
-	public function isPercentage(): bool
-	{
-		return $this === self::PERCENTAGE;
-	}
+    public function isPercentage(): bool
+    {
+        return $this === self::PERCENTAGE;
+    }
 
-	public function isFixed(): bool
-	{
-		return $this === self::FIXED;
-	}
+    public function isFixed(): bool
+    {
+        return $this === self::FIXED;
+    }
 }

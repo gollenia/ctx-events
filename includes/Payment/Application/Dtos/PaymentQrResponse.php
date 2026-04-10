@@ -19,8 +19,7 @@ final readonly class PaymentQrResponse
         string $format,
         string $mimeType,
         string $dataUri
-    ): self
-    {
+    ): self {
         return new self($gateway, $format, $mimeType, $dataUri);
     }
 }

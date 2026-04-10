@@ -61,7 +61,11 @@ final class CancelBooking implements BookingAction
             return BookingEmailResult::empty();
         }
 
-        $emailResult = $this->bookingEmailTrigger->trigger(EmailTrigger::BOOKING_CANCELLED, $id);
+        $emailResult = $this->bookingEmailTrigger->trigger(
+            EmailTrigger::BOOKING_CANCELLED,
+            $id,
+            $request->cancellationReason,
+        );
         $logEntries = BookingEmailWarnings::appendToLogEntries(
             $updatedBooking->logEntries,
             $emailResult,

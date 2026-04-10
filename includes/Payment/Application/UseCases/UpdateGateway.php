@@ -13,6 +13,10 @@ final class UpdateGateway
         private readonly GatewayRepository $gatewayRepository,
     ) {
     }
+
+	/**
+	 * @param array<string, mixed> $settings
+	 */
     public function execute(string $slug, array $settings): ?EditGatewayDto
     {
         $gateway = $this->gatewayRepository->find($slug);

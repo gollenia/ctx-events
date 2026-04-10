@@ -8,6 +8,9 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 
 final readonly class BookingListRequest
 {
+	/** 
+	 * @param array<string> $status
+	 */
     public function __construct(
         public ?EventId $eventId = null,
         public ?array $status = null,

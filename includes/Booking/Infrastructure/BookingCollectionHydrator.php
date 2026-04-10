@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Infrastructure;
 
 use Contexis\Events\Booking\Domain\AttendeeRepository;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\BookingCollection;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Infrastructure\Mapper\BookingMapper;
 use Contexis\Events\Payment\Domain\TransactionRepository;
@@ -18,11 +19,13 @@ final class BookingCollectionHydrator
     ) {
     }
 
-    /** @param array<int, array<string, mixed>> $rows @return Booking[] */
-    public function hydrate(array $rows): array
+    /** 
+	 * @param array<int, array<string, mixed>> $rows
+	 */
+    public function hydrate(array $rows): BookingCollection
     {
         if ($rows === []) {
-            return [];
+            return BookingCollection::empty();
         }
 
         $bookingIds = [];
@@ -49,6 +52,6 @@ final class BookingCollectionHydrator
             $bookings[] = BookingMapper::map($row);
         }
 
-        return $bookings;
+        return BookingCollection::from(...$bookings);
     }
 }

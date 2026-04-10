@@ -8,13 +8,17 @@ use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 
 final readonly class RegistrationData
 {
+	/** @phpstan-var array<string, mixed> */
 	private array $data;
+
+	/** @phpstan-param array<string, mixed> $data */
     public function __construct(
        array $data 
     ) {
 		$this->data = $data;
     }
 
+	/** @return array<string, mixed> */
 	public function all(): array
     {
         return $this->data;

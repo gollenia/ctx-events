@@ -23,6 +23,7 @@ final class BookingMigration implements Migration
 	public const NOTES = 'notes';
 	public const LOG = 'log';
 
+	/** @var array<string> */
     private array $columns = [
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		self::UUID . ' VARCHAR(191) NOT NULL',

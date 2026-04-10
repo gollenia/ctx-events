@@ -7,7 +7,17 @@ namespace Contexis\Events\Booking\Domain\ValueObjects;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
-class PriceSummary
+/**
+ * @phpstan-type PriceSummaryData array{
+ *     bookingPrice?: int,
+ *     donationAmount?: int,
+ *     discountAmount?: int,
+ *     finalPrice?: int,
+ *     currency?: string
+ * }
+ */
+
+final readonly class PriceSummary
 {
     public function __construct(
         public readonly Price $bookingPrice,
@@ -49,6 +59,7 @@ class PriceSummary
 		);
 	}
 
+	/** @param PriceSummaryData $data */
 	public static function fromArray(array $data): self
 	{
 		$currency = Currency::fromCode($data['currency']);
@@ -76,7 +87,7 @@ class PriceSummary
 	}
 
 	/**
-	 * @return array<string, int>
+	 * @return PriceSummaryData
 	 */
 	public function toArray(): array
 	{

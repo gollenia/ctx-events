@@ -26,13 +26,13 @@ final readonly class Coupon
     ) {
     }
 
-	public function getDiscountAmount(Price $price): Price
-	{
-		$minus = $this->discountType->isPercentage()
-			? $price->percentageOf($this->value)
-			: $this->value;
-		return Price::from($minus, $price->currency);
-	}
+    public function getDiscountAmount(Price $price): Price
+    {
+        $minus = $this->discountType->isPercentage()
+            ? $price->percentageOf($this->value)
+            : $this->value;
+        return Price::from($minus, $price->currency);
+    }
 
     public function isUsableAt(DateTimeImmutable $now): bool
     {

@@ -8,6 +8,9 @@ use Contexis\Events\Payment\Domain\GatewayRepository;
 
 final class GatewayService
 {
+	/**
+	 * @var array<string>
+	 */
     private ?array $nameMap = null;
 
     public function __construct(private GatewayRepository $gatewayRepository)
@@ -19,6 +22,9 @@ final class GatewayService
         return $this->getNameMap()[$slug] ?? $slug;
     }
 
+	/**
+	 * @return array<string>
+	 */
     private function getNameMap(): array
     {
         if ($this->nameMap !== null) {

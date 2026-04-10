@@ -6,22 +6,22 @@ namespace Contexis\Events\Payment\Application\UseCases;
 
 use Contexis\Events\Payment\Application\Dtos\EditGatewayDto;
 use Contexis\Events\Payment\Domain\GatewayRepository;
-use Contexis\Events\Payment\Domain\PaymentGateway;
 
 final class EditGateway
 {
     public function __construct(
         private GatewayRepository $gatewayRepository
-    ) {}
+    ) {
+    }
 
     public function execute(string $id): ?EditGatewayDto
     {
         $gateway = $this->gatewayRepository->find($id);
 
-		if (!$gateway) {
-			return null;
-		}
-		
-		return EditGatewayDto::fromPaymentGateway($gateway);
+        if (!$gateway) {
+            return null;
+        }
+
+        return EditGatewayDto::fromPaymentGateway($gateway);
     }
 }

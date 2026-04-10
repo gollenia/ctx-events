@@ -23,6 +23,9 @@ use Contexis\Events\Shared\Infrastructure\Contracts\DatabaseMapper;
 
 final class BookingMapper implements DatabaseMapper
 {
+	/**
+	 * @param array<string, mixed> $data
+	 */
 	public static function map(array $data): Booking
 	{
 		$registration = self::getRegistrationData($data);
@@ -62,7 +65,9 @@ final class BookingMapper implements DatabaseMapper
 		);
 	}
 
-
+	/**
+	 * @param array<string, mixed> $data
+	 */
 	private static function getRegistrationData(array $data): RegistrationData
 	{
 		$registration = is_string($data['registration']) ? json_decode($data['registration'], true) : ($data['registration'] ?? []);

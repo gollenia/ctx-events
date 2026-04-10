@@ -12,34 +12,38 @@ final class GatewayListItemDto
         public string $slug,
         public string $adminName,
         public string $title,
-		public ?string $description,
+        public ?string $description,
         public bool $active,
-		public bool $isValid,
+        public bool $isValid,
         public bool $supportsCheckoutLink,
-    ) {}
+    ) {
+    }
 
-	static function fromPaymentGateway(PaymentGateway $gateway): self
-	{
-		return new self(
-			$gateway->getId(),
-			$gateway->getAdminName(),
-			$gateway->getTitle(),
-			$gateway->getDescription(),
-			$gateway->isEnabled(),
-			$gateway->isValid(),
+    public static function fromPaymentGateway(PaymentGateway $gateway): self
+    {
+        return new self(
+            $gateway->getId(),
+            $gateway->getAdminName(),
+            $gateway->getTitle(),
+            $gateway->getDescription(),
+            $gateway->isEnabled(),
+            $gateway->isValid(),
             $gateway->supportsCheckoutLink()
-		);
-	}
+        );
+    }
 
+	/**
+	 * @return array<string, mixed>
+	 */
     public function toArray(): array
     {
         return [
             'slug' => $this->slug,
             'adminName' => $this->adminName,
             'title' => $this->title,
-			'description' => $this->description,
+            'description' => $this->description,
             'active' => $this->active,
-			'isValid' => $this->isValid,
+            'isValid' => $this->isValid,
             'supportsCheckoutLink' => $this->supportsCheckoutLink,
         ];
     }

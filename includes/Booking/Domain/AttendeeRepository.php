@@ -11,7 +11,10 @@ interface AttendeeRepository
 
     public function findByBookingId(BookingId $bookingId): AttendeeCollection;
 
-    /** @param BookingId[] $bookingIds @return array<int, AttendeeCollection> */
+    /** 
+	 * @param BookingId[] $bookingIds 
+	 * @return array<int, AttendeeCollection> 
+	 **/
     public function findByBookingIds(array $bookingIds): array;
 
     public function deleteByBookingId(BookingId $bookingId): void;

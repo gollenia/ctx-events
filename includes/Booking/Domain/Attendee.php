@@ -10,6 +10,7 @@ use DateTimeImmutable;
 
 final readonly class Attendee
 {
+	/** @param array<string, mixed> $metadata */
     public function __construct(
         public TicketId $ticketId,
 		public Price $ticketPrice,

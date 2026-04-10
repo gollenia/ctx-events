@@ -1,10 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Domain\ValueObjects;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
+
+/**
+ * @phpstan-type TokenRecord array{
+ *     tokenId?: string,
+ *     eventId?: int,
+ *     sessionHash?: string,
+ *     expiresAt?: string,
+ *     used?: bool,
+ * }
+ */
 
 final readonly class BookingTokenRecord
 {
@@ -28,6 +39,7 @@ final readonly class BookingTokenRecord
         }
     }
 
+	/** @param TokenRecord $data */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -39,6 +51,7 @@ final readonly class BookingTokenRecord
         );
     }
 
+    /** @return TokenRecord */
     public function toArray(): array
     {
         return [

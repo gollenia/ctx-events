@@ -18,7 +18,8 @@ final class ValidateCoupon
         private CouponRepository $couponRepository,
         private EventRepository $eventRepository,
         private Clock $clock,
-    ) {}
+    ) {
+    }
 
     public function execute(string $code, EventId $eventId, int $bookingPriceCents, string $currencyCode): CouponCheckResponse
     {

@@ -12,6 +12,9 @@ use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final class AttendeeMapper
 {
+	/**
+	 * @param array<string, mixed> $row
+	 */
     public static function map(array $row): Attendee
     {
         $metadata  = json_decode($row['metadata'] ?? '{}', true) ?? [];

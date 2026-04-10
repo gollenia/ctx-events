@@ -12,23 +12,23 @@ use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
 class WpCouponRepository implements CouponRepository
 {
-	public function find(CouponId $id): ?Coupon
-	{
-		$post = new \WP_Query([
-			'post_type' => CouponPost::POST_TYPE,
-			'post_status' => 'publish',
-			'posts_per_page' => 1,
-			'p' => $id->toInt(),
-		]);
+    public function find(CouponId $id): ?Coupon
+    {
+        $post = new \WP_Query([
+            'post_type' => CouponPost::POST_TYPE,
+            'post_status' => 'publish',
+            'posts_per_page' => 1,
+            'p' => $id->toInt(),
+        ]);
 
-		if (!$post->have_posts()) {
-			return null;
-		}
+        if (!$post->have_posts()) {
+            return null;
+        }
 
-		$wpPost = $post->next_post();
+        $wpPost = $post->next_post();
 
-		return CouponMapper::map(PostSnapshot::fromWpPost($wpPost));
-	}
+        return CouponMapper::map(PostSnapshot::fromWpPost($wpPost));
+    }
 
 	public function get(CouponId $id): Coupon
 	{
@@ -61,10 +61,13 @@ class WpCouponRepository implements CouponRepository
 		}
 
 		$wpPost = $post->next_post();
-        
+
 		return CouponMapper::map(PostSnapshot::fromWpPost($wpPost));
 	}
 
+	/**
+	 * @param array<int> $ids
+	 */
     public function findMany(array $ids): CouponCollection
     {
         $couponIds = array_map(static fn (mixed $couponId): int => (int) $couponId, $ids);

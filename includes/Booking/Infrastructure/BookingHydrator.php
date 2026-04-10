@@ -18,6 +18,9 @@ final class BookingHydrator
     ) {
     }
 
+	 /**
+	  * @param array<string, mixed> $row
+	  */
     public function hydrate(array $row): Booking
     {
         $bookingId = BookingId::from((int) ($row['id'] ?? 0));

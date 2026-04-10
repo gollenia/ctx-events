@@ -10,6 +10,7 @@ final class PersonIncludes
     ) {
     }
 
+	/** @param array<string, mixed> $includes */
     public static function fromArray(array $includes): self
     {
         return new self(

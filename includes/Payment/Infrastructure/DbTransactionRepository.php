@@ -98,6 +98,10 @@ final class DbTransactionRepository implements TransactionRepository
         );
     }
 
+	/**
+	 * @param BookingId[] $bookingIds
+	 * @return array<int, \Contexis\Events\Payment\Domain\TransactionCollection>
+	 */
     public function findByBookingIds(array $bookingIds): array
     {
         if ($bookingIds === []) {

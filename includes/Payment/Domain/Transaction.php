@@ -21,9 +21,9 @@ final readonly class Transaction
         public \DateTimeImmutable $createdAt,
         public ?string $externalId = null,
         public ?BankData $bankData = null,
-		public string $instructions = '',
+        public string $instructions = '',
         public ?Uri $checkoutUrl = null,
-		public ?Uri $gatewayUrl = null,
+        public ?Uri $gatewayUrl = null,
         public ?\DateTimeImmutable $expiresAt = null,
     ) {
     }
@@ -33,17 +33,17 @@ final readonly class Transaction
         Price $amount,
         string $gateway,
         ?BankData $bankData = null,
-		string $instructions = '',
+        string $instructions = '',
         ?\DateTimeImmutable $expiresAt = null,
     ): self {
         return new self(
-            id: null, 
+            id: null,
             bookingId: $bookingId,
             amount: $amount,
             gateway: $gateway,
             status: TransactionStatus::PENDING,
             bankData: $bankData,
-			instructions: $instructions,
+            instructions: $instructions,
             createdAt: new \DateTimeImmutable(),
             expiresAt: $expiresAt,
         );
@@ -55,8 +55,8 @@ final readonly class Transaction
         string $externalId,
         Uri $checkoutUrl,
         string $gateway,
-		Uri $gatewayUrl,
-		string $instructions = '',
+        Uri $gatewayUrl,
+        string $instructions = '',
         ?\DateTimeImmutable $expiresAt = null,
     ): self {
         return new self(
@@ -67,8 +67,8 @@ final readonly class Transaction
             status: TransactionStatus::PENDING,
             externalId: $externalId,
             checkoutUrl: $checkoutUrl,
-			gatewayUrl: $gatewayUrl,
-			instructions: $instructions,
+            gatewayUrl: $gatewayUrl,
+            instructions: $instructions,
             createdAt: new \DateTimeImmutable(),
             expiresAt: $expiresAt,
         );
@@ -121,12 +121,12 @@ final readonly class Transaction
         return $this->checkoutUrl === null;
     }
 
-	public function setAmount(Price $amount): self
-	{
-		return clone($this, [
-			"amount" => $amount
-		]);
-	}
+    public function setAmount(Price $amount): self
+    {
+        return clone($this, [
+            "amount" => $amount
+        ]);
+    }
 
     public function withExpiresAt(?\DateTimeImmutable $expiresAt): self
     {

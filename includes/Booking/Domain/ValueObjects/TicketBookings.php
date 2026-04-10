@@ -51,6 +51,13 @@ final class TicketBookings implements \JsonSerializable
         };
     }
 
+	/** @return array{
+	 * pending: int,
+	 * approved: int,
+	 * canceled: int,
+	 * expired: int
+	 * }
+	 */
 	public function jsonSerialize(): array
 	{
 		return [
