@@ -9,6 +9,7 @@ final readonly class BookingActionRequest
     public function __construct(
         public string $reference,
         public bool $sendMail = true,
+        public ?string $cancellationReason = null,
     ) {
     }
 }

@@ -10,5 +10,9 @@ use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 
 interface BookingEmailTrigger
 {
-    public function trigger(EmailTrigger $trigger, BookingId $bookingId): BookingEmailResult;
+    public function trigger(
+        EmailTrigger $trigger,
+        BookingId $bookingId,
+        ?string $cancellationReason = null,
+    ): BookingEmailResult;
 }

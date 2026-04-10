@@ -16,6 +16,7 @@ final readonly class TriggeredEmailContext
         public Event $event,
         public AttendeeCollection $attendees,
         public TransactionCollection $transactions,
+        public ?string $cancellationReason = null,
     ) {
     }
 }

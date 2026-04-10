@@ -249,8 +249,11 @@ final class EventController implements RestController
 		$event_id = (int) $request->get_param('id');
 		$notify_attendees = (bool) $request->get_param('notifyAttendees');
 		$attendee_message = (string) $request->get_param('attendee_message');
-		$result = $this->cancelEvent->execute($event_id);
+		$success = $this->cancelEvent->execute($event_id, $notify_attendees, $attendee_message);
 
+		if (!$success) {
+			return new \WP_REST_Response(['message' => 'Event not found'], 404);
+		}
 
 		return new \WP_REST_Response(['message' => 'Event cancelled'], 200);
 	}
@@ -262,6 +265,7 @@ final class EventController implements RestController
 		return new \WP_REST_Response(['message' => 'Event deleted'], 200);
 	}
 
+	/** @return array<string> */
 	private function normalizeIncludeParam(mixed $includeParam): array
 	{
 		if ($includeParam === null) {

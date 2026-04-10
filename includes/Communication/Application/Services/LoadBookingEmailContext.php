@@ -21,7 +21,7 @@ final readonly class LoadBookingEmailContext
     ) {
     }
 
-    public function load(BookingId $bookingId): ?TriggeredEmailContext
+    public function load(BookingId $bookingId, ?string $cancellationReason = null): ?TriggeredEmailContext
     {
         $booking = $this->bookingRepository->find($bookingId);
 
@@ -40,6 +40,7 @@ final readonly class LoadBookingEmailContext
             event: $event,
             attendees: $this->attendeeRepository->findByBookingId($bookingId),
             transactions: $this->transactionRepository->findByBookingId($bookingId),
+            cancellationReason: $cancellationReason,
         );
     }
 }

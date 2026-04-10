@@ -37,6 +37,7 @@ final class EmailTemplateTokenReplacer
             '{{booking.email}}' => $replace($context->booking->email->toString()),
             '{{booking.first_name}}' => $replace($context->booking->name->firstName),
             '{{booking.last_name}}' => $replace($context->booking->name->lastName),
+            '{{booking.cancellation_reason}}' => $replace($context->cancellationReason),
             '{{event.name}}' => $replace($context->event->name),
             '{{event.start}}' => $replace($context->event->startDate->format('Y-m-d H:i')),
             '{{event.end}}' => $replace($context->event->endDate->format('Y-m-d H:i')),

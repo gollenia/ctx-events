@@ -42,7 +42,11 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
     ) {
     }
 
-    public function trigger(EmailTrigger $trigger, BookingId $bookingId): BookingEmailResult
+    public function trigger(
+        EmailTrigger $trigger,
+        BookingId $bookingId,
+        ?string $cancellationReason = null,
+    ): BookingEmailResult
     {
         $presets = $this->presetProvider->all()->findByTrigger($trigger);
 
@@ -50,7 +54,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
             return BookingEmailResult::empty();
         }
 
-        $context = $this->loadBookingEmailContext->load($bookingId);
+        $context = $this->loadBookingEmailContext->load($bookingId, $cancellationReason);
 
         if ($context === null) {
             return $this->missingContextResult($presets);
@@ -215,6 +219,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
     }
 
     /**
+	 * @param array<string, mixed>|null $eventOverride
      * @return array{EmailDefinition, AdminEmailRecipientConfig}
      */
     private function resolveTemplate(EmailTemplatePreset $preset, ?array $eventOverride): array
