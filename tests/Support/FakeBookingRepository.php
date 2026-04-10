@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Domain\BookingCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
@@ -69,11 +70,11 @@ final class FakeBookingRepository implements BookingRepository
         return null;
     }
 
-    public function findByEventId(EventId $eventId): array
+    public function findByEventId(EventId $eventId): BookingCollection
     {
         $this->lastEventIdArg = $eventId;
 
-        return $this->bookingsForEvent($eventId);
+        return BookingCollection::from(...$this->bookingsForEvent($eventId));
     }
 
     public function save(Booking $booking): BookingId

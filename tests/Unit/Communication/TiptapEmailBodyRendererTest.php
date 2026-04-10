@@ -25,6 +25,7 @@ test('renders legacy mail bodies as plain text with replaced tokens', function (
             event: $event,
             attendees: AttendeeCollection::empty(),
             transactions: TransactionCollection::empty(),
+            cancellationReason: null,
         ),
     );
 
@@ -60,9 +61,32 @@ test('renders tiptap mail bodies as html with replaced tokens', function () {
             event: $event,
             attendees: AttendeeCollection::empty(),
             transactions: TransactionCollection::empty(),
+            cancellationReason: null,
         ),
     );
 
     expect($rendered->isHtml)->toBeTrue();
     expect($rendered->content)->toContain('<p>', 'Hello Max', $event->name);
+});
+
+test('renders cancellation reason token when present', function () {
+    $event = FakeEventFactory::create(703);
+    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $renderer = new TiptapEmailBodyRenderer(
+        new TiptapDocumentRenderer(),
+        new EmailTemplateTokenReplacer(),
+    );
+
+    $rendered = $renderer->render(
+        'Reason: {{booking.cancellation_reason}}',
+        new TriggeredEmailContext(
+            booking: $booking,
+            event: $event,
+            attendees: AttendeeCollection::empty(),
+            transactions: TransactionCollection::empty(),
+            cancellationReason: 'Speaker is ill',
+        ),
+    );
+
+    expect($rendered->content)->toBe('Reason: Speaker is ill');
 });

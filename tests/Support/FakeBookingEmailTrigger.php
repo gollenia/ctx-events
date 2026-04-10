@@ -11,7 +11,7 @@ use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 
 final class FakeBookingEmailTrigger implements BookingEmailTrigger
 {
-    /** @var list<array{trigger: EmailTrigger, bookingId: BookingId}> */
+    /** @var list<array{trigger: EmailTrigger, bookingId: BookingId, cancellationReason: ?string}> */
     public array $calls = [];
 
     public BookingEmailResult $result;
@@ -21,17 +21,22 @@ final class FakeBookingEmailTrigger implements BookingEmailTrigger
         $this->result = $result ?? BookingEmailResult::empty();
     }
 
-    public function trigger(EmailTrigger $trigger, BookingId $bookingId): BookingEmailResult
+    public function trigger(
+        EmailTrigger $trigger,
+        BookingId $bookingId,
+        ?string $cancellationReason = null,
+    ): BookingEmailResult
     {
         $this->calls[] = [
             'trigger' => $trigger,
             'bookingId' => $bookingId,
+            'cancellationReason' => $cancellationReason,
         ];
 
         return $this->result;
     }
 
-    /** @return array{trigger: EmailTrigger, bookingId: BookingId}|null */
+    /** @return array{trigger: EmailTrigger, bookingId: BookingId, cancellationReason: ?string}|null */
     public function lastCall(): ?array
     {
         if ($this->calls === []) {

@@ -300,6 +300,39 @@ test('replaces template tokens in the subject during sending', function () {
     );
 });
 
+test('passes cancellation reason into cancelled booking emails', function () {
+    $event = FakeEventFactory::create(218);
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $attendeeRepository = FakeAttendeeRepository::empty();
+    $transactionRepository = FakeTransactionRepository::empty();
+    $emailSender = new FakeEmailSender();
+    $overrideStore = new FakeEmailTemplateOverrideStore([
+        EmailTemplateKey::BOOKING_CANCELLED->value => [
+            'subject' => 'Cancelled',
+            'body' => 'Reason: {{booking.cancellation_reason}}',
+        ],
+    ]);
+
+    $processor = makeTriggeredEmailProcessor(
+        $bookingRepository,
+        FakeEventRepository::one($event),
+        $attendeeRepository,
+        $transactionRepository,
+        $emailSender,
+        overrideStore: $overrideStore,
+    );
+
+    $result = $processor->trigger(
+        EmailTrigger::BOOKING_CANCELLED,
+        $bookingId,
+        'Speaker is ill',
+    );
+
+    expect($result->deliveries)->toHaveCount(1);
+    expect($emailSender->lastEmail?->body)->toContain('Reason: Speaker is ill');
+});
+
 test('attaches an ical file to booking emails when the setting is enabled', function () {
     $event = FakeEventFactory::create(215);
     $bookingRepository = FakeBookingRepository::empty();
