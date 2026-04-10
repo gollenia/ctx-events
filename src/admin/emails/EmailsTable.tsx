@@ -28,14 +28,10 @@ const updateTemplateEnabled = async (
 	enabled: boolean,
 ): Promise<MailTemplate> =>
 	apiFetch<MailTemplate>({
-		path: `/events/v3/emails/${template.key}`,
-		method: 'PUT',
+		path: `/events/v3/emails/${template.key}/status`,
+		method: 'POST',
 		data: {
 			enabled,
-			subject: template.subject ?? '',
-			body: template.body,
-			replyTo: template.replyTo ?? '',
-			recipientConfig: template.recipientConfig,
 		},
 	});
 
@@ -184,20 +180,31 @@ const EmailsTable = () => {
 					item.enabled
 						? __('Disable', 'ctx-events')
 						: __('Enable', 'ctx-events'),
-				callback: (items) => {
+				callback: async (items) => {
 					const template = items[0] as MailTemplate | undefined;
 
 					if (!template) {
 						return;
 					}
 
-					updateTemplateEnabled(template, !template.enabled).then((updated) => {
+					try {
+						const updated = await updateTemplateEnabled(
+							template,
+							!template.enabled,
+						);
 						setEmails((current) =>
 							current.map((item) =>
 								item.key === updated.key ? updated : item,
 							),
 						);
-					});
+						setError(null);
+					} catch (err) {
+						const message =
+							err && typeof err === 'object' && 'message' in err
+								? String(err.message)
+								: __('Unknown error', 'ctx-events');
+						setError(message);
+					}
 				},
 			},
 		],

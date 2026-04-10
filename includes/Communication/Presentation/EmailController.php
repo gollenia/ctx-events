@@ -93,6 +93,24 @@ final class EmailController implements RestController
                 ],
             ],
         ]);
+
+        register_rest_route('events/v3', '/emails/(?P<key>[a-z0-9_]+)/status', [
+            [
+                'methods' => 'POST',
+                'callback' => [$this, 'updateStatus'],
+                'permission_callback' => fn (): bool => current_user_can('manage_options'),
+                'args' => [
+                    'key' => [
+                        'type' => 'string',
+                        'required' => true,
+                    ],
+                    'enabled' => [
+                        'type' => 'boolean',
+                        'required' => true,
+                    ],
+                ],
+            ],
+        ]);
     }
 
     public function index(WP_REST_Request $request): WP_REST_Response
@@ -138,6 +156,25 @@ final class EmailController implements RestController
         $reset = $this->resetEmailTemplate->execute($key);
 
         if (!$reset) {
+            return new WP_REST_Response(['message' => 'Email template not found'], 404);
+        }
+
+        $item = $this->findByKey($key);
+
+        return new WP_REST_Response(
+            $item ? MailListItemResource::fromDTO($item) : ['message' => 'Email template not found'],
+            $item ? 200 : 404
+        );
+    }
+
+    public function updateStatus(WP_REST_Request $request): WP_REST_Response
+    {
+        $key = (string) $request->get_param('key');
+        $updated = $this->updateEmailTemplate->execute($key, [
+            'enabled' => $request->get_param('enabled'),
+        ]);
+
+        if (!$updated) {
             return new WP_REST_Response(['message' => 'Email template not found'], 404);
         }
 
