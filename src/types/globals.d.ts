@@ -18,7 +18,14 @@ declare global {
 	}
 }
 
-declare module '@wordpress/block-editor';
+declare module '@wordpress/edit-post' {
+	export const __experimentalFullscreenModeClose: React.ComponentType<{
+		href: string;
+	}>;
+	export const __experimentalMainDashboardButton: React.ComponentType<{
+		children: React.ReactNode;
+	}>;
+}
 
 export type Embedded = {
 	_embedded: {
