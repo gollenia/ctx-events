@@ -3,33 +3,34 @@
 		"target": "ESNext",
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"module": "esnext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
-		"jsx": "react",
-		"jsxFactory": "window.wp.element.createElement",
-		"jsxFragmentFactory": "window.wp.element.Fragment",
-		"baseUrl": ".",
+		"types": ["node"],
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
 		"paths": {
-			"@events/form": ["src/editor/blocks/form/_shared"],
-			"@events/form/*": ["src/editor/blocks/form/_shared/*"],
+			"@events/form": ["./src/editor/blocks/form/_shared"],
+			"@events/form/*": ["./src/editor/blocks/form/_shared/*"],
 
-			"@events/details": ["src/editor/blocks/details/_shared"],
-			"@events/details/*": ["src/editor/blocks/details/_shared/*"],
+			"@events/details": ["./src/editor/blocks/details/_shared"],
+			"@events/details/*": ["./src/editor/blocks/details/_shared/*"],
 
-			"@events/datatable": ["src/shared/datatable"],
-			"@events/datatable/*": ["src/shared/datatable/*"],
+			"@events/datatable": ["./src/shared/datatable"],
+			"@events/datatable/*": ["./src/shared/datatable/*"],
 
-			"@events/adminfields": ["src/shared/adminfields"],
-			"@events/adminfields/*": ["src/shared/adminfields/*"],
+			"@events/adminfields": ["./src/shared/adminfields"],
+			"@events/adminfields/*": ["./src/shared/adminfields/*"],
 
-			"@events/emails": ["src/shared/emails"],
-			"@events/emails/*": ["src/shared/emails/*"],
+			"@events/emails": ["./src/shared/emails"],
+			"@events/emails/*": ["./src/shared/emails/*"],
 
-			"@events/i18n": ["src/shared/i18n"],
-			"@events/i18n/*": ["src/shared/i18n/*"],
+			"@events/i18n": ["./src/shared/i18n"],
+			"@events/i18n/*": ["./src/shared/i18n/*"],
 
-			"@events/utilities": ["src/shared/utilities"],
-			"@events/utilities/*": ["src/shared/utilities/*"]
+			"@events/utilities": ["./src/shared/utilities"],
+			"@events/utilities/*": ["./src/shared/utilities/*"],
+
+			"@wordpress/*": ["./node_modules/@wordpress/*"]
 		},
 		"strict": true,
 		"noUnusedLocals": true,
@@ -46,5 +47,5 @@
 		"erasableSyntaxOnly": true,
 		"noErrorTruncation": false
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*", "globals.d.ts"]
 }
