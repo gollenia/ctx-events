@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ae410da39b04ff3b3e3ea5ed482869d",
+    "content-hash": "021d7d90ba9654ac82ef98047eea284d",
     "packages": [
         {
             "name": "chillerlan/php-qrcode",
@@ -239,6 +239,37 @@
                 }
             ],
             "time": "2026-03-30T09:16:10+00:00"
+        },
+        {
+            "name": "contexis/wp-github-updater",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gollenia/wp-github-updater.git",
+                "reference": "c02ef67593de1f2a2866a0893cc527719c6fb32e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gollenia/wp-github-updater/zipball/c02ef67593de1f2a2866a0893cc527719c6fb32e",
+                "reference": "c02ef67593de1f2a2866a0893cc527719c6fb32e",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Contexis\\WpGitHubUpdater\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "GitHub release based WordPress plugin updater",
+            "support": {
+                "issues": "https://github.com/gollenia/wp-github-updater/issues",
+                "source": "https://github.com/gollenia/wp-github-updater/tree/0.1.0"
+            },
+            "time": "2026-04-14T11:23:50+00:00"
         },
         {
             "name": "laravel/serializable-closure",
