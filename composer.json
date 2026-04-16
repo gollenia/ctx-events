@@ -1,4 +1,5 @@
 {
+	"$schema": "https://getcomposer.org/schema.json",
 	"name": "contexis/events",
 	"version": "7.0.0",
 	"description": "Events Manager",
@@ -36,13 +37,13 @@
 		"php": "^8.5",
 		"ext-gd": "^8.5",
 		"ext-curl": "^8.5",
-		"shuchkin/simplexlsxgen": "^1.4.11",
-		"smhg/sepa-qr-data": "^2.0.1",
-		"mpdf/mpdf": "^8.2.4",
-		"chillerlan/php-qrcode": "^5.0.2",
-		"mollie/mollie-api-php": "^3.9.0",
-		"symfony/http-foundation": "^7.2",
-		"php-di/php-di": "^7.1",
+		"shuchkin/simplexlsxgen": "^1.5.15",
+		"smhg/sepa-qr-data": "^3.0.0",
+		"mpdf/mpdf": "^8.3.1",
+		"chillerlan/php-qrcode": "^6.0.1",
+		"mollie/mollie-api-php": "^3.10.0",
+		"symfony/http-foundation": "^8.0.8",
+		"php-di/php-di": "^7.1.1",
 		"psr/clock": "^1.0.0",
 		"ueberdosis/tiptap-php": "^2.1",
 		"contexis/wp-github-updater": "^0.1.0"
@@ -59,12 +60,12 @@
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^2.1",
-		"php-stubs/wordpress-stubs": "^6.7",
+		"php-stubs/wordpress-stubs": "^6.9.1",
 		"szepeviktor/phpstan-wordpress": "^2.0",
-		"pestphp/pest": "^4.1",
+		"pestphp/pest": "^4.6",
 		"pestphp/pest-plugin-faker": "^4.0",
 		"mockery/mockery": "^1.6",
-		"symfony/var-dumper": "^7.3",
-		"spatie/typescript-transformer": "^3.0.0-beta.1"
+		"symfony/var-dumper": "^8.0",
+		"spatie/typescript-transformer": "^3.1"
 	}
 }

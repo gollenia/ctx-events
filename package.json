@@ -1,4 +1,5 @@
 {
+	"$schema": "https://www.schemastore.org/package.json",
 	"version": "1.0.0",
 	"name": "ctx-events",
 	"description": "A WordPress plugin to manage events.",
@@ -16,12 +17,9 @@
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
 	},
-	"resolutions": {
-		"@types/react": "18.3.1"
-	},
 	"overrides": {
-		"@types/react": "^18.3.1",
-		"@types/react-dom": "^18.3.1"
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.3.0",
