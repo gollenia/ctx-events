@@ -1,6 +1,6 @@
 {
 	"version": "1.0.0",
-	"name": "events",
+	"name": "ctx-events",
 	"description": "A WordPress plugin to manage events.",
 	"author": {
 		"email": "thomas@kids-team.at",
@@ -38,7 +38,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
 		"@playwright/test": "^1.58.2",
-		"@types/wordpress__block-editor": "^15.0.3",
+		"@types/wordpress__block-editor": "^15.0.5",
 		"@types/wordpress__blocks": "^15.10.0",
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.2",
