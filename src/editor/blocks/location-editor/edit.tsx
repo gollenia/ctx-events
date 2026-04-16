@@ -1,10 +1,13 @@
+import { getCountries } from '@events/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import {
+	ComboboxControl,
 	Flex,
 	FlexItem,
 	SelectControl,
 	TextControl,
 } from '@wordpress/components';
+import type { ComboboxControlOption } from '@wordpress/components/build-types/combobox-control/types';
 import { useEntityProp } from '@wordpress/core-data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -24,22 +27,9 @@ type EditProps = {
 	};
 };
 
-const COUNTRY_CODES = [
-	'US',
-	'CA',
-	'GB',
-	'DE',
-	'FR',
-	'IT',
-	'ES',
-	'NL',
-	'AU',
-	'JP',
-	'CN',
-	'IN',
-];
+const COUNTRY_CODES = getCountries();
 
-function makeCountryOptions(locale = 'de') {
+function makeCountryOptions(locale = 'de'): ComboboxControlOption[] {
 	let regionNames: Intl.DisplayNames | undefined;
 
 	if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
@@ -48,9 +38,9 @@ function makeCountryOptions(locale = 'de') {
 
 	return [
 		{ value: '', label: __('Select Country', 'ctx-events') },
-		...COUNTRY_CODES.map((code) => ({
+		...COUNTRY_CODES.map<ComboboxControlOption>((code) => ({
 			value: code,
-			label: regionNames ? regionNames.of(code) : code,
+			label: regionNames?.of(code) ?? code,
 		})),
 	];
 }
@@ -65,6 +55,7 @@ const edit = (props: EditProps) => {
 	const [meta, setMeta] = useEntityProp('postType', postType, 'meta') as [
 		LocationMeta,
 		(value: LocationMeta) => void,
+		unknown,
 	];
 
 	const blockProps = useBlockProps({
@@ -82,7 +73,7 @@ const edit = (props: EditProps) => {
 					onChange={(value) => {
 						setMeta({
 							...meta,
-							_location_address: value,
+							_location_address: value ?? undefined,
 						});
 					}}
 				/>
@@ -94,7 +85,7 @@ const edit = (props: EditProps) => {
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_location_postcode: value,
+									_location_postcode: value ?? undefined,
 								});
 							}}
 						/>
@@ -106,21 +97,21 @@ const edit = (props: EditProps) => {
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_location_town: value,
+									_location_town: value ?? undefined,
 								});
 							}}
 						/>
 					</FlexItem>
 				</Flex>
 
-				<SelectControl
+				<ComboboxControl
 					label={__('Country', 'ctx-events')}
 					value={meta._location_country ?? ''}
 					options={countries}
 					onChange={(value) => {
 						setMeta({
 							...meta,
-							_location_country: value,
+							_location_country: value ?? undefined,
 						});
 					}}
 				/>
@@ -131,7 +122,7 @@ const edit = (props: EditProps) => {
 					onChange={(value) => {
 						setMeta({
 							...meta,
-							_location_state: value,
+							_location_state: value ?? undefined,
 						});
 					}}
 				/>
@@ -142,7 +133,7 @@ const edit = (props: EditProps) => {
 					onChange={(value) => {
 						setMeta({
 							...meta,
-							_location_url: value,
+							_location_url: value ?? undefined,
 						});
 					}}
 				/>
