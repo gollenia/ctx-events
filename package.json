@@ -24,7 +24,7 @@
 	"dependencies": {
 		"@base-ui/react": "^1.3.0",
 		"@contexis/use-api-fetch": "^1.0.4",
-		"@contexis/wp-react-form": "^1.1.6",
+		"@contexis/wp-react-form": "^2.0.0",
 		"@tiptap/pm": "^3.20.4",
 		"@tiptap/react": "^3.20.4",
 		"@tiptap/starter-kit": "^3.20.4",
