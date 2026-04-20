@@ -1,4 +1,5 @@
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const { getWebpackEntryPoints } = require('@wordpress/scripts/utils/config');
 const path = require('path');
 
 module.exports = {
@@ -21,11 +22,12 @@ module.exports = {
 		},
 	},
 
-	entry: {
+	entry: () => ({
+		...getWebpackEntryPoints('script')(),
 		admin: path.resolve(__dirname, 'src/admin/index.ts'),
 		frontend: path.resolve(__dirname, 'src/frontend/index.ts'),
 		editor: path.resolve(__dirname, 'src/editor/index.ts'),
-	},
+	}),
 
 	output: {
 		...defaultConfig.output,
