@@ -25,5 +25,7 @@
 	},
 	"usesContext": ["postType"],
 	"parent": ["ctx-events/details"],
-	"render": "file:./render.php"
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }

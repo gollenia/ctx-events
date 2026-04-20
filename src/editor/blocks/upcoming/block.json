@@ -120,7 +120,8 @@
 			}
 		}
 	},
+	"editorScript": "file:./index.js",
 	"style": "events-frontend-style",
 	"viewScript": "events-frontend-view",
-	"editorStyle": "events-block-editor-style"
+	"editorStyle": "file:./index.css"
 }

@@ -41,5 +41,7 @@
 	},
 	"parent": ["ctx-events/details"],
 	"usesContext": ["postType", "postId"],
-	"render": "file:./render.php"
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }

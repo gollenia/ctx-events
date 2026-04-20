@@ -42,6 +42,7 @@
 		}
 	},
 	"render": "file:./render.php",
-	"editorStyle": "events-block-editor-style",
-	"style": "events-block-style"
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
 }

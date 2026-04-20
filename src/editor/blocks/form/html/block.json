@@ -17,5 +17,7 @@
 	},
 	"parent": [
 		"ctx-events/form-container"
-	]
+	],
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }

@@ -1,3 +1,4 @@
+import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
@@ -14,5 +15,7 @@ const settings = {
 	edit: Edit,
 	save: () => null,
 };
+
+registerBlockType(name, settings);
 
 export { name, settings };

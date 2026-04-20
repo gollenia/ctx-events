@@ -39,5 +39,7 @@
 			"default": null
 		}
 	},
-	"parent": ["ctx-events/form-container"]
+	"parent": ["ctx-events/form-container"],
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }

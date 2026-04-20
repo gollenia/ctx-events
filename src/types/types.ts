@@ -208,10 +208,6 @@ export type Price = {
 readonly amountCents: number,
 readonly currency: string,
 };
-export type Price = {
-readonly amountCents: number,
-readonly currency: string,
-};
 export type PriceSummary = {
 readonly bookingPrice: Price,
 readonly donationAmount: Price,
@@ -237,7 +233,7 @@ export type Status = "publish" | "future" | "draft" | "private" | "trash";
 export type Ticket = {
 readonly id: string,
 readonly name: string,
-readonly price: Price,
+readonly price: undefined,
 readonly availableQuantity: number,
 readonly ticketLimitPerBooking: number | null,
 readonly remainingTickets: number | null,

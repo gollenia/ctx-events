@@ -18,5 +18,7 @@
 		"html": false,
 		"reusable": false,
 		"className": false
-	}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
 }

@@ -1,3 +1,4 @@
+import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import deprecated from './deprecated';
@@ -17,5 +18,7 @@ const settings = {
 	save,
 	deprecated,
 };
+
+registerBlockType(name, settings);
 
 export { name, settings };

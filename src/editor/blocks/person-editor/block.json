@@ -19,5 +19,7 @@
 		"customClass": false,
 		"selector": false
 	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
 	"usesContext": ["postType"]
 }

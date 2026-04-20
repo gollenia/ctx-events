@@ -61,7 +61,8 @@
 			"label": "Outline"
 		}
 	],
-	"editorStyle": "events-block-editor-style",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
 	"style": "booking-style",
 	"render": "file:./render.php",
 	"viewScript": "booking-view"
