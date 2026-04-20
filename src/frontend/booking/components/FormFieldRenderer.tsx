@@ -1,5 +1,5 @@
 import type { FormField as FormFieldType } from '../types';
-import { FormFields } from '../../../shared/__experimentalForm';
+import { FormFields } from '@contexis/wp-react-form';
 import { getBookingFieldDefinition } from '../formFields';
 
 type Props = {

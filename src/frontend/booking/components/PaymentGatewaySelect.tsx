@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { InputField } from '../../../shared/__experimentalForm';
+import { InputField } from '@contexis/wp-react-form';
 
 import type { GatewayInfo } from '../types';
 

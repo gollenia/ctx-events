@@ -1,5 +1,12 @@
-import type { FieldValue, FormFieldDefinition, FormState } from '../form-core';
-import { isFieldVisible, normalizeFieldValue } from '../form-core';
+import type {
+	FieldValue,
+	FormFieldDefinition,
+	FormState,
+} from '@contexis/wp-react-form';
+import {
+	isFieldVisible,
+	normalizeFieldValue,
+} from '@contexis/wp-react-form';
 import InputField from './InputField';
 
 type Props = {

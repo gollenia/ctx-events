@@ -1,6 +1,6 @@
 import { formatPrice } from '@events/i18n';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '../../../shared/__experimentalForm';
+import { Button } from '@contexis/wp-react-form';
 import { BookingCard } from '../components/BookingCard';
 import { usePaymentQr } from '../hooks/usePaymentQr';
 import type { BookingPayment } from '../types';

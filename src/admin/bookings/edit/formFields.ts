@@ -1,10 +1,10 @@
 import { __ } from '@wordpress/i18n';
-import type { BookingFormField } from 'src/types/types';
 import type {
 	FieldValue,
 	FormFieldDefinition,
 	InputType,
-} from '../../../shared/form-core';
+} from '@contexis/wp-react-form';
+import type { BookingFormField } from 'src/types/types';
 
 export type BookingFormValues = Record<string, unknown>;
 

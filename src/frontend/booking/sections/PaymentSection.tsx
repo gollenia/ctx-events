@@ -1,6 +1,6 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, Checkbox } from '../../../shared/__experimentalForm';
+import { Button, Checkbox } from '@contexis/wp-react-form';
 import { DonationAdvertisement } from '../components/DonationAdvertisement';
 import { PaymentGatewaySelect } from '../components/PaymentGatewaySelect';
 import { SectionFooter } from '../components/SectionFooter';

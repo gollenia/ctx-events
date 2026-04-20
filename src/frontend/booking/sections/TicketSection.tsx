@@ -1,4 +1,4 @@
-import { Button } from '../../../shared/__experimentalForm';
+import { Button } from '@contexis/wp-react-form';
 import { __ } from '@wordpress/i18n';
 import { SectionFooter } from '../components/SectionFooter';
 import { TicketCounter } from '../components/TicketCounter';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '../../../shared/__experimentalForm';
+import { Button } from '@contexis/wp-react-form';
 import EventIcon from '../../../shared/icons/EventIcon';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
 import { SectionFooter } from '../components/SectionFooter';

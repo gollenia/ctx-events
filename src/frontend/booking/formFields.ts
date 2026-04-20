@@ -2,7 +2,7 @@ import type {
 	FieldValue,
 	FormFieldDefinition,
 	InputType,
-} from '../../../shared/__experimentalForm';
+} from '@contexis/wp-react-form';
 import type { FormField } from './types';
 
 export type BookingFormValues = Record<string, unknown>;

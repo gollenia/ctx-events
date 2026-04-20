@@ -1,1 +1,1 @@
-export { isFieldVisible } from '../../../shared/__experimentalForm';
+export { isFieldVisible } from '@contexis/wp-react-form';

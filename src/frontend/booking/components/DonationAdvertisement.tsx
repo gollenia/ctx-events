@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, InputField } from '../../../shared/__experimentalForm';
+import { Button, InputField } from '@contexis/wp-react-form';
 import Chevron from '../../../shared/icons/Chevron';
 
 type Props = {

@@ -2,7 +2,7 @@ import { useEffect, useId, useState } from '@wordpress/element';
 import { Collapsible } from '@base-ui/react/collapsible';
 import { formatPrice } from '@events/i18n';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Flex, InputField } from '../../../shared/__experimentalForm';
+import { Button, Flex, InputField } from '@contexis/wp-react-form';
 import Chevron from '../../../shared/icons/Chevron';
 import Plus from '../../../shared/icons/Plus';
 import type { CouponCheckResult } from '../types';

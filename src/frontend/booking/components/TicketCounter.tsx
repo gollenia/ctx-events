@@ -1,6 +1,6 @@
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
-import { Stepper } from '../../../shared/__experimentalForm';
+import { Stepper } from '@contexis/wp-react-form';
 import type { TicketInfo } from '../types';
 
 type Props = {
