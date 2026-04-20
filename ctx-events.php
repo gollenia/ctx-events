@@ -33,26 +33,20 @@ add_action('init', function () {
 
 /**
  * Register Gutenberg blocks for the plugin. This function must be at root level, otherwise
- * the blocks won't be registered correctly.
+ * the blocks won't be registered properly.
  */
 function ctx_register_blocks(): void
 {
-    $blocks = [
-        'upcoming',
-        'program-pdf-export',
-        'details',
-        'details-audience',
-        'details-date',
-        'details-location',
-        'details-price',
-        'details-shutdown',
-        'details-spaces',
-        'details-time',
-        'details-person',
-        'booking'
-    ];
-    foreach ($blocks as $block) {
-        register_block_type(__DIR__ . '/build/editor/blocks/' . $block);
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(__DIR__ . '/build/editor/blocks')
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile() || $file->getFilename() !== 'block.json') {
+            continue;
+        }
+
+        register_block_type($file->getPath());
     }
 }
 
