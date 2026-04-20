@@ -112,20 +112,6 @@ final class Assets implements Registrar
 
         wp_set_script_translations('ctx-events-editor', 'ctx-events', PluginInfo::getPluginDir('/languages'));
 
-        wp_register_style(
-            'ctx-events-editor-style',
-            PluginInfo::getPluginUrl(self::ASSET_PATH . '/style-editor.css'),
-            array(),
-            $script_asset['version']
-        );
-
-		wp_enqueue_style(
-            'ctx-events-editor-style-be',
-            PluginInfo::getPluginUrl(self::ASSET_PATH . '/editor.css'),
-            array(),
-            $script_asset['version']
-        );
-
 		wp_localize_script('ctx-events-editor', 'eventEditorLocalization', [
             "bookingEnabled" => $this->bookingOptions->enabled(),
 			"currency" => $this->bookingOptions->currency(),
