@@ -6,7 +6,6 @@ namespace Contexis\Events\Shared\Domain\ValueObjects;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 
-#[TypeScript(name: 'Price')]
 final class Price
 {
     public function __construct(
