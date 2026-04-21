@@ -1,7 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
 import { formatDateRange } from '@events/i18n';
-import EventIcon from '../../shared/icons/EventIcon';
 
 import truncate from './truncate';
 import type { UpcomingViewEvent, UpcomingViewProps } from './types';
@@ -26,26 +25,36 @@ const renderBookingWarning = (
 		return null;
 	}
 
-	if ((event.bookings.spaces ?? 0) > bookedUpWarningThreshold) {
+	if (
+		event.bookings.spaces === null &&
+		event.bookings.denyReason !== 'sold_out'
+	) {
 		return null;
 	}
 
-	if ((event.bookings.spaces ?? 0) > 0) {
+	if (
+		event.bookings.spaces !== null &&
+		event.bookings.spaces > bookedUpWarningThreshold
+	) {
+		return null;
+	}
+
+	if (event.bookings.spaces !== null && event.bookings.spaces > 0) {
 		return (
-			<span className="event-card-pill event-card-pill-warning">
+			<span className="pills__item pills__item--warning">
 				{__('Nearly Booked up', 'ctx-events')}
 			</span>
 		);
 	}
 
 	return (
-		<span className="event-card-pill event-card-pill-error">
+		<span className="pills__item pills__item--error">
 			{__('Booked up', 'ctx-events')}
 		</span>
 	);
 };
 
-function EventCards({
+function ListView({
 	attributes: {
 		showImages,
 		showCategory,
@@ -55,33 +64,16 @@ function EventCards({
 		excerptLength,
 		showAudience,
 		showPerson,
-		animateOnScroll,
-		animationType,
 	},
 	events,
 }: UpcomingViewProps) {
-	const className = [
-		'event-grid',
-		animateOnScroll ? 'ctx-animate-children' : '',
-		animationType ? `ctx-${animationType}` : '',
-	]
-		.filter(Boolean)
-		.join(' ');
-
 	return (
-		<ul className={className}>
+		<div className="event-list">
 			{events.map((item) => {
 				const location = getLocationLabel(item, showLocation);
 
 				return (
-					<li className="event-card" key={item.id}>
-						{showPerson === 'image' && item.person ? (
-							<div className="event-card-speaker">
-								<div>
-									<div>{item.person.name}</div>
-								</div>
-							</div>
-						) : null}
+					<div className="event-card" key={item.id}>
 						{showImages && item.image?.url ? (
 							<a href={item.link} className="event-card-image">
 								<img
@@ -94,34 +86,33 @@ function EventCards({
 							{item.category && showCategory ? (
 								<span className="event-card-label">{item.category.name}</span>
 							) : null}
-							<a href={item.link}>
-								<h2 className="event-card-title">{item.title}</h2>
-							</a>
-							<h4 className="event-card-subtitle">
+							<h5 className="event-card-subtitle">
 								{formatDateRange(item.start, item.end)}
-							</h4>
+							</h5>
+							<a href={item.link}>
+								<h4 className="event-card-title">{item.title}</h4>
+							</a>
+
 							<p className="event-card-text">
 								{truncate(item.excerpt, excerptLength)}
 							</p>
 							{showAudience || showPerson || showLocation || showBookedUp ? (
-								<div className="event-card-footer">
-									<div className="event-card-footer-details">
-										<div className="event-card-footer-details-text">
-											{showLocation && item.location?.id ? (
-												<div className="event-card-detail">
-													<EventIcon name="location" />{' '}
-													<span>{location}</span>
-												</div>
-											) : null}
-											{showAudience && item.audience?.length ? (
-												<div className="event-card-detail">
-													<EventIcon name="audience" />{' '}
-													<span>{item.audience}</span>
-												</div>
-											) : null}
-										</div>
-									</div>
-
+								<div className="card__footer card__subtitle pills pills--small">
+									{showAudience && item.audience?.length ? (
+										<span className="pills__item event__audience">
+											{item.audience}
+										</span>
+									) : null}
+									{showPerson === 'name' && item.person?.id ? (
+										<span className="pills__item event__speaker">
+											{item.person.name}
+										</span>
+									) : null}
+									{showLocation && item.location?.id ? (
+										<span className="pills__item event__location">
+											{location}
+										</span>
+									) : null}
 									{renderBookingWarning(
 										item,
 										showBookedUp,
@@ -130,11 +121,11 @@ function EventCards({
 								</div>
 							) : null}
 						</div>
-					</li>
+					</div>
 				);
 			})}
-		</ul>
+		</div>
 	);
 }
 
-export default EventCards;
+export default ListView;

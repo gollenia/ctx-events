@@ -1,6 +1,8 @@
+import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
-import { ensureIcons } from '../../shared/icons/ensureIcons';
-import Upcoming from './upcoming';
+import { ensureIcons } from '../../../../shared/icons/ensureIcons';
+import type { UpcomingAttributes } from './types';
+import Upcoming from './Upcoming';
 
 const UPCOMING_ICON_NAMES = ['date', 'time', 'audience', 'location', 'warning'];
 
@@ -19,9 +21,11 @@ async function initUpcoming(className = 'events-upcoming-block') {
 			return;
 		}
 
-		const attributes = JSON.parse(rawAttributes) as Record<string, unknown>;
+		const attributes = JSON.parse(rawAttributes) as UpcomingAttributes;
 		createRoot(element).render(<Upcoming attributes={attributes} />);
 	});
 }
 
-export default initUpcoming;
+domReady(() => {
+	initUpcoming();
+});

@@ -1,7 +1,8 @@
+import { InputField } from '@contexis/wp-react-form';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import EventIcon from '../../shared/icons/EventIcon';
+import EventIcon from '../../../../shared/icons/EventIcon';
 import CardView from './CardView';
 import ListView from './ListView';
 import { mapUpcomingEvent } from './mappers';
@@ -193,15 +194,18 @@ function Upcoming({ attributes }: Props) {
 					<div className="event-filters-header">
 						{showSearch && (
 							<div className="filter__search">
-								<div className="input">
-									<label>{__('Search', 'ctx-events')}</label>
-									<input
-										type="text"
-										onChange={(event) => {
-											changeFilter('string', event.target.value);
-										}}
-									/>
-								</div>
+								<InputField
+									type="text"
+									name="search"
+									label={__('Search', 'ctx-events')}
+									onChange={(value) => {
+										changeFilter('string', value);
+									}}
+									formTouched={false}
+									status="LOADED"
+									value={filter.string}
+									disabled={status === 'LOADING'}
+								/>
 							</div>
 						)}
 
@@ -312,29 +316,27 @@ function Upcoming({ attributes }: Props) {
 				</aside>
 			)}
 
-			<>
-				{currentView === 'cards' && (
-					<CardView
-						attributes={{ ...attributes, showPerson: personView }}
-						events={getFilteredEvents()}
-						status={status}
-					/>
-				)}
-				{currentView === 'list' && (
-					<ListView
-						attributes={{ ...attributes, showPerson: personView }}
-						events={getFilteredEvents()}
-						status={status}
-					/>
-				)}
-				{currentView === 'mini' && (
-					<TableView
-						attributes={{ ...attributes, showPerson: personView }}
-						events={getFilteredEvents()}
-						status={status}
-					/>
-				)}
-			</>
+			{currentView === 'cards' && (
+				<CardView
+					attributes={{ ...attributes, showPerson: personView }}
+					events={getFilteredEvents()}
+					status={status}
+				/>
+			)}
+			{currentView === 'list' && (
+				<ListView
+					attributes={{ ...attributes, showPerson: personView }}
+					events={getFilteredEvents()}
+					status={status}
+				/>
+			)}
+			{currentView === 'mini' && (
+				<TableView
+					attributes={{ ...attributes, showPerson: personView }}
+					events={getFilteredEvents()}
+					status={status}
+				/>
+			)}
 		</div>
 	);
 }

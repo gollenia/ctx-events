@@ -2,6 +2,7 @@ import { InspectorControls } from '@wordpress/block-editor';
 import {
 	Button,
 	CheckboxControl,
+	ComboboxControl,
 	FormTokenField,
 	Icon,
 	PanelBody,
@@ -11,8 +12,9 @@ import {
 	SelectControl,
 	TextControl,
 } from '@wordpress/components';
-import { useMemo, useState } from '@wordpress/element';
+import type { ComboboxControlOption } from '@wordpress/components/build-types/combobox-control/types';
 import { select } from '@wordpress/data';
+import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import icons from './icons';
 
@@ -48,17 +50,12 @@ type TermEntity = {
 	name: string;
 };
 
-type LocationOption = {
-	value: number;
-	label: string;
-};
-
 type InspectorProps = {
 	attributes: UpcomingAttributes;
 	tagList: TermEntity[];
 	availableCategories: TermEntity[];
 	tagsFieldValue: string[];
-	locationList: LocationOption[];
+	locationList: ComboboxControlOption[];
 	tagNames: string[];
 	setAttributes: (attributes: Partial<UpcomingAttributes>) => void;
 };
@@ -96,8 +93,9 @@ const Inspector = (props: InspectorProps) => {
 	} = props;
 
 	const [categoryQuery, setCategoryQuery] = useState('');
-	const postType = (select('core/editor') as { getCurrentPostType: () => string })
-		.getCurrentPostType();
+	const postType = (
+		select('core/editor') as { getCurrentPostType: () => string }
+	).getCurrentPostType();
 
 	const locationViewOptions = [
 		{ value: '', label: __("Don't show", 'ctx-events') },
@@ -177,20 +175,27 @@ const Inspector = (props: InspectorProps) => {
 
 						setAttributes({ selectedTags: selectedTagsArray });
 					}}
+					__next40pxDefaultSize
 					__experimentalExpandOnFocus
 				/>
-				<SelectControl
+				<ComboboxControl
 					label={__('Location', 'ctx-events')}
-					value={selectedLocation}
+					value={selectedLocation.toString()}
 					options={locationList}
 					onChange={(value) => {
-						setAttributes({ selectedLocation: Number.parseInt(value, 10) || 0 });
+						setAttributes({
+							selectedLocation: value ? Number(value) : 0,
+						});
 					}}
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 				/>
 				<SelectControl
 					label={__('Scope', 'ctx-events')}
 					value={scope}
 					options={scopeOptions}
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					onChange={(value) => {
 						setAttributes({ scope: value });
 					}}
@@ -199,8 +204,10 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Sorting', 'ctx-events')}
 					value={order}
 					options={orderListViewOptions}
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					onChange={(value) => {
-						setAttributes({ order: value });
+						setAttributes({ order: value as 'asc' | 'desc' });
 					}}
 				/>
 				<RangeControl
@@ -208,6 +215,7 @@ const Inspector = (props: InspectorProps) => {
 					max={100}
 					min={1}
 					value={limit}
+					__next40pxDefaultSize
 					onChange={(value) => {
 						setAttributes({ limit: Number(value) || 1 });
 					}}
@@ -221,24 +229,29 @@ const Inspector = (props: InspectorProps) => {
 							'If applicable, exclude the current event from the list',
 							'events',
 						)}
+						__nextHasNoMarginBottom
 					/>
 				)}
 			</PanelBody>
+
 			<PanelBody title={__('Filter', 'ctx-events')}>
 				<CheckboxControl
 					label={__('Show category filter', 'ctx-events')}
 					checked={showCategoryFilter}
 					onChange={(value) => setAttributes({ showCategoryFilter: value })}
+					__nextHasNoMarginBottom
 				/>
 				<CheckboxControl
 					label={__('Show tag filter', 'ctx-events')}
 					checked={showTagFilter}
 					onChange={(value) => setAttributes({ showTagFilter: value })}
+					__nextHasNoMarginBottom
 				/>
 				<CheckboxControl
 					label={__('Show search bar', 'ctx-events')}
 					checked={showSearch}
 					onChange={(value) => setAttributes({ showSearch: value })}
+					__nextHasNoMarginBottom
 				/>
 				<RadioControl
 					label={__('Position', 'ctx-events')}
@@ -254,7 +267,10 @@ const Inspector = (props: InspectorProps) => {
 				/>
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
-				<label className="components-base-control__label" htmlFor="upcoming-style">
+				<label
+					className="components-base-control__label"
+					htmlFor="upcoming-style"
+				>
 					{__('Style', 'ctx-events')}
 				</label>
 				<br />
@@ -263,21 +279,21 @@ const Inspector = (props: InspectorProps) => {
 						onClick={() => setAttributes({ view: 'mini' })}
 						className={view === 'mini' ? 'active' : ''}
 					>
-						<Icon size="64" className="icon" icon={icons.mini} />
+						<Icon size={64} className="icon" icon={icons.mini} />
 						<div>{__('Table', 'ctx-events')}</div>
 					</Button>
 					<Button
 						onClick={() => setAttributes({ view: 'list' })}
 						className={view === 'list' ? 'active' : ''}
 					>
-						<Icon size="64" className="icon" icon={icons.list} />
+						<Icon size={64} className="icon" icon={icons.list} />
 						<div>{__('List', 'ctx-events')}</div>
 					</Button>
 					<Button
 						onClick={() => setAttributes({ view: 'cards' })}
 						className={view === 'cards' ? 'active' : ''}
 					>
-						<Icon size="64" className="icon" icon={icons.cards} />
+						<Icon size={64} className="icon" icon={icons.cards} />
 						<div>{__('Cards', 'ctx-events')}</div>
 					</Button>
 				</div>
@@ -290,6 +306,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Location', 'ctx-events')}
 					value={showLocation}
 					options={locationViewOptions}
+					__next40pxDefaultSize
 					onChange={(value) => {
 						setAttributes({ showLocation: value });
 					}}
@@ -298,6 +315,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Show Person', 'ctx-events')}
 					value={personView}
 					options={speakerViewOptions}
+					__next40pxDefaultSize
 					onChange={(value) => {
 						setAttributes({ showPerson: value });
 					}}
@@ -334,7 +352,10 @@ const Inspector = (props: InspectorProps) => {
 					/>
 				</PanelRow>
 				<CheckboxControl
-					label={__('Show if event is booked up or nearly booked up', 'ctx-events')}
+					label={__(
+						'Show if event is booked up or nearly booked up',
+						'ctx-events',
+					)}
 					checked={showBookedUp}
 					onChange={(value) => setAttributes({ showBookedUp: value })}
 				/>

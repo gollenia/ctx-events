@@ -1,10 +1,5 @@
-import domReady from '@wordpress/dom-ready';
+import '@contexis/wp-react-form/style.css';
 
 import './booking/index.tsx';
 import './booking/style.scss';
 import '../shared/icons/style.scss';
-import initUpcoming from './upcoming/index.tsx';
-
-domReady(() => {
-	initUpcoming();
-});

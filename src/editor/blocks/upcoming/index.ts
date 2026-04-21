@@ -6,7 +6,7 @@ import Edit from './edit';
 import './editor.scss';
 import icons from './icons';
 import save from './save';
-import './style.scss';
+import './style-index.scss';
 
 const { name, title } = metadata;
 

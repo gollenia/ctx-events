@@ -41,7 +41,7 @@ export function mapUpcomingEvent(event: RawEvent): UpcomingViewEvent {
 
 	return {
 		id: event.id,
-		link: event.schema?.id ?? '#',
+		link: event.url ?? '#',
 		title: event.name,
 		excerpt: event.description ?? '',
 		start: event.startDate,
@@ -71,6 +71,7 @@ export function mapUpcomingEvent(event: RawEvent): UpcomingViewEvent {
 					hasBookings: true,
 					spaces: event.bookingSummary.available,
 					isBookable: event.bookingSummary.isBookable,
+					denyReason: event.bookingSummary.denyReason,
 				}
 			: null,
 		person: person

@@ -25,11 +25,21 @@ const renderBookingWarning = (
 		return null;
 	}
 
-	if ((event.bookings.spaces ?? 0) > bookedUpWarningThreshold) {
+	if (
+		event.bookings.spaces === null &&
+		event.bookings.denyReason !== 'sold_out'
+	) {
 		return null;
 	}
 
-	if ((event.bookings.spaces ?? 0) > 0) {
+	if (
+		event.bookings.spaces !== null &&
+		event.bookings.spaces > bookedUpWarningThreshold
+	) {
+		return null;
+	}
+
+	if (event.bookings.spaces !== null && event.bookings.spaces > 0) {
 		return (
 			<span className="pills__item pills__item--warning">
 				{__('Nearly Booked up', 'ctx-events')}

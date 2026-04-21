@@ -60,6 +60,7 @@ export type UpcomingViewEvent = {
 		hasBookings: boolean;
 		spaces: number | null;
 		isBookable: boolean;
+		denyReason: string | null;
 	} | null;
 	person: {
 		id: number;
