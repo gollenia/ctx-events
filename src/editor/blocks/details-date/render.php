@@ -20,13 +20,13 @@ $ical = $attributes['iCalLink'] ?? false;
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Date', 'ctx-events')) ?></h4>
-		<div class="event-details-data"><?= esc_html($date) ?></div>
+		<p><?= esc_html($date) ?></p>
 	</div>
 	<?php if ($ical) : ?>
-		<div class="event-details-action">
+		<p class="event-details-action">
 			<a href="<?= esc_url($ical) ?>" target="_blank">
 				<?= BlockEventLoader::renderIcon('download') ?>
 			</a>
-		</div>
+		</p>
 	<?php endif; ?>
 </div>

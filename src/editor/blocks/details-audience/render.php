@@ -19,6 +19,6 @@ if (!$audience) {
 	</div>
 	<div class="event-details-text">
 		<h4><?= esc_html($attributes['description'] ?: __('Audience', 'ctx-events')) ?></h4>
-		<div class="event-details-data"><?= esc_html($audience) ?></div>
+		<p><?= esc_html($audience) ?></p>
 	</div>
 </div>
