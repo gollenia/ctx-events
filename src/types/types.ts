@@ -113,6 +113,7 @@ export type EmailTrigger = "booking_pending_manual" | "booking_created_online" |
 export type ErrorType = "ERROR" | "WARNING" | "INFO";
 export type Event = {
 readonly id: number,
+readonly url: string | null,
 readonly name: string,
 readonly description: string | null,
 readonly status: string,
