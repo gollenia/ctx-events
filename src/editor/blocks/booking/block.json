@@ -65,5 +65,5 @@
 	"editorStyle": "file:./index.css",
 	"style": "booking-style",
 	"render": "file:./render.php",
-	"viewScript": "booking-view"
+	"viewScript": "file:./view/index.js"
 }
