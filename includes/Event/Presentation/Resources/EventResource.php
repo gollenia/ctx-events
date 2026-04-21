@@ -15,6 +15,7 @@ final readonly class EventResource implements Resource
 	public function __construct(
 
 		public int $id,
+		public ?string $url,
 		public string $name,
 		public ?string $description,
 		public string $status,
@@ -32,6 +33,7 @@ final readonly class EventResource implements Resource
 	{
 		return new self(
 			id: $eventResponse->id,
+			url: $route->getFriendlyUrl($eventResponse->id),
 			name: $eventResponse->name,
 			description: $eventResponse->description,
 			status: $eventResponse->status->value,
@@ -49,6 +51,7 @@ final readonly class EventResource implements Resource
 		return [
 			...$this->schema?->toArray(),
 			'id' => $this->id,
+			'url' => $this->url,
 			'name' => $this->name,
 			'description' => $this->description,
 			'status' => $this->status,
@@ -66,4 +69,3 @@ final readonly class EventResource implements Resource
 		return $this->toArray();
 	}
 }
-

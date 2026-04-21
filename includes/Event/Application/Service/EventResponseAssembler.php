@@ -40,10 +40,19 @@ final class EventResponseAssembler
 		$now = $this->clock->now();
 
 		foreach ($events as $event) {
-            $locationDto = $locationCollectionDto?->findById($event->locationId ?? 0) ?: null;
-            $personDto = $personCollectionDto?->findById($event->personId ?? 0) ?: null;
-            $imageDto = $imageCollectionDto?->findById($event->imageId ?? 0) ?: null;
-			
+			$locationDto = $event->locationId !== null
+				? $locationCollectionDto?->findById($event->locationId)
+				: null;
+			$personDto = $event->personId !== null
+				? $personCollectionDto?->findById($event->personId->toInt())
+				: null;
+			$imageDto = $event->imageId !== null
+				? $imageCollectionDto?->findById($event->imageId)
+				: null;
+			$categories = null;
+			$tags = null;
+			$bookingSummary = null;
+
 			if ($includes->categories) {
 				$categories = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES);
 			}
@@ -56,21 +65,18 @@ final class EventResponseAssembler
 				$ticketBookingsMap = $ticketBookingsMaps[$event->id->toInt()] ?? TicketBookingsMap::empty();
 				$bookingSummary = EventBookingSummary::fromEvent($event, $now, $userContext->isAnonymous(), $ticketBookingsMap);
 			}
-		
-            $items[] = EventResponse::fromDomainModel(
-                event: $event,
-                locationDto: $locationDto,
-                imageDto: $imageDto,
-                personDto: $personDto,
+
+			$items[] = EventResponse::fromDomainModel(
+				event: $event,
+				locationDto: $locationDto,
+				imageDto: $imageDto,
+				personDto: $personDto,
 				categories: $categories ?? null,
 				tags: $tags ?? null,
 				bookingSummary: $bookingSummary ?? null,
 			);
-
-			
-        }
+		}
 
 		return EventResponseCollection::from(...$items);
-
 	}
 }
