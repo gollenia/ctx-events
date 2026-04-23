@@ -1,3 +1,4 @@
+@use '../styles/tokens';
 @use './styles/cards';
 @use './styles/sections';
 @use './styles/tickets';
@@ -5,52 +6,54 @@
 @use './styles/payment';
 @use './styles/success';
 
+@include tokens.register-theme-tokens();
+
 :root,
 :where(.ctx-form, .ctx-form-field, .ctx-content-block, .ctx-stepper) {
-	--wp--custom--ctx-events--booking--section-radius: 0px;
+	--wp--custom--ctx-events--booking--section-radius: var(--wp--custom--ctx-events--radius--md);
 	--wp--custom--ctx-events--booking--padding-x: 1.25rem;
-	--wp--custom--ctx-events--booking--section-border: 0px solid rgba(229, 231, 235, 0.95);
-	--wp--custom--ctx-events--booking--section-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
-	--wp--custom--ctx-events--booking--surface: rgba(255, 255, 255, 0.96);
-	--wp--custom--ctx-events--booking--surface-muted: #f8fafc;
-	--wp--custom--ctx-events--booking--page-bg: #f5f5f5;
-	--wp--custom--ctx-events--booking--border-subtle: #e5e7eb;
-	--wp--custom--ctx-events--booking--border-strong: #e2e8f0;
-	--wp--custom--ctx-events--booking--text: var(--wp--preset-color-contrast, #0f172a);
-	--wp--custom--ctx-events--booking--text-muted: #6b7280;
-	--wp--custom--ctx-events--booking--text-soft: #475569;
-	--wp--custom--ctx-events--booking--text-faint: #64748b;
-	--wp--custom--ctx-events--booking--accent: var(--wp--preset-color-primary, #2563eb);
-	--wp--custom--ctx-events--booking--danger: #dc2626;
-	--wp--custom--ctx-events--booking--danger-strong: #b91c1c;
-	--wp--custom--ctx-events--booking--danger-hover: #991b1b;
+	--wp--custom--ctx-events--booking--section-border: 0px solid var(--wp--custom--ctx-events--color--border);
+	--wp--custom--ctx-events--booking--section-shadow: var(--wp--custom--ctx-events--shadow--md);
+	--wp--custom--ctx-events--booking--surface: var(--wp--custom--ctx-events--color--surface);
+	--wp--custom--ctx-events--booking--surface-muted: var(--wp--custom--ctx-events--color--surface-muted);
+	--wp--custom--ctx-events--booking--page-bg: var(--wp--custom--ctx-events--color--surface-soft);
+	--wp--custom--ctx-events--booking--border-subtle: var(--wp--custom--ctx-events--color--border);
+	--wp--custom--ctx-events--booking--border-strong: var(--wp--custom--ctx-events--color--border-strong);
+	--wp--custom--ctx-events--booking--text: var(--wp--custom--ctx-events--color--text);
+	--wp--custom--ctx-events--booking--text-muted: var(--wp--custom--ctx-events--color--text-muted);
+	--wp--custom--ctx-events--booking--text-soft: var(--wp--custom--ctx-events--color--text-soft);
+	--wp--custom--ctx-events--booking--text-faint: var(--wp--custom--ctx-events--color--text-faint);
+	--wp--custom--ctx-events--booking--accent: var(--wp--custom--ctx-events--color--accent);
+	--wp--custom--ctx-events--booking--danger: var(--wp--custom--ctx-events--color--danger);
+	--wp--custom--ctx-events--booking--danger-strong: var(--wp--custom--ctx-events--color--danger-strong);
+	--wp--custom--ctx-events--booking--danger-hover: var(--wp--custom--ctx-events--color--danger-hover);
 	--wp--custom--ctx-events--booking--summary-bg: var(--wp--custom--ctx-events--booking--surface);
 	--wp--custom--ctx-events--booking--summary-border: var(--wp--custom--ctx-events--booking--section-border);
 	--wp--custom--ctx-events--booking--summary-shadow: var(--wp--custom--ctx-events--booking--section-shadow);
 	--wp--custom--ctx-events--booking--attendee-accent: var(--wp--custom--ctx-events--booking--accent);
 	--wp--custom--ctx-events--booking--section-border-width: 0px 0px 0px 2px;
-	--wp--custom--ctx-events--booking--attendee-bg: rgba(37, 99, 235, .06);
+	--wp--custom--ctx-events--booking--attendee-bg: var(--wp--custom--ctx-events--color--accent-soft);
 	--wp--custom--ctx-events--booking--price-summary-bg: none;
 	--wp--custom--ctx-events--booking--price-summary-border: none;
 	--wp--custom--ctx-events--booking--price-summary-radius: 0rem;
-	--wp--custom--ctx-events--booking--success-card-bg: #f9fafb;
+	--wp--custom--ctx-events--booking--success-card-bg: var(--wp--custom--ctx-events--color--surface-muted);
 	--wp--custom--ctx-events--booking--success-card-border: var(--wp--custom--ctx-events--booking--border-subtle);
-	--wp--custom--ctx-events--booking--qr-bg: #fff;
+	--wp--custom--ctx-events--booking--qr-bg: var(--wp--custom--ctx-events--color--surface);
 	--wp--custom--ctx-events--booking--qr-border: var(--wp--custom--ctx-events--booking--border-subtle);
 	--wp--custom--ctx-events--booking--coupon-trigger-bg: transparent;
-	--wp--custom--ctx-events--booking--coupon-trigger-icon-bg: rgba(37, 99, 235, 0.08);
+	--wp--custom--ctx-events--booking--coupon-trigger-icon-bg: var(--wp--custom--ctx-events--color--icon-bg);
 	--wp--custom--ctx-events--booking--coupon-trigger-icon-color: var(--wp--custom--ctx-events--booking--accent);
-	--wp--custom--ctx-events--booking--donation-bg: rgba(37, 99, 235, 0.06);
-	--wp--custom--ctx-events--booking--donation-border: rgba(37, 99, 235, 0.22);
+	--wp--custom--ctx-events--booking--donation-bg: var(--wp--custom--ctx-events--color--accent-soft);
+	--wp--custom--ctx-events--booking--donation-border: var(--wp--custom--ctx-events--color--accent-border);
 	--wp--custom--ctx-events--booking--donation-eyebrow: var(--wp--custom--ctx-events--booking--accent);
-	--wp--custom--ctx-events--booking--donation-panel-bg: rgba(255, 255, 255, 0.72);
-	--wp--custom--ctx-events--booking--donation-preset-bg: rgba(255, 255, 255, 0.86);
-	--wp--custom--ctx-events--booking--donation-preset-border: rgba(37, 99, 235, 0.18);
-	--wp--custom--ctx-events--color--primary: #2563eb;
-	--wp--custom--ctx-events--color--primary-hover: #1d4ed8;
-	--wp--custom--ctx-events--color--success: #16a34a;
+	--wp--custom--ctx-events--booking--donation-panel-bg: var(--wp--custom--ctx-events--color--surface-overlay);
+	--wp--custom--ctx-events--booking--donation-preset-bg: var(--wp--custom--ctx-events--color--surface-elevated);
+	--wp--custom--ctx-events--booking--donation-preset-border: var(--wp--custom--ctx-events--color--accent-border-soft);
+	--wp--custom--ctx-events--color--primary: var(--wp--custom--ctx-events--color--accent);
+	--wp--custom--ctx-events--color--primary-hover: var(--wp--custom--ctx-events--color--accent-hover);
+	--wp--custom--ctx-events--color--success: var(--wp--custom--ctx-events--color--success);
 	--wp--custom--ctx-forms--field--border-color-focus: var(--wp--custom--ctx-events--booking--accent);
-	--wp--custom--ctx-forms--field--background: #fff;
+	--wp--custom--ctx-forms--field--background: var(--wp--custom--ctx-events--color--surface);
 	--wp--custom--ctx-forms--field--text-color: var(--wp--custom--ctx-events--booking--text);
 	--wp--custom--ctx-forms--field--muted-color: var(--wp--custom--ctx-events--booking--text-muted);
 	--wp--custom--ctx-forms--field--error-color: var(--wp--custom--ctx-events--booking--danger);
@@ -87,7 +90,7 @@
 	inset: 0;
 	z-index: 100001;
 	transform: none;
-	background: #fff;
+	background: var(--wp--custom--ctx-events--color--surface);
 	border-radius: 0;
 	box-shadow: none;
 	width: 100vw;
@@ -106,7 +109,7 @@
 		max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-left));
 	border-bottom: 1px solid var(--wp--custom--ctx-events--booking--border-subtle);
 	gap: 1rem;
-	background: #fff;
+	background: var(--wp--custom--ctx-events--color--surface);
 }
 
 .booking-modal__title {
@@ -122,7 +125,7 @@
 	font-size: 1.5rem;
 	line-height: 1;
 	cursor: pointer;
-	color: #6b7280;
+	color: var(--wp--custom--ctx-events--color--text-muted);
 	padding: 0.25rem 0.5rem;
 	border-radius: 4px;
 	display: inline-flex;
@@ -130,8 +133,8 @@
 	justify-content: center;
 
 	&:hover {
-		color: #111;
-		background: #f3f4f6;
+		color: var(--wp--custom--ctx-events--color--text);
+		background: var(--wp--custom--ctx-events--color--surface-muted);
 	}
 }
 

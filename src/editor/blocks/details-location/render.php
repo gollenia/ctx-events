@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $event = BlockEventLoader::load(get_the_ID());
 if (!$event) {
@@ -25,11 +26,11 @@ $photo = get_the_post_thumbnail_url($location->id, 'post-thumbnail');
 		<?php if ($hasPhoto && $photo) : ?>
 			<img class="event-details-image" src="<?= esc_url($photo) ?>" alt="<?= esc_attr($location->name) ?>">
 		<?php else : ?>
-			<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'location') ?>
+			<?= BlockIconRenderer::render($attributes['icon'] ?: 'location') ?>
 		<?php endif; ?>
 	</div>
 	<div class="event-details-text">
-		<h4><?= esc_html($attributes['description'] ?: __('Location', 'ctx-events')) ?></h4>
+		<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Location', 'ctx-events')) ?></h4>
 		<address class="event-details-data">
 			<?php if ($attributes['showTitle'] ?? false) : ?>
 				<?= esc_html($location->name) ?><br>
@@ -47,7 +48,7 @@ $photo = get_the_post_thumbnail_url($location->id, 'post-thumbnail');
 	<?php if ($attributes['showLink'] ?? false) : ?>
 		<div class="event-details-action">
 			<a target="_blank" href="<?= esc_url($attributes['url'] ?: $location->externalUrl) ?>">
-				<?= BlockEventLoader::renderIcon('directions') ?>
+				<?= BlockIconRenderer::render('directions') ?>
 			</a>
 		</div>
 	<?php endif; ?>

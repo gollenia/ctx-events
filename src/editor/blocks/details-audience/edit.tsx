@@ -26,20 +26,20 @@ const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
 		attributes: { description },
 		setAttributes,
 	} = props;
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps();
 
 	return (
 		<div {...blockProps}>
 			<Inspector />
 
-			<div className="event-details__item">
-				<div className="event-details__icon">
+			<div className="event-details-item">
+				<div className="event-details-image">
 					<EventIcon name="audience" />
 				</div>
-				<div>
+				<div className="event-details-text">
 					<RichText
 						tagName="h4"
-						className="event-details_title description-editable"
+						className="event-details-title description-editable"
 						placeholder={__('Audience', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
@@ -48,7 +48,7 @@ const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
 					/>
 					<RichText
 						tagName="span"
-						className="event-details_audience description-editable"
+						className="event-details-data description-editable"
 						placeholder={__('Enter audience', 'ctx-events')}
 						value={meta._event_audience ?? ''}
 						onChange={(value) => {

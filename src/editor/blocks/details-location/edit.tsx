@@ -46,7 +46,7 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 		[meta._location_id],
 	);
 
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps({ className: undefined });
 	const hasPhoto =
 		(blockProps.className ?? '').includes('is-style-photo') &&
 		Boolean(
@@ -58,8 +58,8 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 		<div {...blockProps}>
 			<Inspector {...props} />
 
-			<div className="event-details__item">
-				<div className="event-details__icon">
+			<div className="event-details-item">
+				<div className="event-details-image">
 					{hasPhoto ? (
 						<img
 							className="icon-round"
@@ -73,10 +73,10 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 						<EventIcon name="location" />
 					)}
 				</div>
-				<div>
+				<div className="event-details-text">
 					<RichText
 						tagName="h4"
-						className="event-details_title description-editable"
+						className="event-details-title description-editable"
 						placeholder={__('Location', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
@@ -84,7 +84,7 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 						}}
 					/>
 					{location ? (
-						<div className="event-details_audience description-editable">
+						<div className="event-details-data description-editable">
 							{showTitle && <div>{location.title?.rendered}</div>}
 							{location.meta?._location_address && showAddress && (
 								<div>{location.meta._location_address}</div>
@@ -102,7 +102,7 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 							)}
 						</div>
 					) : (
-						<div className="event-details_audience description-editable">
+						<div className="event-details-data description-editable">
 							{showTitle && <div>{__('No location selected', 'ctx-events')}</div>}
 						</div>
 					)}

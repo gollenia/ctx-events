@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/featured-excerpt",
+	"apiVersion": 3,
+	"title": "Featured Event Excerpt",
+	"description": "Render the featured event excerpt.",
+	"category": "widgets",
+	"icon": "excerpt-view",
+	"ancestor": ["ctx-events/featured-event"],
+	"attributes": {
+		"words": {
+			"type": "number",
+			"default": 26
+		}
+	},
+	"usesContext": ["ctx-events/eventId", "postId", "postType"],
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

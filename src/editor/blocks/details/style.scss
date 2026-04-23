@@ -1,17 +1,36 @@
+@use '../../../frontend/styles/tokens';
+
+@include tokens.register-theme-tokens();
+
 .wp-block-events-details {
 	display: flex;
 	flex-direction: column;
 }
 
 .event-details {
+	--ctx-events-details-gap: var(--wp--custom--ctx-events--space--md);
+	--ctx-events-details-divider-color: var(--wp--custom--ctx-events--color--border);
+	--ctx-events-details-heading-color: var(--wp--custom--ctx-events--color--text-muted);
+	--ctx-events-details-body-color: var(--wp--custom--ctx-events--color--text);
+	--ctx-events-details-meta-color: var(--wp--custom--ctx-events--color--text-soft);
+	--ctx-events-details-icon-bg: var(--wp--custom--ctx-events--color--icon-bg);
+	--ctx-events-details-icon-size: 3rem;
+	--ctx-events-details-text-offset: 0.4rem;
+	--ctx-events-details-action-size: 2rem;
+	--ctx-events-details-action-bg: var(--wp--custom--ctx-events--color--accent);
+	--ctx-events-details-action-color: var(
+		--wp--custom--ctx-events--color--text-inverse
+	);
+	--ctx-events-details-action-radius: var(--wp--custom--ctx-events--radius--pill);
+
 	&.has-dividers .event-details-item {
-		border-bottom: 1px solid #ddd;
-		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--ctx-events-details-divider-color);
+		padding-bottom: var(--ctx-events-details-gap);
 	}
 
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--ctx-events-details-gap);
 
 	h4 {
 		font-size: 0.8rem;
@@ -19,29 +38,50 @@
 		margin: 0;
 		padding: 0;
 		text-transform: uppercase;
-		color: #666;
+		color: var(--ctx-events-details-heading-color);
 	}
 
 	p {
 		margin: 0;
 		padding: 0;
 		font-size: var(--wp--preset--font-size--small);
+		color: var(--ctx-events-details-body-color);
+	}
+
+	.event-details-title {
+		color: var(--ctx-events-details-body-color);
+	}
+
+	.event-details-data {
+		color: var(--ctx-events-details-meta-color);
+	}
+
+	.event-details-status {
+		color: var(--ctx-events-details-meta-color);
+	}
+
+	.event-details-status--warning {
+		color: var(--wp--custom--ctx-events--color--danger);
+	}
+
+	.event-details-status--ok {
+		color: var(--wp--custom--ctx-events--color--success);
 	}
 
 	&-item {
 		width: 100%;
 		display: flex;
-		gap: 1rem;
+		gap: var(--ctx-events-details-gap);
 	}
 
 	&-image {
-		background: rgba( 0, 0, 0, 0.133 );
+		background: var(--ctx-events-details-icon-bg);
 		display: grid;
 		flex-shrink: 0;
-		height: 3rem;
+		height: var(--ctx-events-details-icon-size);
 		object-fit: cover;
 		place-items: center;
-		width: 3rem;
+		width: var(--ctx-events-details-icon-size);
 
 		i {
 			font-size: 30px !important;
@@ -49,26 +89,27 @@
 	}
 
 	&-text {
-		margin-top: 0.4rem;
+		margin-top: var(--ctx-events-details-text-offset);
 	}
 
 	&-action {
 		margin-left: auto;
+
 		a {
 			text-decoration: none;
-			color: var( --primary-contrast );
-			width: 2rem;
-			height: 2rem;
-			background: var( --primary );
-			border-radius: 999px;
+			color: var(--ctx-events-details-action-color);
+			width: var(--ctx-events-details-action-size);
+			height: var(--ctx-events-details-action-size);
+			background: var(--ctx-events-details-action-bg);
+			border-radius: var(--ctx-events-details-action-radius);
 			display: grid;
 			place-items: center;
-			margin-top: 0.5rem;
+			margin-top: var(--wp--custom--ctx-events--space--sm);
 			transition: transform 100ms ease-in-out;
 
 			&:hover {
 				animation: action-zoom-in 150ms ease-in-out;
-				transform: scale( 1.3 );
+				transform: scale(1.3);
 			}
 
 			i {

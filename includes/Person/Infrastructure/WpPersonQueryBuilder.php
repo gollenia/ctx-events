@@ -15,8 +15,12 @@ final class WpPersonQueryBuilder extends WpQueryBuilder
         $builder = new self()
             ->withPostType(PersonPost::POST_TYPE)
             ->withPagination($criteria->page, $criteria->perPage)
-            ->withTaxonomy(PersonPost::CATEGORY, $criteria->categories)
-            ->withStatus($criteria->status);
+            ->withTaxonomy(PersonPost::CATEGORY, $criteria->categories);
+
+        if ($criteria->status !== null) {
+            $builder = $builder->withStatus($criteria->status);
+        }
+
         return $builder;
     }
 }

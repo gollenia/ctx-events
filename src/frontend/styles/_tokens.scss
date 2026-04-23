@@ -1,0 +1,35 @@
+@mixin register-theme-tokens() {
+	:root {
+		--wp--custom--ctx-events--color--accent: var(--wp--preset--color--primary, #2563eb);
+		--wp--custom--ctx-events--color--accent-hover: #1d4ed8;
+		--wp--custom--ctx-events--color--accent-soft: rgba(37, 99, 235, 0.06);
+		--wp--custom--ctx-events--color--accent-soft-strong: rgba(37, 99, 235, 0.08);
+		--wp--custom--ctx-events--color--accent-border: rgba(37, 99, 235, 0.22);
+		--wp--custom--ctx-events--color--accent-border-soft: rgba(37, 99, 235, 0.18);
+		--wp--custom--ctx-events--color--surface: rgba(255, 255, 255, 0.96);
+		--wp--custom--ctx-events--color--surface-muted: #f8fafc;
+		--wp--custom--ctx-events--color--surface-soft: #f5f5f5;
+		--wp--custom--ctx-events--color--surface-overlay: rgba(255, 255, 255, 0.72);
+		--wp--custom--ctx-events--color--surface-elevated: rgba(255, 255, 255, 0.86);
+		--wp--custom--ctx-events--color--border: #e5e7eb;
+		--wp--custom--ctx-events--color--border-strong: #e2e8f0;
+		--wp--custom--ctx-events--color--text: var(--wp--preset--color--contrast, #0f172a);
+		--wp--custom--ctx-events--color--text-muted: #6b7280;
+		--wp--custom--ctx-events--color--text-soft: #475569;
+		--wp--custom--ctx-events--color--text-faint: #64748b;
+		--wp--custom--ctx-events--color--text-inverse: #fff;
+		--wp--custom--ctx-events--color--icon-bg: var(--wp--custom--ctx-events--color--accent-soft-strong);
+		--wp--custom--ctx-events--color--danger: #dc2626;
+		--wp--custom--ctx-events--color--danger-strong: #b91c1c;
+		--wp--custom--ctx-events--color--danger-hover: #991b1b;
+		--wp--custom--ctx-events--color--success: #16a34a;
+		--wp--custom--ctx-events--space--xs: 0.25rem;
+		--wp--custom--ctx-events--space--sm: 0.5rem;
+		--wp--custom--ctx-events--space--md: 1rem;
+		--wp--custom--ctx-events--space--lg: 1.5rem;
+		--wp--custom--ctx-events--space--xl: 2rem;
+		--wp--custom--ctx-events--radius--md: 0px;
+		--wp--custom--ctx-events--radius--pill: 999px;
+		--wp--custom--ctx-events--shadow--md: 0 18px 40px rgba(15, 23, 42, 0.06);
+	}
+}

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
+use Contexis\Events\Event\Infrastructure\Bindings\EventBindingSource;
+use Contexis\Events\Event\Infrastructure\Bindings\BookingBindingSource;
+use Contexis\Events\Event\Infrastructure\Bindings\LocationBindingSource;
+use Contexis\Events\Event\Infrastructure\Bindings\PersonBindingSource;
 use Contexis\Events\Event\Application\DTOs\EventCacheSnapshot;
 use Contexis\Events\Event\Domain\EventCacheRepository;
 use Contexis\Events\Event\Domain\EventRepository;
@@ -13,6 +17,10 @@ use Contexis\Events\Shared\Domain\Contracts\Clock;
 class EventHooks
 {
     public function __construct(
+        private EventBindingSource $eventBindingSource,
+        private BookingBindingSource $bookingBindingSource,
+        private PersonBindingSource $personBindingSource,
+        private LocationBindingSource $locationBindingSource,
         private EventRepository $eventRepository,
         private EventCacheRepository $eventCacheRepository,
         private Clock $clock,
@@ -21,6 +29,10 @@ class EventHooks
 
     public function register(): void
     {
+        $this->eventBindingSource->register();
+        $this->bookingBindingSource->register();
+        $this->personBindingSource->register();
+        $this->locationBindingSource->register();
         add_action('save_post_' . EventPost::POST_TYPE, [$this, 'savePost'], 10, 3);
         add_action('rest_after_insert_' . EventPost::POST_TYPE, [$this, 'saveRestPost'], 10, 3);
     }

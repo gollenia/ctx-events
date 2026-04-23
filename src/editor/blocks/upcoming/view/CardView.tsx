@@ -42,14 +42,14 @@ const renderBookingWarning = (
 
 	if (event.bookings.spaces !== null && event.bookings.spaces > 0) {
 		return (
-			<span className="event-card-pill event-card-pill-warning">
+			<span className="ctx-upcoming-card__pill">
 				{__('Nearly Booked up', 'ctx-events')}
 			</span>
 		);
 	}
 
 	return (
-		<span className="event-card-pill event-card-pill-error">
+		<span className="ctx-upcoming-card__pill ctx-upcoming-card__pill--error">
 			{__('Booked up', 'ctx-events')}
 		</span>
 	);
@@ -71,7 +71,7 @@ function EventCards({
 	events,
 }: UpcomingViewProps) {
 	const className = [
-		'event-grid',
+		'ctx-upcoming-grid',
 		animateOnScroll ? 'ctx-animate-children' : '',
 		animationType ? `ctx-${animationType}` : '',
 	]
@@ -84,47 +84,47 @@ function EventCards({
 				const location = getLocationLabel(item, showLocation);
 
 				return (
-					<li className="event-card" key={item.id}>
+					<li className="ctx-upcoming-card" key={item.id}>
 						{showPerson === 'image' && item.person ? (
-							<div className="event-card-speaker">
+							<div className="ctx-upcoming-card__speaker">
 								<div>
 									<div>{item.person.name}</div>
 								</div>
 							</div>
 						) : null}
 						{showImages && item.image?.url ? (
-							<a href={item.link} className="event-card-image">
+							<a href={item.link} className="ctx-upcoming-card__image">
 								<img
 									src={item.image.sizes?.large?.url || item.image.url}
 									alt={item.image.altText || item.title}
 								/>
 							</a>
 						) : null}
-						<div className="event-card-content">
+						<div className="ctx-upcoming-card__content">
 							{item.category && showCategory ? (
-								<span className="event-card-label">{item.category.name}</span>
+								<span className="ctx-upcoming-card__label">{item.category.name}</span>
 							) : null}
 							<a href={item.link}>
-								<h2 className="event-card-title">{item.title}</h2>
+								<h2 className="ctx-upcoming-card__title">{item.title}</h2>
 							</a>
-							<h4 className="event-card-subtitle">
+							<h4 className="ctx-upcoming-card__subtitle">
 								{formatDateRange(item.start, item.end)}
 							</h4>
-							<p className="event-card-text">
+							<p className="ctx-upcoming-card__text">
 								{truncate(item.excerpt, excerptLength)}
 							</p>
 							{showAudience || showPerson || showLocation || showBookedUp ? (
-								<div className="event-card-footer">
-									<div className="event-card-footer-details">
-										<div className="event-card-footer-details-text">
+								<div className="ctx-upcoming-card__footer">
+									<div className="ctx-upcoming-card__footer-details">
+										<div className="ctx-upcoming-card__footer-text">
 											{showLocation && item.location?.id ? (
-												<div className="event-card-detail">
+												<div className="ctx-upcoming-card__detail">
 													<EventIcon name="location" />{' '}
 													<span>{location}</span>
 												</div>
 											) : null}
 											{showAudience && item.audience?.length ? (
-												<div className="event-card-detail">
+												<div className="ctx-upcoming-card__detail">
 													<EventIcon name="audience" />{' '}
 													<span>{item.audience}</span>
 												</div>

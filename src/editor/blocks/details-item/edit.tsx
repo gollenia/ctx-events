@@ -62,7 +62,7 @@ function ItemEdit(props: DetailsItemEditProps) {
 		});
 	};
 
-	const classes = [className, 'event-details__item'].filter(Boolean).join(' ');
+	const classes = [className].filter(Boolean).join(' ');
 	const blockProps = useBlockProps({ className: classes });
 	const borderProps = useBorderProps(props.attributes);
 	const imageStyle = {
@@ -73,7 +73,7 @@ function ItemEdit(props: DetailsItemEditProps) {
 	};
 
 	const imageClasses = [
-		'event-details__icon',
+		'event-details-image',
 		getColorClassName('color', iconColor as unknown as string),
 		getColorClassName(
 			'background-color',
@@ -89,18 +89,18 @@ function ItemEdit(props: DetailsItemEditProps) {
 			{
 				placeholder: 'Title',
 				level: 4,
-				className: 'event-details_title',
+				className: 'event-details-title',
 				style: { spacing: { margin: { top: '0px', bottom: '0px' } } },
 			},
 		],
 		[
 			'core/paragraph',
-			{ placeholder: 'Description', className: 'event-details_text' },
+			{ placeholder: 'Description', className: 'event-details-data' },
 		],
 	] as const;
 
 	const innerBlockProps = useInnerBlocksProps(
-		{ className: 'event-details__item-content' },
+		{ className: 'event-details-text' },
 		{
 			template,
 			allowedBlocks: ['core/paragraph', 'core/heading'],
@@ -117,20 +117,22 @@ function ItemEdit(props: DetailsItemEditProps) {
 		>
 			<Inspector {...props} />
 			<Toolbar {...props} onSelectMedia={onSelectMedia} />
-			<div className={imageClasses} style={imageStyle}>
-				{imageUrl ? (
-					<img src={imageUrl} ref={imageRef} alt="" />
-				) : (
-					<EventIcon name={icon} />
+			<div className="event-details-item">
+				<div className={imageClasses} style={imageStyle}>
+					{imageUrl ? (
+						<img src={imageUrl} ref={imageRef} alt="" />
+					) : (
+						<EventIcon name={icon} />
+					)}
+				</div>
+
+				<div className="event-details-text" {...innerBlockProps} />
+				{url && (
+					<div className="event-details-action">
+						<b><EventIcon name={urlIcon} /></b>
+					</div>
 				)}
 			</div>
-
-			<div className="event-details__item-content" {...innerBlockProps} />
-			{url && (
-				<div className="event-details__item-action">
-					<b><EventIcon name={urlIcon} /></b>
-				</div>
-			)}
 		</div>
 	);
 }

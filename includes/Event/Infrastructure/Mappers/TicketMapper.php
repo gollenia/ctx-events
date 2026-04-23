@@ -1,6 +1,6 @@
 <?php
 
-namespace Contexis\Events\Event\Infrastructure;
+namespace Contexis\Events\Event\Infrastructure\Mappers;
 
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\TicketCollection;
@@ -17,7 +17,7 @@ class TicketMapper
             id: TicketId::from($ticket['ticket_id']),
             name: $ticket['ticket_name'],
             description: $ticket['ticket_description'],
-            price: Price::fromFloat((float) $ticket['ticket_price'], $currency),
+            price: Price::from($ticket['ticket_price'], $currency),
             capacity: $ticket['ticket_spaces'],
             max: $ticket['ticket_max'],
             min: $ticket['ticket_min'],

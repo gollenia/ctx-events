@@ -51,7 +51,7 @@ const PeopleSelector = () => {
 			per_page: -1,
 			_embed: true,
 		}) ?? []) as PersonRecord[];
-		console.log('Fetched people list:', list);
+
 		return list.map(
 			(person): ComboboxControlOption => ({
 				key: person.id,

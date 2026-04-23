@@ -1,4 +1,6 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import { Placeholder } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import Inspector from './inspector';
 
 type DetailsAttributes = {
@@ -8,6 +10,9 @@ type DetailsAttributes = {
 type EditProps = {
 	attributes: DetailsAttributes;
 	className?: string;
+	context?: {
+		postType?: string;
+	};
 	setAttributes: (attributes: Partial<DetailsAttributes>) => void;
 };
 
@@ -15,6 +20,7 @@ export default function Edit(props: EditProps) {
 	const {
 		attributes: { dividers },
 		className,
+		context,
 	} = props;
 
 	const allowedBlocks = [
@@ -40,7 +46,7 @@ export default function Edit(props: EditProps) {
 		['ctx-events/details-shutdown'],
 	] as const;
 
-	const classes = ['event-details', className, dividers ? 'has-divider' : false]
+	const classes = ['event-details', className, dividers ? 'has-dividers' : false]
 		.filter(Boolean)
 		.join(' ');
 
@@ -49,11 +55,22 @@ export default function Edit(props: EditProps) {
 		{},
 		{ allowedBlocks, template, templateLock: false },
 	);
+	const isInvalidContext = context?.postType !== 'ctx-event';
 
 	return (
 		<div {...blockProps}>
 			<Inspector {...props} />
-			<div {...innerBlocksProps} />
+			{isInvalidContext ? (
+				<Placeholder
+					label={__('Event Details', 'ctx-events')}
+					instructions={__(
+						'This block only works inside event posts and can be removed here.',
+						'ctx-events',
+					)}
+				/>
+			) : (
+				<div {...innerBlocksProps} />
+			)}
 		</div>
 	);
 }

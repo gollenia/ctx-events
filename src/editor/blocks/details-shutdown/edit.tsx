@@ -27,7 +27,7 @@ const edit = (props: ShutdownBlockProps) => {
 	const [meta] = useEntityProp('postType', postType, 'meta') as [
 		EventRsvpMeta,
 	];
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps();
 
 	const endFormatted = () =>
 		meta._event_rsvp_end ? formatDate(meta._event_rsvp_end) : '';
@@ -48,12 +48,12 @@ const edit = (props: ShutdownBlockProps) => {
 		<div {...blockProps}>
 			<Inspector {...props} />
 
-			<div className="event-details__item">
-				<div className="event-details__icon">
+			<div className="event-details-item">
+				<div className="event-details-image">
 					<EventIcon name="booking_closed" />
 				</div>
-				<div>
-					<h4 className="event-details_title">
+				<div className="event-details-text">
+					<h4 className="event-details-title">
 						{bookingEnded
 							? __('Booking ended', 'ctx-events')
 							: bookingStarted
@@ -61,7 +61,7 @@ const edit = (props: ShutdownBlockProps) => {
 								: __('Booking start', 'ctx-events')}
 					</h4>
 
-					<span className="event-details_audience description-editable">
+					<span className="event-details-data description-editable">
 						{bookingEnded || bookingStarted ? endFormatted() : startFormatted()}
 					</span>
 				</div>

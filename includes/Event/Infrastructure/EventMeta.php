@@ -83,11 +83,14 @@ class EventMeta extends MetaData
         self::BOOKING_REFERENCE_PREFIX => ['type' => 'string', 'default' => ''],
         self::BOOKING_REFERENCE_SUFFIX => ['type' => 'string', 'default' => ''],
         self::PERSON_ID           => [
-            'type'         => 'array',
-            'show_in_rest' => [
+            'type'              => 'integer',
+            'default'           => 0,
+            'sanitize_callback' => [self::class, 'sanitizeRelationId'],
+            'show_in_rest'      => [
                 'schema' => [
-                    'type'  => 'array',
-                    'items' => ['type' => 'integer'],
+                    'type'    => ['integer', 'array', 'null'],
+                    'items'   => ['type' => 'integer'],
+                    'default' => 0,
                 ],
             ],
         ],
@@ -148,4 +151,13 @@ class EventMeta extends MetaData
 			],
 		],
     ];
+
+	public static function sanitizeRelationId(mixed $value): int
+	{
+		if (is_array($value)) {
+			$value = reset($value);
+		}
+
+		return max(0, (int) $value);
+	}
 }

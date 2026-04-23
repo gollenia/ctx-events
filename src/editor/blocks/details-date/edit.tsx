@@ -28,7 +28,7 @@ const edit = (props: DetailBlockProps<DetailsDateAttributes>) => {
 		setAttributes,
 	} = props;
 
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps();
 
 	const startFormatted = () => {
 		if (!meta?._event_start || !meta?._event_end) {
@@ -42,21 +42,21 @@ const edit = (props: DetailBlockProps<DetailsDateAttributes>) => {
 		<div {...blockProps}>
 			<Inspector {...props} meta={meta} setMeta={setMeta} />
 
-			<div className="event-details__item">
-				<div className="event-details__icon">
+			<div className="event-details-item">
+				<div className="event-details-image">
 					<EventIcon name="date" />
 				</div>
-				<div>
+				<div className="event-details-text">
 					<RichText
 						tagName="h4"
-						className="event-details_title description-editable"
+						className="event-details-title description-editable"
 						placeholder={__('Date', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
 							setAttributes({ description: value });
 						}}
 					/>
-					<span className="event-details_audience description-editable">
+					<span className="event-details-data description-editable">
 						{startFormatted()}
 					</span>
 				</div>

@@ -13,6 +13,7 @@ import datetimeSelector from './plugins/event/datetime';
 import locationSelector from './plugins/event/location';
 import peopleSelector from './plugins/event/people';
 import recurrenceSettings from './plugins/event/recurrence';
+import './bindings';
 
 const plugins = [
 	{ name: 'event-select-datetime', component: datetimeSelector },

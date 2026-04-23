@@ -83,40 +83,42 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 	})();
 
 	const image = speaker?._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null;
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps();
 
 	return (
 		<div {...blockProps}>
 			<Inspector {...props} />
 
-			<div className="event-details__icon">
-				{showPortrait && image ? (
-					<img src={image} alt="" />
-				) : (
-					<EventIcon name={speaker?.gender ?? 'male'} />
+			<div className="event-details-item">
+				<div className="event-details-image">
+					{showPortrait && image ? (
+						<img src={image} alt="" />
+					) : (
+						<EventIcon name={speaker?.gender ?? 'male'} />
+					)}
+				</div>
+				<div className="event-details-text">
+					<RichText
+						tagName="h4"
+						className="event-details-title description-editable"
+						placeholder={__('Speaker', 'ctx-events')}
+						value={description}
+						onChange={(value) => {
+							setAttributes({ description: value });
+						}}
+					/>
+					<span className="event-details-data">
+						{speaker?.title?.rendered}
+					</span>
+				</div>
+				{showLink && link && (
+					<div className="event-details-action">
+						<a href={link}>
+							<EventIcon name={linkIcon} />
+						</a>
+					</div>
 				)}
 			</div>
-			<div className="event-details-text">
-				<RichText
-					tagName="h4"
-					className="event-details_title description-editable"
-					placeholder={__('Speaker', 'ctx-events')}
-					value={description}
-					onChange={(value) => {
-						setAttributes({ description: value });
-					}}
-				/>
-				<span className="event-details_audience">
-					{speaker?.title?.rendered}
-				</span>
-			</div>
-			{showLink && link && (
-				<div className="event-details-action">
-					<a href={link}>
-						<EventIcon name={linkIcon} />
-					</a>
-				</div>
-			)}
 		</div>
 	);
 };
