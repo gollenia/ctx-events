@@ -31,3 +31,5 @@ node_modules/
 .env.playwright.local
 
 test-results
+
+.DS_Store
