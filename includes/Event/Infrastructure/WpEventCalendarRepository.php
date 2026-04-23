@@ -101,6 +101,12 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 					: ($personMeta ? [(int) $personMeta] : []);
 				$personNames = array_filter(array_map('get_the_title', $personIds));
 				$categoryIds = wp_get_post_terms($post->ID, EventPost::CATEGORIES, ['fields' => 'ids']);
+				$primaryCategoryId = is_array($categoryIds) && $categoryIds !== []
+					? (int) reset($categoryIds)
+					: null;
+				$color = $primaryCategoryId !== null
+					? sanitize_hex_color((string) get_term_meta($primaryCategoryId, 'color', true)) ?: null
+					: null;
 
 				return new EventCalendarEntry(
 					id: $post->ID,
@@ -112,6 +118,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 						?: ($snapshot->getDateTime(EventMeta::EVENT_START, $timezone)
 							?: new \DateTimeImmutable('1970-01-01 00:00:00', $timezone)),
 					categoryIds: is_array($categoryIds) ? array_map('intval', $categoryIds) : [],
+					color: $color,
 					locationName: $locationId !== null ? get_the_title($locationId) : null,
 					personName: $personNames !== [] ? implode(', ', $personNames) : null,
 				);
