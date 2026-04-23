@@ -6,6 +6,7 @@ namespace Contexis\Events\Platform\Wordpress\Admin;
 
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
+use Contexis\Events\Event\Infrastructure\EventPost;
 
 final class AdminMenu implements AdminServiceInterface
 {
@@ -21,7 +22,14 @@ final class AdminMenu implements AdminServiceInterface
     public function parent_file(string $parent_file): string
     {
         global $current_screen;
-        if ($current_screen && $current_screen->post_type === 'ctx-event') {
+        if (
+            $current_screen &&
+            (
+                $current_screen->post_type === EventPost::POST_TYPE ||
+                $current_screen->taxonomy === EventPost::CATEGORIES ||
+                $current_screen->taxonomy === EventPost::TAGS
+            )
+        ) {
             return AdminMenu::MENU_SLUG;
         }
 
@@ -88,6 +96,22 @@ final class AdminMenu implements AdminServiceInterface
 			'manage_options',
 			'contexis_events_email',
 			fn() => print('<div id="ctx-email-admin"></div>')
+		);
+
+		add_submenu_page(
+			self::MENU_SLUG,
+			__('Categories', 'ctx-events'),
+			__('Categories', 'ctx-events'),
+			'manage_categories',
+			'edit-tags.php?taxonomy=' . EventPost::CATEGORIES . '&post_type=' . EventPost::POST_TYPE
+		);
+
+		add_submenu_page(
+			self::MENU_SLUG,
+			__('Tags', 'ctx-events'),
+			__('Tags', 'ctx-events'),
+			'manage_categories',
+			'edit-tags.php?taxonomy=' . EventPost::TAGS . '&post_type=' . EventPost::POST_TYPE
 		);
 
 		add_submenu_page(
