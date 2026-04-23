@@ -15,6 +15,7 @@ import type {
 	DataStatusItem,
 	DataTableAction,
 	DataViewConfig,
+	DataViewOption,
 } from './types';
 
 interface DataTableProps<T> {
@@ -35,6 +36,7 @@ interface DataTableProps<T> {
 	createLinkLabel?: string;
 	children?: React.ReactNode;
 	screenMeta?: boolean;
+	views?: Array<DataViewOption>;
 }
 
 type DataTableComponent = (<T extends object>(
@@ -74,6 +76,7 @@ const DataTable: DataTableComponent = <T extends object>({
 	createLinkLabel,
 	children,
 	screenMeta = true,
+	views,
 }: DataTableProps<T>) => {
 	const [screenMetaContext, setScreenMetaContext] = useState('');
 	return (
@@ -95,6 +98,7 @@ const DataTable: DataTableComponent = <T extends object>({
 				createLinkLabel,
 				setScreenMetaContext,
 				screenMetaContext,
+				views,
 			}}
 		>
 			{screenMeta && (

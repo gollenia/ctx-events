@@ -1,5 +1,12 @@
+export type DataViewType = 'table' | 'grid' | 'list' | string;
+
+export type DataViewOption = {
+	id: DataViewType;
+	label: string;
+};
+
 export type DataViewConfig = {
-	type?: 'table' | 'grid' | 'list';
+	type?: DataViewType;
 	search?: string;
 	refreshKey?: number;
 	filters: Array<DataFilterField>;

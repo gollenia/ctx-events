@@ -7,4 +7,6 @@ export type {
 	DataStatusItem,
 	DataTableAction,
 	DataViewConfig,
+	DataViewOption,
+	DataViewType,
 } from './types';

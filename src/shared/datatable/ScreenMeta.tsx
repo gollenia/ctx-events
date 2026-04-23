@@ -1,11 +1,17 @@
+import { __ } from '@wordpress/i18n';
 import { useDataTable } from './DataTableContext';
-import type { DataFieldConfig, DataViewConfig } from './types';
+import type {
+	DataFieldConfig,
+	DataViewConfig,
+	DataViewOption,
+} from './types';
 
 interface ScreenMetaProps {
 	context: string;
 	fields: Array<DataFieldConfig>;
 	view: DataViewConfig;
 	onChangeView?: (updates: Partial<DataViewConfig>) => void;
+	views?: Array<DataViewOption>;
 }
 
 const ScreenMeta = ({
@@ -13,7 +19,12 @@ const ScreenMeta = ({
 	fields,
 	view,
 	onChangeView,
+	views = [],
 }: ScreenMetaProps) => {
+	const activeView = view.type ?? 'table';
+	const availableViews = views.filter((option) => option.id !== 'table');
+	const showViews = availableViews.length > 0;
+
 	return (
 		<div
 			id="screen-meta"
@@ -53,7 +64,9 @@ const ScreenMeta = ({
 					</fieldset>
 					<fieldset className="screen-options">
 						<legend>Seitennummerierung</legend>
-						<label htmlFor="edit_post_per_page">Einträge pro Seite:</label>
+						<label htmlFor="edit_post_per_page">
+							{__('Entries per page', 'ctx-events')}
+						</label>
 						<input
 							type="number"
 							step="1"
@@ -68,6 +81,33 @@ const ScreenMeta = ({
 							}
 						/>
 					</fieldset>
+					{showViews && (
+						<fieldset className="views">
+							<legend>{__('Views', 'ctx-events')}</legend>
+							<label>
+								<input
+									type="radio"
+									name="ctx-datatable-view"
+									value="table"
+									checked={activeView === 'table'}
+									onChange={() => onChangeView?.({ type: 'table' })}
+								/>
+								{__('Table', 'ctx-events')}
+							</label>
+							{availableViews.map((option) => (
+								<label key={option.id}>
+									<input
+										type="radio"
+										name="ctx-datatable-view"
+										value={option.id}
+										checked={activeView === option.id}
+										onChange={() => onChangeView?.({ type: option.id })}
+									/>
+									{option.label}
+								</label>
+							))}
+						</fieldset>
+					)}
 				</form>
 			</div>{' '}
 		</div>
@@ -75,13 +115,15 @@ const ScreenMeta = ({
 };
 
 const DataTableScreenMeta = () => {
-	const { screenMetaContext, view, onChangeView, fields } = useDataTable();
+	const { screenMetaContext, view, onChangeView, fields, views } =
+		useDataTable();
 	return (
 		<ScreenMeta
 			context={screenMetaContext}
 			fields={fields}
 			view={view}
 			onChangeView={onChangeView}
+			views={views}
 		/>
 	);
 };
