@@ -5,6 +5,7 @@ namespace Contexis\Events\Shared\Infrastructure\Abstracts;
 
 use Contexis\Events\Shared\Infrastructure\Contracts\HasHooks;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasPatterns;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasTaxonomies;
 
 abstract class PostType
@@ -21,6 +22,10 @@ abstract class PostType
 
 		if ($this instanceof HasMetaData) {
 			$this->registerMeta();
+		}
+
+		if ($this instanceof HasPatterns) {
+			$this->registerPatterns();
 		}
 		
 		if ($this instanceof HasHooks) {

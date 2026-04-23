@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $event = BlockEventLoader::load(get_the_ID());
 if (!$event || !$event->bookingSummary) {
@@ -32,10 +33,10 @@ if ($summary->bookingStart && $now < $summary->bookingStart->getTimestamp()) {
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon('booking_closed') ?>
+		<?= BlockIconRenderer::render('booking_closed') ?>
 	</div>
 	<div class="event-details-text">
-		<h4><?= esc_html($description) ?></h4>
+		<h4 class="event-details-title"><?= esc_html($description) ?></h4>
 		<time class="event-details-data"><?= esc_html($date) ?></time>
 	</div>
 </div>

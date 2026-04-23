@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $event = BlockEventLoader::load(get_the_ID());
 if (!$event || !$event->bookingSummary) {
@@ -27,20 +28,20 @@ if (!$isFree && $lowestPrice !== null) {
 <?php if ($isFree) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<?= BlockEventLoader::renderIcon('price') ?>
+			<?= BlockIconRenderer::render('price') ?>
 		</div>
 		<div class="event-details-text">
-			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
+			<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
 			<div class="event-details-data"><?= esc_html(__('Free', 'ctx-events')) ?></div>
 		</div>
 	</div>
 <?php elseif ($overwritePrice || isset($priceDisplay)) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<?= BlockEventLoader::renderIcon('payment') ?>
+			<?= BlockIconRenderer::render('payment') ?>
 		</div>
 		<div class="event-details-text">
-			<h4><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
+			<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>
 			<div class="event-details-data"><?= esc_html($overwritePrice ?: ($priceDisplay ?? '')) ?></div>
 		</div>
 	</div>

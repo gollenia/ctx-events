@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/featured-title",
+	"apiVersion": 3,
+	"title": "Featured Event Title",
+	"description": "Render the featured event title.",
+	"category": "widgets",
+	"icon": "heading",
+	"ancestor": ["ctx-events/featured-event"],
+	"attributes": {
+		"level": {
+			"type": "number",
+			"default": 2
+		}
+	},
+	"usesContext": ["ctx-events/eventId", "postId", "postType"],
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

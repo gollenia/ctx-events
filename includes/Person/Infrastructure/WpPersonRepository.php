@@ -45,12 +45,16 @@ class WpPersonRepository implements PersonRepository
 	 */
     public function findByIds(array $ids): PersonCollection
     {
-        $builder = WpPersonQueryBuilder::fromCriteria(new PersonCriteria())
-            ->withCache()
-            ->addArg('post__in', array_map(fn(PersonId $id) => $id->toInt(), $ids))
-            ->addArg('posts_per_page', -1);
-
-        $wpq = new \WP_Query($builder->getArgs());
+        $wpq = new \WP_Query([
+            'post_type'      => PersonPost::POST_TYPE,
+            'post__in'       => array_map(fn(PersonId $id) => $id->toInt(), $ids),
+            'posts_per_page' => -1,
+            'orderby'        => 'post__in',
+            'no_found_rows'  => true,
+            'fields'         => 'all',
+            'update_post_meta_cache' => true,
+            'update_post_term_cache' => true,
+        ]);
 
         $persons = [];
 

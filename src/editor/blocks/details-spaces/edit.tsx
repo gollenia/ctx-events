@@ -36,14 +36,14 @@ const edit = (props: SpacesBlockProps) => {
 		record?: SpacesRecord;
 	};
 	const spaces = record?.extras?.spaces || 0;
-	const blockProps = useBlockProps({ className: 'event-details-item' });
+	const blockProps = useBlockProps();
 
 	return (
 		<div {...blockProps}>
 			<Inspector {...props} />
 
-			<div className="event-details__item">
-				<div className="event-details__icon">
+			<div className="event-details-item">
+				<div className="event-details-image">
 					<EventIcon
 						name={
 							spaces === 0
@@ -54,23 +54,23 @@ const edit = (props: SpacesBlockProps) => {
 						}
 					/>
 				</div>
-				<div>
+				<div className="event-details-text">
 					<RichText
 						tagName="h4"
-						className="event-details_title description-editable"
+						className="event-details-title description-editable"
 						placeholder={__('Free Spaces', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
 							setAttributes({ description: value });
 						}}
 					/>
-					<span className="event-details_audience description-editable">
+					<span className="event-details-data description-editable">
 						{showNumber && spaces > warningThreshold ? (
 							spaces
 						) : (
 							<>
 								{spaces <= warningThreshold && spaces > 0 && (
-									<span className="event-details_warning">
+									<span className="event-details-status event-details-status--warning">
 										{warningText
 											? sprintf(
 													warningText,
@@ -88,12 +88,12 @@ const edit = (props: SpacesBlockProps) => {
 									</span>
 								)}
 								{spaces === 0 && (
-									<span className="event-details_warning">
+									<span className="event-details-status event-details-status--warning">
 										{bookedUpText || __('Booked up', 'ctx-events')}
 									</span>
 								)}
 								{spaces > warningThreshold && (
-									<span className="event-details_ok">
+									<span className="event-details-status event-details-status--ok">
 										{okText || __('Enough free spaces left', 'ctx-events')}
 									</span>
 								)}

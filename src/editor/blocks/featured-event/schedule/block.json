@@ -1,0 +1,13 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/featured-schedule",
+	"apiVersion": 3,
+	"title": "Featured Event Schedule",
+	"description": "Render the featured event date and time.",
+	"category": "widgets",
+	"icon": "calendar",
+	"ancestor": ["ctx-events/featured-event"],
+	"usesContext": ["ctx-events/eventId", "postId", "postType"],
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

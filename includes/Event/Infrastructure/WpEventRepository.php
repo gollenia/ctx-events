@@ -13,6 +13,7 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventStatusCounts;
 use Contexis\Events\Event\Domain\ValueObjects\EventSpaces;
+use Contexis\Events\Event\Infrastructure\Mappers\EventMapper;
 use Contexis\Events\Shared\Application\ValueObjects\Pagination;
 use Contexis\Events\Shared\Infrastructure\Wordpress\InteractsWithStatusCounts;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;

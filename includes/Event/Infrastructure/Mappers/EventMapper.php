@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contexis\Events\Event\Infrastructure;
+namespace Contexis\Events\Event\Infrastructure\Mappers;
 
 use Contexis\Events\Booking\Infrastructure\WpBookingOptions;
 use Contexis\Events\Event\Domain\ValueObjects\BookingPolicy;
@@ -24,6 +24,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Infrastructure\Contracts\PostMapper;
+use Contexis\Events\Event\Infrastructure\EventMeta;
 
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
@@ -50,7 +51,9 @@ final class EventMapper implements PostMapper
             locationId: LocationId::from($post->getInt(EventMeta::LOCATION_ID)),
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
-            personId: $post->getInt('_person_id') ? PersonId::from($post->getInt(EventMeta::PERSON_ID)) : null
+            personId: $post->getInt(EventMeta::PERSON_ID)
+                ? PersonId::from($post->getInt(EventMeta::PERSON_ID))
+                : null
         );
 
 		if(!$post->getBool(EventMeta::BOOKING_ENABLED)) {

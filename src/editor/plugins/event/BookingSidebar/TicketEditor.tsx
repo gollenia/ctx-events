@@ -5,8 +5,10 @@ import {
 	TextareaControl,
 	TextControl,
 } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
+import { formatCentsAsPriceInput, parsePriceInputToCents } from './price';
 import type { BookingTicket } from './types';
 
 type TicketEditorProps = {
@@ -22,6 +24,14 @@ const TicketEditor = ({
 	onCancel,
 	setTicket,
 }: TicketEditorProps) => {
+	const [priceInput, setPriceInput] = useState(() =>
+		formatCentsAsPriceInput(ticket.ticket_price),
+	);
+
+	useEffect(() => {
+		setPriceInput(formatCentsAsPriceInput(ticket.ticket_price));
+	}, [ticket.ticket_id]);
+
 	return (
 		<>
 			<Flex direction="column">
@@ -50,13 +60,17 @@ const TicketEditor = ({
 						<TextControl
 							label={__('Price', 'ctx-events')}
 							type="text"
-							value={String(ticket.ticket_price)}
-							onChange={(value) =>
+							value={priceInput}
+							onChange={(value) => {
+								setPriceInput(value);
 								setTicket({
 									...ticket,
-									ticket_price: value,
-								})
-							}
+									ticket_price: parsePriceInputToCents(value),
+								});
+							}}
+							onBlur={() => {
+								setPriceInput(formatCentsAsPriceInput(ticket.ticket_price));
+							}}
 						/>
 					</FlexItem>
 					<FlexItem style={{ flex: 1 }}>

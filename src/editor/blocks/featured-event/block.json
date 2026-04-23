@@ -1,0 +1,107 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/featured-event",
+	"apiVersion": 3,
+	"title": "Featured Event",
+	"description": "Compose a featured event section from theme-friendly event blocks.",
+	"category": "widgets",
+	"icon": "calendar-alt",
+
+	"attributes": {
+		"selectedEvent": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"usesContext": ["postId", "postType"],
+	"providesContext": {
+		"ctx-events/eventId": "selectedEvent"
+	},
+	"supports": {
+		"inserter": false,
+		"anchor": true,
+		"align": ["wide", "full"],
+		"spacing": {
+			"margin": ["top", "bottom"],
+			"padding": ["top", "bottom", "left", "right"],
+			"blockGap": true,
+			"__experimentalDefaultControls": {
+				"padding": true,
+				"blockGap": true
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"selectedEvent": -1
+		},
+		"innerBlocks": [
+			{
+				"name": "core/columns",
+				"innerBlocks": [
+					{
+						"name": "core/column",
+						"attributes": {
+							"width": "45%"
+						},
+						"innerBlocks": [
+							{
+								"name": "core/image",
+								"attributes": {
+									"url": "https://s.w.org/images/core/5.3/MtBlanc1.jpg",
+									"alt": "",
+									"sizeSlug": "large"
+								}
+							}
+						]
+					},
+					{
+						"name": "core/column",
+						"attributes": {
+							"width": "55%"
+						},
+						"innerBlocks": [
+							{
+								"name": "core/paragraph",
+								"attributes": {
+									"content": "May 12, 2026, 7:30 PM"
+								}
+							},
+							{
+								"name": "core/heading",
+								"attributes": {
+									"level": 2,
+									"content": "Featured event title"
+								}
+							},
+							{
+								"name": "core/paragraph",
+								"attributes": {
+									"content": "A short event summary appears here to preview the featured event layout."
+								}
+							},
+							{
+								"name": "ctx-events/featured-location"
+							},
+							{
+								"name": "core/buttons",
+								"innerBlocks": [
+									{
+										"name": "core/button",
+										"attributes": {
+											"text": "View event",
+											"url": "#"
+										}
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}

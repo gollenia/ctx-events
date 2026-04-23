@@ -4,19 +4,20 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Application\Contracts\EventOptions;
-use Contexis\Events\Event\Infrastructure\EventMeta as InfrastructureEventMeta;
 use Contexis\Events\Event\Infrastructure\EventMeta;
-use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
+use Contexis\Events\Platform\Wordpress\PluginInfo;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasHooks;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasPatterns;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasTaxonomies;
 
-class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
+class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatterns, HasHooks
 {
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
     public const TAGS = 'ctx-event-tags';
+    private const PATTERN_DIR = '/includes/Platform/Wordpress/patterns';
 
 	public function __construct(
 		private readonly EventHooks $hooks,
@@ -114,6 +115,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
             'show_in_menu' => false,
             'show_in_rest' => true,
             'show_in_nav_menus' => true,
+			'show_in_admin_bar' => true,
             'can_export' => true,
             'exclude_from_search' => false,
             'publicly_queryable' => true,
@@ -143,8 +145,67 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasHooks
         EventMeta::registerAll(self::POST_TYPE);
     }
 
+    public function registerPatterns(): void
+    {
+        if (!function_exists('register_block_pattern_category') || !function_exists('register_block_pattern')) {
+            return;
+        }
+
+        register_block_pattern_category('ctx-events', [
+            'label' => __('Events', 'ctx-events'),
+        ]);
+
+        register_block_pattern(
+            'ctx-events/featured-event-split',
+            [
+                'title' => __('Featured Event: Image Left, Details Right', 'ctx-events'),
+                'description' => __('Two-column featured event layout with the image on the left and event details on the right.', 'ctx-events'),
+                'categories' => ['ctx-events'],
+                'viewportWidth' => 1440,
+                'content' => $this->loadPatternFile('featured-event-split.html'),
+            ]
+        );
+
+        register_block_pattern(
+            'ctx-events/featured-event-stacked',
+            [
+                'title' => __('Featured Event: Stacked', 'ctx-events'),
+                'description' => __('Stacked featured event layout with image first and the event content underneath.', 'ctx-events'),
+                'categories' => ['ctx-events'],
+                'viewportWidth' => 960,
+                'content' => $this->loadPatternFile('featured-event-stacked.html'),
+            ]
+        );
+
+        register_block_pattern(
+            'ctx-events/event-details',
+            [
+                'title' => __('Event Details', 'ctx-events'),
+                'description' => __('Default event details block with the standard set of event metadata items.', 'ctx-events'),
+                'categories' => ['ctx-events'],
+                'viewportWidth' => 960,
+                'content' => $this->loadPatternFile('event-details.html'),
+            ]
+        );
+    }
+
 	public function registerHooks(): void
 	{
 		$this->hooks->register();	
 	}
+
+    private function loadPatternFile(string $filename): string
+    {
+        $path = PluginInfo::getPluginDir(self::PATTERN_DIR . '/' . $filename);
+        if (!is_readable($path)) {
+            return '';
+        }
+
+        $content = file_get_contents($path);
+        if (!is_string($content) || $content === '') {
+            return '';
+        }
+
+        return $content;
+    }
 }

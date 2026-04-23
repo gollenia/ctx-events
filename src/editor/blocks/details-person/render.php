@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $event = BlockEventLoader::load(get_the_ID());
 if (!$event) {
@@ -36,16 +37,16 @@ if ($linkTo === 'custom') {
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($attributes['icon'] ?: 'speaker') ?>
+		<?= BlockIconRenderer::render($attributes['icon'] ?: 'speaker') ?>
 	</div>
 	<div class="event-details-text">
-		<h4><?= esc_html($attributes['description'] ?: __('Speaker', 'ctx-events')) ?></h4>
+		<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Speaker', 'ctx-events')) ?></h4>
 		<div class="event-details-data"><?= esc_html($displayName) ?></div>
 	</div>
 	<?php if (($attributes['showLink'] ?? false) && $url) : ?>
 		<div class="event-details-action">
 			<a target="_blank" href="<?= esc_url($url) ?>">
-				<?= BlockEventLoader::renderIcon($linkIcon) ?>
+				<?= BlockIconRenderer::render($linkIcon) ?>
 			</a>
 		</div>
 	<?php endif; ?>

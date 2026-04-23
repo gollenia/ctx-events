@@ -1,8 +1,7 @@
 import { Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-import { formatPrice } from '@events/i18n';
-
+import { formatCentsAsPrice } from './price';
 import { getDefaultCurrency, type BookingTicket } from './types';
 
 type TicketRowProps = {
@@ -64,7 +63,7 @@ const TicketRow = ({
 				</div>
 			</td>
 			<td>{ticket.ticket_description}</td>
-			<td>{formatPrice(ticket.ticket_price, currency)}</td>
+			<td>{formatCentsAsPrice(ticket.ticket_price, currency)}</td>
 			<td>{ticket.ticket_spaces}</td>
 		</tr>
 	);

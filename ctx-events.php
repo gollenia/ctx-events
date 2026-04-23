@@ -7,7 +7,7 @@ Plugin Name: Events
 Plugin URI: https://github.com/gollenia/ctx-events
 Description: Modern event and booking management for WordPress. Easily create events, manage attendees, track availability and handle payments
 Version: 1.0.0
-Requires at least: 6.8.0
+Requires at least: 6.9.0
 Requires PHP: 8.5
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -30,24 +30,3 @@ add_action('init', function () {
     do_action('qm/stop', 'ctx-events');
 	
 }, 10);
-
-/**
- * Register Gutenberg blocks for the plugin. This function must be at root level, otherwise
- * the blocks won't be registered properly.
- */
-function ctx_register_blocks(): void
-{
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(__DIR__ . '/build/editor/blocks')
-    );
-
-    foreach ($iterator as $file) {
-        if (!$file->isFile() || $file->getFilename() !== 'block.json') {
-            continue;
-        }
-
-        register_block_type($file->getPath());
-    }
-}
-
-add_action('init', 'ctx_register_blocks');

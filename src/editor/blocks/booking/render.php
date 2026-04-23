@@ -4,6 +4,7 @@ use Contexis\Events\Event\Infrastructure\BlockEventLoader;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Platform\Bootstrap;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $post_id = get_the_ID();
 
@@ -50,7 +51,7 @@ $block_attributes = get_block_wrapper_attributes([
 <button <?php echo $block_attributes; ?> type="button">
 <?php
 if ($button_icon !== '') {
-    echo BlockEventLoader::renderIcon($button_icon);
+    echo BlockIconRenderer::render($button_icon);
 }
 
 if (!$icon_only) {

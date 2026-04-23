@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
+use Contexis\Events\Shared\Infrastructure\Icons\BlockIconRenderer;
 
 $event = BlockEventLoader::load(get_the_ID());
 if (!$event || !$event->bookingSummary) {
@@ -22,24 +23,24 @@ $icon = $spaces === 0 ? 'spaces_full' : ($warningThreshold < $spaces ? 'done' : 
 
 <div class="event-details-item">
 	<div class="event-details-image">
-		<?= BlockEventLoader::renderIcon($icon) ?>
+		<?= BlockIconRenderer::render($icon) ?>
 	</div>
 	<div class="event-details-text">
-		<h4><?= esc_html($attributes['description'] ?? __('Free spaces', 'ctx-events')) ?></h4>
+		<h4 class="event-details-title"><?= esc_html($attributes['description'] ?? __('Free spaces', 'ctx-events')) ?></h4>
 		<div class="event-details-data">
 			<?php if (($attributes['showNumber'] ?? false) && $spaces > 0) : ?>
 				<?php if ($spaces <= $warningThreshold) : ?>
-					<div class="event-details-number"><?= esc_html(sprintf(_n('Only %s space left', 'Only %s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
+					<div class="event-details-status event-details-status--warning"><?= esc_html(sprintf(_n('Only %s space left', 'Only %s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
 				<?php else : ?>
-					<div class="event-details-number"><?= esc_html(sprintf(_n('%s space left', '%s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
+					<div class="event-details-status event-details-status--ok"><?= esc_html(sprintf(_n('%s space left', '%s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
 				<?php endif; ?>
 			<?php else : ?>
 				<?php if ($spaces === 0) : ?>
-					<div class="event-details-number"><?= esc_html(__('No spaces left', 'ctx-events')) ?></div>
+					<div class="event-details-status event-details-status--warning"><?= esc_html(__('No spaces left', 'ctx-events')) ?></div>
 				<?php elseif ($spaces <= $warningThreshold) : ?>
-					<div class="event-details-number"><?= esc_html(__('Only few spaces left', 'ctx-events')) ?></div>
+					<div class="event-details-status event-details-status--warning"><?= esc_html(__('Only few spaces left', 'ctx-events')) ?></div>
 				<?php else : ?>
-					<div class="event-details-number"><?= esc_html(__('Plenty of spaces left', 'ctx-events')) ?></div>
+					<div class="event-details-status event-details-status--ok"><?= esc_html(__('Plenty of spaces left', 'ctx-events')) ?></div>
 				<?php endif; ?>
 			<?php endif; ?>
 		</div>

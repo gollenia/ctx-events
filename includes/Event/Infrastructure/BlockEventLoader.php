@@ -12,7 +12,6 @@ use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Platform\Bootstrap;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
-use Contexis\Events\Shared\Infrastructure\Icons\IconRenderer;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 
 final class BlockEventLoader
@@ -76,10 +75,5 @@ final class BlockEventLoader
         $formatter = new \NumberFormatter(get_locale(), \NumberFormatter::CURRENCY);
 
         return $formatter->formatCurrency($price->toFloat(), $price->currency->toString());
-    }
-
-    public static function renderIcon(string $name): string
-    {
-        return Bootstrap::container()->get(IconRenderer::class)->render($name);
     }
 }
