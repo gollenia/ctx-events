@@ -1,13 +1,20 @@
 import PostTable from '@events/datatable/DataTable';
 import type { DataFilterField, DataViewConfig } from '@events/datatable/types';
 
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { TimeScope } from '../../types/types';
 
 import { actions } from './actions';
+import EventCalendarView from './calendar';
 import { eventStatusItems } from './eventStatusItems';
 import { fields } from './fields';
 import { useFetchEvents } from './useFetchEvents';
+import { useStoredView } from './useStoredView';
+
+const getActiveScope = (filters: Array<DataFilterField>): TimeScope => {
+	const dateFilter = filters.find((filter) => filter.field === 'date');
+	return (dateFilter?.value as TimeScope | undefined) ?? 'future';
+};
 
 const EventsList = () => {
 	const filterConfig: Array<DataFilterField> = [
@@ -23,7 +30,7 @@ const EventsList = () => {
 		},
 	];
 
-	const [view, setView] = useState<DataViewConfig>({
+	const defaultView: DataViewConfig = {
 		search: '',
 		page: 1,
 		perPage: 20,
@@ -40,7 +47,11 @@ const EventsList = () => {
 			'bookable',
 			'availability',
 		],
-	});
+	};
+	const { view, setView } = useStoredView(
+		'ctx-events:admin:events:view',
+		defaultView,
+	);
 
 	console.log('EventsList view', view);
 
@@ -71,7 +82,23 @@ const EventsList = () => {
 			title={__('Events', 'ctx-events')}
 			createLink="/wp-admin/post-new.php?post_type=ctx-event"
 			createLinkLabel={__('New Event', 'ctx-events')}
-		/>
+			views={[{ id: 'calender', label: __('Calendar', 'ctx-events') }]}
+		>
+			<PostTable.Header />
+			<PostTable.StatusSelect />
+			{view.type === 'calender' ? (
+				<EventCalendarView
+					filters={view.filters}
+					scope={getActiveScope(view.filters)}
+				/>
+			) : (
+				<>
+					<PostTable.Filter />
+					<PostTable.Table />
+				</>
+			)}
+			<PostTable.Pagination />
+		</PostTable>
 	);
 };
 
