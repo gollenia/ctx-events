@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Infrastructure;
 
-use Contexis\Events\Event\Application\Contracts\EventCalendarRepository;
 use Contexis\Events\Event\Application\DTOs\EventCalendarCriteria;
 use Contexis\Events\Event\Application\DTOs\EventCalendarEntry;
+use Contexis\Events\Event\Domain\EventCalendarRepository;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 
 final class WpEventCalendarRepository implements EventCalendarRepository

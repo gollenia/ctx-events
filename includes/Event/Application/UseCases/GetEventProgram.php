@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\UseCases;
 
-use Contexis\Events\Event\Application\Contracts\EventCalendarRepository;
 use Contexis\Events\Event\Application\DTOs\EventCalendarCriteria;
 use Contexis\Events\Event\Application\DTOs\EventProgramData;
+use Contexis\Events\Event\Domain\EventCalendarRepository;
 
 final class GetEventProgram
 {
