@@ -56,6 +56,23 @@ const getDefaultEventStart = () => {
 	return formatLocalDateTime(now);
 };
 
+const getInitialEventStart = () => {
+	const defaultStart = getDefaultEventStart();
+
+	if (typeof window === 'undefined') {
+		return defaultStart;
+	}
+
+	const params = new URLSearchParams(window.location.search);
+	const dateParam = params.get('date');
+
+	if (!dateParam || !/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+		return defaultStart;
+	}
+
+	return `${dateParam}T09:00`;
+};
+
 const DatetimeSelector = () => {
 	const postType = useSelect((select) => {
 		const editor = select('core/editor') as EditorSelection;
@@ -97,7 +114,7 @@ const DatetimeSelector = () => {
 			return;
 		}
 
-		const defaultStart = getDefaultEventStart();
+		const defaultStart = getInitialEventStart();
 
 		hasInitializedDefaultDate.current = true;
 		setMeta({
