@@ -10,7 +10,8 @@ final class Taxonomy
         public readonly string $slug,
         public readonly string $name,
         public readonly string $taxonomy,
-		public readonly ?string $description = null
+		public readonly ?string $description = null,
+		public readonly ?string $color = null,
     ) {
     }
 
@@ -24,7 +25,8 @@ final class Taxonomy
 			'slug' => $this->slug,
 			'name' => $this->name,
 			'taxonomy' => $this->taxonomy,
-			'description' => $this->description
+			'description' => $this->description,
+			'color' => $this->color,
 		];
 	}
 }

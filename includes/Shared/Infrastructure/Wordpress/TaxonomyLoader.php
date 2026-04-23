@@ -22,7 +22,8 @@ final class TaxonomyLoader
                 slug: $term->slug,
                 name: $term->name,
                 taxonomy: $taxonomy,
-				description: $term->description
+				description: $term->description,
+				color: sanitize_hex_color((string) get_term_meta((int) $term->term_id, 'color', true)) ?: null,
             ),
             $terms
         );

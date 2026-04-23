@@ -17,6 +17,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
     public const TAGS = 'ctx-event-tags';
+    private const CATEGORY_COLOR_META = 'color';
     private const PATTERN_DIR = '/includes/Platform/Wordpress/patterns';
 
 	public function __construct(
@@ -191,7 +192,98 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 
 	public function registerHooks(): void
 	{
-		$this->hooks->register();	
+		$this->hooks->register();
+		add_action(self::CATEGORIES . '_add_form_fields', [$this, 'renderCategoryColorAddField']);
+		add_action(self::CATEGORIES . '_edit_form_fields', [$this, 'renderCategoryColorEditField']);
+		add_action('created_' . self::CATEGORIES, [$this, 'saveCategoryColor']);
+		add_action('edited_' . self::CATEGORIES, [$this, 'saveCategoryColor']);
+		add_filter('manage_edit-' . self::CATEGORIES . '_columns', [$this, 'filterCategoryColumns']);
+		add_filter('manage_' . self::CATEGORIES . '_custom_column', [$this, 'renderCategoryColumn'], 10, 3);
+	}
+
+	/**
+	 * @param array<string, string> $columns
+	 * @return array<string, string>
+	 */
+	public function filterCategoryColumns(array $columns): array
+	{
+		$result = [];
+
+		foreach ($columns as $key => $label) {
+			$result[$key] = $label;
+
+			if ($key === 'name') {
+				$result['color'] = __('Color', 'ctx-events');
+			}
+		}
+
+		return $result;
+	}
+
+	public function renderCategoryColorAddField(): void
+	{
+		?>
+		<div class="form-field term-color-wrap">
+			<label for="ctx-events-category-color"><?php esc_html_e('Color', 'ctx-events'); ?></label>
+			<input
+				type="color"
+				id="ctx-events-category-color"
+				name="ctx_events_category_color"
+				value="#2271b1"
+			/>
+			<p><?php esc_html_e('Used for calendar highlighting.', 'ctx-events'); ?></p>
+		</div>
+		<?php
+	}
+
+	public function renderCategoryColorEditField(\WP_Term $term): void
+	{
+		$color = sanitize_hex_color((string) get_term_meta($term->term_id, self::CATEGORY_COLOR_META, true)) ?: '#2271b1';
+		?>
+		<tr class="form-field term-color-wrap">
+			<th scope="row">
+				<label for="ctx-events-category-color"><?php esc_html_e('Color', 'ctx-events'); ?></label>
+			</th>
+			<td>
+				<input
+					type="color"
+					id="ctx-events-category-color"
+					name="ctx_events_category_color"
+					value="<?php echo esc_attr($color); ?>"
+				/>
+				<p class="description"><?php esc_html_e('Used for calendar highlighting.', 'ctx-events'); ?></p>
+			</td>
+		</tr>
+		<?php
+	}
+
+	public function saveCategoryColor(int $termId): void
+	{
+		$rawColor = isset($_POST['ctx_events_category_color'])
+			? wp_unslash((string) $_POST['ctx_events_category_color'])
+			: '';
+		$color = sanitize_hex_color($rawColor);
+
+		if ($color === null) {
+			delete_term_meta($termId, self::CATEGORY_COLOR_META);
+			return;
+		}
+
+		update_term_meta($termId, self::CATEGORY_COLOR_META, $color);
+	}
+
+	public function renderCategoryColumn(string $content, string $columnName, int $termId): string
+	{
+		if ($columnName !== 'color') {
+			return $content;
+		}
+
+		$color = sanitize_hex_color((string) get_term_meta($termId, self::CATEGORY_COLOR_META, true)) ?: '#2271b1';
+
+		return sprintf(
+			'<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:999px;background:%1$s;border:1px solid rgba(0,0,0,.12);display:inline-block;"></span><code>%1$s</code></span>',
+			esc_attr($color),
+		);
 	}
 
     private function loadPatternFile(string $filename): string

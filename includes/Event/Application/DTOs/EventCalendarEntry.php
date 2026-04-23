@@ -16,6 +16,7 @@ final readonly class EventCalendarEntry
 		public \DateTimeImmutable $startDate,
 		public \DateTimeImmutable $endDate,
 		public array $categoryIds,
+		public ?string $color,
 		public ?string $locationName,
 		public ?string $personName,
 	) {
