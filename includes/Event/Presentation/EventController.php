@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Presentation;
 
 use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
+use Contexis\Events\Event\Application\UseCases\GetEventCalendar;
 use Contexis\Events\Event\Application\UseCases\PrepareBooking;
 use Contexis\Events\Event\Application\UseCases\GetEvent;
 use Contexis\Events\Event\Application\UseCases\CancelEvent;
 use Contexis\Events\Event\Application\UseCases\ListEvents;
 use Contexis\Events\Event\Presentation\Resources\EventResource;
+use Contexis\Events\Event\Presentation\Resources\EventCalendarEntryResource;
 use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
@@ -22,6 +24,7 @@ final class EventController implements RestController
     public function __construct(
         private GetEvent $getEvent,
         private ListEvents $listEvents,
+		private GetEventCalendar $getEventCalendar,
 		private CancelEvent $cancelEvent,
 		private PrepareBooking $prepareBooking,
     ) {
@@ -172,6 +175,35 @@ final class EventController implements RestController
             ],
         ]);
 
+		$calendarArgs = $this->route->getForCollection('/calendar');
+		register_rest_route($calendarArgs->namespace, $calendarArgs->route, args: [[
+			'methods' => 'GET',
+			'callback' => [$this, 'getCalendarEntries'],
+			'permission_callback' => '__return_true',
+			'args' => [
+				'start_date' => [
+					'type' => 'string',
+					'required' => true,
+				],
+				'end_date' => [
+					'type' => 'string',
+					'required' => true,
+				],
+				'categories' => [
+					'type' => 'array',
+					'items' => ['type' => 'integer'],
+				],
+				'location' => [
+					'type' => 'integer',
+					'default' => null,
+				],
+				'person' => [
+					'type' => 'integer',
+					'default' => null,
+				],
+			],
+		]]);
+
 		$args = $this->route->getForSingle('/prepare-booking');
 		register_rest_route($args->namespace, $args->route, args: [
 			[
@@ -286,5 +318,30 @@ final class EventController implements RestController
 		$parts = explode(',', $includeParam);
 
 		return array_values(array_filter($parts, static fn (string $value): bool => $value !== ''));
+	}
+
+	public function getCalendarEntries(\WP_REST_Request $request): \WP_REST_Response
+	{
+		try {
+			$startDate = new \DateTimeImmutable((string) $request->get_param('start_date'), wp_timezone());
+			$endDate = new \DateTimeImmutable((string) $request->get_param('end_date'), wp_timezone());
+		} catch (\Exception) {
+			return new \WP_REST_Response(['message' => 'Invalid date range'], 400);
+		}
+
+		$entries = $this->getEventCalendar->execute(
+			startDate: $startDate,
+			endDate: $endDate,
+			categories: array_map('intval', $request->get_param('categories') ?? []),
+			locationId: $request->has_param('location') ? (int) $request->get_param('location') : null,
+			personId: $request->has_param('person') ? (int) $request->get_param('person') : null,
+		);
+
+		$result = array_map(
+			static fn ($entry) => EventCalendarEntryResource::fromDto($entry)->toArray(),
+			$entries,
+		);
+
+		return new \WP_REST_Response($result, 200);
 	}
 }
