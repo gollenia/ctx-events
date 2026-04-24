@@ -11,6 +11,7 @@ use Contexis\Events\Event\Domain\Enums\TicketScope;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Form\Domain\FormRepository;
 use Contexis\Events\Location\Application\LocationDto;
 use Contexis\Events\Location\Domain\LocationRepository;
@@ -50,8 +51,8 @@ final class GetEvent
 		$location = $includes->location ? $this->locationRepository->find($event->locationId) : null;
 		$person = $includes->person ? $this->personRepository->find($event->personId) : null;
 		$image = $includes->image ? $this->imageRepository->find($event->imageId) : null;
-		$categories = $includes->categories ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES) : null;
-		$tags = $includes->tags ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::TAGS) : null;
+		$categories = $includes->categories ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::CATEGORIES) : null;
+		$tags = $includes->tags ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::TAGS) : null;
 		// Missing: Available Coupons -really?
 		// Missing: Booking Info
 		

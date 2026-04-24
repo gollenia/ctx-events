@@ -14,6 +14,7 @@ use Contexis\Events\Event\Domain\Enums\TicketScope;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventCollection;
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
@@ -54,11 +55,11 @@ final class EventResponseAssembler
 			$bookingSummary = null;
 
 			if ($includes->categories) {
-				$categories = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::CATEGORIES);
+				$categories = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::CATEGORIES);
 			}
 
 			if ($includes->tags) {
-				$tags = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventPost::TAGS);
+				$tags = $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::TAGS);
 			}
 
 			if ($includes->bookings) {

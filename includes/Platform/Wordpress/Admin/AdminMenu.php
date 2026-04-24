@@ -7,6 +7,7 @@ namespace Contexis\Events\Platform\Wordpress\Admin;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 
 final class AdminMenu implements AdminServiceInterface
 {
@@ -26,8 +27,8 @@ final class AdminMenu implements AdminServiceInterface
             $current_screen &&
             (
                 $current_screen->post_type === EventPost::POST_TYPE ||
-                $current_screen->taxonomy === EventPost::CATEGORIES ||
-                $current_screen->taxonomy === EventPost::TAGS
+                $current_screen->taxonomy === EventTaxonomy::CATEGORIES ||
+                $current_screen->taxonomy === EventTaxonomy::TAGS
             )
         ) {
             return AdminMenu::MENU_SLUG;
@@ -103,7 +104,7 @@ final class AdminMenu implements AdminServiceInterface
 			__('Categories', 'ctx-events'),
 			__('Categories', 'ctx-events'),
 			'manage_categories',
-			'edit-tags.php?taxonomy=' . EventPost::CATEGORIES . '&post_type=' . EventPost::POST_TYPE
+			'edit-tags.php?taxonomy=' . EventTaxonomy::CATEGORIES . '&post_type=' . EventPost::POST_TYPE
 		);
 
 		add_submenu_page(
@@ -111,7 +112,7 @@ final class AdminMenu implements AdminServiceInterface
 			__('Tags', 'ctx-events'),
 			__('Tags', 'ctx-events'),
 			'manage_categories',
-			'edit-tags.php?taxonomy=' . EventPost::TAGS . '&post_type=' . EventPost::POST_TYPE
+			'edit-tags.php?taxonomy=' . EventTaxonomy::TAGS . '&post_type=' . EventPost::POST_TYPE
 		);
 
 		add_submenu_page(
