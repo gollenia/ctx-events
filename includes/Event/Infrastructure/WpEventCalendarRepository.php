@@ -13,77 +13,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 {
 	public function search(EventCalendarCriteria $criteria): array
 	{
-		$args = [
-			'post_type' => EventPost::POST_TYPE,
-			'post_status' => ['publish', 'future'],
-			'posts_per_page' => -1,
-			'orderby' => 'meta_value',
-			'meta_key' => EventMeta::EVENT_START,
-			'order' => 'ASC',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key' => EventMeta::EVENT_START,
-					'value' => $criteria->endDate->format('Y-m-d 23:59:59'),
-					'compare' => '<=',
-					'type' => 'DATETIME',
-				],
-				[
-					'relation' => 'OR',
-					[
-						'key' => EventMeta::EVENT_END,
-						'value' => $criteria->startDate->format('Y-m-d 00:00:00'),
-						'compare' => '>=',
-						'type' => 'DATETIME',
-					],
-					[
-						'relation' => 'AND',
-						[
-							'key' => EventMeta::EVENT_END,
-							'value' => '',
-							'compare' => '=',
-						],
-						[
-							'key' => EventMeta::EVENT_START,
-							'value' => $criteria->startDate->format('Y-m-d 00:00:00'),
-							'compare' => '>=',
-							'type' => 'DATETIME',
-						],
-					],
-					[
-						'relation' => 'AND',
-						[
-							'key' => EventMeta::EVENT_END,
-							'compare' => 'NOT EXISTS',
-						],
-						[
-							'key' => EventMeta::EVENT_START,
-							'value' => $criteria->startDate->format('Y-m-d 00:00:00'),
-							'compare' => '>=',
-							'type' => 'DATETIME',
-						],
-					],
-				],
-			],
-		];
-
-		if ($criteria->categories !== []) {
-			$args['tax_query'] = [[
-				'taxonomy' => EventPost::CATEGORIES,
-				'field' => 'term_id',
-				'terms' => $criteria->categories,
-			]];
-		}
-
-		if ($criteria->locationId !== null) {
-			$args['meta_query'][] = [
-				'key' => EventMeta::LOCATION_ID,
-				'value' => (string) $criteria->locationId,
-				'compare' => '=',
-			];
-		}
-
-		$query = new \WP_Query($args);
+		$query = WpEventQueryBuilder::fromCalendarCriteria($criteria)->toWpQuery();
 
 		$posts = array_filter(
 			$query->posts,
@@ -100,7 +30,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 					? array_map('intval', $personMeta)
 					: ($personMeta ? [(int) $personMeta] : []);
 				$personNames = array_filter(array_map('get_the_title', $personIds));
-				$categoryIds = wp_get_post_terms($post->ID, EventPost::CATEGORIES, ['fields' => 'ids']);
+				$categoryIds = wp_get_post_terms($post->ID, EventTaxonomy::CATEGORIES, ['fields' => 'ids']);
 				$primaryCategoryId = is_array($categoryIds) && $categoryIds !== []
 					? (int) reset($categoryIds)
 					: null;

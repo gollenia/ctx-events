@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Event\Application\Contracts\EventOptions;
+use Contexis\Events\Event\Application\DTOs\EventCalendarCriteria;
 use Contexis\Events\Event\Application\DTOs\EventCriteria;
 use Contexis\Events\Event\Application\EventPageCriteria;
 use Contexis\Events\Event\Domain\Enums\EventOrderBy;
@@ -17,14 +18,35 @@ use Contexis\Events\Shared\Infrastructure\ValueObjects\Order;
 
 final class WpEventQueryBuilder extends WpQueryBuilder
 {
+    public static function fromCalendarCriteria(EventCalendarCriteria $criteria): self
+    {
+        $builder = new self()
+            ->withPostType(EventPost::POST_TYPE)
+            ->withStatus(StatusList::public())
+            ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->categories)
+            ->withDateOverlap($criteria->startDate, $criteria->endDate)
+            ->orderBy(OrderBy::fromMeta(EventMeta::EVENT_START, Order::ASC))
+            ->addArg('posts_per_page', -1);
+
+        if ($criteria->locationId !== null) {
+            $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->locationId);
+        }
+
+        if ($criteria->personId !== null) {
+            $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->personId);
+        }
+
+        return $builder;
+    }
+
     public static function fromCriteria(EventCriteria $criteria): self
     {
         $builder = new self()
             ->withPostType(EventPost::POST_TYPE)
             ->withPagination($criteria->page, $criteria->perPage)
             ->withStatus($criteria->status ?? StatusList::public())
-            ->withTaxonomy(EventPost::CATEGORIES, $criteria->categories)
-            ->withTaxonomy(EventPost::TAGS, $criteria->tags);
+            ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->categories)
+            ->withTaxonomy(EventTaxonomy::TAGS, $criteria->tags);
 
         if ($criteria->location !== null) {
             $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->location);
@@ -57,6 +79,51 @@ final class WpEventQueryBuilder extends WpQueryBuilder
         $builder = $builder->orderBy($orderBy);
 
         return $builder;
+    }
+
+    public function withDateOverlap(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate): static
+    {
+        return $this->withMetaQuery([
+            'key' => EventMeta::EVENT_START,
+            'value' => $endDate->format('Y-m-d 23:59:59'),
+            'compare' => '<=',
+            'type' => 'DATETIME',
+        ])->withMetaQuery([
+            'relation' => 'OR',
+            [
+                'key' => EventMeta::EVENT_END,
+                'value' => $startDate->format('Y-m-d 00:00:00'),
+                'compare' => '>=',
+                'type' => 'DATETIME',
+            ],
+            [
+                'relation' => 'AND',
+                [
+                    'key' => EventMeta::EVENT_END,
+                    'value' => '',
+                    'compare' => '=',
+                ],
+                [
+                    'key' => EventMeta::EVENT_START,
+                    'value' => $startDate->format('Y-m-d 00:00:00'),
+                    'compare' => '>=',
+                    'type' => 'DATETIME',
+                ],
+            ],
+            [
+                'relation' => 'AND',
+                [
+                    'key' => EventMeta::EVENT_END,
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key' => EventMeta::EVENT_START,
+                    'value' => $startDate->format('Y-m-d 00:00:00'),
+                    'compare' => '>=',
+                    'type' => 'DATETIME',
+                ],
+            ],
+        ]);
     }
 
     private static function mapOrderBy(OrderBy $orderBy): OrderBy
