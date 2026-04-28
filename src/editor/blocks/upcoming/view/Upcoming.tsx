@@ -185,15 +185,15 @@ function Upcoming({ attributes }: Props) {
 		return <div>{altText}</div>;
 	}
 
-		return (
-			<div
-				className={`ctx-upcoming ${showFilters ? 'ctx-upcoming--has-filters' : ''} ctx-upcoming--filters-${filterPosition}`}
-			>
-				{showFilters && (
-					<aside className="ctx-upcoming-filters">
-						<div className="ctx-upcoming-filters__header">
-							{showSearch && (
-								<div className="ctx-upcoming-filters__search">
+	return (
+		<div
+			className={`ctx-upcoming ${showFilters ? 'ctx-upcoming--has-filters' : ''} ctx-upcoming--filters-${filterPosition}`}
+		>
+			{showFilters && (
+				<aside className="ctx-upcoming-filters">
+					<div className="ctx-upcoming-filters__header">
+						{showSearch && (
+							<div className="ctx-upcoming-filters__search">
 								<InputField
 									type="text"
 									name="search"
@@ -209,8 +209,8 @@ function Upcoming({ attributes }: Props) {
 							</div>
 						)}
 
-							{userStylePicker && (
-								<div className="ctx-upcoming-view-switcher">
+						{userStylePicker && (
+							<div className="ctx-upcoming-view-switcher">
 								<button
 									type="button"
 									onClick={() => setCustomView('cards')}
@@ -241,7 +241,7 @@ function Upcoming({ attributes }: Props) {
 							</div>
 						)}
 
-							<div className="ctx-upcoming-filter-toggle">
+						<div className="ctx-upcoming-filter-toggle">
 							<button
 								type="button"
 								className="button"
@@ -252,19 +252,19 @@ function Upcoming({ attributes }: Props) {
 						</div>
 					</div>
 
-						<div
-							className={
-								filterMobileVisible
-									? 'ctx-upcoming-filters__advanced'
-									: 'ctx-upcoming-filters__advanced mobile-hidden'
-							}
-						>
-							{showCategoryFilter && Object.keys(categories).length > 0 && (
-								<div>
-									<h5 className="ctx-upcoming-filters__title">
-										{__('Select category', 'ctx-events')}
-									</h5>
-									<div className="ctx-upcoming-filter-pills">
+					<div
+						className={
+							filterMobileVisible
+								? 'ctx-upcoming-filters__advanced'
+								: 'ctx-upcoming-filters__advanced mobile-hidden'
+						}
+					>
+						{showCategoryFilter && Object.keys(categories).length > 0 && (
+							<div>
+								<h5 className="ctx-upcoming-filters__title">
+									{__('Select category', 'ctx-events')}
+								</h5>
+								<div className="ctx-upcoming-filter-pills">
 									<button
 										type="button"
 										className={filter.category === 0 ? 'active' : ''}
@@ -292,9 +292,9 @@ function Upcoming({ attributes }: Props) {
 							</div>
 						)}
 
-							{showTagFilter && Object.keys(tags).length > 0 && (
-								<div>
-									<h5 className="ctx-upcoming-filters__title">
+						{showTagFilter && Object.keys(tags).length > 0 && (
+							<div>
+								<h5 className="ctx-upcoming-filters__title">
 									{__('Select tags', 'ctx-events')}
 								</h5>
 								{Object.values(tags).map((tag) => (
