@@ -16,7 +16,9 @@ type CouponMeta = {
 	_expires_at?: string;
 	_type?: 'percent' | 'fixed';
 	_value?: number | string;
+	_valid_from?: string;
 	_is_global?: boolean;
+	_description?: string;
 };
 
 type PostContent = string | { raw?: string };
@@ -44,11 +46,12 @@ export default function Edit(props: EditProps) {
 		'content',
 	);
 
+	console.log('meta', meta);
+
 	const blockProps = useBlockProps({
 		className: 'coupon-edit',
 	});
 
-	const description = typeof content === 'string' ? content : (content?.raw ?? '');
 	const discountType = meta?._type ?? 'percent';
 
 	return (
@@ -77,10 +80,7 @@ export default function Edit(props: EditProps) {
 							onClick={() => {
 								setMeta({
 									...meta,
-									_code: Math.random()
-										.toString(36)
-										.slice(2, 12)
-										.toUpperCase(),
+									_code: Math.random().toString(36).slice(2, 12).toUpperCase(),
 								});
 							}}
 							className="generate"
@@ -92,13 +92,12 @@ export default function Edit(props: EditProps) {
 				<TextControl
 					label={__('Description', 'ctx-events')}
 					__next40pxDefaultSize
-					value={description}
+					value={meta?._description ?? ''}
 					onChange={(value) => {
-						setContent(
-							typeof content === 'string'
-								? value
-								: { ...(content ?? {}), raw: value },
-						);
+						setMeta({
+							...meta,
+							_description: value,
+						});
 					}}
 				/>
 				<h3>{__('Coupon Limits', 'ctx-events')}</h3>
