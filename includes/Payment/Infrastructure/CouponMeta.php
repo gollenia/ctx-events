@@ -16,6 +16,7 @@ final class CouponMeta extends MetaData
     public const USED        = '_used';
     public const STATUS      = '_status';
     public const GLOBAL      = '_is_global';
+	public const DESCRIPTION = '_description';
 
     protected static array $metadata = [
         self::CODE   => ['type' => 'string'],
@@ -27,5 +28,6 @@ final class CouponMeta extends MetaData
         self::USED   => ['type' => 'number'],
         self::STATUS => ['type' => 'string'],
         self::GLOBAL => ['type' => 'boolean', 'default' => false],
+		self::DESCRIPTION => ['type' => 'string'],
     ];
 }
