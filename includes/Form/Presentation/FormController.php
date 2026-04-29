@@ -73,6 +73,9 @@ final class FormController implements RestController
 		register_rest_route('events/v3', '/forms/(?P<id>\d+)/status', [
 			'methods' => 'POST',
 			'callback' => [$this, 'setStatus'],
+			'permission_callback' => function() {
+			   return current_user_can('edit_post');
+			},
 			'args' => [
 				'status' => [
 					'type' => 'string',
