@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Person\Infrastructure;
 
-use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Person\Domain\PersonCriteria;
 use Contexis\Events\Person\Infrastructure\PersonPost;
 use Contexis\Events\Shared\Infrastructure\Abstracts\WpQueryBuilder;
