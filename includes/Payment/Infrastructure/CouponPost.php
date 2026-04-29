@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Payment\Infrastructure;
 
+use Contexis\Events\Event\Application\Contracts\EventOptions;
 use Contexis\Events\Event\Infrastructure\EventPost;
 use Contexis\Events\Platform\Wordpress\Admin\AdminMenu;
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasHooks;
 use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
-class CouponPost extends PostType implements HasMetaData
+class CouponPost extends PostType implements HasMetaData, HasHooks
 {
     public const POST_TYPE = "ctx-event-coupon";
 
@@ -61,5 +63,54 @@ class CouponPost extends PostType implements HasMetaData
     public function registerMeta(): void
     {
         CouponMeta::registerAll(self::POST_TYPE);
+    }
+
+	public function registerHooks(): void
+    {
+        add_filter('manage_' . self::POST_TYPE . '_posts_columns', [$this, 'filterColumns']);
+        add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderColumn'], 10, 2);
+    }
+
+	/**
+     * @param array<string, string> $columns
+     * @return array<string, string>
+     */
+    public function filterColumns(array $columns): array
+    {
+        return [
+            'cb' => $columns['cb'] ?? '<input type="checkbox" />',
+            'title' => $columns['title'] ?? __('Title', 'ctx-events'),
+            'code' => __('Coupon Code', 'ctx-events'),
+			'discount' => __('Discount', 'ctx-events'),
+            'expires_at' => __('Expires At', 'ctx-events'),
+			'usage' => __('Usage', 'ctx-events'),
+			
+        ];
+    }
+
+    public function renderColumn(string $column, int $postId): void
+    {
+        switch ($column) {
+
+            case 'code':
+                echo esc_html((string) get_post_meta($postId, CouponMeta::CODE, true) ?: '—');
+                break;
+
+            case 'discount':
+                echo esc_html((string) get_post_meta($postId, CouponMeta::VALUE, true) ?: '—') . ' ' . esc_html((string) get_post_meta($postId, CouponMeta::TYPE, true) === 'fixed' ? 'EUR' : '%');
+				break;
+			
+			case 'expires_at':
+				$expiresAt = get_post_meta($postId, CouponMeta::EXPIRES_AT, true);
+				echo esc_html($expiresAt ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($expiresAt)) : '—');
+                break;
+
+			case 'usage':
+				$usageCount = get_post_meta($postId, CouponMeta::USED, true);
+				$usageLimit = get_post_meta($postId, CouponMeta::LIMIT, true);
+				echo esc_html(($usageCount !== '' ? $usageCount : '0') . ' / ' . ($usageLimit !== '' ? $usageLimit : '∞'));
+				break;
+        }
+
     }
 }
