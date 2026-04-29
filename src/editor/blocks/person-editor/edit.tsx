@@ -1,5 +1,6 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import {
+	Button,
 	Flex,
 	FlexItem,
 	__experimentalItem as Item,
@@ -34,10 +35,11 @@ const edit = ({ context }: EditProps) => {
 		return null;
 	}
 
-	const [meta, setMeta] = useEntityProp('postType', context.postType, 'meta') as [
-		PersonMeta,
-		(value: PersonMeta) => void,
-	];
+	const [meta, setMeta] = useEntityProp(
+		'postType',
+		context.postType,
+		'meta',
+	) as [PersonMeta, (value: PersonMeta) => void];
 
 	const socialLinks = Array.isArray(meta._person_same_as)
 		? meta._person_same_as
@@ -49,60 +51,8 @@ const edit = ({ context }: EditProps) => {
 
 	return (
 		<div {...blockProps}>
-			<div className="person-edit__admin">
-				<Flex>
-					<FlexItem isBlock>
-						<TextControl
-							label={__('Organization', 'ctx-events')}
-							value={meta._person_organization ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_organization: value,
-								});
-							}}
-						/>
-					</FlexItem>
-					<FlexItem isBlock>
-						<TextControl
-							label={__('Prefix', 'ctx-events')}
-							value={meta._person_prefix ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_prefix: value,
-								});
-							}}
-						/>
-					</FlexItem>
-					<FlexItem isBlock>
-						<TextControl
-							label={__('Suffix', 'ctx-events')}
-							value={meta._person_suffix ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_suffix: value,
-								});
-							}}
-						/>
-					</FlexItem>
-				</Flex>
-				<Flex>
-					<FlexItem isBlock>
-						<TextControl
-							label={__('Position', 'ctx-events')}
-							value={meta._person_position ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_position: value,
-								});
-							}}
-						/>
-					</FlexItem>
-				</Flex>
-				<Flex>
+			<Flex direction="column" gap={4}>
+				<Flex gap={4}>
 					<FlexItem isBlock>
 						<SelectControl
 							label={__('Gender', 'ctx-events')}
@@ -118,8 +68,65 @@ const edit = ({ context }: EditProps) => {
 									_person_gender: value,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Prefix', 'ctx-events')}
+							value={meta._person_prefix ?? ''}
+							onChange={(value) => {
+								setMeta({
+									...meta,
+									_person_prefix: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Suffix', 'ctx-events')}
+							value={meta._person_suffix ?? ''}
+							onChange={(value) => {
+								setMeta({
+									...meta,
+									_person_suffix: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+				</Flex>
+				<Flex gap={4}>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Organization', 'ctx-events')}
+							value={meta._person_organization ?? ''}
+							onChange={(value) => {
+								setMeta({
+									...meta,
+									_person_organization: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Position', 'ctx-events')}
+							value={meta._person_position ?? ''}
+							onChange={(value) => {
+								setMeta({
+									...meta,
+									_person_position: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+				</Flex>
+				<Flex gap={4}>
 					<FlexItem isBlock>
 						<TextControl
 							label={__('First Name', 'ctx-events')}
@@ -130,6 +137,7 @@ const edit = ({ context }: EditProps) => {
 									_person_first_name: value,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 					<FlexItem isBlock>
@@ -142,10 +150,11 @@ const edit = ({ context }: EditProps) => {
 									_person_last_name: value,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 				</Flex>
-				<Flex>
+				<Flex gap={4}>
 					<FlexItem isBlock>
 						<TextControl
 							label={__('E-Mail', 'ctx-events')}
@@ -156,6 +165,7 @@ const edit = ({ context }: EditProps) => {
 									_person_email: value,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 					<FlexItem isBlock>
@@ -168,6 +178,7 @@ const edit = ({ context }: EditProps) => {
 									_person_phone: value,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 				</Flex>
@@ -185,12 +196,12 @@ const edit = ({ context }: EditProps) => {
 										_person_same_as: newSameAs,
 									});
 								}}
+								__next40pxDefaultSize
 							/>
 						</Item>
 					))}
 				</ItemGroup>
-				<button
-					type="button"
+				<Button
 					className="button button-secondary"
 					onClick={() => {
 						setMeta({
@@ -198,10 +209,11 @@ const edit = ({ context }: EditProps) => {
 							_person_same_as: [...socialLinks, ''],
 						});
 					}}
+					variant="secondary"
 				>
 					{__('Add Social Link', 'ctx-events')}
-				</button>
-			</div>
+				</Button>
+			</Flex>
 		</div>
 	);
 };

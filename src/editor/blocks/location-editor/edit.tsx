@@ -4,7 +4,6 @@ import {
 	ComboboxControl,
 	Flex,
 	FlexItem,
-	SelectControl,
 	TextControl,
 } from '@wordpress/components';
 import type { ComboboxControlOption } from '@wordpress/components/build-types/combobox-control/types';
@@ -76,6 +75,7 @@ const edit = (props: EditProps) => {
 							_location_address: value ?? undefined,
 						});
 					}}
+					__next40pxDefaultSize
 				/>
 				<Flex>
 					<FlexItem isBlock>
@@ -88,6 +88,7 @@ const edit = (props: EditProps) => {
 									_location_postcode: value ?? undefined,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 					<FlexItem isBlock>
@@ -100,6 +101,7 @@ const edit = (props: EditProps) => {
 									_location_town: value ?? undefined,
 								});
 							}}
+							__next40pxDefaultSize
 						/>
 					</FlexItem>
 				</Flex>
@@ -114,6 +116,7 @@ const edit = (props: EditProps) => {
 							_location_country: value ?? undefined,
 						});
 					}}
+					__next40pxDefaultSize
 				/>
 
 				<TextControl
@@ -125,6 +128,7 @@ const edit = (props: EditProps) => {
 							_location_state: value ?? undefined,
 						});
 					}}
+					__next40pxDefaultSize
 				/>
 
 				<TextControl
@@ -136,6 +140,7 @@ const edit = (props: EditProps) => {
 							_location_url: value ?? undefined,
 						});
 					}}
+					__next40pxDefaultSize
 				/>
 			</div>
 		</div>
