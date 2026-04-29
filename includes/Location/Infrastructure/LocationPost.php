@@ -84,29 +84,17 @@ class LocationPost extends PostType implements HasMetaData, HasHooks
 
         return [
             'cb' => $columns['cb'] ?? '<input type="checkbox" />',
-            'photo' => __('Photo', 'ctx-events'),
             'title' => $columns['title'] ?? __('Title', 'ctx-events'),
             'address' => __('Address', 'ctx-events'),
+			'postcode' => __('Postcode', 'ctx-events'),
             'city' => __('City', 'ctx-events'),
             'country' => __('Country', 'ctx-events'),
-            'date' => $date,
         ];
     }
 
     public function renderColumn(string $column, int $postId): void
     {
         switch ($column) {
-            case 'photo':
-                $thumbnail = get_the_post_thumbnail(
-                    $postId,
-                    [48, 48],
-                    [
-                        'style' => 'width:48px;height:48px;object-fit:cover;border-radius:4px;',
-                    ]
-                );
-
-                echo $thumbnail ?: '&#8212;';
-                break;
 
             case 'address':
                 echo esc_html((string) get_post_meta($postId, LocationMeta::ADDRESS, true) ?: '—');
@@ -115,6 +103,10 @@ class LocationPost extends PostType implements HasMetaData, HasHooks
             case 'city':
                 echo esc_html((string) get_post_meta($postId, LocationMeta::CITY, true) ?: '—');
                 break;
+
+			case 'postcode':
+				echo esc_html((string) get_post_meta($postId, LocationMeta::POSTCODE, true) ?: '—');
+				break;
 
             case 'country':
                 echo esc_html((string) get_post_meta($postId, LocationMeta::COUNTRY, true) ?: '—');
