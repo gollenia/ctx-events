@@ -21,7 +21,7 @@ final class LocationController implements RestController
 
     public function register(): void
     {
-        register_rest_route('/events/v3', '/location/(?P<id>\d+)', array(
+        register_rest_route('events/v3', '/location/(?P<id>\d+)', array(
             'methods'   => \WP_REST_Server::READABLE,
             'callback'  => [$this, 'getItem'],
             'permission_callback' => '__return_true',
