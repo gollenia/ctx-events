@@ -23,6 +23,7 @@ class CouponMapper implements PostMapper
 		$expiresAt = $post->getDateTime(CouponMeta::EXPIRES_AT);
 		$usageLimit = $post->getInt(CouponMeta::LIMIT);
 		$usageCount = $post->getInt(CouponMeta::USED);
+		$description = $post->getString(CouponMeta::DESCRIPTION, '');
 
 		return new Coupon(
 			id: new CouponId($post->id),
@@ -34,7 +35,7 @@ class CouponMapper implements PostMapper
 			expiresAt: $expiresAt,
 			usageLimit: $usageLimit,
 			usageCount: $usageCount,
-			description: $post->post_content,
+			description: $description,
 			status: Status::from($post->post_status),
 			isGlobal: $post->getBool(CouponMeta::GLOBAL) ?? false,
 		);
