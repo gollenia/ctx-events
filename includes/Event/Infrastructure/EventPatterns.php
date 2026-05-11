@@ -19,7 +19,7 @@ final class EventPatterns
                 'description' => __('Two-column featured event layout with the image on the left and event details on the right.', 'ctx-events'),
                 'categories' => ['ctx-events'],
                 'viewportWidth' => 1440,
-                'content' => self::loadPatternFile('featured-event-split.html'),
+                'content' => self::loadPatternFile('featured-event-split.php'),
             ]
         );
 
@@ -30,20 +30,10 @@ final class EventPatterns
                 'description' => __('Stacked featured event layout with image first and the event content underneath.', 'ctx-events'),
                 'categories' => ['ctx-events'],
                 'viewportWidth' => 960,
-                'content' => self::loadPatternFile('featured-event-stacked.html'),
+                'content' => self::loadPatternFile('featured-event-stacked.php'),
             ]
         );
 
-        register_block_pattern(
-            'ctx-events/event-details',
-            [
-                'title' => __('Event Details', 'ctx-events'),
-                'description' => __('Default event details block with the standard set of event metadata items.', 'ctx-events'),
-                'categories' => ['ctx-events'],
-                'viewportWidth' => 960,
-                'content' => self::loadPatternFile('event-details.html'),
-            ]
-        );
 	}
 
 	private static function loadPatternFile(string $filename): string
