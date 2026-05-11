@@ -1,3 +1,4 @@
+import { Flex, FlexItem } from '@contexis/wp-react-form';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { BookingAccordion } from './BookingAccordion';
@@ -58,7 +59,9 @@ export default function Booking() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [bookingState, setBookingState] = useState<BookingState>(initialState);
 	const [successRef, setSuccessRef] = useState<string | null>(null);
-	const [successPayment, setSuccessPayment] = useState<BookingPayment | null>(null);
+	const [successPayment, setSuccessPayment] = useState<BookingPayment | null>(
+		null,
+	);
 	const [successCustomerEmailStatus, setSuccessCustomerEmailStatus] = useState<
 		'sent' | 'failed' | 'skipped' | 'unknown'
 	>('unknown');
@@ -188,11 +191,18 @@ export default function Booking() {
 			aria-label={__('Book event', 'ctx-events')}
 			data-testid="booking-modal"
 		>
-			<div className="booking-modal__backdrop" onClick={handleClose} />
+			<button
+				type="button"
+				className="booking-modal__backdrop"
+				onClick={handleClose}
+				aria-label={__('Close booking dialog', 'ctx-events')}
+			/>
 			<div className="booking-modal__dialog">
-				<div className="booking-modal__header">
+				<Flex className="booking-modal__header" align="center" gap="1rem">
 					{dataState.status === 'loaded' && (
-						<h2 className="booking-modal__title">{dataState.data.eventName}</h2>
+						<FlexItem as="h2" className="booking-modal__title" flex="1">
+							{dataState.data.eventName}
+						</FlexItem>
 					)}
 					<button
 						type="button"
@@ -200,9 +210,24 @@ export default function Booking() {
 						onClick={handleClose}
 						aria-label={__('Close', 'ctx-events')}
 					>
-						×
+						<svg
+							aria-hidden="true"
+							focusable="false"
+							xmlns="http://www.w3.org/2000/svg"
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
 					</button>
-				</div>
+				</Flex>
 
 				<div className="booking-modal__body">
 					{dataState.status === 'idle' || dataState.status === 'loading' ? (

@@ -1,6 +1,6 @@
+import { Button, Flex } from '@contexis/wp-react-form';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@contexis/wp-react-form';
 import EventIcon from '../../../shared/icons/EventIcon';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
 import { SectionFooter } from '../components/SectionFooter';
@@ -76,7 +76,7 @@ export function AttendeeSection({
 						}
 					: e,
 			),
-			);
+		);
 	}
 
 	function handleRemove(index: number) {
@@ -103,8 +103,8 @@ export function AttendeeSection({
 		onNext(payloads);
 	}
 
-	const canContinue = entries.every(
-		(entry) => isBookingFormComplete(attendeeForm, entry.formData),
+	const canContinue = entries.every((entry) =>
+		isBookingFormComplete(attendeeForm, entry.formData),
 	);
 
 	return (
@@ -112,30 +112,35 @@ export function AttendeeSection({
 			className="booking-section booking-section--attendees"
 			data-testid="booking-section-attendees"
 		>
-				{entries.map((entry) => (
-					<div
-						key={entry.index}
-						className="booking-attendee"
-						data-testid={`booking-attendee-${entry.index}`}
+			{entries.map((entry) => (
+				<div
+					key={entry.index}
+					className="booking-attendee"
+					data-testid={`booking-attendee-${entry.index}`}
+				>
+					<Flex
+						className="booking-attendee__header"
+						align="center"
+						justify="space-between"
+						gap="1rem"
 					>
-						<div className="booking-attendee__header">
-							<h3 className="booking-attendee__title">
-								{entry.ticketName} #{entry.index + 1}
-							</h3>
-							<button
-								type="button"
-								className="booking-attendee__remove"
-								onClick={() => handleRemove(entry.index)}
-								data-testid={`booking-attendee-remove-${entry.index}`}
-								aria-label={__('Remove attendee', 'ctx-events')}
-								title={__('Remove attendee', 'ctx-events')}
-							>
-								<EventIcon name="delete" />
-							</button>
-						</div>
-						<FormFieldRenderer
-							fields={attendeeForm.fields}
-							formData={entry.formData}
+						<h3 className="booking-attendee__title">
+							{entry.ticketName} #{entry.index + 1}
+						</h3>
+						<button
+							type="button"
+							className="booking-attendee__remove"
+							onClick={() => handleRemove(entry.index)}
+							data-testid={`booking-attendee-remove-${entry.index}`}
+							aria-label={__('Remove attendee', 'ctx-events')}
+							title={__('Remove attendee', 'ctx-events')}
+						>
+							<EventIcon name="delete" />
+						</button>
+					</Flex>
+					<FormFieldRenderer
+						fields={attendeeForm.fields}
+						formData={entry.formData}
 						errors={entry.errors}
 						onChange={(name, value) => handleChange(entry.index, name, value)}
 					/>

@@ -1,7 +1,7 @@
-import { Accordion } from '@base-ui/react/accordion';
+import { Accordion, AccordionSection } from '@contexis/wp-react-form';
 import { __ } from '@wordpress/i18n';
-import { AccordionSection } from './AccordionSection';
 import { BookingSummarySlot } from './components/BookingSummarySlot';
+import { SectionHeading } from './components/SectionHeading';
 import { AttendeeSection } from './sections/AttendeeSection';
 import { BookingFormSection } from './sections/BookingFormSection';
 import { PaymentSection } from './sections/PaymentSection';
@@ -67,7 +67,10 @@ function isSectionDisabled(
 	return !completedSections.has(prev);
 }
 
-function getPaymentSectionTitle(data: BookingData, state: BookingState): string {
+function getPaymentSectionTitle(
+	data: BookingData,
+	state: BookingState,
+): string {
 	const hasPaidTickets = data.tickets.some(
 		(ticket) =>
 			ticket.price.amountCents > 0 &&
@@ -126,11 +129,12 @@ export function BookingAccordion({
 		'booking',
 	);
 	const paymentSectionTitle = getPaymentSectionTitle(data, state);
+	const attendeeForm = data.attendeeForm;
 
 	return (
 		<div className="booking-layout">
 			<div className="booking-layout__main">
-				<Accordion.Root
+				<Accordion
 					className="booking-accordion"
 					value={[state.openSection]}
 					onValueChange={(value) => {
@@ -143,8 +147,9 @@ export function BookingAccordion({
 					<AccordionSection
 						id="tickets"
 						title={__('Tickets', 'ctx-events')}
-						isCompleted={state.completedSections.has('tickets')}
+						completed={state.completedSections.has('tickets')}
 					>
+						<SectionHeading title={__('Tickets', 'ctx-events')} />
 						<TicketSection
 							tickets={data.tickets}
 							attendees={state.attendees}
@@ -153,15 +158,16 @@ export function BookingAccordion({
 						/>
 					</AccordionSection>
 
-					{hasAttendees(data) && (
+					{attendeeForm !== null && attendeeForm.fields.length > 0 && (
 						<AccordionSection
 							id="attendees"
 							title={__('Attendees', 'ctx-events')}
-							isCompleted={state.completedSections.has('attendees')}
-							isDisabled={attendeesSectionDisabled}
+							completed={state.completedSections.has('attendees')}
+							disabled={attendeesSectionDisabled}
 						>
+							<SectionHeading title={__('Attendees', 'ctx-events')} />
 							<AttendeeSection
-								attendeeForm={data.attendeeForm!}
+								attendeeForm={attendeeForm}
 								tickets={data.tickets}
 								initialAttendees={state.attendees}
 								onRemove={onAttendeeRemove}
@@ -173,9 +179,10 @@ export function BookingAccordion({
 					<AccordionSection
 						id="booking"
 						title={__('Your details', 'ctx-events')}
-						isCompleted={state.completedSections.has('booking')}
-						isDisabled={bookingSectionDisabled}
+						completed={state.completedSections.has('booking')}
+						disabled={bookingSectionDisabled}
 					>
+						<SectionHeading title={__('Your details', 'ctx-events')} />
 						<BookingFormSection
 							bookingForm={data.bookingForm}
 							initialData={state.registration}
@@ -194,9 +201,10 @@ export function BookingAccordion({
 					<AccordionSection
 						id="payment"
 						title={paymentSectionTitle}
-						isCompleted={state.completedSections.has('payment')}
-						isDisabled={paymentSectionDisabled}
+						completed={state.completedSections.has('payment')}
+						disabled={paymentSectionDisabled}
 					>
+						<SectionHeading title={paymentSectionTitle} />
 						<PaymentSection
 							data={data}
 							bookingState={state}
@@ -207,7 +215,7 @@ export function BookingAccordion({
 							isSubmitting={isSubmitting}
 						/>
 					</AccordionSection>
-				</Accordion.Root>
+				</Accordion>
 			</div>
 
 			<BookingSummarySlot

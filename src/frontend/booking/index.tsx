@@ -1,6 +1,5 @@
 import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
-import { ensureIcons } from '../../shared/icons/ensureIcons';
 import Booking from './Booking';
 
 domReady(() => {
@@ -8,7 +7,6 @@ domReady(() => {
 	if (!rootElement) return;
 
 	const root = createRoot(rootElement);
-	ensureIcons(['delete']).finally(() => {
-		root.render(<Booking />);
-	});
+
+	root.render(<Booking />);
 });
