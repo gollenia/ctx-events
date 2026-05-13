@@ -31,9 +31,9 @@
 	}
 
 	&__counter {
-		--wp--custom--ctx-forms--stepper--gap: 0.5rem;
-		--wp--custom--ctx-forms--stepper--padding: 3px;
-		--wp--custom--ctx-forms--stepper--value-min-width: var(--wp--custom--ctx-events--booking--ticket-count-min-width);
+		.ctx2-stepper__value {
+			min-width: var(--wp--custom--ctx-events--booking--ticket-count-min-width);
+		}
 	}
 }
 
@@ -48,10 +48,6 @@
 	background-color: var(--wp--custom--ctx-events--booking--attendee-bg);
 
 	&__header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
 		margin-bottom: 1rem;
 		padding-bottom: 0.875rem;
 	}

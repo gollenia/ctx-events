@@ -1,0 +1,15 @@
+.booking-consent {
+	margin-bottom: 1rem;
+}
+
+.booking-loading {
+	padding: 2rem;
+	text-align: center;
+	color: var(--wp--custom--ctx-events--booking--text-muted);
+}
+
+.booking-error {
+	color: var(--wp--custom--ctx-events--booking--danger);
+	font-size: 0.875rem;
+	margin: 0.5rem 0;
+}

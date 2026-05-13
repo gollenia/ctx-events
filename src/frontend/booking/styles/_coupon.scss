@@ -1,0 +1,119 @@
+.booking-coupon {
+	margin-bottom: 1rem;
+
+	&__trigger {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		border: none;
+		background: var(--wp--custom--ctx-events--booking--coupon-trigger-bg);
+		padding: 0.5rem 0;
+		cursor: pointer;
+		text-align: left;
+		color: var(--wp--custom--ctx-events--booking--text);
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--wp--custom--ctx-forms--field--focus-ring);
+		}
+	}
+
+	&__trigger-title-wrap {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-width: 0;
+	}
+
+	&__trigger-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 999px;
+		background: var(--wp--custom--ctx-events--booking--coupon-trigger-icon-bg);
+		color: var(--wp--custom--ctx-events--booking--coupon-trigger-icon-color);
+		flex-shrink: 0;
+	}
+
+	&__trigger-title {
+		font-size: 0.95rem;
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	&__trigger-chevron {
+		color: var(--wp--custom--ctx-events--booking--text-soft);
+		flex: 0 0 auto;
+	}
+
+	&__panel {
+		height: var(--collapsible-panel-height);
+		overflow: hidden;
+		transition: height 200ms cubic-bezier(0.2, 0, 0, 1);
+
+		&[data-starting-style],
+		&[data-ending-style] {
+			height: 0;
+		}
+	}
+
+	&__panel-inner {
+		padding-top: 0.875rem;
+		display: block;
+	}
+
+	&__label {
+		display: block;
+		font-size: 0.875rem;
+		font-weight: 500;
+		margin-bottom: 0.3rem;
+		width: 100%;
+	}
+
+	&__controls {
+		width: 100%;
+	}
+
+	&__input-field {
+		flex: 1 1 14rem;
+		max-width: 100%;
+	}
+
+	&__button {
+		white-space: nowrap;
+	}
+
+	&__message {
+		width: 100%;
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	&__message--success {
+		color: var(--wp--custom--ctx-events--color--success);
+	}
+
+	&__message--error {
+		color: var(--wp--custom--ctx-events--booking--danger);
+	}
+}
+
+@media (max-width: 640px) {
+	.booking-coupon__controls {
+		flex-direction: column;
+		align-items: stretch !important;
+	}
+
+	.booking-coupon__input-field {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.booking-coupon__button {
+		width: 100%;
+	}
+}

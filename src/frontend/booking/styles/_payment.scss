@@ -93,7 +93,10 @@
 
 	&__field {
 		display: block;
-		--wp--custom--ctx-forms--field--gap: 0.5rem;
+
+		.ctx2-form-field {
+			gap: 0.5rem;
+		}
 	}
 
 	&__footer {

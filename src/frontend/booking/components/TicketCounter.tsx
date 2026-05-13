@@ -1,4 +1,4 @@
-import { Flex, FlexItem, Stepper } from '@contexis/wp-react-form';
+import { Stepper } from '@contexis/wp-react-form';
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { TicketInfo } from '../types';
@@ -13,13 +13,8 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 	const max = ticket.booking_limit ?? ticket.ticket_limit_per_booking ?? 10;
 
 	return (
-		<Flex
-			className="booking-ticket"
-			align="center"
-			justify="space-between"
-			data-testid={`booking-ticket-${ticket.id}`}
-		>
-			<FlexItem className="booking-ticket__info" flex="1">
+		<div className="booking-ticket" data-testid={`booking-ticket-${ticket.id}`}>
+			<div className="booking-ticket__info">
 				<span className="booking-ticket__name">{ticket.name}</span>
 				<span className="booking-ticket__price">
 					{ticket.price.amountCents === 0
@@ -29,7 +24,7 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 								currency: ticket.price.currency,
 							})}
 				</span>
-			</FlexItem>
+			</div>
 			<Stepper
 				className="booking-ticket__counter"
 				value={count}
@@ -41,6 +36,6 @@ export function TicketCounter({ ticket, count, onChange }: Props) {
 				decrementTestId={`booking-ticket-${ticket.id}-decrement`}
 				incrementTestId={`booking-ticket-${ticket.id}-increment`}
 			/>
-		</Flex>
+		</div>
 	);
 }
