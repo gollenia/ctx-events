@@ -43,7 +43,7 @@ final class AdminMenu implements AdminServiceInterface
 
         add_menu_page(
             __('Events', 'ctx-events'),
-            $this->withCounter(__('Events', 'ctx-events'), $pendingBookings),
+            $this->withCounter("Events", $pendingBookings),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'eventsPage'],
