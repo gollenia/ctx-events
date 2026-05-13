@@ -69,6 +69,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
             'rewrite' => ['slug' => $this->getSlug(), 'with_front' => false],
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
+            'template' => $this->defaultEditorTemplate(),
             'label' => __('Events', 'ctx-events'),
             'description' => __('Display events on your blog.', 'ctx-events'),
             'labels' => $labels,
@@ -101,6 +102,27 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 	{
 		$this->hooks->register();
 		
+	}
+
+	private function defaultEditorTemplate(): array
+	{
+		return [
+			[
+				'core/paragraph',
+				[
+					'placeholder' => __('Describe the event...', 'ctx-events'),
+				],
+			],
+			[
+				'ctx-events/details',
+				[],
+				[
+					['ctx-events/details-date', []],
+					['ctx-events/details-time', []],
+					['ctx-events/details-location', []],
+				],
+			],
+		];
 	}
    
 }
