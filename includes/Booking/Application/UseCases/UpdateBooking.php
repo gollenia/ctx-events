@@ -44,18 +44,22 @@ final class UpdateBooking
         if ($event === null) {
             throw new \DomainException('Event not found.');
         }
+        if ($event->tickets === null) {
+            throw new \DomainException('Event has no tickets.');
+        }
 
         $attendees = AttendeeCollection::from(...array_map(
-            static function (array $item) use ($currency): Attendee {
+            static function (array $item) use ($event): Attendee {
                 $metadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
                 $nameData = $item['name'] ?? null;
                 $name     = is_array($nameData) && (($nameData['firstName'] ?? '') !== '' || ($nameData['lastName'] ?? '') !== '')
                     ? new PersonName((string) ($nameData['firstName'] ?? ''), (string) ($nameData['lastName'] ?? ''))
                     : null;
+                $ticketId = TicketId::from($item['ticketId'] ?? $item['ticket_id'] ?? '');
 
                 return new Attendee(
-                    ticketId:    TicketId::from($item['ticketId'] ?? $item['ticket_id'] ?? ''),
-                    ticketPrice: Price::from(0, $currency),
+                    ticketId:    $ticketId,
+                    ticketPrice: $event->tickets->getTicketById($ticketId)->price,
                     name:        $name,
                     metadata:    $metadata,
                 );
