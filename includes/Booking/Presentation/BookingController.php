@@ -253,12 +253,44 @@ final class BookingController implements RestController
         }
 
         $xlsx = SimpleXLSXGen::fromArray($firstSheet->rows, $firstSheet->name);
+        $this->applyExportSheetOptions($xlsx, $firstSheet->rows);
 
         foreach ($sheets as $sheet) {
             $xlsx->addSheet($sheet->rows, $sheet->name);
+            $this->applyExportSheetOptions($xlsx, $sheet->rows);
         }
 
         $xlsx->downloadAs(sanitize_file_name($export->fileName . '.xlsx'));
         exit;
+    }
+
+    /**
+     * @param array<int, array<int, mixed>> $rows
+     */
+    private function applyExportSheetOptions(SimpleXLSXGen $xlsx, array $rows): void
+    {
+        if ($rows === [] || !isset($rows[0]) || !is_array($rows[0]) || count($rows[0]) === 0) {
+            return;
+        }
+
+        $lastColumn = $this->spreadsheetColumnName(count($rows[0]));
+        $lastRow = max(1, count($rows));
+
+        $xlsx
+            ->autoFilter(sprintf('A1:%s%d', $lastColumn, $lastRow))
+            ->freezePanes('A2');
+    }
+
+    private function spreadsheetColumnName(int $columnNumber): string
+    {
+        $name = '';
+
+        while ($columnNumber > 0) {
+            $columnNumber--;
+            $name = chr(65 + ($columnNumber % 26)) . $name;
+            $columnNumber = intdiv($columnNumber, 26);
+        }
+
+        return $name;
     }
 }

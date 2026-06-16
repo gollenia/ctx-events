@@ -14,8 +14,10 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Event\Domain\Event;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Form\Domain\FormId;
 use Contexis\Events\Form\Domain\FormRepository;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final class ExportEventBookings
 {
@@ -166,6 +168,8 @@ final class ExportEventBookings
         $rows = [$headers];
 
         foreach ($bookings as $booking) {
+            $resolveZeroTicketPricesFromEvent = $this->shouldResolveZeroTicketPricesFromEvent($booking);
+
             foreach ($booking->attendees as $attendee) {
                 $rows[] = $this->buildAttendeeRow(
                     $event,
@@ -174,6 +178,7 @@ final class ExportEventBookings
                     $ticketNames,
                     $bookingMetadataKeys,
                     $attendeeMetadataKeys,
+                    $resolveZeroTicketPricesFromEvent,
                 );
             }
         }
@@ -194,8 +199,10 @@ final class ExportEventBookings
         array $ticketNames,
         array $bookingMetadataKeys,
         array $attendeeMetadataKeys,
+        bool $resolveZeroTicketPricesFromEvent,
     ): array {
         $registration = $booking->registration->all();
+        $ticketPrice = $this->resolveAttendeeTicketPrice($event, $attendee, $booking, $resolveZeroTicketPricesFromEvent);
 
         return [
             $booking->reference->toString(),
@@ -215,8 +222,8 @@ final class ExportEventBookings
             $ticketNames[$attendee->ticketId->toString()] ?? $attendee->ticketId->toString(),
             $attendee->name !== null ? $attendee->name->firstName : '',
             $attendee->name !== null ? $attendee->name->lastName : '',
-            $this->formatMoney($attendee->ticketPrice->toInt()),
-            $attendee->ticketPrice->currency->toString(),
+            $this->formatMoney($ticketPrice->toInt()),
+            $ticketPrice->currency->toString(),
             ...array_map(
                 fn (string $key): string|int|float|null => $this->normalizeCellValue($registration[$key] ?? null),
                 $bookingMetadataKeys,
@@ -226,6 +233,42 @@ final class ExportEventBookings
                 $attendeeMetadataKeys,
             ),
         ];
+    }
+
+    private function shouldResolveZeroTicketPricesFromEvent(Booking $booking): bool
+    {
+        if ($booking->priceSummary->bookingPrice->isFree()) {
+            return false;
+        }
+
+        $storedAttendeeTotal = 0;
+        foreach ($booking->attendees as $attendee) {
+            $storedAttendeeTotal += $attendee->ticketPrice->toInt();
+        }
+
+        return $storedAttendeeTotal < $booking->priceSummary->bookingPrice->toInt();
+    }
+
+    private function resolveAttendeeTicketPrice(
+        Event $event,
+        Attendee $attendee,
+        Booking $booking,
+        bool $resolveZeroTicketPricesFromEvent,
+    ): Price
+    {
+        if (!$attendee->ticketPrice->isFree()) {
+            return $attendee->ticketPrice;
+        }
+        if (!$resolveZeroTicketPricesFromEvent) {
+            return $attendee->ticketPrice;
+        }
+
+        try {
+            return $event->tickets?->getTicketById(TicketId::from($attendee->ticketId->toString()))->price
+                ?? $attendee->ticketPrice;
+        } catch (\DomainException) {
+            return Price::from(0, $booking->priceSummary->finalPrice->currency);
+        }
     }
 
     /**
