@@ -40,11 +40,6 @@ export default function Edit(props: EditProps) {
 		postType,
 		'meta',
 	);
-	const [content, setContent] = useEntityProp<PostContent>(
-		'postType',
-		postType,
-		'content',
-	);
 
 	console.log('meta', meta);
 
@@ -184,7 +179,6 @@ export default function Edit(props: EditProps) {
 							_is_global: value,
 						});
 					}}
-					__next40pxDefaultSize
 				/>
 			</div>
 		</div>
