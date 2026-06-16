@@ -1,7 +1,8 @@
+import type { BlockTypeIconDescriptor } from '@wordpress/blocks/build-types';
 import { Path, SVG } from '@wordpress/components';
 
-const icons = {
-	posts: (
+const posts: BlockTypeIconDescriptor = {
+	src: (
 		<SVG
 			xmlns="http://www.w3.org/2000/svg"
 			enableBackground="new 0 0 24 24"
@@ -27,4 +28,4 @@ const icons = {
 	),
 };
 
-export default icons;
+export { posts };
