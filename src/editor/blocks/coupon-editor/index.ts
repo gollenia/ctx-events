@@ -3,14 +3,14 @@ import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import './editor.scss';
-import icons from './icons';
+import { posts } from './icons';
 
 const { name, title } = metadata;
 
 const settings = {
 	...metadata,
 	title: __(title, 'ctx-events'),
-	icon: icons.posts,
+	icon: posts,
 	edit: Edit,
 	save: () => null,
 };
