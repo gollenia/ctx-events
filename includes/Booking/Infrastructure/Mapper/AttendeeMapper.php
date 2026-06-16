@@ -30,9 +30,13 @@ final class AttendeeMapper
             ? new PersonName((string) $firstName, (string) $lastName)
             : null;
 
+        $currency = is_string($row['currency'] ?? null) && $row['currency'] !== ''
+            ? Currency::fromCode($row['currency'])
+            : Currency::fromCode('EUR');
+
         return new Attendee(
             ticketId:    TicketId::from($row['ticket_id']),
-            ticketPrice: Price::from(0, Currency::fromCode('EUR')),
+            ticketPrice: Price::from((int) ($row['ticket_price'] ?? 0), $currency),
             name:        $name,
             birthDate:   $birthDate,
             metadata:    $metadata,

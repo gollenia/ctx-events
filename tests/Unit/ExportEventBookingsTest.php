@@ -94,7 +94,7 @@ test('exports bookings with optional attendee sheet', function () {
         attendees: AttendeeCollection::from(
             new Attendee(
                 ticketId: $ticket->id,
-                ticketPrice: Price::from(2500, $currency),
+                ticketPrice: Price::from(0, $currency),
                 name: PersonName::from('Erika', 'Gast'),
                 birthDate: null,
                 metadata: [
@@ -128,4 +128,8 @@ test('exports bookings with optional attendee sheet', function () {
     expect($export->sheets[0]->rows[1])->toContain('VIP');
     expect($export->sheets[0]->rows[1])->toContain('Vertrieb');
     expect($export->sheets[0]->rows[1])->toContain('BOOK-101');
+
+    $ticketPriceColumn = array_search('Ticketpreis', $export->sheets[0]->rows[0], true);
+    expect($ticketPriceColumn)->not->toBeFalse();
+    expect($export->sheets[0]->rows[1][$ticketPriceColumn])->toBe('25.00');
 });

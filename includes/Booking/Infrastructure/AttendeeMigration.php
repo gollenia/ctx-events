@@ -11,6 +11,7 @@ final class AttendeeMigration implements Migration
 
 	public const ID = 'id';
 	public const TICKET_ID = 'ticket_id';
+	public const TICKET_PRICE = 'ticket_price';
 	public const BOOKING_ID = 'booking_id';
 	public const FIRST_NAME = 'first_name';
 	public const LAST_NAME = 'last_name';
@@ -21,6 +22,7 @@ final class AttendeeMigration implements Migration
     private array $columns = [
         self::ID . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
         self::TICKET_ID . ' VARCHAR(100) NOT NULL',
+        self::TICKET_PRICE . ' BIGINT UNSIGNED NOT NULL DEFAULT 0',
         self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
         self::FIRST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',
         self::LAST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',

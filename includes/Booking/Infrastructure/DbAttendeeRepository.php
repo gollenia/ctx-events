@@ -34,6 +34,7 @@ final class DbAttendeeRepository implements AttendeeRepository
         $row = [
             'booking_id' => $bookingId->toInt(),
             'ticket_id'  => $attendee->ticketId->toString(),
+            'ticket_price' => $attendee->ticketPrice->toInt(),
             'metadata'   => wp_json_encode($metadata),
         ];
 
@@ -60,7 +61,8 @@ final class DbAttendeeRepository implements AttendeeRepository
     public function findByBookingId(BookingId $bookingId): AttendeeCollection
     {
         $table = AttendeeMigration::getTableName();
-        $sql = "SELECT * FROM $table WHERE booking_id = %d";
+        $bookingTable = BookingMigration::getTableName();
+        $sql = "SELECT attendees.*, bookings.currency FROM $table attendees LEFT JOIN $bookingTable bookings ON bookings.id = attendees.booking_id WHERE attendees.booking_id = %d";
         $rows = $this->db->getResults($this->db->prepare($sql, $bookingId->toInt()), DatabaseOutput::ARRAY_ASSOC);
 
         return AttendeeCollection::from(...array_map(AttendeeMapper::map(...), $rows));
@@ -79,8 +81,9 @@ final class DbAttendeeRepository implements AttendeeRepository
 
         $placeholders = implode(', ', array_fill(0, count($ids), '%d'));
         $table = AttendeeMigration::getTableName();
+        $bookingTable = BookingMigration::getTableName();
         $sql = $this->db->prepare(
-            "SELECT * FROM $table WHERE booking_id IN ($placeholders) ORDER BY booking_id ASC",
+            "SELECT attendees.*, bookings.currency FROM $table attendees LEFT JOIN $bookingTable bookings ON bookings.id = attendees.booking_id WHERE attendees.booking_id IN ($placeholders) ORDER BY attendees.booking_id ASC",
             ...$ids
         );
         $rows = $this->db->getResults($sql, DatabaseOutput::ARRAY_ASSOC);
