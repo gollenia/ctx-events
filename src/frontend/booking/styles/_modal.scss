@@ -1,29 +1,16 @@
 .booking-modal__backdrop {
-	position: fixed;
-	inset: 0;
-	z-index: 100000;
-	padding: 0;
-	border: 0;
 	background: rgba(0, 0, 0, 0.55);
 }
 
 .booking-modal__dialog {
-	position: fixed;
-	inset: 0;
-	z-index: 100001;
-	transform: none;
 	background: var(--wp--custom--ctx-events--color--surface);
-	border-radius: 0;
-	box-shadow: none;
-	width: 100vw;
-	height: 100dvh;
-	max-height: 100dvh;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 }
 
 .booking-modal__header {
+	margin-bottom: 0;
 	padding: max(1rem, env(safe-area-inset-top)) max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-right))
 		max(1rem, env(safe-area-inset-bottom))
 		max(var(--wp--custom--ctx-events--booking--padding-x), env(safe-area-inset-left));
@@ -38,17 +25,10 @@
 }
 
 .booking-modal__close {
-	background: none;
-	border: none;
 	font-size: 1.5rem;
 	line-height: 1;
-	cursor: pointer;
 	color: var(--wp--custom--ctx-events--color--text-muted);
 	padding: 0.25rem 0.5rem;
-	border-radius: 4px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
 
 	&:hover {
 		color: var(--wp--custom--ctx-events--color--text);
