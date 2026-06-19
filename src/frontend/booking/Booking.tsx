@@ -1,4 +1,4 @@
-import { Flex, FlexItem } from '@contexis/wp-react-form';
+import { Dialog } from '@contexis/wp-react-form';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { BookingAccordion } from './BookingAccordion';
@@ -112,6 +112,12 @@ export default function Booking() {
 		setSuccessCustomerEmailStatus('unknown');
 	}
 
+	function handleOpenChange(open: boolean) {
+		if (!open) {
+			handleClose();
+		}
+	}
+
 	function handleToggleSection(id: SectionId) {
 		setBookingState((prev) => ({ ...prev, openSection: id }));
 	}
@@ -181,83 +187,79 @@ export default function Booking() {
 		}
 	}
 
-	if (!postId || !isOpen) return null;
+	if (!postId) return null;
 
 	return (
-		<div
-			className="booking-modal"
-			role="dialog"
-			aria-modal="true"
-			aria-label={__('Book event', 'ctx-events')}
-			data-testid="booking-modal"
-		>
-			<button
-				type="button"
-				className="booking-modal__backdrop"
-				onClick={handleClose}
-				aria-label={__('Close booking dialog', 'ctx-events')}
-			/>
-			<div className="booking-modal__dialog">
-				<Flex className="booking-modal__header" align="center" gap="1rem">
-					{dataState.status === 'loaded' && (
-						<FlexItem as="h2" className="booking-modal__title" flex="1">
-							{dataState.data.eventName}
-						</FlexItem>
-					)}
-					<button
-						type="button"
-						className="booking-modal__close"
-						onClick={handleClose}
-						aria-label={__('Close', 'ctx-events')}
-					>
-						<svg
-							aria-hidden="true"
-							focusable="false"
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+			<Dialog.Portal>
+				<Dialog.Backdrop
+					className="booking-modal__backdrop"
+					data-testid="booking-modal"
+				/>
+				<Dialog.Panel
+					variant="fullscreen"
+					className="booking-modal__dialog"
+					aria-label={__('Book event', 'ctx-events')}
+					data-testid="booking-modal"
+				>
+					<Dialog.Header className="booking-modal__header">
+						<Dialog.Title className="booking-modal__title">
+							{dataState.status === 'loaded'
+								? dataState.data.eventName
+								: __('Book event', 'ctx-events')}
+						</Dialog.Title>
+						<Dialog.Close
+							className="booking-modal__close"
+							aria-label={__('Close', 'ctx-events')}
 						>
-							<line x1="18" y1="6" x2="6" y2="18" />
-							<line x1="6" y1="6" x2="18" y2="18" />
-						</svg>
-					</button>
-				</Flex>
-
-				<div className="booking-modal__body">
-					{dataState.status === 'idle' || dataState.status === 'loading' ? (
-						<p className="booking-loading">{__('Loading…', 'ctx-events')}</p>
-					) : dataState.status === 'error' ? (
-						<p className="booking-error" role="alert">
-							{dataState.message}
-						</p>
-					) : (
-						<BookingAccordion
-							data={dataState.data}
-							state={bookingState}
-							postId={postId}
-							isSubmitting={submitStatus === 'loading'}
-							successRef={successRef}
-							successPayment={successPayment}
-							successCustomerEmailStatus={successCustomerEmailStatus}
-							onTicketChange={handleTicketChange}
-							onTicketsDone={handleTicketsDone}
-							onAttendeesDone={handleAttendeesDone}
-							onRegistrationDone={handleRegistrationDone}
-							onSubmit={submit}
-							onResult={handleResult}
-							onPaymentStateChange={handlePaymentStateChange}
-							onToggleSection={handleToggleSection}
-							onClose={handleClose}
-						/>
-					)}
-				</div>
-			</div>
-		</div>
+							<svg
+								aria-hidden="true"
+								focusable="false"
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<line x1="18" y1="6" x2="6" y2="18" />
+								<line x1="6" y1="6" x2="18" y2="18" />
+							</svg>
+						</Dialog.Close>
+					</Dialog.Header>
+					<div className="booking-modal__body">
+						{dataState.status === 'idle' || dataState.status === 'loading' ? (
+							<p className="booking-loading">{__('Loading…', 'ctx-events')}</p>
+						) : dataState.status === 'error' ? (
+							<p className="booking-error" role="alert">
+								{dataState.message}
+							</p>
+						) : (
+							<BookingAccordion
+								data={dataState.data}
+								state={bookingState}
+								postId={postId}
+								isSubmitting={submitStatus === 'loading'}
+								successRef={successRef}
+								successPayment={successPayment}
+								successCustomerEmailStatus={successCustomerEmailStatus}
+								onTicketChange={handleTicketChange}
+								onTicketsDone={handleTicketsDone}
+								onAttendeesDone={handleAttendeesDone}
+								onRegistrationDone={handleRegistrationDone}
+								onSubmit={submit}
+								onResult={handleResult}
+								onPaymentStateChange={handlePaymentStateChange}
+								onToggleSection={handleToggleSection}
+								onClose={handleClose}
+							/>
+						)}
+					</div>
+				</Dialog.Panel>
+			</Dialog.Portal>
+		</Dialog>
 	);
 }
