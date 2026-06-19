@@ -116,6 +116,14 @@ final class Assets implements Registrar
             "bookingEnabled" => $this->bookingOptions->enabled(),
 			"currency" => $this->bookingOptions->currency(),
         ]);
+
+        wp_enqueue_style(
+            'ctx-events-editor-style',
+            PluginInfo::getPluginUrl(self::ASSET_PATH . '/style-editor.css'),
+            [],
+            $script_asset['version'],
+            'all'
+        );
     }
 
     private function addIconConfig(string $handle): void
