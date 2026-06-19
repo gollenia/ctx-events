@@ -1,4 +1,10 @@
 import PanelTitle from '@events/adminfields/PanelTitle';
+import DataTable from '@events/datatable/DataTable';
+import type {
+	DataFieldConfig,
+	DataTableAction,
+	DataViewConfig,
+} from '@events/datatable/types';
 import {
 	applyMailTemplateOverrides,
 	createMailTemplateOverride,
@@ -7,11 +13,10 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
 	Flex,
-	FlexItem,
+	FlexBlock,
 	Modal,
 	Notice,
 	PanelBody,
-	SelectControl,
 	Spinner,
 } from '@wordpress/components';
 import {
@@ -30,10 +35,33 @@ const EmailTemplateEditor = lazy(
 	() => import('@events/emails/EmailTemplateEditor'),
 );
 
+type MailSettingsView = 'list' | 'editor';
+type MailSettingsTableRow = MailTemplate & {
+	id: string;
+	hasOverride: boolean;
+};
+
+const targetLabels: Record<string, string> = {
+	customer: __('Customer', 'ctx-events'),
+	admin: __('Admin', 'ctx-events'),
+	billing_contact: __('Billing contact', 'ctx-events'),
+	event_contact: __('Event contact', 'ctx-events'),
+};
+
 const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [baseTemplates, setBaseTemplates] = useState<MailTemplate[]>([]);
 	const [activeKey, setActiveKey] = useState<string>('');
+	const [view, setView] = useState<MailSettingsView>('list');
+	const [tableView, setTableView] = useState<DataViewConfig>({
+		search: '',
+		page: 1,
+		perPage: 100,
+		sort: { field: 'label', direction: 'asc' },
+		filters: [],
+		titleField: 'label',
+		fields: ['label', 'target', 'trigger', 'scope'],
+	});
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [form, setForm] = useState<MailTemplate | null>(null);
@@ -57,18 +85,147 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 		[baseTemplates, overrides],
 	);
 
+	const tableRows = useMemo<MailSettingsTableRow[]>(
+		() =>
+			templates.map((template) => ({
+				...template,
+				id: template.key,
+				hasOverride: overrides.some((item) => item.key === template.key),
+			})),
+		[templates, overrides],
+	);
+
 	useEffect(() => {
 		const template = templates.find((item) => item.key === activeKey) ?? null;
 		setForm(template);
 	}, [activeKey, templates]);
 
-	const options = useMemo(
-		() =>
-			templates.map((template) => ({
-				label: template.label,
-				value: template.key,
-			})),
-		[templates],
+	const filteredRows = useMemo(() => {
+		const search = (tableView.search ?? '').trim().toLowerCase();
+		const items = [...tableRows];
+		const { field, direction } = tableView.sort;
+
+		if (search !== '') {
+			items.splice(
+				0,
+				items.length,
+				...items.filter((item) =>
+					[
+						item.label,
+						item.description,
+						item.subject ?? '',
+						targetLabels[item.target] ?? item.target,
+						item.trigger,
+						item.hasOverride
+							? __('Event override', 'ctx-events')
+							: __('Global template', 'ctx-events'),
+					]
+						.join('\n')
+						.toLowerCase()
+						.includes(search),
+				),
+			);
+		}
+
+		items.sort((left, right) => {
+			const leftValue =
+				field === 'scope'
+					? left.hasOverride
+						? '1'
+						: '0'
+					: String((left as Record<string, unknown>)[field] ?? '');
+			const rightValue =
+				field === 'scope'
+					? right.hasOverride
+						? '1'
+						: '0'
+					: String((right as Record<string, unknown>)[field] ?? '');
+
+			const comparison = leftValue.localeCompare(rightValue, undefined, {
+				sensitivity: 'base',
+			});
+
+			return direction === 'asc' ? comparison : comparison * -1;
+		});
+
+		return items;
+	}, [tableRows, tableView]);
+
+	const tableFields = useMemo<Array<DataFieldConfig>>(
+		() => [
+			{
+				id: 'label',
+				label: __('Mail', 'ctx-events'),
+				enableSorting: true,
+				className:
+					'column-title column-primary has-row-actions events-booking-mail-table__title',
+				render: (item: MailSettingsTableRow) => (
+					<Flex
+						direction="column"
+						gap={0}
+						style={{ alignItems: 'flex-start' }}
+					>
+						<strong style={{ fontSize: '13px' }}>{item.label}</strong>
+					</Flex>
+				),
+			},
+			{
+				id: 'target',
+				label: __('Recipient', 'ctx-events'),
+				enableSorting: true,
+				render: (item: MailSettingsTableRow) => (
+					<span>{targetLabels[item.target] ?? item.target}</span>
+				),
+			},
+			{
+				id: 'trigger',
+				label: __('Trigger', 'ctx-events'),
+				enableSorting: true,
+				render: (item: MailSettingsTableRow) => (
+					<code className="events-booking-mail-table__trigger">
+						{item.trigger}
+					</code>
+				),
+			},
+			{
+				id: 'scope',
+				label: __('Scope', 'ctx-events'),
+				enableSorting: true,
+				render: (item: MailSettingsTableRow) => (
+					<span
+						className={
+							item.hasOverride
+								? 'events-booking-mail-table__badge'
+								: 'events-booking-mail-table__badge events-booking-mail-table__badge--muted'
+						}
+					>
+						{item.hasOverride
+							? __('Event override', 'ctx-events')
+							: __('Global template', 'ctx-events')}
+					</span>
+				),
+			},
+		],
+		[],
+	);
+
+	const tableActions = useMemo<Array<DataTableAction>>(
+		() => [
+			{
+				id: 'edit',
+				label: __('Edit', 'ctx-events'),
+				isPrimary: true,
+				callback: (items) => {
+					const item = items[0] as MailSettingsTableRow | undefined;
+					if (!item) {
+						return;
+					}
+
+					openTemplate(item.key);
+				},
+			},
+		],
+		[],
 	);
 
 	const updateOverride = (template: MailTemplate) => {
@@ -103,6 +260,22 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 		});
 	};
 
+	const openTemplate = (templateKey: string) => {
+		setActiveKey(templateKey);
+		setError(null);
+		setView('editor');
+	};
+
+	const closeModal = () => {
+		setIsOpen(false);
+		setView('list');
+		setError(null);
+	};
+
+	const activeOverride = activeKey
+		? (overrides.find((item) => item.key === activeKey) ?? null)
+		: null;
+
 	return (
 		<>
 			<PanelBody
@@ -129,12 +302,13 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 			{isOpen ? (
 				<Modal
 					title={__('Mail Settings', 'ctx-events')}
-					onRequestClose={() => setIsOpen(false)}
-					size="large"
+					onRequestClose={closeModal}
+					isFullScreen={true}
+					className="events-booking-mail-settings-modal-shell"
 				>
-					<div className="events-booking-mail-settings-modal">
+					<Flex direction="column" gap={4}>
 						{loading ? <Spinner /> : null}
-						{!loading && error && !form ? (
+						{!loading && error && view === 'list' ? (
 							<Notice status="error" isDismissible={false}>
 								{error}
 							</Notice>
@@ -144,15 +318,60 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 								{__('No email templates found.', 'ctx-events')}
 							</Notice>
 						) : null}
-						{options.length ? (
-							<SelectControl
-								label={__('Template', 'ctx-events')}
-								value={activeKey}
-								options={options}
-								onChange={setActiveKey}
-							/>
+						{!loading && templates.length && view === 'list' ? (
+							<div className="events-booking-mail-settings-list">
+								<DataTable<MailSettingsTableRow>
+									data={filteredRows}
+									fields={tableFields}
+									view={tableView}
+									onChangeView={(updates) =>
+										setTableView((prev) => ({ ...prev, ...updates }))
+									}
+									isLoading={loading}
+									actions={tableActions}
+									search={true}
+									searchLabel={__('Search emails…', 'ctx-events')}
+									availableStatusItems={[]}
+									screenMeta={false}
+									variant="plugins"
+									empty={() => (
+										<div>{__('No email templates found.', 'ctx-events')}</div>
+									)}
+								>
+									<DataTable.Table />
+								</DataTable>
+							</div>
 						) : null}
-						{form ? (
+						{view === 'editor' && form ? (
+							<Flex direction="column" gap={4}>
+								<Flex
+									align="flex-start"
+									gap={4}
+									style={{ flexWrap: 'wrap' }}
+								>
+									<Button variant="tertiary" onClick={() => setView('list')}>
+										{__('Back', 'ctx-events')}
+									</Button>
+									<FlexBlock>
+										<h2 style={{ margin: 0, fontSize: '20px', lineHeight: 1.2 }}>
+											{form.label}
+										</h2>
+										<p style={{ margin: '0.25rem 0 0', color: '#4b5563' }}>
+											{form.description}
+										</p>
+									</FlexBlock>
+								</Flex>
+								{activeOverride ? (
+									<Notice status="warning" isDismissible={false}>
+										{__(
+											'This event currently overrides the global template.',
+											'ctx-events',
+										)}
+									</Notice>
+								) : null}
+							</Flex>
+						) : null}
+						{view === 'editor' && form ? (
 							<Notice status="info" isDismissible={false}>
 								{__(
 									'Changes here are saved as event-specific mail overrides and apply only to this event after the post is updated.',
@@ -160,28 +379,26 @@ const MailSettings = ({ meta, updateMeta }: BookingSidebarProps) => {
 								)}
 							</Notice>
 						) : null}
-						{form ? (
+						{view === 'editor' && form ? (
 							<Suspense fallback={<Spinner />}>
 								<EmailTemplateEditor
 									template={form}
 									onChange={setForm}
 									onSave={handleSave}
 									onReset={handleReset}
-									onClose={() => setIsOpen(false)}
+									onClose={closeModal}
 									error={error}
 									saveLabel={__('Use for this event', 'ctx-events')}
 									resetLabel={__('Use global template', 'ctx-events')}
 								/>
 							</Suspense>
 						) : null}
-						<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
-							<FlexItem>
-								<Button variant="secondary" onClick={() => setIsOpen(false)}>
-									{__('Close', 'ctx-events')}
-								</Button>
-							</FlexItem>
+						<Flex justify="flex-end">
+							<Button variant="secondary" onClick={closeModal}>
+								{__('Close', 'ctx-events')}
+							</Button>
 						</Flex>
-					</div>
+					</Flex>
 				</Modal>
 			) : null}
 		</>
