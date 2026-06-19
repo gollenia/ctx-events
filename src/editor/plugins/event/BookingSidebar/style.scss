@@ -13,8 +13,70 @@
 	margin-top: 0;
 }
 
-.events-booking-mail-settings-modal {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
+.events-booking-mail-settings-modal-shell {
+	width: min(1320px, calc(100vw - 3rem));
+	max-width: 1320px;
+}
+
+.events-booking-mail-settings-modal-shell .components-modal__frame {
+	width: min(1320px, calc(100vw - 3rem));
+	max-width: 1320px;
+}
+
+.events-booking-mail-settings-list {
+	.ctx-datatable {
+		padding: 0;
+	}
+
+	.wp-list-table .check-column,
+	.wp-list-table th.check-column,
+	.wp-list-table td.check-column,
+	.wp-list-table .column-cb,
+	.wp-list-table th.column-cb,
+	.wp-list-table td.column-cb {
+		display: none !important;
+		width: 0 !important;
+		padding: 0 !important;
+	}
+
+	.wp-list-table input[type='checkbox'] {
+		display: none !important;
+	}
+
+	td.column-title,
+	th.column-title {
+		padding-left: 12px;
+	}
+}
+
+.events-booking-mail-table__trigger {
+	font-family: ui-monospace, sfmono-regular, sf mono, menlo, monospace;
+	font-size: 11px;
+}
+
+.events-booking-mail-table__badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.55rem;
+	border-radius: 999px;
+	background: #dbeafe;
+	color: #1e3a8a;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.events-booking-mail-table__badge--muted {
+	background: #f3f4f6;
+	color: #374151;
+}
+
+@media (max-width: 782px) {
+	.events-booking-mail-settings-modal-shell {
+		width: calc(100vw - 2rem);
+	}
+
+	.events-booking-mail-settings-modal-shell .components-modal__frame {
+		width: calc(100vw - 2rem);
+		max-width: calc(100vw - 2rem);
+	}
 }
