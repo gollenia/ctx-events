@@ -31,6 +31,62 @@ use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeReconcilableTransactionFinder;
 use Tests\Support\FakeTransactionRepository;
 
+if (!function_exists('makeOfflineBooking')) {
+    function makeOfflineBooking(BookingStatus $status = BookingStatus::PENDING): Booking
+    {
+        return new Booking(
+            reference: BookingReference::fromString('BOOK-1001'),
+            email: new Email('booking@example.test'),
+            name: PersonName::from('Max', 'Mustermann'),
+            priceSummary: PriceSummary::fromValues(
+                bookingPrice: Price::from(5000, Currency::fromCode('EUR')),
+                donationAmount: Price::from(0, Currency::fromCode('EUR')),
+                discountAmount: Price::from(0, Currency::fromCode('EUR'))
+            ),
+            bookingTime: new DateTimeImmutable('2026-03-10 10:00:00'),
+            status: $status,
+            registration: new RegistrationData([
+                'email' => 'booking@example.test',
+                'first_name' => 'Max',
+                'last_name' => 'Mustermann',
+            ]),
+            attendees: AttendeeCollection::empty(),
+            gateway: 'offline',
+            coupon: null,
+            transactions: null,
+            eventId: EventId::from(1),
+        );
+    }
+}
+
+if (!function_exists('makeOnlineSyncBooking')) {
+    function makeOnlineSyncBooking(): Booking
+    {
+        return new Booking(
+            reference: BookingReference::fromString('BOOK-2001'),
+            email: new Email('online@example.test'),
+            name: PersonName::from('Erika', 'Muster'),
+            priceSummary: PriceSummary::fromValues(
+                bookingPrice: Price::from(5000, Currency::fromCode('EUR')),
+                donationAmount: Price::from(0, Currency::fromCode('EUR')),
+                discountAmount: Price::from(0, Currency::fromCode('EUR'))
+            ),
+            bookingTime: new DateTimeImmutable('2026-03-10 10:00:00'),
+            status: BookingStatus::PENDING,
+            registration: new RegistrationData([
+                'email' => 'online@example.test',
+                'first_name' => 'Erika',
+                'last_name' => 'Muster',
+            ]),
+            attendees: AttendeeCollection::empty(),
+            gateway: 'mollie',
+            coupon: null,
+            transactions: null,
+            eventId: EventId::from(2),
+        );
+    }
+}
+
 function makeReconcileClock(): Clock
 {
     $clock = Mockery::mock(Clock::class);
@@ -263,6 +319,42 @@ test('cron does not reconcile expired bookings automatically when the setting is
 
     expect($transactionRepository->findLatestByBookingId($bookingId)?->status)->toBe(TransactionStatus::PENDING)
         ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING);
+});
+
+test('wordpress cron expires the booking when an expired transaction is reconciled', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeOfflineBooking());
+    $transaction = Transaction::forBankTransfer(
+        bookingId: $bookingId,
+        amount: Price::from(5000, Currency::fromCode('EUR')),
+        gateway: 'offline',
+        expiresAt: new DateTimeImmutable('2026-03-15 11:00:00'),
+    );
+    $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
+
+    $cron = new ReconcilePendingTransactionsCron(
+        reconcilePendingTransactions: new ReconcilePendingTransactions(
+            findReconcilableTransactions: new FakeReconcilableTransactionFinder([$transaction]),
+            transactionRepository: $transactionRepository,
+            gatewayRepository: FakeGatewayRepository::empty(),
+            syncBookingFromTransaction: new SyncBookingFromTransaction(
+                $bookingRepository,
+                FakeEventRepository::one(FakeEventFactory::create(1)),
+                $transactionRepository,
+                makeReconcileClock(),
+                $bookingEmailTrigger,
+            ),
+            clock: makeReconcileClock(),
+        ),
+        bookingOptions: new FakeBookingOptions(),
+    );
+
+    $cron->run();
+
+    expect($transactionRepository->findLatestByBookingId($bookingId)?->status)->toBe(TransactionStatus::EXPIRED)
+        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED)
+        ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_OFFLINE_EXPIRED);
 });
 
 test('wordpress cron does not run when external reconciliation mode is enabled', function () {
