@@ -26,7 +26,7 @@ final class TransactionMapper
             amount: Price::from((int) $row['amount'], Currency::fromCode($row['currency'] ?? 'EUR')),
             gateway: $row['gateway'],
             status: TransactionStatus::from((int) $row['status']),
-            createdAt: new \DateTimeImmutable($row['created_at']),
+            createdAt: self::resolveCreatedAt($row),
             externalId: $row['external_id'] ?? null,
             bankData: $bankData,
             instructions: (string) ($details['instructions'] ?? ''),
@@ -49,6 +49,16 @@ final class TransactionMapper
         $decoded = json_decode($details, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private static function resolveCreatedAt(array $row): \DateTimeImmutable
+    {
+        $value = $row['transaction_date'] ?? $row['created_at'] ?? 'now';
+
+        return new \DateTimeImmutable((string) $value);
     }
 
     private static function mapBankData(mixed $bankData): ?BankData
