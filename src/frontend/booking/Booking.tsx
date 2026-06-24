@@ -1,4 +1,4 @@
-import { Dialog } from '@contexis/wp-react-form';
+import { Dialog } from '@contexis/wp-react-form/dialog';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { BookingAccordion } from './BookingAccordion';
