@@ -129,19 +129,24 @@
 	}
 
 	&__event {
+		--ctx-events-calendar-event-accent: #c6d9f1;
+		--ctx-events-calendar-event-bg: #f0f6fc;
+		--ctx-events-calendar-event-border: #c6d9f1;
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		min-width: 0;
-		padding: 8px;
-		background: #f0f6fc;
+		padding: 4px 5px;
+		border-left: 4px solid var(--ctx-events-calendar-event-accent);
+		background: var(--ctx-events-calendar-event-bg);
 		color: inherit;
 		text-decoration: none;
-		box-shadow: inset 0 0 0 1px #c6d9f1;
+		box-shadow: inset 0 0 0 1px var(--ctx-events-calendar-event-border);
 
 		&:hover,
 		&:focus {
-			background: #e7f0fa;
+			background: var(--ctx-events-calendar-event-bg);
+			filter: brightness(0.985);
 		}
 	}
 

@@ -70,6 +70,28 @@ export const formatCalendarTime = (
 	return `${startTime} - ${endTime}`;
 };
 
+export const lightenHexColor = (hexColor: string, amount = 0.82): string => {
+	const normalized = hexColor.trim();
+
+	if (!/^#([\da-f]{3}|[\da-f]{6})$/i.test(normalized)) {
+		return hexColor;
+	}
+
+	const expanded =
+		normalized.length === 4
+			? `#${normalized[1]}${normalized[1]}${normalized[2]}${normalized[2]}${normalized[3]}${normalized[3]}`
+			: normalized;
+
+	const channel = (offset: number) =>
+		Number.parseInt(expanded.slice(offset, offset + 2), 16);
+	const mixWithWhite = (value: number) =>
+		Math.round(value + (255 - value) * amount)
+			.toString(16)
+			.padStart(2, '0');
+
+	return `#${mixWithWhite(channel(1))}${mixWithWhite(channel(3))}${mixWithWhite(channel(5))}`;
+};
+
 export const getCreateEventUrl = (date: Date): string => {
 	const year = date.getFullYear();
 	const month = String(date.getMonth() + 1).padStart(2, '0');
