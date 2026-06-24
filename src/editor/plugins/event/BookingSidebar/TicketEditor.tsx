@@ -76,13 +76,16 @@ const TicketEditor = ({
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
 							label={__('Spaces', 'ctx-events')}
+							help={__('Leave empty for unlimited. 0 means sold out.', 'ctx-events')}
 							type="number"
 							min={0}
-							value={String(ticket.ticket_spaces)}
+							value={
+								ticket.ticket_spaces === null ? '' : String(ticket.ticket_spaces)
+							}
 							onChange={(value) =>
 								setTicket({
 									...ticket,
-									ticket_spaces: value,
+									ticket_spaces: value === '' ? null : value,
 								})
 							}
 						/>
@@ -101,8 +104,9 @@ const TicketEditor = ({
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
 							label={__('Maximum bookable', 'ctx-events')}
+							help={__('0 means unlimited per booking.', 'ctx-events')}
 							type="number"
-							min={1}
+							min={0}
 							value={String(ticket.ticket_max)}
 							onChange={(value) => setTicket({ ...ticket, ticket_max: value })}
 						/>

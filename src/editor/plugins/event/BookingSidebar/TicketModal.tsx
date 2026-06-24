@@ -17,7 +17,7 @@ const emptyTicket = (tickets: BookingTicket[], fallbackSpaces: string | number):
 	ticket_name: __('Default Ticket', 'ctx-events'),
 	ticket_description: '',
 	ticket_price: 0,
-	ticket_spaces: fallbackSpaces || 0,
+	ticket_spaces: fallbackSpaces === '' ? null : (fallbackSpaces ?? null),
 	ticket_min: 0,
 	ticket_max: 0,
 	ticket_start: '',

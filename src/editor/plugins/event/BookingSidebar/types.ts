@@ -22,7 +22,7 @@ export type BookingTicket = {
 	ticket_name: string;
 	ticket_description: string;
 	ticket_price: string | number;
-	ticket_spaces: string | number;
+	ticket_spaces: string | number | null;
 	ticket_min: string | number;
 	ticket_max: string | number;
 	ticket_start: string;

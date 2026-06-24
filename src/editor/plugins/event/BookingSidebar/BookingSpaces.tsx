@@ -32,6 +32,7 @@ const BookingSpaces = ({
 			<Flex gap={4} direction="column">
 				<TextControl
 					label={__('Spaces overall', 'ctx-events')}
+					help={__('Leave empty for unlimited. 0 means sold out.', 'ctx-events')}
 					value={String(meta._booking_capacity ?? '')}
 					type="number"
 					onChange={(value) => {

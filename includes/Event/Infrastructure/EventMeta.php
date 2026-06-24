@@ -47,7 +47,7 @@ class EventMeta extends MetaData
                     'ticket_price'       => ['type' => 'integer'],
                     'ticket_max'         => ['type' => 'integer'],
                     'ticket_min'         => ['type' => 'integer'],
-                    'ticket_spaces'      => ['type' => 'integer'],
+                    'ticket_spaces'      => ['type' => ['integer', 'null']],
                     'ticket_start'       => ['type' => 'string'],
                     'ticket_end'         => ['type' => 'string'],
                     'ticket_order'       => ['type' => 'integer'],

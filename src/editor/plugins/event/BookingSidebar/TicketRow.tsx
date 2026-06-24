@@ -64,7 +64,7 @@ const TicketRow = ({
 			</td>
 			<td>{ticket.ticket_description}</td>
 			<td>{formatCentsAsPrice(ticket.ticket_price, currency)}</td>
-			<td>{ticket.ticket_spaces}</td>
+			<td>{ticket.ticket_spaces === null || ticket.ticket_spaces === '' ? '∞' : ticket.ticket_spaces}</td>
 		</tr>
 	);
 };

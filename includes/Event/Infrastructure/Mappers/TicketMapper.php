@@ -18,7 +18,7 @@ class TicketMapper
             name: $ticket['ticket_name'],
             description: $ticket['ticket_description'],
             price: Price::from($ticket['ticket_price'], $currency),
-            capacity: $ticket['ticket_spaces'],
+            capacity: self::normalizeCapacity($ticket['ticket_spaces'] ?? null),
             max: $ticket['ticket_max'],
             min: $ticket['ticket_min'],
             enabled: $ticket['ticket_enabled'],
@@ -27,5 +27,14 @@ class TicketMapper
             order: $ticket['ticket_order'],
             form: $ticket['ticket_form'],
         );
+    }
+
+    private static function normalizeCapacity(mixed $capacity): ?int
+    {
+        if ($capacity === null || $capacity === '') {
+            return null;
+        }
+
+        return is_numeric($capacity) ? (int) $capacity : null;
     }
 }
