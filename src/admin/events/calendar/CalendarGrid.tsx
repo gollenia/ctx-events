@@ -1,10 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import type { CalendarDay } from './types';
-import {
-	DAY_LABELS,
-	formatCalendarTime,
-	getCreateEventUrl,
-} from './utils';
+import { DAY_LABELS, formatCalendarTime, getCreateEventUrl } from './utils';
 
 interface CalendarGridProps {
 	days: Array<CalendarDay>;
@@ -71,7 +67,12 @@ const CalendarGrid = ({ days, loading }: CalendarGridProps) => {
 								<span className="ctx-events-calendar__event-time">
 									{formatCalendarTime(event.startDate, event.endDate ?? false)}
 								</span>
-								<strong>{event.title || __('(No title)', 'ctx-events')}</strong>
+								<strong
+									className="ctx-events-calendar__event-title"
+									title={event.title || __('(No title)', 'ctx-events')}
+								>
+									{event.title || __('(No title)', 'ctx-events')}
+								</strong>
 							</a>
 						))}
 					</div>
