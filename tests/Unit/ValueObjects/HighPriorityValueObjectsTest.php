@@ -70,6 +70,32 @@ test('booking policy throws on invalid booking window', function () {
     ))->toThrow(DomainException::class);
 });
 
+test('booking policy does not throw when implicit fallback window is inverted', function () {
+    $policy = BookingPolicy::create(
+        enabled: true,
+        start: null,
+        end: null,
+        event_created_at: new DateTimeImmutable('2026-04-02 10:00:00'),
+        event_start: new DateTimeImmutable('2026-04-01 10:00:00')
+    );
+
+    expect($policy->canBookAt(new DateTimeImmutable('2026-04-03 10:00:00'))->reason)
+        ->toBe(BookingDenyReason::ENDED);
+});
+
+test('booking policy clamps a missing boundary instead of throwing', function () {
+    $policy = BookingPolicy::create(
+        enabled: true,
+        start: new DateTimeImmutable('2026-04-10 10:00:00'),
+        end: null,
+        event_created_at: new DateTimeImmutable('2026-04-02 10:00:00'),
+        event_start: new DateTimeImmutable('2026-04-01 10:00:00')
+    );
+
+    expect($policy->canBookAt(new DateTimeImmutable('2026-04-11 10:00:00'))->reason)
+        ->toBe(BookingDenyReason::ENDED);
+});
+
 test('price range rejects half-empty and mixed currencies', function () {
     $eur = Currency::fromCode('EUR');
     $usd = Currency::fromCode('USD');

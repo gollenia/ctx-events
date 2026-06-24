@@ -15,9 +15,7 @@ final class BookingPolicy
         private readonly ?DateTimeImmutable $event_created_at,
         private readonly ?DateTimeImmutable $event_start,
     ) {
-        $s = $this->start() ;
-        $e = $this->end()   ;
-        if ($e < $s) {
+        if ($this->start !== null && $this->end !== null && $this->end < $this->start) {
             throw new \DomainException('Booking window invalid: end before start.');
         }
     }
@@ -35,13 +33,48 @@ final class BookingPolicy
         DateTimeImmutable $event_created_at,
         DateTimeImmutable $event_start
     ): self {
-        return new self(
-            enabled: $enabled,
+        [$normalizedStart, $normalizedEnd] = self::normalizeWindow(
             start: $start,
             end: $end,
+            eventCreatedAt: $event_created_at,
+            eventStart: $event_start
+        );
+
+        return new self(
+            enabled: $enabled,
+            start: $normalizedStart,
+            end: $normalizedEnd,
             event_created_at: $event_created_at,
             event_start: $event_start
         );
+    }
+
+    private static function normalizeWindow(
+        ?DateTimeImmutable $start,
+        ?DateTimeImmutable $end,
+        DateTimeImmutable $eventCreatedAt,
+        DateTimeImmutable $eventStart
+    ): array {
+        $resolvedStart = $start ?? $eventCreatedAt;
+        $resolvedEnd = $end ?? $eventStart;
+
+        if ($resolvedEnd >= $resolvedStart) {
+            return [$start, $end];
+        }
+
+        if ($start !== null && $end !== null) {
+            return [$start, $end];
+        }
+
+        if ($start === null && $end === null) {
+            return [$eventStart, $eventStart];
+        }
+
+        if ($start === null) {
+            return [$resolvedEnd, $end];
+        }
+
+        return [$start, $resolvedStart];
     }
 
     public function start(): DateTimeImmutable
