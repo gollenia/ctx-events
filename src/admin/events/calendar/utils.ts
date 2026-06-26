@@ -114,6 +114,7 @@ export const buildCalendarDays = (
 	const sortedEvents = sortEvents(events);
 	const monthEnd = endOfMonth(activeMonth);
 	const gridStart = startOfCalendarGrid(activeMonth);
+	const today = new Date();
 	const days: Array<CalendarDay> = [];
 
 	for (let index = 0; index < 42; index += 1) {
@@ -135,6 +136,7 @@ export const buildCalendarDays = (
 			date: currentDate,
 			key: currentDate.toISOString(),
 			inMonth: isSameMonth(currentDate, activeMonth),
+			isToday: isSameDay(currentDate, today),
 			events: sortedEvents.filter((event) => {
 				const eventDate = toDate(event.startDate);
 				return eventDate ? isSameDay(eventDate, currentDate) : false;

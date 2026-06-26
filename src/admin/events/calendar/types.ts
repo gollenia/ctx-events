@@ -14,5 +14,6 @@ export type CalendarDay = {
 	date: Date;
 	key: string;
 	inMonth: boolean;
+	isToday: boolean;
 	events: Array<CalendarEvent>;
 };

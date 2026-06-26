@@ -115,11 +115,27 @@
 			background: #f6f7f7;
 			color: #646970;
 		}
+
+		&.is-today {
+			background: #eef6ff;
+			box-shadow: inset 0 0 0 1px #b9d4f0;
+		}
+
+		&.is-today:hover,
+		&.is-today:focus {
+			background: #e6f1fd;
+		}
 	}
 
 	&__day-number {
 		font-size: 12px;
 		font-weight: 700;
+	}
+
+	&__day.is-today &__day-number {
+		font-size: 13px;
+		font-weight: 800;
+		color: #0a4b78;
 	}
 
 	&__events {

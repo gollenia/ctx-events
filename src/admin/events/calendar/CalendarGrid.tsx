@@ -47,7 +47,7 @@ const CalendarGrid = ({ days, loading }: CalendarGridProps) => {
 			{days.map((day) => (
 				<div
 					key={day.key}
-					className={`ctx-events-calendar__day ${day.inMonth ? '' : 'is-outside-month'}`}
+					className={`ctx-events-calendar__day ${day.inMonth ? '' : 'is-outside-month'} ${day.isToday ? 'is-today' : ''}`}
 					role="gridcell"
 					tabIndex={loading ? -1 : 0}
 					onClick={() => {
