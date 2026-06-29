@@ -1,7 +1,8 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, InputField } from '@contexis/wp-react-form';
+import { Button } from '@contexis/wp-react-form';
 import Chevron from '../../../shared/icons/Chevron';
+import { DonationAmountSelector } from './DonationAmountSelector';
 
 type Props = {
 	content: string;
@@ -9,8 +10,6 @@ type Props = {
 	donationAmount: number;
 	onChange: (amount: number) => void;
 };
-
-const DONATION_PRESETS = [5, 10, 20];
 
 function normalizeDonationAmount(value: string): number {
 	const sanitized = value.replace(',', '.').trim();
@@ -91,38 +90,22 @@ export function DonationAdvertisement({
 			</div>
 			{isOpen && (
 				<div className="booking-donation-advertisement__panel">
-					<div className="booking-donation-advertisement__presets">
-						{DONATION_PRESETS.map((preset) => (
-							<button
-								key={preset}
-								type="button"
-								className={
-									normalizeDonationAmount(draftAmount) === preset * 100
-										? 'booking-donation-advertisement__preset booking-donation-advertisement__preset--active'
-										: 'booking-donation-advertisement__preset'
-								}
-								onClick={() => setDraftAmount(preset.toFixed(2))}
-							>
-								{preset} {currency}
-							</button>
-						))}
-					</div>
-					<label className="booking-donation-advertisement__field">
-						<InputField
-							type="number"
-							name="donation-amount"
-							label={__('Your contribution', 'ctx-events')}
-							width={6}
-							min="0"
-							value={draftAmount}
-							placeholder="0.00"
-							status="LOADED"
-							formTouched={false}
-							disabled={false}
-							help={sprintf(__('Amount in %s.', 'ctx-events'), currency)}
-							onChange={(value) => setDraftAmount(String(value))}
+					<p className="booking-donation-advertisement__help">
+						{sprintf(
+							__(
+								'Choose an amount with the slider or enter a custom contribution in %s.',
+								'ctx-events',
+							),
+							currency,
+						)}
+					</p>
+					<div className="booking-donation-advertisement__field">
+						<DonationAmountSelector
+							amount={draftAmount}
+							currency={currency}
+							onChange={setDraftAmount}
 						/>
-					</label>
+					</div>
 					<div className="booking-donation-advertisement__footer">
 						<Button
 							variant="primary"
