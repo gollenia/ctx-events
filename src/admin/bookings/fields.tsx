@@ -182,7 +182,7 @@ export const createFields = (
 		id: 'gateway',
 		label: __('Gateway', 'ctx-events'),
 		render: (booking: BookingListItem) => {
-			const countdown = booking.transactionExpiresAt
+			const countdown = booking.status !== 2 && booking.transactionExpiresAt
 				? getExpiresCountdown(booking.transactionExpiresAt)
 				: null;
 
