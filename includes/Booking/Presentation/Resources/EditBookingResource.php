@@ -54,7 +54,10 @@ final readonly class EditBookingResource implements Resource
                 iterator_to_array($response->booking->attendees),
             ),
             transactions: array_map(
-                static fn(\Contexis\Events\Payment\Domain\Transaction $transaction) => BookingTransactionResource::fromTransaction($transaction),
+                static fn(\Contexis\Events\Payment\Domain\Transaction $transaction) => BookingTransactionResource::fromTransaction(
+                    $transaction,
+                    $response->booking->reference->toString(),
+                ),
                 iterator_to_array($response->booking->transactions ?? []),
             ),
             price: PriceSummaryResource::from($response->booking->priceSummary),

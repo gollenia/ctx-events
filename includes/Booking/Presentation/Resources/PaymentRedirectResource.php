@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Presentation\Resources;
 
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Booking\Presentation\BookingPaymentLink;
 use Contexis\Events\Shared\Presentation\Contracts\Resource;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -22,7 +23,7 @@ final readonly class PaymentRedirectResource implements Resource
     ) {
     }
 
-	public static function fromTransaction(Transaction $transaction): self
+	public static function fromTransaction(Transaction $transaction, string $reference): self
 	{
 		if ($transaction->checkoutUrl !== null) {
 			return new self(
@@ -30,7 +31,7 @@ final readonly class PaymentRedirectResource implements Resource
 				status: $transaction->status->value,
 				amount: $transaction->amount->toArray(),
 				externalId: $transaction->externalId,
-				checkoutUrl: $transaction->checkoutUrl->toString(),
+				checkoutUrl: BookingPaymentLink::forReference($reference),
 				gatewayUrl: $transaction->gatewayUrl ? $transaction->gatewayUrl->toString() : null,
 				instructions: $transaction->instructions,
 			);

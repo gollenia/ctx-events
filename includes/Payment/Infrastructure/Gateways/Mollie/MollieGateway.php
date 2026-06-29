@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Infrastructure\Gateways\Mollie;
 
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Booking\Presentation\BookingReturnLink;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
 
@@ -85,7 +86,7 @@ final class MollieGateway implements PaymentGateway
                 'description' => sprintf('Booking #%s', $reference),
                 'redirectUrl' => $this->config->returnUrl !== ''
                     ? $this->config->returnUrl
-                    : site_url('/wp-json/events/v3/bookings/return?booking_uuid=' . $reference),
+                    : BookingReturnLink::forReference($reference),
                 'locale' => get_locale(),
                 'metadata' => [
                     'booking_uuid' => $reference,

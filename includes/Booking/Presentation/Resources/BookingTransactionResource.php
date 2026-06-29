@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Booking\Presentation\Resources;
 
+use Contexis\Events\Booking\Presentation\BookingPaymentLink;
 use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Shared\Presentation\Contracts\Resource;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -24,7 +25,7 @@ final readonly class BookingTransactionResource implements Resource
     ) {
     }
 
-    public static function fromTransaction(Transaction $transaction): self
+    public static function fromTransaction(Transaction $transaction, string $reference): self
     {
         return new self(
             gateway: $transaction->gateway,
@@ -34,7 +35,7 @@ final readonly class BookingTransactionResource implements Resource
             createdAt: $transaction->createdAt->format(DATE_ATOM),
             bankData: $transaction->bankData?->toArray(),
             instructions: $transaction->instructions,
-            checkoutUrl: $transaction->checkoutUrl ? $transaction->checkoutUrl->toString() : null,
+            checkoutUrl: $transaction->checkoutUrl ? BookingPaymentLink::forReference($reference) : null,
             gatewayUrl: $transaction->gatewayUrl ? $transaction->gatewayUrl->toString() : null,
         );
     }

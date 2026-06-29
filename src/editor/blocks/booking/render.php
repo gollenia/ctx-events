@@ -67,6 +67,6 @@ if (!$booking_app_rendered) {
 	$booking_app_rendered = true;
 
 	add_action('wp_footer', static function () use ($post_id): void {
-		echo '<div id="booking_app"></div>';
+		echo '<div id="booking_app" data-ctx-event-id="' . esc_attr((string) $post_id) . '"></div>';
 	});
 }

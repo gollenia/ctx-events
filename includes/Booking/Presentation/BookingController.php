@@ -222,7 +222,13 @@ final class BookingController implements RestController
         try {
             $transaction = $this->resolveBookingPaymentLink->execute((string) $request->get_param('uuid'));
 
-            return new \WP_REST_Response(BookingTransactionResource::fromTransaction($transaction), 200);
+            return new \WP_REST_Response(
+                BookingTransactionResource::fromTransaction(
+                    $transaction,
+                    (string) $request->get_param('uuid'),
+                ),
+                200,
+            );
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }

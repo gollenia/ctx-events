@@ -36,7 +36,7 @@ final readonly class BookingCreatedResource implements Resource
 		if ($transaction->checkoutUrl !== null) {
 			return new self(
 				reference: $reference,
-				payment: PaymentRedirectResource::fromTransaction($transaction),
+				payment: PaymentRedirectResource::fromTransaction($transaction, $reference),
 				customerEmailStatus: self::resolveCustomerEmailStatus($emailResult),
 			);
 		}

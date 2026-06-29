@@ -103,6 +103,11 @@
 		gap: 1rem;
 	}
 
+	&__retry {
+		display: flex;
+		justify-content: flex-start;
+	}
+
 	&__qr {
 		display: grid;
 		gap: 1rem;

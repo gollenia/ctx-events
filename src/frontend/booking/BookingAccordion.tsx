@@ -11,6 +11,7 @@ import type {
 	AttendeePayload,
 	BookingData,
 	BookingPayment,
+	PaymentReturnStatus,
 	BookingState,
 	PaymentStateUpdates,
 	SectionId,
@@ -25,6 +26,7 @@ type Props = {
 	successRef: string | null;
 	successPayment: BookingPayment | null;
 	successCustomerEmailStatus: 'sent' | 'failed' | 'skipped' | 'unknown';
+	successPaymentStatus: PaymentReturnStatus | null;
 	onTicketChange: (ticketId: string, count: number) => void;
 	onTicketsDone: () => void;
 	onAttendeesDone: (attendees: AttendeePayload[]) => void;
@@ -90,6 +92,7 @@ export function BookingAccordion({
 	successRef,
 	successPayment,
 	successCustomerEmailStatus,
+	successPaymentStatus,
 	onTicketChange,
 	onTicketsDone,
 	onAttendeesDone,
@@ -108,6 +111,7 @@ export function BookingAccordion({
 				eventName={data.eventName}
 				payment={successPayment}
 				customerEmailStatus={successCustomerEmailStatus}
+				paymentStatus={successPaymentStatus}
 				onClose={onClose}
 			/>
 		);

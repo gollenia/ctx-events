@@ -1,5 +1,5 @@
 import { Dialog } from '@contexis/wp-react-form/dialog';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { BookingAccordion } from './BookingAccordion';
 import { useBookingData } from './hooks/useBookingData';
@@ -8,6 +8,7 @@ import type {
 	AttendeePayload,
 	BookingPayment,
 	BookingState,
+	PaymentReturnStatus,
 	PaymentStateUpdates,
 	SectionId,
 	SubmitResult,
@@ -17,6 +18,16 @@ const BOOKING_OPEN_EVENT = 'ctx:booking:open';
 
 type BookingOpenDetail = {
 	postId: number;
+};
+
+type InitialReturnState = {
+	reference: string;
+	paymentStatus: PaymentReturnStatus;
+};
+
+type Props = {
+	initialPostId?: number | null;
+	initialReturnState?: InitialReturnState | null;
 };
 
 function initialState(): BookingState {
@@ -54,7 +65,11 @@ function buildAttendeesFromTickets(
 	return nextAttendees;
 }
 
-export default function Booking() {
+export default function Booking({
+	initialPostId = null,
+	initialReturnState = null,
+}: Props) {
+	const skipNextPostResetRef = useRef(false);
 	const [postId, setPostId] = useState<number | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [bookingState, setBookingState] = useState<BookingState>(initialState);
@@ -65,6 +80,8 @@ export default function Booking() {
 	const [successCustomerEmailStatus, setSuccessCustomerEmailStatus] = useState<
 		'sent' | 'failed' | 'skipped' | 'unknown'
 	>('unknown');
+	const [successPaymentStatus, setSuccessPaymentStatus] =
+		useState<PaymentReturnStatus | null>(null);
 	const { state: dataState, load } = useBookingData(postId);
 	const { status: submitStatus, submit } = useSubmitBooking();
 
@@ -92,10 +109,37 @@ export default function Booking() {
 	}, []);
 
 	useEffect(() => {
+		if (!initialReturnState || !initialPostId) {
+			return;
+		}
+
+		setPostId(initialPostId);
+		setIsOpen(true);
+		setSuccessRef(initialReturnState.reference);
+		setSuccessPayment(null);
+		setSuccessCustomerEmailStatus('unknown');
+		setSuccessPaymentStatus(initialReturnState.paymentStatus);
+		skipNextPostResetRef.current = true;
+
+		const params = new URLSearchParams(window.location.search);
+		params.delete('ctx_events_booking_reference');
+		params.delete('ctx_events_payment_status');
+		const nextQuery = params.toString();
+		const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+		window.history.replaceState({}, '', nextUrl);
+	}, [initialPostId, initialReturnState]);
+
+	useEffect(() => {
+		if (skipNextPostResetRef.current) {
+			skipNextPostResetRef.current = false;
+			return;
+		}
+
 		setBookingState(initialState());
 		setSuccessRef(null);
 		setSuccessPayment(null);
 		setSuccessCustomerEmailStatus('unknown');
+		setSuccessPaymentStatus(null);
 	}, [postId]);
 
 	useEffect(() => {
@@ -110,6 +154,7 @@ export default function Booking() {
 		setSuccessRef(null);
 		setSuccessPayment(null);
 		setSuccessCustomerEmailStatus('unknown');
+		setSuccessPaymentStatus(null);
 	}
 
 	function handleOpenChange(open: boolean) {
@@ -184,6 +229,9 @@ export default function Booking() {
 			setSuccessRef(result.reference);
 			setSuccessPayment(result.payment);
 			setSuccessCustomerEmailStatus(result.customerEmailStatus);
+			setSuccessPaymentStatus(
+				result.payment ? ('checkoutUrl' in result.payment ? 'pending' : 'unknown') : null,
+			);
 		}
 	}
 
@@ -246,6 +294,7 @@ export default function Booking() {
 								successRef={successRef}
 								successPayment={successPayment}
 								successCustomerEmailStatus={successCustomerEmailStatus}
+								successPaymentStatus={successPaymentStatus}
 								onTicketChange={handleTicketChange}
 								onTicketsDone={handleTicketsDone}
 								onAttendeesDone={handleAttendeesDone}

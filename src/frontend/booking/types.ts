@@ -154,3 +154,12 @@ export type SubmitResult =
 			customerEmailStatus: 'sent' | 'failed' | 'skipped' | 'unknown';
 	  }
 	| { type: 'error'; message: string };
+
+export type PaymentReturnStatus =
+	| 'pending'
+	| 'paid'
+	| 'failed'
+	| 'expired'
+	| 'refunded'
+	| 'canceled'
+	| 'unknown';
