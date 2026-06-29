@@ -8,10 +8,13 @@ export const EMAIL_TEMPLATE_TOKENS = [
 	{ token: '{{booking.email}}', label: 'Booking email' },
 	{ token: '{{booking.first_name}}', label: 'Booking first name' },
 	{ token: '{{booking.last_name}}', label: 'Booking last name' },
+	{ token: '{{booking.price}}', label: 'Booking price' },
 	{ token: '{{booking.cancellation_reason}}', label: 'Cancellation reason' },
 	{ token: '{{event.name}}', label: 'Event name' },
 	{ token: '{{event.start}}', label: 'Event start' },
 	{ token: '{{event.end}}', label: 'Event end' },
+	{ token: '{{event.location}}', label: 'Event location' },
+	{ token: '{{event.speaker}}', label: 'Event speaker' },
 ] as const;
 
 export const EMAIL_TEMPLATE_BLOCKS = [

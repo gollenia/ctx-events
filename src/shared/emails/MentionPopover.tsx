@@ -38,6 +38,7 @@ const MentionPopover = ({
 						key={item.id}
 						variant={index === selectedIndex ? 'primary' : 'tertiary'}
 						className="ctx-email-editor__mention-item"
+						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => onSelect(item)}
 					>
 						{item.label}

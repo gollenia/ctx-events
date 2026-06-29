@@ -113,14 +113,23 @@ const useBodyEditor = ({ template, onChange }: Props) => {
 	});
 
 	const insertMention = (item: EmailTemplateMentionItem | null) => {
-		if (!editor || !commandState || !item) {
+		const currentCommandState = commandStateRef.current;
+
+		if (!editor || !currentCommandState || !item) {
 			return;
 		}
 
-		const chain = editor.chain().focus().deleteRange({
-			from: commandState.from,
-			to: commandState.to,
-		});
+		const chain = editor
+			.chain()
+			.focus()
+			.setTextSelection({
+				from: currentCommandState.from,
+				to: currentCommandState.to,
+			})
+			.deleteRange({
+				from: currentCommandState.from,
+				to: currentCommandState.to,
+			});
 
 		if (item.kind === 'token') {
 			chain.insertContent([
