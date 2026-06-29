@@ -44,7 +44,7 @@ class CouponPost extends PostType implements HasMetaData, HasHooks
             'show_in_nav_menus' => true,
             'can_export' => true,
             'exclude_from_search' => true,
-            'show_in_menu' => AdminMenu::MENU_SLUG,
+            'show_in_menu' => false,
             'publicly_queryable' => false,
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],

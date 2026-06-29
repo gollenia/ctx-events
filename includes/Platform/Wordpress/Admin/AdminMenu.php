@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Booking\Infrastructure\BookingMigration;
 use Contexis\Events\Event\Infrastructure\EventPost;
 use Contexis\Events\Event\Infrastructure\EventTaxonomy;
+use Contexis\Events\Payment\Infrastructure\CouponPost;
 
 final class AdminMenu implements AdminServiceInterface
 {
@@ -27,6 +28,7 @@ final class AdminMenu implements AdminServiceInterface
             $current_screen &&
             (
                 $current_screen->post_type === EventPost::POST_TYPE ||
+                $current_screen->post_type === CouponPost::POST_TYPE ||
                 $current_screen->taxonomy === EventTaxonomy::CATEGORIES ||
                 $current_screen->taxonomy === EventTaxonomy::TAGS
             )
@@ -80,6 +82,15 @@ final class AdminMenu implements AdminServiceInterface
             'contexis_events_bookings',
             fn() => print('<div id="ctx-bookings-admin"></div>')
         );
+
+		add_submenu_page(
+			self::MENU_SLUG,
+			__('Coupons', 'ctx-events'),
+			__('Coupons', 'ctx-events'),
+			'manage_options',
+			'contexis_events_coupons',
+			fn() => print('<div id="ctx-coupons-admin"></div>')
+		);
 
 		add_submenu_page(
 			self::MENU_SLUG,

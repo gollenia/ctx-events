@@ -109,6 +109,19 @@ readonly checkoutUrl: string | null,
 readonly gatewayUrl: string | null,
 };
 export type CheckboxVariant = "default" | "switch";
+export type CouponListItem = {
+readonly id: number,
+readonly title: string,
+readonly code: string,
+readonly discountType: string,
+readonly discountValue: number,
+readonly validFrom: string | null,
+readonly expiresAt: string | null,
+readonly usageLimit: number | null,
+readonly usageCount: number | null,
+readonly isGlobal: boolean,
+readonly status: string,
+};
 export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
 export type DiscountType = "percent" | "fixed";
 export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";

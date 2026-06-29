@@ -9,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
+import { generateCouponCode } from './generateCouponCode';
 
 type CouponMeta = {
 	_code?: string;
@@ -75,7 +76,7 @@ export default function Edit(props: EditProps) {
 							onClick={() => {
 								setMeta({
 									...meta,
-									_code: Math.random().toString(36).slice(2, 12).toUpperCase(),
+									_code: generateCouponCode(),
 								});
 							}}
 							className="generate"

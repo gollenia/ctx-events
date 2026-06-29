@@ -6,6 +6,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import { copyTextToClipboard } from '../shared/copyTextToClipboard';
 import { createActions } from './actions';
 import BookingExportModal from './BookingExportModal';
 import { bookingStatusItems } from './bookingStatusItems';
@@ -115,45 +116,20 @@ const BookingsList = () => {
 		() =>
 			createFields(filterOptions, {
 				onReferenceCopy: (reference) => {
-					const fallbackCopy = () => {
-						const input = document.createElement('input');
-						input.value = reference;
-						document.body.append(input);
-						input.select();
-						document.execCommand('copy');
-						input.remove();
-					};
-
-					try {
-						if (navigator.clipboard?.writeText) {
-							void navigator.clipboard.writeText(reference).then(
-								() =>
-									createSuccessNotice(
-										__('Reference copied to clipboard.', 'ctx-events'),
-										{ type: 'snackbar' },
-									),
-								() => {
-									fallbackCopy();
-									createSuccessNotice(
-										__('Reference copied to clipboard.', 'ctx-events'),
-										{ type: 'snackbar' },
-									);
-								},
+					void copyTextToClipboard(reference).then((copied) => {
+						if (copied) {
+							createSuccessNotice(
+								__('Reference copied to clipboard.', 'ctx-events'),
+								{ type: 'snackbar' },
 							);
 							return;
 						}
 
-						fallbackCopy();
-						createSuccessNotice(
-							__('Reference copied to clipboard.', 'ctx-events'),
-							{ type: 'snackbar' },
-						);
-					} catch {
 						createWarningNotice(
 							__('The reference could not be copied.', 'ctx-events'),
 							{ type: 'snackbar' },
 						);
-					}
+					});
 				},
 				onReferenceClick: setEditingReference,
 			}),

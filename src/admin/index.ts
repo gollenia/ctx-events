@@ -1,6 +1,7 @@
 import domReady from '@wordpress/dom-ready';
 
 import { initBookingsAdmin } from './bookings/index.tsx';
+import { initCouponList } from './coupons/index.tsx';
 import { initEmailAdmin } from './emails/index.tsx';
 import { initEventsList } from './events/index.tsx';
 import { initFormList } from './forms/index.tsx';
@@ -16,6 +17,7 @@ type AdminMount = {
 domReady(() => {
 	const mounts: AdminMount[] = [
 		{ id: 'ctx-bookings-admin', init: initBookingsAdmin },
+		{ id: 'ctx-coupons-admin', init: initCouponList },
 		{ id: 'ctx-gateways-admin', init: initGatewayAdmin },
 		{ id: 'ctx-email-admin', init: initEmailAdmin },
 		{ id: 'ctx-options-admin', init: initOptionsAdmin },
