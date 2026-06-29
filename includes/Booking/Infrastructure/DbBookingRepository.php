@@ -41,10 +41,10 @@ class DbBookingRepository implements BookingRepository
     public function save(Booking $booking): BookingId
     {
         $table = BookingMigration::getTableName();
+        $logEntries = $booking->logEntries ?? LogEntryCollection::empty();
         $data = [
             'uuid'         => $booking->reference->toString(),
             'event_id'     => $booking->eventId->toInt(),
-            'spaces'       => $booking->countAttendees(),
             'email'        => $booking->email->toString(),
             'status'       => $booking->status->value,
             'price_summary'  => wp_json_encode($booking->priceSummary->toArray()),
@@ -53,7 +53,7 @@ class DbBookingRepository implements BookingRepository
             'coupon_id'    => $booking->coupon?->id?->toInt(),
             'log'          => wp_json_encode(array_map(
                 static fn ($entry): array => $entry->toArray(),
-                $booking->logEntries->toArray(),
+                $logEntries->toArray(),
             )),
         ];
 
@@ -105,6 +105,7 @@ class DbBookingRepository implements BookingRepository
     {
         global $wpdb;
         $bookingTable = BookingMigration::getTableName();
+        $attendeeTable = AttendeeMigration::getTableName();
 
         [$whereSql, $params] = $this->buildWhereClause($query);
         [$whereNoStatusSql, $noStatusParams] = $this->buildStatusCountWhereClause($query);
@@ -115,13 +116,19 @@ class DbBookingRepository implements BookingRepository
         $offset = ($query->page - 1) * $query->perPage;
 
         $mainSql = $this->db->prepare(
-            "SELECT b.*, p.post_title AS event_title
+            "SELECT b.*, p.post_title AS event_title, COALESCE(attendee_counts.active_spaces, 0) AS attendee_spaces
             FROM {$bookingTable} b
+            LEFT JOIN (
+                SELECT booking_id, COUNT(*) AS active_spaces
+                FROM {$attendeeTable}
+                WHERE status = %s
+                GROUP BY booking_id
+            ) attendee_counts ON attendee_counts.booking_id = b.id
             LEFT JOIN {$wpdb->posts} p ON p.ID = b.event_id
             {$whereSql}
             ORDER BY b.{$orderBy} {$order}
             LIMIT %d OFFSET %d",
-            ...[...$params, $query->perPage, $offset]
+            ...['active', ...$params, $query->perPage, $offset]
         );
 
         $rows = $this->db->getResults($mainSql);
@@ -169,32 +176,23 @@ class DbBookingRepository implements BookingRepository
     public function update(Booking $booking): void
     {
         $table         = BookingMigration::getTableName();
-        $attendeeTable = AttendeeMigration::getTableName();
+        $notes = $booking->notes ?? BookingNotesCollection::empty();
+        $logEntries = $booking->logEntries ?? LogEntryCollection::empty();
 
         $this->db->update($table, [
             'email'        => $booking->email->toString(),
             'registration' => wp_json_encode($booking->registration->all()),
             'gateway'      => $booking->gateway,
             'price_summary' => wp_json_encode($booking->priceSummary->toArray()),
-            'notes'        => wp_json_encode($booking->notes->toArray()),
+            'notes'        => wp_json_encode($notes->toArray()),
             'log'          => wp_json_encode(array_map(
                 static fn ($entry): array => $entry->toArray(),
-                $booking->logEntries->toArray(),
+                $logEntries->toArray(),
             )),
-            'spaces'       => $booking->countAttendees(),
         ], ['id' => $booking->id->toInt()]);
 
-        $this->db->delete($attendeeTable, ['booking_id' => $booking->id->toInt()]);
-
-        foreach ($booking->attendees as $attendee) {
-            $this->db->insert($attendeeTable, [
-                'booking_id' => $booking->id->toInt(),
-                'ticket_id'  => $attendee->ticketId->toString(),
-                'first_name' => $attendee->name?->firstName,
-                'last_name'  => $attendee->name?->lastName,
-                'metadata'   => wp_json_encode($attendee->metadata),
-            ]);
-        }
+        $this->attendeeRepository->deleteByBookingId($booking->id);
+        $this->attendeeRepository->saveAll($booking->attendees, $booking->id);
     }
 
     public function updateNotes(BookingId $id, BookingNotesCollection $notes): void
@@ -244,6 +242,7 @@ class DbBookingRepository implements BookingRepository
 			FROM {$attendeeTable} a
 			JOIN {$bookingTable} b ON a.booking_id = b.id
 			WHERE b.event_id = %d
+            AND a.status = %s
 			{$ticketFilterSql}
 			GROUP BY a.ticket_id",
             BookingStatus::PENDING->value,
@@ -251,6 +250,7 @@ class DbBookingRepository implements BookingRepository
             BookingStatus::CANCELED->value,
             BookingStatus::EXPIRED->value,
             $eventId->toInt(),
+            'active',
             ...array_map(static fn (TicketId $ticketId): string => $ticketId->toString(), $expectedTicketIds)
         );
 
@@ -310,13 +310,19 @@ class DbBookingRepository implements BookingRepository
 				SUM(CASE WHEN b.status = %d THEN 1 ELSE 0 END) as expired
 			FROM {$attendeeTable} a
 			JOIN {$bookingTable} b ON a.booking_id = b.id
-			WHERE b.event_id IN ({$eventPlaceholders})
-			GROUP BY b.event_id, a.ticket_id",
-            BookingStatus::PENDING->value,
-            BookingStatus::APPROVED->value,
-            BookingStatus::CANCELED->value,
-            BookingStatus::EXPIRED->value,
-            ...array_map(static fn (EventId $eventId): int => $eventId->toInt(), $eventIds)
+				WHERE b.event_id IN ({$eventPlaceholders})
+            AND a.status = %s
+				GROUP BY b.event_id, a.ticket_id",
+            ...array_merge(
+                [
+                    BookingStatus::PENDING->value,
+                    BookingStatus::APPROVED->value,
+                    BookingStatus::CANCELED->value,
+                    BookingStatus::EXPIRED->value,
+                ],
+                array_map(static fn (EventId $eventId): int => $eventId->toInt(), $eventIds),
+                ['active'],
+            ),
         );
 
         $rows = $this->db->getResults($sql);
@@ -417,7 +423,7 @@ class DbBookingRepository implements BookingRepository
             eventTitle: (string) ($row->event_title ?? ''),
             status: (int) $row->status,
             priceSummary: $row->price_summary ? PriceSummary::fromArray(json_decode($row->price_summary, true)) : PriceSummary::free(),
-            spaces: (int) $row->spaces,
+            spaces: (int) ($row->attendee_spaces ?? 0),
             gateway: isset($row->gateway) ? (string) $row->gateway : null,
             bookingTime: $bookingTime,
         );

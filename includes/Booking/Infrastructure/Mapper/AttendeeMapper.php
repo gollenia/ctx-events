@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Infrastructure\Mapper;
 
 use Contexis\Events\Booking\Domain\Attendee;
+use Contexis\Events\Booking\Domain\Enums\AttendeeStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\AttendeeId;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
@@ -24,8 +26,8 @@ final class AttendeeMapper
             $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $metadata['birth_date']) ?: null;
         }
 
-        $firstName = $metadata['first_name'] ?? null;
-        $lastName  = $metadata['last_name'] ?? null;
+        $firstName = $metadata['first_name'] ?? $row['first_name'] ?? null;
+        $lastName  = $metadata['last_name'] ?? $row['last_name'] ?? null;
         $name      = ($firstName !== null && $firstName !== '') || ($lastName !== null && $lastName !== '')
             ? new PersonName((string) $firstName, (string) $lastName)
             : null;
@@ -33,6 +35,8 @@ final class AttendeeMapper
         $currency = is_string($row['currency'] ?? null) && $row['currency'] !== ''
             ? Currency::fromCode($row['currency'])
             : Currency::fromCode('EUR');
+        $status = AttendeeStatus::tryFrom((string) ($row['status'] ?? AttendeeStatus::ACTIVE->value))
+            ?? AttendeeStatus::ACTIVE;
 
         return new Attendee(
             ticketId:    TicketId::from($row['ticket_id']),
@@ -40,6 +44,8 @@ final class AttendeeMapper
             name:        $name,
             birthDate:   $birthDate,
             metadata:    $metadata,
+            status:      $status,
+            id:          isset($row['id']) ? AttendeeId::from((int) $row['id']) : null,
         );
     }
 

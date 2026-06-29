@@ -98,6 +98,15 @@ final readonly class DefaultEmailTemplatePresetProvider implements EmailTemplate
                 body: $this->translate('Your booking has been cancelled.'),
             ),
             EmailTemplatePreset::create(
+                key: EmailTemplateKey::TICKET_CANCELLED,
+                label: $this->translate('Ticket cancelled'),
+                description: $this->translate('Sent to participants when a single attendee ticket in a booking was cancelled.'),
+                trigger: EmailTrigger::TICKET_CANCELLED,
+                target: EmailTarget::CUSTOMER,
+                subject: $this->translate('A ticket in your booking was cancelled'),
+                body: $this->translate('A ticket in your booking has been cancelled.'),
+            ),
+            EmailTemplatePreset::create(
                 key: EmailTemplateKey::ADMIN_BOOKING_PENDING_MANUAL,
                 label: $this->translate('Admin: booking pending manual'),
                 description: $this->translate('Sent to admins when a new booking needs manual handling.'),

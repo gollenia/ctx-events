@@ -20,6 +20,17 @@ export const useBookingDetail = (reference: string | null) => {
 	const [saving, setSaving] = useState(false);
 	const [addingNote, setAddingNote] = useState(false);
 	const [resolvingPaymentLink, setResolvingPaymentLink] = useState(false);
+	const [cancellingAttendee, setCancellingAttendee] = useState(false);
+	const [cancellingBooking, setCancellingBooking] = useState(false);
+
+	const loadBooking = async (bookingReference: string): Promise<BookingDetail> => {
+		const nextBooking = await apiFetch<BookingDetail>({
+			path: `/events/v3/bookings/${bookingReference}`,
+		});
+		setBooking(nextBooking);
+
+		return nextBooking;
+	};
 
 	useEffect(() => {
 		if (!reference) {
@@ -31,8 +42,7 @@ export const useBookingDetail = (reference: string | null) => {
 		setLoading(true);
 		setError(null);
 
-		apiFetch<BookingDetail>({ path: `/events/v3/bookings/${reference}` })
-			.then(setBooking)
+		loadBooking(reference)
 			.catch((err: any) => setError(err?.message ?? 'Unknown error'))
 			.finally(() => setLoading(false));
 	}, [reference]);
@@ -85,6 +95,55 @@ export const useBookingDetail = (reference: string | null) => {
 		}
 	};
 
+	const cancelAttendee = async (
+		bookingReference: string,
+		attendeeId: number,
+		options: {
+			sendMail: boolean;
+			cancellationAmountCents: number;
+		},
+	): Promise<BookingDetail> => {
+		setCancellingAttendee(true);
+		try {
+			await apiFetch({
+				path: `/events/v3/bookings/${bookingReference}/attendees/${attendeeId}/cancel`,
+				method: 'POST',
+				data: {
+					sendmail: options.sendMail,
+					cancellation_amount_cents: options.cancellationAmountCents,
+				},
+			});
+
+			return await loadBooking(bookingReference);
+		} finally {
+			setCancellingAttendee(false);
+		}
+	};
+
+	const cancelBooking = async (
+		bookingReference: string,
+		options: {
+			sendMail: boolean;
+			cancellationReason?: string;
+		},
+	): Promise<BookingDetail> => {
+		setCancellingBooking(true);
+		try {
+			await apiFetch({
+				path: `/events/v3/bookings/${bookingReference}/cancel`,
+				method: 'POST',
+				data: {
+					sendmail: options.sendMail,
+					cancellation_reason: options.cancellationReason ?? '',
+				},
+			});
+
+			return await loadBooking(bookingReference);
+		} finally {
+			setCancellingBooking(false);
+		}
+	};
+
 	return {
 		booking,
 		loading,
@@ -95,5 +154,9 @@ export const useBookingDetail = (reference: string | null) => {
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		cancellingAttendee,
+		cancelAttendee,
+		cancellingBooking,
+		cancelBooking,
 	};
 };

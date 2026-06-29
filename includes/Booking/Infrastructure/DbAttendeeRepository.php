@@ -27,6 +27,11 @@ final class DbAttendeeRepository implements AttendeeRepository
     private function saveOne(Attendee $attendee, BookingId $bookingId, string $table): void
     {
         $metadata = $attendee->metadata;
+        if ($attendee->name !== null) {
+            $metadata['first_name'] ??= $attendee->name->firstName;
+            $metadata['last_name'] ??= $attendee->name->lastName;
+        }
+
         if ($attendee->birthDate !== null) {
             $metadata['birth_date'] = $attendee->birthDate->format('Y-m-d');
         }
@@ -35,14 +40,15 @@ final class DbAttendeeRepository implements AttendeeRepository
             'booking_id' => $bookingId->toInt(),
             'ticket_id'  => $attendee->ticketId->toString(),
             'ticket_price' => $attendee->ticketPrice->toInt(),
+            'status' => $attendee->status->value,
             'metadata'   => wp_json_encode($metadata),
         ];
 
-        if (($attendee->metadata['first_name'] ?? null) !== null) {
-            $row['first_name'] = $attendee->metadata['first_name'];
+        if (($metadata['first_name'] ?? null) !== null) {
+            $row['first_name'] = $metadata['first_name'];
         }
-        if (($attendee->metadata['last_name'] ?? null) !== null) {
-            $row['last_name'] = $attendee->metadata['last_name'];
+        if (($metadata['last_name'] ?? null) !== null) {
+            $row['last_name'] = $metadata['last_name'];
         }
 
         $result = $this->db->insert($table, $row);

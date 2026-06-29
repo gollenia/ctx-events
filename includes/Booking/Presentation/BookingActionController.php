@@ -6,7 +6,9 @@ namespace Contexis\Events\Booking\Presentation;
 
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
+use Contexis\Events\Booking\Application\DTOs\CancelBookingAttendeeRequest;
 use Contexis\Events\Booking\Application\UseCases\ApproveBooking;
+use Contexis\Events\Booking\Application\UseCases\CancelBookingAttendee;
 use Contexis\Events\Booking\Application\UseCases\CancelBooking;
 use Contexis\Events\Booking\Application\UseCases\DeleteBooking;
 use Contexis\Events\Booking\Application\UseCases\DenyBooking;
@@ -24,6 +26,7 @@ final class BookingActionController implements RestController
         private ApproveBooking $approveBooking,
         private DenyBooking $denyBooking,
         private CancelBooking $cancelBooking,
+        private CancelBookingAttendee $cancelBookingAttendee,
         private RestoreBooking $restoreBooking,
         private DeleteBooking $deleteBooking,
     ) {
@@ -56,6 +59,16 @@ final class BookingActionController implements RestController
             'callback'            => [$this, 'cancelBooking'],
             'permission_callback' => [$this, 'checkBookingAdminPermission'],
             'args'                => $baseWithSendmail,
+        ]]);
+
+        register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/attendees/(?P<attendee_id>\d+)/cancel', [[
+            'methods'             => 'POST',
+            'callback'            => [$this, 'cancelAttendee'],
+            'permission_callback' => [$this, 'checkBookingAdminPermission'],
+            'args'                => array_merge($baseWithSendmail, [
+                'attendee_id' => ['required' => true, 'type' => 'integer'],
+                'cancellation_amount_cents' => ['required' => true, 'type' => 'integer'],
+            ]),
         ]]);
 
         register_rest_route('events/v3', '/bookings/(?P<uuid>' . self::UUID_PATTERN . ')/restore', [[
@@ -108,6 +121,28 @@ final class BookingActionController implements RestController
     public function cancelBooking(\WP_REST_Request $request): \WP_REST_Response
     {
         return $this->executeAction($this->cancelBooking, $request);
+    }
+
+    public function cancelAttendee(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $sendMail = $request->get_param('sendmail');
+            $emailResult = $this->cancelBookingAttendee->execute(new CancelBookingAttendeeRequest(
+                reference: (string) $request->get_param('uuid'),
+                attendeeId: (int) $request->get_param('attendee_id'),
+                cancellationAmountCents: (int) $request->get_param('cancellation_amount_cents'),
+                sendMail: $sendMail === null ? true : (bool) $sendMail,
+            ));
+            $warnings = BookingEmailWarnings::messages($emailResult);
+
+            if ($warnings === []) {
+                return new \WP_REST_Response(null, 204);
+            }
+
+            return new \WP_REST_Response(['warnings' => $warnings], 200);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
     }
 
     public function restoreBooking(\WP_REST_Request $request): \WP_REST_Response

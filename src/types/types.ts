@@ -5,6 +5,7 @@ readonly postalCode: string | null,
 readonly addressRegion: string | null,
 readonly addressCountry: string | null,
 };
+export type AttendeeStatus = "active" | "cancelled" | "checked_in";
 export type AvailableTicketResource = {
 readonly id: string,
 readonly name: string,
@@ -18,9 +19,12 @@ readonly bankData: Array<any>,
 readonly instructions: string,
 };
 export type BookingAttendeeResource = {
+readonly id: number | null,
 readonly ticketId: string,
+readonly ticketPrice: Price,
 readonly name: PersonName | null,
 readonly metadata: Array<any>,
+readonly status: AttendeeStatus,
 };
 export type BookingDenyReason = "disabled" | "no_capacity" | "not_started" | "ended" | "sold_out" | "form_error" | "no_tickets";
 export type BookingDetail = {
@@ -85,7 +89,7 @@ readonly actorId: number,
 readonly actorName: string,
 readonly message: string | null,
 };
-export type BookingLogEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "restored" | "email_warning";
+export type BookingLogEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "attendee_cancelled" | "restored" | "email_warning";
 export type BookingLogLevel = "info" | "warning" | "error";
 export type BookingNoteResource = {
 readonly text: string,
@@ -108,8 +112,8 @@ export type CheckboxVariant = "default" | "switch";
 export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
 export type DiscountType = "percent" | "fixed";
 export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";
-export type EmailTemplateKey = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "admin_booking_pending_manual" | "admin_booking_created_online";
-export type EmailTrigger = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled";
+export type EmailTemplateKey = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "ticket_cancelled" | "admin_booking_pending_manual" | "admin_booking_created_online";
+export type EmailTrigger = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "ticket_cancelled";
 export type ErrorType = "ERROR" | "WARNING" | "INFO";
 export type Event = {
 readonly id: number,

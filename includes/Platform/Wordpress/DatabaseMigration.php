@@ -10,7 +10,7 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Migration;
 final class DatabaseMigration implements Registrar
 {
 
-	private const VERSION = '1.0.7';
+	private const VERSION = '1.0.8';
 
 	/**
 	 * @param iterable<Migration> $migrations

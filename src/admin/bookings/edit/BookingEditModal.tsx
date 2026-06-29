@@ -1,24 +1,17 @@
-import { formatPrice } from '@events/i18n';
 import {
 	Flex,
 	Notice,
-	Panel,
-	PanelBody,
-	PanelHeader,
-	SelectControl,
 	Spinner,
-	TextControl,
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import type {
 	BookingAttendeeResource,
 	BookingDetail,
 	BookingTransactionResource,
 } from 'src/types/types';
-import { STATUS_LABELS } from '../constants';
 import AttendeeSection from './AttendeeSection';
-import DynamicFieldsGrid from './DynamicFieldsGrid';
+import BookingInfoPanel from './BookingInfoPanel';
 import {
 	type BookingFormValues,
 	getFallbackRegistrationFields,
@@ -61,6 +54,10 @@ const BookingEditModal = ({
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		cancellingAttendee,
+		cancelAttendee,
+		cancellingBooking,
+		cancelBooking,
 	} = useBookingDetail(reference);
 
 	const [booking, setBooking] = useState<BookingDetail | null>(null);
@@ -103,7 +100,6 @@ const BookingEditModal = ({
 			...nextBooking,
 			price: calculateBookingPriceSummary({
 				attendees: nextBooking.attendees,
-				availableTickets: nextBooking.availableTickets,
 				currentPrice: nextBooking.price,
 				donationCents,
 			}),
@@ -167,14 +163,14 @@ const BookingEditModal = ({
 							className="components-button is-secondary"
 							onClick={onClose}
 						>
-							{__('Cancel', 'ctx-events')}
+							{_x('Cancel', 'dialog action: abort and close modal', 'ctx-events')}
 						</button>
 						<button
 							type="button"
 							className="components-button is-primary"
 							onClick={handleSave}
-							disabled={saving}
-							aria-busy={saving}
+							disabled={saving || cancellingAttendee || cancellingBooking}
+							aria-busy={saving || cancellingAttendee || cancellingBooking}
 						>
 							{saving ? __('Saving…', 'ctx-events') : __('Save', 'ctx-events')}
 						</button>
@@ -196,73 +192,25 @@ const BookingEditModal = ({
 					<div className="booking-edit__body">
 						<div className="booking-edit__columns">
 							<div className="booking-edit__info">
-								<Panel header={__('Booking Info', 'ctx-events')}>
-									<PanelBody>
-										<div className="booking-edit__meta">
-											<span>
-												<strong>{__('Status', 'ctx-events')}:</strong>{' '}
-												{STATUS_LABELS[booking.status] ?? booking.status}
-											</span>
-											<span>
-												<strong>{__('Date', 'ctx-events')}:</strong>{' '}
-												{new Date(booking.date).toLocaleString()}
-											</span>
-											<span>
-												<strong>{__('Total', 'ctx-events')}:</strong>{' '}
-												{formatPrice(booking.price.finalPrice)}
-											</span>
-										</div>
-
-										<DynamicFieldsGrid
-											fields={registrationFields}
-											values={registration}
-											onChange={patchRegistration}
-											gridClassName="booking-edit__registration-grid"
-											fieldClassName="booking-edit__registration-grid-field"
-											inputWrapClassName="booking-edit__field-input-wrap"
-										/>
-
-										<SelectControl
-											label={__('Gateway', 'ctx-events')}
-											value={booking.gateway ?? ''}
-											options={[
-												{ value: '', label: __('— None —', 'ctx-events') },
-												...availableGateways,
-											]}
-											onChange={(value) => patch({ gateway: value || null })}
-											__nextHasNoMarginBottom
-											__next40pxDefaultSize
-										/>
-
-										<TextControl
-											label={__('Donation', 'ctx-events')}
-											type="number"
-											value={String(
-												(booking.price.donationAmount.amountCents ?? 0) / 100,
-											)}
-											__nextHasNoMarginBottom
-											__next40pxDefaultSize
-											onChange={(value) => {
-												if (!booking) return;
-
-												const amount = Number.parseFloat(value);
-												const donationCents = Number.isFinite(amount)
-													? Math.round(amount * 100)
-													: 0;
-
-												patchBookingPrice(booking, {
-													price: {
-														...booking.price,
-														donationAmount: {
-															...booking.price.donationAmount,
-															amountCents: donationCents,
-														},
-													},
-												});
-											}}
-										/>
-									</PanelBody>
-								</Panel>
+								<BookingInfoPanel
+									booking={booking}
+									registration={registration}
+									registrationFields={registrationFields}
+									availableGateways={availableGateways}
+									onRegistrationChange={patchRegistration}
+									onGatewayChange={(gateway) => patch({ gateway })}
+									onDonationChange={(donationCents) =>
+										patchBookingPrice(booking, {
+											price: {
+												...booking.price,
+												donationAmount: {
+													...booking.price.donationAmount,
+													amountCents: donationCents,
+												},
+											},
+										})
+									}
+								/>
 							</div>
 
 							<Flex
@@ -272,9 +220,50 @@ const BookingEditModal = ({
 							>
 								<AttendeeSection
 									booking={booking}
-									onChange={(attendees: BookingAttendeeResource[]) =>
-										patchBookingPrice(booking, { attendees })
-									}
+								onChange={(attendees: BookingAttendeeResource[]) =>
+									patchBookingPrice(booking, { attendees })
+								}
+									onCancelAttendee={async (attendee, options) => {
+										if (attendee.id === null) {
+											return;
+										}
+
+										setSaveError(null);
+
+										try {
+											const updatedBooking = await cancelAttendee(
+												booking.reference,
+												attendee.id,
+												options,
+											);
+											setBooking(updatedBooking);
+											setRegistration(createRegistrationDraft(updatedBooking));
+										} catch (err: any) {
+											setSaveError(
+												err?.message ??
+													__('Could not cancel attendee.', 'ctx-events'),
+											);
+											throw err;
+										}
+									}}
+									onCancelBooking={async (options) => {
+										setSaveError(null);
+
+										try {
+											const updatedBooking = await cancelBooking(
+												booking.reference,
+												options,
+											);
+											setBooking(updatedBooking);
+											setRegistration(createRegistrationDraft(updatedBooking));
+										} catch (err: any) {
+											setSaveError(
+												err?.message ??
+													__('Could not cancel booking.', 'ctx-events'),
+											);
+											throw err;
+										}
+									}}
 								/>
 								<TransactionSection
 									booking={booking}

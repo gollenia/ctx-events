@@ -15,6 +15,7 @@ final class AttendeeMigration implements Migration
 	public const BOOKING_ID = 'booking_id';
 	public const FIRST_NAME = 'first_name';
 	public const LAST_NAME = 'last_name';
+	public const STATUS = 'status';
 	public const METADATA = 'metadata';
 	public const CHECKIN_AT = 'checkin_at';
 
@@ -26,6 +27,7 @@ final class AttendeeMigration implements Migration
         self::BOOKING_ID . ' BIGINT UNSIGNED NOT NULL',
         self::FIRST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',
         self::LAST_NAME . ' VARCHAR(191) NULL DEFAULT NULL',
+        self::STATUS . " VARCHAR(32) NOT NULL DEFAULT 'active'",
         self::CHECKIN_AT . ' TIMESTAMP NULL DEFAULT NULL',
         self::METADATA . ' JSON NULL',
         'PRIMARY KEY  (' . self::ID . ')',

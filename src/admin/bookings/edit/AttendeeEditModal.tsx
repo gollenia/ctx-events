@@ -90,9 +90,16 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 				: null;
 
 		onSave({
+			id: attendee?.id ?? null,
 			ticketId,
+			ticketPrice: {
+				amountCents:
+					booking.availableTickets.find((ticket) => ticket.id === ticketId)?.price ?? 0,
+				currency: booking.price.finalPrice.currency,
+			},
 			name: attendeeName,
 			metadata,
+			status: attendee?.status ?? 'active',
 		});
 	};
 

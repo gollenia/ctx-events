@@ -10,6 +10,7 @@ use Contexis\Events\Booking\Application\DTOs\BookingListResponse;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\BookingCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
+use Contexis\Events\Booking\Domain\Enums\AttendeeStatus;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingId;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
@@ -110,6 +111,10 @@ final class FakeBookingRepository implements BookingRepository
 
         foreach ($this->bookingsForEvent($eventId) as $booking) {
             foreach ($booking->attendees as $attendee) {
+                if ($attendee->status !== AttendeeStatus::ACTIVE) {
+                    continue;
+                }
+
                 $ticketId = $attendee->ticketId->toString();
 
                 if ($ticketIds !== [] && !in_array($ticketId, $ticketIds, true)) {

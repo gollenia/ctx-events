@@ -70,6 +70,7 @@ const NotesSection = ({ booking, isSaving, onAdd }: Props) => {
 					onChange={setText}
 					rows={3}
 					disabled={isSaving}
+					style={{ marginBottom: '1em' }}
 				/>
 				<Button
 					variant="secondary"

@@ -1,28 +1,22 @@
 import type {
-	AvailableTicketResource,
 	BookingAttendeeResource,
 	PriceSummary,
 } from 'src/types/types';
 
 type CalculatePriceSummaryArgs = {
 	attendees: BookingAttendeeResource[];
-	availableTickets: AvailableTicketResource[];
 	currentPrice: PriceSummary;
 	donationCents: number;
 };
 
 export const calculateBookingPriceSummary = ({
 	attendees,
-	availableTickets,
 	currentPrice,
 	donationCents,
 }: CalculatePriceSummaryArgs): PriceSummary => {
 	const currency = currentPrice.finalPrice.currency;
 	const bookingPriceCents = attendees.reduce((sum, attendee) => {
-		const ticket = availableTickets.find(
-			(availableTicket) => availableTicket.id === attendee.ticketId,
-		);
-		return sum + (ticket?.price ?? 0);
+		return sum + attendee.ticketPrice.amountCents;
 	}, 0);
 	const discountAmountCents = currentPrice.discountAmount.amountCents ?? 0;
 	const finalPriceCents = Math.max(

@@ -107,7 +107,7 @@ final readonly class Booking
 
 	public function countAttendees(): int
 	{
-		return count($this->attendees);
+		return $this->attendees->countActive();
 	}
 
 	public function update(

@@ -469,6 +469,16 @@ body.booking-edit-open {
 		}
 	}
 
+	.booking-edit__attendee-status {
+		color: var(--wp-admin-theme-color-darker-20);
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.booking-edit__attendee-actions .booking-edit__attendee-status {
+		color: #b32d2e;
+	}
+
 	.booking-edit__add-attendee {
 		display: flex;
 		align-items: flex-end;

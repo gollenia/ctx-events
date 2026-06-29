@@ -12,6 +12,7 @@ enum BookingLogEvent: string
 	case Approved = 'approved';
 	case Rejected = 'rejected';
 	case Cancelled = 'cancelled';
+	case AttendeeCancelled = 'attendee_cancelled';
 	case Restored = 'restored';
     case EmailWarning = 'email_warning';
 }

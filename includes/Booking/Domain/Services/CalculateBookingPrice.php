@@ -22,11 +22,7 @@ final class CalculateBookingPrice
 		Currency $currency
 	): PriceSummary
 	{
-		$bookingPrice = new Price(0, $currency);
-		foreach ($attendees as $attendee) {
-			$ticket = $availableTickets->getTicketById($attendee->ticketId);
-			$bookingPrice = $bookingPrice->add($ticket->price);
-		}
+		$bookingPrice = $attendees->totalPrice($currency);
 
 		if($bookingPrice->isFree()) return PriceSummary::free();
 

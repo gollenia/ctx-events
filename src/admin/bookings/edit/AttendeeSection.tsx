@@ -1,25 +1,42 @@
 import { formatPrice } from '@events/i18n';
 import { Button, Panel, PanelBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { plus } from '@wordpress/icons';
 import type {
 	AvailableTicketResource,
 	BookingAttendeeResource,
 	BookingDetail,
 } from 'src/types/types';
+import CancelBookingFromAttendeeModal from './CancelBookingFromAttendeeModal';
+import CancelAttendeeModal from './CancelAttendeeModal';
 import AttendeeEditModal from './AttendeeEditModal';
 
 type Props = {
 	booking: BookingDetail;
 	onChange: (attendees: BookingAttendeeResource[]) => void;
+	onCancelAttendee: (
+		attendee: BookingAttendeeResource,
+		options: { sendMail: boolean; cancellationAmountCents: number },
+	) => Promise<void>;
+	onCancelBooking: (options: { sendMail: boolean }) => Promise<void>;
 };
 
-const AttendeeSection = ({ booking, onChange }: Props) => {
+const AttendeeSection = ({
+	booking,
+	onChange,
+	onCancelAttendee,
+	onCancelBooking,
+}: Props) => {
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
+	const [cancellingIndex, setCancellingIndex] = useState<number | null>(null);
+	const [isBookingCancelOpen, setIsBookingCancelOpen] = useState(false);
 	const discountAmountCents = booking.price.discountAmount.amountCents ?? 0;
 	const currency = booking.price.finalPrice.currency;
+	const activeAttendeeCount = booking.attendees.filter(
+		(attendee) => attendee.status === 'active',
+	).length;
 
 	const ticketById = (ticketId: string): AvailableTicketResource | undefined =>
 		booking.availableTickets.find((ticket) => ticket.id === ticketId);
@@ -33,6 +50,8 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 	const closeModal = () => {
 		setEditingIndex(null);
 		setIsCreating(false);
+		setCancellingIndex(null);
+		setIsBookingCancelOpen(false);
 	};
 
 	const handleCreate = (attendee: BookingAttendeeResource) => {
@@ -52,6 +71,8 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 
 	const activeAttendee =
 		editingIndex === null ? null : (booking.attendees[editingIndex] ?? null);
+	const cancellingAttendee =
+		cancellingIndex === null ? null : (booking.attendees[cancellingIndex] ?? null);
 
 	return (
 		<Panel header={__('Attendees', 'ctx-events')}>
@@ -78,33 +99,64 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 							const fullName = attendee.name
 								? `${attendee.name.firstName} ${attendee.name.lastName}`.trim()
 								: '—';
+							const isPersisted = attendee.id !== null;
+							const isActive = attendee.status === 'active';
+							const canCancel = isPersisted && isActive;
+							const statusLabel =
+								attendee.status === 'cancelled'
+									? _x('Cancelled', 'booking attendee status', 'ctx-events')
+									: attendee.status === 'checked_in'
+										? _x('Checked in', 'booking attendee status', 'ctx-events')
+										: null;
 
 							return (
 								<tr key={index}>
 									<td>{ticket?.name ?? attendee.ticketId}</td>
-									<td>{fullName}</td>
 									<td>
-										{ticket
-											? formatPrice({
-													amountCents: ticket.price,
-													currency: booking.price.finalPrice.currency,
-												})
-											: '—'}
+										{fullName}
 									</td>
+									<td>{formatPrice(attendee.ticketPrice)}</td>
 									<td className="booking-edit__attendee-actions">
-										<Button
-											variant="link"
-											onClick={() => setEditingIndex(index)}
-										>
-											{__('Edit', 'ctx-events')}
-										</Button>
-										<Button
-											variant="link"
-											isDestructive
-											onClick={() => removeAttendee(index)}
-										>
-											{__('Remove', 'ctx-events')}
-										</Button>
+										{statusLabel ? (
+											<span className="booking-edit__attendee-status">
+												{statusLabel}
+											</span>
+										) : (
+											<>
+												<Button
+													variant="link"
+													onClick={() => setEditingIndex(index)}
+													disabled={!isActive}
+												>
+													{__('Edit', 'ctx-events')}
+												</Button>
+												{isPersisted ? (
+												<Button
+													variant="link"
+													isDestructive
+													onClick={() => {
+														if (activeAttendeeCount <= 1) {
+															setIsBookingCancelOpen(true);
+															return;
+														}
+
+														setCancellingIndex(index);
+													}}
+													disabled={!canCancel}
+												>
+													{_x('Cancel attendee', 'booking action button', 'ctx-events')}
+													</Button>
+												) : (
+													<Button
+														variant="link"
+														isDestructive
+														onClick={() => removeAttendee(index)}
+													>
+														{__('Remove', 'ctx-events')}
+													</Button>
+												)}
+											</>
+										)}
 									</td>
 								</tr>
 							);
@@ -156,6 +208,23 @@ const AttendeeSection = ({ booking, onChange }: Props) => {
 						onSave={isCreating ? handleCreate : handleUpdate}
 					/>
 				)}
+
+				{cancellingAttendee && cancellingAttendee.id !== null ? (
+					<CancelAttendeeModal
+						attendee={cancellingAttendee}
+						onClose={closeModal}
+						onConfirm={(options) =>
+							onCancelAttendee(cancellingAttendee, options)
+						}
+					/>
+				) : null}
+
+				{isBookingCancelOpen ? (
+					<CancelBookingFromAttendeeModal
+						onClose={closeModal}
+						onConfirm={onCancelBooking}
+					/>
+				) : null}
 			</PanelBody>
 		</Panel>
 	);

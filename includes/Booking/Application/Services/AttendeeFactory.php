@@ -5,6 +5,8 @@ namespace Contexis\Events\Booking\Application\Services;
 
 use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
+use Contexis\Events\Booking\Domain\Enums\AttendeeStatus;
+use Contexis\Events\Booking\Domain\ValueObjects\AttendeeId;
 use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Event\Domain\ValueObjects\TicketId;
 use Contexis\Events\Person\Domain\Person;
@@ -30,6 +32,8 @@ final class AttendeeFactory
 
 			$personName = $this->getPersonName($metadata);
             $birthDate = $this->getBithdate($metadata);
+            $status = AttendeeStatus::tryFrom((string) ($item['status'] ?? AttendeeStatus::ACTIVE->value))
+                ?? AttendeeStatus::ACTIVE;
 
             $attendees[] = new Attendee(
                 ticketId: $ticketId,
@@ -37,6 +41,8 @@ final class AttendeeFactory
                 name: $personName,
 				birthDate: $birthDate,
                 metadata: $metadata,
+                status: $status,
+                id: isset($item['id']) ? AttendeeId::from((int) $item['id']) : null,
             );
         }
 
