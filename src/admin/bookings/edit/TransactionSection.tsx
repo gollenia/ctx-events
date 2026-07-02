@@ -213,7 +213,6 @@ const TransactionSection = ({
 		<Panel header={__('Transactions', 'ctx-events')}>
 			<PanelBody>
 				<div className="booking-edit__section-header">
-					<h3>{__('Transactions', 'ctx-events')}</h3>
 					{canResolvePaymentLink && (
 						<button
 							type="button"

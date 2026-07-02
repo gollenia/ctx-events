@@ -1,5 +1,15 @@
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import {
+	cancelCircleFilled,
+	Icon,
+	keyboardReturn,
+	plusCircleFilled,
+	scheduled,
+	thumbsDown,
+	thumbsUp,
+	update,
+} from '@wordpress/icons';
 import type { BookingDetail, BookingLogEntryResource } from 'src/types/types';
 
 type Props = {
@@ -43,6 +53,25 @@ const LogEntriesSection = ({ booking }: Props) => {
 							>
 								<div className="booking-edit__activity-head">
 									<div className="booking-edit__activity-title">
+										<Icon
+											icon={
+												entry.eventType === 'created'
+													? plusCircleFilled
+													: entry.eventType === 'updated'
+														? update
+														: entry.eventType === 'deleted'
+															? cancelCircleFilled
+															: entry.eventType === 'approved'
+																? thumbsUp
+																: entry.eventType === 'rejected'
+																	? thumbsDown
+																	: entry.eventType === 'restored'
+																		? keyboardReturn
+																		: entry.eventType === 'email_warning'
+																			? scheduled
+																			: plusCircleFilled
+											}
+										/>
 										<strong>
 											{EVENT_LABELS[entry.eventType] ?? entry.eventType}
 										</strong>
