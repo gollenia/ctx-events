@@ -2,19 +2,28 @@ import { formatPrice } from '@events/i18n';
 import { Button, Panel, PanelBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __, _x } from '@wordpress/i18n';
-import { plus } from '@wordpress/icons';
+import { Icon, pencil, plus, trash } from '@wordpress/icons';
 import type {
 	AvailableTicketResource,
 	BookingAttendeeResource,
 	BookingDetail,
 } from 'src/types/types';
-import CancelBookingFromAttendeeModal from './CancelBookingFromAttendeeModal';
-import CancelAttendeeModal from './CancelAttendeeModal';
 import AttendeeEditModal from './AttendeeEditModal';
+import CancelAttendeeModal from './CancelAttendeeModal';
+import CancelBookingFromAttendeeModal from './CancelBookingFromAttendeeModal';
+import NoSeatsAvailableModal from './NoSeatsAvailableModal';
 
 type Props = {
 	booking: BookingDetail;
 	onChange: (attendees: BookingAttendeeResource[]) => void;
+	onRequestCreate: () => Promise<BookingDetail>;
+	onAddAttendee: (attendee: BookingAttendeeResource) => Promise<void>;
+	onUpdateAttendee: (
+		attendeeId: number,
+		attendee: BookingAttendeeResource,
+	) => Promise<void>;
+	isAddingAttendee: boolean;
+	isUpdatingAttendee: boolean;
 	onCancelAttendee: (
 		attendee: BookingAttendeeResource,
 		options: { sendMail: boolean; cancellationAmountCents: number },
@@ -25,6 +34,11 @@ type Props = {
 const AttendeeSection = ({
 	booking,
 	onChange,
+	onRequestCreate,
+	onAddAttendee,
+	onUpdateAttendee,
+	isAddingAttendee,
+	isUpdatingAttendee,
 	onCancelAttendee,
 	onCancelBooking,
 }: Props) => {
@@ -32,6 +46,8 @@ const AttendeeSection = ({
 	const [isCreating, setIsCreating] = useState(false);
 	const [cancellingIndex, setCancellingIndex] = useState<number | null>(null);
 	const [isBookingCancelOpen, setIsBookingCancelOpen] = useState(false);
+	const [isNoSeatsDialogOpen, setIsNoSeatsDialogOpen] = useState(false);
+	const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 	const discountAmountCents = booking.price.discountAmount.amountCents ?? 0;
 	const currency = booking.price.finalPrice.currency;
 	const activeAttendeeCount = booking.attendees.filter(
@@ -52,36 +68,50 @@ const AttendeeSection = ({
 		setIsCreating(false);
 		setCancellingIndex(null);
 		setIsBookingCancelOpen(false);
+		setIsNoSeatsDialogOpen(false);
 	};
 
-	const handleCreate = (attendee: BookingAttendeeResource) => {
-		onChange([...booking.attendees, attendee]);
+	const handleCreate = async (attendee: BookingAttendeeResource) => {
+		await onAddAttendee(attendee);
 		closeModal();
 	};
 
-	const handleUpdate = (attendee: BookingAttendeeResource) => {
+	const handleUpdate = async (attendee: BookingAttendeeResource) => {
 		if (editingIndex === null) return;
-		onChange(
-			booking.attendees.map((current, index) =>
-				index === editingIndex ? attendee : current,
-			),
-		);
+		const attendeeId = booking.attendees[editingIndex]?.id;
+		if (attendeeId === null || attendeeId === undefined) {
+			onChange(
+				booking.attendees.map((current, index) =>
+					index === editingIndex ? attendee : current,
+				),
+			);
+			closeModal();
+			return;
+		}
+
+		await onUpdateAttendee(attendeeId, attendee);
 		closeModal();
 	};
 
 	const activeAttendee =
 		editingIndex === null ? null : (booking.attendees[editingIndex] ?? null);
 	const cancellingAttendee =
-		cancellingIndex === null ? null : (booking.attendees[cancellingIndex] ?? null);
+		cancellingIndex === null
+			? null
+			: (booking.attendees[cancellingIndex] ?? null);
+	const hasAnyAddableTicket = booking.availableTickets.some(
+		(ticket) => ticket.bookingLimit === null || ticket.bookingLimit > 0,
+	);
 
 	return (
 		<Panel header={__('Attendees', 'ctx-events')}>
 			<PanelBody>
-				<table className="widefat booking-edit__attendees">
+				<table className="booking-edit__attendees">
 					<thead>
 						<tr>
 							<th>{__('Ticket', 'ctx-events')}</th>
 							<th>{__('Name', 'ctx-events')}</th>
+							<th>{__('Status', 'ctx-events')}</th>
 							<th>{__('Price', 'ctx-events')}</th>
 							<th></th>
 						</tr>
@@ -112,50 +142,43 @@ const AttendeeSection = ({
 							return (
 								<tr key={index}>
 									<td>{ticket?.name ?? attendee.ticketId}</td>
+									<td>{fullName}</td>
+									<td>{statusLabel}</td>
 									<td>
-										{fullName}
+										<b>{formatPrice(attendee.ticketPrice)}</b>
 									</td>
-									<td>{formatPrice(attendee.ticketPrice)}</td>
 									<td className="booking-edit__attendee-actions">
-										{statusLabel ? (
-											<span className="booking-edit__attendee-status">
-												{statusLabel}
-											</span>
-										) : (
-											<>
-												<Button
-													variant="link"
-													onClick={() => setEditingIndex(index)}
-													disabled={!isActive}
-												>
-													{__('Edit', 'ctx-events')}
-												</Button>
-												{isPersisted ? (
-												<Button
-													variant="link"
-													isDestructive
-													onClick={() => {
-														if (activeAttendeeCount <= 1) {
-															setIsBookingCancelOpen(true);
-															return;
-														}
+										<Button
+											variant="link"
+											onClick={() => setEditingIndex(index)}
+											disabled={!isActive}
+										>
+											<Icon icon={pencil} color="#575858" />
+										</Button>
+										{isPersisted ? (
+											<Button
+												variant="link"
+												isDestructive
+												onClick={() => {
+													if (activeAttendeeCount <= 1) {
+														setIsBookingCancelOpen(true);
+														return;
+													}
 
-														setCancellingIndex(index);
-													}}
-													disabled={!canCancel}
-												>
-													{_x('Cancel attendee', 'booking action button', 'ctx-events')}
-													</Button>
-												) : (
-													<Button
-														variant="link"
-														isDestructive
-														onClick={() => removeAttendee(index)}
-													>
-														{__('Remove', 'ctx-events')}
-													</Button>
-												)}
-											</>
+													setCancellingIndex(index);
+												}}
+												disabled={!canCancel}
+											>
+												<Icon icon={trash} color="#575858" />
+											</Button>
+										) : (
+											<Button
+												variant="link"
+												isDestructive
+												onClick={() => removeAttendee(index)}
+											>
+												<Icon icon={trash} color="#575858" />
+											</Button>
 										)}
 									</td>
 								</tr>
@@ -164,24 +187,28 @@ const AttendeeSection = ({
 					</tbody>
 					<tfoot>
 						<tr className="booking-edit__attendees-summary">
-							<th colSpan={2}>{__('Booking price', 'ctx-events')}</th>
+							<td colSpan={3}>{__('Subtotal', 'ctx-events')}</td>
 							<td>{formatPrice(booking.price.bookingPrice)}</td>
 							<td></td>
 						</tr>
-						<tr className="booking-edit__attendees-summary">
-							<th colSpan={2}>{__('Donation', 'ctx-events')}</th>
-							<td>{formatPrice(booking.price.donationAmount)}</td>
-							<td></td>
-						</tr>
-						<tr className="booking-edit__attendees-summary">
-							<th colSpan={2}>{__('Coupon / Discount', 'ctx-events')}</th>
-							<td>
-								-{formatPrice({ amountCents: discountAmountCents, currency })}
-							</td>
-							<td></td>
-						</tr>
+						{booking.price.donationAmount.amountCents > 0 && (
+							<tr className="booking-edit__attendees-summary">
+								<td colSpan={3}>{__('Donation', 'ctx-events')}</td>
+								<td>{formatPrice(booking.price.donationAmount)}</td>
+								<td></td>
+							</tr>
+						)}
+						{discountAmountCents > 0 && (
+							<tr className="booking-edit__attendees-summary">
+								<td colSpan={3}>{__('Coupon / Discount', 'ctx-events')}</td>
+								<td>
+									-{formatPrice({ amountCents: discountAmountCents, currency })}
+								</td>
+								<td></td>
+							</tr>
+						)}
 						<tr className="booking-edit__attendees-summary booking-edit__attendees-summary--total">
-							<th colSpan={2}>{__('Final price', 'ctx-events')}</th>
+							<td colSpan={3}>{__('Total', 'ctx-events')}</td>
 							<td>{formatPrice(booking.price.finalPrice)}</td>
 							<td></td>
 						</tr>
@@ -193,10 +220,37 @@ const AttendeeSection = ({
 						<Button
 							variant="secondary"
 							icon={plus}
-							onClick={() => setIsCreating(true)}
+							onClick={async () => {
+								setIsCheckingAvailability(true);
+								try {
+									const refreshedBooking = await onRequestCreate();
+									const canAdd = refreshedBooking.availableTickets.some(
+										(ticket) =>
+											ticket.bookingLimit === null ||
+											ticket.bookingLimit > 0,
+									);
+
+									if (!canAdd) {
+										setIsNoSeatsDialogOpen(true);
+										return;
+									}
+
+									setIsCreating(true);
+								} finally {
+									setIsCheckingAvailability(false);
+								}
+							}}
+							disabled={isCheckingAvailability}
 						>
-							{__('Add Attendee', 'ctx-events')}
+							{isCheckingAvailability
+								? __('Checking…', 'ctx-events')
+								: __('Add Attendee', 'ctx-events')}
 						</Button>
+						{!hasAnyAddableTicket && (
+							<span className="booking-edit__empty">
+								{__('No seats currently available.', 'ctx-events')}
+							</span>
+						)}
 					</div>
 				)}
 
@@ -205,6 +259,7 @@ const AttendeeSection = ({
 						attendee={isCreating ? null : activeAttendee}
 						booking={booking}
 						onClose={closeModal}
+						isSaving={isCreating ? isAddingAttendee : isUpdatingAttendee}
 						onSave={isCreating ? handleCreate : handleUpdate}
 					/>
 				)}
@@ -224,6 +279,10 @@ const AttendeeSection = ({
 						onClose={closeModal}
 						onConfirm={onCancelBooking}
 					/>
+				) : null}
+
+				{isNoSeatsDialogOpen ? (
+					<NoSeatsAvailableModal onClose={closeModal} />
 				) : null}
 			</PanelBody>
 		</Panel>

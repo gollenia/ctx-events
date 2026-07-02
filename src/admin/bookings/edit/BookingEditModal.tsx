@@ -50,10 +50,15 @@ const BookingEditModal = ({
 		error,
 		saving,
 		save,
+		refresh,
 		addingNote,
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		addingAttendee,
+		addAttendee,
+		updatingAttendee,
+		updateAttendee,
 		cancellingAttendee,
 		cancelAttendee,
 		cancellingBooking,
@@ -220,9 +225,55 @@ const BookingEditModal = ({
 							>
 								<AttendeeSection
 									booking={booking}
-								onChange={(attendees: BookingAttendeeResource[]) =>
-									patchBookingPrice(booking, { attendees })
-								}
+									onChange={(attendees: BookingAttendeeResource[]) =>
+										patchBookingPrice(booking, { attendees })
+									}
+									onRequestCreate={async () => {
+										const refreshedBooking = await refresh(booking.reference);
+										setBooking(refreshedBooking);
+										setRegistration(createRegistrationDraft(refreshedBooking));
+
+										return refreshedBooking;
+									}}
+									onAddAttendee={async (attendee) => {
+										setSaveError(null);
+
+										try {
+											const updatedBooking = await addAttendee(
+												booking.reference,
+												attendee,
+											);
+											setBooking(updatedBooking);
+											setRegistration(createRegistrationDraft(updatedBooking));
+										} catch (err: any) {
+											setSaveError(
+												err?.message ??
+													__('Could not add attendee.', 'ctx-events'),
+											);
+											throw err;
+										}
+									}}
+									onUpdateAttendee={async (attendeeId, attendee) => {
+										setSaveError(null);
+
+										try {
+											const updatedBooking = await updateAttendee(
+												booking.reference,
+												attendeeId,
+												attendee,
+											);
+											setBooking(updatedBooking);
+											setRegistration(createRegistrationDraft(updatedBooking));
+										} catch (err: any) {
+											setSaveError(
+												err?.message ??
+													__('Could not update attendee.', 'ctx-events'),
+											);
+											throw err;
+										}
+									}}
+									isAddingAttendee={addingAttendee}
+									isUpdatingAttendee={updatingAttendee}
 									onCancelAttendee={async (attendee, options) => {
 										if (attendee.id === null) {
 											return;

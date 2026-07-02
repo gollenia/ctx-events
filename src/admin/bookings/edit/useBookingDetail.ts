@@ -20,6 +20,8 @@ export const useBookingDetail = (reference: string | null) => {
 	const [saving, setSaving] = useState(false);
 	const [addingNote, setAddingNote] = useState(false);
 	const [resolvingPaymentLink, setResolvingPaymentLink] = useState(false);
+	const [addingAttendee, setAddingAttendee] = useState(false);
+	const [updatingAttendee, setUpdatingAttendee] = useState(false);
 	const [cancellingAttendee, setCancellingAttendee] = useState(false);
 	const [cancellingBooking, setCancellingBooking] = useState(false);
 
@@ -78,6 +80,43 @@ export const useBookingDetail = (reference: string | null) => {
 			});
 		} finally {
 			setAddingNote(false);
+		}
+	};
+
+	const addAttendee = async (
+		bookingReference: string,
+		attendee: BookingDetail['attendees'][number],
+	): Promise<BookingDetail> => {
+		setAddingAttendee(true);
+		try {
+			await apiFetch({
+				path: `/events/v3/bookings/${bookingReference}/attendees`,
+				method: 'POST',
+				data: { attendee },
+			});
+
+			return await loadBooking(bookingReference);
+		} finally {
+			setAddingAttendee(false);
+		}
+	};
+
+	const updateAttendee = async (
+		bookingReference: string,
+		attendeeId: number,
+		attendee: BookingDetail['attendees'][number],
+	): Promise<BookingDetail> => {
+		setUpdatingAttendee(true);
+		try {
+			await apiFetch({
+				path: `/events/v3/bookings/${bookingReference}/attendees/${attendeeId}`,
+				method: 'PUT',
+				data: { attendee },
+			});
+
+			return await loadBooking(bookingReference);
+		} finally {
+			setUpdatingAttendee(false);
 		}
 	};
 
@@ -150,10 +189,15 @@ export const useBookingDetail = (reference: string | null) => {
 		error,
 		saving,
 		save,
+		refresh: loadBooking,
 		addingNote,
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		addingAttendee,
+		addAttendee,
+		updatingAttendee,
+		updateAttendee,
 		cancellingAttendee,
 		cancelAttendee,
 		cancellingBooking,

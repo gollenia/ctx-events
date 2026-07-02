@@ -10,6 +10,7 @@ export type AvailableTicketResource = {
 readonly id: string,
 readonly name: string,
 readonly price: number,
+readonly bookingLimit: number | null,
 };
 export type BankTransferPayment = {
 readonly gateway: string,

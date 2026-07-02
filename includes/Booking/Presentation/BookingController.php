@@ -6,12 +6,16 @@ namespace Contexis\Events\Booking\Presentation;
 
 use Contexis\Events\Booking\Application\DTOs\BookingListRequest;
 use Contexis\Events\Booking\Application\DTOs\CreateBookingRequest;
+use Contexis\Events\Booking\Application\DTOs\AddBookingAttendeeRequest;
+use Contexis\Events\Booking\Application\DTOs\UpdateBookingAttendeeRequest;
 use Contexis\Events\Booking\Application\DTOs\UpdateBookingRequest;
+use Contexis\Events\Booking\Application\UseCases\AddBookingAttendee;
 use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Application\UseCases\EditBooking;
 use Contexis\Events\Booking\Application\UseCases\ExportEventBookings;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
 use Contexis\Events\Booking\Application\UseCases\ResolveBookingPaymentLink;
+use Contexis\Events\Booking\Application\UseCases\UpdateBookingAttendee;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingCreatedResource;
@@ -30,6 +34,8 @@ final class BookingController implements RestController
         private CreateBooking $createBooking,
         private ListBookings $listBookings,
         private EditBooking $editBooking,
+        private AddBookingAttendee $addBookingAttendee,
+        private UpdateBookingAttendee $updateBookingAttendee,
         private UpdateBooking $updateBooking,
         private ExportEventBookings $exportEventBookings,
         private ResolveBookingPaymentLink $resolveBookingPaymentLink,
@@ -110,6 +116,29 @@ final class BookingController implements RestController
                     'attendees'     => ['required' => true, 'type' => 'array'],
                     'gateway'       => ['required' => false, 'type' => 'string'],
                     'donation_cents' => ['required' => false, 'type' => 'integer', 'default' => 0],
+                ]),
+            ],
+        ]);
+
+        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9-]{6,64})/attendees', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'addAttendee'],
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'args'                => array_merge($baseArgs, [
+                    'attendee' => ['required' => true, 'type' => 'object'],
+                ]),
+            ],
+        ]);
+
+        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9-]{6,64})/attendees/(?P<attendee_id>\d+)', [
+            [
+                'methods'             => 'PUT',
+                'callback'            => [$this, 'updateAttendee'],
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'args'                => array_merge($baseArgs, [
+                    'attendee_id' => ['required' => true, 'type' => 'integer'],
+                    'attendee' => ['required' => true, 'type' => 'object'],
                 ]),
             ],
         ]);
@@ -211,6 +240,35 @@ final class BookingController implements RestController
 
         try {
             $this->updateBooking->execute($updateRequest);
+            return new \WP_REST_Response(null, 204);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
+    }
+
+    public function addAttendee(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $this->addBookingAttendee->execute(new AddBookingAttendeeRequest(
+                reference: (string) $request->get_param('uuid'),
+                attendee: (array) $request->get_param('attendee'),
+            ));
+
+            return new \WP_REST_Response(null, 204);
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
+    }
+
+    public function updateAttendee(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $this->updateBookingAttendee->execute(new UpdateBookingAttendeeRequest(
+                reference: (string) $request->get_param('uuid'),
+                attendeeId: (int) $request->get_param('attendee_id'),
+                attendee: (array) $request->get_param('attendee'),
+            ));
+
             return new \WP_REST_Response(null, 204);
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);

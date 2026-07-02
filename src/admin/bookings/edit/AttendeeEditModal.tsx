@@ -17,6 +17,7 @@ type Props = {
 	attendee: BookingAttendeeResource | null;
 	booking: BookingDetail;
 	onClose: () => void;
+	isSaving?: boolean;
 	onSave: (attendee: BookingAttendeeResource) => void;
 };
 
@@ -40,10 +41,20 @@ const createInitialMetadata = (
 	return initialValues;
 };
 
-const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
+const AttendeeEditModal = ({
+	attendee,
+	booking,
+	onClose,
+	isSaving = false,
+	onSave,
+}: Props) => {
 	const attendeeFields = booking.attendeeForm?.fields ?? [];
+	const availableCreateTickets = booking.availableTickets.filter(
+		(ticket) => ticket.bookingLimit === null || ticket.bookingLimit > 0,
+	);
+	const firstAvailableCreateTicketId = availableCreateTickets[0]?.id ?? '';
 	const [ticketId, setTicketId] = useState<string>(
-		attendee?.ticketId ?? booking.availableTickets[0]?.id ?? '',
+		attendee?.ticketId ?? firstAvailableCreateTicketId,
 	);
 	const [metadata, setMetadata] = useState<BookingFormValues>(
 		createInitialMetadata(
@@ -54,7 +65,7 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 	);
 
 	useEffect(() => {
-		setTicketId(attendee?.ticketId ?? booking.availableTickets[0]?.id ?? '');
+		setTicketId(attendee?.ticketId ?? firstAvailableCreateTicketId);
 		setMetadata(
 			createInitialMetadata(
 				attendeeFields,
@@ -62,12 +73,20 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 				attendee?.name ?? null,
 			),
 		);
-	}, [attendee, attendeeFields, booking.availableTickets]);
+	}, [attendee, attendeeFields, firstAvailableCreateTicketId]);
 
-	const ticketOptions = booking.availableTickets.map((ticket) => ({
-		value: ticket.id,
-		label: ticket.name,
-	}));
+	const ticketOptions = booking.availableTickets.map((ticket) => {
+		const isAvailable =
+			ticket.bookingLimit === null || ticket.bookingLimit > 0 || attendee?.ticketId === ticket.id;
+
+		return {
+			value: ticket.id,
+			label: isAvailable
+				? ticket.name
+				: `${ticket.name} (${__('Sold out', 'ctx-events')})`,
+			disabled: !isAvailable,
+		};
+	});
 
 	const patchMetadata = (key: string, value: unknown) =>
 		setMetadata((prev) => ({ ...prev, [key]: value }));
@@ -120,6 +139,7 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 					value={ticketId}
 					options={ticketOptions}
 					onChange={setTicketId}
+					disabled={isSaving}
 				/>
 
 				{attendeeFields.length > 0 && (
@@ -138,6 +158,7 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 						type="button"
 						className="components-button is-secondary"
 						onClick={onClose}
+						disabled={isSaving}
 					>
 						{__('Cancel', 'ctx-events')}
 					</button>
@@ -145,9 +166,11 @@ const AttendeeEditModal = ({ attendee, booking, onClose, onSave }: Props) => {
 						type="button"
 						className="components-button is-primary"
 						onClick={handleSave}
-						disabled={!ticketId}
+						disabled={!ticketId || isSaving}
 					>
-						{__('Save attendee', 'ctx-events')}
+						{isSaving
+							? __('Saving…', 'ctx-events')
+							: __('Save attendee', 'ctx-events')}
 					</button>
 				</div>
 			</div>

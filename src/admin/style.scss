@@ -407,19 +407,32 @@ body.booking-edit-open {
 		th {
 			text-align: left;
 			font-weight: 600;
-			padding: 6px 10px;
-			background: #f6f7f7;
-			border-bottom: 1px solid #ddd;
+			padding: 10px 10px;
 		}
 
 		td {
-			padding: 6px 10px;
-			border-bottom: 1px solid #f0f0f0;
+			padding: 10px 10px;
 			vertical-align: middle;
 		}
 
-		tbody tr:last-child td {
-			border-bottom: none;
+		thead {
+			text-transform: uppercase;
+		}
+
+		tbody {
+			border-bottom: 2px solid #ddd;
+		}
+
+		tbody tr:hover {
+			background: #f7f8fe;
+
+			.booking-edit__attendee-actions {
+				opacity: 1;
+			}
+		}
+
+		tbody tr {
+			border-top: 1px solid #f1f1f1;
 		}
 
 		td:last-child {
@@ -429,9 +442,8 @@ body.booking-edit-open {
 
 		tfoot th,
 		tfoot td {
-			padding: 8px 10px;
-			border-top: 1px solid #ddd;
-			background: #fcfcfc;
+			padding: 10px 10px;
+			border-top: none;
 		}
 
 		tfoot th {
@@ -452,7 +464,7 @@ body.booking-edit-open {
 
 	.booking-edit__attendees-summary--total th,
 	.booking-edit__attendees-summary--total td {
-		background: #f6f7f7;
+		border-top: 2px solid #ddd;
 		font-size: 14px;
 	}
 
@@ -461,6 +473,7 @@ body.booking-edit-open {
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.5rem;
+		opacity: 0;
 
 		.components-button {
 			min-height: auto;

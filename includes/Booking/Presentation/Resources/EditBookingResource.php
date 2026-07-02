@@ -72,7 +72,12 @@ final readonly class EditBookingResource implements Resource
                 iterator_to_array($response->booking->logEntries),
             ),
             availableTickets: array_map(
-                static fn(TicketResponse $t) => new AvailableTicketResource($t->id, $t->name, $t->price->amountCents),
+                static fn(TicketResponse $t) => new AvailableTicketResource(
+                    $t->id,
+                    $t->name,
+                    $t->price->amountCents,
+                    $t->bookingLimit,
+                ),
                 $response->availableTickets->toArray(),
             ),
         );

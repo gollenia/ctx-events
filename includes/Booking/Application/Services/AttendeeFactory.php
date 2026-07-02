@@ -49,6 +49,49 @@ final class AttendeeFactory
         return AttendeeCollection::from(...$attendees);
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $payload
+     */
+    public function fromAdminPayload(array $payload, TicketCollection $tickets): AttendeeCollection
+    {
+        if ($payload === []) {
+            throw new \DomainException('At least one attendee is required.');
+        }
+
+        return AttendeeCollection::from(...array_map(
+            fn (array $item): Attendee => $this->oneFromAdminPayload($item, $tickets),
+            $payload,
+        ));
+    }
+
+	/** @param array<string, mixed> $payload */
+    public function oneFromAdminPayload(array $payload, TicketCollection $tickets): Attendee
+    {
+        $metadata = is_array($payload['metadata'] ?? null) ? $payload['metadata'] : [];
+        $nameData = $payload['name'] ?? null;
+        $name = is_array($nameData) && (($nameData['firstName'] ?? '') !== '' || ($nameData['lastName'] ?? '') !== '')
+            ? new PersonName((string) ($nameData['firstName'] ?? ''), (string) ($nameData['lastName'] ?? ''))
+            : $this->getPersonName($metadata);
+        $ticketId = TicketId::from((string) ($payload['ticketId'] ?? $payload['ticket_id'] ?? ''));
+        $ticket = $tickets->getTicketById($ticketId);
+        $status = AttendeeStatus::tryFrom((string) ($payload['status'] ?? AttendeeStatus::ACTIVE->value))
+            ?? AttendeeStatus::ACTIVE;
+        $ticketPriceData = $payload['ticketPrice'] ?? null;
+        $ticketPriceCents = is_array($ticketPriceData)
+            ? (int) ($ticketPriceData['amountCents'] ?? $ticket->price->amountCents)
+            : (int) ($payload['ticket_price'] ?? $ticket->price->amountCents);
+
+        return new Attendee(
+            ticketId: $ticketId,
+            ticketPrice: $ticket->price->withAmount($ticketPriceCents),
+            name: $name,
+			birthDate: $this->getBithdate($metadata),
+            metadata: $metadata,
+            status: $status,
+            id: isset($payload['id']) ? AttendeeId::from((int) $payload['id']) : null,
+        );
+    }
+
 	/** @param array<string, mixed> $metadata */
 	private function getPersonName(array $metadata): ?PersonName
 	{

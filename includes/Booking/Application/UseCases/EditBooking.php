@@ -45,7 +45,11 @@ final class EditBooking
 		$now = $this->clock->now();
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($event->id);
-        $tickets = $event->getAvailableTickets($now, $ticketBookingsMap) ?? TicketCollection::empty();
+        $tickets = $event->tickets
+            ? $event->tickets
+                ->getEnabledTickets()
+                ->getValidTicketsForDate($now)
+            : TicketCollection::empty();
         $ticketDtos = $this->prepareBookingTicketLimits->map($tickets, $ticketBookingsMap, $event->overallCapacity);
         $bookingForm = $this->formRepository->find($event->forms->bookingForm);
         $attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
