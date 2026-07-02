@@ -9,6 +9,7 @@ use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Event\Application\DTOs\PrepareBookingResponse;
 use Contexis\Events\Event\Application\Service\EventPolicy;
 use Contexis\Events\Event\Application\Service\PrepareBookingTicketLimits;
+use Contexis\Events\Event\Domain\Enums\BookingDenyReason;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
@@ -47,8 +48,13 @@ final class PrepareBooking
         }
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($eventId);
+        $bookingDecision = $event->canBookAt($now, $ticketBookingsMap);
 
-        $tickets = $event->getAvailableTickets($now, $ticketBookingsMap) ?? TicketCollection::empty();
+        if ($bookingDecision->reason === BookingDenyReason::ENDED) {
+            throw new DomainException('Booking period has ended');
+        }
+
+        $tickets = $event->tickets?->getBookableTickets($ticketBookingsMap, $now) ?? TicketCollection::empty();
         $ticketDtos = $this->prepareBookingTicketLimits->map($tickets, $ticketBookingsMap, $event->overallCapacity);
         $bookingForm = $this->formRepository->find($event->forms->bookingForm);
         $attendeeForm = $this->formRepository->find($event->forms->attendeeForm);
