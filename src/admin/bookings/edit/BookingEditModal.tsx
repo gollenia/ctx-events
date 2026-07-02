@@ -168,16 +168,7 @@ const BookingEditModal = ({
 							className="components-button is-secondary"
 							onClick={onClose}
 						>
-							{_x('Cancel', 'dialog action: abort and close modal', 'ctx-events')}
-						</button>
-						<button
-							type="button"
-							className="components-button is-primary"
-							onClick={handleSave}
-							disabled={saving || cancellingAttendee || cancellingBooking}
-							aria-busy={saving || cancellingAttendee || cancellingBooking}
-						>
-							{saving ? __('Saving…', 'ctx-events') : __('Save', 'ctx-events')}
+							{_x('Close', 'dialog action: close modal', 'ctx-events')}
 						</button>
 					</div>
 				</div>
@@ -202,6 +193,13 @@ const BookingEditModal = ({
 									registration={registration}
 									registrationFields={registrationFields}
 									availableGateways={availableGateways}
+									isSaving={
+										saving ||
+										addingAttendee ||
+										updatingAttendee ||
+										cancellingAttendee ||
+										cancellingBooking
+									}
 									onRegistrationChange={patchRegistration}
 									onGatewayChange={(gateway) => patch({ gateway })}
 									onDonationChange={(donationCents) =>
@@ -215,6 +213,7 @@ const BookingEditModal = ({
 											},
 										})
 									}
+									onSave={handleSave}
 								/>
 							</div>
 

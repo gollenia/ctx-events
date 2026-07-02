@@ -181,6 +181,12 @@ body.booking-edit-open {
 		}
 	}
 
+	.booking-edit__info-actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 1.25rem;
+	}
+
 	.booking-edit__empty {
 		margin: 0 0 1rem;
 		color: #646970;
