@@ -1,0 +1,19 @@
+.booking-accordion {
+	.ctx2-form-accordion__section {
+		border-color: var(
+			--wp--custom--ctx--ui--accordion--border-color,
+			var(--wp--custom--ctx--ui--field--border-color)
+		);
+		background: var(
+			--wp--custom--ctx--ui--accordion--background,
+			var(--wp--custom--ctx--ui--field--background)
+		);
+	}
+
+	.ctx2-form-accordion__header:not([data-disabled]):hover {
+		background: var(
+			--wp--custom--ctx--ui--accordion--header-hover-background,
+			var(--wp--custom--ctx--ui--field--hover-background)
+		);
+	}
+}

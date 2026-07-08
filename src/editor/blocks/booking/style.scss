@@ -1,0 +1,39 @@
+.ctx__button {
+	background-color: var(--wp--custom--ctx--ui--color, #f00);
+	padding: var(--wp--custom--ctx--ui--padding-y, 0.5rem)
+		var(--wp--custom--ctx--ui--padding-x, 1rem);
+	border-radius: var(--wp--custom--ctx--ui--radius, 0.25rem);
+	box-sizing: border-box;
+	color: var(--wp--custom--ctx--ui--on-color, #fff);
+	font-size: var(--wp--custom--ctx--ui--font-size, 1rem);
+	font-weight: var(--wp--custom--ctx--ui--font-weight, 600);
+}
+
+.ctx__button.is-style-outline {
+	background: var(--wp--custom--ctx--ui--on-color, #fff);
+	box-shadow: inset 0 0 0 2px var(--wp--custom--ctx--ui--color, #f00);
+	color: var(--wp--custom--ctx--ui--color, #f00);
+}
+
+.ctx__button.is-style-link {
+	background: transparent !important;
+	box-shadow: none;
+	color: var(--wp--custom--ctx--ui--color, #f00);
+}
+
+.ctx__button.is-style-link:hover {
+	text-decoration: underline;
+}
+
+.ctx__button:disabled {
+	opacity: 0.5;
+	pointer-events: none;
+	
+}
+
+.ctx__button:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px var(--wp--custom--ctx--ui--on-color, #fff),
+		0 0 0 4px var(--wp--custom--ctx--ui--color, #f00);
+}
