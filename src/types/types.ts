@@ -91,7 +91,7 @@ readonly actorName: string,
 readonly message: string | null,
 };
 export type BookingLogEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "attendee_cancelled" | "restored" | "email_warning";
-export type BookingLogLevel = "info" | "warning" | "error";
+export type BookingLogLevel = "info" | "warning" | "error" | "success";
 export type BookingNoteResource = {
 readonly text: string,
 readonly date: string,

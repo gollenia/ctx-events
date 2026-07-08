@@ -17,6 +17,7 @@ type BookingActionConfig = {
 	method: 'POST' | 'DELETE';
 	data?: Record<string, string>;
 	supportsMail: boolean;
+	RenderModal: typeof BookingActionConfirmModal;
 	modalHeader: string;
 	confirmText: string;
 	confirmLabel: string;
@@ -66,10 +67,7 @@ const ACTIONS: BookingActionConfig[] = [
 		supportsMail: true,
 		RenderModal: BookingActionConfirmModal,
 		modalHeader: __('Cancel booking', 'ctx-events'),
-		confirmText: __(
-			'Do you really want to cancel this booking?',
-			'ctx-events',
-		),
+		confirmText: __('Do you really want to cancel this booking?', 'ctx-events'),
 		confirmLabel: __('Cancel booking', 'ctx-events'),
 		disabled: (item) => item.status !== 2,
 		delete: true,
@@ -98,10 +96,7 @@ const ACTIONS: BookingActionConfig[] = [
 		supportsMail: false,
 		RenderModal: BookingActionConfirmModal,
 		modalHeader: __('Delete booking', 'ctx-events'),
-		confirmText: __(
-			'Do you really want to delete this booking?',
-			'ctx-events',
-		),
+		confirmText: __('Do you really want to delete this booking?', 'ctx-events'),
 		confirmLabel: __('Delete booking', 'ctx-events'),
 		disabled: (item) => item.status !== 3 && item.status !== 4,
 		delete: true,
@@ -110,23 +105,24 @@ const ACTIONS: BookingActionConfig[] = [
 
 export const createActions = (
 	onWarnings?: (warnings: string[]) => void,
-): Array<DataTableAction> => ACTIONS.map((config) => {
-	const action: BookingDataTableAction = {
-		...config,
-		RenderModal: BookingActionConfirmModal,
-		callback: async (items, onActionPerformed, options) => {
-			await executeBookingAction(
-				items[0] as Booking,
-				action,
-				options as BookingActionOptions | undefined,
-				onWarnings,
-			);
-			onActionPerformed?.(items);
-		},
-	};
+): Array<DataTableAction> =>
+	ACTIONS.map((config) => {
+		const action: BookingDataTableAction = {
+			...config,
+			RenderModal: BookingActionConfirmModal,
+			callback: async (items, onActionPerformed, options) => {
+				await executeBookingAction(
+					items[0] as Booking,
+					action,
+					options as BookingActionOptions | undefined,
+					onWarnings,
+				);
+				onActionPerformed?.(items);
+			},
+		};
 
-	return action;
-});
+		return action;
+	});
 
 export const executeBookingAction = async (
 	item: Booking,
