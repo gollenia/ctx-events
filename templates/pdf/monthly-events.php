@@ -39,57 +39,87 @@
 
 	.program-table td {
 		vertical-align: top;
-		padding: 10px 0;
 		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.day-cell {
-		width: 70px;
-		padding-right: 16px;
+	.program-table tr.weekday-7 td {
+		background-color: #f3f4f6;
 	}
 
+	.day-cell {
+		width: 1px;
+		padding: 3px;
+		white-space: nowrap;
+	}
+
+	.right {
+		text-align: right;
+	}
+
+	.padding {
+		padding: 3px;
+	}
+	
+
 	.day-number {
-		font-size: 20pt;
 		font-weight: bold;
 		line-height: 1;
+		display: inline-block;
 	}
 
 	.day-name {
-		font-size: 9pt;
 		text-transform: uppercase;
 		color: #6b7280;
-		margin-top: 4px;
 	}
 
 	.event-item {
-		margin-bottom: 12px;
+		width: 100%;
+		border-collapse: collapse;
 	}
 
 	.event-item:last-child {
 		margin-bottom: 0;
 	}
 
+	.event-item td {
+		border: 0;
+		
+	}
+
+	.event-main {
+		padding-right: 12px;
+	}
+
+	.event-time {
+		width: 72px;
+		text-align: right;
+		white-space: nowrap;
+		color: #52606d;
+	}
+
 	.event-title {
-		font-size: 12pt;
 		font-weight: bold;
-		margin-bottom: 2px;
+	}
+
+	.border{
+		border-bottom: 1px solid #bbb;
 	}
 
 	.event-meta {
-		font-size: 9pt;
+		
 		color: #52606d;
-		margin-bottom: 3px;
+		
 	}
 
 	.event-flag {
-		font-size: 9pt;
+		
 		font-style: italic;
 		color: #7c3aed;
-		margin-bottom: 3px;
+		
 	}
 
 	.event-excerpt {
-		font-size: 10pt;
+		
 		color: #1f2933;
 	}
 
@@ -115,37 +145,42 @@
 			<?php if (!$showEmptyDays && $day['events'] === []) : ?>
 				<?php continue; ?>
 			<?php endif; ?>
-			<tr>
-				<td class="day-cell">
-					<div class="day-number"><?php echo esc_html((string) $day['count']); ?></div>
-					<div class="day-name"><?php echo esc_html((string) $day['name']); ?></div>
+			<tr class="weekday-<?php echo esc_attr((string) $day['weekday']); ?>">
+				<td class="day-cell right padding">
+					<span class="day-number"><?php echo esc_html((string) $day['count']); ?></span>
 				</td>
-				<td>
+				<td class="day-cell padding">
+					<span class="day-name"><?php echo esc_html((string) $day['name']); ?></span>
+				</td>
+				<td class="padding">
 					<?php if ($day['events'] === []) : ?>
-						<div class="empty-text"><?php esc_html_e('No events', 'ctx-events'); ?></div>
+						<div class="empty-text"></div>
 					<?php else : ?>
 						<?php foreach ($day['events'] as $event) : ?>
-							<div class="event-item">
-								<div class="event-title"><?php echo esc_html((string) $event['title']); ?></div>
-								<?php if (!empty($event['isContinuation'])) : ?>
-									<div class="event-flag"><?php esc_html_e('Continues', 'ctx-events'); ?></div>
-								<?php elseif (!empty($event['dateLabel']) && is_string($event['dateLabel'])) : ?>
-									<div class="event-flag"><?php echo esc_html($event['dateLabel']); ?></div>
-								<?php endif; ?>
-								<div class="event-meta">
-									<?php
-									$meta = array_filter([
-										is_string($event['timeLabel'] ?? null) ? $event['timeLabel'] : '',
-										is_string($event['location'] ?? null) ? $event['location'] : '',
-										is_string($event['person'] ?? null) ? $event['person'] : '',
-									]);
-									echo esc_html(implode(' | ', $meta));
-									?>
-								</div>
-								<?php if (!empty($event['excerpt']) && is_string($event['excerpt'])) : ?>
-									<div class="event-excerpt"><?php echo esc_html($event['excerpt']); ?></div>
-								<?php endif; ?>
-							</div>
+							<table class="event-item">
+								<tr>
+									<td class="event-main">
+										<span class="event-title"><?php echo esc_html((string) $event['title']); ?></span>
+										<?php if (!empty($event['isContinuation'])) : ?>
+											<span class="event-flag"><?php esc_html_e('Continues', 'ctx-events'); ?></span>
+										<?php elseif (!empty($event['dateLabel']) && is_string($event['dateLabel'])) : ?>
+											<span class="event-flag"><?php echo esc_html($event['dateLabel']); ?></span>
+										<?php endif; ?>
+										<span class="event-meta">
+											<?php
+											$meta = array_filter([
+												is_string($event['location'] ?? null) ? $event['location'] : '',
+												is_string($event['person'] ?? null) ? $event['person'] : '',
+											]);
+											echo esc_html(implode(' | ', $meta));
+											?>
+										</span>
+									</td>
+									<td class="event-time">
+										<?php echo esc_html(is_string($event['timeLabel'] ?? null) ? $event['timeLabel'] : ''); ?>
+									</td>
+								</tr>
+							</table>
 						<?php endforeach; ?>
 					<?php endif; ?>
 				</td>
