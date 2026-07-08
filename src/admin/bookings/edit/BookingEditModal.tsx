@@ -1,15 +1,11 @@
-import {
-	Flex,
-	Notice,
-	Spinner,
-} from '@wordpress/components';
+import { Flex, Notice, Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __, _x } from '@wordpress/i18n';
 import type {
 	BookingAttendeeResource,
 	BookingDetail,
 	BookingTransactionResource,
-} from 'src/types/types';
+} from '../../../types/types';
 import AttendeeSection from './AttendeeSection';
 import BookingInfoPanel from './BookingInfoPanel';
 import {

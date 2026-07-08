@@ -2,8 +2,8 @@ import { formatPrice } from '@events/i18n';
 import { Icon } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { notAllowed, pending, published, swatch } from '@wordpress/icons';
-import type { BookingListItem } from 'src/types/types';
 import type { DataFieldConfig } from '../../shared/datatable/types';
+import type { BookingListItem } from '../../types/types';
 import { STATUS_LABELS } from './constants';
 
 type FilterOptions = {
@@ -182,9 +182,10 @@ export const createFields = (
 		id: 'gateway',
 		label: __('Gateway', 'ctx-events'),
 		render: (booking: BookingListItem) => {
-			const countdown = booking.status !== 2 && booking.transactionExpiresAt
-				? getExpiresCountdown(booking.transactionExpiresAt)
-				: null;
+			const countdown =
+				booking.status !== 2 && booking.transactionExpiresAt
+					? getExpiresCountdown(booking.transactionExpiresAt)
+					: null;
 
 			return (
 				<div>
