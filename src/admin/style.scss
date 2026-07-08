@@ -193,14 +193,109 @@ body.booking-edit-open {
 		font-size: 13px;
 	}
 
-	.booking-edit__notes,
-	.booking-edit__activity-list {
-		list-style: none;
-		margin: 0 0 1rem;
-		padding: 0;
+	.booking-edit__note-avatar {
+		width: 40px;
+		height: 40px;
+		flex: 0 0 40px;
+		border-radius: 999px;
+		display: grid;
+		place-items: center;
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+	}
+
+	.booking-edit__note-content {
+		min-width: 0;
+		flex: 1;
+		background: #f1f1f1;
+    	padding: 1rem;
+    	border-radius: 10px;
+	}
+
+	.booking-edit__note-meta {
 		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.35rem 0.75rem;
+		margin-bottom: 0.375rem;
+	}
+
+	.booking-edit__note-author {
+		color: #1e1e1e;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+
+	.booking-edit__note-date {
+		color: #646970;
+		font-size: 12px;
+		line-height: 1.4;
+	}
+
+	.booking-edit__note-text {
+		margin: 0;
+		color: #2c3338;
+		font-size: 13px;
+		line-height: 1.55;
+		white-space: pre-wrap;
+	}
+
+	.booking-edit__activity-item {
+		position: relative;
+
+		&:not(:last-child) {
+			padding-bottom: 0.75rem;
+			margin-bottom: 0rem;
+		}
+
+		&::after {
+			content: " ";
+			border-left: 1px solid #e0e0e0;
+			position: absolute;
+			top: 0;
+			height: 100%;
+			left: 16px;
+		}
+	}
+
+	.booking-edit__activity-header {
+		height: 32px;
+	}
+
+	.booking-edit__activity-icon {
+		z-index: 1;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+
+		&--success {
+			background: #d1e7dd;
+			color: #198754;
+			fill: #198754;
+		}
+
+		&--warning {
+			background: #fff3cd;
+			color: #ffc107;
+			fill: #ffc107;
+		}
+
+		&--error {
+			background: #f8d7da;
+			color: #dc3545;
+			fill: #dc3545;
+		}
+
+		&--info {
+			background: #cff4fc;
+			color: #0dcaf0;
+			fill: #0dcaf0;
+		}
 	}
 
 	.booking-edit__transactions {
@@ -269,79 +364,6 @@ body.booking-edit-open {
 		margin: 0;
 	}
 
-	.booking-edit__note,
-	.booking-edit__activity-item {
-		padding: 0.75rem;
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
-		background: #f9fafb;
-	}
-
-	.booking-edit__activity-item[data-level='warning'] {
-		border-color: #e0b03f;
-		background: #fff8e1;
-	}
-
-	.booking-edit__activity-item[data-level='error'] {
-		border-color: #d63638;
-		background: #fbeaea;
-	}
-
-	.booking-edit__note-date,
-	.booking-edit__note-author,
-	.booking-edit__activity-head span,
-	.booking-edit__activity-actor {
-		display: block;
-		font-size: 12px;
-		color: #646970;
-	}
-
-	.booking-edit__note-author {
-		margin-top: 0.2rem;
-		font-weight: 600;
-	}
-
-	.booking-edit__note p,
-	.booking-edit__activity-actor {
-		margin: 0.35rem 0 0;
-	}
-
-	.booking-edit__activity-head {
-		display: flex;
-		justify-content: space-between;
-		gap: 0.75rem;
-		align-items: baseline;
-	}
-
-	.booking-edit__activity-title {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.booking-edit__activity-level {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.1rem 0.45rem;
-		border-radius: 999px;
-		font-size: 11px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		background: #e8eaeb;
-		color: #50575e;
-	}
-
-	.booking-edit__activity-item[data-level='warning'] .booking-edit__activity-level {
-		background: #f6d675;
-		color: #5f4b00;
-	}
-
-	.booking-edit__activity-item[data-level='error'] .booking-edit__activity-level {
-		background: #f0b8b9;
-		color: #6a0d0f;
-	}
 
 	.booking-edit__registration-fields {
 		display: grid;
