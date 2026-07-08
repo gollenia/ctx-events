@@ -27,26 +27,7 @@
 	"supports": {
 		"anchor": true,
 		"html": false,
-		"color": {
-			"link": false,
-			"text": true,
-			"background": true
-		},
-		"__experimentalBorder": {
-			"color": true,
-			"radius": true,
-			"style": false,
-			"width": false,
-			"__experimentalDefaultControls": {
-				"radius": true,
-				"style": false,
-				"width": true,
-				"linked": false,
-				"color": true
-			}
-		},
 		"spacing": {
-			"padding": true,
 			"margin": true
 		}
 	},
@@ -59,11 +40,15 @@
 		{
 			"name": "outline",
 			"label": "Outline"
+		},
+		{
+			"name": "link",
+			"label": "Link"
 		}
 	],
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
-	"style": "booking-style",
+	"style": "file:./style-index.css",
 	"render": "file:./render.php",
 	"viewScript": "file:./view/index.js"
 }

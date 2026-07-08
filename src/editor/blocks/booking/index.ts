@@ -1,9 +1,9 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { withColors } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import './editor.scss';
+import './style.scss';
 import icon from './icon';
 
 const { name, title, description } = metadata;
@@ -13,7 +13,7 @@ const settings = {
 	title: __(title, 'ctx-events'),
 	description: __(description, 'ctx-events'),
 	icon,
-	edit: withColors({ buttonColor: 'buttonColor' })(Edit),
+	edit: Edit,
 	save: () => null,
 };
 

@@ -21,8 +21,6 @@ type BookingEditProps = {
 	attributes: BookingAttributes;
 	setAttributes: (attributes: Partial<BookingAttributes>) => void;
 	className?: string;
-	backgroundColor?: string;
-	textColor?: string;
 };
 
 const edit = (props: BookingEditProps) => {
@@ -30,8 +28,6 @@ const edit = (props: BookingEditProps) => {
 		attributes: { buttonTitle, buttonIcon, iconRight, iconOnly },
 		setAttributes,
 		className,
-		backgroundColor,
-		textColor,
 	} = props;
 
 	const postType = (select('core/editor') as { getCurrentPostType: () => string })
@@ -44,16 +40,6 @@ const edit = (props: BookingEditProps) => {
 	const blockProps = useBlockProps({
 		className: 'ctx-event-booking',
 	});
-
-	const isOutline = (blockProps.className ?? '').includes('is-style-outline');
-	const style = {
-		...blockProps.style,
-		backgroundColor: isOutline ? 'transparent' : backgroundColor,
-		boxShadow: isOutline
-			? `inset 0px 0px 0px 2px ${backgroundColor}`
-			: 'none',
-		color: isOutline ? backgroundColor : textColor,
-	};
 
 	const buttonClasses = [
 		className,
@@ -69,7 +55,7 @@ const edit = (props: BookingEditProps) => {
 		<div {...blockProps}>
 			<Inspector {...props} />
 			<Toolbar {...props} />
-			<span style={style} className={buttonClasses} aria-disabled={!meta._booking_enabled}>
+			<span className={buttonClasses} aria-disabled={!meta._booking_enabled}>
 				{buttonIcon && <EventIcon name={buttonIcon} />}
 				<RichText
 					disabled={!meta._booking_enabled}
