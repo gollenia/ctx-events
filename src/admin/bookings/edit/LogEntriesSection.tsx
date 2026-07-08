@@ -1,16 +1,22 @@
+import { Flex, FlexItem } from '@contexis/wp-react-form';
+import { formatDate } from '@events/i18n/datetime';
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
-	cancelCircleFilled,
+	caution,
 	Icon,
 	keyboardReturn,
-	plusCircleFilled,
+	notAllowed,
+	plusCircle,
 	scheduled,
 	thumbsDown,
 	thumbsUp,
 	update,
 } from '@wordpress/icons';
-import type { BookingDetail, BookingLogEntryResource } from 'src/types/types';
+import type {
+	BookingDetail,
+	BookingLogEntryResource,
+} from '../../../types/types';
 
 type Props = {
 	booking: BookingDetail;
@@ -23,14 +29,46 @@ const EVENT_LABELS: Record<BookingLogEntryResource['eventType'], string> = {
 	approved: __('Approved', 'ctx-events'),
 	rejected: __('Rejected', 'ctx-events'),
 	cancelled: __('Cancelled', 'ctx-events'),
+	attendee_cancelled: __('Attendee cancelled', 'ctx-events'),
 	restored: __('Restored', 'ctx-events'),
 	email_warning: __('Email warning', 'ctx-events'),
 };
 
-const LEVEL_LABELS: Record<BookingLogEntryResource['level'], string> = {
-	info: __('Info', 'ctx-events'),
-	warning: __('Warning', 'ctx-events'),
-	error: __('Error', 'ctx-events'),
+const levelClassMap: Record<BookingLogEntryResource['level'], string> = {
+	info: 'info',
+	warning: 'warning',
+	error: 'error',
+};
+
+const LogIcon = ({
+	eventType,
+}: {
+	eventType: BookingLogEntryResource['eventType'];
+}) => {
+	const icon = (() => {
+		switch (eventType) {
+			case 'created':
+				return plusCircle;
+			case 'updated':
+				return update;
+			case 'deleted':
+				return notAllowed;
+			case 'approved':
+				return thumbsUp;
+			case 'rejected':
+				return thumbsDown;
+			case 'restored':
+				return keyboardReturn;
+			case 'attendee_cancelled':
+				return notAllowed;
+			case 'email_warning':
+				return scheduled;
+			default:
+				return caution;
+		}
+	})();
+
+	return <Icon icon={icon} />;
 };
 
 const LogEntriesSection = ({ booking }: Props) => {
@@ -44,54 +82,45 @@ const LogEntriesSection = ({ booking }: Props) => {
 						{__('No activity yet.', 'ctx-events')}
 					</p>
 				) : (
-					<ul className="booking-edit__activity-list">
+					<Flex direction="column" as="ul" gap="0.75rem">
 						{logEntries.map((entry, index) => (
-							<li
+							<Flex
 								key={`${entry.timestamp}-${entry.eventType}-${index}`}
-								className="booking-edit__activity-item"
 								data-level={entry.level}
 							>
-								<div className="booking-edit__activity-head">
-									<div className="booking-edit__activity-title">
-										<Icon
-											icon={
-												entry.eventType === 'created'
-													? plusCircleFilled
-													: entry.eventType === 'updated'
-														? update
-														: entry.eventType === 'deleted'
-															? cancelCircleFilled
-															: entry.eventType === 'approved'
-																? thumbsUp
-																: entry.eventType === 'rejected'
-																	? thumbsDown
-																	: entry.eventType === 'restored'
-																		? keyboardReturn
-																		: entry.eventType === 'email_warning'
-																			? scheduled
-																			: plusCircleFilled
-											}
-										/>
-										<strong>
-											{EVENT_LABELS[entry.eventType] ?? entry.eventType}
-										</strong>
-										<span className="booking-edit__activity-level">
-											{LEVEL_LABELS[entry.level] ?? entry.level}
-										</span>
-									</div>
-									<span>{new Date(entry.timestamp).toLocaleString()}</span>
-								</div>
-								<p className="booking-edit__activity-actor">
-									{entry.actorName || __('Guest', 'ctx-events')}
-								</p>
-								{entry.message ? (
-									<p className="booking-edit__activity-actor">
-										{entry.message}
-									</p>
-								) : null}
-							</li>
+								<Flex align="flex-start" gap="1rem">
+									<FlexItem
+										className={`booking-edit__activity-icon booking-edit__activity-icon--${levelClassMap[entry.level]}`}
+										style={{ flex: '0 0 auto' }}
+									>
+										<LogIcon eventType={entry.eventType} />
+									</FlexItem>
+									<Flex direction="column" style={{ flex: 1 }}>
+										<Flex
+											justify="space-between"
+											align="center"
+											className="booking-edit__activity-header"
+										>
+											<Flex align="center" gap="1rem">
+												<strong>
+													{EVENT_LABELS[entry.eventType] ?? entry.eventType}
+												</strong>
+												<span className="">
+													{entry.actorName || __('Guest', 'ctx-events')}
+												</span>
+											</Flex>
+											<span>{formatDate(entry.timestamp)}</span>
+										</Flex>
+										{entry.message ? (
+											<span className="booking-edit__activity-actor">
+												{entry.message}
+											</span>
+										) : null}
+									</Flex>
+								</Flex>
+							</Flex>
 						))}
-					</ul>
+					</Flex>
 				)}
 			</PanelBody>
 		</Panel>
