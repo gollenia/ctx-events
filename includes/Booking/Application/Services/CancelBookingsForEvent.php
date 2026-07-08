@@ -43,7 +43,7 @@ final class CancelBookingsForEvent
 				->withBookingStatus(BookingStatus::CANCELED)
 				->appendLogEntry(new LogEntry(
 					eventType: BookingLogEvent::Cancelled,
-					level: BookingLogLevel::Info,
+					level: BookingLogLevel::Error,
 					actor: $this->currentActorProvider->current(),
 					timestamp: $this->clock->now(),
 				));

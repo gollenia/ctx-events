@@ -84,13 +84,12 @@ final class CancelBookingAttendee
             )
             ->appendLogEntry(new LogEntry(
                 eventType: BookingLogEvent::AttendeeCancelled,
-                level: BookingLogLevel::Info,
+                level: BookingLogLevel::Error,
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
                 message: sprintf(
-                    'Attendee %d cancelled with %d cents.',
-                    $request->attendeeId,
-                    $request->cancellationAmountCents,
+                    __('Attendee %d cancelled'),
+                    $request->attendeeId
                 ),
             ));
 

@@ -49,7 +49,7 @@ final class ApproveBooking implements BookingAction
             ->withBookingStatus(BookingStatus::APPROVED)
             ->appendLogEntry(new LogEntry(
                 eventType: BookingLogEvent::Approved,
-                level: BookingLogLevel::Info,
+                level: BookingLogLevel::Success,
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
             ));
