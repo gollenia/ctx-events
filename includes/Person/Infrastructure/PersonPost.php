@@ -67,6 +67,7 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
     {
         add_filter('manage_' . self::POST_TYPE . '_posts_columns', [$this, 'filterColumns']);
         add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderColumn'], 10, 2);
+        add_filter('post_row_actions', [$this, 'filterRowActions'], 10, 2);
     }
 
     public function registerTaxonomies(): void
@@ -138,7 +139,18 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
                 break;
 
             case 'email':
-                echo esc_html((string) get_post_meta($postId, PersonMeta::EMAIL, true) ?: '—');
+                $email = (string) get_post_meta($postId, PersonMeta::EMAIL, true);
+
+                if ($email === '') {
+                    echo '—';
+                    break;
+                }
+
+                printf(
+                    '<a href="%1$s">%2$s</a>',
+                    esc_url('mailto:' . $email),
+                    esc_html($email),
+                );
                 break;
 
             case 'phone':
@@ -149,5 +161,21 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
                 echo esc_html((string) get_post_meta($postId, PersonMeta::ORGANIZATION, true) ?: '—');
                 break;
         }
+    }
+
+    /**
+     * @param array<string, string> $actions
+     * @param \WP_Post $post
+     * @return array<string, string>
+     */
+    public function filterRowActions(array $actions, \WP_Post $post): array
+    {
+        if ($post->post_type !== self::POST_TYPE) {
+            return $actions;
+        }
+
+        unset($actions['inline hide-if-no-js']);
+
+        return $actions;
     }
 }
