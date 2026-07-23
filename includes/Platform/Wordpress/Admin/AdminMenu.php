@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Platform\Wordpress\Admin;
 
-use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
-use Contexis\Events\Booking\Infrastructure\BookingMigration;
+use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Event\Infrastructure\EventPost;
 use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Payment\Infrastructure\CouponPost;
@@ -14,6 +13,10 @@ final class AdminMenu implements AdminServiceInterface
 {
     public const MENU_SLUG = 'ctx_events_admin_menu';
     public string $hook = 'admin_menu';
+
+    public function __construct(private BookingRepository $bookingRepository)
+    {
+    }
 
     public function hook(): void
     {
@@ -41,7 +44,7 @@ final class AdminMenu implements AdminServiceInterface
 
     public function register(): void
     {
-        $pendingBookings = $this->pendingBookingCount();
+        $pendingBookings = $this->bookingRepository->countPending();
 
         add_menu_page(
             __('Events', 'ctx-events'),
@@ -59,7 +62,7 @@ final class AdminMenu implements AdminServiceInterface
             __('Events', 'ctx-events'),
             'manage_options',
             self::MENU_SLUG,
-            [$this, 'eventsPage'],
+            fn() => print('<div id="ctx-events-list"></div>'),
             0
         );
 
@@ -136,25 +139,6 @@ final class AdminMenu implements AdminServiceInterface
 		);
     }
 
-    public function eventsPage(): string
-    {
-		echo "<div id='ctx-events-list'></div>";
-        return '';
-    }
-
-    private function pendingBookingCount(): int
-    {
-        global $wpdb;
-
-        $table = BookingMigration::getTableName();
-        $sql = $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE status = %d",
-            BookingStatus::PENDING->value
-        );
-
-        return (int) $wpdb->get_var($sql);
-    }
-
     private function withCounter(string $label, int $count): string
     {
         if ($count < 1) {
@@ -164,8 +148,9 @@ final class AdminMenu implements AdminServiceInterface
         $countLabel = number_format_i18n($count);
 
         return sprintf(
-            '%s <span class="awaiting-mod"><span class="pending-count">%s</span></span>',
+            '%s <span class="menu-counter awaiting-mod count-%s"><span class="count">%s</span></span>',
             esc_html($label),
+            esc_html($count),
             esc_html($countLabel)
         );
     }

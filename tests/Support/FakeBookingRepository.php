@@ -78,6 +78,14 @@ final class FakeBookingRepository implements BookingRepository
         return BookingCollection::from(...$this->bookingsForEvent($eventId));
     }
 
+    public function countPending(): int
+    {
+        return count(array_filter(
+            $this->bookingsById,
+            static fn (Booking $booking): bool => $booking->status === BookingStatus::PENDING,
+        ));
+    }
+
     public function save(Booking $booking): BookingId
     {
         $bookingId = BookingId::from($this->sequence) ?? throw new \RuntimeException('Invalid id');

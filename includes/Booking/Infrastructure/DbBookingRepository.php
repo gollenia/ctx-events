@@ -92,13 +92,24 @@ class DbBookingRepository implements BookingRepository
         return $this->bookingHydrator->hydrate($result);
     }
 
-	public function findByEventId(EventId $eventId): BookingCollection
+    public function findByEventId(EventId $eventId): BookingCollection
 	{
 		$table = BookingMigration::getTableName();
 		$sql = "SELECT * FROM $table WHERE event_id = %d";
 		$results = $this->db->getResults($this->db->prepare($sql, $eventId->toInt()), DatabaseOutput::ARRAY_ASSOC);
 
 		return $this->bookingCollectionHydrator->hydrate($results);
+    }
+
+    public function countPending(): int
+    {
+        $table = BookingMigration::getTableName();
+        $sql = $this->db->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE status = %d",
+            BookingStatus::PENDING->value
+        );
+
+        return (int) $this->db->getVar($sql);
     }
 
     public function search(BookingListRequest $query): BookingListResponse
