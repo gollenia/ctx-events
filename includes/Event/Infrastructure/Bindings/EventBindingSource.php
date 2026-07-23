@@ -83,6 +83,7 @@ final class EventBindingSource
 			'imageId' => (int) get_post_thumbnail_id($event),
 			'imageUrl' => $this->getImageUrl($event->ID),
 			'schedule' => $this->getSchedule($eventResponse),
+			'locationName' => $eventResponse?->locationDto?->name ?? '',
 			'title' => get_the_title($event),
 			'excerpt' => $this->getExcerpt($event),
 			'link' => (string) get_permalink($event),
