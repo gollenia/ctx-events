@@ -117,13 +117,13 @@
 		}
 
 		&.is-today {
-			background: #eef6ff;
-			box-shadow: inset 0 0 0 1px #b9d4f0;
+			background: #eaeefc;
+			box-shadow: inset 0 0 0 1px #3858e9;
 		}
 
 		&.is-today:hover,
 		&.is-today:focus {
-			background: #e6f1fd;
+			background: #dfe5fc;
 		}
 	}
 

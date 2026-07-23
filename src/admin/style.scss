@@ -77,6 +77,18 @@ p.warning {
 	color: #d54e21;
 }
 
+body.post-type-ctx-event-person {
+	.wp-list-table {
+		th.column-photo,
+		td.column-photo {
+			box-sizing: border-box;
+			width: 60px !important;
+			min-width: 60px;
+			max-width: 60px;
+		}
+	}
+}
+
 
 
 
