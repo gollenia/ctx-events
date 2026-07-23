@@ -11,6 +11,11 @@ export type Context = {
 	postId?: number;
 	postType?: string;
 	'ctx-events/eventId'?: number;
+	'ctx-events/selectionMode'?: 'manual' | 'query' | 'current';
+	'ctx-events/queryCategoryIds'?: number[];
+	'ctx-events/queryTagIds'?: number[];
+	'ctx-events/queryLocationId'?: number;
+	'ctx-events/queryScope'?: string;
 };
 
 export type EventTicket = {
@@ -34,6 +39,8 @@ export type EventRecord = {
 		_person_id?: number | string | number[];
 		_event_tickets?: EventTicket[];
 	};
+	'ctx-event-categories'?: number[];
+	'ctx-event-tags'?: number[];
 	_embedded?: {
 		'wp:featuredmedia'?: Array<{
 			id?: number;
@@ -71,14 +78,127 @@ export function stripHtml(html?: string): string {
 	return html.replace(/<[^>]+>/g, '').trim();
 }
 
+function normalizeIds(values?: number[]): number[] {
+	return Array.isArray(values)
+		? values.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0)
+		: [];
+}
+
+function resolveScopeField(event: EventRecord): string {
+	return event.meta?._event_end || event.meta?._event_start || '';
+}
+
+function matchesScope(event: EventRecord, scope: string): boolean {
+	const start = event.meta?._event_start ? new Date(event.meta._event_start) : null;
+	const end = event.meta?._event_end ? new Date(event.meta._event_end) : start;
+	const compare = resolveScopeField(event);
+	const compareDate = compare ? new Date(compare) : null;
+	const now = new Date();
+
+	if (!start || Number.isNaN(start.getTime()) || !compareDate || Number.isNaN(compareDate.getTime())) {
+		return false;
+	}
+
+	switch (scope) {
+		case 'today': {
+			const today = now.toISOString().slice(0, 10);
+			const startDay = start.toISOString().slice(0, 10);
+			const endDay = end && !Number.isNaN(end.getTime()) ? end.toISOString().slice(0, 10) : startDay;
+			return startDay <= today && endDay >= today;
+		}
+		case 'this-week': {
+			const weekEnd = new Date(now);
+			weekEnd.setDate(now.getDate() + 7);
+			return compareDate >= now && start <= weekEnd;
+		}
+		case 'this-month': {
+			return (
+				start.getFullYear() === now.getFullYear() &&
+				start.getMonth() === now.getMonth() &&
+				compareDate >= now
+			);
+		}
+		case 'future':
+		default:
+			return compareDate >= now;
+	}
+}
+
+function getQueryEventFromContext(
+	select: unknown,
+	context?: Context,
+): EventRecord | null {
+	const categories = normalizeIds(context?.['ctx-events/queryCategoryIds']);
+	const tags = normalizeIds(context?.['ctx-events/queryTagIds']);
+	const locationId = Number(context?.['ctx-events/queryLocationId'] ?? 0);
+	const scope = context?.['ctx-events/queryScope'] || 'future';
+
+	const events =
+		(
+			select as (store: typeof coreStore) => {
+				getEntityRecords: (
+					kind: string,
+					name: string,
+					query?: Record<string, unknown>,
+				) => EventRecord[] | null;
+			}
+		)(coreStore).getEntityRecords('postType', 'ctx-event', {
+			per_page: -1,
+			status: ['publish', 'future'],
+			_embed: true,
+		}) ?? [];
+
+	const filtered = events
+		.filter((event) => {
+			if (!matchesScope(event, scope)) {
+				return false;
+			}
+
+			if (
+				locationId > 0 &&
+				Number(event.meta?._location_id ?? 0) !== locationId
+			) {
+				return false;
+			}
+
+			const eventCategories = normalizeIds(event['ctx-event-categories']);
+			if (categories.length > 0 && !categories.every((id) => eventCategories.includes(id))) {
+				return false;
+			}
+
+			const eventTags = normalizeIds(event['ctx-event-tags']);
+			if (tags.length > 0 && !tags.every((id) => eventTags.includes(id))) {
+				return false;
+			}
+
+			return true;
+		})
+		.sort((a, b) => {
+			const aDate = new Date(a.meta?._event_start || '').getTime();
+			const bDate = new Date(b.meta?._event_start || '').getTime();
+			return aDate - bDate;
+		});
+
+	return filtered[0] ?? null;
+}
+
 export function getEventFromContext(
 	select: unknown,
 	context?: Context,
 ): EventRecord | null {
+	const selectionMode = context?.['ctx-events/selectionMode'] ?? 'manual';
 	const selectedEventId = Number(context?.['ctx-events/eventId'] ?? 0);
 	const fallbackEventId =
 		context?.postType === 'ctx-event' ? Number(context?.postId ?? 0) : 0;
-	const eventId = selectedEventId || fallbackEventId;
+
+	if (selectionMode === 'query') {
+		return getQueryEventFromContext(select, context);
+	}
+
+	const eventId =
+		selectionMode === 'current'
+			? fallbackEventId
+			: selectedEventId || fallbackEventId;
 
 	if (!eventId) {
 		return null;

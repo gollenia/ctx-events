@@ -10,7 +10,16 @@ import {
 
 registerBlockBindingsSource({
 	name: 'ctx-events/booking',
-	usesContext: ['ctx-events/eventId', 'postId', 'postType'],
+	usesContext: [
+		'ctx-events/eventId',
+		'ctx-events/selectionMode',
+		'ctx-events/queryCategoryIds',
+		'ctx-events/queryTagIds',
+		'ctx-events/queryLocationId',
+		'ctx-events/queryScope',
+		'postId',
+		'postType',
+	],
 	getFieldsList(): BindingField[] {
 		return [
 			{ label: __('Status', 'ctx-events'), type: 'string', args: { field: 'statusLabel' } },

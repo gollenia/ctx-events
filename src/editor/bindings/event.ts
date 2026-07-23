@@ -6,12 +6,23 @@ import {
 	type BindingField,
 	type Context,
 	getEventFromContext,
+	getRecordTitle,
+	getRelatedRecord,
 	stripHtml,
 } from './shared';
 
 registerBlockBindingsSource({
 	name: 'ctx-events/event',
-	usesContext: ['ctx-events/eventId', 'postId', 'postType'],
+	usesContext: [
+		'ctx-events/eventId',
+		'ctx-events/selectionMode',
+		'ctx-events/queryCategoryIds',
+		'ctx-events/queryTagIds',
+		'ctx-events/queryLocationId',
+		'ctx-events/queryScope',
+		'postId',
+		'postType',
+	],
 	getFieldsList(): BindingField[] {
 		return [
 			{ label: __('Title', 'ctx-events'), type: 'string', args: { field: 'title' } },
@@ -19,6 +30,7 @@ registerBlockBindingsSource({
 			{ label: __('Schedule', 'ctx-events'), type: 'string', args: { field: 'schedule' } },
 			{ label: __('Date', 'ctx-events'), type: 'string', args: { field: 'dateLabel' } },
 			{ label: __('Time', 'ctx-events'), type: 'string', args: { field: 'timeLabel' } },
+			{ label: __('Location', 'ctx-events'), type: 'string', args: { field: 'locationName' } },
 			{ label: __('Link', 'ctx-events'), type: 'string', args: { field: 'link' } },
 			{
 				label: __('Featured image URL', 'ctx-events'),
@@ -42,6 +54,12 @@ registerBlockBindingsSource({
 		if (!event) {
 			return {};
 		}
+
+		const location = getRelatedRecord(
+			select,
+			'ctx-event-location',
+			Number(event.meta?._location_id ?? 0),
+		);
 
 		const values: Record<string, string | number> = {};
 
@@ -87,6 +105,10 @@ registerBlockBindingsSource({
 				const date = start ? formatDateRange(start, end || start) : '';
 				const time = start ? formatTimeRange(start, end || start) : '';
 				values[attributeName] = time ? `${date}, ${time}` : date;
+			}
+
+			if (field === 'locationName') {
+				values[attributeName] = getRecordTitle(location);
 			}
 
 			if (field === 'excerpt') {
