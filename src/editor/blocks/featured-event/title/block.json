@@ -13,7 +13,7 @@
 			"default": 2
 		}
 	},
-	"usesContext": ["ctx-events/eventId", "postId", "postType"],
+	"usesContext": ["ctx-events/eventId", "ctx-events/selectionMode", "ctx-events/queryCategoryIds", "ctx-events/queryTagIds", "ctx-events/queryLocationId", "ctx-events/queryScope", "postId", "postType"],
 	"render": "file:./render.php",
 	"editorScript": "file:./index.js"
 }
