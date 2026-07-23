@@ -46,7 +46,7 @@
 		"php-di/php-di": "^7.1.1",
 		"psr/clock": "^1.0.0",
 		"ueberdosis/tiptap-php": "^2.1",
-		"contexis/wp-github-updater": "^0.1.0"
+		"contexis/wp-github-updater": "^0.3.0"
 	},
 	"autoload": {
 		"psr-4": {
