@@ -11,11 +11,36 @@
 		"selectedEvent": {
 			"type": "number",
 			"default": 0
+		},
+		"selectionMode": {
+			"type": "string",
+			"default": "manual"
+		},
+		"queryCategoryIds": {
+			"type": "array",
+			"default": []
+		},
+		"queryTagIds": {
+			"type": "array",
+			"default": []
+		},
+		"queryLocationId": {
+			"type": "number",
+			"default": 0
+		},
+		"queryScope": {
+			"type": "string",
+			"default": "future"
 		}
 	},
 	"usesContext": ["postId", "postType"],
 	"providesContext": {
-		"ctx-events/eventId": "selectedEvent"
+		"ctx-events/eventId": "selectedEvent",
+		"ctx-events/selectionMode": "selectionMode",
+		"ctx-events/queryCategoryIds": "queryCategoryIds",
+		"ctx-events/queryTagIds": "queryTagIds",
+		"ctx-events/queryLocationId": "queryLocationId",
+		"ctx-events/queryScope": "queryScope"
 	},
 	"supports": {
 		"inserter": false,
@@ -80,9 +105,12 @@
 									"content": "A short event summary appears here to preview the featured event layout."
 								}
 							},
-							{
-								"name": "ctx-events/featured-location"
-							},
+								{
+									"name": "core/paragraph",
+									"attributes": {
+										"content": "Featured location"
+									}
+								},
 							{
 								"name": "core/buttons",
 								"innerBlocks": [
