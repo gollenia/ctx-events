@@ -5,6 +5,7 @@ import { useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import icons from './icons';
+import './location.scss';
 import type { EditorSelection, EventMeta, MediaOption } from './types';
 
 type LocationRecord = {
@@ -91,7 +92,7 @@ const LocationSelector = () => {
 					}
 
 					return (
-						<div className="events-speaker-item">
+						<div className="events-location-item">
 							{item.media ? (
 								<img
 									className="icon-round"

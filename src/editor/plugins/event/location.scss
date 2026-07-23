@@ -1,0 +1,15 @@
+.events-location-item {
+ 	display: flex;
+ 	align-items: center;
+ 	gap: 0.5rem;
+
+ 	.icon-round {
+ 		border-radius: 99px;
+ 		background-color: #ddd;
+ 		width: 24px;
+ 		height: 24px;
+ 		
+ 		display: grid;
+ 		place-items: center;
+ 	}
+ }
