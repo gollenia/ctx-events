@@ -19,7 +19,9 @@
 <p>Event excerpt</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:ctx-events/featured-location /-->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"ctx-events/event","args":{"field":"locationName"}}}}} -->
+<p>Event location</p>
+<!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"ctx-events/event","args":{"field":"link"}}}}} -->
