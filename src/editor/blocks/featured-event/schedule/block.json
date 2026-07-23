@@ -7,7 +7,42 @@
 	"category": "widgets",
 	"icon": "calendar",
 	"ancestor": ["ctx-events/featured-event"],
-	"usesContext": ["ctx-events/eventId", "postId", "postType"],
+	"usesContext": [
+		"ctx-events/eventId",
+		"ctx-events/selectionMode",
+		"ctx-events/queryCategoryIds",
+		"ctx-events/queryTagIds",
+		"ctx-events/queryLocationId",
+		"ctx-events/queryScope",
+		"postId",
+		"postType"
+	],
 	"render": "file:./render.php",
-	"editorScript": "file:./index.js"
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
+	"attributes": {
+		"displayMode": {
+			"type": "string",
+			"default": "date-time"
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"fontFamily": true,
+			"fontWeight": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"align": true
+	}
 }
