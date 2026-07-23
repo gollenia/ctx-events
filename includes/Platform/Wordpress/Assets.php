@@ -124,6 +124,14 @@ final class Assets implements Registrar
             $script_asset['version'],
             'all'
         );
+
+        wp_enqueue_style(
+            'ctx-events-editor-plugin-style',
+            PluginInfo::getPluginUrl(self::ASSET_PATH . '/editor.css'),
+            ['ctx-events-editor-style'],
+            $script_asset['version'],
+            'all'
+        );
     }
 
     private function addIconConfig(string $handle): void
