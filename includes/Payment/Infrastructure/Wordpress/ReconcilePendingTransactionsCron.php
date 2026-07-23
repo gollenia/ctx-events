@@ -20,8 +20,8 @@ final class ReconcilePendingTransactionsCron implements Registrar
 
     public function hook(): void
     {
-        add_action('init', [$this, 'registerSchedule']);
         add_action(self::HOOK, [$this, 'run']);
+        $this->registerSchedule();
     }
 
     public function registerSchedule(): void
