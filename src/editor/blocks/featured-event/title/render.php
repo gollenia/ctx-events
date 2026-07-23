@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
+use Contexis\Events\Event\Infrastructure\Bindings\EventBindingContext;
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
 
 $context = isset($block) && is_object($block) && isset($block->context) && is_array($block->context)
 	? $block->context
 	: [];
-$selected_event = isset($context['ctx-events/eventId']) ? (int) $context['ctx-events/eventId'] : 0;
-$fallback_event = get_post_type(get_the_ID()) === 'ctx-event' ? (int) get_the_ID() : 0;
-$event_id = $selected_event ?: $fallback_event;
+$event_id = EventBindingContext::resolveEventIdFromContext($context);
 
 if ($event_id <= 0) {
 	return;
