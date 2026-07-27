@@ -25,12 +25,15 @@ final readonly class TiptapEmailBodyRenderer implements EmailBodyRenderer
             );
         }
 
+        $document = $this->documentRenderer->render($body, $context);
+
         return new RenderedEmailBody(
             content: $this->tokenReplacer->replaceHtml(
-                $this->documentRenderer->renderToHtml($body, $context),
+                $document->html,
                 $context,
             ),
             isHtml: true,
+            inlineAttachments: $document->inlineAttachments,
         );
     }
 }

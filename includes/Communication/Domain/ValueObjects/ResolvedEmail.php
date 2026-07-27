@@ -9,6 +9,7 @@ use Contexis\Events\Shared\Domain\ValueObjects\Email;
 final readonly class ResolvedEmail
 {
     /** @param list<EmailAttachment> $attachments */
+    /** @param list<EmailInlineAttachment> $inlineAttachments */
     public function __construct(
         public Email $to,
         public string $subject,
@@ -16,6 +17,7 @@ final readonly class ResolvedEmail
         public ?Email $replyTo = null,
         public bool $isHtml = false,
         public array $attachments = [],
+        public array $inlineAttachments = [],
     ) {
     }
 }

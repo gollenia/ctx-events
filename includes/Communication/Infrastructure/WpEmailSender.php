@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Contexis\Events\Communication\Infrastructure;
 
 use Contexis\Events\Communication\Application\Contracts\EmailSender;
+use Contexis\Events\Communication\Domain\ValueObjects\EmailAttachment;
+use Contexis\Events\Communication\Domain\ValueObjects\EmailInlineAttachment;
 use Contexis\Events\Communication\Domain\ValueObjects\ResolvedEmail;
 
 final class WpEmailSender implements EmailSender
@@ -21,7 +23,23 @@ final class WpEmailSender implements EmailSender
             $headers[] = 'Reply-To: ' . $email->replyTo->toString();
         }
 
-        $attachments = $this->createTemporaryAttachments($email);
+        $attachments = $this->createTemporaryAttachments($email->attachments);
+        $inlineAttachments = $this->createTemporaryInlineAttachments($email->inlineAttachments);
+        $embedInlineAttachments = static function ($mailer) use ($inlineAttachments): void {
+            foreach ($inlineAttachments as $attachment) {
+                $mailer->addEmbeddedImage(
+                    $attachment['path'],
+                    $attachment['contentId'],
+                    $attachment['filename'],
+                    'base64',
+                    $attachment['mimeType'],
+                );
+            }
+        };
+
+        if ($inlineAttachments !== []) {
+            add_action('phpmailer_init', $embedInlineAttachments);
+        }
 
         try {
             return wp_mail(
@@ -32,7 +50,11 @@ final class WpEmailSender implements EmailSender
                 $attachments,
             );
         } finally {
-            foreach ($attachments as $attachment) {
+            if ($inlineAttachments !== []) {
+                remove_action('phpmailer_init', $embedInlineAttachments);
+            }
+
+            foreach (array_merge($attachments, array_column($inlineAttachments, 'path')) as $attachment) {
                 if (is_string($attachment) && is_file($attachment)) {
                     @unlink($attachment);
                 }
@@ -43,29 +65,65 @@ final class WpEmailSender implements EmailSender
     /**
      * @return list<string>
      */
-    private function createTemporaryAttachments(ResolvedEmail $email): array
+    private function createTemporaryAttachments(array $attachments): array
     {
         $files = [];
 
-        foreach ($email->attachments as $index => $attachment) {
-            $path = tempnam(sys_get_temp_dir(), 'ctx-events-mail-');
-
-            if ($path === false) {
+        foreach ($attachments as $attachment) {
+            if (!$attachment instanceof EmailAttachment) {
                 continue;
             }
 
-            @unlink($path);
-            $sanitizedFilename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $attachment->filename) ?: 'attachment.bin';
-            $targetPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('ctx-events-mail-', true) . '-' . $sanitizedFilename;
-
-            if (file_put_contents($targetPath, $attachment->content) === false) {
-                @unlink($targetPath);
-                continue;
+            $path = $this->createTemporaryFile($attachment->filename, $attachment->content);
+            if ($path !== null) {
+                $files[] = $path;
             }
-
-            $files[] = $targetPath;
         }
 
         return $files;
+    }
+
+    /**
+     * @param list<EmailInlineAttachment> $attachments
+     * @return list<array{path: string, contentId: string, filename: string, mimeType: string}>
+     */
+    private function createTemporaryInlineAttachments(array $attachments): array
+    {
+        $files = [];
+
+        foreach ($attachments as $attachment) {
+            $path = $this->createTemporaryFile($attachment->filename, $attachment->content);
+            if ($path === null) {
+                continue;
+            }
+
+            $files[] = [
+                'path' => $path,
+                'contentId' => $attachment->contentId,
+                'filename' => $attachment->filename,
+                'mimeType' => $attachment->mimeType,
+            ];
+        }
+
+        return $files;
+    }
+
+    private function createTemporaryFile(string $filename, string $content): ?string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'ctx-events-mail-');
+        if ($path === false) {
+            return null;
+        }
+
+        @unlink($path);
+        $sanitizedFilename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename) ?: 'attachment.bin';
+        $targetPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('ctx-events-mail-', true) . '-' . $sanitizedFilename;
+
+        if (file_put_contents($targetPath, $content) === false) {
+            @unlink($targetPath);
+            return null;
+        }
+
+        return $targetPath;
     }
 }

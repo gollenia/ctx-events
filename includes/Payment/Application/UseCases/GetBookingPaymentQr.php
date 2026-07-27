@@ -7,14 +7,14 @@ namespace Contexis\Events\Payment\Application\UseCases;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Payment\Application\Dtos\PaymentQrResponse;
 use Contexis\Events\Payment\Domain\TransactionRepository;
-use Contexis\Events\Payment\Infrastructure\SepaPaymentQrGenerator;
+use Contexis\Events\Payment\Application\Contracts\PaymentQrGenerator;
 
 final class GetBookingPaymentQr
 {
     public function __construct(
         private BookingRepository $bookingRepository,
         private TransactionRepository $transactionRepository,
-        private SepaPaymentQrGenerator $qrGenerator,
+        private PaymentQrGenerator $qrGenerator,
     ) {
     }
 

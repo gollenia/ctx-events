@@ -78,7 +78,7 @@ final class ResolveBookingPaymentLink
         $now = $this->clock->now();
 
         foreach ($transactions as $transaction) {
-            if ($transaction->checkoutUrl === null) {
+            if ($transaction->gateway !== $gateway->getId() || $transaction->checkoutUrl === null) {
                 continue;
             }
 

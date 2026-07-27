@@ -6,12 +6,11 @@ namespace Contexis\Events\Communication\Application\DTOs;
 
 use Contexis\Events\Communication\Domain\ValueObjects\EmailInlineAttachment;
 
-final readonly class RenderedEmailBody
+final readonly class TiptapRenderedDocument
 {
+    /** @param list<EmailInlineAttachment> $inlineAttachments */
     public function __construct(
-        public string $content,
-        public bool $isHtml = false,
-        /** @var list<EmailInlineAttachment> */
+        public string $html,
         public array $inlineAttachments = [],
     ) {
     }

@@ -41,4 +41,6 @@ return [
 	=> autowire(\Contexis\Events\Payment\Infrastructure\DbTransactionRepository::class),
     \Contexis\Events\Payment\Application\Contracts\FindReconcilableTransactions::class
     => autowire(\Contexis\Events\Payment\Infrastructure\DbReconcilableTransactionFinder::class),
+    \Contexis\Events\Payment\Application\Contracts\PaymentQrGenerator::class
+    => autowire(\Contexis\Events\Payment\Infrastructure\SepaPaymentQrGenerator::class),
 ];

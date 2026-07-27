@@ -6,10 +6,14 @@ namespace Contexis\Events\Payment\Infrastructure;
 
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Common\EccLevel;
+use chillerlan\QRCode\Output\QRGdImagePNG;
+use chillerlan\QRCode\Output\QRMarkupSVG;
+use Contexis\Events\Payment\Application\Contracts\PaymentQrGenerator;
 use Contexis\Events\Payment\Domain\Transaction;
-use SepaQr\Data;
+use SepaQr\SepaQrData;
 
-final class SepaPaymentQrGenerator
+final class SepaPaymentQrGenerator implements PaymentQrGenerator
 {
     public function generate(Transaction $transaction, string $reference, string $format = 'svg'): string
     {
@@ -21,7 +25,7 @@ final class SepaPaymentQrGenerator
             throw new \DomainException('Payment QR requires a positive transaction amount.');
         }
 
-        $paymentData = Data::create()
+        $paymentData = (new SepaQrData())
             ->setName($transaction->bankData->accountHolder)
             ->setIban($transaction->bankData->iban)
             ->setAmount($transaction->amount->toFloat())
@@ -36,14 +40,14 @@ final class SepaPaymentQrGenerator
         }
 
         [$outputType, $mimeType] = match ($format) {
-            'svg' => [QRCode::OUTPUT_MARKUP_SVG, 'image/svg+xml'],
-            'png' => [QRCode::OUTPUT_IMAGE_PNG, 'image/png'],
+            'svg' => [QRMarkupSVG::class, 'image/svg+xml'],
+            'png' => [QRGdImagePNG::class, 'image/png'],
             default => throw new \DomainException('Unsupported QR format.'),
         };
 
         $options = new QROptions([
-            'eccLevel' => QRCode::ECC_M,
-            'outputType' => $outputType,
+            'eccLevel' => EccLevel::M,
+            'outputInterface' => $outputType,
             'outputBase64' => true,
             'svgAddXmlHeader' => false,
         ]);

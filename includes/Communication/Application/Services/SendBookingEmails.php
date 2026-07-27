@@ -182,6 +182,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
             replyTo: $definition->replyTo,
             isHtml: $renderedBody->isHtml,
             attachments: $attachments,
+            inlineAttachments: $renderedBody->inlineAttachments,
         );
 
         try {

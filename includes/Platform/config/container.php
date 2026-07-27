@@ -13,6 +13,8 @@ use Contexis\Events\Shared\Infrastructure\Contracts\Database;
 use Contexis\Events\Communication\Infrastructure\DefaultEmailTemplatePresetProvider;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
 use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
+use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
+use Contexis\Events\Communication\Application\UseCases\ResolveEmailPaymentInformation;
 use Contexis\Events\Communication\Infrastructure\WpEventMailTemplateOverrideStore;
 use Contexis\Events\Communication\Infrastructure\WpEmailSender;
 use Contexis\Events\Communication\Application\Services\SendBookingEmails;
@@ -46,6 +48,7 @@ return [
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpSessionHashResolver::class),
     EmailTemplatePresetProvider::class => autowire(DefaultEmailTemplatePresetProvider::class),
     EmailTemplateTokenReplacer::class => autowire(),
+    TiptapDocumentRenderer::class => autowire()->constructor(get(ResolveEmailPaymentInformation::class)),
     EmailBodyRenderer::class => autowire(TiptapEmailBodyRenderer::class),
     EventMailTemplateOverrideStore::class => autowire(WpEventMailTemplateOverrideStore::class),
     EventCalendarExporter::class => autowire(IcalEventCalendarExporter::class),
