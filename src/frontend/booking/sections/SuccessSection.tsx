@@ -1,6 +1,6 @@
+import { Button } from '@contexis/wp-react-form';
 import { formatPrice } from '@events/i18n';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@contexis/wp-react-form';
 import { BookingCard } from '../components/BookingCard';
 import { usePaymentQr } from '../hooks/usePaymentQr';
 import type { BookingPayment, PaymentReturnStatus } from '../types';
@@ -29,49 +29,70 @@ function getReturnCopy(paymentStatus: PaymentReturnStatus | null) {
 			return {
 				eyebrow: __('Payment received', 'ctx-events'),
 				title: __('Your payment was successful', 'ctx-events'),
-				message: __('We have received your payment and your booking is confirmed.', 'ctx-events'),
+				message: __(
+					'We have received your payment and your booking is confirmed.',
+					'ctx-events',
+				),
 				showRetry: false,
 			};
 		case 'pending':
 			return {
 				eyebrow: __('Payment pending', 'ctx-events'),
 				title: __('Your payment is still pending', 'ctx-events'),
-				message: __('You can continue the payment process using the link below.', 'ctx-events'),
+				message: __(
+					'You can continue the payment process using the link below.',
+					'ctx-events',
+				),
 				showRetry: true,
 			};
 		case 'failed':
 			return {
 				eyebrow: __('Payment failed', 'ctx-events'),
 				title: __('Your payment could not be completed', 'ctx-events'),
-				message: __('You can try again using the payment link below.', 'ctx-events'),
+				message: __(
+					'You can try again using the payment link below.',
+					'ctx-events',
+				),
 				showRetry: true,
 			};
 		case 'expired':
 			return {
 				eyebrow: __('Payment expired', 'ctx-events'),
 				title: __('Your payment link has expired', 'ctx-events'),
-				message: __('You can generate a fresh payment and continue using the link below.', 'ctx-events'),
+				message: __(
+					'You can generate a fresh payment and continue using the link below.',
+					'ctx-events',
+				),
 				showRetry: true,
 			};
 		case 'canceled':
 			return {
 				eyebrow: __('Payment canceled', 'ctx-events'),
 				title: __('Your payment was canceled', 'ctx-events'),
-				message: __('You can start the payment again using the link below.', 'ctx-events'),
+				message: __(
+					'You can start the payment again using the link below.',
+					'ctx-events',
+				),
 				showRetry: true,
 			};
 		case 'refunded':
 			return {
 				eyebrow: __('Payment refunded', 'ctx-events'),
 				title: __('Your payment was refunded', 'ctx-events'),
-				message: __('If you still want to attend, please contact us before starting a new payment.', 'ctx-events'),
+				message: __(
+					'If you still want to attend, please contact us before starting a new payment.',
+					'ctx-events',
+				),
 				showRetry: false,
 			};
 		default:
 			return {
 				eyebrow: __('Booking completed', 'ctx-events'),
 				title: __('Booking confirmed!', 'ctx-events'),
-				message: __('You will receive a confirmation email shortly.', 'ctx-events'),
+				message: __(
+					'You will receive a confirmation email shortly.',
+					'ctx-events',
+				),
 				showRetry: false,
 			};
 	}
@@ -184,12 +205,8 @@ export function SuccessSection({
 						✓
 					</span>
 					<div className="booking-success__hero-copy">
-						<p className="booking-success__eyebrow">
-							{returnCopy.eyebrow}
-						</p>
-						<h2 className="booking-success__title">
-							{returnCopy.title}
-						</h2>
+						<p className="booking-success__eyebrow">{returnCopy.eyebrow}</p>
+						<h2 className="booking-success__title">{returnCopy.title}</h2>
 						<p className="booking-success__event">{eventName}</p>
 						<div className="booking-success__reference-card">
 							<span>{__('Your booking reference', 'ctx-events')}</span>
@@ -211,14 +228,14 @@ export function SuccessSection({
 									{paymentStatus !== null
 										? returnCopy.message
 										: customerEmailFailed
-										? __(
-												'There was a problem sending your confirmation email. Please contact us if you do not hear from us shortly.',
-												'ctx-events',
-											)
-										: __(
-												'You will receive a confirmation email shortly.',
-												'ctx-events',
-											)}
+											? __(
+													'There was a problem sending your confirmation email. Please contact us if you do not hear from us shortly.',
+													'ctx-events',
+												)
+											: __(
+													'You will receive a confirmation email shortly.',
+													'ctx-events',
+												)}
 								</p>
 							)}
 							{paymentStatus !== null && returnCopy.showRetry && (
@@ -237,12 +254,6 @@ export function SuccessSection({
 								</p>
 							)}
 						</BookingCard>
-
-						<div className="booking-success__actions">
-							<Button variant="secondary" onClick={onClose}>
-								{__('Close', 'ctx-events')}
-							</Button>
-						</div>
 					</div>
 
 					{showOfflineQr && (
@@ -277,6 +288,11 @@ export function SuccessSection({
 							</BookingCard>
 						</aside>
 					)}
+				</div>
+				<div className="booking-success__actions">
+					<Button variant="primary" onClick={onClose}>
+						{__('Close', 'ctx-events')}
+					</Button>
 				</div>
 			</div>
 		</div>
