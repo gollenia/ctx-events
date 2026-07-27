@@ -20,6 +20,7 @@ export const EMAIL_TEMPLATE_TOKENS = [
 export const EMAIL_TEMPLATE_BLOCKS = [
 	{ type: 'registrationData', label: 'Registration data' },
 	{ type: 'attendeeTable', label: 'Attendee table' },
+	{ type: 'paymentInformation', label: 'Payment information' },
 ] as const;
 
 export type EmailTemplateMentionItem =

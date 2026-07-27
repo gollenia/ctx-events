@@ -4,7 +4,7 @@ import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import type { EmailTemplateEditorProps } from './editorTypes';
-import BodyToolbar from './BodyToolbar';
+import BodyBubbleMenu from './BodyBubbleMenu';
 import MentionPopover from './MentionPopover';
 import SubjectField from './SubjectField';
 import { getThemeTextColors } from './themeColors';
@@ -76,9 +76,13 @@ const EmailTemplateEditor = ({
 				<p className="ctx-email-editor__hint">
 					{__('Type @ for tokens and / for block inserts in the body.', 'ctx-events')}
 				</p>
-				<BodyToolbar editor={bodyEditor.editor} colors={themeTextColors} />
 				<div className="ctx-email-editor__surface" ref={editorSurfaceRef}>
 					<EditorContent editor={bodyEditor.editor} />
+					<BodyBubbleMenu
+						editor={bodyEditor.editor}
+						colors={themeTextColors}
+						element={bodyEditor.bubbleMenuElement}
+					/>
 					{bodyEditor.commandState ? (
 						<MentionPopover
 							anchor={editorSurfaceRef.current}

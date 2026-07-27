@@ -1,11 +1,13 @@
 import { useEditor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 
 import type { MailTemplate } from '../../types/types';
 import {
 	AttendeeTableNode,
 	MailTokenNode,
+	PaymentInformationNode,
 	RegistrationDataNode,
 	TextColorMark,
 	UnderlineMark,
@@ -20,6 +22,10 @@ type Props = {
 };
 
 const useBodyEditor = ({ template, onChange }: Props) => {
+	const bubbleMenuElement = useMemo(
+		() => (typeof document === 'undefined' ? null : document.createElement('div')),
+		[],
+	);
 	const [commandState, setCommandState] = useState<ReturnType<
 		typeof getBodyCommandState
 	> | null>(null);
@@ -55,6 +61,13 @@ const useBodyEditor = ({ template, onChange }: Props) => {
 			MailTokenNode,
 			RegistrationDataNode,
 			AttendeeTableNode,
+			PaymentInformationNode,
+			BubbleMenu.configure({
+				element: bubbleMenuElement,
+				shouldShow: ({ editor: currentEditor, state }) =>
+					currentEditor.isFocused && !state.selection.empty && currentEditor.isEditable,
+				options: { placement: 'top', offset: 8 },
+			}),
 		],
 		content: parseEmailBodyDocument(template.body),
 		onUpdate: ({ editor: currentEditor }) => {
@@ -182,6 +195,7 @@ const useBodyEditor = ({ template, onChange }: Props) => {
 		items,
 		selectedIndex,
 		insertMention,
+		bubbleMenuElement,
 	};
 };
 

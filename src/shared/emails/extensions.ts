@@ -122,7 +122,7 @@ export const MailTokenNode = Node.create({
 });
 
 const createMailBlockNode = (
-	name: 'registrationData' | 'attendeeTable',
+	name: 'registrationData' | 'attendeeTable' | 'paymentInformation',
 	label: string,
 ) =>
 	Node.create({
@@ -155,4 +155,9 @@ export const RegistrationDataNode = createMailBlockNode(
 export const AttendeeTableNode = createMailBlockNode(
 	'attendeeTable',
 	'Attendee table block',
+);
+
+export const PaymentInformationNode = createMailBlockNode(
+	'paymentInformation',
+	'Payment information block',
 );
