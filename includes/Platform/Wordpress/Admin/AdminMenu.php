@@ -51,7 +51,7 @@ final class AdminMenu implements AdminServiceInterface
             $this->withCounter("Events", $pendingBookings),
             'manage_options',
             self::MENU_SLUG,
-            [$this, 'eventsPage'],
+            fn() => print('<div id="ctx-events-list"></div>'),
             'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgLTk2MCA5NjAgOTYwIiB3aWR0aD0iMjRweCIgZmlsbD0iIzFmMWYxZiI+PHBhdGggZD0iTTUwOS0yNjlxLTI5LTI5LTI5LTcxdDI5LTcxcTI5LTI5IDcxLTI5dDcxIDI5cTI5IDI5IDI5IDcxdC0yOSA3MXEtMjkgMjktNzEgMjl0LTcxLTI5Wk0yMDAtODBxLTMzIDAtNTYuNS0yMy41VDEyMC0xNjB2LTU2MHEwLTMzIDIzLjUtNTYuNVQyMDAtODAwaDQwdi04MGg4MHY4MGgzMjB2LTgwaDgwdjgwaDQwcTMzIDAgNTYuNSAyMy41VDg0MC03MjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC04MEgyMDBabTAtODBoNTYwdi00MDBIMjAwdjQwMFptMC00ODBoNTYwdi04MEgyMDB2ODBabTAgMHYtODAgODBaIi8+PC9zdmc+',
             6
         );
