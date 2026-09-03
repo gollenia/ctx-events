@@ -6,7 +6,7 @@ declare(strict_types=1);
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/ctx-events
 Description: Modern event and booking management for WordPress. Easily create events, manage attendees, track availability and handle payments
-Version: 0.1.2
+Version: 0.1.3
 Requires at least: 6.9.0
 Requires PHP: 8.5
 License: GPL3
