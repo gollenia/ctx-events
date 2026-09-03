@@ -9,6 +9,7 @@ use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
 use Contexis\Events\Event\Application\Service\EventResponseAssembler;
 use Contexis\Events\Event\Domain\EventRepository;
 use Contexis\Events\Event\Domain\EventStatusRepository;
+use Contexis\Events\Event\Domain\ValueObjects\EventStatusCounts;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
 
 final class ListEvents
@@ -26,6 +27,10 @@ final class ListEvents
 		$eventListDto = $this->eventResponseAssembler->mapEventCollection($events, $includes, $context)->withPagination($events->pagination());
 
 		$statusCounts = $this->eventStatusRepository->getCountsByStatus();
+		if (!$context->isAdmin()) {
+			$statusCounts = new EventStatusCounts(publish: $statusCounts->publish);
+		}
+
 		return $eventListDto->withStatusCounts($statusCounts);
     }
 }

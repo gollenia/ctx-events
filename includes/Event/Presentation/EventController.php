@@ -59,7 +59,7 @@ final class EventController implements RestController
 			[
 				'methods'   => \WP_REST_Server::DELETABLE,
 				'callback'  => [$this, 'deleteEvent'],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [$this, 'checkEditPermission'],
 				'args' => [
 					'id' => [
 						'required' => true,
@@ -75,7 +75,7 @@ final class EventController implements RestController
 			[
 				'methods'   => 'POST',
 				'callback'  => [$this, 'cancelEvent'],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [$this, 'checkEditPermission'],
 				'args' => [
 					'id' => [
 						'required' => true,
@@ -219,6 +219,11 @@ final class EventController implements RestController
 			],
 		]);
     }
+
+	public function checkEditPermission(\WP_REST_Request $request): bool
+	{
+		return current_user_can('edit_post', (int) $request->get_param('id'));
+	}
 
 	public function getItem(\WP_REST_Request $request): \WP_REST_Response
 	{

@@ -77,7 +77,7 @@ test('lists events with pagination and status counts', function () {
     expect($response->pagination()->currentPage)->toBe(2);
     expect($response->pagination()->perPage)->toBe(5);
     expect($response->pagination()->totalItems)->toBe(2);
-    expect($response->statusCounts())->toBe($statusCounts);
     expect($response->statusCounts()?->publish)->toBe(2);
-    expect($response->statusCounts()?->cancelled)->toBe(1);
+    expect($response->statusCounts()?->draft)->toBe(0);
+    expect($response->statusCounts()?->cancelled)->toBe(0);
 });
