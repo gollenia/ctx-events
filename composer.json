@@ -1,7 +1,7 @@
 {
 	"$schema": "https://getcomposer.org/schema.json",
 	"name": "contexis/events",
-	"version": "7.0.0",
+	"version": "0.1.1",
 	"description": "Events Manager",
 	"type": "project",
 	"homepage": "http://www.kids-team.at",
