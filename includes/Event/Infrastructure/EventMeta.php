@@ -11,6 +11,8 @@ class EventMeta extends MetaData
     public const BOOKING_FORM      = '_booking_form';
     public const ATTENDEE_FORM     = '_attendee_form';
     public const PERSON_ID         = '_person_id';
+    public const MAIL_TO_RESPONSIBLE = '_mail_to_responsible';
+    public const RESPONSIBLE_AS_REPLY = '_responsible_as_reply';
     public const LOCATION_ID       = '_location_id';
     public const EVENT_START       = '_event_start';
     public const EVENT_END         = '_event_end';
@@ -94,6 +96,8 @@ class EventMeta extends MetaData
                 ],
             ],
         ],
+        self::MAIL_TO_RESPONSIBLE => ['type' => 'boolean', 'default' => false],
+        self::RESPONSIBLE_AS_REPLY => ['type' => 'boolean', 'default' => false],
         self::LOCATION_ID         => ['type' => 'integer'],
         self::EVENT_START      => ['type' => 'string'],
         self::EVENT_END        => ['type' => 'string'],

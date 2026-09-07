@@ -23,8 +23,8 @@ class WpEventRepository implements EventRepository, EventStatusRepository, Event
     use InteractsWithStatusCounts;
 
     public function __construct(
-        private EventMapper $mapper
-
+        private EventMapper $mapper,
+		private readonly EventDuplicatePost $duplicatePost,
     ) {
     }
 
@@ -103,6 +103,16 @@ class WpEventRepository implements EventRepository, EventStatusRepository, Event
         }
         return $event;
     }
+
+	public function duplicateAt(EventId $eventId, \DateTimeImmutable $startDate): ?EventId
+	{
+		$newPostId = $this->duplicatePost->duplicateAt($eventId->toInt(), $startDate);
+		if ($newPostId === null) {
+			return null;
+		}
+
+		return EventId::from($newPostId);
+	}
 
 	public function saveCache(EventCacheSnapshot $snapshot): void
 	{

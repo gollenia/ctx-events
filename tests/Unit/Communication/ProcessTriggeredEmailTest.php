@@ -20,6 +20,9 @@ use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Communication\Domain\Enums\EmailTemplateKey;
 use Contexis\Events\Communication\Infrastructure\DefaultEmailTemplatePresetProvider;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Person\Domain\Person;
+use Contexis\Events\Person\Domain\PersonId;
+use Contexis\Events\Communication\Domain\ValueObjects\EventMailSettings;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
@@ -29,9 +32,11 @@ use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeBookingOptions;
 use Tests\Support\FakeEmailSender;
 use Tests\Support\FakeEventMailTemplateOverrideStore;
+use Tests\Support\FakeEventMailSettingsProvider;
 use Tests\Support\FakeEmailTemplateOverrideStore;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
+use Tests\Support\FakeLocationRepository;
 use Tests\Support\FakePersonRepository;
 use Tests\Support\FakeTransactionRepository;
 
@@ -70,17 +75,24 @@ function makeTriggeredEmailProcessor(
     ?FakeEmailTemplateOverrideStore $overrideStore = null,
     ?FakeBookingOptions $bookingOptions = null,
     ?FakeEventMailTemplateOverrideStore $eventOverrideStore = null,
+    ?FakePersonRepository $personRepository = null,
+    ?FakeEventMailSettingsProvider $eventMailSettingsProvider = null,
 ): SendBookingEmails {
+    $personRepository ??= new FakePersonRepository();
+
     return new SendBookingEmails(
         new LoadBookingEmailContext(
             bookingRepository: $bookingRepository,
             eventRepository: $eventRepository,
             attendeeRepository: $attendeeRepository,
             transactionRepository: $transactionRepository,
+            locationRepository: new FakeLocationRepository(),
+            personRepository: $personRepository,
         ),
         new DefaultEmailTemplatePresetProvider(),
         $overrideStore ?? new FakeEmailTemplateOverrideStore(),
         $eventOverrideStore ?? new FakeEventMailTemplateOverrideStore(),
+        $eventMailSettingsProvider ?? new FakeEventMailSettingsProvider(),
         new IcalEventCalendarExporter(),
         $bookingOptions ?? new FakeBookingOptions(),
         new TiptapEmailBodyRenderer(
@@ -88,7 +100,11 @@ function makeTriggeredEmailProcessor(
             new EmailTemplateTokenReplacer(),
         ),
         new EmailTemplateTokenReplacer(),
-        new ResolveEmailRecipient($eventRepository, new FakePersonRepository(), $bookingOptions ?? new FakeBookingOptions()),
+        new ResolveEmailRecipient(
+            $eventRepository,
+            $personRepository,
+            $bookingOptions ?? new FakeBookingOptions(),
+        ),
         $emailSender
     );
 }
@@ -202,6 +218,89 @@ test('sends admin emails to configured recipients', function () {
         'booking-admin@example.com',
         'ops@example.com',
     ]);
+});
+
+test('sends admin mails to the responsible person when enabled for the event', function () {
+    $event = FakeEventFactory::create(219);
+    $personId = $event->personId ?? PersonId::from(1);
+    $person = new Person(
+        id: $personId,
+        status: \Contexis\Events\Shared\Domain\ValueObjects\Status::Published,
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+        email: Email::tryFrom('responsible@example.com'),
+    );
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $emailSender = new FakeEmailSender();
+    $overrideStore = new FakeEmailTemplateOverrideStore([
+        EmailTemplateKey::ADMIN_BOOKING_PENDING_MANUAL->value => [
+            'recipientConfig' => [
+                'sendToEventContact' => false,
+                'sendToEventPerson' => false,
+                'sendToBookingAdmin' => false,
+                'sendToWpAdmin' => false,
+                'customRecipients' => [],
+            ],
+        ],
+    ]);
+
+    $processor = makeTriggeredEmailProcessor(
+        $bookingRepository,
+        FakeEventRepository::one($event),
+        FakeAttendeeRepository::empty(),
+        FakeTransactionRepository::empty(),
+        $emailSender,
+        overrideStore: $overrideStore,
+        personRepository: new FakePersonRepository($person),
+        eventMailSettingsProvider: new FakeEventMailSettingsProvider([
+            $event->id->toInt() => new EventMailSettings(sendAdminMailsToResponsible: true),
+        ]),
+    );
+
+    $processor->trigger(EmailTrigger::BOOKING_PENDING_MANUAL, $bookingId);
+
+    expect(array_map(
+        static fn ($email): string => $email->to->toString(),
+        $emailSender->sentEmails,
+    ))->toEqualCanonicalizing(['booking@example.test', 'responsible@example.com']);
+});
+
+test('uses the responsible person as Reply-To when enabled for the event', function () {
+    $event = FakeEventFactory::create(220);
+    $personId = $event->personId ?? PersonId::from(1);
+    $person = new Person(
+        id: $personId,
+        status: \Contexis\Events\Shared\Domain\ValueObjects\Status::Published,
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+        email: Email::tryFrom('responsible@example.com'),
+    );
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $emailSender = new FakeEmailSender();
+    $overrideStore = new FakeEmailTemplateOverrideStore([
+        EmailTemplateKey::BOOKING_PENDING_MANUAL->value => [
+            'replyTo' => 'template@example.com',
+        ],
+    ]);
+
+    $processor = makeTriggeredEmailProcessor(
+        $bookingRepository,
+        FakeEventRepository::one($event),
+        FakeAttendeeRepository::empty(),
+        FakeTransactionRepository::empty(),
+        $emailSender,
+        overrideStore: $overrideStore,
+        personRepository: new FakePersonRepository($person),
+        eventMailSettingsProvider: new FakeEventMailSettingsProvider([
+            $event->id->toInt() => new EventMailSettings(responsibleAsReplyTo: true),
+        ]),
+    );
+
+    $processor->trigger(EmailTrigger::BOOKING_PENDING_MANUAL, $bookingId);
+
+    expect($emailSender->lastEmail?->replyTo?->toString())->toBe('responsible@example.com');
 });
 
 test('logs failed sends', function () {

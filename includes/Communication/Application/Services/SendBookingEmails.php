@@ -10,6 +10,7 @@ use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
 use Contexis\Events\Communication\Application\Contracts\EmailBodyRenderer;
 use Contexis\Events\Communication\Application\Contracts\EmailSender;
 use Contexis\Events\Communication\Application\Contracts\EventMailTemplateOverrideStore;
+use Contexis\Events\Communication\Application\Contracts\EventMailSettingsProvider;
 use Contexis\Events\Communication\Application\Contracts\EmailTemplateOverrideStore;
 use Contexis\Events\Communication\Application\Contracts\EmailTemplatePresetProvider;
 use Contexis\Events\Communication\Application\DTOs\BookingEmailDeliveryResult;
@@ -21,6 +22,7 @@ use Contexis\Events\Communication\Domain\Enums\EmailTemplateKey;
 use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Communication\Domain\ValueObjects\EmailAttachment;
 use Contexis\Events\Communication\Domain\ValueObjects\AdminEmailRecipientConfig;
+use Contexis\Events\Communication\Domain\ValueObjects\EventMailSettings;
 use Contexis\Events\Communication\Domain\ValueObjects\ResolvedEmail;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
 use Contexis\Events\Event\Application\Contracts\EventCalendarExporter;
@@ -33,6 +35,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
         private EmailTemplatePresetProvider $presetProvider,
         private EmailTemplateOverrideStore $overrideStore,
         private EventMailTemplateOverrideStore $eventOverrideStore,
+        private EventMailSettingsProvider $eventMailSettingsProvider,
         private EventCalendarExporter $eventCalendarExporter,
         private BookingOptions $bookingOptions,
         private EmailBodyRenderer $emailBodyRenderer,
@@ -61,6 +64,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
         }
 
         $eventOverrides = $this->eventOverrideStore->eventMailTemplateOverrides($context->event->id);
+        $eventMailSettings = $this->eventMailSettingsProvider->get($context->event->id);
         $attachments = $this->attachmentsFor($context->event);
         $result = BookingEmailResult::empty();
 
@@ -71,6 +75,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
                 $eventOverrides[$preset->key->value] ?? null,
                 $context,
                 $attachments,
+                $eventMailSettings,
             );
         }
 
@@ -106,6 +111,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
         ?array $eventOverride,
         \Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext $context,
         array $attachments,
+        EventMailSettings $eventMailSettings,
     ): BookingEmailResult {
         [$definition, $recipientConfig] = $this->resolveTemplate($preset, $eventOverride);
 
@@ -113,7 +119,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
             return $this->skippedResult($result, $preset, $definition, 'template_disabled');
         }
 
-        $recipients = $this->resolveRecipients($definition, $recipientConfig, $context);
+        $recipients = $this->resolveRecipients($definition, $recipientConfig, $context, $eventMailSettings);
 
         if ($recipients === []) {
             return $this->skippedResult($result, $preset, $definition, 'recipient_not_resolved');
@@ -127,6 +133,7 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
                 $context,
                 $recipient,
                 $attachments,
+                $eventMailSettings,
             );
         }
 
@@ -154,12 +161,14 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
         EmailDefinition $definition,
         AdminEmailRecipientConfig $recipientConfig,
         \Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext $context,
+        EventMailSettings $eventMailSettings,
     ): array {
         return $this->resolveEmailRecipient->executeMany(
             $definition->target,
             $context->booking,
             $context->event,
             $recipientConfig,
+            $eventMailSettings->sendAdminMailsToResponsible,
         );
     }
 
@@ -173,13 +182,14 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
         \Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext $context,
         Email $recipient,
         array $attachments,
+        EventMailSettings $eventMailSettings,
     ): BookingEmailResult {
         $renderedBody = $this->emailBodyRenderer->render($definition->body, $context);
         $email = new ResolvedEmail(
             to: $recipient,
             subject: $this->tokenReplacer->replace($definition->subject ?? '', $context),
             body: $renderedBody->content,
-            replyTo: $definition->replyTo,
+            replyTo: $this->resolveReplyTo($definition, $context, $eventMailSettings),
             isHtml: $renderedBody->isHtml,
             attachments: $attachments,
             inlineAttachments: $renderedBody->inlineAttachments,
@@ -201,6 +211,19 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
             status: BookingEmailDeliveryResult::STATUS_SENT,
             recipient: $recipient,
         ));
+    }
+
+    private function resolveReplyTo(
+        EmailDefinition $definition,
+        \Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext $context,
+        EventMailSettings $eventMailSettings,
+    ): ?Email {
+        if (!$eventMailSettings->responsibleAsReplyTo) {
+            return $definition->replyTo;
+        }
+
+        return $this->resolveEmailRecipient->getResponsiblePersonEmail($context->event)
+            ?? $definition->replyTo;
     }
 
     private function failedResult(

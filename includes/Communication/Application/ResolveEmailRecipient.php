@@ -35,7 +35,13 @@ final readonly class ResolveEmailRecipient
     /**
      * @return list<Email>
      */
-    public function executeMany(EmailTarget $target, Booking $booking, ?Event $event = null, ?AdminEmailRecipientConfig $config = null): array
+    public function executeMany(
+        EmailTarget $target,
+        Booking $booking,
+        ?Event $event = null,
+        ?AdminEmailRecipientConfig $config = null,
+        bool $sendToResponsible = false,
+    ): array
     {
         if ($target !== EmailTarget::ADMIN) {
             $recipient = $this->execute($target, $booking, $event);
@@ -55,7 +61,14 @@ final readonly class ResolveEmailRecipient
         }
 
         if ($config->sendToEventPerson) {
-            $person = $this->resolveEventPerson($event);
+            $person = $this->getResponsiblePersonEmail($event);
+            if ($person instanceof Email) {
+                $recipients[$person->toString()] = $person;
+            }
+        }
+
+        if ($sendToResponsible) {
+            $person = $this->getResponsiblePersonEmail($event);
             if ($person instanceof Email) {
                 $recipients[$person->toString()] = $person;
             }
@@ -98,7 +111,7 @@ final readonly class ResolveEmailRecipient
         return $this->personRepository->find($event->personId)?->email;
     }
 
-    private function resolveEventPerson(?Event $event): ?Email
+    public function getResponsiblePersonEmail(?Event $event): ?Email
     {
         if (!$event instanceof Event || $event->personId === null) {
             return null;

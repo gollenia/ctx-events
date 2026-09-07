@@ -7,6 +7,7 @@ use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
 use Contexis\Events\Communication\Application\Contracts\EmailBodyRenderer;
 use Contexis\Events\Communication\Application\Contracts\EmailTemplatePresetProvider;
 use Contexis\Events\Communication\Application\Contracts\EventMailTemplateOverrideStore;
+use Contexis\Events\Communication\Application\Contracts\EventMailSettingsProvider;
 use Contexis\Events\Communication\Application\Contracts\EmailSender;
 use Contexis\Events\Shared\Domain\Contracts\CurrentActorProvider;
 use Contexis\Events\Shared\Infrastructure\Contracts\Database;
@@ -16,6 +17,7 @@ use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
 use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
 use Contexis\Events\Communication\Application\UseCases\ResolveEmailPaymentInformation;
 use Contexis\Events\Communication\Infrastructure\WpEventMailTemplateOverrideStore;
+use Contexis\Events\Communication\Infrastructure\WpEventMailSettingsProvider;
 use Contexis\Events\Communication\Infrastructure\WpEmailSender;
 use Contexis\Events\Communication\Application\Services\SendBookingEmails;
 use Contexis\Events\Event\Application\Contracts\EventCalendarExporter;
@@ -51,6 +53,7 @@ return [
     TiptapDocumentRenderer::class => autowire()->constructor(get(ResolveEmailPaymentInformation::class)),
     EmailBodyRenderer::class => autowire(TiptapEmailBodyRenderer::class),
     EventMailTemplateOverrideStore::class => autowire(WpEventMailTemplateOverrideStore::class),
+    EventMailSettingsProvider::class => autowire(WpEventMailSettingsProvider::class),
     EventCalendarExporter::class => autowire(IcalEventCalendarExporter::class),
     EmailSender::class => autowire(WpEmailSender::class),
     BookingEmailTrigger::class => autowire(SendBookingEmails::class),

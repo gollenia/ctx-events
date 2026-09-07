@@ -68,6 +68,15 @@ final class FakeEventRepository implements EventRepository
         throw new \RuntimeException('Event not found (mock)');
     }
 
+	public function duplicateAt(EventId $eventId, \DateTimeImmutable $startDate): ?EventId
+	{
+		if ($this->find($eventId) === null) {
+			return null;
+		}
+
+		return EventId::from($this->nextId());
+	}
+
     public function first(EventCriteria $criteria): ?Event
     {
         $this->lastCriteria = $criteria;
@@ -94,4 +103,13 @@ final class FakeEventRepository implements EventRepository
 
         return count($this->eventsById);
     }
+
+	private function nextId(): int
+	{
+		if ($this->eventsById === []) {
+			return 1;
+		}
+
+		return max(array_keys($this->eventsById)) + 1;
+	}
 }
