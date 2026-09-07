@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Events 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ctx-events\n"
 "Last-Translator: \n"
-"Language-Team: Deutsch (Österreich)\n"
+"Language-Team: Deutsch (Schweiz)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,7 @@ msgstr ""
 "PO-Revision-Date: 2026-09-07 09:29+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
-"Language: de_AT\n"
+"Language: de_CH\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Loco-Version: 2.8.7; wp-7.1; php-8.5.7"
 
@@ -1203,7 +1203,7 @@ msgstr "Ort"
 #: build/2205.js:1 build/4586.js:1 build/admin.js:1 build/editor.js:1
 #: build/frontend.js:7
 msgid "Close"
-msgstr "Schließen"
+msgstr "Schliessen"
 
 #: includes/Payment/Application/UseCases/ExportCoupons.php:34 build/admin.js:2
 #: build/editor.js:1
@@ -1219,7 +1219,7 @@ msgstr "Farbe"
 
 #: build/frontend.js:7
 msgid "Complete your payment using the link below."
-msgstr "Schließen Sie Ihre Zahlung über den folgenden Link ab."
+msgstr "Schliessen Sie Ihre Zahlung über den folgenden Link ab."
 
 #: build/admin.js:3
 msgid "Configured"
@@ -1548,7 +1548,7 @@ msgstr "Abbrechen"
 #: build/admin.js:1
 msgctxt "dialog action: close modal"
 msgid "Close"
-msgstr "Schließen"
+msgstr "Schliessen"
 
 #: build/admin.js:2
 msgid "Disable"
@@ -1934,7 +1934,7 @@ msgstr "Kurzfassung"
 
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Exclude current event"
-msgstr "Aktuelle Veranstaltung ausschließen"
+msgstr "Aktuelle Veranstaltung ausschliessen"
 
 #: build/editor/blocks/form/text/index.js:1
 msgid "Existing contexts:"
@@ -2233,7 +2233,7 @@ msgstr ""
 msgid ""
 "I consent to my personal data being stored and used as per the Privacy Policy"
 msgstr ""
-"Ich stimme zu, dass meine personenbezogenen Daten gemäß der "
+"Ich stimme zu, dass meine personenbezogenen Daten gemäss der "
 "Datenschutzerklärung gespeichert und verwendet werden"
 
 #: includes/Platform/Wordpress/Assets.php:46
@@ -2374,7 +2374,7 @@ msgstr "Inaktiv"
 
 #: build/admin.js:1
 msgid "Include attendees"
-msgstr "Teilnehmer einschließen"
+msgstr "Teilnehmer einschliessen"
 
 #: build/editor/blocks/form/number/index.js:1
 msgid "Input"
@@ -2541,7 +2541,7 @@ msgstr "Maximal buchbar"
 
 #: build/editor/blocks/form/number/index.js:1
 msgid "Maximum value"
-msgstr "Größter Wert"
+msgstr "Grösster Wert"
 
 #: build/editor/blocks/upcoming/index.js:1
 msgid "May not apply on mobile phones"
