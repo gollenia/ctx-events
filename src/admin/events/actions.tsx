@@ -3,16 +3,22 @@ import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import type { Event } from '../../types/types';
 import EventCancelConfirmModal from './EventCancelConfirmModal';
+import EventDuplicateModal from './EventDuplicateModal';
 
 type EventCancelOptions = {
 	notifyAttendees?: boolean;
 	cancellationReason?: string;
 };
 
+type EventDuplicateOptions = {
+	dates?: Array<string>;
+};
+
 type EventActionConfig = {
 	id: string;
 	label: string;
 	delete?: boolean;
+	disabled?: (event: Event) => boolean;
 	RenderModal?: DataTableAction['RenderModal'];
 	modalHeader?: string;
 	confirmText?: (item: Event) => string;
@@ -20,17 +26,19 @@ type EventActionConfig = {
 	callback: (
 		items: Array<Event>,
 		onActionPerformed?: (items: Array<any>) => void,
-		options?: EventCancelOptions,
+		options?: EventCancelOptions | EventDuplicateOptions,
 	) => void | Promise<void>;
 };
 
-type EventCancelAction = DataTableAction & {
-	confirmText: (item: Event) => string;
-	confirmLabel: string;
-};
-
-const duplicateEvent = (event: Event) => {
-	window.location.href = `/wp-admin/post.php?post=${event.id}&action=edit`;
+const duplicateEvent = async (
+	event: Event,
+	dates: Array<string>,
+): Promise<void> => {
+	await apiFetch({
+		path: `/events/v3/events/${event.id}/duplicate`,
+		method: 'POST',
+		data: { dates },
+	});
 };
 
 const cancelEvent = async (
@@ -53,15 +61,30 @@ const ACTIONS: Array<EventActionConfig> = [
 		id: 'view_bookings',
 		label: __('Bookings', 'ctx-events'),
 		callback: (items) => {
-			window.location.href = `/wp-admin/admin.php?page=contexis_events_bookings&event_id=${items[0].id}`;
+			const event = items[0];
+			if (!event) {
+				return;
+			}
+
+			window.location.href = `/wp-admin/admin.php?page=contexis_events_bookings&event_id=${event.id}`;
 		},
-		disabled: (event) => !event.bookingSummary.isBookable,
+		disabled: (event) => !event.bookingSummary?.isBookable,
 	},
 	{
 		id: 'duplicate',
 		label: __('Duplicate', 'ctx-events'),
-		callback: (items) => {
-			duplicateEvent(items[0]);
+		disabled: (event) => event.status === 'trash',
+		RenderModal: EventDuplicateModal,
+		modalHeader: __('Duplicate event', 'ctx-events'),
+		callback: async (items, onActionPerformed, options) => {
+			const event = items[0];
+			if (!event) {
+				return;
+			}
+
+			const dates = (options as EventDuplicateOptions | undefined)?.dates ?? [];
+			await duplicateEvent(event, dates);
+			onActionPerformed?.([event]);
 		},
 	},
 	{
@@ -78,8 +101,13 @@ const ACTIONS: Array<EventActionConfig> = [
 			),
 		confirmLabel: __('Cancel event', 'ctx-events'),
 		callback: async (items, onActionPerformed, options) => {
-			await cancelEvent(items[0], options);
-			onActionPerformed?.(items);
+			const event = items[0];
+			if (!event) {
+				return;
+			}
+
+			await cancelEvent(event, options as EventCancelOptions | undefined);
+			onActionPerformed?.([event]);
 		},
 	},
 ];

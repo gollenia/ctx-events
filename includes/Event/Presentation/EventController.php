@@ -9,7 +9,9 @@ use Contexis\Events\Event\Application\UseCases\GetEventCalendar;
 use Contexis\Events\Event\Application\UseCases\PrepareBooking;
 use Contexis\Events\Event\Application\UseCases\GetEvent;
 use Contexis\Events\Event\Application\UseCases\CancelEvent;
+use Contexis\Events\Event\Application\UseCases\DuplicateEvent;
 use Contexis\Events\Event\Application\UseCases\ListEvents;
+use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Presentation\Resources\EventResource;
 use Contexis\Events\Event\Presentation\Resources\EventCalendarEntryResource;
 use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
@@ -26,6 +28,7 @@ final class EventController implements RestController
         private ListEvents $listEvents,
 		private GetEventCalendar $getEventCalendar,
 		private CancelEvent $cancelEvent,
+		private DuplicateEvent $duplicateEvent,
 		private PrepareBooking $prepareBooking,
     ) {
         $this->route = RestRoute::forType('events');
@@ -98,6 +101,26 @@ final class EventController implements RestController
 				],
 			],
 		]);
+
+		$args = $this->route->getForSingle('/duplicate');
+		register_rest_route($args->namespace, $args->route, args: [[
+			'methods' => 'POST',
+			'callback' => [$this, 'duplicateEvent'],
+			'permission_callback' => [$this, 'checkEditPermission'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'description' => 'The ID of the event to duplicate.',
+					'type' => 'integer',
+				],
+				'dates' => [
+					'required' => true,
+					'description' => 'The dates for the event copies.',
+					'type' => 'array',
+					'items' => ['type' => 'string', 'format' => 'date'],
+				],
+			],
+		]]);
 
         $args = $this->route->getForCollection();
         register_rest_route($args->namespace, $args->route, args: [
@@ -295,6 +318,37 @@ final class EventController implements RestController
 		return new \WP_REST_Response(['message' => 'Event cancelled'], 200);
 	}
 
+	public function duplicateEvent(\WP_REST_Request $request): \WP_REST_Response
+	{
+		$dates = $request->get_param('dates');
+		if (!is_array($dates) || $dates === []) {
+			return new \WP_REST_Response(['message' => 'At least one date is required'], 422);
+		}
+
+		$startDates = [];
+		foreach ($dates as $date) {
+			$startDate = $this->dateFromRequest($date);
+			if ($startDate === null) {
+				return new \WP_REST_Response(['message' => 'Invalid event date'], 422);
+			}
+
+			$startDates[] = $startDate;
+		}
+
+		$newEventIds = $this->duplicateEvent->execute(
+			EventId::from((int) $request->get_param('id')),
+			...$startDates,
+		);
+		if ($newEventIds === []) {
+			return new \WP_REST_Response(['message' => 'Event not found'], 404);
+		}
+
+		return new \WP_REST_Response([
+			'message' => 'Events duplicated',
+			'ids' => array_map(static fn (EventId $eventId): int => $eventId->toInt(), $newEventIds),
+		], 200);
+	}
+
 	public function deleteEvent(\WP_REST_Request $request): \WP_REST_Response
 	{
 		$event_id = (int) $request->get_param('id');
@@ -323,6 +377,21 @@ final class EventController implements RestController
 		$parts = explode(',', $includeParam);
 
 		return array_values(array_filter($parts, static fn (string $value): bool => $value !== ''));
+	}
+
+	private function dateFromRequest(mixed $value): ?\DateTimeImmutable
+	{
+		if (!is_string($value) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+			return null;
+		}
+
+		$date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, wp_timezone());
+		$errors = \DateTimeImmutable::getLastErrors();
+		if ($date === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+			return null;
+		}
+
+		return $date;
 	}
 
 	public function getCalendarEntries(\WP_REST_Request $request): \WP_REST_Response
