@@ -7,7 +7,8 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import type { ComboboxControlOption } from '@wordpress/components/build-types/combobox-control/types';
-import { useEntityProp } from '@wordpress/core-data';
+import { store as coreStore, useEntityProp } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -61,11 +62,24 @@ const edit = (props: EditProps) => {
 		className: 'location-edit',
 	});
 
-	const countries = useMemo(() => makeCountryOptions('de'), []);
+	const locale = useSelect((select) => {
+		const currentUser = select(coreStore).getCurrentUser() as
+			| { locale?: string }
+			| undefined;
+
+		const locale = currentUser?.locale || document.documentElement.lang || 'en';
+
+		return locale.replace(/_/g, '-');
+	}, []);
+
+	const countries = useMemo(() => makeCountryOptions(locale), [locale]);
 
 	return (
 		<div {...blockProps}>
-			<div className="location-edit__admin ctx-block-editor">
+			<Flex
+				direction="column"
+				className="location-edit__admin ctx-block-editor"
+			>
 				<TextControl
 					label={__('Address', 'ctx-events')}
 					value={meta._location_address ?? ''}
@@ -77,7 +91,7 @@ const edit = (props: EditProps) => {
 					}}
 					__next40pxDefaultSize
 				/>
-				<Flex>
+				<Flex gap={4}>
 					<FlexItem isBlock>
 						<TextControl
 							label={__('ZIP Code', 'ctx-events')}
@@ -142,7 +156,7 @@ const edit = (props: EditProps) => {
 					}}
 					__next40pxDefaultSize
 				/>
-			</div>
+			</Flex>
 		</div>
 	);
 };

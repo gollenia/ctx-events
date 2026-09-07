@@ -1,4 +1,5 @@
 import {
+	CheckboxControl,
 	ComboboxControl,
 	Flex,
 	Icon,
@@ -84,9 +85,9 @@ const PeopleSelector = () => {
 			}
 			className="events-people-settings"
 		>
-			<VStack>
+			<Flex direction="column" gap={4}>
 				<ComboboxControl
-					label={__('Select a person', 'ctx-events')}
+					label={__('Select a responsible person', 'ctx-events')}
 					value={String(meta._person_id ?? '')}
 					__nextHasNoMarginBottom
 					__next40pxDefaultSize
@@ -123,6 +124,24 @@ const PeopleSelector = () => {
 					}}
 				/>
 
+				<CheckboxControl
+					label={__('Send admin mails to responsible', 'ctx-events')}
+					checked={Boolean(meta._mail_to_responsible)}
+					onChange={(value) => {
+						setMeta({ _mail_to_responsible: value });
+					}}
+					__nextHasNoMarginBottom
+				/>
+
+				<CheckboxControl
+					label={__('Responsible person as Reply-To', 'ctx-events')}
+					checked={Boolean(meta._responsible_as_reply)}
+					onChange={(value) => {
+						setMeta({ _responsible_as_reply: value });
+					}}
+					__nextHasNoMarginBottom
+				/>
+
 				<TextControl
 					__next40pxDefaultSize
 					__nextHasNoMarginBottom
@@ -132,7 +151,7 @@ const PeopleSelector = () => {
 						setMeta({ _event_audience: value });
 					}}
 				/>
-			</VStack>
+			</Flex>
 		</PluginDocumentSettingPanel>
 	);
 };
