@@ -34,7 +34,7 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
             'template' => [
                 ['ctx-events/person-editor', []],
             ],
-            'supports' => ['title', 'thumbnail', 'editor', 'excerpt', 'custom-fields'],
+            'supports' => ['title', 'thumbnail', 'editor', 'excerpt', 'custom-fields', 'revisions'],
             'label' => __('Persons', 'ctx-events'),
             'description' => __('Person for an event.', 'ctx-events'),
             'labels' => [
