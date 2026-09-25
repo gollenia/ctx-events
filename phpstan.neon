@@ -3,6 +3,6 @@ parameters:
     paths:
         - includes
     scanFiles:
-        - events.php
+        - ctx-events.php
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
