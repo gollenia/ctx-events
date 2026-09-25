@@ -1,4 +1,5 @@
 import { VisibilityRules } from '@events/form';
+import ContextControl from '@events/form/components/ContextControl';
 import { getCountriesByRegion } from '@events/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
@@ -13,7 +14,16 @@ import { __ } from '@wordpress/i18n';
 
 const Inspector = (props) => {
 	const {
-		attributes: { width, required, error, region, help, allowedCountries },
+		attributes: {
+			width,
+			required,
+			error,
+			region,
+			help,
+			allowedCountries,
+			visibilityRule,
+			context,
+		},
 		setAttributes,
 	} = props;
 
@@ -74,8 +84,17 @@ const Inspector = (props) => {
 			<PanelBody title={__('Behavior', 'ctx-events')} initialOpen={false}>
 				<VisibilityRules
 					clientId={props.clientId}
-					visibilityRule={props.attributes.visibilityRule ?? null}
+					visibilityRule={visibilityRule ?? null}
 					onChange={(visibilityRule) => setAttributes({ visibilityRule })}
+				/>
+
+				<ContextControl
+					value={context ?? ''}
+					clientId={props.clientId}
+					onChange={(value: string) => {
+						console.log('Context changed to', value);
+						setAttributes({ context: value });
+					}}
 				/>
 			</PanelBody>
 		</InspectorControls>

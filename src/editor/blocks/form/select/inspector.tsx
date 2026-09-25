@@ -1,4 +1,5 @@
 import { type VisibilityRule, VisibilityRules } from '@events/form';
+import ContextControl from '@events/form/components/ContextControl';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	CheckboxControl,
@@ -15,6 +16,7 @@ type SelectAttributes = {
 	options: string[];
 	hasEmptyOption: boolean;
 	visibilityRule?: VisibilityRule | null;
+	context?: string;
 };
 
 interface InspectorProps {
@@ -25,7 +27,14 @@ interface InspectorProps {
 
 const Inspector = (props: InspectorProps) => {
 	const {
-		attributes: { width, required, options, hasEmptyOption, visibilityRule },
+		attributes: {
+			width,
+			required,
+			options,
+			hasEmptyOption,
+			visibilityRule,
+			context,
+		},
 		setAttributes,
 		clientId,
 	} = props;
@@ -81,6 +90,15 @@ const Inspector = (props: InspectorProps) => {
 					onChange={(nextRule) =>
 						setAttributes({ visibilityRule: nextRule ?? undefined })
 					}
+				/>
+
+				<ContextControl
+					value={context ?? ''}
+					clientId={clientId}
+					onChange={(value: string) => {
+						console.log('Context changed to', value);
+						setAttributes({ context: value });
+					}}
 				/>
 			</PanelBody>
 		</InspectorControls>

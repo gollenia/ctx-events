@@ -1,4 +1,5 @@
 import { VisibilityRules } from '@events/form';
+import ContextControl from '@events/form/components/ContextControl';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -17,7 +18,15 @@ interface InspectorProps {
 
 const Inspector = (props: InspectorProps) => {
 	const {
-		attributes: { width, required, min, max, description, visibilityRule },
+		attributes: {
+			width,
+			required,
+			min,
+			max,
+			description,
+			visibilityRule,
+			context,
+		},
 		clientId,
 		setAttributes,
 	} = props;
@@ -72,6 +81,15 @@ const Inspector = (props: InspectorProps) => {
 					onChange={(visibilityRule) =>
 						setAttributes({ visibilityRule: visibilityRule ?? undefined })
 					}
+				/>
+
+				<ContextControl
+					value={context ?? ''}
+					clientId={clientId}
+					onChange={(value: string) => {
+						console.log('Context changed to', value);
+						setAttributes({ context: value });
+					}}
 				/>
 			</PanelBody>
 		</InspectorControls>
