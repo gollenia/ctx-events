@@ -18,3 +18,13 @@
     gap: .5rem;
     align-items: center;
 }
+
+.inline-editor {
+	background: #fff;
+    padding: 2rem;
+    box-shadow: 0 0 0 1px #e0e0e0;
+}
+
+body.post-type-ctx-event-person .edit-post-visual-editor__post-title-wrapper {
+	display: none;
+}
