@@ -36,6 +36,7 @@ final class PersonMeta extends MetaData
         self::ORGANIZATION => ['type' => 'string'],
         self::WEBSITE    => ['type' => 'string'],
         self::SAME_AS    => [
+            'type' => 'array',
             'show_in_rest' => [
                 'schema' => [
                     'type'  => 'array',
