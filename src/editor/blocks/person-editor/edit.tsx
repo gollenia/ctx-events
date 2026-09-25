@@ -3,6 +3,7 @@ import {
 	Button,
 	Flex,
 	FlexItem,
+	Icon,
 	__experimentalItem as Item,
 	__experimentalItemGroup as ItemGroup,
 	SelectControl,
@@ -10,6 +11,7 @@ import {
 } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
+import { trash } from '@wordpress/icons';
 
 type PersonMeta = {
 	_person_organization?: string;
@@ -208,22 +210,42 @@ const edit = ({ context }: EditProps) => {
 						/>
 					</FlexItem>
 				</Flex>
+				<h4>{__('Social Media Links', 'ctx-events')}</h4>
 				<ItemGroup>
 					{socialLinks.map((sameAs, index) => (
 						<Item key={index}>
-							<TextControl
-								label={__('Social Link', 'ctx-events')}
-								value={sameAs}
-								onChange={(value) => {
-									const newSameAs = [...socialLinks];
-									newSameAs[index] = value;
-									updatePersonMeta({
-										...meta,
-										_person_same_as: newSameAs,
-									});
-								}}
-								__next40pxDefaultSize
-							/>
+							<Flex gap={4} align="flex-end">
+								<FlexItem isBlock flex="1">
+									<TextControl
+										label={__('Social Media Link', 'ctx-events')}
+										value={sameAs}
+										onChange={(value) => {
+											const newSameAs = [...socialLinks];
+											newSameAs[index] = value;
+											updatePersonMeta({
+												...meta,
+												_person_same_as: newSameAs,
+											});
+										}}
+										__next40pxDefaultSize
+									/>
+								</FlexItem>
+								<Button
+									className="button button-secondary"
+									onClick={() => {
+										const newSameAs = [...socialLinks];
+										newSameAs.splice(index, 1);
+										updatePersonMeta({
+											...meta,
+											_person_same_as: newSameAs,
+										});
+									}}
+									variant="secondary"
+									__next40pxDefaultSize
+								>
+									<Icon icon={trash} />
+								</Button>
+							</Flex>
 						</Item>
 					))}
 				</ItemGroup>
@@ -237,7 +259,7 @@ const edit = ({ context }: EditProps) => {
 					}}
 					variant="secondary"
 				>
-					{__('Add Social Link', 'ctx-events')}
+					{__('Add Social Media Link', 'ctx-events')}
 				</Button>
 			</Flex>
 		</div>
