@@ -40,13 +40,35 @@ const edit = ({ context }: EditProps) => {
 		context.postType,
 		'meta',
 	) as [PersonMeta, (value: PersonMeta) => void];
+	const [title, setTitle] = useEntityProp(
+		'postType',
+		context.postType,
+		'title',
+	) as [string, (value: string) => void];
+
+	const updatePersonMeta = (nextMeta: PersonMeta) => {
+		setMeta(nextMeta);
+
+		const nextTitle = [
+			nextMeta._person_prefix,
+			nextMeta._person_first_name,
+			nextMeta._person_last_name,
+			nextMeta._person_suffix,
+		]
+			.filter(Boolean)
+			.join(' ');
+
+		if (nextTitle !== title) {
+			setTitle(nextTitle);
+		}
+	};
 
 	const socialLinks = Array.isArray(meta._person_same_as)
 		? meta._person_same_as
 		: [];
 
 	const blockProps = useBlockProps({
-		className: 'person-edit',
+		className: 'person-edit inline-editor',
 	});
 
 	return (
@@ -63,7 +85,7 @@ const edit = ({ context }: EditProps) => {
 								{ label: __('Female', 'ctx-events'), value: 'female' },
 							]}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_gender: value,
 								});
@@ -76,7 +98,7 @@ const edit = ({ context }: EditProps) => {
 							label={__('Prefix', 'ctx-events')}
 							value={meta._person_prefix ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_prefix: value,
 								});
@@ -89,7 +111,7 @@ const edit = ({ context }: EditProps) => {
 							label={__('Suffix', 'ctx-events')}
 							value={meta._person_suffix ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_suffix: value,
 								});
@@ -98,41 +120,15 @@ const edit = ({ context }: EditProps) => {
 						/>
 					</FlexItem>
 				</Flex>
+
 				<Flex gap={4}>
 					<FlexItem isBlock>
 						<TextControl
-							label={__('Organization', 'ctx-events')}
-							value={meta._person_organization ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_organization: value,
-								});
-							}}
-							__next40pxDefaultSize
-						/>
-					</FlexItem>
-					<FlexItem isBlock>
-						<TextControl
-							label={__('Position', 'ctx-events')}
-							value={meta._person_position ?? ''}
-							onChange={(value) => {
-								setMeta({
-									...meta,
-									_person_position: value,
-								});
-							}}
-							__next40pxDefaultSize
-						/>
-					</FlexItem>
-				</Flex>
-				<Flex gap={4}>
-					<FlexItem isBlock>
-						<TextControl
+							required
 							label={__('First Name', 'ctx-events')}
 							value={meta._person_first_name ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_first_name: value,
 								});
@@ -142,10 +138,11 @@ const edit = ({ context }: EditProps) => {
 					</FlexItem>
 					<FlexItem isBlock>
 						<TextControl
+							required
 							label={__('Last Name', 'ctx-events')}
 							value={meta._person_last_name ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_last_name: value,
 								});
@@ -157,10 +154,11 @@ const edit = ({ context }: EditProps) => {
 				<Flex gap={4}>
 					<FlexItem isBlock>
 						<TextControl
+							required
 							label={__('E-Mail', 'ctx-events')}
 							value={meta._person_email ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_email: value,
 								});
@@ -173,9 +171,37 @@ const edit = ({ context }: EditProps) => {
 							label={__('Telephone', 'ctx-events')}
 							value={meta._person_phone ?? ''}
 							onChange={(value) => {
-								setMeta({
+								updatePersonMeta({
 									...meta,
 									_person_phone: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+				</Flex>
+				<Flex gap={4}>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Organization', 'ctx-events')}
+							value={meta._person_organization ?? ''}
+							onChange={(value) => {
+								updatePersonMeta({
+									...meta,
+									_person_organization: value,
+								});
+							}}
+							__next40pxDefaultSize
+						/>
+					</FlexItem>
+					<FlexItem isBlock>
+						<TextControl
+							label={__('Position', 'ctx-events')}
+							value={meta._person_position ?? ''}
+							onChange={(value) => {
+								updatePersonMeta({
+									...meta,
+									_person_position: value,
 								});
 							}}
 							__next40pxDefaultSize
@@ -191,7 +217,7 @@ const edit = ({ context }: EditProps) => {
 								onChange={(value) => {
 									const newSameAs = [...socialLinks];
 									newSameAs[index] = value;
-									setMeta({
+									updatePersonMeta({
 										...meta,
 										_person_same_as: newSameAs,
 									});
@@ -204,7 +230,7 @@ const edit = ({ context }: EditProps) => {
 				<Button
 					className="button button-secondary"
 					onClick={() => {
-						setMeta({
+						updatePersonMeta({
 							...meta,
 							_person_same_as: [...socialLinks, ''],
 						});
