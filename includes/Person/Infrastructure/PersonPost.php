@@ -34,7 +34,7 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
             'template' => [
                 ['ctx-events/person-editor', []],
             ],
-            'supports' => ['title', 'thumbnail', 'editor', 'excerpt', 'custom-fields', 'revisions'],
+            'supports' => ['thumbnail', 'editor', 'excerpt', 'custom-fields', 'revisions'],
             'label' => __('Persons', 'ctx-events'),
             'description' => __('Person for an event.', 'ctx-events'),
             'labels' => [
@@ -68,6 +68,30 @@ class PersonPost extends PostType implements HasMetaData, HasTaxonomies, HasHook
         add_filter('manage_' . self::POST_TYPE . '_posts_columns', [$this, 'filterColumns']);
         add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderColumn'], 10, 2);
         add_filter('post_row_actions', [$this, 'filterRowActions'], 10, 2);
+        add_filter('rest_pre_insert_' . self::POST_TYPE, [$this, 'setTitleFromName'], 10, 2);
+    }
+
+    public function setTitleFromName(\stdClass $preparedPost, \WP_REST_Request $request): \stdClass
+    {
+        $meta = $request->get_param('meta');
+        $meta = is_array($meta) ? $meta : [];
+        $postId = (int) $request->get_param('id');
+        $parts = [];
+
+        foreach ([PersonMeta::PREFIX, PersonMeta::FIRST_NAME, PersonMeta::LAST_NAME, PersonMeta::SUFFIX] as $key) {
+            $value = $meta[$key] ?? ($postId > 0 ? get_post_meta($postId, $key, true) : '');
+            $value = trim((string) $value);
+
+            if ($value !== '') {
+                $parts[] = $value;
+            }
+        }
+
+        if ($parts !== []) {
+            $preparedPost->post_title = implode(' ', $parts);
+        }
+
+        return $preparedPost;
     }
 
     public function registerTaxonomies(): void
