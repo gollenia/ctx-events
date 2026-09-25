@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/person-editor",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Person Editor",
 	"description": "Edit a person's metadata.",
 	"category": "widgets",
