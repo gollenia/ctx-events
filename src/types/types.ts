@@ -5,7 +5,7 @@ readonly postalCode: string | null,
 readonly addressRegion: string | null,
 readonly addressCountry: string | null,
 };
-export type AttendeeStatus = "active" | "cancelled" | "checked_in";
+export type AttendeeStatus = 'active' | 'cancelled' | 'checked_in';
 export type AvailableTicketResource = {
 readonly id: string,
 readonly name: string,
@@ -27,7 +27,7 @@ readonly name: PersonName | null,
 readonly metadata: Array<any>,
 readonly status: AttendeeStatus,
 };
-export type BookingDenyReason = "disabled" | "no_capacity" | "not_started" | "ended" | "sold_out" | "form_error" | "no_tickets";
+export type BookingDenyReason = 'disabled' | 'no_capacity' | 'not_started' | 'ended' | 'sold_out' | 'form_error' | 'no_tickets';
 export type BookingDetail = {
 readonly reference: string,
 readonly date: string,
@@ -90,8 +90,8 @@ readonly actorId: number,
 readonly actorName: string,
 readonly message: string | null,
 };
-export type BookingLogEvent = "created" | "updated" | "deleted" | "approved" | "rejected" | "cancelled" | "attendee_cancelled" | "restored" | "email_warning";
-export type BookingLogLevel = "info" | "warning" | "error" | "success";
+export type BookingLogEvent = 'created' | 'updated' | 'deleted' | 'approved' | 'rejected' | 'cancelled' | 'attendee_cancelled' | 'restored' | 'email_warning';
+export type BookingLogLevel = 'info' | 'warning' | 'error' | 'success';
 export type BookingNoteResource = {
 readonly text: string,
 readonly date: string,
@@ -109,7 +109,7 @@ readonly instructions: string,
 readonly checkoutUrl: string | null,
 readonly gatewayUrl: string | null,
 };
-export type CheckboxVariant = "default" | "switch";
+export type CheckboxVariant = 'default' | 'switch';
 export type CouponListItem = {
 readonly id: number,
 readonly title: string,
@@ -123,12 +123,12 @@ readonly usageCount: number | null,
 readonly isGlobal: boolean,
 readonly status: string,
 };
-export type DatabaseOutput = "OBJECT" | "ARRAY_A" | "ARRAY_N";
-export type DiscountType = "percent" | "fixed";
-export type EmailTarget = "customer" | "admin" | "billing_contact" | "event_contact";
-export type EmailTemplateKey = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "ticket_cancelled" | "admin_booking_pending_manual" | "admin_booking_created_online";
-export type EmailTrigger = "booking_pending_manual" | "booking_created_online" | "booking_confirmed_manual" | "booking_confirmed_online" | "booking_offline_expiring" | "booking_offline_expired" | "booking_payment_failed" | "booking_denied" | "booking_cancelled" | "ticket_cancelled";
-export type ErrorType = "ERROR" | "WARNING" | "INFO";
+export type DatabaseOutput = 'OBJECT' | 'ARRAY_A' | 'ARRAY_N';
+export type DiscountType = 'percent' | 'fixed';
+export type EmailTarget = 'customer' | 'admin' | 'billing_contact' | 'event_contact';
+export type EmailTemplateKey = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled' | 'admin_booking_pending_manual' | 'admin_booking_created_online';
+export type EmailTrigger = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled';
+export type ErrorType = 'ERROR' | 'WARNING' | 'INFO';
 export type Event = {
 readonly id: number,
 readonly url: string | null,
@@ -162,9 +162,9 @@ person: undefined | null,
 categories: Array<any> | null,
 tags: Array<any> | null,
 };
-export type EventOrderBy = "date" | "title" | "booking_start" | "booking" | "location" | "person" | "price";
-export type EventStatus = "draft" | "publish" | "future" | "pending" | "private" | "trash" | "cancelled";
-export type FieldType = "input" | "textarea" | "select" | "checkbox" | "html" | "country" | "date" | "number";
+export type EventOrderBy = 'date' | 'title' | 'booking_start' | 'booking' | 'location' | 'person' | 'price';
+export type EventStatus = 'draft' | 'publish' | 'future' | 'pending' | 'private' | 'trash' | 'cancelled';
+export type FieldType = 'input' | 'textarea' | 'select' | 'checkbox' | 'html' | 'country' | 'date' | 'number';
 export type FieldWidth = 1 | 2 | 3 | 4 | 5 | 6;
 export type Form = {
 readonly id: number,
@@ -176,7 +176,7 @@ readonly tags: undefined,
 readonly status: string,
 readonly usageCount: number,
 };
-export type FormType = "booking" | "attendee";
+export type FormType = 'booking' | 'attendee';
 export type Gateway = {
 readonly slug: string,
 readonly title: string,
@@ -186,7 +186,7 @@ readonly supportsCheckoutLink: boolean,
 readonly settings: any[],
 readonly isValid: boolean,
 };
-export type InputType = "email" | "tel" | "url" | "text" | "number" | "date";
+export type InputType = 'email' | 'tel' | 'url' | 'text' | 'number' | 'date';
 export type Location = {
 id: number,
 link: undefined,
@@ -214,9 +214,9 @@ sendToWpAdmin: boolean,
 customRecipients: string[],
 } | null,
 };
-export type NumberVariant = "input" | "slider";
-export type Order = "asc" | "desc";
-export type PaymentProvider = "offline" | "mollie";
+export type NumberVariant = 'input' | 'slider';
+export type Order = 'asc' | 'desc';
+export type PaymentProvider = 'offline' | 'mollie';
 export type PersonName = {
 readonly firstName: string,
 readonly lastName: string,
@@ -247,8 +247,8 @@ context: string,
 type: string,
 id: string,
 };
-export type SelectVariant = "radio" | "select" | "combobox";
-export type Status = "publish" | "future" | "draft" | "private" | "trash";
+export type SelectVariant = 'radio' | 'select' | 'combobox';
+export type Status = 'publish' | 'future' | 'draft' | 'private' | 'trash';
 export type Ticket = {
 readonly id: string,
 readonly name: string,
@@ -259,6 +259,6 @@ readonly remainingTickets: number | null,
 readonly remainingOverallCapacity: number | null,
 readonly bookingLimit: number | null,
 };
-export type TimeScope = "all" | "future" | "past" | "today" | "tomorrow" | "one-week" | "this-week" | "this-month" | "next-month" | "1-months" | "2-months" | "3-months" | "this-year" | "1-year";
+export type TimeScope = 'all' | 'future' | 'past' | 'today' | 'tomorrow' | 'one-week' | 'this-week' | 'this-month' | 'next-month' | '1-months' | '2-months' | '3-months' | 'this-year' | '1-year';
 export type TransactionStatus = 0 | 1 | 2 | 3 | 4 | 5;
-export type ValidationError = "required" | "invalid_format" | "too_low" | "too_high" | "empty";
+export type ValidationError = 'required' | 'invalid_format' | 'too_low' | 'too_high' | 'empty';
