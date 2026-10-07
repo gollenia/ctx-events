@@ -2,11 +2,12 @@ import type {
 	DetailBlockContext,
 	DetailBlockProps,
 	DetailsSpacesAttributes,
-	SpacesRecord,
+	EventBookingRecord,
 } from '@events/details/types';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
-import { useEntityRecord } from '@wordpress/core-data';
+import apiFetch from '@wordpress/api-fetch';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { useEffect, useState } from '@wordpress/element';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
@@ -32,10 +33,32 @@ const edit = (props: SpacesBlockProps) => {
 		return null;
 	}
 
-	const { record } = useEntityRecord('postType', postType, postId) as {
-		record?: SpacesRecord;
-	};
-	const spaces = record?.extras?.spaces || 0;
+	const [spaces, setSpaces] = useState<number | null | undefined>(undefined);
+
+	useEffect(() => {
+		let isCurrent = true;
+		setSpaces(undefined);
+
+		apiFetch<EventBookingRecord>({
+			path: `/events/v3/events/${postId}?include=bookings`,
+		})
+			.then((event) => {
+				if (isCurrent) {
+					setSpaces(event.bookingSummary?.available ?? null);
+				}
+			})
+			.catch(() => {
+				if (isCurrent) {
+					setSpaces(null);
+				}
+			});
+
+		return () => {
+			isCurrent = false;
+		};
+	}, [postId]);
+
+	const hasSpaces = typeof spaces === 'number';
 	const blockProps = useBlockProps();
 
 	return (
@@ -46,7 +69,9 @@ const edit = (props: SpacesBlockProps) => {
 				<div className="event-details-image">
 					<EventIcon
 						name={
-							spaces === 0
+							!hasSpaces
+								? 'spaces_available'
+								: spaces === 0
 								? 'spaces_full'
 								: spaces > warningThreshold
 									? 'spaces_available'
@@ -65,7 +90,11 @@ const edit = (props: SpacesBlockProps) => {
 						}}
 					/>
 					<span className="event-details-data description-editable">
-						{showNumber && spaces > warningThreshold ? (
+						{spaces === undefined ? (
+							__('Loading available spaces…', 'ctx-events')
+						) : !hasSpaces ? (
+							__('Space information is not available', 'ctx-events')
+						) : showNumber && spaces > warningThreshold ? (
 							spaces
 						) : (
 							<>

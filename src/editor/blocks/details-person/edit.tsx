@@ -1,19 +1,21 @@
+import type {
+	DetailBlockProps,
+	DetailsPersonAttributes,
+	EventSpeakerMeta,
+	SpeakerRecord,
+} from '@events/details/types';
+import { formatPersonName } from '@events/utilities';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import type {
-	DetailsPersonAttributes,
-	DetailBlockProps,
-	EventSpeakerMeta,
-	SpeakerRecord,
-} from '@events/details/types';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
-	const postType = (select('core/editor') as { getCurrentPostType: () => string })
-		.getCurrentPostType();
+	const postType = (
+		select('core/editor') as { getCurrentPostType: () => string }
+	).getCurrentPostType();
 	const [meta] = useEntityProp('postType', postType, 'meta') as [
 		EventSpeakerMeta,
 	];
@@ -29,21 +31,23 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 		setAttributes,
 	} = props;
 
-	const id = customSpeakerId || meta._speaker_id;
+	const id = customSpeakerId || meta._person_id;
 	const speaker = useSelect(
 		(selectFn) => {
 			if (!id) {
 				return null;
 			}
 
-			return (selectFn('core') as {
-				getEntityRecord: (
-					kind: string,
-					name: string,
-					recordId: number,
-					query?: Record<string, unknown>,
-				) => SpeakerRecord | null;
-			}).getEntityRecord('postType', 'event-speaker', id, {
+			return (
+				selectFn('core') as {
+					getEntityRecord: (
+						kind: string,
+						name: string,
+						recordId: number,
+						query?: Record<string, unknown>,
+					) => SpeakerRecord | null;
+				}
+			).getEntityRecord('postType', 'ctx-event-person', id, {
 				per_page: 1,
 				include: [id],
 				_embed: true,
@@ -52,6 +56,8 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 		},
 		[id],
 	);
+
+	const personName = formatPersonName(speaker?.meta);
 
 	const link = (() => {
 		switch (linkTo) {
@@ -82,7 +88,8 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 		return linkTo === 'custom' || linkTo === 'public' ? 'link' : linkTo;
 	})();
 
-	const image = speaker?._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null;
+	const image =
+		speaker?._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null;
 	const blockProps = useBlockProps();
 
 	return (
@@ -101,15 +108,13 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 					<RichText
 						tagName="h4"
 						className="event-details-title description-editable"
-						placeholder={__('Speaker', 'ctx-events')}
+						placeholder={__('Person', 'ctx-events')}
 						value={description}
 						onChange={(value) => {
 							setAttributes({ description: value });
 						}}
 					/>
-					<span className="event-details-data">
-						{speaker?.title?.rendered}
-					</span>
+					<span className="event-details-data">{personName}</span>
 				</div>
 				{showLink && link && (
 					<div className="event-details-action">

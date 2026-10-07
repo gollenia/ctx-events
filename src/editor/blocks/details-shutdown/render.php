@@ -24,9 +24,11 @@ if ($summary->bookingStart && $now < $summary->bookingStart->getTimestamp()) {
 } elseif ($summary->bookingEnd && $now > $summary->bookingEnd->getTimestamp()) {
     $description = __('Booking has ended on', 'ctx-events');
     $date = wp_date($dateFormat, $summary->bookingEnd->getTimestamp());
-} else {
+} elseif ($summary->bookingEnd) {
     $description = __('Booking ends on', 'ctx-events');
     $date = wp_date($dateFormat, $summary->bookingEnd->getTimestamp());
+} else {
+    return;
 }
 
 ?>

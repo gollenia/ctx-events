@@ -1,18 +1,19 @@
+import type {
+	DetailBlockProps,
+	DetailsAudienceAttributes,
+	EventAudienceMeta,
+} from '@events/details/types';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import type {
-	DetailsAudienceAttributes,
-	DetailBlockProps,
-	EventAudienceMeta,
-} from '@events/details/types';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
-	const postType = (select('core/editor') as { getCurrentPostType: () => string })
-		.getCurrentPostType();
+	const postType = (
+		select('core/editor') as { getCurrentPostType: () => string }
+	).getCurrentPostType();
 
 	if (postType !== 'ctx-event') {
 		return null;

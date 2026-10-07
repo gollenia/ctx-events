@@ -1,19 +1,20 @@
+import type {
+	DetailBlockProps,
+	DetailsLocationAttributes,
+	EventLocationMeta,
+	LocationRecord,
+} from '@events/details/types';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import type {
-	DetailsLocationAttributes,
-	DetailBlockProps,
-	EventLocationMeta,
-	LocationRecord,
-} from '@events/details/types';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
-	const postType = (select('core/editor') as { getCurrentPostType: () => string })
-		.getCurrentPostType();
+	const postType = (
+		select('core/editor') as { getCurrentPostType: () => string }
+	).getCurrentPostType();
 
 	if (postType !== 'ctx-event') {
 		return null;
@@ -36,13 +37,15 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 
 	const location = useSelect(
 		(selectFn) =>
-			(selectFn('core') as {
-				getEntityRecord: (
-					kind: string,
-					name: string,
-					id?: number,
-				) => LocationRecord | null;
-			}).getEntityRecord('postType', 'location', meta._location_id),
+			(
+				selectFn('core') as {
+					getEntityRecord: (
+						kind: string,
+						name: string,
+						id?: number,
+					) => LocationRecord | null;
+				}
+			).getEntityRecord('postType', 'ctx-event-location', meta._location_id),
 		[meta._location_id],
 	);
 
@@ -103,7 +106,9 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 						</div>
 					) : (
 						<div className="event-details-data description-editable">
-							{showTitle && <div>{__('No location selected', 'ctx-events')}</div>}
+							{showTitle && (
+								<div>{__('No location selected', 'ctx-events')}</div>
+							)}
 						</div>
 					)}
 				</div>

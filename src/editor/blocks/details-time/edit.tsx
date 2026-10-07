@@ -1,19 +1,20 @@
+import type {
+	DetailBlockProps,
+	DetailsTimeAttributes,
+	EventDateMeta,
+} from '@events/details/types';
+import { formatTimeRange } from '@events/i18n';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { formatTimeRange } from '../../../shared/i18n/datetime';
-import type {
-	DetailsTimeAttributes,
-	DetailBlockProps,
-	EventDateMeta,
-} from '@events/details/types';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
 
 const edit = (props: DetailBlockProps<DetailsTimeAttributes>) => {
-	const postType = (select('core/editor') as { getCurrentPostType: () => string })
-		.getCurrentPostType();
+	const postType = (
+		select('core/editor') as { getCurrentPostType: () => string }
+	).getCurrentPostType();
 
 	if (postType !== 'ctx-event') {
 		return null;

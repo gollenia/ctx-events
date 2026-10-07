@@ -6,7 +6,7 @@ import type {
 	DetailsShutdownAttributes,
 	DetailBlockContext,
 	DetailBlockProps,
-	EventRsvpMeta,
+	EventBookingMeta,
 } from '@events/details/types';
 import EventIcon from '../../../shared/icons/EventIcon';
 import Inspector from './inspector';
@@ -25,20 +25,20 @@ const edit = (props: ShutdownBlockProps) => {
 	}
 
 	const [meta] = useEntityProp('postType', postType, 'meta') as [
-		EventRsvpMeta,
+		EventBookingMeta,
 	];
 	const blockProps = useBlockProps();
 
 	const endFormatted = () =>
-		meta._event_rsvp_end ? formatDate(meta._event_rsvp_end) : '';
+		meta._booking_end ? formatDate(meta._booking_end) : '';
 
 	const startFormatted = () =>
-		meta._event_rsvp_start ? formatDate(meta._event_rsvp_start) : '';
+		meta._booking_start ? formatDate(meta._booking_start) : '';
 
-	const start = meta._event_rsvp_start
-		? new Date(meta._event_rsvp_start)
+	const start = meta._booking_start
+		? new Date(meta._booking_start)
 		: null;
-	const end = meta._event_rsvp_end ? new Date(meta._event_rsvp_end) : null;
+	const end = meta._booking_end ? new Date(meta._booking_end) : null;
 	const now = new Date();
 
 	const bookingEnded = end ? end < now : false;
