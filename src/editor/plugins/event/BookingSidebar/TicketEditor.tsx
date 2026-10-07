@@ -34,7 +34,7 @@ const TicketEditor = ({
 
 	return (
 		<>
-			<Flex direction="column">
+			<Flex direction="column" gap="1rem">
 				<FlexItem>
 					<TextControl
 						label={__('Name', 'ctx-events')}
@@ -55,7 +55,7 @@ const TicketEditor = ({
 						}
 					/>
 				</FlexItem>
-				<Flex justify="flex-start">
+				<Flex align="flex-start">
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
 							label={__('Price', 'ctx-events')}
@@ -91,7 +91,7 @@ const TicketEditor = ({
 						/>
 					</FlexItem>
 				</Flex>
-				<Flex>
+				<Flex justify="flex-start" align="flex-start">
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
 							label={__('Minimum bookable', 'ctx-events')}
