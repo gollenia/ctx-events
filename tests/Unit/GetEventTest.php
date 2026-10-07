@@ -5,10 +5,11 @@ use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
 use Contexis\Events\Event\Application\DTOs\EventResponse;
 use Contexis\Events\Event\Application\Service\EventPolicy;
 use Contexis\Events\Event\Application\UseCases\GetEvent;
-use Contexis\Events\Form\Domain\FormRepository;
 use Contexis\Events\Location\Application\LocationDto;
 use Contexis\Events\Shared\Application\ValueObjects\UserContext;
+use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
+use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeImageFactory;
 use Tests\Support\FakeEventRepository;
@@ -37,7 +38,8 @@ test('returns null when event not found', function () {
     $imageRepository = new FakeImageRepository(null);
     $locationRepository = new FakeLocationRepository(null);
     $taxonomyLoader = new TaxonomyLoader();
-    $formRepository = Mockery::mock(FormRepository::class);
+	$bookingRepository = FakeBookingRepository::empty();
+	$clock = Mockery::mock(Clock::class);
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
 
@@ -48,7 +50,8 @@ test('returns null when event not found', function () {
         $locationRepository,
         $eventPolicy,
         $taxonomyLoader,
-        $formRepository,
+		$bookingRepository,
+		$clock,
     );
 
     $dto = $uc->execute(999, new EventIncludeRequest(location: false, image: false), fakeUserContext());
@@ -65,7 +68,8 @@ test('returns event dto without includes', function () {
     $imageRepository = new FakeImageRepository(null);
     $locationRepository = new FakeLocationRepository(null);
     $taxonomyLoader = new TaxonomyLoader();
-    $formRepository = Mockery::mock(FormRepository::class);
+	$bookingRepository = FakeBookingRepository::empty();
+	$clock = Mockery::mock(Clock::class);
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
     $eventPolicy->shouldReceive('userCanView')->andReturn(true);
@@ -77,7 +81,8 @@ test('returns event dto without includes', function () {
         $locationRepository,
         $eventPolicy,
         $taxonomyLoader,
-        $formRepository,
+		$bookingRepository,
+		$clock,
     );
 
     $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: false, image: false), fakeUserContext());
@@ -101,7 +106,9 @@ test('returns event dto when event found with includes', function () {
     $imageRepository = new FakeImageRepository($image);
     $locationRepository = new FakeLocationRepository($location);
     $taxonomyLoader = new TaxonomyLoader();
-    $formRepository = Mockery::mock(FormRepository::class);
+	$bookingRepository = FakeBookingRepository::empty();
+	$clock = Mockery::mock(Clock::class);
+	$clock->shouldReceive('now')->once()->andReturn(new \DateTimeImmutable('2026-03-10 10:00:00'));
 
     $eventPolicy = Mockery::mock(EventPolicy::class);
     $eventPolicy->shouldReceive('userCanView')->andReturn(true);
@@ -113,13 +120,15 @@ test('returns event dto when event found with includes', function () {
         $locationRepository,
         $eventPolicy,
         $taxonomyLoader,
-        $formRepository,
+		$bookingRepository,
+		$clock,
     );
 
-    $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: true, image: true), fakeUserContext());
+    $dto = $uc->execute($event->id->toInt(), new EventIncludeRequest(location: true, image: true, bookings: true), fakeUserContext());
 
     expect($dto)->toBeInstanceOf(EventResponse::class);
     expect($dto->id)->toBe($id);
     expect($dto->locationDto)->toBeInstanceOf(LocationDto::class);
     expect($dto->imageDto)->not->toBeNull();
+	expect($dto->bookingSummary)->not->toBeNull();
 });
