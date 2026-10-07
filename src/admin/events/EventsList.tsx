@@ -85,7 +85,7 @@ const EventsList = () => {
 			views={[{ id: 'calender', label: __('Calendar', 'ctx-events') }]}
 		>
 			<PostTable.Header />
-			<PostTable.StatusSelect />
+
 			{view.type === 'calender' ? (
 				<EventCalendarView
 					filters={view.filters}
@@ -93,11 +93,12 @@ const EventsList = () => {
 				/>
 			) : (
 				<>
+					<PostTable.StatusSelect />
 					<PostTable.Filter />
 					<PostTable.Table />
+					<PostTable.Pagination />
 				</>
 			)}
-			<PostTable.Pagination />
 		</PostTable>
 	);
 };
