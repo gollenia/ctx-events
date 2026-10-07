@@ -12,15 +12,12 @@ import {
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { trash } from '@wordpress/icons';
+import { formatPersonName, type PersonNameMeta } from '@events/utilities';
 
-type PersonMeta = {
+type PersonMeta = PersonNameMeta & {
 	_person_organization?: string;
-	_person_prefix?: string;
-	_person_suffix?: string;
 	_person_position?: string;
 	_person_gender?: string;
-	_person_first_name?: string;
-	_person_last_name?: string;
 	_person_email?: string;
 	_person_phone?: string;
 	_person_same_as?: string[];
@@ -51,14 +48,7 @@ const edit = ({ context }: EditProps) => {
 	const updatePersonMeta = (nextMeta: PersonMeta) => {
 		setMeta(nextMeta);
 
-		const nextTitle = [
-			nextMeta._person_prefix,
-			nextMeta._person_first_name,
-			nextMeta._person_last_name,
-			nextMeta._person_suffix,
-		]
-			.filter(Boolean)
-			.join(' ');
+		const nextTitle = formatPersonName(nextMeta);
 
 		if (nextTitle !== title) {
 			setTitle(nextTitle);
