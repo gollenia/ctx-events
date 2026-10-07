@@ -30,6 +30,32 @@ type EditProps = {
 	};
 };
 
+const formatDiscountValue = (
+	value: CouponMeta['_value'],
+	discountType: CouponMeta['_type'],
+): string => {
+	if (value === undefined || value === '') {
+		return '';
+	}
+
+	return discountType === 'fixed'
+		? (Number(value) / 100).toFixed(2)
+		: String(value);
+};
+
+const toDiscountValue = (
+	value: string,
+	discountType: CouponMeta['_type'],
+): number | string => {
+	if (discountType !== 'fixed') {
+		return value;
+	}
+
+	const amount = Number(value.replace(',', '.'));
+
+	return Number.isFinite(amount) ? Math.round(amount * 100) : 0;
+};
+
 export default function Edit(props: EditProps) {
 	const postType = props.context?.postType;
 	if (postType !== 'ctx-event-coupon') {
@@ -138,11 +164,11 @@ export default function Edit(props: EditProps) {
 							__next40pxDefaultSize
 							placeholder={discountType === 'percent' ? '0' : '0.00'}
 							step={discountType === 'percent' ? 1 : 0.01}
-							value={meta?._value ?? ''}
+							value={formatDiscountValue(meta?._value, discountType)}
 							onChange={(value) => {
 								setMeta({
 									...meta,
-									_value: value,
+									_value: toDiscountValue(value, discountType),
 								});
 							}}
 						/>
