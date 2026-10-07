@@ -1,14 +1,15 @@
 import { unregisterBlockType } from '@wordpress/blocks';
 import domReady from '@wordpress/dom-ready';
 import { registerPlugin } from '@wordpress/plugins';
+import REWRITES from './plugins/common/dashboardRewrites';
 
 import './editor.scss';
 import '../shared/icons/style.scss';
 import '@events/emails/style.scss';
 
+import DashboardButton from './plugins/common/DashboardButton';
 import bookingSidebar from './plugins/event/BookingSidebar';
 import BookingStatus from './plugins/event/BookingStatus';
-import DashboardButton from './plugins/event/DashboardButton';
 import datetimeSelector from './plugins/event/datetime';
 import locationSelector from './plugins/event/location';
 import peopleSelector from './plugins/event/people';
@@ -26,7 +27,7 @@ const plugins = [
 
 const currentType = (window as Window & { typenow?: string }).typenow;
 
-if (currentType === 'ctx-event') {
+if (REWRITES[currentType ?? '']) {
 	plugins.push({
 		name: 'event-dashboard-button',
 		component: DashboardButton,
