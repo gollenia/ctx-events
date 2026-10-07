@@ -9,11 +9,3 @@ export type CalendarEvent = {
 	locationName: string | null;
 	personName: string | null;
 };
-
-export type CalendarDay = {
-	date: Date;
-	key: string;
-	inMonth: boolean;
-	isToday: boolean;
-	events: Array<CalendarEvent>;
-};

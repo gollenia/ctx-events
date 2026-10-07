@@ -32,9 +32,9 @@ export type EventSpeakerMeta = {
 	_speaker_id?: number;
 };
 
-export type EventRsvpMeta = {
-	_event_rsvp_start?: string;
-	_event_rsvp_end?: string;
+export type EventBookingMeta = {
+	_booking_start?: string;
+	_booking_end?: string;
 };
 
 export type EventTicketsMeta = {
@@ -92,10 +92,12 @@ export type SpeakerRecord = {
 	};
 };
 
-export type SpacesRecord = {
-	extras?: {
-		spaces?: number;
-	};
+export type EventBookingSummary = {
+	available?: number | null;
+};
+
+export type EventBookingRecord = {
+	bookingSummary?: EventBookingSummary | null;
 };
 
 export type ColorValue = {
