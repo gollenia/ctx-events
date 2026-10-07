@@ -21,7 +21,7 @@ final class CouponMeta extends MetaData
     protected static array $metadata = [
         self::CODE   => ['type' => 'string'],
         self::TYPE   => ['type' => 'string', 'default' => 'percent'],
-        self::VALUE  => ['type' => 'number', 'default' => 0],
+        self::VALUE  => ['type' => 'integer', 'default' => 0],
         self::EXPIRES_AT => ['type' => 'string'],
 		self::VALID_FROM => ['type' => 'string'],
         self::LIMIT  => ['type' => 'number'],
