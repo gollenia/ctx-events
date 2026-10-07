@@ -59,7 +59,7 @@ const edit = (props: EditProps) => {
 	];
 
 	const blockProps = useBlockProps({
-		className: 'location-edit',
+		
 	});
 
 	const locale = useSelect((select) => {
@@ -78,7 +78,7 @@ const edit = (props: EditProps) => {
 		<div {...blockProps}>
 			<Flex
 				direction="column"
-				className="location-edit__admin ctx-block-editor"
+				className="location-edit ctx-block-editor"
 			>
 				<TextControl
 					label={__('Address', 'ctx-events')}
