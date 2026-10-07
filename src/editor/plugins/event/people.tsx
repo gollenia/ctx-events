@@ -10,6 +10,7 @@ import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
+import { formatPersonName, type PersonNameMeta } from '@events/utilities';
 
 import icons from './icons';
 import './speaker.scss';
@@ -23,7 +24,7 @@ type PersonRecord = {
 	};
 	meta?: {
 		thumbnail?: string;
-	};
+	} & PersonNameMeta;
 	_embedded?: {
 		'wp:featuredmedia'?: Array<{
 			media_details?: {
@@ -57,7 +58,7 @@ const PeopleSelector = () => {
 			(person): ComboboxControlOption => ({
 				key: person.id,
 				value: String(person.id),
-				label: person.title?.raw ?? '',
+				label: formatPersonName(person.meta ?? {}),
 				media:
 					person._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes
 						?.thumbnail?.source_url,
@@ -68,6 +69,8 @@ const PeopleSelector = () => {
 	if (postType !== 'ctx-event') {
 		return null;
 	}
+
+	console.log(meta)
 
 	return (
 		<PluginDocumentSettingPanel

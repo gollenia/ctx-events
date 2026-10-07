@@ -32,9 +32,11 @@ final class PersonResource implements \JsonSerializable
         return [
             ...$this->getJsonLd(),
             'id' => $this->personDto->id,
+			'honorificPrefix' => $this->personDto->honorificPrefix,
             'givenName' => $this->personDto->givenName,
             'familyName' => $this->personDto->familyName,
-            'email' => $this->personDto->email->address(),
+			'honorificSuffix' => $this->personDto->honorificSuffix,
+			'email' => $this->personDto->email?->address(),
             'telephone' => $this->personDto->telephone,
             'sameAs' => $this->personDto->sameAs,
         ];
