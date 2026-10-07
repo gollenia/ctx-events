@@ -3,16 +3,20 @@ import {
 	__experimentalMainDashboardButton as MainDashboardButton,
 } from '@wordpress/edit-post';
 
+import REWRITES from './dashboardRewrites';
+
 const DashboardButton = () => {
 	const currentType = (window as Window & { typenow?: string }).typenow;
-
-	if (currentType !== 'ctx-event') {
+	console.log(currentType);
+	if (!(currentType && REWRITES[currentType])) {
 		return null;
 	}
 
 	return (
 		<MainDashboardButton>
-			<FullscreenModeClose href="admin.php?page=ctx_events_admin_menu" />
+			<FullscreenModeClose
+				href={`admin.php?page=${REWRITES[currentType] ?? ''}`}
+			/>
 		</MainDashboardButton>
 	);
 };
