@@ -1,5 +1,5 @@
-import { formatPrice } from '@events/i18n';
 import type { DataFieldConfig } from '@events/datatable';
+import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { CouponListItem } from 'src/types/types';
 
@@ -53,23 +53,27 @@ export const createFields = (
 		id: 'usage',
 		label: __('Usage', 'ctx-events'),
 		getValue: (coupon: CouponListItem) =>
-			`${coupon.usageCount ?? 0} / ${coupon.usageLimit ?? '∞'}`,
+			coupon.usageLimit
+				? `${coupon.usageCount ?? 0} / ${coupon.usageLimit}`
+				: `${coupon.usageCount ?? 0}`,
+	},
+	{
+		id: 'isGlobal',
+		label: __('Global', 'ctx-events'),
+		getValue: (coupon: CouponListItem) =>
+			coupon.isGlobal ? __('Yes', 'ctx-events') : __('No', 'ctx-events'),
 	},
 	{
 		id: 'validFrom',
 		label: __('Valid from', 'ctx-events'),
 		getValue: (coupon: CouponListItem) =>
-			coupon.validFrom
-				? new Date(coupon.validFrom).toLocaleDateString()
-				: '—',
+			coupon.validFrom ? new Date(coupon.validFrom).toLocaleDateString() : '—',
 	},
 	{
 		id: 'expiresAt',
 		label: __('Expires', 'ctx-events'),
 		getValue: (coupon: CouponListItem) =>
-			coupon.expiresAt
-				? new Date(coupon.expiresAt).toLocaleDateString()
-				: '—',
+			coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString() : '—',
 	},
 	{
 		id: 'status',

@@ -23,7 +23,15 @@ const CouponList = () => {
 		sort: { field: 'date', direction: 'desc' },
 		filters: [{ field: 'status', operator: 'is', value: 'publish' }] as Array<DataFilterField>,
 		titleField: 'title',
-		fields: ['title', 'code', 'discount', 'usage', 'expiresAt', 'status'] as Array<string>,
+		fields: [
+			'title',
+			'code',
+			'discount',
+			'usage',
+			'isGlobal',
+			'expiresAt',
+			'status',
+		] as Array<string>,
 	});
 	const fields = createFields({
 		onCodeCopy: (code) => {
