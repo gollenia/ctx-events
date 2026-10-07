@@ -41,7 +41,7 @@ final class EventMapper implements PostMapper
             id: EventId::from($post->id),
             status: EventPostStatusMapper::fromPost($post->post_status),
             name: $post->getString('post_title'),
-            audience: $post->getString('audience') ?? null,
+			audience: $post->getString(EventMeta::AUDIENCE) ?? null,
             description: $post->getString('post_excerpt'),
             authorId: new AuthorId($post->getInt('post_author')),
             eventViewConfig: EventViewConfig::fromArray($post->getArray(EventMeta::VIEW_CONFIG, [])),

@@ -36,6 +36,7 @@ class EventMeta extends MetaData
     public const CACHED_MIN_PRICE = '_cached_min_price';
     public const CACHED_MAX_PRICE = '_cached_max_price';
     public const GATEWAYS_EXCLUDED = '_gateways_excluded';
+	public const AUDIENCE           = '_event_audience';
 
     public const TICKETS_SCHEMA = [
         'schema' => [
@@ -86,15 +87,6 @@ class EventMeta extends MetaData
         self::BOOKING_REFERENCE_SUFFIX => ['type' => 'string', 'default' => ''],
         self::PERSON_ID           => [
             'type'              => 'integer',
-            'default'           => 0,
-            'sanitize_callback' => [self::class, 'sanitizeRelationId'],
-            'show_in_rest'      => [
-                'schema' => [
-                    'type'    => ['integer', 'array', 'null'],
-                    'items'   => ['type' => 'integer'],
-                    'default' => 0,
-                ],
-            ],
         ],
         self::MAIL_TO_RESPONSIBLE => ['type' => 'boolean', 'default' => false],
         self::RESPONSIBLE_AS_REPLY => ['type' => 'boolean', 'default' => false],
@@ -154,14 +146,6 @@ class EventMeta extends MetaData
 				],
 			],
 		],
+		self::AUDIENCE => ['type' => 'string'],
     ];
-
-	public static function sanitizeRelationId(mixed $value): int
-	{
-		if (is_array($value)) {
-			$value = reset($value);
-		}
-
-		return max(0, (int) $value);
-	}
 }
