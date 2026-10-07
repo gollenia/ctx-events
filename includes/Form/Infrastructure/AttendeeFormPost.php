@@ -38,14 +38,14 @@ class AttendeeFormPost extends PostType
                 ]], [
                     ['ctx-events/form-text', [
                         'lock'     => ['remove' => true, 'move' => false],
-                        'required' => false,
+                        'required' => true,
                         'width'    => 3,
                         'label'    => __('First Name', 'ctx-events'),
                         'name'     => 'first_name',
                     ]],
                     ['ctx-events/form-text', [
                         'lock'     => ['remove' => true, 'move' => false],
-                        'required' => false,
+                        'required' => true,
                         'width'    => 3,
                         'label'    => __('Last Name', 'ctx-events'),
                         'name'     => 'last_name',
