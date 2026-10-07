@@ -25,7 +25,7 @@ final readonly class EventIncludeRequest implements DTO
             tickets: in_array('tickets', $data, true),
             location: in_array('location', $data, true),
             author: in_array('author', $data, true),
-            person: in_array('person', $data, true),	
+			person: in_array('person', $data, true) || in_array('persons', $data, true),
             image: in_array('image', $data, true),
             bookings: in_array('bookings', $data, true),
 			categories: in_array('categories', $data, true),

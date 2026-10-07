@@ -93,6 +93,14 @@ final class Assets implements Registrar
             $script_asset['version'],
             'all'
         );
+
+        wp_enqueue_style(
+            'ctx-events-admin-runtime-style',
+            PluginInfo::getPluginUrl(self::ASSET_PATH . '/admin.css'),
+            ['ctx-events-admin-style'],
+            $script_asset['version'],
+            'all'
+        );
     }
 
     public function editorScript(): void
