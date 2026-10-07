@@ -1,7 +1,7 @@
 {
 	"$schema": "https://getcomposer.org/schema.json",
 	"name": "contexis/events",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Events Manager",
 	"type": "project",
 	"homepage": "http://www.kids-team.at",
@@ -46,7 +46,7 @@
 		"php-di/php-di": "^7.1.1",
 		"psr/clock": "^1.0.0",
 		"ueberdosis/tiptap-php": "^2.1",
-		"contexis/wp-github-updater": "^0.3.0"
+		"contexis/wp-github-updater": "^0.3.2"
 	},
 	"autoload": {
 		"psr-4": {

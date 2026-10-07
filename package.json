@@ -1,6 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/package.json",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"name": "ctx-events",
 	"description": "A WordPress plugin to manage events.",
 	"author": {
