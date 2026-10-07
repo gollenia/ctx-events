@@ -11,6 +11,11 @@ import Inspector from './inspector';
 
 type UpcomingAttributes = {
 	textAlignment?: string;
+	tableShowHeader: boolean;
+	tableShowDividers: boolean;
+	tableAlternatingRows: boolean;
+	tableHoverEffect: boolean;
+	tableShowCalendarIcon: boolean;
 	selectedTags: number[];
 	selectedCategory: number[];
 	selectedLocation: number;

@@ -34,6 +34,26 @@
 			"type": "string",
 			"default": "cards"
 		},
+		"tableShowHeader": {
+			"type": "boolean",
+			"default": false
+		},
+		"tableShowDividers": {
+			"type": "boolean",
+			"default": true
+		},
+		"tableAlternatingRows": {
+			"type": "boolean",
+			"default": false
+		},
+		"tableHoverEffect": {
+			"type": "boolean",
+			"default": true
+		},
+		"tableShowCalendarIcon": {
+			"type": "boolean",
+			"default": false
+		},
 		"limit": {
 			"type": "number",
 			"default": 99

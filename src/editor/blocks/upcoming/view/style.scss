@@ -223,12 +223,21 @@
 		object-fit: cover;
 	}
 
-	tr {
+	tbody tr {
 		border-bottom: 1px solid var(--wp--custom--ctx-events--color--border);
 		cursor: pointer;
-		&:hover {
-			background-color: var(--wp--custom--ctx-events--color--surface-muted);
-		}
+	}
+
+	&--no-dividers tbody tr {
+		border-bottom: 0;
+	}
+
+	&--alternating tbody tr:nth-child(even) {
+		background-color: var(--wp--custom--ctx-events--color--surface-muted);
+	}
+
+	&--hover tbody tr:hover {
+		background-color: var(--wp--custom--ctx-events--color--surface-muted);
 	}
 
 	&__title {
@@ -239,8 +248,19 @@
 		white-space: nowrap;
 	}
 
+	&__calendar-icon {
+		display: block;
+		margin: 0 auto var(--wp--custom--ctx-events--space--xs);
+	}
+
+	th,
 	td {
 		padding: var(--wp--custom--ctx-events--space--md) var(--wp--custom--ctx-events--space--sm);
+	}
+
+	th {
+		font-weight: 700;
+		text-align: left;
 	}
 
 .ctx-upcoming-date {

@@ -25,6 +25,11 @@ type UpcomingAttributes = {
 	columnsLarge?: number;
 	showImages: boolean;
 	view: 'mini' | 'list' | 'cards';
+	tableShowHeader: boolean;
+	tableShowDividers: boolean;
+	tableAlternatingRows: boolean;
+	tableHoverEffect: boolean;
+	tableShowCalendarIcon: boolean;
 	scope: string;
 	showCategory: boolean;
 	showLocation: string;
@@ -66,6 +71,11 @@ const Inspector = (props: InspectorProps) => {
 			limit,
 			showImages,
 			view,
+			tableShowHeader,
+			tableShowDividers,
+			tableAlternatingRows,
+			tableHoverEffect,
+			tableShowCalendarIcon,
 			scope,
 			showCategory,
 			showLocation,
@@ -302,6 +312,8 @@ const Inspector = (props: InspectorProps) => {
 					checked={userStylePicker}
 					onChange={(value) => setAttributes({ userStylePicker: value })}
 				/>
+			</PanelBody>
+			<PanelBody title={__('Event details', 'ctx-events')} initialOpen={true}>
 				<SelectControl
 					label={__('Location', 'ctx-events')}
 					value={showLocation}
@@ -373,6 +385,40 @@ const Inspector = (props: InspectorProps) => {
 					)}
 				/>
 			</PanelBody>
+			{view === 'mini' && (
+				<PanelBody title={__('Table options', 'ctx-events')} initialOpen={true}>
+					<CheckboxControl
+						label={__('Show table header', 'ctx-events')}
+						checked={tableShowHeader}
+						onChange={(value) => setAttributes({ tableShowHeader: value })}
+						__nextHasNoMarginBottom
+					/>
+					<CheckboxControl
+						label={__('Show row dividers', 'ctx-events')}
+						checked={tableShowDividers}
+						onChange={(value) => setAttributes({ tableShowDividers: value })}
+						__nextHasNoMarginBottom
+					/>
+					<CheckboxControl
+						label={__('Use alternating row colors', 'ctx-events')}
+						checked={tableAlternatingRows}
+						onChange={(value) => setAttributes({ tableAlternatingRows: value })}
+						__nextHasNoMarginBottom
+					/>
+					<CheckboxControl
+						label={__('Show hover effect', 'ctx-events')}
+						checked={tableHoverEffect}
+						onChange={(value) => setAttributes({ tableHoverEffect: value })}
+						__nextHasNoMarginBottom
+					/>
+					<CheckboxControl
+						label={__('Show calendar icon', 'ctx-events')}
+						checked={tableShowCalendarIcon}
+						onChange={(value) => setAttributes({ tableShowCalendarIcon: value })}
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			)}
 		</InspectorControls>
 	);
 };

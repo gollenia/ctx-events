@@ -6,6 +6,11 @@ export type UpcomingAttributes = {
 	showLocation: '' | 'name' | 'city' | 'country' | 'state';
 	filterPosition: 'top' | 'side';
 	view: 'cards' | 'list' | 'mini';
+	tableShowHeader: boolean;
+	tableShowDividers: boolean;
+	tableAlternatingRows: boolean;
+	tableHoverEffect: boolean;
+	tableShowCalendarIcon: boolean;
 	limit: number;
 	order: 'asc' | 'desc';
 	selectedCategory: number[];
