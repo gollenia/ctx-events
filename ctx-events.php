@@ -20,6 +20,8 @@ Domain Path: /languages
 
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
+Contexis\WpGitHubUpdater\WordPressPluginUpdater::fromPluginFile(__FILE__)->registerHooks();
+
 add_action('init', function () {
     load_plugin_textdomain(
         'ctx-events',
