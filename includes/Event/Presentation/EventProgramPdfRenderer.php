@@ -7,7 +7,6 @@ namespace Contexis\Events\Event\Presentation;
 use Contexis\Events\Event\Application\DTOs\EventCalendarEntry;
 use Contexis\Events\Event\Application\DTOs\EventProgramData;
 use Mpdf\Config\ConfigVariables;
-use Mpdf\Config\FontVariables;
 use Mpdf\Mpdf;
 
 final class EventProgramPdfRenderer
@@ -193,12 +192,9 @@ final class EventProgramPdfRenderer
 	private function locateTemplate(string $mode): string
 	{
 		$templateNames = [
-			sprintf('plugins/events/pdf/%s-events.php', $mode),
-			sprintf('ctx-events/pdf/%s-events.php', $mode),
-			'plugins/events/pdf/program.php',
-			'ctx-events/pdf/program.php',
-			'plugins/events/pdf/monthly-events.php',
-			'ctx-events/pdf/monthly-events.php',
+			sprintf('plugins/ctx-events/pdf/%s-events.php', $mode),
+			'plugins/ctx-events/pdf/program.php',
+			'plugins/ctx-events/pdf/monthly-events.php',
 		];
 
 		$themeTemplate = locate_template($templateNames, false, false);
@@ -224,26 +220,54 @@ final class EventProgramPdfRenderer
 	 */
 	private function getPdfConfig(): array
 	{
-		$fontPath = get_stylesheet_directory() . '/plugins/events/pdf/fonts';
-		if (!is_dir($fontPath)) {
-			return [];
+		$fontPaths = [
+			get_stylesheet_directory() . '/plugins/ctx-events/pdf/fonts',
+			get_stylesheet_directory() . '/plugins/ctx-events/pdf',
+		];
+		$defaultConfig = (new ConfigVariables())->getDefaults();
+		$fontData = [
+			'dejavusans' => [
+				'R' => 'DejaVuSans.ttf',
+				'B' => 'DejaVuSans-Bold.ttf',
+				'I' => 'DejaVuSans-Oblique.ttf',
+				'BI' => 'DejaVuSans-BoldOblique.ttf',
+			],
+		];
+		$fontDirs = $defaultConfig['fontDir'];
+		$defaultFont = 'dejavusans';
+
+		$fontPath = null;
+		foreach ($fontPaths as $candidate) {
+			if (is_file($candidate . '/regular.ttf')) {
+				$fontPath = $candidate;
+				break;
+			}
 		}
 
-		$defaultConfig = (new ConfigVariables())->getDefaults();
-		$fontDirs = $defaultConfig['fontDir'];
-		$defaultFontConfig = (new FontVariables())->getDefaults();
-		$fontData = $defaultFontConfig['fontdata'];
+		if ($fontPath !== null) {
+			$fontData['ctxpdf'] = [
+				'R' => 'regular.ttf',
+			];
+
+			foreach (['B' => 'bold.ttf', 'I' => 'italic.ttf', 'BI' => 'bolditalic.ttf'] as $style => $file) {
+				if (is_file($fontPath . '/' . $file)) {
+					$fontData['ctxpdf'][$style] = $file;
+				}
+			}
+
+			$fontDirs[] = $fontPath;
+			$defaultFont = 'ctxpdf';
+		}
 
 		return [
-			'fontDir' => array_merge($fontDirs, [$fontPath]),
-			'fontdata' => $fontData + [
-				'ctxpdf' => [
-					'R' => 'regular.ttf',
-					'B' => 'bold.ttf',
-					'I' => 'italic.ttf',
-				],
-			],
-			'default_font' => 'ctxpdf',
+			'fontDir' => $fontDirs,
+			'fontdata' => $fontData,
+			'sans_fonts' => ['dejavusans', 'sans', 'sans-serif'],
+			'serif_fonts' => ['dejavusans', 'serif'],
+			'mono_fonts' => ['dejavusans', 'mono', 'monospace'],
+			'backupSubsFont' => ['dejavusans'],
+			'backupSIPFont' => null,
+			'default_font' => $defaultFont,
 		];
 	}
 }
