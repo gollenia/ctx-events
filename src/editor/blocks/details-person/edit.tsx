@@ -57,7 +57,7 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 		[id],
 	);
 
-	const personName = formatPersonName(speaker?.meta);
+	const personName = formatPersonName(speaker?.meta ?? {});
 
 	const link = (() => {
 		switch (linkTo) {
@@ -85,7 +85,15 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 			}
 		}
 
-		return linkTo === 'custom' || linkTo === 'public' ? 'link' : linkTo;
+		if (linkTo === 'mail') {
+			return 'email';
+		}
+
+		if (linkTo === 'call') {
+			return 'phone';
+		}
+
+		return 'link';
 	})();
 
 	const image =
@@ -97,9 +105,15 @@ const edit = (props: DetailBlockProps<DetailsPersonAttributes>) => {
 			<Inspector {...props} />
 
 			<div className="event-details-item">
-				<div className="event-details-image">
+				<div
+					className={
+						showPortrait && image
+							? 'event-details-image event-details-image--photo'
+							: 'event-details-image'
+					}
+				>
 					{showPortrait && image ? (
-						<img src={image} alt="" />
+						<img className="event-details-image__photo" src={image} alt="" />
 					) : (
 						<EventIcon name={speaker?.gender ?? 'male'} />
 					)}
