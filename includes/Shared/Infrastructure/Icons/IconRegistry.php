@@ -4,116 +4,145 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Shared\Infrastructure\Icons;
 
+use Contexis\Events\Platform\Wordpress\PluginInfo;
+
 final class IconRegistry
 {
-    /** @var array<string, string> */
-    private array $icons = [];
+	private const COLLECTION = 'ctx-events';
 
-    private bool $booted = false;
+	/** @var array<string, string> */
+	private array $icons = [];
 
-    public function boot(): void
-    {
-        if ($this->booted) {
-            return;
-        }
+	private bool $booted = false;
 
-        do_action('ctx_icons_register', $this);
-        do_action('ctx_icons_override', $this);
+	public function boot(): void
+	{
+		if ($this->booted) {
+			return;
+		}
 
-        $icons = apply_filters('ctx_icons', $this->icons, $this);
+		if (!function_exists('wp_register_icon_collection') || !function_exists('wp_register_icon')) {
+			return;
+		}
 
-        $this->icons = is_array($icons) ? array_filter($icons, 'is_string') : $this->icons;
-        $this->booted = true;
-    }
+		$collections = \WP_Icon_Collections_Registry::get_instance();
+		if (!$collections->is_registered(self::COLLECTION)) {
+			wp_register_icon_collection(self::COLLECTION, [
+				'label' => __('Events', 'ctx-events'),
+			]);
+		}
 
-    public function register(string $name, string $markup, string $source = ''): bool
-    {
-        $name = trim($name);
+		foreach ($this->pluginIconPaths() as $name => $pluginPath) {
+			$iconName = $this->qualifiedName($name);
+			$iconPath = $this->locateThemeIcon($name) ?? $pluginPath;
 
-        if ($name === '' || $markup === '' || isset($this->icons[$name])) {
-            return false;
-        }
+			if (!\WP_Icons_Registry::get_instance()->is_registered($iconName)) {
+				wp_register_icon($iconName, [
+					'label' => $this->labelFor($name),
+					// The core icon sanitizer deliberately allows `fill` on paths,
+					// but not on the SVG root. Normalise the common SVG shorthand
+					// (`<svg fill="currentColor">`) before registration so its colour
+					// remains identical in the editor and on the frontend.
+					'content' => $this->normaliseIconContent($iconPath),
+				]);
+			}
 
-        $this->icons[$name] = $markup;
+			if (\WP_Icons_Registry::get_instance()->is_registered($iconName)) {
+				$this->icons[$name] = $iconName;
+			}
+		}
 
-        return true;
-    }
+		$this->booted = true;
+	}
 
-    public function registerFromFile(string $name, string $path, string $source = ''): bool
-    {
-        $markup = $this->readMarkupFromFile($path);
+	public function resolveSlot(string $icon): string
+	{
+		return trim($icon);
+	}
 
-        if ($markup === '') {
-            return false;
-        }
+	public function qualifiedName(string $icon): string
+	{
+		return self::COLLECTION . '/' . $this->resolveSlot($icon);
+	}
 
-        return $this->register($name, $markup, $source);
-    }
+	/** @return array<string, string> */
+	public function getIcons(): array
+	{
+		$this->boot();
 
-    public function override(string $name, string $markup, string $source = ''): void
-    {
-        $name = trim($name);
+		$icons = [];
+		foreach ($this->icons as $name => $iconName) {
+			$icon = \WP_Icons_Registry::get_instance()->get_registered_icon($iconName);
+			$content = $icon['content'] ?? '';
 
-        if ($name === '' || $markup === '') {
-            return;
-        }
+			if (is_string($content) && $content !== '') {
+				$icons[$name] = $content;
+			}
+		}
 
-        $this->icons[$name] = $markup;
-    }
+		return $icons;
+	}
 
-    public function overrideFromFile(string $name, string $path, string $source = ''): void
-    {
-        $markup = $this->readMarkupFromFile($path);
+	public function getIconMarkup(string $icon): string
+	{
+		return $this->getIcons()[$this->resolveSlot($icon)] ?? '';
+	}
 
-        if ($markup === '') {
-            return;
-        }
+	/** @return array<string, string> */
+	public function getEditorIcons(): array
+	{
+		return $this->getIcons();
+	}
 
-        $this->override($name, $markup, $source);
-    }
+	/** @return array<string, string> */
+	private function pluginIconPaths(): array
+	{
+		$paths = glob(PluginInfo::getPluginDir('/assets/icons/*.svg')) ?: [];
+		$icons = [];
 
-    public function resolveSlot(string $icon): string
-    {
-        return trim($icon);
-    }
+		foreach ($paths as $path) {
+			$name = pathinfo($path, PATHINFO_FILENAME);
+			if ($name !== '') {
+				$icons[$name] = $path;
+			}
+		}
 
-    /** @return array<string, string> */
-    public function getIcons(): array
-    {
-        $this->boot();
+		return $icons;
+	}
 
-        return $this->icons;
-    }
+	private function locateThemeIcon(string $name): ?string
+	{
+		$path = locate_template('plugins/ctx-events/icons/' . $name . '.svg', false, false);
 
-    public function getIconMarkup(string $icon): string
-    {
-        $this->boot();
+		return $path !== '' ? $path : null;
+	}
 
-        $slot = $this->resolveSlot($icon);
+	private function normaliseIconContent(string $path): string
+	{
+		$content = file_get_contents($path);
+		if (!is_string($content)) {
+			return '';
+		}
 
-        if ($slot === '') {
-            return '';
-        }
+		if (!preg_match('/<svg\\b[^>]*\\bfill=["\\\']currentColor["\\\'][^>]*>/i', $content)) {
+			return $content;
+		}
 
-        $icons = $this->getIcons();
+		return (string) preg_replace_callback(
+			'/<path\\b([^>]*)>/i',
+			static function (array $matches): string {
+				if (preg_match('/\\bfill\\s*=/i', $matches[1])) {
+					return $matches[0];
+				}
 
-        return $icons[$slot] ?? '';
-    }
+				return '<path fill="currentColor"' . $matches[1] . '>';
+			},
+			$content,
+		);
+	}
 
-    /** @return array<string, string> */
-    public function getEditorIcons(): array
-    {
-        return $this->getIcons();
-    }
-
-    private function readMarkupFromFile(string $path): string
-    {
-        $path = trim($path);
-
-        if ($path === '' || !is_file($path)) {
-            return '';
-        }
-
-        return (string) file_get_contents($path);
-    }
+	private function labelFor(string $name): string
+	{
+		return ucwords(str_replace(['-', '_'], ' ', $name));
+	}
 }

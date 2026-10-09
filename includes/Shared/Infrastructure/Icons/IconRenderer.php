@@ -16,28 +16,39 @@ final class IconRenderer
     public function render(string $icon, array $attributes = []): string
     {
         $resolvedIcon = $this->registry->resolveSlot($icon);
-        $markup = $this->registry->getIconMarkup($icon);
 
-        if ($markup === '') {
+		if ($resolvedIcon === '') {
             return '';
         }
 
-        $className = trim('ctx-events-icon ' . (string) ($attributes['class'] ?? ''));
-        $wrapperAttributes = [
-            'class' => $className,
-            'data-ctx-icon' => $resolvedIcon,
-            'aria-hidden' => 'true',
-        ];
+		$this->registry->boot();
+		$iconName = $this->registry->qualifiedName($resolvedIcon);
+		if (!\WP_Icons_Registry::get_instance()->is_registered($iconName)) {
+			return '';
+		}
 
-        if (!empty($attributes['title']) && is_string($attributes['title'])) {
-            $wrapperAttributes['aria-label'] = $attributes['title'];
-            unset($wrapperAttributes['aria-hidden']);
-        }
+        $className = trim('ctx-events-icon ' . (string) ($attributes['class'] ?? ''));
+        $label = !empty($attributes['title']) && is_string($attributes['title'])
+			? $attributes['title']
+			: '';
+		$markup = wp_get_icon($iconName, [
+			'size' => null,
+			'class' => $className . '__svg',
+			'label' => $label,
+		]);
+
+		if ($markup === '') {
+			return '';
+		}
 
         $html = sprintf(
             '<span %s>%s</span>',
-            $this->buildAttributes($wrapperAttributes),
-            $this->sanitizeSvg($markup),
+			$this->buildAttributes([
+				'class' => $className,
+				'data-ctx-icon' => $resolvedIcon,
+				'aria-hidden' => $label === '' ? 'true' : null,
+			]),
+			$markup,
         );
 
         return (string) apply_filters(
@@ -47,95 +58,6 @@ final class IconRenderer
             $resolvedIcon,
             $attributes,
         );
-    }
-
-    private function sanitizeSvg(string $markup): string
-    {
-        return (string) wp_kses($markup, [
-            'svg' => [
-                'aria-hidden' => true,
-                'class' => true,
-                'fill' => true,
-                'height' => true,
-                'role' => true,
-                'stroke' => true,
-                'stroke-linecap' => true,
-                'stroke-linejoin' => true,
-                'stroke-width' => true,
-                'viewBox' => true,
-                'width' => true,
-                'xmlns' => true,
-            ],
-            'g' => [
-                'fill' => true,
-                'stroke' => true,
-                'stroke-linecap' => true,
-                'stroke-linejoin' => true,
-                'stroke-width' => true,
-                'transform' => true,
-            ],
-            'path' => [
-                'd' => true,
-                'fill' => true,
-                'stroke' => true,
-                'stroke-linecap' => true,
-                'stroke-linejoin' => true,
-                'stroke-width' => true,
-                'transform' => true,
-            ],
-            'circle' => [
-                'cx' => true,
-                'cy' => true,
-                'fill' => true,
-                'r' => true,
-                'stroke' => true,
-                'stroke-width' => true,
-            ],
-            'ellipse' => [
-                'cx' => true,
-                'cy' => true,
-                'fill' => true,
-                'rx' => true,
-                'ry' => true,
-                'stroke' => true,
-                'stroke-width' => true,
-            ],
-            'line' => [
-                'stroke' => true,
-                'stroke-linecap' => true,
-                'stroke-linejoin' => true,
-                'stroke-width' => true,
-                'x1' => true,
-                'x2' => true,
-                'y1' => true,
-                'y2' => true,
-            ],
-            'polygon' => [
-                'fill' => true,
-                'points' => true,
-                'stroke' => true,
-                'stroke-width' => true,
-            ],
-            'polyline' => [
-                'fill' => true,
-                'points' => true,
-                'stroke' => true,
-                'stroke-width' => true,
-            ],
-            'rect' => [
-                'fill' => true,
-                'height' => true,
-                'rx' => true,
-                'ry' => true,
-                'stroke' => true,
-                'stroke-width' => true,
-                'width' => true,
-                'x' => true,
-                'y' => true,
-            ],
-            'title' => [],
-            'desc' => [],
-        ]);
     }
 
     /**
