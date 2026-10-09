@@ -60,6 +60,12 @@ final class BlockEventLoader
             return $startFormatted;
         }
 
+		if (
+			wp_date('Y-m', $start->getTimestamp()) === wp_date('Y-m', $end->getTimestamp())
+		) {
+			return wp_date('j.', $start->getTimestamp()) . ' – ' . $endFormatted;
+		}
+
         return $startFormatted . ' – ' . $endFormatted;
     }
 
@@ -68,6 +74,11 @@ final class BlockEventLoader
         $format = get_option('time_format');
 
         return wp_date($format, $start->getTimestamp()) . ' – ' . wp_date($format, $end->getTimestamp());
+    }
+
+    public static function formatTime(\DateTimeImmutable $date): string
+    {
+        return wp_date(get_option('time_format'), $date->getTimestamp());
     }
 
     public static function formatPrice(Price $price): string
