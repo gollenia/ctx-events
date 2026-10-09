@@ -1,3 +1,5 @@
+import type { PersonNameMeta } from '@events/utilities';
+
 export type SetBlockAttributes<TAttributes> = (
 	attributes: Partial<TAttributes>,
 ) => void;
@@ -74,7 +76,7 @@ export type SpeakerRecord = {
 		rendered?: string;
 		raw?: string;
 	};
-	meta?: {
+	meta?: PersonNameMeta & {
 		_email?: string;
 		_phone?: string;
 	};

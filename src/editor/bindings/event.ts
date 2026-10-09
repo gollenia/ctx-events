@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockBindingsSource } from '@wordpress/blocks';
-import { formatDateRange, formatTimeRange } from '@events/i18n';
+import { formatDateRange, formatTime, formatTimeRange } from '@events/i18n';
 import {
 	type BindingConfig,
 	type BindingField,
@@ -81,8 +81,7 @@ registerBlockBindingsSource({
 
 			if (field === 'timeLabel') {
 				const start = event.meta?._event_start || '';
-				const end = event.meta?._event_end || '';
-				values[attributeName] = start ? formatTimeRange(start, end || start) : '';
+				values[attributeName] = start ? formatTime(start) : '';
 			}
 
 			if (field === 'imageAlt') {
