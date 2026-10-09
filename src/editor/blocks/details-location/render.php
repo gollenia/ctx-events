@@ -18,13 +18,14 @@ if (!$location) {
 $blockAttributes = get_block_wrapper_attributes();
 $hasPhoto = str_contains($blockAttributes, 'is-style-photo');
 $photo = get_the_post_thumbnail_url($location->id, 'post-thumbnail');
+$showPhoto = $hasPhoto && $photo;
 
 ?>
 
 <div class="event-details-item">
-	<div class="event-details-image">
-		<?php if ($hasPhoto && $photo) : ?>
-			<img class="event-details-image" src="<?= esc_url($photo) ?>" alt="<?= esc_attr($location->name) ?>">
+	<div class="event-details-image<?= $showPhoto ? ' event-details-image--photo' : '' ?>">
+		<?php if ($showPhoto) : ?>
+			<img class="event-details-image__photo" src="<?= esc_url($photo) ?>" alt="<?= esc_attr($location->name) ?>">
 		<?php else : ?>
 			<?= BlockIconRenderer::render($attributes['icon'] ?: 'location') ?>
 		<?php endif; ?>

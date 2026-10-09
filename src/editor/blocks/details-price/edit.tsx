@@ -31,6 +31,9 @@ const edit = (props: PriceBlockProps) => {
 		EventTicketsMeta,
 	];
 	const tickets = meta._event_tickets;
+	const isFree = !overwritePrice && !tickets?.some(
+		(ticket) => Number(ticket.ticket_price) > 0,
+	);
 
 	const getPrice = () => {
 		if (tickets && tickets.length > 0) {
@@ -53,7 +56,7 @@ const edit = (props: PriceBlockProps) => {
 
 			<div className="event-details-item">
 				<div className="event-details-image">
-					<EventIcon name="price" />
+					<EventIcon name={isFree ? 'free' : 'payment'} />
 				</div>
 				<div className="event-details-text">
 					<RichText

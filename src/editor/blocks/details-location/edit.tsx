@@ -62,10 +62,12 @@ const edit = (props: DetailBlockProps<DetailsLocationAttributes>) => {
 			<Inspector {...props} />
 
 			<div className="event-details-item">
-				<div className="event-details-image">
+				<div
+					className={`event-details-image${hasPhoto ? ' event-details-image--photo' : ''}`}
+				>
 					{hasPhoto ? (
 						<img
-							className="icon-round"
+							className="event-details-image__photo"
 							src={
 								location?._embedded?.['wp:featuredmedia']?.[0]?.media_details
 									?.sizes?.thumbnail?.source_url

@@ -15,6 +15,7 @@
 	--ctx-events-details-meta-color: var(--wp--custom--ctx-events--color--text-soft);
 	--ctx-events-details-icon-bg: var(--wp--custom--ctx-events--color--icon-bg);
 	--ctx-events-details-icon-size: 3rem;
+	--ctx-events-details-icon-radius: var(--wp--custom--ctx-events--radius--md);
 	--ctx-events-details-text-offset: 0.4rem;
 	--ctx-events-details-action-size: 2rem;
 	--ctx-events-details-action-bg: var(--wp--custom--ctx-events--color--accent);
@@ -76,12 +77,37 @@
 
 	&-image {
 		background: var(--ctx-events-details-icon-bg);
+		box-sizing: border-box;
+		color: var(--ctx-events-details-body-color);
 		display: grid;
+		border-radius: var(--ctx-events-details-icon-radius);
 		flex-shrink: 0;
 		height: var(--ctx-events-details-icon-size);
 		object-fit: cover;
+		padding: 5px;
 		place-items: center;
 		width: var(--ctx-events-details-icon-size);
+
+		> .ctx-events-icon {
+			height: 100%;
+			width: 90%;
+
+			> svg {
+				height: 100%;
+				width: 100%;
+			}
+		}
+
+		&--photo {
+			padding: 0;
+			overflow: hidden;
+		}
+
+		&__photo {
+			height: 100%;
+			object-fit: cover;
+			width: 100%;
+		}
 
 		i {
 			font-size: 30px !important;

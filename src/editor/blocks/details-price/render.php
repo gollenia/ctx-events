@@ -28,7 +28,7 @@ if (!$isFree && $lowestPrice !== null) {
 <?php if ($isFree) : ?>
 	<div class="event-details-item">
 		<div class="event-details-image">
-			<?= BlockIconRenderer::render('price') ?>
+			<?= BlockIconRenderer::render('free') ?>
 		</div>
 		<div class="event-details-text">
 			<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Price', 'ctx-events')) ?></h4>

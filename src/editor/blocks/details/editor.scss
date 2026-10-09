@@ -54,9 +54,32 @@
 		display: grid;
 		place-items: center;
 		background-color: var(--ctx-events-details-icon-bg);
+		box-sizing: border-box;
 		height: var(--ctx-events-details-icon-size);
 		width: var(--ctx-events-details-icon-size);
 		flex-shrink: 0;
+		padding: 5px;
+
+		> .ctx-events-icon {
+			height: 100%;
+			width: 100%;
+
+			> svg {
+				height: 100%;
+				width: 100%;
+			}
+		}
+	}
+
+	.event-details-image--photo {
+		overflow: hidden;
+		padding: 0;
+	}
+
+	.event-details-image__photo {
+		height: 100%;
+		object-fit: cover;
+		width: 100%;
 	}
 
 	.event-details-text {
