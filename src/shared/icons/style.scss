@@ -1,5 +1,5 @@
 .ctx-events-icon {
-	--ctx-icon-size: 2rem;
+	--ctx-icon-size: 90%;
 
 	display: inline-flex;
 	align-items: center;
@@ -13,8 +13,7 @@
 		display: block;
 		width: var(--ctx-icon-size);
 		height: var(--ctx-icon-size);
-		stroke: currentColor;
-		fill: none;
+		fill: currentColor;
 		overflow: visible;
 	}
 }
