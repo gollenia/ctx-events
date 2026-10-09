@@ -10,3 +10,4 @@ jobs:
         uses: gollenia/github-actions/.github/workflows/wordpress-release.yml@main
         with:
             tag: ${{ github.ref_name }}
+            prune_mpdf_fonts: true
