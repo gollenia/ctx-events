@@ -4,5 +4,6 @@ parameters:
         - includes
     scanFiles:
         - ctx-events.php
+        - phpstan/wordpress-7.1-icons.stub.php
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
