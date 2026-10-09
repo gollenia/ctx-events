@@ -77,7 +77,7 @@ final class EventBindingSource
 				? BlockEventLoader::formatDateRange($eventResponse->startDate, $eventResponse->endDate)
 				: '',
 			'timeLabel' => $eventResponse
-				? BlockEventLoader::formatTimeRange($eventResponse->startDate, $eventResponse->endDate)
+				? BlockEventLoader::formatTime($eventResponse->startDate)
 				: '',
 			'imageAlt' => $this->getImageAlt($event->ID),
 			'imageId' => (int) get_post_thumbnail_id($event),
