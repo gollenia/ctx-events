@@ -17,18 +17,16 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
     
-    
-    
-
 	public function __construct(
 		private readonly EventHooks $hooks,
-		private readonly EventOptions $options
+		private readonly EventOptions $options,
+		private readonly EventEditorTemplateProvider $editorTemplateProvider,
 	)
 	{
 		
 	}
 
-    public function getSlug($suffix = ''): string
+    public function getSlug(string $suffix = ''): string
     {
         return $this->options->getEventsSlug() . $suffix;
     }
@@ -69,7 +67,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
             'rewrite' => ['slug' => $this->getSlug(), 'with_front' => false],
             'has_archive' => true,
             'supports' => ['title','editor','excerpt','thumbnail','author','custom-fields'],
-            'template' => $this->defaultEditorTemplate(),
+			'template' => $this->editorTemplateProvider->get(),
             'label' => __('Events', 'ctx-events'),
             'description' => __('Display events on your blog.', 'ctx-events'),
             'labels' => $labels,
@@ -104,25 +102,4 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 		
 	}
 
-	private function defaultEditorTemplate(): array
-	{
-		return [
-			[
-				'core/paragraph',
-				[
-					'placeholder' => __('Describe the event...', 'ctx-events'),
-				],
-			],
-			[
-				'ctx-events/details',
-				[],
-				[
-					['ctx-events/details-date', []],
-					['ctx-events/details-time', []],
-					['ctx-events/details-location', []],
-				],
-			],
-		];
-	}
-   
 }
