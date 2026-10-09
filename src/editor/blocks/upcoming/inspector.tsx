@@ -47,6 +47,7 @@ type UpcomingAttributes = {
 	showBookedUp: boolean;
 	bookedUpWarningThreshold: number;
 	excludeCurrent: boolean;
+	includeRecurring: boolean;
 	selectedTags: number[];
 };
 
@@ -93,6 +94,7 @@ const Inspector = (props: InspectorProps) => {
 			showBookedUp,
 			bookedUpWarningThreshold,
 			excludeCurrent,
+			includeRecurring,
 		},
 		tagList,
 		availableCategories,
@@ -229,6 +231,11 @@ const Inspector = (props: InspectorProps) => {
 					onChange={(value) => {
 						setAttributes({ limit: Number(value) || 1 });
 					}}
+				/>
+				<CheckboxControl
+					label={__('Include recurring', 'ctx-events')}
+					checked={includeRecurring}
+					onChange={(value) => setAttributes({ includeRecurring: value })}
 				/>
 				{postType === 'ctx-event' && (
 					<CheckboxControl

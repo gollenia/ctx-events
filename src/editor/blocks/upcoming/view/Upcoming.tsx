@@ -34,6 +34,7 @@ function Upcoming({ attributes }: Props) {
 		showTagFilter,
 		showSearch,
 		showPerson,
+		includeRecurring,
 	} = attributes;
 	const personView = showPerson || '';
 	const normalizedOrder = order === 'desc' ? 'desc' : 'asc';
@@ -82,6 +83,9 @@ function Upcoming({ attributes }: Props) {
 			order: normalizedOrder,
 			scope,
 		});
+		if (includeRecurring) {
+			params.set('with_recurrences', 'true');
+		}
 
 		for (const categoryId of selectedCategory) {
 			params.append('categories', String(categoryId));
@@ -118,6 +122,7 @@ function Upcoming({ attributes }: Props) {
 		selectedLocation,
 		selectedTags,
 		scope,
+		includeRecurring,
 	]);
 
 	const changeFilter = (

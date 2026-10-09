@@ -13,9 +13,17 @@ $periods_ahead = isset($attributes['periodsAhead'])
 	? (int) $attributes['periodsAhead']
 	: (isset($attributes['monthsAhead']) ? (int) $attributes['monthsAhead'] : 12);
 $periods_ahead = max(1, min(24, $periods_ahead));
+$selected_offset = isset($attributes['selectedOffset']) ? (int) $attributes['selectedOffset'] : 0;
+$selected_offset = max(0, min($periods_ahead - 1, $selected_offset));
+$show_date_selection = !array_key_exists('showDateSelection', $attributes)
+	|| filter_var($attributes['showDateSelection'], FILTER_VALIDATE_BOOLEAN);
 $show_empty_days = array_key_exists('showEmptyDays', $attributes)
 	? filter_var($attributes['showEmptyDays'], FILTER_VALIDATE_BOOLEAN)
 	: true;
+$show_location = !array_key_exists('showLocation', $attributes)
+	|| filter_var($attributes['showLocation'], FILTER_VALIDATE_BOOLEAN);
+$show_person = !array_key_exists('showPerson', $attributes)
+	|| filter_var($attributes['showPerson'], FILTER_VALIDATE_BOOLEAN);
 $category = isset($attributes['category'])
 	? (int) $attributes['category']
 	: (isset($attributes['featuredCategory']) ? (int) $attributes['featuredCategory'] : 0);
@@ -38,6 +46,9 @@ $wrapper_attributes = get_block_wrapper_attributes([
 		</label>
 		<input type="hidden" name="mode" value="<?php echo esc_attr($export_mode); ?>" />
 		<input type="hidden" name="show_empty_days" value="<?php echo $show_empty_days ? '1' : '0'; ?>" />
+		<input type="hidden" name="show_location" value="<?php echo $show_location ? '1' : '0'; ?>" />
+		<input type="hidden" name="show_person" value="<?php echo $show_person ? '1' : '0'; ?>" />
+		<?php if ($show_date_selection) : ?>
 		<select
 			class="ctx-program-pdf-export__select"
 			name="offset"
@@ -68,11 +79,14 @@ $wrapper_attributes = get_block_wrapper_attributes([
 					$label = wp_date('F Y', $date->getTimestamp());
 				}
 				?>
-				<option value="<?php echo esc_attr((string) $offset); ?>">
+				<option value="<?php echo esc_attr((string) $offset); ?>" <?php selected($offset, $selected_offset); ?>>
 					<?php echo esc_html($label); ?>
 				</option>
 			<?php endfor; ?>
 		</select>
+		<?php else : ?>
+			<input type="hidden" name="offset" value="<?php echo esc_attr((string) $selected_offset); ?>" />
+		<?php endif; ?>
 
 		<?php if ($category > 0) : ?>
 			<input type="hidden" name="category" value="<?php echo esc_attr((string) $category); ?>" />

@@ -30,6 +30,8 @@ final class EventExportController implements RestController
 				'mode' => ['type' => 'string', 'default' => 'month'],
 				'offset' => ['type' => 'integer', 'default' => 0],
 				'show_empty_days' => ['type' => 'boolean', 'default' => true],
+				'show_location' => ['type' => 'boolean', 'default' => true],
+				'show_person' => ['type' => 'boolean', 'default' => true],
 				'category' => ['type' => 'integer', 'required' => false],
 			],
 		]]);
@@ -46,6 +48,8 @@ final class EventExportController implements RestController
 		$this->pdfRenderer->download(
 			$program,
 			(bool) $request->get_param('show_empty_days'),
+			(bool) $request->get_param('show_location'),
+			(bool) $request->get_param('show_person'),
 		);
 	}
 }

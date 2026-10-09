@@ -45,19 +45,19 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             ->withPostType(EventPost::POST_TYPE)
             ->withPagination($criteria->page, $criteria->perPage)
             ->withStatus($criteria->status ?? StatusList::public())
-            ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->categories)
-            ->withTaxonomy(EventTaxonomy::TAGS, $criteria->tags);
+            ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->filters->categories)
+            ->withTaxonomy(EventTaxonomy::TAGS, $criteria->filters->tags);
 
-        if ($criteria->location !== null) {
-            $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->location);
+        if ($criteria->filters->locationId !== null) {
+            $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->filters->locationId);
         }
 		
         if ($criteria->bookable !== null) {
             $builder = $builder->withMetaEquals(EventMeta::BOOKING_ENABLED, (string) $criteria->bookable);
         }
 
-        if ($criteria->person !== null) {
-            $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->person);
+        if ($criteria->filters->personId !== null) {
+            $builder = $builder->withMetaEquals(EventMeta::PERSON_ID, (string) $criteria->filters->personId);
         }
 
 		foreach (self::dateScopeToMetaQuery($criteria->scope) as $cond) {
@@ -65,8 +65,8 @@ final class WpEventQueryBuilder extends WpQueryBuilder
 		}
         
 
-		if($criteria->search) {
-			$builder = $builder->withSearch($criteria->search);
+		if($criteria->filters->search) {
+			$builder = $builder->withSearch($criteria->filters->search);
 		}
 
 		$builder = match ($criteria->isFree) {

@@ -66,7 +66,7 @@ const PeopleSelector = () => {
 		) as ComboboxControlOption[];
 	}, []);
 
-	if (postType !== 'ctx-event') {
+	if (!['ctx-event', 'ctx-event-recurring'].includes(postType)) {
 		return null;
 	}
 

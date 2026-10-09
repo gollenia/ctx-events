@@ -20,6 +20,7 @@ export type DataViewConfig = {
 	showMedia?: boolean;
 	showDescription?: boolean;
 	showLevels?: boolean;
+	showRecurrences?: boolean;
 	groupBy?: {
 		field: string;
 		direction: 'asc' | 'desc';

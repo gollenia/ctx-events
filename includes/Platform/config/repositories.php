@@ -15,6 +15,14 @@ return [
     => get(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
     \Contexis\Events\Event\Domain\EventCacheRepository::class
     => get(\Contexis\Events\Event\Infrastructure\WpEventRepository::class),
+    \Contexis\Events\Event\Domain\RecurringEventRepository::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpRecurringEventRepository::class),
+    \Contexis\Events\Event\Domain\OccurrenceExceptionRepository::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpOccurrenceExceptionRepository::class),
+    \Contexis\Events\Event\Application\Contracts\RecurringOccurrenceDetacher::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpRecurringOccurrenceDetacher::class),
+    \Contexis\Events\Event\Application\Contracts\RecurringOccurrenceCanceller::class
+    => autowire(\Contexis\Events\Event\Infrastructure\WpRecurringOccurrenceCanceller::class),
     \Contexis\Events\Location\Domain\LocationRepository::class
     => autowire(\Contexis\Events\Location\Infrastructure\WpLocationRepository::class),
     \Contexis\Events\Person\Domain\PersonRepository::class

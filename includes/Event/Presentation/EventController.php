@@ -11,8 +11,14 @@ use Contexis\Events\Event\Application\UseCases\GetEvent;
 use Contexis\Events\Event\Application\UseCases\CancelEvent;
 use Contexis\Events\Event\Application\UseCases\DuplicateEvent;
 use Contexis\Events\Event\Application\UseCases\ListEvents;
+use Contexis\Events\Event\Application\UseCases\ListOccurrences;
+use Contexis\Events\Event\Application\UseCases\DetachRecurringOccurrence;
+use Contexis\Events\Event\Application\UseCases\CancelRecurringOccurrence;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Event\Domain\ValueObjects\OccurrenceKey;
+use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
 use Contexis\Events\Event\Presentation\Resources\EventResource;
+use Contexis\Events\Event\Presentation\Resources\OccurrenceResource;
 use Contexis\Events\Event\Presentation\Resources\EventCalendarEntryResource;
 use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
@@ -26,6 +32,9 @@ final class EventController implements RestController
     public function __construct(
         private GetEvent $getEvent,
         private ListEvents $listEvents,
+		private ListOccurrences $listOccurrences,
+		private DetachRecurringOccurrence $detachRecurringOccurrence,
+		private CancelRecurringOccurrence $cancelRecurringOccurrence,
 		private GetEventCalendar $getEventCalendar,
 		private CancelEvent $cancelEvent,
 		private DuplicateEvent $duplicateEvent,
@@ -193,6 +202,16 @@ final class EventController implements RestController
                     ],
                     'search' => [
                         'type' => 'string'
+                    ],
+                    'with_recurrences' => [
+                        'type' => 'boolean',
+                        'default' => false,
+                        'description' => 'Opt in to a merged list of real and virtual recurring occurrences.',
+                    ],
+                    'recurring_event' => [
+                        'type' => 'integer',
+                        'minimum' => 1,
+                        'description' => 'Limit projected occurrences to one recurring-event post.',
                     ]
                 ]
             ],
@@ -241,6 +260,28 @@ final class EventController implements RestController
 				],
 			],
 		]);
+
+		$args = $this->route->getForSingle('/detach-occurrence');
+		register_rest_route($args->namespace, $args->route, args: [[
+			'methods' => 'POST',
+			'callback' => [$this, 'detachOccurrence'],
+			'permission_callback' => [$this, 'checkEditPermission'],
+			'args' => [
+				'id' => ['required' => true, 'type' => 'integer'],
+				'occurrence_key' => ['required' => true, 'type' => 'string'],
+			],
+		]]);
+
+		$args = $this->route->getForSingle('/cancel-occurrence');
+		register_rest_route($args->namespace, $args->route, args: [[
+			'methods' => 'POST',
+			'callback' => [$this, 'cancelOccurrence'],
+			'permission_callback' => [$this, 'checkEditPermission'],
+			'args' => [
+				'id' => ['required' => true, 'type' => 'integer'],
+				'occurrence_key' => ['required' => true, 'type' => 'string'],
+			],
+		]]);
     }
 
 	public function checkEditPermission(\WP_REST_Request $request): bool
@@ -266,6 +307,10 @@ final class EventController implements RestController
 
     public function getEventPage(\WP_REST_Request $request): \WP_REST_Response
     {
+        if ((bool) $request->get_param('with_recurrences')) {
+            return $this->getOccurrencePage($request);
+        }
+
         $userContext = UserContextFactory::createFromCurrentUser();
         $criteria = EventCriteriaMapper::fromRequest($request, $userContext);
 		$includes = EventIncludeRequest::fromArray($request->get_param('include') ?? []);
@@ -283,6 +328,29 @@ final class EventController implements RestController
         $response->header('X-WP-TotalPages', (string) $page->pagination()->totalPages());
 		$response->header('X-WP-StatusCounts', json_encode($page->statusCounts()?->toArray()));
 		
+        return $response;
+    }
+
+    private function getOccurrencePage(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $userContext = UserContextFactory::createFromCurrentUser();
+        $criteria = EventCriteriaMapper::fromRequest($request, $userContext);
+
+        try {
+            $page = $this->listOccurrences->execute($criteria);
+        } catch (\InvalidArgumentException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 400);
+        }
+
+        $result = array_map(
+            fn ($occurrence) => OccurrenceResource::fromDto($occurrence, $this->route)->toArray(),
+            $page->toArray(),
+        );
+
+        $response = new \WP_REST_Response($result, 200);
+        $response->header('X-WP-Total', (string) $page->pagination()->totalItems);
+        $response->header('X-WP-TotalPages', (string) $page->pagination()->totalPages());
+
         return $response;
     }
 
@@ -347,6 +415,39 @@ final class EventController implements RestController
 			'message' => 'Events duplicated',
 			'ids' => array_map(static fn (EventId $eventId): int => $eventId->toInt(), $newEventIds),
 		], 200);
+	}
+
+	public function detachOccurrence(\WP_REST_Request $request): \WP_REST_Response
+	{
+		try {
+			$occurrenceKey = OccurrenceKey::fromString((string) $request->get_param('occurrence_key'));
+			$eventId = $this->detachRecurringOccurrence->execute(
+				new RecurrenceId((int) $request->get_param('id')),
+				$occurrenceKey,
+			);
+		} catch (\InvalidArgumentException|\DomainException $exception) {
+			return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+		} catch (\RuntimeException $exception) {
+			return new \WP_REST_Response(['message' => $exception->getMessage()], 500);
+		}
+
+		return new \WP_REST_Response(['eventId' => $eventId->toInt()], 200);
+	}
+
+	public function cancelOccurrence(\WP_REST_Request $request): \WP_REST_Response
+	{
+		try {
+			$this->cancelRecurringOccurrence->execute(
+				new RecurrenceId((int) $request->get_param('id')),
+				OccurrenceKey::fromString((string) $request->get_param('occurrence_key')),
+			);
+		} catch (\InvalidArgumentException|\DomainException $exception) {
+			return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+		} catch (\RuntimeException $exception) {
+			return new \WP_REST_Response(['message' => $exception->getMessage()], 500);
+		}
+
+		return new \WP_REST_Response(['message' => 'Recurring occurrence cancelled'], 200);
 	}
 
 	public function deleteEvent(\WP_REST_Request $request): \WP_REST_Response

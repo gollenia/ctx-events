@@ -1,5 +1,5 @@
 export type CalendarEvent = {
-	id: number;
+	id: string;
 	title: string;
 	description: string;
 	startDate: string;
@@ -8,4 +8,5 @@ export type CalendarEvent = {
 	color: string | null;
 	locationName: string | null;
 	personName: string | null;
+	recurrenceSeriesId?: number;
 };

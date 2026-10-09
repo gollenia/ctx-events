@@ -16,6 +16,7 @@ use Contexis\Events\Location\Domain\LocationId;
 use Contexis\Events\Media\Domain\ImageId;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
+use Contexis\Events\Event\Domain\ValueObjects\OccurrenceKey;
 use Contexis\Events\Shared\Domain\ValueObjects\AuthorId;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
@@ -45,8 +46,18 @@ final readonly class Event
         public ?LocationId $locationId = null,
         public ?PersonId $personId = null,
         public ?ImageId $imageId = null,
-        public ?RecurrenceId $recurrenceId = null
+        public ?RecurrenceId $recurrenceId = null,
+        public ?OccurrenceKey $recurrenceOccurrenceKey = null,
+        public bool $isDetached = false,
     ) {
+        if ($this->isDetached !== ($this->recurrenceOccurrenceKey !== null)) {
+            throw new \InvalidArgumentException('Only a detached event may have a recurrence occurrence key.');
+        }
+
+        if ($this->recurrenceOccurrenceKey !== null
+            && ($this->recurrenceId === null || !$this->recurrenceOccurrenceKey->recurringEventId->equals($this->recurrenceId))) {
+            throw new \InvalidArgumentException('A detached event occurrence key must belong to its recurrence series.');
+        }
     }
 
 	public function allowsCoupons(): bool

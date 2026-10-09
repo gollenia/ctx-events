@@ -32,7 +32,7 @@ const LocationSelector = () => {
 		return editor.getCurrentPostType() ?? '';
 	}, []);
 
-	const allowedPostTypes = ['ctx-event', 'event-recurring'];
+	const allowedPostTypes = ['ctx-event', 'ctx-event-recurring'];
 
 	const [rawMeta, setMeta] = useEntityProp('postType', postType, 'meta');
 	const meta = (rawMeta ?? {}) as EventMeta;

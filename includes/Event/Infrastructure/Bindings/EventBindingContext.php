@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure\Bindings;
 
 use Contexis\Events\Event\Application\DTOs\EventCriteria;
+use Contexis\Events\Event\Domain\ValueObjects\EventFilters;
 use Contexis\Events\Event\Application\DTOs\EventResponse;
 use Contexis\Events\Event\Domain\Enums\TimeScope;
 use Contexis\Events\Event\Infrastructure\BlockEventLoader;
@@ -132,14 +133,14 @@ final class EventBindingContext
 			perPage: 1,
 			orderBy: OrderBy::fromField('date-time', Order::ASC),
 			scope: $scope,
-			categories: $categories,
-			tags: $tags,
 			status: StatusList::public(),
-			location: $locationId > 0 ? $locationId : null,
-			person: null,
 			isFree: null,
 			bookable: null,
-			search: null,
+            filters: new EventFilters(
+                categories: $categories,
+                tags: $tags,
+                locationId: $locationId > 0 ? $locationId : null,
+            ),
 		);
 
 		$query = WpEventQueryBuilder::fromCriteria($criteria)->toWpQuery();

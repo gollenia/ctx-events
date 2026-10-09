@@ -1,0 +1,33 @@
+.ctx-recurring-event-settings {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	.components-base-control {
+		margin-bottom: 0;
+	}
+}
+
+.ctx-recurring-event-settings__row {
+	gap: 8px;
+}
+
+.ctx-recurring-event-settings__weekdays {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 4px 12px;
+
+	.components-base-control {
+		margin: 0;
+	}
+}
+
+.ctx-recurring-event-settings__weekday .components-base-control__field {
+	margin-bottom: 0;
+}
+
+.ctx-recurring-event-settings__monthly {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}

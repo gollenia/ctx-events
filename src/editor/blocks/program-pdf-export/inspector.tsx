@@ -14,7 +14,11 @@ type MonthlyPdfExportAttributes = {
 	buttonText: string;
 	exportMode: 'week' | 'month' | 'year';
 	periodsAhead: number;
+	selectedOffset: number;
+	showDateSelection: boolean;
 	showEmptyDays: boolean;
+	showLocation: boolean;
+	showPerson: boolean;
 	category: number;
 };
 
@@ -22,16 +26,19 @@ type CategoryOption = {
 	label: string;
 	value: number;
 };
+type PeriodOption = { label: string; value: string };
 
 type InspectorProps = {
 	attributes: MonthlyPdfExportAttributes;
 	categoryOptions: CategoryOption[];
+	periodOptions: PeriodOption[];
 	setAttributes: (attributes: Partial<MonthlyPdfExportAttributes>) => void;
 };
 
 export default function Inspector({
 	attributes,
 	categoryOptions,
+	periodOptions,
 	setAttributes,
 }: InspectorProps) {
 	return (
@@ -72,10 +79,22 @@ export default function Inspector({
 						setAttributes({ periodsAhead: Number(value) || 12 })
 					}
 				/>
+				<SelectControl label={__('Default period', 'ctx-events')} value={String(attributes.selectedOffset)} options={periodOptions} onChange={(value) => setAttributes({ selectedOffset: Number(value) || 0 })} />
+				<CheckboxControl label={__('Show date selection', 'ctx-events')} checked={attributes.showDateSelection} onChange={(value) => setAttributes({ showDateSelection: value })} />
 				<CheckboxControl
 					label={__('Show days without events', 'ctx-events')}
 					checked={attributes.showEmptyDays}
 					onChange={(value) => setAttributes({ showEmptyDays: value })}
+				/>
+				<CheckboxControl
+					label={__('Show location', 'ctx-events')}
+					checked={attributes.showLocation}
+					onChange={(value) => setAttributes({ showLocation: value })}
+				/>
+				<CheckboxControl
+					label={__('Show person', 'ctx-events')}
+					checked={attributes.showPerson}
+					onChange={(value) => setAttributes({ showPerson: value })}
 				/>
 				<ComboboxControl
 					label={__('Category filter', 'ctx-events')}

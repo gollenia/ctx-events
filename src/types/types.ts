@@ -130,7 +130,10 @@ export type EmailTemplateKey = 'booking_pending_manual' | 'booking_created_onlin
 export type EmailTrigger = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled';
 export type ErrorType = 'ERROR' | 'WARNING' | 'INFO';
 export type Event = {
-readonly id: number,
+readonly id: number | string,
+readonly eventId?: number | null,
+readonly seriesId?: number | null,
+readonly type?: 'real' | 'virtual' | 'detached',
 readonly url: string | null,
 readonly name: string,
 readonly description: string | null,

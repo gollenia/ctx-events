@@ -11,6 +11,7 @@ use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\EventViewConfig;
 use Contexis\Events\Event\Domain\ValueObjects\EventForms;
 use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
+use Contexis\Events\Event\Domain\ValueObjects\OccurrenceKey;
 use Contexis\Events\Event\Domain\Ticket;
 use Contexis\Events\Event\Domain\TicketCollection;
 use Contexis\Events\Event\Domain\ValueObjects\EventCoupons;
@@ -51,6 +52,8 @@ final class EventMapper implements PostMapper
             locationId: LocationId::from($post->getInt(EventMeta::LOCATION_ID)),
             imageId: ImageId::from($post->getInt('_thumbnail_id')),
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
+            recurrenceOccurrenceKey: self::occurrenceKey($post),
+            isDetached: $post->getBool(EventMeta::IS_DETACHED, false) ?? false,
             personId: $post->getInt(EventMeta::PERSON_ID)
                 ? PersonId::from($post->getInt(EventMeta::PERSON_ID))
                 : null
@@ -88,6 +91,13 @@ final class EventMapper implements PostMapper
 		
 		
         return $event;
+    }
+
+    private static function occurrenceKey(PostSnapshot $post): ?OccurrenceKey
+    {
+        $serialized = $post->getString(EventMeta::RECURRENCE_OCCURRENCE_KEY);
+
+        return $serialized === null ? null : OccurrenceKey::fromString($serialized);
     }
 
     private static function ticketsFromArray(array $ticketsData, Currency $currency): TicketCollection

@@ -16,6 +16,8 @@ final class EventPostStatusMapper
             'trash'   => EventStatus::Trash,
             'draft'   => EventStatus::Draft,
 			'cancelled' => EventStatus::Cancelled,
+            'future' => EventStatus::Future,
+            'pending' => EventStatus::Pending,
             default   => EventStatus::Draft,
         };
     }

@@ -22,7 +22,23 @@
 			"type": "number",
 			"default": 12
 		},
+		"selectedOffset": {
+			"type": "number",
+			"default": 0
+		},
+		"showDateSelection": {
+			"type": "boolean",
+			"default": true
+		},
 		"showEmptyDays": {
+			"type": "boolean",
+			"default": true
+		},
+		"showLocation": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPerson": {
 			"type": "boolean",
 			"default": true
 		},

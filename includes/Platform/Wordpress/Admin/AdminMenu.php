@@ -6,12 +6,12 @@ namespace Contexis\Events\Platform\Wordpress\Admin;
 
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Event\Infrastructure\RecurringEventPost;
 use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Payment\Infrastructure\CouponPost;
 
 final class AdminMenu implements AdminServiceInterface
-{
-    public const MENU_SLUG = 'ctx_events_admin_menu';
+{     public const MENU_SLUG = 'ctx_events_admin_menu';
     public string $hook = 'admin_menu';
 
     public function __construct(private BookingRepository $bookingRepository)
@@ -31,6 +31,7 @@ final class AdminMenu implements AdminServiceInterface
             $current_screen &&
             (
                 $current_screen->post_type === EventPost::POST_TYPE ||
+                $current_screen->post_type === RecurringEventPost::POST_TYPE ||
                 $current_screen->post_type === CouponPost::POST_TYPE ||
                 $current_screen->taxonomy === EventTaxonomy::CATEGORIES ||
                 $current_screen->taxonomy === EventTaxonomy::TAGS
@@ -84,6 +85,15 @@ final class AdminMenu implements AdminServiceInterface
             'manage_options',
             'contexis_events_bookings',
             fn() => print('<div id="ctx-bookings-admin"></div>')
+        );
+
+        add_submenu_page(
+            self::MENU_SLUG,
+            __('Recurring Events', 'ctx-events'),
+            __('Recurring Events', 'ctx-events'),
+            'manage_options',
+            'contexis_events_recurring',
+            fn() => print('<div id="ctx-recurring-events-admin"></div>')
         );
 
 		add_submenu_page(

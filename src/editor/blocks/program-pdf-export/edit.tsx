@@ -1,4 +1,5 @@
 import { useBlockProps } from '@wordpress/block-editor';
+import { Button, SelectControl } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -9,7 +10,11 @@ type MonthlyPdfExportAttributes = {
 	buttonText: string;
 	exportMode: 'week' | 'month' | 'year';
 	periodsAhead: number;
+	selectedOffset: number;
+	showDateSelection: boolean;
 	showEmptyDays: boolean;
+	showLocation: boolean;
+	showPerson: boolean;
 	category?: number;
 	featuredCategory?: number;
 };
@@ -33,16 +38,19 @@ export default function Edit({ attributes, setAttributes }: EditProps) {
 	const blockProps = useBlockProps({
 		className: 'ctx-program-pdf-export',
 	});
-	const selectedCategory = attributes.category ?? attributes.featuredCategory ?? 0;
+	const selectedCategory =
+		attributes.category ?? attributes.featuredCategory ?? 0;
 
 	const categoryOptions = useSelect((select) => {
-		const list = ((select(coreStore) as {
-			getEntityRecords: (
-				kind: string,
-				name: string,
-				query?: Record<string, unknown>,
-			) => CategoryRecord[] | null;
-		}).getEntityRecords('taxonomy', 'ctx-event-categories', {
+		const list = ((
+			select(coreStore) as {
+				getEntityRecords: (
+					kind: string,
+					name: string,
+					query?: Record<string, unknown>,
+				) => CategoryRecord[] | null;
+			}
+		).getEntityRecords('taxonomy', 'ctx-event-categories', {
 			hide_empty: false,
 			per_page: -1,
 		}) ?? []) as CategoryRecord[];
@@ -88,27 +96,32 @@ export default function Edit({ attributes, setAttributes }: EditProps) {
 			year: 'numeric',
 		}).format(date);
 	});
+	const periodOptions = monthOptions.map((label, index) => ({
+		label,
+		value: String(index),
+	}));
 
 	return (
 		<div {...blockProps}>
 			<Inspector
 				attributes={{ ...attributes, category: selectedCategory }}
 				categoryOptions={categoryOptions}
+				periodOptions={periodOptions}
 				setAttributes={setAttributes}
 			/>
 			<div className="ctx-program-pdf-export__preview">
-				<div className="ctx-program-pdf-export__title">
-					{attributes.title || __('Programm als PDF', 'ctx-events')}
-				</div>
 				<div className="ctx-program-pdf-export__controls">
-					<select disabled>
-						{monthOptions.map((label) => (
-							<option key={label}>{label}</option>
-						))}
-					</select>
-					<button type="button" className="ctx-program-pdf-export__button">
+					{attributes.showDateSelection ? <SelectControl
+						label={__('Choose period', 'ctx-events')}
+						labelPosition="side"
+						disabled
+						value={String(attributes.selectedOffset)}
+						options={periodOptions}
+						__next40pxDefaultSize
+					/> : null}
+					<Button variant="primary" disabled __next40pxDefaultSize>
 						{attributes.buttonText || __('PDF herunterladen', 'ctx-events')}
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

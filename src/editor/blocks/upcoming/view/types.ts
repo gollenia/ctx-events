@@ -30,6 +30,7 @@ export type UpcomingAttributes = {
 	bookedUpWarningThreshold: number;
 	showBookedUp: boolean;
 	excludeCurrent: boolean;
+	includeRecurring: boolean;
 	altText: string;
 };
 

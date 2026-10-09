@@ -81,6 +81,12 @@ const ScreenMeta = ({
 							}
 						/>
 					</fieldset>
+					{view.showRecurrences !== undefined && <fieldset className="screen-options">
+						<label>
+							<input type="checkbox" checked={view.showRecurrences} onChange={(event) => onChangeView?.({ showRecurrences: event.target.checked })} />
+							{__('Show recurring occurrences', 'ctx-events')}
+						</label>
+					</fieldset>}
 					{showViews && (
 						<fieldset className="views">
 							<legend>{__('Views', 'ctx-events')}</legend>

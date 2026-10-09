@@ -29,10 +29,12 @@ export const fields: Array<DataFieldConfig> = [
 		enableHiding: false,
 		className: 'column-title column-primary has-row-actions',
 		enableSorting: true,
-		render: (event: Event) => (
+		render: (event: Event) => event.type === 'virtual' ? (
+			<strong style={{ color: '#787c82' }}>↻ {event.name || __('(No title)', 'ctx-events')}</strong>
+		) : (
 			<>
 				<strong>
-					<a href={`/wp-admin/post.php?post=${event.id}&action=edit`}>
+					<a href={`/wp-admin/post.php?post=${event.eventId ?? event.id}&action=edit`}>
 						{event.name || __('(No title)', 'ctx-events')}
 					</a>
 				</strong>
@@ -164,7 +166,7 @@ export const fields: Array<DataFieldConfig> = [
 		id: 'bookings',
 		label: __('Bookings', 'ctx-events'),
 		render: (event: Event) => (
-			<a href={bookingsAdminUrl(event.id)}>
+			event.type === 'virtual' ? <>—</> : <a href={bookingsAdminUrl(Number(event.eventId ?? event.id))}>
 				{__('View Bookings', 'ctx-events')}
 			</a>
 		),

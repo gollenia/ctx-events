@@ -16,6 +16,14 @@ export const useFetchEvents = (view: DataViewConfig) => {
 		totalItems: 0,
 		totalPages: 0,
 	});
+	const markDetached = (occurrenceId: string, eventId: number): void => {
+		setEvents((currentEvents) => currentEvents.map((event) => event.id === occurrenceId
+			? { ...event, type: 'detached', eventId, bookingSummary: null }
+			: event));
+	};
+	const removeOccurrence = (occurrenceId: string): void => {
+		setEvents((currentEvents) => currentEvents.filter((event) => event.id !== occurrenceId));
+	};
 
 	const availableFilters: Array<EventFilterField> = useMemo(() => {
 		return (
@@ -58,10 +66,18 @@ export const useFetchEvents = (view: DataViewConfig) => {
 		const loadData = async () => {
 			setLoading(true);
 			try {
-				const response = (await apiFetch({
-					path: `/events/v3/events?${urlParams}`,
-					parse: false,
-				})) as Response;
+				const response = (await apiFetch({ path: `/events/v3/events?${urlParams}`, parse: false })) as Response;
+				if (!view.showRecurrences) {
+					setEvents(await response.json());
+				} else {
+					const recurringResponse = (await apiFetch({
+						path: `/events/v3/events?${urlParams}&with_recurrences=true`,
+						parse: false,
+					})) as Response;
+					const [events, occurrences] = await Promise.all([response.json(), recurringResponse.json()]) as [Event[], Event[]];
+					const virtualOccurrences = occurrences.filter((event) => event.type === 'virtual');
+					setEvents([...events, ...virtualOccurrences].sort((left, right) => new Date(left.startDate).getTime() - new Date(right.startDate).getTime()));
+				}
 
 				const total = parseInt(response.headers.get('X-WP-Total') || '0', 10);
 				const pages = parseInt(
@@ -70,7 +86,6 @@ export const useFetchEvents = (view: DataViewConfig) => {
 				);
 				const rawStatus = response.headers.get('X-WP-StatusCounts');
 
-				setEvents(await response.json());
 				setPagination({ totalItems: total, totalPages: pages });
 				if (rawStatus) setStatusItems(JSON.parse(rawStatus));
 			} catch (error) {
@@ -83,5 +98,5 @@ export const useFetchEvents = (view: DataViewConfig) => {
 		loadData();
 	}, [urlParams]);
 
-	return { events, loading, statusItems, pagination };
+	return { events, loading, statusItems, pagination, markDetached, removeOccurrence };
 };

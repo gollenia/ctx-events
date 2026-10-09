@@ -85,9 +85,7 @@ export default function EventSelector({
 			path: `/events/v3/events/${selectedEventId}?include=location`,
 		})
 			.then((event) => {
-				if (!isCancelled) {
-					setSelectedEvent(event);
-				}
+				if (!isCancelled) setSelectedEvent(event);
 			})
 			.catch(() => {
 				if (!isCancelled) {
@@ -120,11 +118,7 @@ export default function EventSelector({
 		const timer = window.setTimeout(() => {
 			setIsSearching(true);
 			setError('');
-			apiFetch<EventListItem[]>({
-				path: `/events/v3/events?per_page=12&scope=all&search=${encodeURIComponent(
-					search.trim(),
-				)}&include=location`,
-			})
+			apiFetch<EventListItem[]>({ path: `/events/v3/events?per_page=12&scope=all&search=${encodeURIComponent(search.trim())}&include=location` })
 				.then((events) => {
 					if (!isCancelled) {
 						setResults(Array.isArray(events) ? events : []);
@@ -213,7 +207,7 @@ export default function EventSelector({
 										event.id === selectedEventId ? 'primary' : 'tertiary'
 									}
 									onClick={() =>
-										onChange({
+									onChange({
 											selectedEvent: event.id,
 											selectionMode: 'manual',
 										})

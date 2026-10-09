@@ -14,28 +14,15 @@ type EventDuplicateOptions = {
 	dates?: Array<string>;
 };
 
-type EventActionConfig = {
-	id: string;
-	label: string;
-	delete?: boolean;
-	disabled?: (event: Event) => boolean;
-	RenderModal?: DataTableAction['RenderModal'];
-	modalHeader?: string;
-	confirmText?: (item: Event) => string;
-	confirmLabel?: string;
-	callback: (
-		items: Array<Event>,
-		onActionPerformed?: (items: Array<any>) => void,
-		options?: EventCancelOptions | EventDuplicateOptions,
-	) => void | Promise<void>;
-};
+const eventPostId = (event: Event): number | string =>
+	event.eventId ?? event.id;
 
 const duplicateEvent = async (
 	event: Event,
 	dates: Array<string>,
 ): Promise<void> => {
 	await apiFetch({
-		path: `/events/v3/events/${event.id}/duplicate`,
+		path: `/events/v3/events/${eventPostId(event)}/duplicate`,
 		method: 'POST',
 		data: { dates },
 	});
@@ -46,7 +33,7 @@ const cancelEvent = async (
 	options?: EventCancelOptions,
 ): Promise<void> => {
 	await apiFetch({
-		path: `/events/v3/events/${event.id}/cancel`,
+		path: `/events/v3/events/${eventPostId(event)}/cancel`,
 		method: 'POST',
 		data: {
 			notifyAttendees: options?.notifyAttendees ?? true,
@@ -56,7 +43,66 @@ const cancelEvent = async (
 	});
 };
 
-const ACTIONS: Array<EventActionConfig> = [
+export const createActions = (
+	onDetached: (occurrenceId: string, eventId: number) => void,
+	onCancelled: (occurrenceId: string) => void,
+): Array<DataTableAction> => [
+	{
+		id: 'edit_recurrence',
+		label: __('Bearbeiten', 'ctx-events'),
+		disabled: (event) =>
+			event.type !== 'virtual' ||
+			event.seriesId === null ||
+			event.seriesId === undefined,
+		callback: (items) => {
+			const occurrence = items[0];
+			if (occurrence?.seriesId) {
+				window.location.href = `/wp-admin/post.php?post=${occurrence.seriesId}&action=edit`;
+			}
+		},
+	},
+	{
+		id: 'detach_recurrence',
+		label: __('Ausgliedern', 'ctx-events'),
+		disabled: (event) =>
+			event.type !== 'virtual' ||
+			event.seriesId === null ||
+			event.seriesId === undefined,
+		callback: async (items, onActionPerformed) => {
+			const occurrence = items[0];
+			if (!occurrence || occurrence.type !== 'virtual' || !occurrence.seriesId)
+				return;
+			const response = await apiFetch<{ eventId: number }>({
+				path: `/events/v3/events/${occurrence.seriesId}/detach-occurrence`,
+				method: 'POST',
+				data: { occurrence_key: occurrence.id },
+			});
+			onDetached(occurrence.id, response.eventId);
+			onActionPerformed?.([occurrence]);
+		},
+	},
+	{
+		id: 'cancel_recurrence',
+		label: __('Cancel instance', 'ctx-events'),
+		delete: true,
+		disabled: (event) =>
+			event.type !== 'virtual' ||
+			event.seriesId === null ||
+			event.seriesId === undefined,
+		callback: async (items, onActionPerformed) => {
+			const occurrence = items[0];
+			if (!occurrence || occurrence.type !== 'virtual' || !occurrence.seriesId)
+				return;
+
+			await apiFetch({
+				path: `/events/v3/events/${occurrence.seriesId}/cancel-occurrence`,
+				method: 'POST',
+				data: { occurrence_key: occurrence.id },
+			});
+			onCancelled(occurrence.id);
+			onActionPerformed?.([occurrence]);
+		},
+	},
 	{
 		id: 'view_bookings',
 		label: __('Bookings', 'ctx-events'),
@@ -68,12 +114,13 @@ const ACTIONS: Array<EventActionConfig> = [
 
 			window.location.href = `/wp-admin/admin.php?page=contexis_events_bookings&event_id=${event.id}`;
 		},
-		disabled: (event) => !event.bookingSummary?.isBookable,
+		disabled: (event) =>
+			event.type === 'virtual' || !event.bookingSummary?.isBookable,
 	},
 	{
 		id: 'duplicate',
 		label: __('Duplicate', 'ctx-events'),
-		disabled: (event) => event.status === 'trash',
+		disabled: (event) => event.type === 'virtual' || event.status === 'trash',
 		RenderModal: EventDuplicateModal,
 		modalHeader: __('Duplicate event', 'ctx-events'),
 		callback: async (items, onActionPerformed, options) => {
@@ -89,10 +136,11 @@ const ACTIONS: Array<EventActionConfig> = [
 	},
 	{
 		id: 'cancel',
-		label: __('Cancel', 'ctx-events'),
+		label: __('Cancel event', 'ctx-events'),
 		delete: true,
 		RenderModal: EventCancelConfirmModal,
 		modalHeader: __('Cancel event', 'ctx-events'),
+		disabled: (event) => event.type === 'virtual',
 		confirmText: (event) =>
 			sprintf(
 				/* translators: %s: event title */
@@ -112,5 +160,9 @@ const ACTIONS: Array<EventActionConfig> = [
 	},
 ];
 
-export const actions: Array<DataTableAction> =
-	ACTIONS as Array<DataTableAction>;
+// Calendar consumers do not keep the table's local rows, but still require
+// the same action definitions.
+export const actions = createActions(
+	() => undefined,
+	() => undefined,
+);

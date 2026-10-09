@@ -14,6 +14,7 @@ import datetimeSelector from './plugins/event/datetime';
 import locationSelector from './plugins/event/location';
 import peopleSelector from './plugins/event/people';
 import recurrenceSettings from './plugins/event/recurrence';
+import recurringEventSettings from './plugins/event/RecurringEventSettings';
 import './bindings';
 
 const plugins = [
@@ -21,6 +22,7 @@ const plugins = [
 	{ name: 'event-select-location', component: locationSelector },
 	{ name: 'event-select-people', component: peopleSelector },
 	{ name: 'event-recurrence-settings', component: recurrenceSettings },
+	{ name: 'ctx-recurring-event-settings', component: recurringEventSettings },
 	{ name: 'event-booking-sidebar', component: bookingSidebar },
 	{ name: 'event-booking-status', component: BookingStatus },
 ];

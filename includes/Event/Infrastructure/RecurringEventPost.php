@@ -4,19 +4,11 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Infrastructure;
 
 use Contexis\Events\Shared\Infrastructure\Abstracts\PostType;
-use Contexis\Events\Event\Infrastructure\EventPost;
+use Contexis\Events\Shared\Infrastructure\Contracts\HasMetaData;
 
-class RecurringEventPost extends PostType
+class RecurringEventPost extends PostType implements HasMetaData
 {
     public const POST_TYPE = 'ctx-event-recurring';
-
-    public static function init(): self
-    {
-        $instance = new self();
-        add_action('init', [$instance, 'registerPostType'], 10);
-        add_action('init', [$instance, 'registerMeta'], 10);
-        return $instance;
-    }
 
     public function registerPostType(): void
     {
@@ -55,40 +47,15 @@ class RecurringEventPost extends PostType
         ];
 
         register_post_type(self::POST_TYPE, $post_type);
+
+        // The terms are owned by EventTaxonomy and registered for ctx-event.
+        // Attach that existing taxonomy to the series type; do not register it twice.
+        register_taxonomy_for_object_type(EventTaxonomy::TAGS, self::POST_TYPE);
+        register_taxonomy_for_object_type(EventTaxonomy::CATEGORIES, self::POST_TYPE);
     }
 
     public function registerMeta(): void
     {
-
-        $metadata = [
-            [ "name" => "_event_start_date","type" => "string"],
-            [ "name" => "_event_end_date","type" => "string"],
-            [ "name" => "_event_start_time","type" => "string"],
-            [ "name" => "_event_end_time","type" => "string"],
-            [ "name" => "_event_all_day","type" => "boolean"],
-            [ "name" => "_speaker_id","type" => "number"],
-            [ "name" => "_location_id","type" => "number"],
-            [ "name" => "_event_audience","type" => "string"],
-            [ "name" => "_recurrence_interval","type" => "number"],
-            [ "name" => "_recurrence_byweekno","type" => "number"],
-            [ "name" => "_recurrence_byday","type" => "string"],
-            [ "name" => "_recurrence_days","type" => "number"],
-            [ "name" => "_recurrence_freq","type" => "string"]
-        ];
-
-        foreach ($metadata as $meta) {
-            register_post_meta(self::POST_TYPE, $meta['name'], [
-                'type' => $meta['type'],
-                'single'       => true,
-                'auth_callback' => function () {
-                    return current_user_can('edit_posts');
-                },
-                'show_in_rest' => [
-                    'schema' => [
-                        'type' => $meta['type']
-                    ]
-                ]
-            ]);
-        }
+        RecurringEventMeta::registerAll(self::POST_TYPE);
     }
 }

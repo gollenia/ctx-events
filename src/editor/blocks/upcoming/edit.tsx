@@ -20,6 +20,7 @@ type UpcomingAttributes = {
 	selectedCategory: number[];
 	selectedLocation: number;
 	altText: string;
+	includeRecurring: boolean;
 };
 
 type EntityOption = {

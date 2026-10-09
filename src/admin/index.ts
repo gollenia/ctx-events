@@ -7,6 +7,7 @@ import { initEventsList } from './events/index.tsx';
 import { initFormList } from './forms/index.tsx';
 import { initGatewayAdmin } from './gateways/index.tsx';
 import { initOptionsAdmin } from './options';
+import { initRecurringEventsAdmin } from './recurring-events';
 import './style.scss';
 
 type AdminMount = {
@@ -22,6 +23,7 @@ domReady(() => {
 		{ id: 'ctx-email-admin', init: initEmailAdmin },
 		{ id: 'ctx-options-admin', init: initOptionsAdmin },
 		{ id: 'ctx-events-list', init: initEventsList },
+		{ id: 'ctx-recurring-events-admin', init: initRecurringEventsAdmin },
 		{ id: 'ctx-forms-admin', init: initFormList },
 	];
 

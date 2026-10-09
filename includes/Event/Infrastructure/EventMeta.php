@@ -29,6 +29,7 @@ class EventMeta extends MetaData
 	public const VIEW_CONFIG		  = '_view_config';
     public const RECURRENCE_ID     = '_recurrence_id';
     public const IS_DETACHED       = '_is_detached';
+    public const RECURRENCE_OCCURRENCE_KEY = '_recurrence_occurrence_key';
     public const TICKETS           = '_event_tickets';
     public const BOOKING_MAILS     = '_booking_mails';
     public const COUPONS_ALLOWED   = '_booking_coupons';
@@ -114,6 +115,7 @@ class EventMeta extends MetaData
         self::DONATION_ENABLED => ['type' => 'boolean'],
         self::RECURRENCE_ID    => ['type' => 'integer'],
         self::IS_DETACHED      => ['type' => 'boolean'],
+        self::RECURRENCE_OCCURRENCE_KEY => ['type' => 'string'],
 
         self::TICKETS => [
             'type'         => 'array',

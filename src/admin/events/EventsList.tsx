@@ -4,7 +4,7 @@ import type { DataFilterField, DataViewConfig } from '@events/datatable/types';
 import { __ } from '@wordpress/i18n';
 import type { TimeScope } from '../../types/types';
 
-import { actions } from './actions';
+import { createActions } from './actions';
 import EventCalendarView from './calendar';
 import { eventStatusItems } from './eventStatusItems';
 import { fields } from './fields';
@@ -47,6 +47,7 @@ const EventsList = () => {
 			'bookable',
 			'availability',
 		],
+		showRecurrences: true,
 	};
 	const { view, setView } = useStoredView(
 		'ctx-events:admin:events:view',
@@ -55,12 +56,12 @@ const EventsList = () => {
 
 	console.log('EventsList view', view);
 
-	const { events, loading, statusItems, pagination } = useFetchEvents(view);
+	const { events, loading, statusItems, pagination, markDetached, removeOccurrence } = useFetchEvents(view);
 
 	const handeViewChange = (updates: Partial<DataViewConfig>) => {
 		setView((prev) => {
 			const nextView = { ...prev, ...updates };
-			if (updates.filters || updates.search !== undefined) {
+			if (updates.filters || updates.search !== undefined || updates.showRecurrences !== undefined) {
 				nextView.page = 1;
 			}
 			return nextView;
@@ -72,7 +73,7 @@ const EventsList = () => {
 			data={events}
 			fields={fields}
 			view={view}
-			actions={actions}
+			actions={createActions(markDetached, removeOccurrence)}
 			search={true}
 			onChangeView={handeViewChange}
 			paginationInfo={pagination}

@@ -14,9 +14,9 @@ final class EventProgramPdfRenderer
 	/**
 	 * @return never
 	 */
-	public function download(EventProgramData $program, bool $showEmptyDays = true): void
+	public function download(EventProgramData $program, bool $showEmptyDays = true, bool $showLocation = true, bool $showPerson = true): void
 	{
-		$days = $this->buildDayMap($program, $showEmptyDays);
+		$days = $this->buildDayMap($program, $showEmptyDays, $showLocation, $showPerson);
 
 		$html = $this->renderTemplate($program->mode, [
 			'days' => $days,
@@ -39,7 +39,7 @@ final class EventProgramPdfRenderer
 	/**
 	 * @return array<string, array{timestamp: string, count: int, name: string, weekday: int, events: array<int, array<string, mixed>>, is_sunday: bool}>
 	 */
-	private function buildDayMap(EventProgramData $program, bool $showEmptyDays): array
+	private function buildDayMap(EventProgramData $program, bool $showEmptyDays, bool $showLocation, bool $showPerson): array
 	{
 		$days = [];
 		$current = $program->startDate;
@@ -59,7 +59,7 @@ final class EventProgramPdfRenderer
 		}
 
 		foreach ($program->events as $event) {
-			foreach ($this->buildEntries($event, $program) as $entry) {
+			foreach ($this->buildEntries($event, $program, $showLocation, $showPerson) as $entry) {
 				$dayKey = $entry['dayKey'];
 				if (!isset($days[$dayKey])) {
 					continue;
@@ -83,7 +83,7 @@ final class EventProgramPdfRenderer
 	/**
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function buildEntries(EventCalendarEntry $event, EventProgramData $program): array
+	private function buildEntries(EventCalendarEntry $event, EventProgramData $program, bool $showLocation, bool $showPerson): array
 	{
 		if ($program->mode === 'year') {
 			if ($event->startDate < $program->startDate || $event->startDate > $program->endDate) {
@@ -94,8 +94,8 @@ final class EventProgramPdfRenderer
 				'dayKey' => $event->startDate->format('Y-m-d'),
 				'title' => $event->title,
 				'excerpt' => $event->description,
-				'location' => $event->locationName,
-				'person' => $event->personName,
+				'location' => $showLocation ? $event->locationName : null,
+				'person' => $showPerson ? $event->personName : null,
 				'timeLabel' => $this->buildTimeLabel($event),
 				'isContinuation' => false,
 				'dateLabel' => $this->buildDateLabel($event->startDate, $event->endDate),
@@ -117,8 +117,8 @@ final class EventProgramPdfRenderer
 				'dayKey' => $current->format('Y-m-d'),
 				'title' => $event->title,
 				'excerpt' => $event->description,
-				'location' => $event->locationName,
-				'person' => $event->personName,
+				'location' => $showLocation ? $event->locationName : null,
+				'person' => $showPerson ? $event->personName : null,
 				'timeLabel' => $this->buildTimeLabel($event),
 				'isContinuation' => $current > $event->startDate->setTime(0, 0, 0),
 				'dateLabel' => $this->buildDateLabel($event->startDate, $event->endDate),

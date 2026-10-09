@@ -36,6 +36,9 @@ class EventSpaces implements \JsonSerializable
         return $this->confirmed + $this->pending > $this->capacity;
     }
 
+	/**
+     * @return array<string, mixed>
+     */
 	public function jsonSerialize(): array
 	{
 		return [
