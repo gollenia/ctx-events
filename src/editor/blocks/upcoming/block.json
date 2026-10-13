@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/upcoming",
 	"title": "Upcoming Events",
-	"description": "Shows a list or cards of upcoming events",
+	"description": "Shows cards or a list of upcoming events",
 	"apiVersion": 3,
 	"category": "widgets",
 	"attributes": {
@@ -32,7 +32,7 @@
 		},
 		"view": {
 			"type": "string",
-			"default": "cards"
+			"default": "list"
 		},
 		"tableShowHeader": {
 			"type": "boolean",

@@ -1,5 +1,4 @@
 import { useState } from '@wordpress/element';
-import clsx from 'clsx';
 import type React from 'react';
 import { DataTableContext } from './DataTableContext';
 import { DataTableFilter } from './Filter';
@@ -109,10 +108,9 @@ const DataTable: DataTableComponent = <T extends object>({
 			)}
 
 			<div
-				className={clsx(
-					'wrap ctx-datatable',
-					isLoading && 'datatable--loading',
-				)}
+				className={['wrap ctx-datatable', isLoading && 'datatable--loading']
+					.filter(Boolean)
+					.join(' ')}
 				style={{ padding: '10px 20px 0 2px', margin: 0 }}
 			>
 				{children ?? defaultChildren()}

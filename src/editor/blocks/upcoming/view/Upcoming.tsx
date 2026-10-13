@@ -44,7 +44,7 @@ function Upcoming({ attributes }: Props) {
 		'LOADING',
 	);
 	const [filterMobileVisible, setFilterMobileVisible] = useState(false);
-	const [customView, setCustomView] = useState<'cards' | 'list' | 'mini' | ''>(
+	const [customView, setCustomView] = useState<'cards' | 'list' | ''>(
 		'',
 	);
 	const [filter, setFilter] = useState<{
@@ -233,15 +233,6 @@ function Upcoming({ attributes }: Props) {
 									}
 								>
 									<EventIcon name="time" />
-								</button>
-								<button
-									type="button"
-									onClick={() => setCustomView('mini')}
-									className={
-										currentView === 'mini' ? 'button active' : 'button'
-									}
-								>
-									<EventIcon name="audience" />
 								</button>
 							</div>
 						)}

@@ -1,0 +1,22 @@
+.ctx-events-table-column-option {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wp--preset--spacing--20, 0.5rem);
+	border-bottom: 1px solid #ddd;
+
+	&[draggable='true'] {
+		cursor: grab;
+	}
+
+	.components-base-control {
+		margin-bottom: 0;
+	}
+}
+
+.ctx-events-table-column-modal__footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}

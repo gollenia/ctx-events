@@ -13,7 +13,9 @@ const GatewayModal = ({ slug, onCancel }) => {
 	const collectSettings = () => {
 		const settings = {};
 		gateway.settings.forEach((field) => {
-			settings[field.name] = field.value;
+			if (field.name) {
+				settings[field.name] = field.value;
+			}
 		});
 		return settings;
 	};

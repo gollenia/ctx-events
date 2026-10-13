@@ -1,5 +1,4 @@
 import { useState } from '@wordpress/element';
-import clsx from 'clsx';
 import { useDataTable } from './DataTableContext';
 import type { DataTableAction } from './types';
 
@@ -11,14 +10,13 @@ interface ActionProps {
 
 const Actions = ({ actions, showOnHover, item }: ActionProps) => {
 	const { onChangeView, view } = useDataTable();
-	const [activeModalAction, setActiveModalAction] = useState<DataTableAction | null>(
-		null,
-	);
+	const [activeModalAction, setActiveModalAction] =
+		useState<DataTableAction | null>(null);
 
-	const classes: string = clsx(
+	const classes = [
 		'row-actions',
 		showOnHover ? 'show-on-hover' : 'visible',
-	);
+	].join(' ');
 
 	const onActionPerformed = () => {
 		onChangeView({ refreshKey: (view.refreshKey || 0) + 1 });
@@ -36,13 +34,14 @@ const Actions = ({ actions, showOnHover, item }: ActionProps) => {
 		<>
 			<div className={classes}>
 				{filteredActions.map((action: DataTableAction, index: number) => {
-					const actionClasses: string = clsx({
-						trash:
-							action.delete instanceof Function
-								? action.delete(item)
-								: action.delete,
-						last: index === filteredActions.length - 1,
-					});
+					const actionClasses = [
+						(typeof action.delete === 'function'
+							? action.delete(item)
+							: action.delete) && 'trash',
+						index === filteredActions.length - 1 && 'last',
+					]
+						.filter(Boolean)
+						.join(' ');
 
 					if (
 						action.disabled instanceof Function

@@ -1,3 +1,5 @@
 import AdminField from './AdminField';
+import CurrencyField from './CurrencyField';
+import NumberField from './NumberField';
 
-export { AdminField };
+export { AdminField, CurrencyField, NumberField };

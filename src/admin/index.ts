@@ -9,6 +9,7 @@ import { initGatewayAdmin } from './gateways/index.tsx';
 import { initOptionsAdmin } from './options';
 import { initRecurringEventsAdmin } from './recurring-events';
 import './style.scss';
+import '../shared/status-pill/style.scss';
 
 type AdminMount = {
 	id: string;

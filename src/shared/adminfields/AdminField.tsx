@@ -1,14 +1,20 @@
 import apiFetch from '@wordpress/api-fetch';
 import {
+	Button,
 	CheckboxControl,
 	ComboboxControl,
+	Flex,
+	FlexBlock,
 	__experimentalHeading as Heading,
 	SelectControl,
 	TextareaControl,
 	TextControl,
 } from '@wordpress/components';
+import type { HeadingSize } from '@wordpress/components/build-types/heading/types';
 import { useEffect, useState } from '@wordpress/element';
-import clsx from 'clsx';
+import { __ } from '@wordpress/i18n';
+import CurrencyField from './CurrencyField';
+import NumberField from './NumberField';
 
 type OptionMap = Record<string, string | number>;
 
@@ -28,8 +34,13 @@ type AdminFieldProps = {
 	error?: string;
 	required?: boolean;
 	name?: string;
-	level?: number;
+	level?: HeadingSize;
 	options?: OptionMap;
+	min?: number;
+	max?: number;
+	step?: number | 'any';
+	disabled?: boolean;
+	currency?: string;
 	[key: string]: unknown;
 };
 
@@ -45,7 +56,8 @@ const AdminField = ({
 	...props
 }: AdminFieldProps) => {
 	const [pages, setPages] = useState<PageOption[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState<boolean>(false);
+	const [passwordVisible, setPasswordVisible] = useState(false);
 
 	useEffect(() => {
 		if (type !== 'page_select') {
@@ -66,16 +78,21 @@ const AdminField = ({
 			});
 	}, [type]);
 
-	const classes = clsx({
-		'required-field': required,
-		'error-field': error,
-	});
+	const classes = [required && 'required-field', error && 'error-field']
+		.filter(Boolean)
+		.join(' ');
 
 	if (type === 'heading') {
+		return <Heading level={props.level ?? 2}>{label}</Heading>;
+	}
+
+	if (type === 'html') {
 		return (
-			<Heading level={(props.level as number | undefined) ?? 2}>
-				{label}
-			</Heading>
+			<div className="components-base-control">
+				{label && <div className="components-base-control__label">{label}</div>}
+				<code>{String(value ?? '')}</code>
+				{help && <p className="components-base-control__help">{help}</p>}
+			</div>
 		);
 	}
 
@@ -92,12 +109,12 @@ const AdminField = ({
 	}
 
 	if (type === 'select' || type === 'radio') {
-		const mappedOptions = Object.entries(
-			props.options as OptionMap | undefined,
-		).map(([optionLabel, optionValue]) => ({
-			label: optionLabel,
-			value: String(optionValue),
-		}));
+		const mappedOptions = Object.entries(props.options).map(
+			([optionLabel, optionValue]) => ({
+				label: optionLabel,
+				value: String(optionValue),
+			}),
+		);
 
 		return (
 			<SelectControl
@@ -137,6 +154,41 @@ const AdminField = ({
 		);
 	}
 
+	if (type === 'number') {
+		return (
+			<NumberField
+				label={label}
+				value={typeof value === 'boolean' ? '' : value}
+				onChange={onChange}
+				help={help}
+				className={classes}
+				required={required}
+				min={props.min}
+				max={props.max}
+				step={props.step}
+				disabled={props.disabled}
+			/>
+		);
+	}
+
+	if (type === 'currency') {
+		return (
+			<CurrencyField
+				label={label}
+				value={typeof value === 'boolean' ? '' : value}
+				onChange={onChange}
+				help={help}
+				className={classes}
+				required={required}
+				min={props.min}
+				max={props.max}
+				step={props.step}
+				disabled={props.disabled}
+				currency={props.currency ?? 'EUR'}
+			/>
+		);
+	}
+
 	if (type === 'page_select') {
 		return (
 			<ComboboxControl
@@ -151,6 +203,42 @@ const AdminField = ({
 				}))}
 				__nextHasNoMarginBottom
 			/>
+		);
+	}
+
+	if (type === 'password') {
+		return (
+			<div className="components-base-control">
+				<Flex gap="8px" align="flex-end">
+					<FlexBlock flex="1" as="div">
+						<TextControl
+							value={String(value ?? '')}
+							label={`${label}${required ? ' *' : ''}`}
+							className={classes}
+							onChange={onChange}
+							help={help}
+							type={passwordVisible ? 'text' : 'password'}
+							data-bwignore="true"
+							data-lpignore="true"
+							data-1p-ignore
+							required={required}
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+						/>
+					</FlexBlock>
+					<Button
+						type="button"
+						variant="secondary"
+						onClick={() => setPasswordVisible((visible) => !visible)}
+						aria-pressed={passwordVisible}
+						__next40pxDefaultSize
+					>
+						{passwordVisible
+							? __('Hide', 'ctx-events')
+							: __('Show', 'ctx-events')}
+					</Button>
+				</Flex>
+			</div>
 		);
 	}
 

@@ -11,6 +11,7 @@ export type UpcomingAttributes = {
 	tableAlternatingRows: boolean;
 	tableHoverEffect: boolean;
 	tableShowCalendarIcon: boolean;
+	tableColumns?: string[];
 	limit: number;
 	order: 'asc' | 'desc';
 	selectedCategory: number[];

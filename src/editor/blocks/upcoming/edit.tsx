@@ -48,12 +48,14 @@ type LocationEntity = {
 type EditProps = {
 	attributes: UpcomingAttributes;
 	setAttributes: (attributes: Partial<UpcomingAttributes>) => void;
+	variant?: 'upcoming' | 'table';
 };
 
 const EditUpcoming = (props: EditProps) => {
 	const {
 		attributes: { textAlignment, selectedTags, altText },
 		setAttributes,
+		variant = 'upcoming',
 	} = props;
 
 	const availableCategories = useSelect((selectFn) => {
@@ -110,6 +112,11 @@ const EditUpcoming = (props: EditProps) => {
 		<>
 			<Inspector
 				{...props}
+				attributes={{
+					...props.attributes,
+					view: variant === 'table' ? 'mini' : props.attributes.view,
+				}}
+				variant={variant}
 				tagList={tagList ?? []}
 				availableCategories={availableCategories}
 				tagsFieldValue={tagsFieldValue}

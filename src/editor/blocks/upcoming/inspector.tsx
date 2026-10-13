@@ -64,6 +64,7 @@ type InspectorProps = {
 	locationList: ComboboxControlOption[];
 	tagNames: string[];
 	setAttributes: (attributes: Partial<UpcomingAttributes>) => void;
+	variant?: 'upcoming' | 'table';
 };
 
 const Inspector = (props: InspectorProps) => {
@@ -102,6 +103,7 @@ const Inspector = (props: InspectorProps) => {
 		locationList,
 		tagNames,
 		setAttributes,
+		variant = 'upcoming',
 	} = props;
 
 	const [categoryQuery, setCategoryQuery] = useState('');
@@ -283,7 +285,8 @@ const Inspector = (props: InspectorProps) => {
 					}
 				/>
 			</PanelBody>
-			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
+			{variant === 'upcoming' && (
+				<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<label
 					className="components-base-control__label"
 					htmlFor="upcoming-style"
@@ -292,13 +295,6 @@ const Inspector = (props: InspectorProps) => {
 				</label>
 				<br />
 				<div className="styleSelector">
-					<Button
-						onClick={() => setAttributes({ view: 'mini' })}
-						className={view === 'mini' ? 'active' : ''}
-					>
-						<Icon size={64} className="icon" icon={icons.mini} />
-						<div>{__('Table', 'ctx-events')}</div>
-					</Button>
 					<Button
 						onClick={() => setAttributes({ view: 'list' })}
 						className={view === 'list' ? 'active' : ''}
@@ -319,7 +315,8 @@ const Inspector = (props: InspectorProps) => {
 					checked={userStylePicker}
 					onChange={(value) => setAttributes({ userStylePicker: value })}
 				/>
-			</PanelBody>
+				</PanelBody>
+			)}
 			<PanelBody title={__('Event details', 'ctx-events')} initialOpen={true}>
 				<SelectControl
 					label={__('Location', 'ctx-events')}
@@ -392,7 +389,7 @@ const Inspector = (props: InspectorProps) => {
 					)}
 				/>
 			</PanelBody>
-			{view === 'mini' && (
+			{variant === 'table' && (
 				<PanelBody title={__('Table options', 'ctx-events')} initialOpen={true}>
 					<CheckboxControl
 						label={__('Show table header', 'ctx-events')}

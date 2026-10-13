@@ -6,6 +6,7 @@ import REWRITES from './plugins/common/dashboardRewrites';
 import './editor.scss';
 import '../shared/icons/style.scss';
 import '@events/emails/style.scss';
+import '../shared/status-pill/style.scss';
 
 import DashboardButton from './plugins/common/DashboardButton';
 import bookingSidebar from './plugins/event/BookingSidebar';
@@ -13,8 +14,8 @@ import BookingStatus from './plugins/event/BookingStatus';
 import datetimeSelector from './plugins/event/datetime';
 import locationSelector from './plugins/event/location';
 import peopleSelector from './plugins/event/people';
-import recurrenceSettings from './plugins/event/recurrence';
 import recurringEventSettings from './plugins/event/RecurringEventSettings';
+import recurrenceSettings from './plugins/event/recurrence';
 import './bindings';
 
 const plugins = [
