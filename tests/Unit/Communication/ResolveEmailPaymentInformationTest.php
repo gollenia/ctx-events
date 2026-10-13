@@ -27,7 +27,7 @@ use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeTransactionRepository;
 use Tests\Support\FakeEventFactory;
 
-function makeEmailPaymentInformationBooking(): Booking
+function makeEmailPaymentInformationBooking(string $gateway = 'offline'): Booking
 {
     return new Booking(
         reference: BookingReference::fromString('BOOK-PAYMENT-1'),
@@ -42,7 +42,7 @@ function makeEmailPaymentInformationBooking(): Booking
         status: BookingStatus::PENDING,
         registration: new RegistrationData([]),
         attendees: AttendeeCollection::empty(),
-        gateway: 'offline',
+        gateway: $gateway,
         coupon: null,
         transactions: null,
         eventId: EventId::from(1),
@@ -174,3 +174,67 @@ test('renders the payment information mail block with an inline QR image', funct
         ->and($rendered->inlineAttachments)->toHaveCount(1)
         ->and($rendered->inlineAttachments[0]->content)->toBe('png-payment-qr');
 });
+
+test('renders a durable booking payment link instead of the Mollie checkout URL', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $booking = makeEmailPaymentInformationBooking('mollie');
+    $bookingId = $bookingRepository->save($booking);
+    $booking = $booking->withId($bookingId);
+    $transaction = Transaction::forPaymentService(
+        bookingId: $bookingId,
+        amount: Price::from(5000, Currency::fromCode('EUR')),
+        externalId: 'tr_email_payment',
+        checkoutUrl: \Uri\Rfc3986\Uri::parse('https://www.mollie.com/checkout/short-lived'),
+        gateway: 'mollie',
+        gatewayUrl: \Uri\Rfc3986\Uri::parse('https://www.mollie.com/dashboard/payments/tr_email_payment'),
+        expiresAt: new DateTimeImmutable('2026-03-20 12:00:00'),
+    );
+    $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $gatewayRepository = FakeGatewayRepository::withGateways([
+        new FakePaymentGateway(
+            id: 'mollie',
+            verifyPaymentUsing: static fn(Transaction $payment): Transaction => $payment,
+        ),
+    ]);
+    $renderer = new TiptapDocumentRenderer(makePaymentInformationResolver(
+        $bookingRepository,
+        $transactionRepository,
+        $gatewayRepository,
+        makeEmailPaymentInformationClock(),
+    ));
+
+    $rendered = $renderer->render(
+        json_encode([
+            'type' => 'doc',
+            'content' => [['type' => 'paymentInformation']],
+        ], JSON_THROW_ON_ERROR),
+        new TriggeredEmailContext(
+            booking: $booking,
+            event: FakeEventFactory::create(1),
+            attendees: AttendeeCollection::empty(),
+            transactions: \Contexis\Events\Payment\Domain\TransactionCollection::empty(),
+        ),
+    );
+
+    expect($rendered->html)
+        ->toContain('https://events.example.test/?ctx_events_booking_payment=BOOK-PAYMENT-1')
+        ->not->toContain('www.mollie.com/checkout/short-lived');
+});
+
+if (!function_exists('site_url')) {
+    function site_url(string $path = ''): string
+    {
+        return 'https://events.example.test' . $path;
+    }
+}
+
+if (!function_exists('add_query_arg')) {
+    function add_query_arg(string|array $key, ?string $value = null, ?string $url = null): string
+    {
+        if (!is_string($key) || $url === null) {
+            throw new RuntimeException('Unsupported test query arguments.');
+        }
+
+        return $url . '?' . rawurlencode($key) . '=' . rawurlencode($value ?? '');
+    }
+}

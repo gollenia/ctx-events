@@ -35,6 +35,19 @@ test('resolves next gen mollie payment event by embedded payment entity', functi
         ->and($resolution->shouldIgnore)->toBeFalse();
 });
 
+test('resolves a next gen Mollie payment snapshot', function () {
+    $resolver = new MollieWebhookReferenceResolver();
+
+    $resolution = $resolver->resolve([], [
+        'resource' => 'payment',
+        'id' => 'tr_snapshot_123',
+        'status' => 'paid',
+    ]);
+
+    expect($resolution->externalId)->toBe('tr_snapshot_123')
+        ->and($resolution->shouldIgnore)->toBeFalse();
+});
+
 test('ignores non payment mollie events', function () {
     $resolver = new MollieWebhookReferenceResolver();
 
