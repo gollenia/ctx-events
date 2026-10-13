@@ -1,0 +1,38 @@
+.ctx-small-data-table__row--dragging {
+	opacity: 0.45;
+}
+
+
+
+.ctx-small-data-table__drag-handle {
+	cursor: grab;
+	font-size: 1.25rem;
+	line-height: 1;
+	user-select: none;
+}
+
+tr.ctx-small-data-table__row--drop-before > td {
+    box-shadow: inset 0 2px 0 #3858e9;
+}
+
+tr.ctx-small-data-table__row--drop-after > td {
+    box-shadow: inset 0 -2px 0 #3858e9;
+}
+
+tr.ctx-small-data-table__row--dragging {
+    opacity: 0.4;
+}
+
+.ctx-small-data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+
+}
+
+.ctx-small-data-table {
+  
+
+    tr.ctx-small-data-table__row--drop-after > td {
+        border-bottom: 2px solid #3858e9;
+    }
+}

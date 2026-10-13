@@ -1,0 +1,29 @@
+.ctx-status-pill {
+	align-items: center;
+	border-radius: 999px;
+	display: inline-flex;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.5;
+	padding: 2px 8px;
+}
+
+.ctx-status-pill--error {
+	background: #fbeaea;
+	color: #8a2424;
+}
+
+.ctx-status-pill--warning {
+	background: #fcf0d4;
+	color: #7a4b00;
+}
+
+.ctx-status-pill--info {
+	background: #e5f0ff;
+	color: #135e96;
+}
+
+.ctx-status-pill--success {
+	background: #e6f4ea;
+	color: #1e6b38;
+}
