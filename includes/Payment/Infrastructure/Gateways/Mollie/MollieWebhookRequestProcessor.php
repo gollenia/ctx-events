@@ -24,14 +24,39 @@ final class MollieWebhookRequestProcessor
     public function resolve(array $params, string $rawBody = '', array $headers = []): MollieWebhookReferenceResolution
     {
         $payload = $this->decodePayload($rawBody);
+        if ($payload !== []) {
+            $this->assertValidSignature($rawBody, $headers);
 
-        if ($payload === []) {
-            return MollieWebhookReferenceResolution::invalid();
+            return $this->referenceResolver->resolve($params, $payload);
         }
 
-        $this->assertValidSignature($rawBody, $headers);
+        // Payments created with webhookUrl use Mollie's classic webhook: a
+        // form-encoded POST containing only `id=tr_…`. It has no signature;
+        // the ID is deliberately treated only as a lookup key and the current
+        // state is always fetched from Mollie before changing a booking.
+        $classicPaymentId = $this->readClassicPaymentId($params);
+        if ($classicPaymentId !== null) {
+            return MollieWebhookReferenceResolution::sync($classicPaymentId);
+        }
 
-        return $this->referenceResolver->resolve($params, $payload);
+        return MollieWebhookReferenceResolution::invalid();
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function readClassicPaymentId(array $params): ?string
+    {
+        $paymentId = $params['id'] ?? null;
+        if (!is_string($paymentId)) {
+            return null;
+        }
+
+        $paymentId = trim($paymentId);
+
+        return preg_match('/^tr_[A-Za-z0-9]+$/', $paymentId) === 1
+            ? $paymentId
+            : null;
     }
 
     /**
@@ -55,7 +80,7 @@ final class MollieWebhookRequestProcessor
     {
         $secret = trim($this->configuration->webhookSigningSecret);
         if ($secret === '') {
-            return;
+            throw new \DomainException('Mollie webhook signing secret is not configured.', 401);
         }
 
         $signature = trim($headers['x-mollie-signature'] ?? '');

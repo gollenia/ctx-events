@@ -21,6 +21,16 @@ final class MollieWebhookReferenceResolver
             return MollieWebhookReferenceResolution::ignore();
         }
 
+        // Next-gen Payments API webhooks contain a snapshot of the payment
+        // itself, rather than an event envelope.
+        if (
+            $this->readString($payload, 'resource') === 'payment'
+            && ($paymentId = $this->readString($payload, 'id')) !== ''
+            && str_starts_with($paymentId, 'tr_')
+        ) {
+            return MollieWebhookReferenceResolution::sync($paymentId);
+        }
+
         $embeddedEntity = $payload['_embedded']['entity'] ?? null;
         if (is_array($embeddedEntity)) {
             $embeddedResource = $this->readString($embeddedEntity, 'resource');

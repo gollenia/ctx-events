@@ -7,6 +7,7 @@ namespace Contexis\Events\Communication\Infrastructure;
 use Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext;
 use Contexis\Events\Communication\Application\DTOs\TiptapRenderedDocument;
 use Contexis\Events\Communication\Application\UseCases\ResolveEmailPaymentInformation;
+use Contexis\Events\Booking\Presentation\BookingPaymentLink;
 use Contexis\Events\Communication\Infrastructure\Tiptap\AttendeeTableNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\MailTokenNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\PaymentInformationNode;
@@ -162,7 +163,14 @@ final class TiptapDocumentRenderer
         if ($transaction->checkoutUrl !== null) {
             $content .= sprintf(
                 '<p style="margin:16px 0;"><a href="%s" style="display:inline-block;padding:10px 16px;background:#2271b1;color:#ffffff;text-decoration:none;border-radius:3px;">Pay now</a></p>',
-                htmlspecialchars($transaction->checkoutUrl->toString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                // Never mail Mollie's short-lived checkout URL. This stable
+                // booking URL checks the previous transaction when clicked and
+                // creates a replacement payment only when it is no longer usable.
+                htmlspecialchars(
+                    BookingPaymentLink::forReference($context->booking->reference->toString()),
+                    ENT_QUOTES | ENT_SUBSTITUTE,
+                    'UTF-8',
+                ),
             );
         }
 

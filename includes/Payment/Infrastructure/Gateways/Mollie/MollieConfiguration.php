@@ -17,9 +17,10 @@ final class MollieConfiguration implements GatewayConfiguration
 	public private(set) string $mode;
 	public private(set) string $apiKeyLive;
 	public private(set) string $apiKeyTest;
-	public private(set) string $returnUrl;
 	public private(set) string $webhookSigningSecret;
 	public private(set) string $instructions;
+
+    /** @param array<string, mixed>|null $data */
     public function __construct(?array $data = null) {
         $data ??= get_option(self::OPTION_KEY, []);
         $this->mapDataToProperties($data);
@@ -35,6 +36,7 @@ final class MollieConfiguration implements GatewayConfiguration
 		return $this->mode === 'live' ? $this->apiKeyLive : $this->apiKeyTest;
 	}
 
+    /** @param array<string, mixed> $data */
 	public function updateFromArray(array $data): void	
     {
 		$cleanData = [
@@ -43,7 +45,6 @@ final class MollieConfiguration implements GatewayConfiguration
             'mode' => sanitize_key($data['mode'] ?? 'test'),
             'api_key_live' => sanitize_text_field($data['api_key_live'] ?? ''),
             'api_key_test' => sanitize_text_field($data['api_key_test'] ?? ''),
-            'return_url' => esc_url_raw($data['return_url'] ?? ''),
             'webhook_signing_secret' => sanitize_text_field($data['webhookSigningSecret'] ?? $data['webhook_signing_secret'] ?? ''),
             'instructions' => wp_kses_post($data['instructions'] ?? ''),
             'description' => sanitize_text_field($data['description'] ?? ''),
@@ -51,6 +52,7 @@ final class MollieConfiguration implements GatewayConfiguration
 		$this->mapDataToProperties($cleanData);
     }
 
+    /** @param array<string, mixed> $data */
 	private function mapDataToProperties(array $data): void
     {
         $this->isEnabled = (bool) ($data['enabled'] ?? false);
@@ -58,7 +60,6 @@ final class MollieConfiguration implements GatewayConfiguration
         $this->mode = (string) ($data['mode'] ?? 'test');
         $this->apiKeyLive = (string) ($data['api_key_live'] ?? '');
         $this->apiKeyTest = (string) ($data['api_key_test'] ?? '');
-        $this->returnUrl = (string) ($data['return_url'] ?? '');
         $this->webhookSigningSecret = (string) ($data['webhook_signing_secret'] ?? '');
 		$this->description = (string) ($data['description'] ?? '');
         $this->instructions = (string) ($data['instructions'] ?? '');
@@ -71,7 +72,6 @@ final class MollieConfiguration implements GatewayConfiguration
             'mode' => $this->mode,
             'api_key_live' => $this->apiKeyLive,
             'api_key_test' => $this->apiKeyTest,
-            'return_url' => $this->returnUrl,
             'webhook_signing_secret' => $this->webhookSigningSecret,
 			'instructions' => $this->instructions,
 			'description' => $this->description,
@@ -79,6 +79,7 @@ final class MollieConfiguration implements GatewayConfiguration
         ]);
     }
 
+    /** @return list<array<string, mixed>> */
     public function getFormSchema(): array
     {
         return [
@@ -106,17 +107,16 @@ final class MollieConfiguration implements GatewayConfiguration
 				'value' => $this->mode,
             ],
             [
-                'name' => 'returnUrl',
-                'type' => 'text',
-                'label' => __('Return URL after payment (optional)', 'ctx-events'),
-                'description' => __('URL to redirect to after payment.', 'ctx-events'),
-				'value' => $this->returnUrl,
-			],
+                'type' => 'html',
+                'label' => __('Mollie webhook URL', 'ctx-events'),
+                'help' => __('Copy this URL to your Next-gen webhook configuration in Mollie.', 'ctx-events'),
+                'value' => $this->webhookUrl(),
+            ],
             [
                 'name' => 'webhookSigningSecret',
                 'type' => 'password',
-                'label' => __('Webhook signing secret (optional)', 'ctx-events'),
-                'description' => __('Used to verify signed Mollie next-gen webhooks.', 'ctx-events'),
+                'label' => __('Webhook signing secret', 'ctx-events'),
+                'description' => __('Required to verify signed Mollie Next-gen webhooks.', 'ctx-events'),
                 'value' => $this->webhookSigningSecret,
             ],
 			[
@@ -157,11 +157,20 @@ final class MollieConfiguration implements GatewayConfiguration
 		$this->isEnabled = $active;
 	}
 
+    private function webhookUrl(): string
+    {
+        return (string) rest_url('events/v3/payments/webhooks/mollie');
+    }
+
 	private function validateSettings(): void
 	{
 		if (!$this->apiKeyLive && !$this->apiKeyTest) {
 			throw new \DomainException(__("API keys are missing", 'ctx-events'), 400);
 		}
+
+        if ($this->webhookSigningSecret === '') {
+            throw new \DomainException(__("Webhook signing secret is missing", 'ctx-events'), 400);
+        }
 	}
 
 	public function isValid(): bool

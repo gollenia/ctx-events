@@ -38,6 +38,7 @@ final class MollieGateway implements PaymentGateway
 		return $this->config->description;
 	}
 
+    /** @var array{0: string, 1: string, 2: string} */
     public array $transaction_detail = [
         'Mollie Dashboard',
         'https://www.mollie.com/dashboard/payments/%s',
@@ -81,12 +82,12 @@ final class MollieGateway implements PaymentGateway
             [
                 'amount' => [
                     'currency' => $booking->priceSummary->finalPrice->currency->toString(),
-                    'value' => $booking->priceSummary->finalPrice->toFloat(),
+                    // Mollie expects a fixed two-decimal string. Passing a float can
+                    // lose trailing zeroes (or, worse, expose floating point artefacts).
+                    'value' => number_format($booking->priceSummary->finalPrice->toFloat(), 2, '.', ''),
                 ],
                 'description' => sprintf('Booking #%s', $reference),
-                'redirectUrl' => $this->config->returnUrl !== ''
-                    ? $this->config->returnUrl
-                    : BookingReturnLink::forReference($reference),
+                'redirectUrl' => BookingReturnLink::forReference($reference),
                 'locale' => get_locale(),
                 'metadata' => [
                     'booking_uuid' => $reference,
@@ -158,6 +159,7 @@ final class MollieGateway implements PaymentGateway
         return $transaction->pend();
     }
 
+	/** @param array<string, mixed> $settings */
 	public function updateSettings(array $settings): void {
 		$this->config->updateFromArray($settings);
 	}
@@ -166,6 +168,7 @@ final class MollieGateway implements PaymentGateway
 		$this->config->save();
 	}
 
+	/** @return list<array<string, mixed>> */
 	public function getSettingsSchema(): array {
 		return $this->config->getFormSchema();
 	}
