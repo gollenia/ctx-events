@@ -1,9 +1,7 @@
-import React from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
 import Actions from './Actions';
 import { useDataTable } from './DataTableContext';
-import Pagination from './Pagination';
+
 import type {
 	DataFieldConfig,
 	DataPaginationInfo,
@@ -49,10 +47,10 @@ const Table = ({
 
 			{!loading && (
 				<table
-					className={clsx(
+					className={[
 						'wp-list-table widefat',
 						variant === 'plugins' ? 'plugins' : 'fixed striped',
-					)}
+					].join(' ')}
 				>
 					<thead>
 						<tr>
@@ -73,15 +71,15 @@ const Table = ({
 										</th>
 									);
 								}
-								const headerClasses = clsx(
+								const headerClasses = [
 									fieldData.className,
 									'manage-field',
-									{
-										sortable: fieldData.enableSorting,
-										sorted: view.sort.field === fieldData.id,
-										[view.sort.direction]: view.sort.field === fieldData.id,
-									},
-								);
+									fieldData.enableSorting && 'sortable',
+									view.sort.field === fieldData.id && 'sorted',
+									view.sort.field === fieldData.id && view.sort.direction,
+								]
+									.filter(Boolean)
+									.join(' ');
 								return (
 									<th key={index} className={headerClasses} scope="col">
 										{fieldData.enableSorting ? (
@@ -201,5 +199,5 @@ const DataTableTable = () => {
 };
 
 export default Table;
-export { DataTableTable };
 export type { DataTableProps };
+export { DataTableTable };

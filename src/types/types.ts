@@ -130,10 +130,7 @@ export type EmailTemplateKey = 'booking_pending_manual' | 'booking_created_onlin
 export type EmailTrigger = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled';
 export type ErrorType = 'ERROR' | 'WARNING' | 'INFO';
 export type Event = {
-readonly id: number | string,
-readonly eventId?: number | null,
-readonly seriesId?: number | null,
-readonly type?: 'real' | 'virtual' | 'detached',
+readonly id: number,
 readonly url: string | null,
 readonly name: string,
 readonly description: string | null,
@@ -218,6 +215,8 @@ customRecipients: string[],
 } | null,
 };
 export type NumberVariant = 'input' | 'slider';
+export type OccurrenceExceptionType = 'cancelled' | 'detached';
+export type OccurrenceState = 'virtual' | 'detached';
 export type Order = 'asc' | 'desc';
 export type PaymentProvider = 'offline' | 'mollie';
 export type PersonName = {
@@ -236,6 +235,8 @@ readonly donationAmount: Price,
 readonly discountAmount: Price,
 readonly finalPrice: Price,
 };
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type RecurrenceWeekday = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 export type RedirectPayment = {
 readonly gateway: string,
 readonly status: number,
