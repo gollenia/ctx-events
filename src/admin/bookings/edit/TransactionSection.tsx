@@ -6,15 +6,17 @@ import type {
 	BookingDetail,
 	BookingTransactionResource,
 } from 'src/types/types';
+import StatusPill, { type StatusPillState } from '../../../shared/status-pill';
 
-const STATUS_LABELS: Record<number, string> = {
-	0: __('Pending', 'ctx-events'),
-	1: __('Paid', 'ctx-events'),
-	2: __('Failed', 'ctx-events'),
-	3: __('Expired', 'ctx-events'),
-	4: __('Refunded', 'ctx-events'),
-	5: __('Canceled', 'ctx-events'),
-};
+const statusConfig: Record<number, { label: string; state: StatusPillState }> =
+	{
+		0: { label: __('Pending', 'ctx-events'), state: 'warning' },
+		1: { label: __('Paid', 'ctx-events'), state: 'success' },
+		2: { label: __('Failed', 'ctx-events'), state: 'error' },
+		3: { label: __('Expired', 'ctx-events'), state: 'warning' },
+		4: { label: __('Refunded', 'ctx-events'), state: 'info' },
+		5: { label: __('Canceled', 'ctx-events'), state: 'error' },
+	};
 
 type Props = {
 	booking: BookingDetail;
@@ -22,153 +24,56 @@ type Props = {
 	onResolvePaymentLink: () => Promise<BookingTransactionResource>;
 };
 
-function renderValue(value: string | null | undefined) {
-	return value && value.trim() !== '' ? value : '—';
-}
+const renderValue = (value: string | null | undefined) =>
+	value && value.trim() !== '' ? value : '—';
 
-function formatIban(iban: string): string {
-	return iban
+const formatIban = (iban: string) =>
+	iban
 		.replace(/\s/g, '')
 		.replace(/(.{4})/g, '$1 ')
 		.trim();
-}
 
-function formatTransactionDate(value: string): string {
-	return new Date(value).toLocaleString(undefined, {
+const formatTransactionDate = (value: string) =>
+	new Date(value).toLocaleString(undefined, {
 		dateStyle: 'medium',
 		timeStyle: 'short',
 	});
-}
 
-function TransactionCard({
+const TransactionDetails = ({
 	transaction,
-	index,
 }: {
 	transaction: BookingTransactionResource;
-	index: number;
-}) {
-	const hasBankData =
-		transaction.bankData &&
-		(transaction.bankData.accountHolder ||
-			transaction.bankData.bankName ||
-			transaction.bankData.iban ||
-			transaction.bankData.bic);
+}) => {
+	const bankData = transaction.bankData;
+	const bankDetails = bankData
+		? [
+				[__('Account holder', 'ctx-events'), bankData.accountHolder],
+				[__('Bank', 'ctx-events'), bankData.bankName],
+				[__('IBAN', 'ctx-events'), formatIban(bankData.iban ?? '')],
+				[__('BIC', 'ctx-events'), bankData.bic],
+			].filter(([, value]) => Boolean(value))
+		: [];
 
-	const summaryId = renderValue(transaction.externalId);
+	if (!transaction.instructions && bankDetails.length === 0) {
+		return '—';
+	}
 
 	return (
-		<PanelBody
-			className="booking-edit__transaction-card"
-			title={
-				<div className="booking-edit__transaction-summary">
-					<strong>{transaction.gateway}</strong>
-					<span className="booking-edit__transaction-summary-id">
-						{__('Transaction', 'ctx-events')}: {summaryId}
-					</span>
-				</div>
-			}
-			initialOpen={false}
-		>
-			<div className="booking-edit__transaction-content">
-				<div className="booking-edit__transaction-list">
-					<div className="booking-edit__transaction-row">
-						<span className="booking-edit__transaction-label">
-							{__('Status', 'ctx-events')}
-						</span>
-						<strong>
-							{STATUS_LABELS[transaction.status] ?? String(transaction.status)}
-						</strong>
-					</div>
-					<div className="booking-edit__transaction-row">
-						<span className="booking-edit__transaction-label">
-							{__('Amount', 'ctx-events')}
-						</span>
-						<strong>{formatPrice(transaction.amount)}</strong>
-					</div>
-					<div className="booking-edit__transaction-row">
-						<span className="booking-edit__transaction-label">
-							{__('Date', 'ctx-events')}
-						</span>
-						<strong>{formatTransactionDate(transaction.createdAt)}</strong>
-					</div>
-					<div className="booking-edit__transaction-row">
-						<span className="booking-edit__transaction-label">
-							{__('External ID', 'ctx-events')}
-						</span>
-						<strong>{renderValue(transaction.externalId)}</strong>
-					</div>
-					{transaction.checkoutUrl ? (
-						<div className="booking-edit__transaction-row">
-							<span className="booking-edit__transaction-label">
-								{__('Payment link', 'ctx-events')}
-							</span>
-							<ExternalLink href={transaction.checkoutUrl}>
-								{__('Open payment', 'ctx-events')}
-							</ExternalLink>
+		<div className="booking-edit__transaction-details">
+			{transaction.instructions && <p>{transaction.instructions}</p>}
+			{bankDetails.length > 0 && (
+				<dl>
+					{bankDetails.map(([label, value]) => (
+						<div key={label}>
+							<dt>{label}</dt>
+							<dd>{value}</dd>
 						</div>
-					) : null}
-					{hasBankData ? (
-						<div className="booking-edit__transaction-row">
-							<span className="booking-edit__transaction-label">
-								{__('Bank transfer', 'ctx-events')}
-							</span>
-							<strong>
-								{transaction.bankData.accountHolder ||
-									transaction.bankData.bankName ||
-									formatIban(transaction.bankData.iban ?? '') ||
-									__('Details available', 'ctx-events')}
-							</strong>
-						</div>
-					) : null}
-				</div>
-
-				{transaction.instructions ? (
-					<div className="booking-edit__transaction-block">
-						<span className="booking-edit__transaction-label">
-							{__('Instructions', 'ctx-events')}
-						</span>
-						<p>{transaction.instructions}</p>
-					</div>
-				) : null}
-
-				{hasBankData ? (
-					<div className="booking-edit__transaction-block">
-						<div className="booking-edit__transaction-list">
-							<div className="booking-edit__transaction-row">
-								<span className="booking-edit__transaction-label">
-									{__('Account Holder', 'ctx-events')}
-								</span>
-								<strong>
-									{renderValue(transaction.bankData.accountHolder)}
-								</strong>
-							</div>
-							<div className="booking-edit__transaction-row">
-								<span className="booking-edit__transaction-label">
-									{__('Bank', 'ctx-events')}
-								</span>
-								<strong>{renderValue(transaction.bankData.bankName)}</strong>
-							</div>
-							<div className="booking-edit__transaction-row">
-								<span className="booking-edit__transaction-label">
-									{__('IBAN', 'ctx-events')}
-								</span>
-								<strong>
-									{renderValue(formatIban(transaction.bankData.iban ?? ''))}
-								</strong>
-							</div>
-							<div className="booking-edit__transaction-row">
-								<span className="booking-edit__transaction-label">
-									{__('BIC', 'ctx-events')}
-								</span>
-								<strong>{renderValue(transaction.bankData.bic)}</strong>
-							</div>
-						</div>
-					</div>
-				) : null}
-			</div>
-		</PanelBody>
+					))}
+				</dl>
+			)}
+		</div>
 	);
-}
+};
 
 const TransactionSection = ({
 	booking,
@@ -202,9 +107,11 @@ const TransactionSection = ({
 			}
 
 			setPaymentLinkMessage(message);
-		} catch (error: any) {
+		} catch (error: unknown) {
 			setPaymentLinkError(
-				error?.message ?? __('Could not resolve payment link.', 'ctx-events'),
+				error instanceof Error
+					? error.message
+					: __('Could not resolve payment link.', 'ctx-events'),
 			);
 		}
 	};
@@ -244,14 +151,55 @@ const TransactionSection = ({
 						{__('No transactions recorded.', 'ctx-events')}
 					</p>
 				) : (
-					<div className="booking-edit__transactions">
-						{booking.transactions.map((transaction, index) => (
-							<TransactionCard
-								key={`${transaction.externalId || transaction.createdAt}-${index}`}
-								index={index}
-								transaction={transaction}
-							/>
-						))}
+					<div className="booking-edit__transaction-table-wrap">
+						<table className="widefat striped booking-edit__transaction-table">
+							<thead>
+								<tr>
+									<th>{__('Gateway', 'ctx-events')}</th>
+									<th>{__('Status', 'ctx-events')}</th>
+									<th>{__('Amount', 'ctx-events')}</th>
+									<th>{__('Date', 'ctx-events')}</th>
+									<th>{__('Transaction', 'ctx-events')}</th>
+									<th>{__('Details', 'ctx-events')}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{booking.transactions.map((transaction, index) => {
+									const status = statusConfig[transaction.status] ?? {
+										label: String(transaction.status),
+										state: 'info' as const,
+									};
+
+									return (
+										<tr
+											key={`${transaction.externalId || transaction.createdAt}-${index}`}
+										>
+											<td>{transaction.gateway}</td>
+											<td>
+												<StatusPill state={status.state}>
+													{status.label}
+												</StatusPill>
+											</td>
+											<td>{formatPrice(transaction.amount)}</td>
+											<td>{formatTransactionDate(transaction.createdAt)}</td>
+											<td>
+												<strong>{renderValue(transaction.externalId)}</strong>
+												{transaction.checkoutUrl && (
+													<div className="booking-edit__transaction-action">
+														<ExternalLink href={transaction.checkoutUrl}>
+															{__('Open payment', 'ctx-events')}
+														</ExternalLink>
+													</div>
+												)}
+											</td>
+											<td>
+												<TransactionDetails transaction={transaction} />
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
 					</div>
 				)}
 			</PanelBody>

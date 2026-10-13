@@ -310,70 +310,60 @@ body.booking-edit-open {
 		}
 	}
 
-	.booking-edit__transactions {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
+	.booking-edit__transaction-table-wrap {
+		overflow-x: auto;
 	}
 
-	.booking-edit__transaction-card {
-		margin: 0;
-		border: 1px solid #dcdcde;
-		border-radius: 4px;
-		background: #fff;
+	.booking-edit__transaction-table {
+		min-width: 820px;
+		border-spacing: 0;
+
+		th,
+		td {
+			vertical-align: top;
+		}
+
+		th {
+			white-space: nowrap;
+		}
+
+		td {
+			line-height: 1.45;
+		}
 	}
 
-	.booking-edit__transaction-card > .components-panel__body-title {
-		margin: 0;
+	.booking-edit__transaction-action {
+		margin-top: 0.35rem;
 	}
 
-	.booking-edit__transaction-card
-		> .components-panel__body-title
-		> .components-button {
-		padding: 12px 16px;
-	}
-
-	.booking-edit__transaction-summary {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-		align-items: flex-start;
-	}
-
-	.booking-edit__transaction-summary strong {
-		font-size: 13px;
-		font-weight: 600;
-	}
-
-	.booking-edit__transaction-summary-id,
-	.booking-edit__transaction-label {
+	.booking-edit__transaction-details {
+		min-width: 180px;
 		font-size: 12px;
-		color: #646970;
-	}
+		color: #50575e;
 
-	.booking-edit__transaction-content {
-		padding: 0 16px 16px;
-	}
+		p {
+			margin: 0 0 0.5rem;
+			white-space: pre-wrap;
+		}
 
-	.booking-edit__transaction-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
+		dl {
+			margin: 0;
+		}
 
-	.booking-edit__transaction-row {
-		display: grid;
-		grid-template-columns: 140px minmax(0, 1fr);
-		gap: 0.75rem;
-		align-items: start;
-	}
+		dl > div {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr);
+			gap: 0.35rem;
+		}
 
-	.booking-edit__transaction-block {
-		margin-top: 0.75rem;
-	}
+		dt {
+			font-weight: 600;
+		}
 
-	.booking-edit__transaction-block p {
-		margin: 0;
+		dd {
+			margin: 0;
+			word-break: break-word;
+		}
 	}
 
 
@@ -596,9 +586,8 @@ body.booking-edit-open {
 			grid-template-columns: 1fr;
 		}
 
-		.booking-edit__transaction-row {
-			grid-template-columns: 1fr;
-			gap: 0.25rem;
+		.booking-edit__transaction-table {
+			min-width: 720px;
 		}
 	}
 }
