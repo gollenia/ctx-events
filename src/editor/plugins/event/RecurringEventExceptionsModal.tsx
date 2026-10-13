@@ -1,7 +1,18 @@
-import { Button, Flex, FlexItem, Modal, Notice, Spinner } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	Flex,
+	FlexItem,
+	Modal,
+	Notice,
+	Spinner,
+} from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import SmallDataTable, {
+	type SmallDataTableField,
+} from '../../../shared/small-data-table';
+import StatusPill from '../../../shared/status-pill';
 
 export type RecurrenceException = {
 	type: 'cancelled' | 'detached';
@@ -18,6 +29,11 @@ type Occurrence = {
 
 type DetachResponse = { eventId: number };
 
+type DetachedEventRecord = {
+	id: number;
+	title?: { raw?: string; rendered?: string };
+};
+
 type OccurrenceRow = {
 	id: string;
 	occurrence?: Occurrence;
@@ -27,16 +43,18 @@ type OccurrenceRow = {
 
 type Props = {
 	postId: number;
+	recurringEventTitle: string;
 	exceptions: Record<string, RecurrenceException>;
 	show: boolean;
 	onClose: () => void;
 	onChange: (exceptions: Record<string, RecurrenceException>) => void;
 };
 
-const formatDate = (value: string): string => new Intl.DateTimeFormat(undefined, {
-	dateStyle: 'medium',
-	timeStyle: 'short',
-}).format(new Date(value));
+const formatDate = (value: string): string =>
+	new Intl.DateTimeFormat(undefined, {
+		dateStyle: 'medium',
+		timeStyle: 'short',
+	}).format(new Date(value));
 
 const formatOccurrenceKey = (occurrenceKey: string): string => {
 	const match = /^recurrence:\d+:(.+)$/.exec(occurrenceKey);
@@ -69,16 +87,75 @@ const occurrenceRows = (
 	}
 
 	return [...rows.values()].sort((left, right) => {
-		const byDate = new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime();
+		const byDate =
+			new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime();
 		return Number.isNaN(byDate) ? left.id.localeCompare(right.id) : byDate;
 	});
 };
 
-const RecurringEventExceptionsModal = ({ postId, exceptions, show, onClose, onChange }: Props) => {
+const RecurringEventExceptionsModal = ({
+	postId,
+	recurringEventTitle,
+	exceptions,
+	show,
+	onClose,
+	onChange,
+}: Props) => {
 	const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [detachingOccurrenceId, setDetachingOccurrenceId] = useState<string | null>(null);
+	const [detachingOccurrenceId, setDetachingOccurrenceId] = useState<
+		string | null
+	>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [detachedEventTitles, setDetachedEventTitles] = useState<
+		Record<number, string>
+	>({});
+	const detachedEventIds = [
+		...new Set(
+			Object.values(exceptions)
+				.filter(
+					(
+						exception,
+					): exception is RecurrenceException & { eventPostId: number } =>
+						exception.type === 'detached' && Boolean(exception.eventPostId),
+				)
+				.map((exception) => exception.eventPostId),
+		),
+	];
+	const missingDetachedEventIds = detachedEventIds.filter(
+		(eventId) => detachedEventTitles[eventId] === undefined,
+	);
+	const missingDetachedEventIdsKey = missingDetachedEventIds.join(',');
+
+	useEffect(() => {
+		if (!show || missingDetachedEventIds.length === 0) return;
+
+		let isCurrent = true;
+		const loadDetachedEvents = async (): Promise<void> => {
+			try {
+				const events = await apiFetch<DetachedEventRecord[]>({
+					path: `/wp/v2/ctx-event?include=${missingDetachedEventIds.join(',')}&per_page=${missingDetachedEventIds.length}&context=edit&_fields=id,title`,
+				});
+				if (!isCurrent) return;
+				setDetachedEventTitles((current) => ({
+					...current,
+					...Object.fromEntries(
+						events.map((event) => [
+							event.id,
+							event.title?.raw ?? event.title?.rendered ?? '',
+						]),
+					),
+				}));
+			} catch {
+				// Keep the generic occurrence label if a detached event is unavailable.
+			}
+		};
+
+		void loadDetachedEvents();
+		return () => {
+			isCurrent = false;
+		};
+	}, [missingDetachedEventIdsKey, show]);
 
 	useEffect(() => {
 		if (!show) return;
@@ -90,9 +167,15 @@ const RecurringEventExceptionsModal = ({ postId, exceptions, show, onClose, onCh
 				const response = await apiFetch<Occurrence[]>({
 					path: `/events/v3/events?with_recurrences=true&recurring_event=${postId}&scope=1-year&per_page=366&order=asc`,
 				});
-				setOccurrences(response.filter((occurrence) => occurrence.type === 'virtual'));
+				setOccurrences(
+					response.filter((occurrence) => occurrence.type === 'virtual'),
+				);
 			} catch (requestError) {
-				setError(requestError instanceof Error ? requestError.message : __('Could not load occurrences.', 'ctx-events'));
+				setError(
+					requestError instanceof Error
+						? requestError.message
+						: __('Could not load occurrences.', 'ctx-events'),
+				);
 			} finally {
 				setIsLoading(false);
 			}
@@ -103,10 +186,11 @@ const RecurringEventExceptionsModal = ({ postId, exceptions, show, onClose, onCh
 
 	if (!show) return null;
 
-	const cancel = (occurrenceId: string): void => onChange({
-		...exceptions,
-		[occurrenceId]: { type: 'cancelled' },
-	});
+	const cancel = (occurrenceId: string): void =>
+		onChange({
+			...exceptions,
+			[occurrenceId]: { type: 'cancelled' },
+		});
 	const restore = (occurrenceId: string): void => {
 		const { [occurrenceId]: _removed, ...remaining } = exceptions;
 		onChange(remaining);
@@ -120,36 +204,186 @@ const RecurringEventExceptionsModal = ({ postId, exceptions, show, onClose, onCh
 				method: 'POST',
 				data: { occurrence_key: occurrenceId },
 			});
-			onChange({ ...exceptions, [occurrenceId]: { type: 'detached', eventPostId: response.eventId } });
+			onChange({
+				...exceptions,
+				[occurrenceId]: { type: 'detached', eventPostId: response.eventId },
+			});
 		} catch (requestError) {
-			setError(requestError instanceof Error ? requestError.message : __('Could not detach occurrence.', 'ctx-events'));
+			setError(
+				requestError instanceof Error
+					? requestError.message
+					: __('Could not detach occurrence.', 'ctx-events'),
+			);
 		} finally {
 			setDetachingOccurrenceId(null);
 		}
 	};
 	const rows = occurrenceRows(occurrences, exceptions);
+	const renderActions = (row: OccurrenceRow) => {
+		const { exception, occurrence } = row;
 
-	return <Modal title={__('Manage exceptions', 'ctx-events')} onRequestClose={onClose} size="large" className="ctx-recurring-event-exceptions-modal">
-		<p>{__('Cancelled occurrences are saved with this recurring event when you update it.', 'ctx-events')}</p>
-		{error && <Notice status="error" isDismissible={false}>{error}</Notice>}
-		{isLoading ? <Spinner /> : <>
-			<table className="widefat striped">
-				<thead><tr><th>{__('Occurrence', 'ctx-events')}</th><th>{__('Status', 'ctx-events')}</th><th className="column-actions">{__('Action', 'ctx-events')}</th></tr></thead>
-				<tbody>
-					{rows.map((row) => {
-						const { exception, occurrence } = row;
-						return <tr key={row.id}>
-							<td>{occurrence ? <><strong>{occurrence.name}</strong><br />{formatDate(occurrence.startDate)}</> : formatOccurrenceKey(row.id)}</td>
-							<td>{exception ? (exception.type === 'detached' ? __('Detached', 'ctx-events') : __('Cancelled', 'ctx-events')) : __('Scheduled', 'ctx-events')}</td>
-							<td>{exception ? (exception.type === 'detached' && exception.eventPostId ? <a className="button button-secondary" href={`/wp-admin/post.php?post=${exception.eventPostId}&action=edit`}>{__('Edit detached event', 'ctx-events')}</a> : <Button variant="tertiary" onClick={() => restore(row.id)}>{__('Remove exception', 'ctx-events')}</Button>) : occurrence ? <Flex gap="8px" justify="flex-end"><FlexItem><Button variant="tertiary" isDestructive onClick={() => cancel(row.id)}>{__('Cancel occurrence', 'ctx-events')}</Button></FlexItem><FlexItem><Button variant="secondary" isBusy={detachingOccurrenceId === row.id} disabled={detachingOccurrenceId !== null} onClick={() => void detach(row.id)}>{__('Detach occurrence', 'ctx-events')}</Button></FlexItem></Flex> : null}</td>
-						</tr>;
-					})}
-					{rows.length === 0 && <tr><td colSpan={3}>{__('No occurrences in the next twelve months.', 'ctx-events')}</td></tr>}
-				</tbody>
-			</table>
-			<Flex justify="flex-end" style={{ marginTop: '1rem' }}><FlexItem><Button variant="secondary" onClick={onClose}>{__('Done', 'ctx-events')}</Button></FlexItem></Flex>
-		</>}
-	</Modal>;
+		if (exception?.type === 'detached' && exception.eventPostId) {
+			return (
+				<div className="row-actions">
+					<a
+						className="view"
+						href={`/wp-admin/post.php?post=${exception.eventPostId}&action=edit`}
+					>
+						{__('Edit detached event', 'ctx-events')}
+					</a>
+					{' | '}
+					<Button
+						variant="link"
+						className="trash"
+						onClick={() => restore(row.id)}
+					>
+						{__('Remove exception', 'ctx-events')}
+					</Button>
+				</div>
+			);
+		}
+
+		if (exception) {
+			return (
+				<div className="row-actions">
+					<Button
+						variant="link"
+						className="trash"
+						onClick={() => restore(row.id)}
+					>
+						{__('Remove exception', 'ctx-events')}
+					</Button>
+				</div>
+			);
+		}
+
+		if (!occurrence) return null;
+
+		return (
+			<div className="row-actions">
+				<Button
+					variant="link"
+					className="trash"
+					isDestructive
+					onClick={() => cancel(row.id)}
+				>
+					{__('Cancel occurrence', 'ctx-events')}
+				</Button>
+				{' | '}
+				<Button
+					variant="link"
+					className="view"
+					isBusy={detachingOccurrenceId === row.id}
+					disabled={detachingOccurrenceId !== null}
+					onClick={() => void detach(row.id)}
+				>
+					{__('Detach occurrence', 'ctx-events')}
+				</Button>
+			</div>
+		);
+	};
+	const fields: SmallDataTableField<OccurrenceRow>[] = [
+		{
+			id: 'occurrence',
+			label: __('Occurrence', 'ctx-events'),
+			cellClassName: (row) =>
+				row.exception?.type === 'cancelled'
+					? 'ctx-recurring-event-exception__title--cancelled'
+					: undefined,
+			render: (row) => {
+				return (
+					<>
+						<strong>
+							{row.exception?.type === 'cancelled'
+								? recurringEventTitle || __('Occurrence', 'ctx-events')
+								: row.exception?.type === 'detached' &&
+										row.exception.eventPostId
+									? detachedEventTitles[row.exception.eventPostId] ||
+										__('Occurrence', 'ctx-events')
+									: (row.occurrence?.name ?? __('Occurrence', 'ctx-events'))}
+						</strong>
+						{renderActions(row)}
+					</>
+				);
+			},
+		},
+		{
+			id: 'date',
+			label: __('Date', 'ctx-events'),
+			render: (row) =>
+				row.occurrence
+					? formatDate(row.occurrence.startDate)
+					: formatOccurrenceKey(row.id),
+		},
+		{
+			id: 'status',
+			label: __('Status', 'ctx-events'),
+			render: (row) => {
+				if (row.exception?.type === 'detached') {
+					return (
+						<StatusPill state="info">{__('Detached', 'ctx-events')}</StatusPill>
+					);
+				}
+
+				if (row.exception?.type === 'cancelled') {
+					return (
+						<StatusPill state="error">
+							{__('Cancelled', 'ctx-events')}
+						</StatusPill>
+					);
+				}
+
+				return (
+					<StatusPill state="success">
+						{__('Scheduled', 'ctx-events')}
+					</StatusPill>
+				);
+			},
+		},
+	];
+
+	return (
+		<Modal
+			title={__('Manage exceptions', 'ctx-events')}
+			onRequestClose={onClose}
+			size="large"
+			className="ctx-recurring-event-exceptions-modal"
+		>
+			<p>
+				{__(
+					'Cancelled occurrences are saved with this recurring event when you update it.',
+					'ctx-events',
+				)}
+			</p>
+			{error && (
+				<Notice status="error" isDismissible={false}>
+					{error}
+				</Notice>
+			)}
+			{isLoading ? (
+				<Spinner />
+			) : (
+				<>
+					<SmallDataTable
+						items={rows}
+						fields={fields}
+						getRowKey={(row) => row.id}
+						emptyMessage={__(
+							'No occurrences in the next twelve months.',
+							'ctx-events',
+						)}
+					/>
+					<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
+						<FlexItem>
+							<Button variant="secondary" onClick={onClose}>
+								{__('Done', 'ctx-events')}
+							</Button>
+						</FlexItem>
+					</Flex>
+				</>
+			)}
+		</Modal>
+	);
 };
 
 export default RecurringEventExceptionsModal;
