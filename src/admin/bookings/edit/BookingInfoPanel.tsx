@@ -1,11 +1,7 @@
 import { Flex, FlexItem } from '@contexis/wp-react-form';
+import { CurrencyField } from '@events/adminfields';
 import { formatPrice } from '@events/i18n';
-import {
-	Panel,
-	PanelBody,
-	SelectControl,
-	TextControl,
-} from '@wordpress/components';
+import { Panel, PanelBody, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { BookingDetail } from 'src/types/types';
 import { STATUS_LABELS } from '../constants';
@@ -77,16 +73,14 @@ const BookingInfoPanel = ({
 						/>
 					</FlexItem>
 					<FlexItem>
-						<TextControl
+						<CurrencyField
 							label={__('Donation', 'ctx-events')}
-							type="number"
+							currency={booking.price.donationAmount.currency}
 							value={String(
 								(booking.price.donationAmount.amountCents ?? 0) / 100,
 							)}
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
 							onChange={(value) => {
-								const amount = Number.parseFloat(value);
+								const amount = Number.parseFloat(String(value));
 								const donationCents = Number.isFinite(amount)
 									? Math.round(amount * 100)
 									: 0;
@@ -105,7 +99,9 @@ const BookingInfoPanel = ({
 						disabled={isSaving}
 						aria-busy={isSaving}
 					>
-						{isSaving ? __('Saving…', 'ctx-events') : __('Save changes', 'ctx-events')}
+						{isSaving
+							? __('Saving…', 'ctx-events')
+							: __('Save changes', 'ctx-events')}
 					</button>
 				</div>
 			</PanelBody>
