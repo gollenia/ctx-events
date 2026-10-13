@@ -22,7 +22,7 @@
 		"react-dom": "^18.3.1"
 	},
 	"dependencies": {
-		"@base-ui/react": "^1.8.0",
+		"@base-ui/react": "^1.9.0",
 		"@contexis/use-api-fetch": "^1.0.4",
 		"@contexis/wp-react-form": "^2.6.2",
 		"@schedule-x/calendar": "^4.9.0",
@@ -32,9 +32,8 @@
 		"@tiptap/pm": "^3.31.3",
 		"@tiptap/react": "^3.31.3",
 		"@tiptap/starter-kit": "^3.31.3",
-		"@wordpress/api-fetch": "^7.54.0",
-		"@wordpress/icons": "^15.5.0",
-		"clsx": "^2.1.1",
+		"@wordpress/api-fetch": "^7.57.0",
+		"@wordpress/icons": "^18.0.0",
 		"temporal-polyfill": "0.3.2",
 		"uuid": "^14.0.2"
 	},
