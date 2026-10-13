@@ -5,14 +5,21 @@ import { v4 as uuidv4 } from 'uuid';
 
 import TicketEditor from './TicketEditor';
 import TicketTable from './TicketTable';
-import type { BookingSidebarProps, BookingTicket } from './types';
+import {
+	type BookingSidebarProps,
+	type BookingTicket,
+	getDefaultCurrency,
+} from './types';
 
 type TicketModalProps = BookingSidebarProps & {
 	showTickets: boolean;
 	setShowTickets: (value: boolean) => void;
 };
 
-const emptyTicket = (tickets: BookingTicket[], fallbackSpaces: string | number): BookingTicket => ({
+const emptyTicket = (
+	tickets: BookingTicket[],
+	fallbackSpaces: string | number,
+): BookingTicket => ({
 	ticket_id: uuidv4(),
 	ticket_name: __('Default Ticket', 'ctx-events'),
 	ticket_description: '',
@@ -33,7 +40,9 @@ const TicketModal = ({
 	showTickets,
 	setShowTickets,
 }: TicketModalProps) => {
-	const [currentTicket, setCurrentTicket] = useState<BookingTicket | null>(null);
+	const [currentTicket, setCurrentTicket] = useState<BookingTicket | null>(
+		null,
+	);
 	const tickets = meta._event_tickets ?? [];
 
 	const updateTickets = (updatedTickets: BookingTicket[]) => {
@@ -93,6 +102,15 @@ const TicketModal = ({
 		]);
 	};
 
+	const reorderTickets = (reorderedTickets: BookingTicket[]) => {
+		updateTickets(
+			reorderedTickets.map((ticket, index) => ({
+				...ticket,
+				ticket_order: index + 1,
+			})),
+		);
+	};
+
 	if (!showTickets) {
 		return null;
 	}
@@ -110,6 +128,7 @@ const TicketModal = ({
 			{currentTicket ? (
 				<TicketEditor
 					ticket={currentTicket}
+					currency={meta._booking_currency ?? getDefaultCurrency()}
 					setTicket={setCurrentTicket}
 					onUpdate={onUpdate}
 					onCancel={() => setCurrentTicket(null)}
@@ -122,6 +141,7 @@ const TicketModal = ({
 						onSelect={(index) => setCurrentTicket(tickets[index] ?? null)}
 						onDelete={onDelete}
 						onDuplicate={duplicateTicket}
+						onReorder={reorderTickets}
 					/>
 					<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
 						<FlexItem>

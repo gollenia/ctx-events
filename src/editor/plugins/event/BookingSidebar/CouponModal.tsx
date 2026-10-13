@@ -1,5 +1,8 @@
+import { formatPrice } from '@events/i18n';
 import {
 	Button,
+	CheckboxControl,
+	Disabled,
 	Flex,
 	FlexItem,
 	Modal,
@@ -9,9 +12,11 @@ import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import SmallDataTable, {
+	type SmallDataTableField,
+} from '../../../../shared/small-data-table';
 
-import CouponRow from './CouponRow';
-import type { BookingSidebarProps } from './types';
+import { type BookingSidebarProps, getDefaultCurrency } from './types';
 
 type CouponRecord = {
 	id: number;
@@ -32,6 +37,11 @@ type CouponRecord = {
 	};
 };
 
+type CouponModalProps = BookingSidebarProps & {
+	showCoupons: boolean;
+	setShowCoupons: (value: boolean) => void;
+};
+
 type Coupon = {
 	id: number;
 	title: string;
@@ -40,11 +50,6 @@ type Coupon = {
 	expiry: string;
 	amount: string | number;
 	fixed: boolean;
-};
-
-type CouponModalProps = BookingSidebarProps & {
-	showCoupons: boolean;
-	setShowCoupons: (value: boolean) => void;
 };
 
 const CouponModal = ({
@@ -88,6 +93,46 @@ const CouponModal = ({
 
 		updateMeta({ _booking_coupons: coupons });
 	};
+	const fields: SmallDataTableField<Coupon>[] = [
+		{
+			id: 'selected',
+			ariaLabel: __('Selected', 'ctx-events'),
+			render: (coupon) => {
+				const checkbox = (
+					<CheckboxControl
+						id={`coupon-${coupon.id}`}
+						name={`coupon-${coupon.id}`}
+						onChange={(value) => onToggle(value, coupon.id)}
+						checked={selectedCoupons.includes(coupon.id) || coupon.fixed}
+					/>
+				);
+				return coupon.fixed ? <Disabled>{checkbox}</Disabled> : checkbox;
+			},
+		},
+		{
+			id: 'name',
+			label: __('Name', 'ctx-events'),
+			render: (coupon) => <b>{coupon.title}</b>,
+		},
+		{
+			id: 'code',
+			label: __('Code', 'ctx-events'),
+			render: (coupon) => coupon.code,
+		},
+		{
+			id: 'amount',
+			label: __('Amount', 'ctx-events'),
+			render: (coupon) =>
+				coupon.type === 'fixed'
+					? formatPrice(coupon.amount, getDefaultCurrency())
+					: `${coupon.amount}%`,
+		},
+		{
+			id: 'expires',
+			label: __('Expires', 'ctx-events'),
+			render: (coupon) => coupon.expiry,
+		},
+	];
 
 	if (!showCoupons) {
 		return null;
@@ -107,27 +152,12 @@ const CouponModal = ({
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 			/>
-			<table className="wp-list-table widefat striped table-view-list posts">
-				<thead>
-					<tr>
-						<th aria-label={__('Selected', 'ctx-events')} />
-						<th>{__('Name', 'ctx-events')}</th>
-						<th>{__('Code', 'ctx-events')}</th>
-						<th>{__('Amount', 'ctx-events')}</th>
-						<th>{__('Expires', 'ctx-events')}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{filteredCoupons.map((coupon) => (
-						<CouponRow
-							key={coupon.id}
-							coupon={coupon}
-							isSelected={selectedCoupons.includes(coupon.id)}
-							onToggle={onToggle}
-						/>
-					))}
-				</tbody>
-			</table>
+			<SmallDataTable
+				items={filteredCoupons}
+				fields={fields}
+				getRowKey={(coupon) => coupon.id}
+				className="wp-list-table widefat striped table-view-list posts"
+			/>
 			<Flex justify="flex-end" style={{ marginTop: '1rem' }}>
 				<FlexItem>
 					<Button variant="primary" onClick={() => setShowCoupons(false)}>

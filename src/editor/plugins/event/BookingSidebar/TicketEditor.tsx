@@ -1,3 +1,4 @@
+import { CurrencyField } from '@events/adminfields';
 import {
 	Button,
 	Flex,
@@ -13,6 +14,7 @@ import type { BookingTicket } from './types';
 
 type TicketEditorProps = {
 	ticket: BookingTicket;
+	currency: string;
 	onUpdate: () => void;
 	onCancel: () => void;
 	setTicket: (ticket: BookingTicket) => void;
@@ -20,6 +22,7 @@ type TicketEditorProps = {
 
 const TicketEditor = ({
 	ticket,
+	currency,
 	onUpdate,
 	onCancel,
 	setTicket,
@@ -57,15 +60,16 @@ const TicketEditor = ({
 				</FlexItem>
 				<Flex align="flex-start">
 					<FlexItem style={{ flex: 1 }}>
-						<TextControl
+						<CurrencyField
 							label={__('Price', 'ctx-events')}
-							type="text"
+							currency={currency}
 							value={priceInput}
 							onChange={(value) => {
-								setPriceInput(value);
+								const nextValue = String(value);
+								setPriceInput(nextValue);
 								setTicket({
 									...ticket,
-									ticket_price: parsePriceInputToCents(value),
+									ticket_price: parsePriceInputToCents(nextValue),
 								});
 							}}
 							onBlur={() => {
@@ -76,11 +80,16 @@ const TicketEditor = ({
 					<FlexItem style={{ flex: 1 }}>
 						<TextControl
 							label={__('Spaces', 'ctx-events')}
-							help={__('Leave empty for unlimited. 0 means sold out.', 'ctx-events')}
+							help={__(
+								'Leave empty for unlimited. 0 means sold out.',
+								'ctx-events',
+							)}
 							type="number"
 							min={0}
 							value={
-								ticket.ticket_spaces === null ? '' : String(ticket.ticket_spaces)
+								ticket.ticket_spaces === null
+									? ''
+									: String(ticket.ticket_spaces)
 							}
 							onChange={(value) =>
 								setTicket({
@@ -118,19 +127,6 @@ const TicketEditor = ({
 						type="date"
 						value={ticket.ticket_start}
 						onChange={(value) => setTicket({ ...ticket, ticket_start: value })}
-					/>
-				</FlexItem>
-				<FlexItem>
-					<TextControl
-						label={__('Order', 'ctx-events')}
-						type="number"
-						value={String(ticket.ticket_order)}
-						onChange={(value) =>
-							setTicket({
-								...ticket,
-								ticket_order: Number.parseInt(value, 10) || 0,
-							})
-						}
 					/>
 				</FlexItem>
 			</Flex>
