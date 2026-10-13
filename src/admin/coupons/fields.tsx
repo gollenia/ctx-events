@@ -2,6 +2,7 @@ import type { DataFieldConfig } from '@events/datatable';
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { CouponListItem } from 'src/types/types';
+import StatusPill from '../../shared/status-pill';
 
 type FieldCallbacks = {
 	onCodeCopy: (code: string) => void;
@@ -60,8 +61,11 @@ export const createFields = (
 	{
 		id: 'isGlobal',
 		label: __('Global', 'ctx-events'),
-		getValue: (coupon: CouponListItem) =>
-			coupon.isGlobal ? __('Yes', 'ctx-events') : __('No', 'ctx-events'),
+		render: (coupon: CouponListItem) => (
+			<StatusPill state={coupon.isGlobal ? 'success' : 'error'}>
+				{coupon.isGlobal ? __('Yes', 'ctx-events') : __('No', 'ctx-events')}
+			</StatusPill>
+		),
 	},
 	{
 		id: 'validFrom',
