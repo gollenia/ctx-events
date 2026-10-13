@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Spinner } from '@wordpress/components';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import StatusPill from '../../shared/status-pill';
 import type { MailTemplate } from '../../types/types';
 import EmailModal from './EmailModal';
 
@@ -149,9 +150,9 @@ const EmailsTable = () => {
 				label: __('Source', 'ctx-events'),
 				enableSorting: true,
 				render: (item: MailTemplate) => (
-					<span className={`ctx-email-badge ctx-email-badge--${item.source}`}>
+					<StatusPill state={item.source === 'database' ? 'success' : 'info'}>
 						{sourceLabels[item.source] ?? item.source}
-					</span>
+					</StatusPill>
 				),
 			},
 			{
