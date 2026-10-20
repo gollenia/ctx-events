@@ -24,6 +24,7 @@ import type { Event, TimeScope } from '../../../types/types';
 import { getLocale } from '@events/i18n';
 import { actions } from '../actions';
 import EventCancelConfirmModal from '../EventCancelConfirmModal';
+import EventDuplicateModal from '../EventDuplicateModal';
 import { getCreateEventUrl, getMonthFromScope } from './utils';
 import { useStoredCalendarMonth } from './useStoredCalendarMonth';
 import {
@@ -111,7 +112,7 @@ const toScheduleEvent = (
 	timezone: string,
 ): ScheduleEvent => ({
 	id: event.id,
-	title: event.title,
+	title: event.recurrenceSeriesId ? `↻ ${event.title}` : event.title,
 	description: event.description,
 	location: event.locationName ?? undefined,
 	people: event.personName ? [event.personName] : undefined,
@@ -119,29 +120,6 @@ const toScheduleEvent = (
 	start: Temporal.Instant.from(event.startDate).toZonedDateTimeISO(timezone),
 	end: Temporal.Instant.from(event.endDate).toZonedDateTimeISO(timezone),
 	calendarId: isHexColor(event.color) ? colorNameFor(event.color) : undefined,
-});
-
-type VirtualOccurrence = {
-	id: string;
-	type: 'virtual';
-	name: string;
-	description: string | null;
-	startDate: string;
-	endDate: string;
-	seriesId: number;
-};
-
-const toVirtualCalendarEvent = (occurrence: VirtualOccurrence): CalendarEvent => ({
-	id: occurrence.id,
-	title: `↻ ${occurrence.name}`,
-	description: occurrence.description ?? '',
-	startDate: occurrence.startDate,
-	endDate: occurrence.endDate,
-	categoryIds: [],
-	color: null,
-	locationName: null,
-	personName: null,
-	recurrenceSeriesId: occurrence.seriesId,
 });
 
 const filtersKey = (filters: Array<DataFilterField>): string =>
@@ -173,7 +151,9 @@ interface EventModalActionsProps {
 
 const EventModalActions = ({ event, onCancelled }: EventModalActionsProps) => {
 	const [isCancelOpen, setIsCancelOpen] = useState(false);
+	const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 	const cancelAction = actions.find((action) => action.id === 'cancel');
+	const duplicateAction = actions.find((action) => action.id === 'duplicate');
 	const eventId = Number(event.id);
 	const recurrenceSeriesId = (event as ScheduleEvent & { recurrenceSeriesId?: number }).recurrenceSeriesId;
 	const start = event.start as Temporal.ZonedDateTime;
@@ -219,6 +199,15 @@ const EventModalActions = ({ event, onCancelled }: EventModalActionsProps) => {
 				>
 					{__('Edit event', 'ctx-events')}
 				</a>
+				{duplicateAction && (
+					<button
+						type="button"
+						className="button button-secondary"
+						onClick={() => setIsDuplicateOpen(true)}
+					>
+						{__('Duplicate', 'ctx-events')}
+					</button>
+				)}
 				<button
 					type="button"
 					className="button-link-delete"
@@ -234,6 +223,13 @@ const EventModalActions = ({ event, onCancelled }: EventModalActionsProps) => {
 					item={calendarEvent}
 					onClose={() => setIsCancelOpen(false)}
 					onActionPerformed={() => onCancelled(eventId)}
+				/>
+			)}
+			{isDuplicateOpen && duplicateAction && (
+				<EventDuplicateModal
+					action={duplicateAction}
+					item={calendarEvent}
+					onClose={() => setIsDuplicateOpen(false)}
 				/>
 			)}
 		</>
@@ -303,23 +299,9 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 						if (Array.isArray(persons) && persons.length > 0) {
 							params.append('person', String(persons[0]));
 						}
-						const [events, occurrences] = await Promise.all([
-							apiFetch<Array<CalendarEvent>>({
+						const calendarEvents = await apiFetch<Array<CalendarEvent>>({
 							path: `/events/v3/events/calendar?${params.toString()}`,
-							}),
-							apiFetch<Array<VirtualOccurrence>>({
-								path: '/events/v3/events?with_recurrences=true&scope=1-year&per_page=100',
-							}),
-						]);
-						const virtualEvents = occurrences
-							.filter((occurrence) => occurrence.type === 'virtual')
-							.filter((occurrence) => {
-								const start = new Date(occurrence.startDate).getTime();
-								return start >= range.start.toInstant().epochMilliseconds
-									&& start < range.end.toInstant().epochMilliseconds;
-							})
-							.map(toVirtualCalendarEvent);
-						const calendarEvents = [...events, ...virtualEvents];
+						});
 
 						registerCategoryColors(calendarEvents, calendars);
 						return calendarEvents.map((event) => toScheduleEvent(event, timezone));
