@@ -96,10 +96,17 @@ export default function Edit({ attributes, setAttributes }: EditProps) {
 			year: 'numeric',
 		}).format(date);
 	});
-	const periodOptions = monthOptions.map((label, index) => ({
-		label,
-		value: String(index),
-	}));
+	const periodOptions =
+		attributes.exportMode === 'month'
+			? [
+					{ label: __('This month', 'ctx-events'), value: '0' },
+					{ label: __('Next month', 'ctx-events'), value: '1' },
+					{ label: __('The month after next', 'ctx-events'), value: '2' },
+				]
+			: monthOptions.map((label, index) => ({
+					label,
+					value: String(index),
+				}));
 
 	return (
 		<div {...blockProps}>
@@ -111,14 +118,18 @@ export default function Edit({ attributes, setAttributes }: EditProps) {
 			/>
 			<div className="ctx-program-pdf-export__preview">
 				<div className="ctx-program-pdf-export__controls">
-					{attributes.showDateSelection ? <SelectControl
-						label={__('Choose period', 'ctx-events')}
-						labelPosition="side"
-						disabled
-						value={String(attributes.selectedOffset)}
-						options={periodOptions}
-						__next40pxDefaultSize
-					/> : null}
+					{attributes.showDateSelection ? (
+						<SelectControl
+							label={__('Choose period', 'ctx-events')}
+							labelPosition="side"
+							disabled
+							value={String(
+								Math.min(attributes.selectedOffset, periodOptions.length - 1),
+							)}
+							options={periodOptions}
+							__next40pxDefaultSize
+						/>
+					) : null}
 					<Button variant="primary" disabled __next40pxDefaultSize>
 						{attributes.buttonText || __('PDF herunterladen', 'ctx-events')}
 					</Button>

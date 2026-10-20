@@ -70,17 +70,32 @@ export default function Inspector({
 						})
 					}
 				/>
-				<RangeControl
-					label={__('Selectable periods', 'ctx-events')}
-					min={1}
-					max={24}
-					value={attributes.periodsAhead}
+				{attributes.exportMode !== 'month' && (
+					<RangeControl
+						label={__('Selectable periods', 'ctx-events')}
+						min={1}
+						max={24}
+						value={attributes.periodsAhead}
+						onChange={(value) =>
+							setAttributes({ periodsAhead: Number(value) || 12 })
+						}
+					/>
+				)}
+				<SelectControl
+					label={__('Default period', 'ctx-events')}
+					value={String(
+						Math.min(attributes.selectedOffset, periodOptions.length - 1),
+					)}
+					options={periodOptions}
 					onChange={(value) =>
-						setAttributes({ periodsAhead: Number(value) || 12 })
+						setAttributes({ selectedOffset: Number(value) || 0 })
 					}
 				/>
-				<SelectControl label={__('Default period', 'ctx-events')} value={String(attributes.selectedOffset)} options={periodOptions} onChange={(value) => setAttributes({ selectedOffset: Number(value) || 0 })} />
-				<CheckboxControl label={__('Show date selection', 'ctx-events')} checked={attributes.showDateSelection} onChange={(value) => setAttributes({ showDateSelection: value })} />
+				<CheckboxControl
+					label={__('Show date selection', 'ctx-events')}
+					checked={attributes.showDateSelection}
+					onChange={(value) => setAttributes({ showDateSelection: value })}
+				/>
 				<CheckboxControl
 					label={__('Show days without events', 'ctx-events')}
 					checked={attributes.showEmptyDays}
@@ -100,9 +115,7 @@ export default function Inspector({
 					label={__('Category filter', 'ctx-events')}
 					value={attributes.category}
 					options={categoryOptions}
-					onChange={(value) =>
-						setAttributes({ category: Number(value) || 0 })
-					}
+					onChange={(value) => setAttributes({ category: Number(value) || 0 })}
 				/>
 			</PanelBody>
 		</InspectorControls>
