@@ -1,68 +1,100 @@
-# Events
+# Events for WordPress
 
-This Wordpress plugin manages events. It supports booking (including online and offline payments) and recurring events. It's originally based on the [WP Events Manager](https://wp-events-plugin.com/), but changes slowly.
+Events is a WordPress plugin for publishing events, accepting bookings and managing payments. It is built for the block editor and provides both the public booking experience and the administration tools needed to run an event programme.
 
-### Changes from the original plugin
+The plugin is not a fork of, nor compatible with, WP Events Manager. It has its own event model, REST API and Gutenberg blocks.
 
-As the WP Events Manager seems to stagnate in development, we started to modernize it. This process ist yet not finished. So far, we made these Changes (which are still on progress):
+## Features
 
--   Block support for Gutenberg, which makes the old Page templates obsolete
--   React based booking system (also includable as block)
--   Removed a lot of stuff (multisite support, google maps, buddypress, event submission)
--   cleaning up code (greetings to you, uncle Bob!)
--   offline payment now supports QR-Codes
--   generate a PDF with a monthly event list
--   Cool new feature: Multibookings removed. If you're looking to book multiple events at once, consider implementing SAP. Or just use a different plugin. But please — don’t come crying here.
+- Create and manage one-off events, locations, people, categories and tags
+- Create recurring event series, manage individual occurrences and detach exceptions
+- Browse events in an admin list or calendar view
+- Duplicate an event to one or more dates
+- Sell tickets with capacities, booking windows and availability tracking
+- Manage bookings, attendees, notes, cancellations and exports
+- Create custom booking and attendee forms
+- Configure online and offline payment gateways, including SEPA payment QR codes
+- Create and manage coupons
+- Configure transactional email templates and booking notifications
+- Build event pages with Gutenberg blocks, including booking, event details, upcoming events, featured events and programme PDF exports
 
-### Installation
+## Requirements
 
-> :warning: **The plugins ist not listed in Wordpress' plugin archive** since there are some extra steps to make it work. This may or may not change in the future, depending on further development and usage.
+- WordPress 7.1 or newer
+- PHP 8.5 or newer
+- PHP extensions: `curl` and `gd`
 
-To make the plugin work, you need composer. You can either clone the plugin into your plugin directory, cd into it and run `composer install`. Or use GitHub's actions (see examples in this project's `.github` folder)
+For a development checkout, Composer and Node.js/npm are also required.
 
-If you start developping, you need npm.
+## Installation
 
--   `npm install` Install the required packages
--   `npm run build` Compile a compressed version for production
--   `npm start` Compile an uncompressed version and watch for changes
-    With these commands, ALL Javascript and CSS files are generated and put into `./includes`
+### Production
 
-### Versions
+Install a release archive in WordPress as you would any other plugin, or place the release files in `wp-content/plugins/ctx-events/`. Activate **Events** in the WordPress plugins screen.
 
-#### 6.8
+Release builds must include both `vendor/` and `build/`; they contain the PHP dependencies and compiled editor/admin assets.
 
--   Lots of old code removed
+### Development
 
-#### 6.7
+Clone the repository into the WordPress plugins directory, then install and build its dependencies:
 
--   Bookings are now processed through a REST API
--   Bookings can be edited in the backend
--   Ticket Editor is included in the Block Editor
+```bash
+composer install
+npm install
+npm run build
+```
 
-#### 6.6
+For frontend development, run the asset watcher in a separate terminal:
 
--   Details-Block added
--   Updated all Blocks to API 2.0
+```bash
+npm start
+```
 
-#### 6.5
+## Getting started
 
--   Form Editor completely recoded into Gutenberg
--   Refactoring and redesigning of the booking frontend
--   More cleanup work
+1. Open **Events → Settings** and configure the general and payment settings needed for your site.
+2. Add payment gateways under **Events → Gateways** when bookings require payment.
+3. Create locations, people, forms or coupons as needed.
+4. Create an event from **Events → New Event**, set its dates, booking settings and tickets, then publish it.
+5. Add the **Event Booking** block and the desired event-detail blocks to the event template or page.
 
-#### 6.4
+Recurring programmes are created under **Events → Recurring Events**. Individual occurrences can be cancelled or detached into regular events when they need their own details or booking settings.
 
--   removed all old layouting options
--   booking app rewritten for better user experience and performance
+## Gutenberg blocks
 
-#### 6.3
+The plugin registers blocks from the `ctx-events` namespace. The main public blocks are:
 
--   PDF Generator added
--   New List view for events
--   Whole event is now displayed with block, no layout used anymore
+- **Event Booking** — lets visitors select tickets, enter registration data and pay.
+- **Event Details** and its detail blocks — show date, time, location, contact person, prices, audience, availability and booking deadline.
+- **Upcoming Events** and **Events Table** — list forthcoming events.
+- **Featured Event** — compose a highlighted event section from title, image, schedule, location, excerpt and button blocks.
+- **Program PDF Export** — offers weekly, monthly or yearly programme PDFs.
 
-#### 6.2
+The editor also includes blocks for location, person and coupon metadata, plus the form-field blocks used by custom forms.
 
--   Over 200 unused options removed
+## Development commands
 
-For previous versions see the original authors blog: https://wp-events-plugin.com/blog/
+```bash
+composer test                 # Run the Pest test suite
+composer analyse              # Run PHPStan
+npm run ts:generate           # Generate TypeScript types from PHP resources
+npm run build                 # Create production assets
+npm start                     # Watch and rebuild development assets
+npm run test:e2e              # Run Playwright end-to-end tests
+```
+
+## Architecture
+
+The PHP code follows a domain-oriented, hexagonal structure:
+
+- `includes/*/Domain` contains business entities, value objects and repository contracts.
+- `includes/*/Application` contains use cases and application services.
+- `includes/*/Infrastructure` contains WordPress persistence, integrations and framework adapters.
+- `includes/*/Presentation` exposes REST endpoints and response resources.
+- `src/` contains the TypeScript/React editor, admin and public booking applications.
+
+Further notes are available in [docs/architecture.md](docs/architecture.md), [docs/domain/event.md](docs/domain/event.md) and [docs/booking.md](docs/booking.md).
+
+## License
+
+GPL-3.0. See the plugin header for the canonical license declaration.
