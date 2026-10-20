@@ -64,7 +64,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 		$personId = $recurringOccurrence->recurringEvent->personId?->toInt();
 
 		return new EventCalendarEntry(
-			id: $seriesId,
+			id: (string) $recurringOccurrence->occurrence->key,
 			title: $recurringOccurrence->recurringEvent->name,
 			description: $recurringOccurrence->recurringEvent->description ?? '',
 			startDate: $recurringOccurrence->occurrence->startsAt,
@@ -73,6 +73,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			color: $this->color($this->categoryIds($seriesId)),
 			locationName: $locationId !== null ? get_the_title($locationId) : null,
 			personName: $personId !== null ? get_the_title($personId) : null,
+			recurrenceSeriesId: $seriesId,
 		);
 	}
 
@@ -87,7 +88,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 		$categoryIds = $this->categoryIds($post->ID);
 
 		return new EventCalendarEntry(
-			id: $post->ID,
+			id: (string) $post->ID,
 			title: $snapshot->getString('post_title'),
 			description: $snapshot->getString('post_excerpt') ?? '',
 			startDate: $snapshot->getDateTime(EventMeta::EVENT_START, $timezone) ?: new \DateTimeImmutable('1970-01-01 00:00:00', $timezone),

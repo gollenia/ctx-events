@@ -12,7 +12,7 @@ final readonly class EventCalendarEntryResource
 	 * @param array<int> $categoryIds
 	 */
 	public function __construct(
-		public int $id,
+		public string $id,
 		public string $title,
 		public string $description,
 		public string $startDate,
@@ -21,6 +21,7 @@ final readonly class EventCalendarEntryResource
 		public ?string $color,
 		public ?string $locationName,
 		public ?string $personName,
+		public ?int $recurrenceSeriesId,
 	) {
 	}
 
@@ -36,9 +37,11 @@ final readonly class EventCalendarEntryResource
 			color: $entry->color,
 			locationName: $entry->locationName,
 			personName: $entry->personName,
+			recurrenceSeriesId: $entry->recurrenceSeriesId,
 		);
 	}
 
+	/** @return array<string, mixed> */
 	public function toArray(): array
 	{
 		return [
@@ -51,6 +54,7 @@ final readonly class EventCalendarEntryResource
 			'color' => $this->color,
 			'locationName' => $this->locationName,
 			'personName' => $this->personName,
+			'recurrenceSeriesId' => $this->recurrenceSeriesId,
 		];
 	}
 }

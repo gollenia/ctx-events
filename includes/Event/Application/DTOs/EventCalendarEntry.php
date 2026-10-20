@@ -10,7 +10,7 @@ final readonly class EventCalendarEntry
 	 * @param array<int> $categoryIds
 	 */
 	public function __construct(
-		public int $id,
+		public string $id,
 		public string $title,
 		public string $description,
 		public \DateTimeImmutable $startDate,
@@ -19,6 +19,7 @@ final readonly class EventCalendarEntry
 		public ?string $color,
 		public ?string $locationName,
 		public ?string $personName,
+		public ?int $recurrenceSeriesId = null,
 	) {
 	}
 }
