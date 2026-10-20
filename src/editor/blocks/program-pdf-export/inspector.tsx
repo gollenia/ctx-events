@@ -10,7 +10,6 @@ import {
 import { __ } from '@wordpress/i18n';
 
 type MonthlyPdfExportAttributes = {
-	title: string;
 	buttonText: string;
 	exportMode: 'week' | 'month' | 'year';
 	periodsAhead: number;
@@ -44,11 +43,6 @@ export default function Inspector({
 	return (
 		<InspectorControls>
 			<PanelBody title={__('Content', 'ctx-events')} initialOpen={true}>
-				<TextControl
-					label={__('Title', 'ctx-events')}
-					value={attributes.title}
-					onChange={(value) => setAttributes({ title: value })}
-				/>
 				<TextControl
 					label={__('Button text', 'ctx-events')}
 					value={attributes.buttonText}

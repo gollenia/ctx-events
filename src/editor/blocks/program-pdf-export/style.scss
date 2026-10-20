@@ -42,3 +42,18 @@
 		outline-offset: 2px;
 	}
 }
+
+.ctx-program-pdf-export.has-background .ctx-program-pdf-export__button {
+	background-color: inherit;
+	border-color: inherit;
+
+	&:hover,
+	&:focus-visible {
+		background-color: inherit;
+		border-color: inherit;
+	}
+}
+
+.ctx-program-pdf-export.has-text-color .ctx-program-pdf-export__button {
+	color: inherit;
+}

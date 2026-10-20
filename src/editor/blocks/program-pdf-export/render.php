@@ -37,9 +37,6 @@ $wrapper_attributes = get_block_wrapper_attributes([
 ?>
 
 <div <?php echo $wrapper_attributes; ?>>
-	<?php if ($title !== '') : ?>
-		<div class="ctx-program-pdf-export__title"><?php echo esc_html($title); ?></div>
-	<?php endif; ?>
 
 	<form class="ctx-program-pdf-export__form" action="<?php echo esc_url($action); ?>" method="get">
 		<label class="screen-reader-text" for="<?php echo esc_attr($field_id); ?>">

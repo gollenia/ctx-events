@@ -6,10 +6,6 @@
 	"apiVersion": 3,
 	"category": "widgets",
 	"attributes": {
-		"title": {
-			"type": "string",
-			"default": "Monatsprogramm als PDF"
-		},
 		"buttonText": {
 			"type": "string",
 			"default": "PDF herunterladen"
@@ -49,6 +45,10 @@
 	},
 	"supports": {
 		"anchor": true,
+		"color": {
+			"background": true,
+			"text": true
+		},
 		"spacing": {
 			"margin": ["top", "bottom"],
 			"padding": ["top", "bottom", "left", "right"],
