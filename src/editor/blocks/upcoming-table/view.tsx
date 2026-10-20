@@ -1,5 +1,6 @@
 import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
+import { ensureIcons } from '../../../shared/icons/ensureIcons';
 import Upcoming from '../upcoming/view/Upcoming';
 import '../upcoming/view/style.scss';
 import type { UpcomingAttributes } from '../upcoming/view/types';
@@ -12,7 +13,9 @@ function UpcomingTable({ attributes }: { attributes: TableAttributes }) {
 	);
 }
 
-domReady(() => {
+domReady(async () => {
+	await ensureIcons(['date']);
+
 	Array.from(document.getElementsByClassName('events-upcoming-table-block')).forEach(
 		(element) => {
 			const rawAttributes = element.getAttribute('data-attributes');

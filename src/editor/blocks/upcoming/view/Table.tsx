@@ -73,8 +73,7 @@ function TableView({
 	},
 	events,
 }: UpcomingViewProps) {
-	const columns = tableColumns ?? [
-		...(tableShowCalendarIcon ? ['date'] : []),
+	const configuredColumns = tableColumns ?? [
 		'title',
 		...(showCategory ? ['category'] : []),
 		'description',
@@ -83,6 +82,9 @@ function TableView({
 		...(showLocation ? ['location'] : []),
 		...(showBookedUp ? ['booking'] : []),
 	];
+	const columns = tableShowCalendarIcon && !configuredColumns.includes('date')
+		? ['date', ...configuredColumns]
+		: configuredColumns;
 	const className = [
 		'ctx-upcoming-table',
 		tableShowDividers ? '' : 'ctx-upcoming-table--no-dividers',
@@ -107,6 +109,12 @@ function TableView({
 			case 'date':
 				return (
 					<td className="ctx-upcoming-table__date">
+						{tableShowCalendarIcon && (
+							<EventIcon
+								name="date"
+								className="ctx-upcoming-table__calendar-icon"
+							/>
+						)}
 						<div className="ctx-upcoming-date">
 							<span className="ctx-upcoming-date__day--numeric">
 								{formatDate(item.start, { day: 'numeric' })}

@@ -13,8 +13,9 @@ $periods_ahead = isset($attributes['periodsAhead'])
 	? (int) $attributes['periodsAhead']
 	: (isset($attributes['monthsAhead']) ? (int) $attributes['monthsAhead'] : 12);
 $periods_ahead = max(1, min(24, $periods_ahead));
+$selectable_periods = $export_mode === 'month' ? 3 : $periods_ahead;
 $selected_offset = isset($attributes['selectedOffset']) ? (int) $attributes['selectedOffset'] : 0;
-$selected_offset = max(0, min($periods_ahead - 1, $selected_offset));
+$selected_offset = max(0, min($selectable_periods - 1, $selected_offset));
 $show_date_selection = !array_key_exists('showDateSelection', $attributes)
 	|| filter_var($attributes['showDateSelection'], FILTER_VALIDATE_BOOLEAN);
 $show_empty_days = array_key_exists('showEmptyDays', $attributes)
@@ -54,7 +55,7 @@ $wrapper_attributes = get_block_wrapper_attributes([
 			name="offset"
 			id="<?php echo esc_attr($field_id); ?>"
 		>
-			<?php for ($offset = 0; $offset < $periods_ahead; $offset++) : ?>
+			<?php for ($offset = 0; $offset < $selectable_periods; $offset++) : ?>
 				<?php
 				$date = new DateTimeImmutable('now', wp_timezone());
 				$label = '';
@@ -76,7 +77,11 @@ $wrapper_attributes = get_block_wrapper_attributes([
 					if ($offset > 0) {
 						$date = $date->modify(sprintf('+%d months', $offset));
 					}
-					$label = wp_date('F Y', $date->getTimestamp());
+					$label = match ($offset) {
+						0 => __('This month', 'ctx-events'),
+						1 => __('Next month', 'ctx-events'),
+						default => __('The month after next', 'ctx-events'),
+					};
 				}
 				?>
 				<option value="<?php echo esc_attr((string) $offset); ?>" <?php selected($offset, $selected_offset); ?>>
