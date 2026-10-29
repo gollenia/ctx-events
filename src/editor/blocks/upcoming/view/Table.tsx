@@ -110,11 +110,8 @@ function TableView({
 				return (
 					<td className="ctx-upcoming-table__date">
 						{tableShowCalendarIcon && (
-							<EventIcon
-								name="date"
-								className="ctx-upcoming-table__calendar-icon"
-							/>
-						)}
+							
+						
 						<div className="ctx-upcoming-date">
 							<span className="ctx-upcoming-date__day--numeric">
 								{formatDate(item.start, { day: 'numeric' })}
@@ -135,6 +132,7 @@ function TableView({
 								{formatDate(item.start, { month: 'short' })}
 							</span>
 						</div>
+						)}
 					</td>
 				);
 			case 'title':
