@@ -96,7 +96,10 @@ export const useFetchEvents = (view: DataViewConfig) => {
 		};
 
 		loadData();
-	}, [urlParams]);
+	// Actions increment refreshKey after a mutation. It is deliberately not part
+	// of the request parameters, but must retrigger this effect so that a
+	// cancelled event disappears from the current list immediately.
+	}, [urlParams, view.refreshKey]);
 
 	return { events, loading, statusItems, pagination, markDetached, removeOccurrence };
 };
