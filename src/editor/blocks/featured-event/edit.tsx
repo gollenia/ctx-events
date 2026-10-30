@@ -28,6 +28,9 @@ const ALLOWED_BLOCKS = [
 	'core/button',
 	'ctx-events/featured-image',
 	'ctx-events/featured-schedule',
+	'ctx-events/featured-title',
+	'ctx-events/featured-excerpt',
+	'ctx-events/featured-location',
 	'ctx-events/featured-button',
 ];
 
