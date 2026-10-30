@@ -10,7 +10,7 @@ test('provides all v1 communication presets', function () {
     $provider = new DefaultEmailTemplatePresetProvider();
     $presets = $provider->all();
 
-    expect($presets->count())->toBe(11);
+    expect($presets->count())->toBe(12);
     expect($provider->find(EmailTemplateKey::BOOKING_PENDING_MANUAL))->not->toBeNull();
     expect($provider->find(EmailTemplateKey::ADMIN_BOOKING_CREATED_ONLINE))->not->toBeNull();
 });
