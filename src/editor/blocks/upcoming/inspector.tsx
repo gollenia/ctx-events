@@ -24,12 +24,7 @@ type UpcomingAttributes = {
 	columnsMedium?: number;
 	columnsLarge?: number;
 	showImages: boolean;
-	view: 'mini' | 'list' | 'cards';
-	tableShowHeader: boolean;
-	tableShowDividers: boolean;
-	tableAlternatingRows: boolean;
-	tableHoverEffect: boolean;
-	tableShowCalendarIcon: boolean;
+	view: 'list' | 'cards';
 	scope: string;
 	showCategory: boolean;
 	showLocation: string;
@@ -64,7 +59,6 @@ type InspectorProps = {
 	locationList: ComboboxControlOption[];
 	tagNames: string[];
 	setAttributes: (attributes: Partial<UpcomingAttributes>) => void;
-	variant?: 'upcoming' | 'table';
 };
 
 const Inspector = (props: InspectorProps) => {
@@ -73,11 +67,6 @@ const Inspector = (props: InspectorProps) => {
 			limit,
 			showImages,
 			view,
-			tableShowHeader,
-			tableShowDividers,
-			tableAlternatingRows,
-			tableHoverEffect,
-			tableShowCalendarIcon,
 			scope,
 			showCategory,
 			showLocation,
@@ -103,7 +92,6 @@ const Inspector = (props: InspectorProps) => {
 		locationList,
 		tagNames,
 		setAttributes,
-		variant = 'upcoming',
 	} = props;
 
 	const [categoryQuery, setCategoryQuery] = useState('');
@@ -285,8 +273,7 @@ const Inspector = (props: InspectorProps) => {
 					}
 				/>
 			</PanelBody>
-			{variant === 'upcoming' && (
-				<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
+			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>
 				<label
 					className="components-base-control__label"
 					htmlFor="upcoming-style"
@@ -315,8 +302,7 @@ const Inspector = (props: InspectorProps) => {
 					checked={userStylePicker}
 					onChange={(value) => setAttributes({ userStylePicker: value })}
 				/>
-				</PanelBody>
-			)}
+			</PanelBody>
 			<PanelBody title={__('Event details', 'ctx-events')} initialOpen={true}>
 				<SelectControl
 					label={__('Location', 'ctx-events')}
@@ -389,40 +375,6 @@ const Inspector = (props: InspectorProps) => {
 					)}
 				/>
 			</PanelBody>
-			{variant === 'table' && (
-				<PanelBody title={__('Table options', 'ctx-events')} initialOpen={true}>
-					<CheckboxControl
-						label={__('Show table header', 'ctx-events')}
-						checked={tableShowHeader}
-						onChange={(value) => setAttributes({ tableShowHeader: value })}
-						__nextHasNoMarginBottom
-					/>
-					<CheckboxControl
-						label={__('Show row dividers', 'ctx-events')}
-						checked={tableShowDividers}
-						onChange={(value) => setAttributes({ tableShowDividers: value })}
-						__nextHasNoMarginBottom
-					/>
-					<CheckboxControl
-						label={__('Use alternating row colors', 'ctx-events')}
-						checked={tableAlternatingRows}
-						onChange={(value) => setAttributes({ tableAlternatingRows: value })}
-						__nextHasNoMarginBottom
-					/>
-					<CheckboxControl
-						label={__('Show hover effect', 'ctx-events')}
-						checked={tableHoverEffect}
-						onChange={(value) => setAttributes({ tableHoverEffect: value })}
-						__nextHasNoMarginBottom
-					/>
-					<CheckboxControl
-						label={__('Show calendar icon', 'ctx-events')}
-						checked={tableShowCalendarIcon}
-						onChange={(value) => setAttributes({ tableShowCalendarIcon: value })}
-						__nextHasNoMarginBottom
-					/>
-				</PanelBody>
-			)}
 		</InspectorControls>
 	);
 };

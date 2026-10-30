@@ -26,27 +26,6 @@ const icons = {
 		</SVG>
 	),
 
-	mini: (
-		<SVG
-			viewBox="0 0 32 32"
-			xmlns="http://www.w3.org/2000/svg"
-			fillRule="evenodd"
-			clipRule="evenodd"
-			strokeLinejoin="round"
-			strokeMiterlimit={2}
-		>
-			<Path
-				d="M30 24v2H2.429v-2h27.57zm0-10v2H2.429v-2h27.57zm0-10v2H2.429V4h27.57z"
-				fillRule="nonzero"
-			/>
-			<Path
-				fill="#919191"
-				fillRule="nonzero"
-				d="M2.429 7h24.043v3H2.429zM2.429 17h24.043v3H2.429zM2.429 27h24.043v3H2.429z"
-			/>
-		</SVG>
-	),
-
 	list: (
 		<SVG
 			xmlns="http://www.w3.org/2000/svg"

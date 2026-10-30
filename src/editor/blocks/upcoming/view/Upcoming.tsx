@@ -6,7 +6,6 @@ import EventIcon from '../../../../shared/icons/EventIcon';
 import CardView from './CardView';
 import ListView from './ListView';
 import { mapUpcomingEvent } from './mappers';
-import TableView from './Table';
 import './style.scss';
 import type {
 	UpcomingAttributes,
@@ -44,9 +43,7 @@ function Upcoming({ attributes }: Props) {
 		'LOADING',
 	);
 	const [filterMobileVisible, setFilterMobileVisible] = useState(false);
-	const [customView, setCustomView] = useState<'cards' | 'list' | ''>(
-		'',
-	);
+	const [customView, setCustomView] = useState<'cards' | 'list' | ''>('');
 	const [filter, setFilter] = useState<{
 		category: number;
 		tags: number[];
@@ -321,13 +318,6 @@ function Upcoming({ attributes }: Props) {
 			)}
 			{currentView === 'list' && (
 				<ListView
-					attributes={{ ...attributes, showPerson: personView }}
-					events={getFilteredEvents()}
-					status={status}
-				/>
-			)}
-			{currentView === 'mini' && (
-				<TableView
 					attributes={{ ...attributes, showPerson: personView }}
 					events={getFilteredEvents()}
 					status={status}

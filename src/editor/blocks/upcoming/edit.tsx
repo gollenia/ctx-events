@@ -11,11 +11,6 @@ import Inspector from './inspector';
 
 type UpcomingAttributes = {
 	textAlignment?: string;
-	tableShowHeader: boolean;
-	tableShowDividers: boolean;
-	tableAlternatingRows: boolean;
-	tableHoverEffect: boolean;
-	tableShowCalendarIcon: boolean;
 	selectedTags: number[];
 	selectedCategory: number[];
 	selectedLocation: number;
@@ -48,24 +43,20 @@ type LocationEntity = {
 type EditProps = {
 	attributes: UpcomingAttributes;
 	setAttributes: (attributes: Partial<UpcomingAttributes>) => void;
-	variant?: 'upcoming' | 'table';
 };
 
 const EditUpcoming = (props: EditProps) => {
 	const {
 		attributes: { textAlignment, selectedTags, altText },
 		setAttributes,
-		variant = 'upcoming',
 	} = props;
 
 	const availableCategories = useSelect((selectFn) => {
 		const { getEntityRecords } = selectFn(coreStore);
 		const query = { hide_empty: false, per_page: -1 };
-		const list = getEntityRecords(
-			'taxonomy',
-			'ctx-event-categories',
-			query,
-		) as TagEntity[] | null;
+		const list = getEntityRecords('taxonomy', 'ctx-event-categories', query) as
+			| TagEntity[]
+			| null;
 
 		if (!list) {
 			return [];
@@ -77,11 +68,9 @@ const EditUpcoming = (props: EditProps) => {
 	const tagList = useSelect((selectFn) => {
 		const { getEntityRecords } = selectFn(coreStore);
 		const query = { hide_empty: false, per_page: -1 };
-		return getEntityRecords(
-			'taxonomy',
-			'ctx-event-tags',
-			query,
-		) as TagEntity[] | null;
+		return getEntityRecords('taxonomy', 'ctx-event-tags', query) as
+			| TagEntity[]
+			| null;
 	}, []);
 
 	const locationList = useSelect(() => {
@@ -112,11 +101,7 @@ const EditUpcoming = (props: EditProps) => {
 		<>
 			<Inspector
 				{...props}
-				attributes={{
-					...props.attributes,
-					view: variant === 'table' ? 'mini' : props.attributes.view,
-				}}
-				variant={variant}
+				attributes={props.attributes}
 				tagList={tagList ?? []}
 				availableCategories={availableCategories}
 				tagsFieldValue={tagsFieldValue}

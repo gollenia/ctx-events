@@ -4,8 +4,7 @@ import metadata from './block.json';
 import Edit from './edit';
 import save from './save';
 import './editor.scss';
-import '../upcoming/editor.scss';
-import '../upcoming/style-index.scss';
+import './style-index.scss';
 
 registerBlockType(metadata.name, {
 	...metadata,
