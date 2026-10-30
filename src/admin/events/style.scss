@@ -2,6 +2,13 @@
 	color: var(--wp--preset--color-danger);
 }
 
+// The events table uses WordPress' fixed table layout. Reserve enough space
+// for the primary event information instead of distributing it evenly across
+// every visible column.
+.ctx-datatable .ctx-events-list__title {
+	width: 28%;
+}
+
 .ctx-booking-graph {
 	margin-top: 6px;
 	border-radius: 999px;

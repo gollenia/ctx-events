@@ -27,7 +27,7 @@ export const fields: Array<DataFieldConfig> = [
 		label: __('Name', 'ctx-events'),
 		id: 'title',
 		enableHiding: false,
-		className: 'column-title column-primary has-row-actions',
+		className: 'column-title column-primary has-row-actions ctx-events-list__title',
 		enableSorting: true,
 		render: (event: Event) => event.type === 'virtual' ? (
 			<strong style={{ color: '#787c82' }}>↻ {event.name || __('(No title)', 'ctx-events')}</strong>
