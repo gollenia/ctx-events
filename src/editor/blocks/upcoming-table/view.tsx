@@ -2,6 +2,7 @@ import domReady from '@wordpress/dom-ready';
 import { createRoot } from '@wordpress/element';
 import EventsTable from './view/EventsTable';
 import type { EventsTableAttributes } from './view/types';
+import './style-index.scss';
 
 domReady(() => {
 	Array.from(
