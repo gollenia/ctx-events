@@ -24,6 +24,12 @@
 		"test": "pest",
 		"analyse": "phpstan analyse -c phpstan.neon"
 	},
+	"extra": {
+		"wp-github-release": {
+			"plugin_file": "ctx-events.php",
+			"build_command": "npm run build"
+		}
+	},
 	"config": {
 		"platform": {
 			"php": "8.5"
@@ -46,7 +52,7 @@
 		"php-di/php-di": "^7.1.1",
 		"psr/clock": "^1.0.0",
 		"ueberdosis/tiptap-php": "^2.1",
-		"contexis/wp-github-updater": "^0.3.2"
+		"contexis/wp-github-updater": "^0.4.0"
 	},
 	"autoload": {
 		"psr-4": {

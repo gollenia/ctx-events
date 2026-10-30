@@ -13,6 +13,9 @@
 		"build": "wp-scripts build --config webpack.config.js",
 		"start": "npm run ts:generate && wp-scripts start --config webpack.config.js",
 		"test:e2e": "playwright test",
+		"release:patch": "vendor/bin/wp-github-release patch",
+		"release:minor": "vendor/bin/wp-github-release minor",
+		"release:major": "vendor/bin/wp-github-release major",
 		"make-pot": "wp i18n make-pot . languages/ctx-events.pot --slug=ctx-events --domain=ctx-events --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
 		"packages-update": "wp-scripts packages-update"
