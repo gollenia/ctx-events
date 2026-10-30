@@ -26,7 +26,11 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->categories)
             ->withDateOverlap($criteria->startDate, $criteria->endDate)
             ->orderBy(OrderBy::fromMeta(EventMeta::EVENT_START, Order::ASC))
-            ->addArg('posts_per_page', -1);
+			->addArgs([
+				'posts_per_page' => -1,
+				'no_found_rows' => true,
+			])
+			->withCache();
 
         if ($criteria->locationId !== null) {
             $builder = $builder->withMetaEquals(EventMeta::LOCATION_ID, (string) $criteria->locationId);
@@ -89,40 +93,10 @@ final class WpEventQueryBuilder extends WpQueryBuilder
             'compare' => '<=',
             'type' => 'DATETIME',
         ])->withMetaQuery([
-            'relation' => 'OR',
-            [
-                'key' => EventMeta::EVENT_END,
-                'value' => $startDate->format('Y-m-d 00:00:00'),
-                'compare' => '>=',
-                'type' => 'DATETIME',
-            ],
-            [
-                'relation' => 'AND',
-                [
-                    'key' => EventMeta::EVENT_END,
-                    'value' => '',
-                    'compare' => '=',
-                ],
-                [
-                    'key' => EventMeta::EVENT_START,
-                    'value' => $startDate->format('Y-m-d 00:00:00'),
-                    'compare' => '>=',
-                    'type' => 'DATETIME',
-                ],
-            ],
-            [
-                'relation' => 'AND',
-                [
-                    'key' => EventMeta::EVENT_END,
-                    'compare' => 'NOT EXISTS',
-                ],
-                [
-                    'key' => EventMeta::EVENT_START,
-                    'value' => $startDate->format('Y-m-d 00:00:00'),
-                    'compare' => '>=',
-                    'type' => 'DATETIME',
-                ],
-            ],
+			'key' => EventMeta::EVENT_END,
+			'value' => $startDate->format('Y-m-d 00:00:00'),
+			'compare' => '>=',
+			'type' => 'DATETIME',
         ]);
     }
 

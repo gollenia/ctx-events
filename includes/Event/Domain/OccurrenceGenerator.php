@@ -18,6 +18,9 @@ use Generator;
  */
 final class OccurrenceGenerator
 {
+	/** @var array<string, list<array{ts: int, offset: int}>|false> */
+	private array $transitionsByTimezoneAndYear = [];
+
     /**
      * @return Generator<int, Occurrence>
      */
@@ -143,10 +146,12 @@ final class OccurrenceGenerator
     private function laterAmbiguousInstant(DateTimeImmutable $localDateTime): DateTimeImmutable
     {
         $timezone = $localDateTime->getTimezone();
-        $transitions = $timezone->getTransitions(
-            $localDateTime->getTimestamp() - 86_400,
-            $localDateTime->getTimestamp() + 86_400,
-        );
+		$year = $localDateTime->format('Y');
+		$cacheKey = $timezone->getName() . ':' . $year;
+		$transitions = $this->transitionsByTimezoneAndYear[$cacheKey] ??= $timezone->getTransitions(
+			(new DateTimeImmutable("{$year}-01-01 00:00:00", $timezone))->getTimestamp(),
+			(new DateTimeImmutable(((int) $year + 1) . '-01-01 00:00:00', $timezone))->getTimestamp(),
+		);
 
         if ($transitions === false || count($transitions) < 2) {
             return $localDateTime;

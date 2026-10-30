@@ -23,19 +23,21 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 
 	public function search(EventCalendarCriteria $criteria): array
 	{
-		$query = WpEventQueryBuilder::fromCalendarCriteria($criteria)->toWpQuery();
-
-		$posts = array_filter(
-			$query->posts,
-			static fn (mixed $post): bool => $post instanceof \WP_Post,
+		$posts = CalendarTiming::measure('event-query', function () use ($criteria): array {
+			$query = WpEventQueryBuilder::fromCalendarCriteria($criteria)->toWpQuery();
+			return array_filter($query->posts, static fn (mixed $post): bool => $post instanceof \WP_Post);
+		});
+		$entries = CalendarTiming::measure(
+			'event-mapping',
+			fn (): array => array_map(fn (\WP_Post $post): EventCalendarEntry => $this->entryFromPost($post), $posts),
 		);
-
-		$entries = array_map(fn (\WP_Post $post): EventCalendarEntry => $this->entryFromPost($post), $posts);
-		foreach ($this->recurringOccurrences($criteria) as $occurrence) {
+		foreach (CalendarTiming::measure('recurrences', fn (): array => $this->recurringOccurrences($criteria)) as $occurrence) {
 			$entries[] = $this->entryFromRecurringOccurrence($occurrence);
 		}
 
-		usort($entries, static fn (EventCalendarEntry $left, EventCalendarEntry $right): int => $left->startDate <=> $right->startDate);
+		CalendarTiming::measure('sorting', function () use (&$entries): void {
+			usort($entries, static fn (EventCalendarEntry $left, EventCalendarEntry $right): int => $left->startDate <=> $right->startDate);
+		});
 
 		return $entries;
 	}
@@ -62,6 +64,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 		$seriesId = $recurringOccurrence->recurringEvent->id->toInt();
 		$locationId = $recurringOccurrence->recurringEvent->locationId?->toInt();
 		$personId = $recurringOccurrence->recurringEvent->personId?->toInt();
+		$categoryIds = $this->categoryIds($seriesId);
 
 		return new EventCalendarEntry(
 			id: (string) $recurringOccurrence->occurrence->key,
@@ -69,8 +72,8 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			description: $recurringOccurrence->recurringEvent->description ?? '',
 			startDate: $recurringOccurrence->occurrence->startsAt,
 			endDate: $recurringOccurrence->occurrence->endsAt,
-			categoryIds: $this->categoryIds($seriesId),
-			color: $this->color($this->categoryIds($seriesId)),
+			categoryIds: $categoryIds,
+			color: $this->color($categoryIds),
 			locationName: $locationId !== null ? get_the_title($locationId) : null,
 			personName: $personId !== null ? get_the_title($personId) : null,
 			recurrenceSeriesId: $seriesId,

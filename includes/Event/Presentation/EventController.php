@@ -6,6 +6,7 @@ namespace Contexis\Events\Event\Presentation;
 
 use Contexis\Events\Event\Application\DTOs\EventIncludeRequest;
 use Contexis\Events\Event\Application\UseCases\GetEventCalendar;
+use Contexis\Events\Event\Infrastructure\CalendarTiming;
 use Contexis\Events\Event\Application\UseCases\PrepareBooking;
 use Contexis\Events\Event\Application\UseCases\GetEvent;
 use Contexis\Events\Event\Application\UseCases\CancelEvent;
@@ -504,6 +505,8 @@ final class EventController implements RestController
 			return new \WP_REST_Response(['message' => 'Invalid date range'], 400);
 		}
 
+		$calendarStartedAt = microtime(true);
+		CalendarTiming::reset();
 		$entries = $this->getEventCalendar->execute(
 			startDate: $startDate,
 			endDate: $endDate,
@@ -511,12 +514,23 @@ final class EventController implements RestController
 			locationId: $request->has_param('location') ? (int) $request->get_param('location') : null,
 			personId: $request->has_param('person') ? (int) $request->get_param('person') : null,
 		);
+		$calendarDuration = (microtime(true) - $calendarStartedAt) * 1000;
 
+		$serializationStartedAt = microtime(true);
 		$result = array_map(
 			static fn ($entry) => EventCalendarEntryResource::fromDto($entry)->toArray(),
 			$entries,
 		);
+		$serializationDuration = (microtime(true) - $serializationStartedAt) * 1000;
 
-		return new \WP_REST_Response($result, 200);
+		$response = new \WP_REST_Response($result, 200);
+		$timings = [sprintf('calendar;dur=%.1f', $calendarDuration)];
+		foreach (CalendarTiming::durations() as $name => $duration) {
+			$timings[] = sprintf('%s;dur=%.1f', $name, $duration);
+		}
+		$timings[] = sprintf('serialization;dur=%.1f', $serializationDuration);
+		$response->header('Server-Timing', implode(', ', $timings));
+
+		return $response;
 	}
 }
