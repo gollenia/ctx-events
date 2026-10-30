@@ -47,6 +47,11 @@ const getFilterValue = (
 const getTimezone = (): string =>
 	Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
+const getCalendarLocale = (): string => {
+	const locale = getLocale();
+	return locale.toLowerCase().startsWith('de-') ? 'de-DE' : locale;
+};
+
 const isHexColor = (value: string | null): value is string =>
 	Boolean(value && /^#[\da-f]{6}$/i.test(value));
 
@@ -271,7 +276,7 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 			views: [createViewMonthGrid(), createViewWeek(), createViewYearGrid()],
 			defaultView: storedViewRef.current,
 			selectedDate,
-			locale: getLocale(),
+			locale: getCalendarLocale(),
 			timezone,
 			firstDayOfWeek: 1,
 			isResponsive: false,
