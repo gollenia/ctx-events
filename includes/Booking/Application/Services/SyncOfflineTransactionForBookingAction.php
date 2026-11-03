@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Application\Services;
 
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Payment\Domain\TransactionRepository;
+use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
 
 final class SyncOfflineTransactionForBookingAction
 {
@@ -15,13 +16,15 @@ final class SyncOfflineTransactionForBookingAction
 
     public function markPaid(Booking $booking): void
     {
-        $transaction = $this->getOfflineTransaction($booking);
-
-        if ($transaction === null) {
+        if ($booking->id === null) {
             return;
         }
 
-        $this->transactionRepository->save($transaction->complete());
+        foreach ($this->transactionRepository->findByBookingId($booking->id) as $transaction) {
+            if ($transaction->isOffline() && $transaction->status === TransactionStatus::PENDING) {
+                $this->transactionRepository->save($transaction->complete());
+            }
+        }
     }
 
     public function markCanceled(Booking $booking): void

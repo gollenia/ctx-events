@@ -6,6 +6,7 @@ namespace Tests\Support;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final class FakePaymentGateway implements PaymentGateway
 {
@@ -30,13 +31,18 @@ final class FakePaymentGateway implements PaymentGateway
     public function getSettingsSchema(): array { return []; }
     public function updateSettings(array $settings): void {}
 
-    public function initiatePayment(Booking $booking): Transaction
+    public function initiatePayment(Booking $booking, ?Price $amount = null): Transaction
     {
         if ($this->initiatePaymentUsing !== null) {
-            return ($this->initiatePaymentUsing)($booking);
+            return ($this->initiatePaymentUsing)($booking, $amount);
         }
 
         throw new \RuntimeException('Not implemented in FakePaymentGateway');
+    }
+
+    public function cancelPayment(Transaction $transaction): Transaction
+    {
+        return $transaction->cancel();
     }
 
     public function verifyPayment(Transaction $transaction): Transaction

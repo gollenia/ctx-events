@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\CancelBookingAttendeeRequest;
+use Contexis\Events\Booking\Application\Services\SynchronizeBookingPaymentBalance;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
 use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
@@ -30,6 +31,7 @@ final class CancelBookingAttendee
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
         private BookingEmailTrigger $bookingEmailTrigger,
+        private ?SynchronizeBookingPaymentBalance $paymentBalanceSynchronizer = null,
     ) {
     }
 
@@ -88,7 +90,7 @@ final class CancelBookingAttendee
                 actor: $this->currentActorProvider->current(),
                 timestamp: $this->clock->now(),
                 message: sprintf(
-                    __('Attendee %d cancelled'),
+                    'Attendee %d cancelled',
                     $request->attendeeId
                 ),
             ));
@@ -97,6 +99,7 @@ final class CancelBookingAttendee
 
         $bookingId = $updatedBooking->id;
         if ($bookingId === null || !$request->sendMail) {
+            $this->paymentBalanceSynchronizer?->execute($booking, $updatedBooking);
             return BookingEmailResult::empty();
         }
 
@@ -113,6 +116,8 @@ final class CancelBookingAttendee
         if ($logEntries !== $updatedBooking->logEntries) {
             $this->bookingRepository->update($updatedBooking->withLogEntries($logEntries));
         }
+
+        $this->paymentBalanceSynchronizer?->execute($booking, $updatedBooking);
 
         return $emailResult;
     }

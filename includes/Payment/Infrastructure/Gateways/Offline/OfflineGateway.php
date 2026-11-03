@@ -43,10 +43,12 @@ final class OfflineGateway implements PaymentGateway
 		return $transaction->complete();
 	}
 
+	/** @return list<array<string, mixed>> */
 	public function getSettingsSchema(): array {
 		return $this->config->getFormSchema();
 	}
 
+	/** @param array<string, mixed> $settings */
 	public function updateSettings(array $settings): void {
 		$this->config->updateFromArray($settings);
 	}
@@ -55,8 +57,9 @@ final class OfflineGateway implements PaymentGateway
 		$this->config->save();
 	}
 
-    public function initiatePayment(Booking $booking): Transaction
+    public function initiatePayment(Booking $booking, ?Price $amount = null): Transaction
     {
+        $amount ??= $booking->priceSummary->finalPrice;
         $paymentTermDays = $this->paymentTermInDays();
         $expiresAt = $paymentTermDays > 0
             ? new \DateTimeImmutable(sprintf('+%d days', $paymentTermDays))
@@ -64,11 +67,16 @@ final class OfflineGateway implements PaymentGateway
 
         return Transaction::forBankTransfer(
             bookingId: $booking->id,
-            amount: $booking->priceSummary->finalPrice,
+            amount: $amount,
             gateway: 'offline',
             bankData: $this->config->bankData,
             expiresAt: $expiresAt,
         );
+    }
+
+    public function cancelPayment(Transaction $transaction): Transaction
+    {
+        return $transaction->cancel();
     }
 
 	public function setEnabled(bool $active): void

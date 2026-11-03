@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\UpdateBookingRequest;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
+use Contexis\Events\Booking\Application\Services\SynchronizeBookingPaymentBalance;
 use Contexis\Events\Booking\Domain\Services\CalculateBookingPrice;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
@@ -27,6 +28,7 @@ final class UpdateBooking
         private CalculateBookingPrice $calculateBookingPrice,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
+        private ?SynchronizeBookingPaymentBalance $paymentBalanceSynchronizer = null,
     ) {}
 
     public function execute(UpdateBookingRequest $request): void
@@ -75,5 +77,6 @@ final class UpdateBooking
         ));
 
         $this->bookingRepository->update($updated);
+        $this->paymentBalanceSynchronizer?->execute($booking, $updated);
     }
 }

@@ -149,7 +149,7 @@ test('deny does not dispatch a mail signal when sendmail is false', function () 
     expect($bookingEmailTrigger->lastCall())->toBeNull();
 });
 
-test('canceling an offline booking cancels its transaction', function () {
+test('canceling a booking preserves an already paid offline transaction for external refunds', function () {
     $bookingRepository = FakeBookingRepository::empty();
     $bookingId = $bookingRepository->save(makeOfflineBooking(BookingStatus::APPROVED));
     $transactionRepository = FakeTransactionRepository::withTransactions(makeOfflineTransaction($bookingId)->complete());
@@ -157,7 +157,6 @@ test('canceling an offline booking cancels its transaction', function () {
 
     $useCase = new CancelBooking(
         repository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeActionClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,
@@ -166,7 +165,7 @@ test('canceling an offline booking cancels its transaction', function () {
     $useCase->execute(new BookingActionRequest('BOOK-1001', true));
 
     expect($transactionRepository->findLatestByBookingId($bookingId)?->status)
-        ->toBe(TransactionStatus::CANCELED)
+        ->toBe(TransactionStatus::PAID)
         ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CANCELLED);
 });
 
@@ -178,7 +177,6 @@ test('cancel does not dispatch a mail signal when sendmail is false', function (
 
     $useCase = new CancelBooking(
         repository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeActionClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,

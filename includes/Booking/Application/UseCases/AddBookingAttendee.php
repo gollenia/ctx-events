@@ -6,6 +6,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\DTOs\AddBookingAttendeeRequest;
 use Contexis\Events\Booking\Application\Services\AttendeeFactory;
+use Contexis\Events\Booking\Application\Services\SynchronizeBookingPaymentBalance;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
@@ -30,6 +31,7 @@ final class AddBookingAttendee
         private CalculateBookingPrice $calculateBookingPrice,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
+        private ?SynchronizeBookingPaymentBalance $paymentBalanceSynchronizer = null,
     ) {
     }
 
@@ -48,9 +50,6 @@ final class AddBookingAttendee
         }
 
         $ticketId = TicketId::from((string) ($request->attendee['ticketId'] ?? $request->attendee['ticket_id'] ?? ''));
-        if ($ticketId === null) {
-            throw new \DomainException('Invalid ticket.');
-        }
 
         $ticketBookingsMap = $this->bookingRepository->getTicketBookingsForEvent($event->id);
         $tickets = $this->getBookableTickets($event->tickets);
@@ -106,6 +105,7 @@ final class AddBookingAttendee
             ));
 
         $this->bookingRepository->update($updatedBooking);
+        $this->paymentBalanceSynchronizer?->execute($booking, $updatedBooking);
     }
 
     private function getBookableTickets(TicketCollection $tickets): TicketCollection

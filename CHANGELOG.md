@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.2.0 - 2026-11-03
+
+### Added
+
+- Create and automatically email additional payment links when a booking's
+  price increases after attendees are added or changed.
+
+### Changed
+
+- Treat a booking as paid only when the sum of its successful transactions
+  covers its current total, while retaining approved bookings during an open
+  additional-payment request.
+- Keep already paid transactions when bookings or attendees are cancelled;
+  refunds remain an explicit external process.
+
+### Fixed
+
+- Reconcile open payment requests with booking price reductions and cancel
+  obsolete Mollie payment requests instead of leaving them payable.
+
 ## 0.1.19 - 2026-11-03
 
 ### Changed

@@ -89,7 +89,6 @@ test('cancel bookings for event cancels matching bookings and sends mails when e
 
     $service = new CancelBookingsForEvent(
         bookingRepository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeEventBookingClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,
@@ -100,8 +99,8 @@ test('cancel bookings for event cancels matching bookings and sends mails when e
     expect($bookingRepository->find($approvedId)?->status)->toBe(BookingStatus::CANCELED)
         ->and($bookingRepository->find($pendingId)?->status)->toBe(BookingStatus::CANCELED)
         ->and($bookingRepository->find($alreadyCanceledId)?->status)->toBe(BookingStatus::CANCELED)
-        ->and($transactionRepository->findLatestByBookingId($approvedId)?->status)->toBe(TransactionStatus::CANCELED)
-        ->and($transactionRepository->findLatestByBookingId($pendingId)?->status)->toBe(TransactionStatus::CANCELED)
+        ->and($transactionRepository->findLatestByBookingId($approvedId)?->status)->toBe(TransactionStatus::PAID)
+        ->and($transactionRepository->findLatestByBookingId($pendingId)?->status)->toBe(TransactionStatus::PAID)
         ->and(count($bookingEmailTrigger->calls))->toBe(2)
         ->and($bookingEmailTrigger->calls[0]['trigger'])->toBe(EmailTrigger::BOOKING_CANCELLED)
         ->and($bookingEmailTrigger->calls[0]['cancellationReason'])->toBeNull()
@@ -117,7 +116,6 @@ test('cancel bookings for event skips email dispatch when disabled', function ()
 
     $service = new CancelBookingsForEvent(
         bookingRepository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeEventBookingClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,
@@ -138,7 +136,6 @@ test('cancel bookings for event forwards cancellation reason to mail trigger', f
 
     $service = new CancelBookingsForEvent(
         bookingRepository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeEventBookingClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,

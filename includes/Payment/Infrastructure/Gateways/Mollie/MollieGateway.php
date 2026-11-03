@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Presentation\BookingReturnLink;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment as MolliePayment;
@@ -70,9 +71,11 @@ final class MollieGateway implements PaymentGateway
         return $instance;
     }
 
-    public function initiatePayment(Booking $booking): Transaction
+    public function initiatePayment(Booking $booking, ?Price $amount = null): Transaction
     {
-        if ($booking->priceSummary->isFree()) {
+        $amount ??= $booking->priceSummary->finalPrice;
+
+        if ($amount->isFree()) {
             throw new \InvalidArgumentException('Cannot initiate payment for free booking.');
         }
 
@@ -81,10 +84,10 @@ final class MollieGateway implements PaymentGateway
         $molliePayment = $mollieInstance->payments->create(
             [
                 'amount' => [
-                    'currency' => $booking->priceSummary->finalPrice->currency->toString(),
+                    'currency' => $amount->currency->toString(),
                     // Mollie expects a fixed two-decimal string. Passing a float can
                     // lose trailing zeroes (or, worse, expose floating point artefacts).
-                    'value' => number_format($booking->priceSummary->finalPrice->toFloat(), 2, '.', ''),
+                    'value' => number_format($amount->toFloat(), 2, '.', ''),
                 ],
                 'description' => sprintf('Booking #%s', $reference),
                 'redirectUrl' => BookingReturnLink::forReference($reference),
@@ -103,13 +106,26 @@ final class MollieGateway implements PaymentGateway
 
         return Transaction::forPaymentService(
             bookingId: $booking->id,
-            amount: $booking->priceSummary->finalPrice,
+            amount: $amount,
             externalId: $molliePayment->id,
             checkoutUrl: Uri::parse($molliePayment->getCheckoutUrl()),
 			gatewayUrl: Uri::parse('https://www.mollie.com/dashboard/payments/' . $molliePayment->id),
             gateway: 'mollie',
             expiresAt: $this->resolveExpiresAt($molliePayment),
         );
+    }
+
+    public function cancelPayment(Transaction $transaction): Transaction
+    {
+        $externalId = (string) $transaction->externalId;
+        if ($externalId === '') {
+            throw new \DomainException('Cannot cancel Mollie payment without external ID.');
+        }
+
+        $payment = $this->getClient()->payments->cancel($externalId);
+
+        return $this->mapMolliePaymentToTransaction($transaction, $payment)
+            ->withExpiresAt($this->resolveExpiresAt($payment));
     }
 
     private function resolveExpiresAt(object $molliePayment): ?\DateTimeImmutable

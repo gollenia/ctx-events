@@ -23,6 +23,14 @@ use Contexis\Events\Communication\Application\Services\SendBookingEmails;
 use Contexis\Events\Event\Application\Contracts\EventCalendarExporter;
 use Contexis\Events\Event\Application\Service\IcalEventCalendarExporter;
 use Contexis\Events\Shared\Infrastructure\Wordpress\CurrentWordpressActorProvider;
+use Contexis\Events\Booking\Application\Services\SynchronizeBookingPaymentBalance;
+use Contexis\Events\Booking\Application\Services\CancelOpenBookingTransactions;
+use Contexis\Events\Booking\Application\Services\CancelBookingsForEvent;
+use Contexis\Events\Booking\Application\UseCases\AddBookingAttendee;
+use Contexis\Events\Booking\Application\UseCases\CancelBooking;
+use Contexis\Events\Booking\Application\UseCases\CancelBookingAttendee;
+use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
+use Contexis\Events\Booking\Application\UseCases\UpdateBookingAttendee;
 
 use function DI\autowire;
 use function DI\create;
@@ -57,6 +65,20 @@ return [
     EventCalendarExporter::class => autowire(IcalEventCalendarExporter::class),
     EmailSender::class => autowire(WpEmailSender::class),
     BookingEmailTrigger::class => autowire(SendBookingEmails::class),
+    SynchronizeBookingPaymentBalance::class => autowire(),
+    CancelOpenBookingTransactions::class => autowire(),
+    AddBookingAttendee::class => autowire()
+        ->constructorParameter('paymentBalanceSynchronizer', get(SynchronizeBookingPaymentBalance::class)),
+    CancelBookingAttendee::class => autowire()
+        ->constructorParameter('paymentBalanceSynchronizer', get(SynchronizeBookingPaymentBalance::class)),
+    UpdateBookingAttendee::class => autowire()
+        ->constructorParameter('paymentBalanceSynchronizer', get(SynchronizeBookingPaymentBalance::class)),
+    UpdateBooking::class => autowire()
+        ->constructorParameter('paymentBalanceSynchronizer', get(SynchronizeBookingPaymentBalance::class)),
+    CancelBooking::class => autowire()
+        ->constructorParameter('openTransactionCanceler', get(CancelOpenBookingTransactions::class)),
+    CancelBookingsForEvent::class => autowire()
+        ->constructorParameter('openTransactionCanceler', get(CancelOpenBookingTransactions::class)),
 
 	Database::class => autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpDatabase::class),
 	

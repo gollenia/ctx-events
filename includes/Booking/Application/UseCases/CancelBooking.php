@@ -6,7 +6,7 @@ namespace Contexis\Events\Booking\Application\UseCases;
 
 use Contexis\Events\Booking\Application\Contracts\BookingAction;
 use Contexis\Events\Booking\Application\DTOs\BookingActionRequest;
-use Contexis\Events\Booking\Application\Services\SyncOfflineTransactionForBookingAction;
+use Contexis\Events\Booking\Application\Services\CancelOpenBookingTransactions;
 use Contexis\Events\Communication\Application\BookingEmailWarnings;
 use Contexis\Events\Communication\Application\Contracts\BookingEmailTrigger;
 use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
@@ -23,10 +23,10 @@ final class CancelBooking implements BookingAction
 {
     public function __construct(
         private BookingRepository $repository,
-        private SyncOfflineTransactionForBookingAction $transactionSync,
         private Clock $clock,
         private CurrentActorProvider $currentActorProvider,
         private BookingEmailTrigger $bookingEmailTrigger,
+        private ?CancelOpenBookingTransactions $openTransactionCanceler = null,
     ) {
     }
 
@@ -55,7 +55,7 @@ final class CancelBooking implements BookingAction
             ));
 
         $this->repository->updateStatus($id, BookingStatus::CANCELED, $updatedBooking->logEntries);
-        $this->transactionSync->markCanceled($booking);
+        $this->openTransactionCanceler?->execute($booking);
 
         if (!$request->sendMail) {
             return BookingEmailResult::empty();

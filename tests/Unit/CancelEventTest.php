@@ -25,7 +25,6 @@ test('cancel event marks event as cancelled and cancels bookings with email opti
     $eventStatusRepository = Mockery::mock(EventStatusRepository::class);
     $cancelBookingsForEvent = new CancelBookingsForEvent(
         bookingRepository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction($transactionRepository),
         clock: makeEventBookingClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: $bookingEmailTrigger,
@@ -57,7 +56,6 @@ test('cancel event returns null without side effects when event does not exist',
     $eventStatusRepository = Mockery::mock(EventStatusRepository::class);
     $cancelBookingsForEvent = new CancelBookingsForEvent(
         bookingRepository: $bookingRepository,
-        transactionSync: new SyncOfflineTransactionForBookingAction(FakeTransactionRepository::empty()),
         clock: makeEventBookingClock(),
         currentActorProvider: new FakeCurrentActorProvider(),
         bookingEmailTrigger: new FakeBookingEmailTrigger(),
@@ -72,5 +70,5 @@ test('cancel event returns null without side effects when event does not exist',
     );
 
     expect($useCase->execute(999, true, ''))->toBeFalse()
-        ->and($bookingRepository->findByEventId(\Contexis\Events\Event\Domain\ValueObjects\EventId::from(999)))->toBe([]);
+        ->and($bookingRepository->findByEventId(\Contexis\Events\Event\Domain\ValueObjects\EventId::from(999)))->toBeEmpty();
 });

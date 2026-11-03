@@ -12,6 +12,7 @@ use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Payment\Domain\TransactionRepository;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
+use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final class ResolveBookingPaymentLink
 {
@@ -50,12 +51,17 @@ final class ResolveBookingPaymentLink
             throw new \DomainException("Payment gateway not found: {$gatewayId}");
         }
 
+        $outstandingAmount = $this->outstandingAmount($booking, $bookingId);
+        if ($outstandingAmount->isFree()) {
+            throw new \DomainException('Booking has already been paid.');
+        }
+
         $reusableTransaction = $this->findReusableTransaction($bookingId, $gateway);
         if ($reusableTransaction !== null) {
             return $reusableTransaction;
         }
 
-        $transaction = $gateway->initiatePayment($booking);
+        $transaction = $gateway->initiatePayment($booking, $outstandingAmount);
         if ($transaction->checkoutUrl === null) {
             throw new \DomainException('Payment gateway does not provide an online checkout URL.');
         }
@@ -91,10 +97,6 @@ final class ResolveBookingPaymentLink
                 }
             }
 
-            if ($resolved->status === TransactionStatus::PAID) {
-                throw new \DomainException('Booking has already been paid.');
-            }
-
             if ($resolved->status !== TransactionStatus::PENDING) {
                 continue;
             }
@@ -109,6 +111,21 @@ final class ResolveBookingPaymentLink
         }
 
         return null;
+    }
+
+    private function outstandingAmount(\Contexis\Events\Booking\Domain\Booking $booking, BookingId $bookingId): Price
+    {
+        $paidCents = 0;
+        foreach ($this->transactionRepository->findByBookingId($bookingId) as $transaction) {
+            if ($transaction->status === TransactionStatus::PAID) {
+                $paidCents += $transaction->amount->amountCents;
+            }
+        }
+
+        return Price::from(
+            max(0, $booking->priceSummary->finalPrice->amountCents - $paidCents),
+            $booking->priceSummary->finalPrice->currency,
+        );
     }
 
     private function transactionChanged(Transaction $original, Transaction $resolved): bool

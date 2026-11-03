@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Booking\Application\Services;
 
 use Contexis\Events\Booking\Domain\Enums\BookingLogEvent;
+use Contexis\Events\Booking\Application\Services\CancelOpenBookingTransactions;
 use Contexis\Events\Booking\Domain\Enums\BookingLogLevel;
 use Contexis\Events\Booking\Domain\BookingRepository;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
@@ -20,10 +21,10 @@ final class CancelBookingsForEvent
 {
 	public function __construct(
 		private BookingRepository $bookingRepository,
-		private SyncOfflineTransactionForBookingAction $transactionSync,
 		private Clock $clock,
 		private CurrentActorProvider $currentActorProvider,
 		private BookingEmailTrigger $bookingEmailTrigger,
+		private ?CancelOpenBookingTransactions $openTransactionCanceler = null,
 	) {
 	}
 
@@ -53,7 +54,7 @@ final class CancelBookingsForEvent
 				BookingStatus::CANCELED,
 				$updatedBooking->logEntries
 			);
-			$this->transactionSync->markCanceled($booking);
+			$this->openTransactionCanceler?->execute($booking);
 
 			if (!$sendMail) {
 				continue;

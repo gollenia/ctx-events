@@ -44,17 +44,7 @@ final class SyncBookingFromTransaction
             return;
         }
 
-        if (!$this->shouldAffectBooking($transaction, $booking->status)) {
-            return;
-        }
-
-        $targetStatus = match ($transaction->status) {
-            TransactionStatus::PAID => BookingStatus::APPROVED,
-            TransactionStatus::EXPIRED,
-            TransactionStatus::FAILED,
-            TransactionStatus::CANCELED => BookingStatus::EXPIRED,
-            default => null,
-        };
+        $targetStatus = $this->targetStatus($transaction, $booking->status, $booking->priceSummary->finalPrice->amountCents);
 
         if ($targetStatus === null || $booking->status === $targetStatus) {
             return;
@@ -100,37 +90,33 @@ final class SyncBookingFromTransaction
         }
     }
 
-    private function shouldAffectBooking(Transaction $transaction, BookingStatus $bookingStatus): bool
+    private function targetStatus(Transaction $transaction, BookingStatus $bookingStatus, int $requiredCents): ?BookingStatus
     {
-        if ($bookingStatus === BookingStatus::APPROVED && $transaction->status !== TransactionStatus::PAID) {
-            return false;
-        }
-
         $transactions = $this->transactionRepository->findByBookingId($transaction->bookingId)->toArray();
-        $relevantTransactions = array_values(array_filter(
-            $transactions,
-            static fn(Transaction $candidate): bool => self::isRelevantStatus($candidate->status)
-        ));
-
-        if ($relevantTransactions === []) {
-            return true;
+        $paidCents = 0;
+        $hasPending = false;
+        foreach ($transactions as $candidate) {
+            if ($candidate->status === TransactionStatus::PAID) {
+                $paidCents += $candidate->amount->amountCents;
+            }
+            if ($candidate->status === TransactionStatus::PENDING) {
+                $hasPending = true;
+            }
         }
 
-        $mostRecentRelevant = $relevantTransactions[0];
-
-        if ($mostRecentRelevant->externalId !== $transaction->externalId) {
-            return false;
+        if ($paidCents >= $requiredCents) {
+            return BookingStatus::APPROVED;
         }
 
-        if ($transaction->status !== TransactionStatus::PAID && $mostRecentRelevant->status === TransactionStatus::PAID) {
-            return false;
+        if ($bookingStatus === BookingStatus::APPROVED || $hasPending) {
+            return null;
         }
 
-        return true;
-    }
-
-    private static function isRelevantStatus(TransactionStatus $status): bool
-    {
-        return in_array($status, [TransactionStatus::PENDING, TransactionStatus::PAID], true);
+        return match ($transaction->status) {
+            TransactionStatus::EXPIRED,
+            TransactionStatus::FAILED,
+            TransactionStatus::CANCELED => BookingStatus::EXPIRED,
+            default => null,
+        };
     }
 }

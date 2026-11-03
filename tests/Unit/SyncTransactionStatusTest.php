@@ -37,7 +37,7 @@ function makeSyncClock(): Clock
     return $clock;
 }
 
-function makeOnlineSyncBooking(): Booking
+function makeSyncTransactionStatusBooking(): Booking
 {
     return new Booking(
         reference: BookingReference::fromString('BOOK-2001'),
@@ -65,7 +65,7 @@ function makeOnlineSyncBooking(): Booking
 
 test('paid online transaction approves the booking', function () {
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $bookingId = $bookingRepository->save(makeSyncTransactionStatusBooking());
     $transactionRepository = FakeTransactionRepository::withTransactions(
         Transaction::forPaymentService(
             bookingId: $bookingId,
@@ -104,9 +104,50 @@ test('paid online transaction approves the booking', function () {
         ->and($bookingEmailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CONFIRMED_ONLINE);
 });
 
+test('a partial payment leaves a booking pending until its total is covered', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $booking = makeSyncTransactionStatusBooking()->withPriceSummary(PriceSummary::fromValues(
+        Price::from(7000, Currency::fromCode('EUR')),
+        Price::from(0, Currency::fromCode('EUR')),
+        Price::from(0, Currency::fromCode('EUR')),
+    ));
+    $bookingId = $bookingRepository->save($booking);
+    $transactionRepository = FakeTransactionRepository::withTransactions(
+        Transaction::forPaymentService(
+            bookingId: $bookingId,
+            amount: Price::from(5000, Currency::fromCode('EUR')),
+            externalId: 'tr_partial_payment',
+            checkoutUrl: \Uri\Rfc3986\Uri::parse('https://checkout.example.test/partial'),
+            gateway: 'mollie',
+            gatewayUrl: \Uri\Rfc3986\Uri::parse('https://gateway.example.test/pay/tr_partial_payment'),
+        )
+    );
+    $gateway = new FakePaymentGateway(
+        id: 'mollie',
+        verifyPaymentUsing: static fn(Transaction $transaction): Transaction => $transaction->complete(),
+    );
+    $emails = new FakeBookingEmailTrigger();
+
+    (new SyncTransactionStatus(
+        transactionRepository: $transactionRepository,
+        gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
+        syncBookingFromTransaction: new SyncBookingFromTransaction(
+            $bookingRepository,
+            FakeEventRepository::one(FakeEventFactory::create(2)),
+            $transactionRepository,
+            makeSyncClock(),
+            $emails,
+        ),
+        currentActorProvider: new FakeCurrentActorProvider(),
+    ))->execute('tr_partial_payment');
+
+    expect($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::PENDING)
+        ->and($emails->lastCall())->toBeNull();
+});
+
 test('expired online transaction expires the booking', function () {
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $bookingId = $bookingRepository->save(makeSyncTransactionStatusBooking());
     $transactionRepository = FakeTransactionRepository::withTransactions(
         Transaction::forPaymentService(
             bookingId: $bookingId,
@@ -146,7 +187,7 @@ test('expired online transaction expires the booking', function () {
 
 test('manual sync can use an explicit actor', function () {
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $bookingId = $bookingRepository->save(makeSyncTransactionStatusBooking());
     $transactionRepository = FakeTransactionRepository::withTransactions(
         Transaction::forPaymentService(
             bookingId: $bookingId,
@@ -184,7 +225,7 @@ test('manual sync can use an explicit actor', function () {
 
 test('paid online transaction does not change booking when the event is already past', function () {
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $bookingId = $bookingRepository->save(makeSyncTransactionStatusBooking());
     $transactionRepository = FakeTransactionRepository::withTransactions(
         Transaction::forPaymentService(
             bookingId: $bookingId,
