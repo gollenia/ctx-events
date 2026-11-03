@@ -22,8 +22,8 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { TimeScope } from '../../../types/types';
-import type { CalendarEvent } from './types';
 import EventModalActions from './EventModalActions';
+import type { CalendarEvent } from './types';
 import { useStoredCalendarMonth } from './useStoredCalendarMonth';
 import {
 	type CalendarView,
@@ -265,6 +265,7 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 					event={event}
 					onCancelled={(eventId) => {
 						eventModal.close();
+						eventRequests.clear();
 						calendar.events.remove(eventId);
 					}}
 				/>,

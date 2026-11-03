@@ -1,6 +1,6 @@
 import type { DataTableAction } from '@events/datatable';
 import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import type { Event } from '../../types/types';
 import EventCancelConfirmModal from './EventCancelConfirmModal';
 import EventDuplicateModal from './EventDuplicateModal';
@@ -14,8 +14,7 @@ type EventDuplicateOptions = {
 	dates?: Array<string>;
 };
 
-const eventPostId = (event: Event): number | string =>
-	event.eventId ?? event.id;
+const eventPostId = (event: Event): number | string => event.id;
 
 const duplicateEvent = async (
 	event: Event,
@@ -49,7 +48,7 @@ export const createActions = (
 ): Array<DataTableAction> => [
 	{
 		id: 'edit_recurrence',
-		label: __('Bearbeiten', 'ctx-events'),
+		label: __('Edit', 'ctx-events'),
 		disabled: (event) =>
 			event.type !== 'virtual' ||
 			event.seriesId === null ||
@@ -63,7 +62,7 @@ export const createActions = (
 	},
 	{
 		id: 'detach_recurrence',
-		label: __('Ausgliedern', 'ctx-events'),
+		label: __('Detach', 'ctx-events'),
 		disabled: (event) =>
 			event.type !== 'virtual' ||
 			event.seriesId === null ||
@@ -136,12 +135,12 @@ export const createActions = (
 	},
 	{
 		id: 'cancel',
-		label: __('Cancel event', 'ctx-events'),
+		label: _x('Cancel', 'cancel event', 'ctx-events'),
 		delete: true,
 		RenderModal: EventCancelConfirmModal,
 		modalHeader: __('Cancel event', 'ctx-events'),
 		disabled: (event) => event.type === 'virtual',
-		confirmText: (event) =>
+		confirmText: (event: Event) =>
 			sprintf(
 				/* translators: %s: event title */
 				__('Do you really want to cancel "%s"?', 'ctx-events'),

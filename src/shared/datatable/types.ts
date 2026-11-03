@@ -106,6 +106,8 @@ export type DataTableAction = {
 	modalHeader?: string | (() => string);
 	modalSize?: 'small' | 'medium' | 'large';
 	modalFocusOnMount?: boolean | string;
+	confirmText?: string | ((item: any) => string);
+	confirmLabel?: string;
 	delete?: boolean | ((item: any) => boolean);
 };
 
