@@ -10,7 +10,11 @@ type SavePayload = {
 	registration: Record<string, unknown>;
 	attendees: BookingDetail['attendees'];
 	donation_cents: number;
-	gateway?: string;
+};
+
+export type SendPaymentLinkResponse = {
+	transaction: BookingTransactionResource;
+	warnings: string[];
 };
 
 export const useBookingDetail = (reference: string | null) => {
@@ -20,6 +24,7 @@ export const useBookingDetail = (reference: string | null) => {
 	const [saving, setSaving] = useState(false);
 	const [addingNote, setAddingNote] = useState(false);
 	const [resolvingPaymentLink, setResolvingPaymentLink] = useState(false);
+	const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
 	const [addingAttendee, setAddingAttendee] = useState(false);
 	const [updatingAttendee, setUpdatingAttendee] = useState(false);
 	const [cancellingAttendee, setCancellingAttendee] = useState(false);
@@ -62,7 +67,6 @@ export const useBookingDetail = (reference: string | null) => {
 						registration,
 						attendees: updated.attendees,
 						donation_cents: updated.price.donationAmount.amountCents ?? 0,
-						...(updated.gateway !== null ? { gateway: updated.gateway } : {}),
 					} satisfies SavePayload,
 				});
 		} finally {
@@ -134,6 +138,20 @@ export const useBookingDetail = (reference: string | null) => {
 		}
 	};
 
+	const sendPaymentLink = async (
+		reference: string,
+	): Promise<SendPaymentLinkResponse> => {
+		setSendingPaymentLink(true);
+		try {
+			return await apiFetch<SendPaymentLinkResponse>({
+				path: `/events/v3/bookings/${reference}/payment-link/send`,
+				method: 'POST',
+			});
+		} finally {
+			setSendingPaymentLink(false);
+		}
+	};
+
 	const cancelAttendee = async (
 		bookingReference: string,
 		attendeeId: number,
@@ -194,6 +212,8 @@ export const useBookingDetail = (reference: string | null) => {
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		sendingPaymentLink,
+		sendPaymentLink,
 		addingAttendee,
 		addAttendee,
 		updatingAttendee,

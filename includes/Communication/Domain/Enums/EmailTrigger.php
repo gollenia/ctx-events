@@ -8,6 +8,7 @@ enum EmailTrigger: string
 {
     case BOOKING_PENDING_MANUAL = 'booking_pending_manual';
     case BOOKING_CREATED_ONLINE = 'booking_created_online';
+    case BOOKING_PAYMENT_LINK = 'booking_payment_link';
     case BOOKING_CONFIRMED_MANUAL = 'booking_confirmed_manual';
     case BOOKING_CONFIRMED_ONLINE = 'booking_confirmed_online';
     case BOOKING_OFFLINE_EXPIRING = 'booking_offline_expiring';

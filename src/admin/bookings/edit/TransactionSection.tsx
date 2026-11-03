@@ -22,6 +22,11 @@ type Props = {
 	booking: BookingDetail;
 	isResolvingPaymentLink: boolean;
 	onResolvePaymentLink: () => Promise<BookingTransactionResource>;
+	isSendingPaymentLink: boolean;
+	onSendPaymentLink: () => Promise<{
+		transaction: BookingTransactionResource;
+		warnings: string[];
+	}>;
 };
 
 const renderValue = (value: string | null | undefined) =>
@@ -79,6 +84,8 @@ const TransactionSection = ({
 	booking,
 	isResolvingPaymentLink,
 	onResolvePaymentLink,
+	isSendingPaymentLink,
+	onSendPaymentLink,
 }: Props) => {
 	const [paymentLinkError, setPaymentLinkError] = useState<string | null>(null);
 	const [paymentLinkMessage, setPaymentLinkMessage] = useState<string | null>(
@@ -87,7 +94,8 @@ const TransactionSection = ({
 
 	const canResolvePaymentLink =
 		booking.gatewaySupportsCheckoutLink &&
-		booking.price.finalPrice.amountCents > 0;
+		booking.price.finalPrice.amountCents > 0 &&
+		booking.status === 1;
 
 	const handleResolvePaymentLink = async () => {
 		setPaymentLinkError(null);
@@ -116,21 +124,58 @@ const TransactionSection = ({
 		}
 	};
 
+	const handleSendPaymentLink = async () => {
+		setPaymentLinkError(null);
+		setPaymentLinkMessage(null);
+
+		try {
+			const { transaction, warnings } = await onSendPaymentLink();
+			if (!transaction.checkoutUrl) {
+				throw new Error(__('No checkout URL was returned.', 'ctx-events'));
+			}
+
+			if (warnings.length > 0) {
+				setPaymentLinkError(warnings.join(' '));
+				return;
+			}
+
+			setPaymentLinkMessage(__('Payment link sent.', 'ctx-events'));
+		} catch (error: unknown) {
+			setPaymentLinkError(
+				error instanceof Error
+					? error.message
+					: __('Could not send payment link.', 'ctx-events'),
+			);
+		}
+	};
+
 	return (
 		<Panel header={__('Transactions', 'ctx-events')}>
 			<PanelBody>
 				<div className="booking-edit__section-header">
 					{canResolvePaymentLink && (
-						<button
-							type="button"
-							className="components-button is-secondary"
-							onClick={handleResolvePaymentLink}
-							disabled={isResolvingPaymentLink}
-						>
-							{isResolvingPaymentLink
-								? __('Resolving…', 'ctx-events')
-								: __('Get payment link', 'ctx-events')}
-						</button>
+						<>
+							<button
+								type="button"
+								className="components-button is-secondary"
+								onClick={handleResolvePaymentLink}
+								disabled={isResolvingPaymentLink || isSendingPaymentLink}
+							>
+								{isResolvingPaymentLink
+									? __('Resolving…', 'ctx-events')
+									: __('Get payment link', 'ctx-events')}
+							</button>
+							<button
+								type="button"
+								className="components-button is-primary"
+								onClick={handleSendPaymentLink}
+								disabled={isResolvingPaymentLink || isSendingPaymentLink}
+							>
+								{isSendingPaymentLink
+									? __('Sending…', 'ctx-events')
+									: __('Send payment link', 'ctx-events')}
+							</button>
+						</>
 					)}
 				</div>
 

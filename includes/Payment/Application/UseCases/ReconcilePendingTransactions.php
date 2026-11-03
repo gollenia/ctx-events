@@ -49,14 +49,18 @@ final class ReconcilePendingTransactions
 
     private function resolveTransaction(Transaction $transaction, \DateTimeImmutable $now): Transaction
     {
-        if ($transaction->hasExpiredAt($now)) {
-            return $transaction->expire();
+        if ($transaction->isOffline()) {
+            return $transaction->hasExpiredAt($now)
+                ? $transaction->expire()
+                : $transaction;
         }
 
         $gateway = $this->gatewayRepository->find($transaction->gateway);
 
         if ($gateway === null) {
-            return $transaction;
+            return $transaction->hasExpiredAt($now)
+                ? $transaction->expire()
+                : $transaction;
         }
 
         return $gateway->verifyPayment($transaction);

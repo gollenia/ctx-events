@@ -42,6 +42,15 @@ final readonly class DefaultEmailTemplatePresetProvider implements EmailTemplate
                 body: __('Your booking was created and the online payment process has started.', 'ctx-events'),
             ),
             EmailTemplatePreset::create(
+                key: EmailTemplateKey::BOOKING_PAYMENT_LINK,
+                label: __('Payment link', 'ctx-events'),
+                description: __('Sent to participants when an administrator sends a payment link for an unpaid online booking.', 'ctx-events'),
+                trigger: EmailTrigger::BOOKING_PAYMENT_LINK,
+                target: EmailTarget::CUSTOMER,
+                subject: __('Complete your payment', 'ctx-events'),
+                body: __('Please use the payment link below to complete your booking.', 'ctx-events'),
+            ),
+            EmailTemplatePreset::create(
                 key: EmailTemplateKey::BOOKING_CONFIRMED_MANUAL,
                 label: __('Booking confirmed manually', 'ctx-events'),
                 description: __('Sent to participants when a booking was manually confirmed.', 'ctx-events'),

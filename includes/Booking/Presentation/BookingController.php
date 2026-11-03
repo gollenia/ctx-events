@@ -15,6 +15,7 @@ use Contexis\Events\Booking\Application\UseCases\EditBooking;
 use Contexis\Events\Booking\Application\UseCases\ExportEventBookings;
 use Contexis\Events\Booking\Application\UseCases\ListBookings;
 use Contexis\Events\Booking\Application\UseCases\ResolveBookingPaymentLink;
+use Contexis\Events\Booking\Application\UseCases\SendBookingPaymentLink;
 use Contexis\Events\Booking\Application\UseCases\UpdateBookingAttendee;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Presentation\Resources\BookingDetailResource;
@@ -22,6 +23,7 @@ use Contexis\Events\Booking\Presentation\Resources\BookingCreatedResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingListItemResource;
 use Contexis\Events\Booking\Presentation\Resources\BookingTransactionResource;
 use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Shuchkin\SimpleXLSXGen;
@@ -39,6 +41,7 @@ final class BookingController implements RestController
         private UpdateBooking $updateBooking,
         private ExportEventBookings $exportEventBookings,
         private ResolveBookingPaymentLink $resolveBookingPaymentLink,
+        private SendBookingPaymentLink $sendBookingPaymentLink,
     ) {
     }
 
@@ -147,6 +150,15 @@ final class BookingController implements RestController
             [
                 'methods'             => 'POST',
                 'callback'            => [$this, 'resolvePaymentLink'],
+                'permission_callback' => [$this, 'checkBookingAdminPermission'],
+                'args'                => $baseArgs,
+            ],
+        ]);
+
+        register_rest_route('events/v3', '/bookings/(?P<uuid>[A-Za-z0-9-]{6,64})/payment-link/send', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'sendPaymentLink'],
                 'permission_callback' => [$this, 'checkBookingAdminPermission'],
                 'args'                => $baseArgs,
             ],
@@ -287,6 +299,23 @@ final class BookingController implements RestController
                 ),
                 200,
             );
+        } catch (\DomainException $exception) {
+            return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
+        }
+    }
+
+    public function sendPaymentLink(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $response = $this->sendBookingPaymentLink->execute((string) $request->get_param('uuid'));
+
+            return new \WP_REST_Response([
+                'transaction' => BookingTransactionResource::fromTransaction(
+                    $response->transaction,
+                    (string) $request->get_param('uuid'),
+                ),
+                'warnings' => BookingEmailWarnings::messages($response->emailResult),
+            ], 200);
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 422);
         }

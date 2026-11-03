@@ -37,6 +37,10 @@ final class UpdateBooking
             throw new \DomainException('Booking not found.');
         }
 
+        if ($request->gateway !== null && $request->gateway !== $booking->gateway) {
+            throw new \DomainException('The payment gateway cannot be changed after a booking has been created.');
+        }
+
         $currency = $booking->priceSummary->finalPrice->currency;
         $event = $this->eventRepository->find($booking->eventId);
 
@@ -60,7 +64,7 @@ final class UpdateBooking
         $updated = $booking->update(
             new RegistrationData($request->registration),
             $attendees,
-            $request->gateway ?? '',
+            $booking->gateway,
             $booking->notes ?? BookingNotesCollection::empty(),
             $priceSummary,
         )->appendLogEntry(new LogEntry(

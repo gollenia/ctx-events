@@ -1,7 +1,7 @@
 import { Flex, FlexItem } from '@contexis/wp-react-form';
 import { CurrencyField } from '@events/adminfields';
 import { formatPrice } from '@events/i18n';
-import { Panel, PanelBody, SelectControl } from '@wordpress/components';
+import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { BookingDetail } from 'src/types/types';
 import { STATUS_LABELS } from '../constants';
@@ -12,10 +12,8 @@ type Props = {
 	booking: BookingDetail;
 	registration: BookingFormValues;
 	registrationFields: BookingDetail['bookingForm']['fields'];
-	availableGateways: Array<{ value: string; label: string }>;
 	isSaving: boolean;
 	onRegistrationChange: (key: string, value: unknown) => void;
-	onGatewayChange: (gateway: string | null) => void;
 	onDonationChange: (donationCents: number) => void;
 	onSave: () => void;
 };
@@ -24,10 +22,8 @@ const BookingInfoPanel = ({
 	booking,
 	registration,
 	registrationFields,
-	availableGateways,
 	isSaving,
 	onRegistrationChange,
-	onGatewayChange,
 	onDonationChange,
 	onSave,
 }: Props) => {
@@ -47,6 +43,10 @@ const BookingInfoPanel = ({
 						<strong>{__('Total', 'ctx-events')}:</strong>{' '}
 						{formatPrice(booking.price.finalPrice)}
 					</span>
+					<span>
+						<strong>{__('Payment method', 'ctx-events')}:</strong>{' '}
+						{booking.gateway ?? '—'}
+					</span>
 				</div>
 
 				<DynamicFieldsGrid
@@ -59,19 +59,6 @@ const BookingInfoPanel = ({
 				/>
 
 				<Flex gap="1rem" direction="column">
-					<FlexItem>
-						<SelectControl
-							label={__('Gateway', 'ctx-events')}
-							value={booking.gateway ?? ''}
-							options={[
-								{ value: '', label: __('— None —', 'ctx-events') },
-								...availableGateways,
-							]}
-							onChange={(value) => onGatewayChange(value || null)}
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-						/>
-					</FlexItem>
 					<FlexItem>
 						<CurrencyField
 							label={__('Donation', 'ctx-events')}

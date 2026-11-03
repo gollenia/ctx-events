@@ -20,7 +20,6 @@ import { useBookingDetail } from './useBookingDetail';
 
 type Props = {
 	reference: string | null;
-	availableGateways: Array<{ value: string; label: string }>;
 	onClose: () => void;
 	onSaved: () => void;
 };
@@ -36,7 +35,6 @@ const createRegistrationDraft = (
 
 const BookingEditModal = ({
 	reference,
-	availableGateways,
 	onClose,
 	onSaved,
 }: Props) => {
@@ -51,6 +49,8 @@ const BookingEditModal = ({
 		addNote,
 		resolvingPaymentLink,
 		resolvePaymentLink,
+		sendingPaymentLink,
+		sendPaymentLink,
 		addingAttendee,
 		addAttendee,
 		updatingAttendee,
@@ -188,7 +188,6 @@ const BookingEditModal = ({
 									booking={booking}
 									registration={registration}
 									registrationFields={registrationFields}
-									availableGateways={availableGateways}
 									isSaving={
 										saving ||
 										addingAttendee ||
@@ -197,7 +196,6 @@ const BookingEditModal = ({
 										cancellingBooking
 									}
 									onRegistrationChange={patchRegistration}
-									onGatewayChange={(gateway) => patch({ gateway })}
 									onDonationChange={(donationCents) =>
 										patchBookingPrice(booking, {
 											price: {
@@ -314,6 +312,7 @@ const BookingEditModal = ({
 								<TransactionSection
 									booking={booking}
 									isResolvingPaymentLink={resolvingPaymentLink}
+									isSendingPaymentLink={sendingPaymentLink}
 									onResolvePaymentLink={async () => {
 										const transaction = await resolvePaymentLink(
 											booking.reference,
@@ -326,6 +325,17 @@ const BookingEditModal = ({
 										});
 
 										return transaction;
+									}}
+									onSendPaymentLink={async () => {
+										const response = await sendPaymentLink(booking.reference);
+										patch({
+											transactions: mergeTransaction(
+												booking.transactions,
+												response.transaction,
+											),
+										});
+
+										return response;
 									}}
 								/>
 

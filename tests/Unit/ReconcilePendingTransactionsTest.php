@@ -136,7 +136,12 @@ test('reconciliation expires offline transactions that passed their deadline and
     $useCase = new ReconcilePendingTransactions(
         findReconcilableTransactions: new FakeReconcilableTransactionFinder([$transaction]),
         transactionRepository: $transactionRepository,
-        gatewayRepository: FakeGatewayRepository::empty(),
+        gatewayRepository: FakeGatewayRepository::withGateways([
+            new FakePaymentGateway(
+                id: 'offline',
+                verifyPaymentUsing: static fn() => throw new RuntimeException('Offline transactions must not be verified automatically'),
+            ),
+        ]),
         syncBookingFromTransaction: new SyncBookingFromTransaction(
             $bookingRepository,
             FakeEventRepository::one(FakeEventFactory::create(1)),
@@ -190,6 +195,51 @@ test('reconciliation expires online transactions via expiresAt and expires the b
     expect($useCase->execute())->toBe(1)
         ->and($transactionRepository->findByExternalId('tr_reconcile_1')?->status)->toBe(TransactionStatus::EXPIRED)
         ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::EXPIRED);
+});
+
+test('reconciliation verifies an expired online transaction before expiring it locally', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(makeOnlineSyncBooking());
+    $transaction = Transaction::forPaymentService(
+        bookingId: $bookingId,
+        amount: Price::from(5000, Currency::fromCode('EUR')),
+        externalId: 'tr_reconcile_paid_after_expiry',
+        checkoutUrl: \Uri\Rfc3986\Uri::parse('https://checkout.example.test/pay'),
+        gateway: 'mollie',
+        gatewayUrl: \Uri\Rfc3986\Uri::parse('https://gateway.example.test/pay/tr_reconcile_paid_after_expiry'),
+        expiresAt: new DateTimeImmutable('2026-03-16 11:45:00'),
+    );
+    $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $bookingEmailTrigger = new FakeBookingEmailTrigger();
+    $wasVerified = false;
+
+    $gateway = new FakePaymentGateway(
+        id: 'mollie',
+        verifyPaymentUsing: static function (Transaction $candidate) use (&$wasVerified): Transaction {
+            $wasVerified = true;
+
+            return $candidate->complete();
+        },
+    );
+
+    $useCase = new ReconcilePendingTransactions(
+        findReconcilableTransactions: new FakeReconcilableTransactionFinder([$transaction]),
+        transactionRepository: $transactionRepository,
+        gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
+        syncBookingFromTransaction: new SyncBookingFromTransaction(
+            $bookingRepository,
+            FakeEventRepository::one(FakeEventFactory::create(2)),
+            $transactionRepository,
+            makeReconcileClock(),
+            $bookingEmailTrigger,
+        ),
+        clock: makeReconcileClock(),
+    );
+
+    expect($useCase->execute())->toBe(1)
+        ->and($wasVerified)->toBeTrue()
+        ->and($transactionRepository->findByExternalId('tr_reconcile_paid_after_expiry')?->status)->toBe(TransactionStatus::PAID)
+        ->and($bookingRepository->find($bookingId)?->status)->toBe(BookingStatus::APPROVED);
 });
 
 test('reconciliation does not expire a booking when a newer pending transaction exists', function () {

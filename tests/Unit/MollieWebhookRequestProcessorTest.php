@@ -7,6 +7,13 @@ use Contexis\Events\Payment\Infrastructure\Gateways\Mollie\MollieWebhookRequestP
 use Contexis\Events\Payment\Infrastructure\Gateways\Mollie\MollieWebhookReferenceResolver;
 use Mollie\Api\Webhooks\SignatureValidator;
 
+if (!function_exists('__')) {
+    function __(string $text, string $domain = 'default'): string
+    {
+        return $text;
+    }
+}
+
 test('accepts signed next gen mollie payment webhook payloads', function () {
     $payload = json_encode([
         'resource' => 'event',
@@ -131,6 +138,28 @@ test('does not accept arbitrary values as Mollie classic payment ids', function 
 
     expect($resolution->externalId)->toBeNull()
         ->and($resolution->shouldIgnore)->toBeFalse();
+});
+
+test('requires an API key for the selected Mollie mode', function () {
+    $liveWithoutLiveKey = new MollieConfiguration([
+        'mode' => 'live',
+        'api_key_test' => 'test_key',
+        'webhook_signing_secret' => 'secret-123',
+    ]);
+    $testWithoutTestKey = new MollieConfiguration([
+        'mode' => 'test',
+        'api_key_live' => 'live_key',
+        'webhook_signing_secret' => 'secret-123',
+    ]);
+    $validTestConfiguration = new MollieConfiguration([
+        'mode' => 'test',
+        'api_key_test' => 'test_key',
+        'webhook_signing_secret' => 'secret-123',
+    ]);
+
+    expect($liveWithoutLiveKey->isValid())->toBeFalse()
+        ->and($testWithoutTestKey->isValid())->toBeFalse()
+        ->and($validTestConfiguration->isValid())->toBeTrue();
 });
 
 function configuredMollieWebhookConfiguration(string $secret): MollieConfiguration

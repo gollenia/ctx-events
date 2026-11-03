@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Booking\Application\UseCases\ResolveBookingPaymentLink;
+use Contexis\Events\Booking\Application\UseCases\SendBookingPaymentLink;
 use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
@@ -12,12 +13,14 @@ use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Shared\Domain\Contracts\Clock;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tests\Support\FakeBookingRepository;
+use Tests\Support\FakeBookingEmailTrigger;
 use Tests\Support\FakeGatewayRepository;
 use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeTransactionRepository;
@@ -171,4 +174,44 @@ test('throws when the booking already has a paid online transaction', function (
 
     expect(fn() => $useCase->execute($booking->reference->toString()))
         ->toThrow(DomainException::class, 'Booking has already been paid.');
+});
+
+test('sends a payment-link email for a pending online booking', function () {
+    $bookingRepository = FakeBookingRepository::empty();
+    $booking = makePaidOnlineBooking();
+    $bookingId = $bookingRepository->save($booking);
+    $booking = $booking->withId($bookingId);
+
+    $transaction = Transaction::forPaymentService(
+        bookingId: $bookingId,
+        amount: Price::from(5000, Currency::fromCode('EUR')),
+        externalId: 'tr_payment_link_email',
+        checkoutUrl: Uri::parse('https://checkout.example.test/pay'),
+        gateway: 'mollie',
+        gatewayUrl: Uri::parse('https://gateway.example.test/pay/tr_payment_link_email'),
+        expiresAt: new DateTimeImmutable('2026-03-20 12:00:00'),
+    );
+    $transactionRepository = FakeTransactionRepository::withTransactions($transaction);
+    $gateway = new FakePaymentGateway(
+        id: 'mollie',
+        verifyPaymentUsing: static fn(Transaction $candidate): Transaction => $candidate,
+    );
+    $resolvePaymentLink = new ResolveBookingPaymentLink(
+        bookingRepository: $bookingRepository,
+        transactionRepository: $transactionRepository,
+        gatewayRepository: FakeGatewayRepository::withGateways([$gateway]),
+        clock: makeResolvePaymentLinkClock(),
+    );
+    $emailTrigger = new FakeBookingEmailTrigger();
+    $useCase = new SendBookingPaymentLink(
+        bookingRepository: $bookingRepository,
+        resolveBookingPaymentLink: $resolvePaymentLink,
+        bookingEmailTrigger: $emailTrigger,
+    );
+
+    $response = $useCase->execute($booking->reference->toString());
+
+    expect($response->transaction->externalId)->toBe('tr_payment_link_email')
+        ->and($emailTrigger->lastCall()['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_PAYMENT_LINK)
+        ->and($emailTrigger->lastCall()['bookingId'] ?? null)->toBe($bookingId);
 });

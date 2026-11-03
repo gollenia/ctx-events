@@ -109,8 +109,8 @@ final class MollieConfiguration implements GatewayConfiguration
             [
                 'type' => 'html',
                 'label' => __('Mollie webhook URL', 'ctx-events'),
-                'help' => __('Copy this URL to your Next-gen webhook configuration in Mollie.', 'ctx-events'),
-                'value' => $this->webhookUrl(),
+                'help' => __('Copy this URL to your Next-gen webhook configuration in Mollie. It is also sent automatically as the Classic payment webhook URL.', 'ctx-events'),
+                'value' => $this->getWebhookUrl(),
             ],
             [
                 'name' => 'webhookSigningSecret',
@@ -157,15 +157,23 @@ final class MollieConfiguration implements GatewayConfiguration
 		$this->isEnabled = $active;
 	}
 
-    private function webhookUrl(): string
+    public function getWebhookUrl(): string
     {
         return (string) rest_url('events/v3/payments/webhooks/mollie');
     }
 
 	private function validateSettings(): void
 	{
-		if (!$this->apiKeyLive && !$this->apiKeyTest) {
-			throw new \DomainException(__("API keys are missing", 'ctx-events'), 400);
+		if (!in_array($this->mode, ['test', 'live'], true)) {
+			throw new \DomainException(__("Payment mode is invalid", 'ctx-events'), 400);
+		}
+
+        if ($this->getApiKey() === '') {
+            $message = $this->mode === 'live'
+                ? __("Live API key is missing", 'ctx-events')
+                : __("Test API key is missing", 'ctx-events');
+
+			throw new \DomainException($message, 400);
 		}
 
         if ($this->webhookSigningSecret === '') {

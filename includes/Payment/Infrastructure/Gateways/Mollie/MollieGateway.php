@@ -88,6 +88,9 @@ final class MollieGateway implements PaymentGateway
                 ],
                 'description' => sprintf('Booking #%s', $reference),
                 'redirectUrl' => BookingReturnLink::forReference($reference),
+                // Keep the classic payment webhook active as a reliable fallback
+                // alongside the configured, signed Next-gen webhook subscription.
+                'webhookUrl' => $this->config->getWebhookUrl(),
                 'locale' => get_locale(),
                 'metadata' => [
                     'booking_uuid' => $reference,

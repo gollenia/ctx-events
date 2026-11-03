@@ -293,7 +293,6 @@ const BookingsList = () => {
 
 			<BookingEditModal
 				reference={editingReference}
-				availableGateways={filterOptions.gateways}
 				onClose={() => setEditingReference(null)}
 				onSaved={refresh}
 			/>
