@@ -78,7 +78,7 @@ const EventDuplicateModal = ({
 				</>
 			}
 		>
-			<p>{__('Create one draft copy for each selected date.', 'ctx-events')}</p>
+			<p>{__('Create one published event for each selected date.', 'ctx-events')}</p>
 			{dates.map((date, index) => (
 				<div key={`date-${index}`} style={{ display: 'flex', gap: '8px' }}>
 					<TextControl

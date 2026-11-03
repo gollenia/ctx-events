@@ -45,6 +45,18 @@ class EventDuplicatePost extends DuplicatePost
 		return in_array($postType, [EventPost::POST_TYPE, RecurringEventPost::POST_TYPE], true);
 	}
 
+	/**
+	 * @return array<string, mixed>
+	 */
+	protected function buildPostData(\WP_Post $sourcePost): array
+	{
+		$data = parent::buildPostData($sourcePost);
+		$data['post_title'] = $sourcePost->post_title;
+		$data['post_status'] = 'publish';
+
+		return $data;
+	}
+
 	protected function shouldDuplicateMetaKey(string $metaKey): bool
 	{
 		if (!parent::shouldDuplicateMetaKey($metaKey)) {
