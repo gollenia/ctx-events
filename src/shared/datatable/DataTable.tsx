@@ -27,6 +27,7 @@ interface DataTableProps<T> {
 	actions?: Array<DataTableAction>;
 	paginationInfo?: DataPaginationInfo;
 	search?: boolean;
+	selectable?: boolean;
 	searchLabel?: string;
 	empty?: React.ComponentType;
 	availableStatusItems: Array<DataStatusItem>;
@@ -67,6 +68,7 @@ const DataTable: DataTableComponent = <T extends object>({
 	actions,
 	paginationInfo,
 	searchLabel,
+	selectable = false,
 	isLoading,
 	empty,
 	availableStatusItems,
@@ -89,6 +91,7 @@ const DataTable: DataTableComponent = <T extends object>({
 				actions,
 				paginationInfo,
 				searchLabel,
+				selectable,
 				isLoading,
 				empty,
 				availableStatusItems,

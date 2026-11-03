@@ -21,6 +21,7 @@ interface DataTableProps {
 	descriptionField?: string;
 	actions?: Array<DataTableAction>;
 	loading?: boolean;
+	selectable?: boolean;
 	variant?: string;
 	noItemsMessage?: string;
 }
@@ -32,6 +33,7 @@ const Table = ({
 	view,
 	actions,
 	loading,
+	selectable = false,
 	variant,
 	onChangeView,
 	noItemsMessage = __('No items found.', 'ctx-events'),
@@ -39,6 +41,7 @@ const Table = ({
 	console.log('Rendering Table with items', items);
 
 	const pluginStatusField = fieldConfig?.find((f) => f.isPluginStatus)?.id;
+	const columnCount = fields.length + (selectable ? 1 : 0);
 	console.log('Plugin status field:', pluginStatusField);
 
 	return (
@@ -54,13 +57,15 @@ const Table = ({
 				>
 					<thead>
 						<tr>
-							<td
-								id="cb"
-								style={{ width: '1%' }}
-								className="manage-field column-cb check-column field-cb check-field"
-							>
-								<input id="cb-select-all-1" type="checkbox" />
-							</td>
+							{selectable && (
+								<td
+									id="cb"
+									style={{ width: '1%' }}
+									className="manage-field column-cb check-column field-cb check-field"
+								>
+									<input id="cb-select-all-1" type="checkbox" />
+								</td>
+							)}
 
 							{fields.map((field, index) => {
 								const fieldData = fieldConfig?.find((f) => f.id === field);
@@ -114,7 +119,9 @@ const Table = ({
 					<tbody>
 						{!loading && items.length === 0 && (
 							<tr>
-								<td colSpan={fields.length}>{noItemsMessage}</td>
+								<td colSpan={columnCount}>
+									{noItemsMessage}
+								</td>
 							</tr>
 						)}
 						{items.map((item) => {
@@ -126,9 +133,11 @@ const Table = ({
 										pluginStatusField && item[pluginStatusField] ? 'active' : ''
 									}
 								>
-									<th className="check-column field-cb check-field" scope="row">
-										<input type="checkbox" />
-									</th>
+									{selectable && (
+										<th className="check-column field-cb check-field" scope="row">
+											<input type="checkbox" />
+										</th>
+									)}
 
 									{fields.map((field, index) => {
 										const fieldData: DataFieldConfig | false =
@@ -182,7 +191,7 @@ const Table = ({
 };
 
 const DataTableTable = () => {
-	const { data, fields, view, actions, onChangeView, isLoading, variant } =
+	const { data, fields, view, actions, onChangeView, isLoading, variant, selectable } =
 		useDataTable();
 	return (
 		<Table
@@ -194,6 +203,7 @@ const DataTableTable = () => {
 			variant={variant}
 			onChangeView={onChangeView}
 			loading={isLoading}
+			selectable={selectable}
 		/>
 	);
 };

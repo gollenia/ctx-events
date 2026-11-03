@@ -40,6 +40,22 @@ const levelClassMap: Record<BookingLogEntryResource['level'], string> = {
 	error: 'error',
 };
 
+const iconLevel = (entry: BookingLogEntryResource) => {
+	if (entry.eventType === 'created' || entry.eventType === 'approved') {
+		return 'success';
+	}
+
+	if (
+		entry.eventType === 'cancelled' ||
+		entry.eventType === 'attendee_cancelled' ||
+		entry.eventType === 'rejected'
+	) {
+		return 'error';
+	}
+
+	return levelClassMap[entry.level];
+};
+
 const LogIcon = ({
 	eventType,
 }: {
@@ -90,7 +106,7 @@ const LogEntriesSection = ({ booking }: Props) => {
 							>
 								<Flex align="flex-start" gap="1rem">
 									<FlexItem
-										className={`booking-edit__activity-icon booking-edit__activity-icon--${levelClassMap[entry.level]}`}
+										className={`booking-edit__activity-icon booking-edit__activity-icon--${iconLevel(entry)}`}
 										style={{ flex: '0 0 auto' }}
 									>
 										<LogIcon eventType={entry.eventType} />

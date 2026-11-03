@@ -1,5 +1,5 @@
 import { formatPrice } from '@events/i18n';
-import { ExternalLink, Notice, Panel, PanelBody } from '@wordpress/components';
+import { Notice, Panel, PanelBody } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type {
@@ -7,6 +7,9 @@ import type {
 	BookingTransactionResource,
 } from 'src/types/types';
 import StatusPill, { type StatusPillState } from '../../../shared/status-pill';
+import SmallDataTable, {
+	type SmallDataTableField,
+} from '../../../shared/small-data-table';
 
 const statusConfig: Record<number, { label: string; state: StatusPillState }> =
 	{
@@ -29,56 +32,11 @@ type Props = {
 	}>;
 };
 
-const renderValue = (value: string | null | undefined) =>
-	value && value.trim() !== '' ? value : '—';
-
-const formatIban = (iban: string) =>
-	iban
-		.replace(/\s/g, '')
-		.replace(/(.{4})/g, '$1 ')
-		.trim();
-
-const formatTransactionDate = (value: string) =>
-	new Date(value).toLocaleString(undefined, {
-		dateStyle: 'medium',
-		timeStyle: 'short',
-	});
-
-const TransactionDetails = ({
-	transaction,
-}: {
-	transaction: BookingTransactionResource;
-}) => {
-	const bankData = transaction.bankData;
-	const bankDetails = bankData
-		? [
-				[__('Account holder', 'ctx-events'), bankData.accountHolder],
-				[__('Bank', 'ctx-events'), bankData.bankName],
-				[__('IBAN', 'ctx-events'), formatIban(bankData.iban ?? '')],
-				[__('BIC', 'ctx-events'), bankData.bic],
-			].filter(([, value]) => Boolean(value))
-		: [];
-
-	if (!transaction.instructions && bankDetails.length === 0) {
-		return '—';
-	}
-
-	return (
-		<div className="booking-edit__transaction-details">
-			{transaction.instructions && <p>{transaction.instructions}</p>}
-			{bankDetails.length > 0 && (
-				<dl>
-					{bankDetails.map(([label, value]) => (
-						<div key={label}>
-							<dt>{label}</dt>
-							<dd>{value}</dd>
-						</div>
-					))}
-				</dl>
-			)}
-		</div>
-	);
-};
+const gatewayLabel = (gateway: string) =>
+	({
+		mollie: __('Mollie', 'ctx-events'),
+		offline: __('Offline', 'ctx-events'),
+	}[gateway] ?? gateway);
 
 const TransactionSection = ({
 	booking,
@@ -96,6 +54,38 @@ const TransactionSection = ({
 		booking.gatewaySupportsCheckoutLink &&
 		booking.price.finalPrice.amountCents > 0 &&
 		booking.status === 1;
+	const transactionFields: SmallDataTableField<BookingTransactionResource>[] = [
+		{
+			id: 'amount',
+			label: __('Amount', 'ctx-events'),
+			render: (transaction) => formatPrice(transaction.amount),
+		},
+		{
+			id: 'status',
+			label: __('Status', 'ctx-events'),
+			render: (transaction) => {
+				const status = statusConfig[transaction.status] ?? {
+					label: String(transaction.status),
+					state: 'info' as const,
+				};
+
+				return <StatusPill state={status.state}>{status.label}</StatusPill>;
+			},
+		},
+		{
+			id: 'gateway',
+			label: __('Type', 'ctx-events'),
+			render: (transaction) => gatewayLabel(transaction.gateway),
+		},
+		{
+			id: 'reference',
+			label: __('Transaction ID / Reference', 'ctx-events'),
+			render: (transaction) =>
+				transaction.gateway === 'offline'
+					? booking.reference
+					: transaction.externalId || '—',
+		},
+	];
 
 	const handleResolvePaymentLink = async () => {
 		setPaymentLinkError(null);
@@ -191,62 +181,16 @@ const TransactionSection = ({
 					</Notice>
 				)}
 
-				{booking.transactions.length === 0 ? (
-					<p className="booking-edit__empty">
-						{__('No transactions recorded.', 'ctx-events')}
-					</p>
-				) : (
-					<div className="booking-edit__transaction-table-wrap">
-						<table className="widefat striped booking-edit__transaction-table">
-							<thead>
-								<tr>
-									<th>{__('Gateway', 'ctx-events')}</th>
-									<th>{__('Status', 'ctx-events')}</th>
-									<th>{__('Amount', 'ctx-events')}</th>
-									<th>{__('Date', 'ctx-events')}</th>
-									<th>{__('Transaction', 'ctx-events')}</th>
-									<th>{__('Details', 'ctx-events')}</th>
-								</tr>
-							</thead>
-							<tbody>
-								{booking.transactions.map((transaction, index) => {
-									const status = statusConfig[transaction.status] ?? {
-										label: String(transaction.status),
-										state: 'info' as const,
-									};
-
-									return (
-										<tr
-											key={`${transaction.externalId || transaction.createdAt}-${index}`}
-										>
-											<td>{transaction.gateway}</td>
-											<td>
-												<StatusPill state={status.state}>
-													{status.label}
-												</StatusPill>
-											</td>
-											<td>{formatPrice(transaction.amount)}</td>
-											<td>{formatTransactionDate(transaction.createdAt)}</td>
-											<td>
-												<strong>{renderValue(transaction.externalId)}</strong>
-												{transaction.checkoutUrl && (
-													<div className="booking-edit__transaction-action">
-														<ExternalLink href={transaction.checkoutUrl}>
-															{__('Open payment', 'ctx-events')}
-														</ExternalLink>
-													</div>
-												)}
-											</td>
-											<td>
-												<TransactionDetails transaction={transaction} />
-											</td>
-										</tr>
-									);
-								})}
-							</tbody>
-						</table>
-					</div>
-				)}
+				<SmallDataTable
+					items={booking.transactions}
+					fields={transactionFields}
+					getRowKey={(transaction, index) =>
+						transaction.externalId ||
+						`${transaction.gateway}-${transaction.createdAt}-${index}`
+					}
+					className="widefat striped booking-edit__transaction-table"
+					emptyMessage={__('No transactions recorded.', 'ctx-events')}
+				/>
 			</PanelBody>
 		</Panel>
 	);

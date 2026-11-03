@@ -74,6 +74,7 @@ const EventsList = () => {
 			fields={fields}
 			view={view}
 			actions={createActions(markDetached, removeOccurrence)}
+			selectable
 			search={true}
 			onChangeView={handeViewChange}
 			paginationInfo={pagination}
