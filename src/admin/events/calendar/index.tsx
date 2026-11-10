@@ -22,6 +22,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { TimeScope } from '../../../types/types';
+import CalendarHeader, { type ScheduleXCalendarApp } from './CalendarHeader';
 import EventModalActions from './EventModalActions';
 import type { CalendarEvent } from './types';
 import { useStoredCalendarMonth } from './useStoredCalendarMonth';
@@ -265,15 +266,28 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 			},
 			[eventModal, viewStoragePlugin],
 		);
-		const customModalRoots = new Map<string, ReturnType<typeof createRoot>>();
+		const customComponentRoots = new Map<
+			string,
+			ReturnType<typeof createRoot>
+		>();
+
+		calendar._setCustomComponentFn('headerContent', (element, props) => {
+			const componentId = element.dataset.ccid;
+			const calendarApp = props.$app as ScheduleXCalendarApp | undefined;
+			if (!componentId || !calendarApp) return;
+
+			const root = createRoot(element);
+			customComponentRoots.set(componentId, root);
+			root.render(<CalendarHeader calendarApp={calendarApp} />);
+		});
 
 		calendar._setCustomComponentFn('eventModal', (element, props) => {
-			const event = props['calendarEvent'] as ScheduleEvent | undefined;
+			const event = props.calendarEvent as ScheduleEvent | undefined;
 			const componentId = element.dataset.ccid;
 			if (!event || !componentId) return;
 
 			const root = createRoot(element);
-			customModalRoots.set(componentId, root);
+			customComponentRoots.set(componentId, root);
 			root.render(
 				<EventModalActions
 					event={event}
@@ -286,14 +300,16 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 			);
 		});
 		calendar._setDestroyCustomComponentInstance((componentId) => {
-			customModalRoots.get(componentId)?.unmount();
-			customModalRoots.delete(componentId);
+			customComponentRoots.get(componentId)?.unmount();
+			customComponentRoots.delete(componentId);
 		});
 
 		calendar.render(container);
 		return () => {
 			calendar.destroy();
-			customModalRoots.forEach((root) => root.unmount());
+			customComponentRoots.forEach((root) => {
+				root.unmount();
+			});
 		};
 	}, [currentFiltersKey, filters, setActiveMonth, setStoredView]);
 
