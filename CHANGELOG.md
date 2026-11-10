@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.3.0 - 2026-11-10
+
 ### Added
 
 - Support multi-day events that occur at the same hours on every day of their
@@ -15,6 +17,11 @@ All notable changes to this project are documented in this file.
   setting.
 - Format daily event times as "Each day …" in event details and block
   bindings.
+
+### Fixed
+
+- Exclude draft events from the public Upcoming Events and Upcoming Events
+  Table blocks, including for logged-in users.
 
 ## 0.2.5 - 2026-11-10
 
