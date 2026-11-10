@@ -78,6 +78,11 @@
 		font-family: inherit;
 	}
 
+	.sx__month-grid-day:hover {
+		background: rgb(var(--wp-admin-theme-color--rgb) / 6%);
+		cursor: pointer;
+	}
+
 	&__loading {
 		position: absolute;
 		inset: 0;
