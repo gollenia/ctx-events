@@ -7,13 +7,13 @@ import {
 import { DataTableFilter } from '@events/datatable/Filter';
 import { mapStatusItems } from '@events/datatable/statusItems';
 import apiFetch from '@wordpress/api-fetch';
-import { Flex, NoticeList, SnackbarList } from '@wordpress/components';
+import { NoticeList, SnackbarList } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { cancelCircleFilled, check, Icon, trash } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
 import type { Gateway } from 'src/types/types';
+import StatusPill from '../../shared/status-pill';
 import GatewayModal from './GatewayModal';
 
 const GatewayTable = () => {
@@ -103,29 +103,13 @@ const GatewayTable = () => {
 			label: __('Configured', 'ctx-events'),
 			id: 'isValid',
 			enableSorting: true,
-				render: (item) => {
-					return item.isValid ? (
-						<Flex justify="left" gap={2}>
-							<Icon icon={check} />
-							{item.enabled ? (
-								<span className="is-configured">
-									{__('Configured and active', 'ctx-events')}
-								</span>
-							) : (
-							<span className="is-configured">
-								{__('Configured for activation', 'ctx-events')}
-							</span>
-						)}
-					</Flex>
-				) : (
-					<Flex justify="left" gap={2}>
-						<Icon icon={cancelCircleFilled} />{' '}
-						<span className="is-configured">
-							{__('Not Configured for activation', 'ctx-events')}
-						</span>
-					</Flex>
-				);
-			},
+			render: (gateway) => (
+				<StatusPill state={gateway.isValid ? 'success' : 'error'}>
+					{gateway.isValid
+						? __('Configured for activation', 'ctx-events')
+						: __('Not Configured for activation', 'ctx-events')}
+				</StatusPill>
+			),
 		},
 		{
 			label: __('Status', 'ctx-events'),
@@ -158,14 +142,14 @@ const GatewayTable = () => {
 			.then((data: Gateway) => {
 				console.log(data);
 				setGateways((prev) => {
-						const updatedGateways = prev.map((gateway) => {
-							if (gateway.slug === slug) {
-								return {
-									...gateway,
-									enabled: !isActive,
-								};
-							}
-							return gateway;
+					const updatedGateways = prev.map((gateway) => {
+						if (gateway.slug === slug) {
+							return {
+								...gateway,
+								enabled: !isActive,
+							};
+						}
+						return gateway;
 					});
 					return updatedGateways;
 				});
