@@ -54,10 +54,10 @@
 }
 
 .ctx-events-calendar {
-	--sx-color-primary: #2271b1;
+	--sx-color-primary: var(--wp-admin-theme-color);
 	--sx-color-on-primary: #fff;
-	--sx-color-primary-container: #e5f0f8;
-	--sx-color-on-primary-container: #0a4b78;
+	--sx-color-primary-container: rgba(var(--wp-admin-theme-color--rgb), .08);
+	--sx-color-on-primary-container: rgb(29, 35, 39)	;
 	--sx-color-surface: #fff;
 	--sx-color-surface-container: #f6f7f7;
 	--sx-color-background: #fff;
@@ -65,13 +65,16 @@
 	--sx-color-on-surface: #1d2327;
 	--sx-color-outline: #8c8f94;
 	--sx-color-outline-variant: #dcdcde;
+	--sx-rounding-extra-small: 0px;
 	margin-top: 12px;
 	position: relative;
 	width: 100%;
 
 	&__mount .sx__calendar-wrapper {
-		height: min(720px, calc(100vh - 240px));
-		min-height: 480px;
+		// Keep the calendar usable at its intended size. On shorter viewports the
+		// WordPress admin page scrolls as a whole instead of squeezing the grid
+		// into an internal scrollbar.
+		height: 720px;
 		font-family: inherit;
 	}
 
@@ -93,7 +96,7 @@
 		width: 20px;
 		height: 20px;
 		border: 2px solid rgb(34 113 177 / 20%);
-		border-top-color: #2271b1;
+		border-top-color: var(--wp-admin-theme-color);
 		border-radius: 50%;
 		animation: ctx-events-calendar-spin 0.8s linear infinite;
 	}
@@ -101,7 +104,7 @@
 	.sx__event-modal {
 		padding: 16px;
 		border-radius: 4px;
-		background: #fff;
+		background: #ffffff;
 		box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
 
 		&:focus {
@@ -132,12 +135,5 @@
 @keyframes ctx-events-calendar-spin {
 	to {
 		transform: rotate(360deg);
-	}
-}
-
-@media (max-width: 782px) {
-	.ctx-events-calendar__mount .sx__calendar-wrapper {
-		height: min(640px, calc(100vh - 180px));
-		min-height: 420px;
 	}
 }
