@@ -41,7 +41,16 @@ final class BlockRegistrar implements Registrar
 				continue;
 			}
 
-			register_block_type($file->getPathname());
+			$block = register_block_type($file->getPathname());
+			if ($block === false || $block->editor_script === null) {
+				continue;
+			}
+
+			wp_set_script_translations(
+				$block->editor_script,
+				'ctx-events',
+				PluginInfo::getPluginDir('/languages')
+			);
 		}
 	}
 }
