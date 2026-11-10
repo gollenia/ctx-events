@@ -295,6 +295,9 @@ msgstr "Bei täglichen Terminen muss die Endzeit nach der Startzeit liegen."
 msgid "daily"
 msgstr "täglich"
 
+msgid "Each day %s"
+msgstr "Jeweils %s"
+
 #: includes/Event/Infrastructure/EventTaxonomy.php:58
 msgid "All Event Categories"
 msgstr "Alle Veranstaltungskategorien"

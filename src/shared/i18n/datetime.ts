@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import getLocale from './locale';
 
 const parseDate = (date) => {
@@ -101,7 +101,11 @@ function formatTimeRange(start: string, end: string | false = false): string {
 }
 
 function formatDailySchedule(start: string, end: string): string {
-	return `${formatDateRange(start, end)}, ${__('daily', 'ctx-events')} ${formatTimeRange(start, end)}`;
+	return `${formatDateRange(start, end)}, ${formatDailyTimeRange(start, end)}`;
 }
 
-export { formatDate, formatDateRange, formatDailySchedule, formatTime, formatTimeRange };
+function formatDailyTimeRange(start: string, end: string): string {
+	return sprintf(__('Each day %s', 'ctx-events'), formatTimeRange(start, end));
+}
+
+export { formatDate, formatDateRange, formatDailySchedule, formatDailyTimeRange, formatTime, formatTimeRange };

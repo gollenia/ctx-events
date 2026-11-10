@@ -76,6 +76,14 @@ final class BlockEventLoader
         return wp_date($format, $start->getTimestamp()) . ' – ' . wp_date($format, $end->getTimestamp());
     }
 
+    public static function formatDailyTimeRange(\DateTimeImmutable $start, \DateTimeImmutable $end): string
+    {
+        return sprintf(
+            __('Each day %s', 'ctx-events'),
+            self::formatTimeRange($start, $end),
+        );
+    }
+
     public static function formatTime(\DateTimeImmutable $date): string
     {
         return wp_date(get_option('time_format'), $date->getTimestamp());

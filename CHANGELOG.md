@@ -13,6 +13,8 @@ All notable changes to this project are documented in this file.
 
 - Replace the ineffective all-day event toggle with an explicit daily-event
   setting.
+- Format daily event times as "Each day …" in event details and block
+  bindings.
 
 ## 0.2.5 - 2026-11-10
 

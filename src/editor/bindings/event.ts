@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockBindingsSource } from '@wordpress/blocks';
-import { formatDateRange, formatTime, formatTimeRange } from '@events/i18n';
+import { formatDailySchedule, formatDailyTimeRange, formatDateRange, formatTime, formatTimeRange } from '@events/i18n';
 import {
 	type BindingConfig,
 	type BindingField,
@@ -81,7 +81,12 @@ registerBlockBindingsSource({
 
 			if (field === 'timeLabel') {
 				const start = event.meta?._event_start || '';
-				values[attributeName] = start ? formatTime(start) : '';
+				const end = event.meta?._event_end || start;
+				values[attributeName] = start
+					? Boolean(Number(event.meta?._event_daily ?? 0))
+						? formatDailyTimeRange(start, end)
+						: formatTime(start)
+					: '';
 			}
 
 			if (field === 'imageAlt') {
@@ -103,7 +108,9 @@ registerBlockBindingsSource({
 				const end = event.meta?._event_end || '';
 				const date = start ? formatDateRange(start, end || start) : '';
 				const time = start ? formatTimeRange(start, end || start) : '';
-				values[attributeName] = time ? `${date}, ${time}` : date;
+				values[attributeName] = Boolean(Number(event.meta?._event_daily ?? 0))
+					? formatDailySchedule(start, end || start)
+					: time ? `${date}, ${time}` : date;
 			}
 
 			if (field === 'locationName') {

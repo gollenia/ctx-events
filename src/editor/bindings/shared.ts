@@ -31,6 +31,7 @@ export type EventRecord = {
 	meta?: {
 		_event_start?: string;
 		_event_end?: string;
+		_event_daily?: boolean | number | string;
 		_booking_enabled?: boolean | number | string;
 		_booking_currency?: string;
 		_booking_start?: string;

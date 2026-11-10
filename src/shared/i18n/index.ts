@@ -3,6 +3,7 @@ import {
 	formatDate,
 	formatDateRange,
 	formatDailySchedule,
+	formatDailyTimeRange,
 	formatTime,
 	formatTimeRange,
 } from './datetime';
@@ -17,6 +18,7 @@ export {
 	formatDate,
 	formatDateRange,
 	formatDailySchedule,
+	formatDailyTimeRange,
 	formatTime,
 	formatTimeRange,
 	getLocale,

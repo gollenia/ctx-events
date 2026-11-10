@@ -77,7 +77,9 @@ final class EventBindingSource
 				? BlockEventLoader::formatDateRange($eventResponse->startDate, $eventResponse->endDate)
 				: '',
 			'timeLabel' => $eventResponse
-				? BlockEventLoader::formatTime($eventResponse->startDate)
+				? ($eventResponse->isDaily
+					? BlockEventLoader::formatDailyTimeRange($eventResponse->startDate, $eventResponse->endDate)
+					: BlockEventLoader::formatTime($eventResponse->startDate))
 				: '',
 			'imageAlt' => $this->getImageAlt($event->ID),
 			'imageId' => (int) get_post_thumbnail_id($event),
@@ -107,7 +109,9 @@ final class EventBindingSource
 		}
 
 		$date = BlockEventLoader::formatDateRange($eventResponse->startDate, $eventResponse->endDate);
-		$time = BlockEventLoader::formatTimeRange($eventResponse->startDate, $eventResponse->endDate);
+		$time = $eventResponse->isDaily
+			? BlockEventLoader::formatDailyTimeRange($eventResponse->startDate, $eventResponse->endDate)
+			: BlockEventLoader::formatTimeRange($eventResponse->startDate, $eventResponse->endDate);
 
 		if ($date === '') {
 			return '';

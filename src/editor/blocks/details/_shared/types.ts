@@ -20,6 +20,7 @@ export type DetailBlockProps<TAttributes> = {
 export type EventDateMeta = {
 	_event_start?: string;
 	_event_end?: string;
+	_event_daily?: boolean | number | string;
 };
 
 export type EventAudienceMeta = {
