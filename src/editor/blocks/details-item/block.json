@@ -5,7 +5,7 @@
 	"title": "Other Item",
 	"keywords": ["list", "table"],
 	"description": "Create your very own description item with icon, image and custom content.",
-	"textdomain": "events",
+	"textdomain": "ctx-events",
 	"category": "common",
 	"attributes": {
 		"imageUrl": {

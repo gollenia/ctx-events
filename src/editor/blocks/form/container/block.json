@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/form-container",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Form Container",
 	"description": "Show a list with selected details of the event",
 	"category": "layout",

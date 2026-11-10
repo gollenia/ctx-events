@@ -5,7 +5,7 @@
 	"title": "Event Details",
 	"keywords": ["list", "table"],
 	"description": "Show a list with selected details of the event",
-	"textdomain": "events",
+	"textdomain": "ctx-events",
 	"category": "widgets",
 	"attributes": {
 		"dividers": {

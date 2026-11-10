@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/details-price",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Event Price",
 	"description": "Show the event price",
 	"category": "widgets",

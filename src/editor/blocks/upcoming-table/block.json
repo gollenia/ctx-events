@@ -4,6 +4,7 @@
 	"title": "Events Table",
 	"description": "Shows upcoming events in a table",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"category": "widgets",
 	"attributes": {
 		"showCategory": { "type": "boolean", "default": true },

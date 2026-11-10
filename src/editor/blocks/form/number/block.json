@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/number",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Number Field",
 	"description": "Lets the user give a number or a range of numbers",
 	"category": "widgets",

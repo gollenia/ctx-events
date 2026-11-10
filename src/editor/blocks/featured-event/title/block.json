@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/featured-title",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Featured Event Title",
 	"description": "Render the featured event title.",
 	"category": "widgets",

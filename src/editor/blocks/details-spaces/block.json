@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/details-spaces",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Event Booking Spaces",
 	"description": "Show the open spaces",
 	"category": "widgets",

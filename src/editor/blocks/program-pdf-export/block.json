@@ -4,6 +4,7 @@
 	"title": "Program PDF Export",
 	"description": "Render a public selector for weekly, monthly, or yearly event PDF exports.",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"category": "widgets",
 	"attributes": {
 		"buttonText": {

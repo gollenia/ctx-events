@@ -4,6 +4,7 @@
 	"title": "Upcoming Events",
 	"description": "Shows cards or a list of upcoming events",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"category": "widgets",
 	"attributes": {
 		"showImages": {

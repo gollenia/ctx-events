@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/featured-event",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Featured Event",
 	"description": "Compose a featured event section from theme-friendly event blocks.",
 	"category": "widgets",

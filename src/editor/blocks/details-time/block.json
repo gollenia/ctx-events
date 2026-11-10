@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/details-time",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Event Time",
 	"description": "Show the event Time",
 	"category": "widgets",

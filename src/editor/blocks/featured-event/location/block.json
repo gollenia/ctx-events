@@ -2,6 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "ctx-events/featured-location",
 	"apiVersion": 3,
+	"textdomain": "ctx-events",
 	"title": "Featured Event Location",
 	"description": "Render the featured event location.",
 	"category": "widgets",
