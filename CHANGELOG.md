@@ -4,6 +4,31 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.2.4 - 2026-11-10
+
+### Added
+
+- Allow setting a shared title while duplicating events.
+
+### Changed
+
+- Reworked the event-duplication dialog as a compact table with directly
+  editable date fields.
+
+### Fixed
+
+- Persist Mollie live and test API keys from the gateway form and correctly
+  show the selected live/test operating mode.
+
+## 0.2.3 - 2026-11-10
+
+### Fixed
+
+- Load block-editor script translations from the plugin language directory so
+  translated block titles remain visible in the editor.
+
+## 0.2.2 - 2026-11-10
+
 ### Changed
 
 - Replaced the event calendar header with WordPress components: native date
