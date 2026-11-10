@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-11-10 11:37+0000\n"
+"PO-Revision-Date: 2026-11-10 18:47+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Language: de_AT\n"
@@ -65,7 +65,7 @@ msgstr "0 bedeutet unbegrenzt pro Buchung"
 msgid "A booking needs manual confirmation"
 msgstr "Eine Buchung benötigt manuelle Freigabe"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:126
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:130
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:140
 msgid "A brief description shown when the user selects the gateway"
 msgstr ""
@@ -99,6 +99,10 @@ msgstr "Ein Ticket in deiner Buchung wurde storniert"
 #: build/frontend.js:7
 msgid "Account Holder"
 msgstr "Kontoinhaber"
+
+#: build/admin.js:2
+msgid "Actions"
+msgstr "Aktionen"
 
 #: build/admin.js:3
 msgid "Activate"
@@ -164,7 +168,7 @@ msgstr "Buchungsformular hinzufügen"
 msgid "Add New Coupon"
 msgstr "Gutschein hinzufügen"
 
-#: includes/Event/Infrastructure/EventPost.php:45
+#: includes/Event/Infrastructure/EventPost.php:47
 msgid "Add New Event"
 msgstr "Veranstaltung hinzufügen"
 
@@ -276,27 +280,8 @@ msgid "All"
 msgstr "Alle"
 
 #: build/editor.js:1
-msgid "All Day"
-msgstr "Ganztägig"
-
-#: build/editor.js:1
 msgid "All day"
 msgstr "Ganztägig"
-
-msgid "Occurs every day in this date range"
-msgstr "An jedem Tag dieses Zeitraums"
-
-msgid "The event is shown on every selected day between the start and end time."
-msgstr "Der Termin wird an jedem ausgewählten Tag zwischen der Start- und Endzeit angezeigt."
-
-msgid "For daily events, the end time must be after the start time."
-msgstr "Bei täglichen Terminen muss die Endzeit nach der Startzeit liegen."
-
-msgid "daily"
-msgstr "täglich"
-
-msgid "Each day %s"
-msgstr "Jeweils %s"
 
 #: includes/Event/Infrastructure/EventTaxonomy.php:58
 msgid "All Event Categories"
@@ -347,11 +332,11 @@ msgstr "Beim Umschalten des Gateways ist ein Fehler aufgetreten: "
 msgid "Any location"
 msgstr "Jeder Ort"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:90
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:94
 msgid "API key for the live environment."
 msgstr "API-Schlüssel für die Live-Umgebung."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:98
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:102
 msgid "API key for the test environment."
 msgstr "API-Schlüssel für die Test-Umgebung."
 
@@ -1235,7 +1220,7 @@ msgstr "Grund für die Stornierung"
 msgid "Cancelled"
 msgstr "Abgesagt"
 
-#: includes/Event/Infrastructure/EventPost.php:84
+#: includes/Event/Infrastructure/EventPost.php:86
 #, php-format
 msgid "Cancelled <span class=\"count\">(%s)</span>"
 msgid_plural "Cancelled <span class=\"count\">(%s)</span>"
@@ -1387,10 +1372,6 @@ msgid "Configured"
 msgstr "Konfiguriert"
 
 #: build/admin.js:3
-msgid "Configured and active"
-msgstr "Konfiguriert und aktiv"
-
-#: build/admin.js:3
 msgid "Configured for activation"
 msgstr "Für Aktivierung konfiguriert"
 
@@ -1436,7 +1417,7 @@ msgstr "Beitrag"
 msgid "Copy"
 msgstr "Kopieren"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:112
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:116
 msgid ""
 "Copy this URL to your Next-gen webhook configuration in Mollie. It is also "
 "sent automatically as the Classic payment webhook URL."
@@ -1594,7 +1575,7 @@ msgstr "Aktuell ausgewählte Gutscheine:"
 msgid "Custom Link"
 msgstr "Benutzerdefinierter Link"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:140
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:144
 msgid "Custom title for the payment gateway."
 msgstr "Benutzerdefinierter Titel für das Zahlungs-Gateway."
 
@@ -1716,7 +1697,7 @@ msgstr "Absteigend"
 msgid "Describe the event..."
 msgstr "Veranstaltung beschreiben..."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:125
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:129
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:139
 #: build/admin.js:2 build/admin.js:3 build/editor.js:1
 #: build/editor/blocks/coupon-editor/index.js:1
@@ -1787,7 +1768,7 @@ msgstr "Wert der Preisminderung"
 msgid "Display"
 msgstr "Ansicht"
 
-#: includes/Event/Infrastructure/EventPost.php:72
+#: includes/Event/Infrastructure/EventPost.php:74
 msgid "Display events on your blog."
 msgstr "Veranstaltungen auf Ihrer Website anzeigen."
 
@@ -1882,7 +1863,15 @@ msgstr "z. B. maximales Alter für einen Teilnehmer"
 msgid "e.g. minimal age for an attendee"
 msgstr "z. B. Mindestalter für einen Teilnehmer"
 
-#: includes/Event/Infrastructure/EventPost.php:46
+#: includes/Event/Infrastructure/BlockEventLoader.php:82 build/editor.js:1
+#: build/editor/blocks/details-time/index.js:1
+#: build/editor/blocks/upcoming-table/view.js:1
+#: build/editor/blocks/upcoming/view/index.js:1
+#, js-format
+msgid "Each day %s"
+msgstr "Jeweils %s"
+
+#: includes/Event/Infrastructure/EventPost.php:48
 #: includes/Event/Infrastructure/RecurringEventPost.php:21
 #: includes/Form/Infrastructure/AttendeeFormPost.php:61
 #: includes/Form/Infrastructure/BookingFormPost.php:74
@@ -1913,7 +1902,7 @@ msgstr "Gutschein bearbeiten"
 msgid "Edit detached event"
 msgstr "Ausgegliederte Veranstaltung bearbeiten"
 
-#: includes/Event/Infrastructure/EventPost.php:47
+#: includes/Event/Infrastructure/EventPost.php:49
 msgid "Edit Event"
 msgstr "Veranstaltung bearbeiten"
 
@@ -2066,7 +2055,7 @@ msgid "Europe"
 msgstr "Europa"
 
 #: includes/Event/Infrastructure/Bindings/EventBindingSource.php:48
-#: includes/Event/Infrastructure/EventPost.php:43 build/admin.js:1
+#: includes/Event/Infrastructure/EventPost.php:45 build/admin.js:1
 #: build/editor/blocks/featured-event/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming-table/view.js:1
@@ -2141,9 +2130,9 @@ msgstr "Hier erschient die Zeit"
 
 #. Plugin Name of the plugin
 #: ctx-events.php includes/Event/Infrastructure/EventPatterns.php:12
-#: includes/Event/Infrastructure/EventPost.php:42
 #: includes/Event/Infrastructure/EventPost.php:44
-#: includes/Event/Infrastructure/EventPost.php:71
+#: includes/Event/Infrastructure/EventPost.php:46
+#: includes/Event/Infrastructure/EventPost.php:73
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:52
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:53
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:56
@@ -2333,6 +2322,10 @@ msgstr "Erste Uhrzeit"
 #: build/editor/blocks/coupon-editor/index.js:1
 msgid "Fixed Amount"
 msgstr "Fester Betrag"
+
+#: build/editor.js:1
+msgid "For daily events, the end time must be after the start time."
+msgstr "Bei täglichen Terminen muss die Endzeit nach der Startzeit liegen."
 
 #: includes/Form/Infrastructure/AttendeeFormPost.php:32
 msgid "Form for the attendee data"
@@ -2640,7 +2633,7 @@ msgstr "Wiederkehrende einschließen"
 msgid "Input"
 msgstr "Eingabe"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:132
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:136
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:189
 msgid "Instructions"
 msgstr "Anweisungen"
@@ -2717,15 +2710,15 @@ msgstr "Verlinken zu"
 msgid "List"
 msgstr "Liste"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:105
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
 msgid "Live"
 msgstr "Live"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:89
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:93
 msgid "Live API Key"
 msgstr "Live-API-Schlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:173
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:177
 msgid "Live API key is missing"
 msgstr "Live-API Schlüssel fehlt"
 
@@ -2857,7 +2850,7 @@ msgstr ""
 msgid "Mollie"
 msgstr "Mollie"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:111
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:115
 msgid "Mollie webhook URL"
 msgstr "Mollie-Webhook-URL"
 
@@ -3015,11 +3008,11 @@ msgstr "Keine E-Mail-Vorlagen gefunden."
 msgid "No event selected yet."
 msgstr "Noch kein Event ausgewählt"
 
-#: includes/Event/Infrastructure/EventPost.php:51
+#: includes/Event/Infrastructure/EventPost.php:53
 msgid "No Events Found"
 msgstr "Keine Veranstaltungen gefunden"
 
-#: includes/Event/Infrastructure/EventPost.php:52
+#: includes/Event/Infrastructure/EventPost.php:54
 msgid "No Events Found in Trash"
 msgstr "Keine Veranstaltungen im Papierkorb gefunden"
 
@@ -3181,6 +3174,10 @@ msgstr "Anzahl der Wörter"
 msgid "Occurrence"
 msgstr "Termin"
 
+#: build/editor.js:1
+msgid "Occurs every day in this date range"
+msgstr "An jedem Tag dieses Zeitraums"
+
 #: build/editor/blocks/form/country/index.js:1
 msgid "Oceania"
 msgstr "Ozeanien"
@@ -3275,7 +3272,7 @@ msgstr "Übergeordnete Buchungsformular"
 msgid "Parent Coupon"
 msgstr "Übergeordnete Gutschein"
 
-#: includes/Event/Infrastructure/EventPost.php:53
+#: includes/Event/Infrastructure/EventPost.php:55
 msgid "Parent Event"
 msgstr "Übergeordnete Veranstaltung"
 
@@ -3381,7 +3378,7 @@ msgstr "Zahlungslink nicht verfügbar"
 msgid "Payment method"
 msgstr "Zahlungsmethode"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:168
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:172
 msgid "Payment mode is invalid"
 msgstr "Zahlungsmethode ungültig"
 
@@ -3528,7 +3525,7 @@ msgstr "Beliebte Personenkategorien"
 msgid "Position"
 msgstr "Position"
 
-#: includes/Event/Infrastructure/EventPost.php:79
+#: includes/Event/Infrastructure/EventPost.php:81
 msgctxt "post status"
 msgid "Cancelled"
 msgstr "Abgesagt"
@@ -3698,7 +3695,7 @@ msgstr "Antwort-an"
 msgid "Required"
 msgstr "Erforderlich"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:119
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:123
 #| msgid "Used to verify signed Mollie next-gen webhooks."
 msgid "Required to verify signed Mollie Next-gen webhooks."
 msgstr "Wird verwendet, um signierte Mollie-Next-Gen-Webhooks zu verifizieren."
@@ -3842,7 +3839,7 @@ msgstr "Veranstaltungskategorien suchen"
 msgid "Search Event Tags"
 msgstr "Veranstaltungs-Schlagwörter suchen"
 
-#: includes/Event/Infrastructure/EventPost.php:50
+#: includes/Event/Infrastructure/EventPost.php:52
 msgid "Search Events"
 msgstr "Veranstaltungen suchen"
 
@@ -3956,7 +3953,7 @@ msgstr "Schlagwörter auswählen"
 msgid "Select visible columns and arrange them by drag and drop."
 msgstr "Wähle sichtbare Spalten aus und ordne sie per Drag-and-drop an."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:106
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:110
 msgid "Select whether to use the test or live environment for payments."
 msgstr ""
 "Wählen Sie, ob für Zahlungen die Test- oder Live-Umgebung verwendet werden "
@@ -4376,15 +4373,15 @@ msgstr "Teilnehmervorlagen"
 msgid "Telephone"
 msgstr "Telefon"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:105
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
 msgid "Test"
 msgstr "Test"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:97
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:101
 msgid "Test API Key"
 msgstr "Test-API-Schlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:174
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:178
 msgid "Test API key is missing"
 msgstr "Live-API Schlüssel fehlt"
 
@@ -4411,6 +4408,13 @@ msgstr "Der Gutscheincode konnte nicht kopiert werden."
 #: build/editor.js:1
 msgid "The end must be after the start!"
 msgstr "Das Ende muss nach dem Start liegen!"
+
+#: build/editor.js:1
+msgid ""
+"The event is shown on every selected day between the start and end time."
+msgstr ""
+"Der Termin wird an jedem ausgewählten Tag zwischen der Start- und Endzeit "
+"angezeigt."
 
 #: build/editor/blocks/featured-event/index.js:1
 msgid "The event search failed."
@@ -4573,7 +4577,7 @@ msgstr "Ticket storniert"
 msgid "Tickets"
 msgstr "Tickets"
 
-#: build/editor/blocks/details-time/render.php:22
+#: build/editor/blocks/details-time/render.php:24
 #: patterns/event-details-top.php:14 build/editor.js:1
 #: build/editor/blocks/details-time/index.js:1
 msgid "Time"
@@ -4594,7 +4598,7 @@ msgstr "Zeitzone"
 #: includes/Location/Infrastructure/LocationPost.php:87
 #: includes/Payment/Application/UseCases/ExportCoupons.php:33
 #: includes/Payment/Infrastructure/CouponPost.php:82
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:139
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:143
 #: includes/Person/Infrastructure/PersonPost.php:141 build/admin.js:2
 #: build/admin.js:3 build/editor.js:1
 msgid "Title"
@@ -4822,7 +4826,7 @@ msgstr "Gültig von"
 msgid "Value"
 msgstr "Wert"
 
-#: includes/Event/Infrastructure/EventPost.php:48
+#: includes/Event/Infrastructure/EventPost.php:50
 #: includes/Event/Infrastructure/RecurringEventPost.php:24
 #: includes/Form/Infrastructure/AttendeeFormPost.php:64
 #: includes/Form/Infrastructure/BookingFormPost.php:77
@@ -4848,7 +4852,7 @@ msgstr "Buchungen ansehen"
 msgid "View Coupon"
 msgstr "Gutschein ansehen"
 
-#: includes/Event/Infrastructure/EventPost.php:49
+#: includes/Event/Infrastructure/EventPost.php:51
 msgid "View Event"
 msgstr "Veranstaltung ansehen"
 
@@ -4894,11 +4898,11 @@ msgstr "Wir haben deine Bezahlung erhalten und deine Buchung freigegeben."
 msgid "We received your booking"
 msgstr "Wir haben deine Buchung erhalten"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:118
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:122
 msgid "Webhook signing secret"
 msgstr "Webhook-Signaturschlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:180
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:184
 msgid "Webhook signing secret is missing"
 msgstr "Webhook-Signaturschlüssel fehlt"
 
@@ -4957,7 +4961,7 @@ msgstr "Breite"
 msgid "WordPress-Cron"
 msgstr "WordPress-Cron"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:104
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:108
 msgid "Work Mode"
 msgstr "Betriebsmodus"
 
@@ -4965,7 +4969,7 @@ msgstr "Betriebsmodus"
 msgid "World"
 msgstr "Welt"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:133
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:137
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:190
 msgid ""
 "Write a text that the user sees when the bank transfer information is shown"
