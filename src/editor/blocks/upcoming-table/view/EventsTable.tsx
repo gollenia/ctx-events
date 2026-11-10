@@ -36,6 +36,7 @@ export default function EventsTable({ attributes }: Props) {
 			order,
 			scope: attributes.scope,
 		});
+		params.append('status[]', 'publish');
 		if (attributes.includeRecurring) params.set('with_recurrences', 'true');
 		for (const id of attributes.selectedCategory)
 			params.append('categories', String(id));

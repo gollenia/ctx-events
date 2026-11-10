@@ -80,6 +80,7 @@ function Upcoming({ attributes }: Props) {
 			order: normalizedOrder,
 			scope,
 		});
+		params.append('status[]', 'publish');
 		if (includeRecurring) {
 			params.set('with_recurrences', 'true');
 		}
