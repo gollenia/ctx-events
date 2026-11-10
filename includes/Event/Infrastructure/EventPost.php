@@ -16,6 +16,8 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 {
     public const POST_TYPE = "ctx-event";
     public const CATEGORIES = 'ctx-event-categories';
+    private const REWRITE_RULES_VERSION = '1';
+    private const REWRITE_RULES_OPTION = 'ctx_events_event_rewrite_rules_version';
     
 	public function __construct(
 		private readonly EventHooks $hooks,
@@ -99,7 +101,37 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 	public function registerHooks(): void
 	{
 		$this->hooks->register();
+
+		add_action('init', [$this, 'maybeFlushRewriteRules'], 99);
+		add_action(
+			'update_option_' . WpEventOptions::EVENT_SLUG,
+			[$this, 'flushRewriteRulesAfterSlugUpdate'],
+			10,
+			2,
+		);
 		
+	}
+
+	public function maybeFlushRewriteRules(): void
+	{
+		if (get_option(self::REWRITE_RULES_OPTION) === self::REWRITE_RULES_VERSION) {
+			return;
+		}
+
+		flush_rewrite_rules(false);
+		update_option(self::REWRITE_RULES_OPTION, self::REWRITE_RULES_VERSION);
+	}
+
+	public function flushRewriteRulesAfterSlugUpdate(mixed $oldValue, mixed $newValue): void
+	{
+		if ($oldValue === $newValue) {
+			return;
+		}
+
+		$this->registerPostType();
+		$this->registerTaxonomies();
+		flush_rewrite_rules(false);
+		update_option(self::REWRITE_RULES_OPTION, self::REWRITE_RULES_VERSION);
 	}
 
 }

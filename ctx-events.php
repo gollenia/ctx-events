@@ -24,6 +24,11 @@ if (is_callable([Contexis\WpGitHubUpdater\ReleaseInfo::class, 'fromTag'])) {
     Contexis\WpGitHubUpdater\WordPressPluginUpdater::fromPluginFile(__FILE__)->registerHooks();
 }
 
+register_activation_hook(__FILE__, static function (): void {
+    Contexis\Events\Platform\Bootstrap::init();
+    flush_rewrite_rules(false);
+});
+
 add_action('init', function () {
     load_plugin_textdomain(
         'ctx-events',
