@@ -2,7 +2,7 @@ export type EventMeta = {
 	_booking_enabled?: boolean | number;
 	_event_start?: string;
 	_event_end?: string;
-	_event_all_day?: boolean | number | string;
+	_event_daily?: boolean | number | string;
 	_location_id?: number | string;
 	_person_id?: number | string | number[];
 	_mail_to_responsible?: boolean | number;

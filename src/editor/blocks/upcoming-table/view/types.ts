@@ -37,6 +37,7 @@ export type EventsTableEvent = {
 	excerpt: string;
 	start: string;
 	end: string;
+	isDaily: boolean;
 	audience: string | null;
 	category: EventsTableTerm | null;
 	categories: EventsTableTerm[];

@@ -23,6 +23,7 @@ final readonly class EventCalendarEntryResource
 		public ?string $personName,
 		public ?int $recurrenceSeriesId,
 		public bool $isDraft,
+		public ?int $eventId,
 	) {
 	}
 
@@ -40,6 +41,7 @@ final readonly class EventCalendarEntryResource
 			personName: $entry->personName,
 			recurrenceSeriesId: $entry->recurrenceSeriesId,
 			isDraft: $entry->isDraft,
+			eventId: $entry->eventId,
 		);
 	}
 
@@ -58,6 +60,7 @@ final readonly class EventCalendarEntryResource
 			'personName' => $this->personName,
 			'recurrenceSeriesId' => $this->recurrenceSeriesId,
 			'isDraft' => $this->isDraft,
+			'eventId' => $this->eventId,
 		];
 	}
 }

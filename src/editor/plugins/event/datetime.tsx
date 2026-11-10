@@ -134,10 +134,18 @@ const DatetimeSelector = () => {
 
 		const noticeId = 'event_date_notice';
 		const isMissingStart = !meta._event_start;
+		const startTime = splitDateTime(meta._event_start).time;
+		const endTime = splitDateTime(meta._event_end).time;
+		const isInvalidDailyTimeRange =
+			Boolean(Number(meta._event_daily ?? 0)) &&
+			Boolean(startTime) &&
+			Boolean(endTime) &&
+			startTime >= endTime;
 		const isInvalidRange =
 			Boolean(meta._event_start) &&
 			Boolean(meta._event_end) &&
-			(meta._event_start as string) > (meta._event_end as string);
+			((meta._event_start as string) > (meta._event_end as string) ||
+				isInvalidDailyTimeRange);
 
 		if (!isMissingStart && !isInvalidRange) {
 			unlockPostSaving('event_date_lock');
@@ -153,7 +161,9 @@ const DatetimeSelector = () => {
 				'error',
 				isMissingStart
 					? __('please set a start date before saving.', 'ctx-events')
-					: __('The end must be after the start!', 'ctx-events'),
+					: isInvalidDailyTimeRange
+						? __('For daily events, the end time must be after the start time.', 'ctx-events')
+						: __('The end must be after the start!', 'ctx-events'),
 				{
 					id: noticeId,
 					isDismissible: true,
@@ -166,6 +176,7 @@ const DatetimeSelector = () => {
 		isSaving,
 		lockPostSaving,
 		meta._event_end,
+		meta._event_daily,
 		meta._event_start,
 		postType,
 		removeNotice,
@@ -179,7 +190,9 @@ const DatetimeSelector = () => {
 
 	const start = splitDateTime(meta._event_start);
 	const end = splitDateTime(meta._event_end);
-	const isAllDay = Boolean(Number(meta._event_all_day ?? 0));
+	const isDaily = Boolean(Number(meta._event_daily ?? 0));
+	const isInvalidDailyTimeRange =
+		isDaily && Boolean(start.time) && Boolean(end.time) && start.time >= end.time;
 
 	return (
 		<PluginDocumentSettingPanel
@@ -196,7 +209,7 @@ const DatetimeSelector = () => {
 					label={__('Start of the event', 'ctx-events')}
 					date={start.date}
 					time={start.time}
-					showTime={!isAllDay}
+					showTime
 					onDateChange={(value) => {
 						const newStart = combineDateTime(value, start.time);
 						const updates: Partial<EventMeta> = {
@@ -222,7 +235,7 @@ const DatetimeSelector = () => {
 					label={__('End of the event', 'ctx-events')}
 					date={end.date}
 					time={end.time}
-					showTime={!isAllDay}
+					showTime
 					minDate={start.date}
 					minTime={
 						start.date && end.date === start.date ? start.time : undefined
@@ -235,11 +248,20 @@ const DatetimeSelector = () => {
 					}
 				/>
 				<CheckboxControl
-					label={__('All Day', 'ctx-events')}
+					label={__('Occurs every day in this date range', 'ctx-events')}
+					help={__(
+						'The event is shown on every selected day between the start and end time.',
+						'ctx-events',
+					)}
 					__nextHasNoMarginBottom
-					checked={isAllDay}
-					onChange={(value) => setMeta({ _event_all_day: value ? 1 : 0 })}
+					checked={isDaily}
+					onChange={(value) => setMeta({ _event_daily: value ? 1 : 0 })}
 				/>
+				{isInvalidDailyTimeRange && (
+					<p className="components-base-control__help">
+						{__('For daily events, the end time must be after the start time.', 'ctx-events')}
+					</p>
+				)}
 			</Flex>
 		</PluginDocumentSettingPanel>
 	);

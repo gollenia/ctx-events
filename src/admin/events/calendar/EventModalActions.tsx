@@ -19,7 +19,9 @@ const EventModalActions = ({ event, onCancelled }: EventModalActionsProps) => {
 	const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 	const cancelAction = actions.find((action) => action.id === 'cancel');
 	const duplicateAction = actions.find((action) => action.id === 'duplicate');
-	const eventId = Number(event.id);
+	const eventId = Number(
+		(event as ScheduleEvent & { eventId?: number }).eventId ?? event.id,
+	);
 	const recurrenceSeriesId = (
 		event as ScheduleEvent & { recurrenceSeriesId?: number }
 	).recurrenceSeriesId;

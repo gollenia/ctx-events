@@ -122,6 +122,7 @@ const toScheduleEvent = (
 	location: event.locationName ?? undefined,
 	people: event.personName ? [event.personName] : undefined,
 	recurrenceSeriesId: event.recurrenceSeriesId,
+	eventId: event.eventId ?? undefined,
 	start: Temporal.Instant.from(event.startDate).toZonedDateTimeISO(timezone),
 	end: Temporal.Instant.from(event.endDate).toZonedDateTimeISO(timezone),
 	calendarId: isHexColor(event.color)

@@ -16,7 +16,7 @@ class EventMeta extends MetaData
     public const LOCATION_ID       = '_location_id';
     public const EVENT_START       = '_event_start';
     public const EVENT_END         = '_event_end';
-    public const EVENT_ALL_DAY     = '_event_all_day';
+    public const EVENT_DAILY       = '_event_daily';
     public const BOOKING_START     = '_booking_start';
     public const BOOKING_END       = '_booking_end';
     public const BOOKING_ENABLED   = '_booking_enabled';
@@ -94,7 +94,7 @@ class EventMeta extends MetaData
         self::LOCATION_ID         => ['type' => 'integer'],
         self::EVENT_START      => ['type' => 'string'],
         self::EVENT_END        => ['type' => 'string'],
-        self::EVENT_ALL_DAY    => ['type' => 'boolean'],
+        self::EVENT_DAILY      => ['type' => 'boolean'],
         self::BOOKING_START    => ['type' => 'string'],
         self::BOOKING_END      => ['type' => 'string'],
         self::BOOKING_ENABLED  => ['type' => 'boolean'],

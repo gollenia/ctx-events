@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { formatDateRange } from '@events/i18n';
+import { formatDailySchedule, formatDateRange } from '@events/i18n';
 
 import truncate from './truncate';
 import type { UpcomingViewEvent, UpcomingViewProps } from './types';
@@ -87,7 +87,9 @@ function ListView({
 								<span className="ctx-upcoming-card__label">{item.category.name}</span>
 							) : null}
 							<h5 className="ctx-upcoming-card__subtitle">
-								{formatDateRange(item.start, item.end)}
+								{item.isDaily
+									? formatDailySchedule(item.start, item.end)
+									: formatDateRange(item.start, item.end)}
 							</h5>
 							<a href={item.link}>
 								<h4 className="ctx-upcoming-card__title">{item.title}</h4>

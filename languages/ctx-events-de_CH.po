@@ -285,6 +285,18 @@ msgstr "Ganztägig"
 msgid "All day"
 msgstr "Ganztägig"
 
+msgid "Occurs every day in this date range"
+msgstr "An jedem Tag dieses Zeitraums"
+
+msgid "The event is shown on every selected day between the start and end time."
+msgstr "Der Termin wird an jedem ausgewählten Tag zwischen der Start- und Endzeit angezeigt."
+
+msgid "For daily events, the end time must be after the start time."
+msgstr "Bei täglichen Terminen muss die Endzeit nach der Startzeit liegen."
+
+msgid "daily"
+msgstr "täglich"
+
 #: includes/Event/Infrastructure/EventTaxonomy.php:58
 msgid "All Event Categories"
 msgstr "Alle Veranstaltungskategorien"

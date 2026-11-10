@@ -48,6 +48,7 @@ export function mapUpcomingEvent(event: RawEvent): UpcomingViewEvent {
 		excerpt: event.description ?? '',
 		start: event.startDate,
 		end: event.endDate ?? event.startDate,
+		isDaily: event.isDaily,
 		audience: event.audience,
 		category: categories[0] ?? null,
 		categories,

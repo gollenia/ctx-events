@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Support multi-day events that occur at the same hours on every day of their
+  date range.
+
+### Changed
+
+- Replace the ineffective all-day event toggle with an explicit daily-event
+  setting.
+
 ## 0.2.5 - 2026-11-10
 
 ### Fixed

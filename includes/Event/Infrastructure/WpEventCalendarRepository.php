@@ -28,10 +28,14 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			$query = WpEventQueryBuilder::fromCalendarCriteria($criteria)->toWpQuery();
 			return array_filter($query->posts, static fn (mixed $post): bool => $post instanceof \WP_Post);
 		});
-		$entries = CalendarTiming::measure(
-			'event-mapping',
-			fn (): array => array_map(fn (\WP_Post $post): EventCalendarEntry => $this->entryFromPost($post), $posts),
-		);
+		$entries = CalendarTiming::measure('event-mapping', function () use ($posts): array {
+			$entries = [];
+			foreach ($posts as $post) {
+				array_push($entries, ...$this->entriesFromPost($post));
+			}
+
+			return $entries;
+		});
 		foreach (CalendarTiming::measure('recurrences', fn (): array => $this->recurringOccurrences($criteria)) as $occurrence) {
 			$entries[] = $this->entryFromRecurringOccurrence($occurrence);
 		}
@@ -108,7 +112,58 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			locationName: $locationId !== null ? get_the_title($locationId) : null,
 			personName: $personNames !== [] ? implode(', ', $personNames) : null,
 			isDraft: $post->post_status === 'draft',
+			eventId: $post->ID,
 		);
+	}
+
+	/** @return list<EventCalendarEntry> */
+	private function entriesFromPost(\WP_Post $post): array
+	{
+		$entry = $this->entryFromPost($post);
+		if (!get_post_meta($post->ID, EventMeta::EVENT_DAILY, true)) {
+			return [$entry];
+		}
+
+		return $this->dailyEntries($entry);
+	}
+
+	/** @return list<EventCalendarEntry> */
+	private function dailyEntries(EventCalendarEntry $entry): array
+	{
+		$entries = [];
+		$day = $entry->startDate->setTime(0, 0);
+		$lastDay = $entry->endDate->setTime(0, 0);
+
+		while ($day <= $lastDay) {
+			$start = $day->setTime(
+				(int) $entry->startDate->format('H'),
+				(int) $entry->startDate->format('i'),
+			);
+			$end = $day->setTime(
+				(int) $entry->endDate->format('H'),
+				(int) $entry->endDate->format('i'),
+			);
+
+			if ($end > $start) {
+				$entries[] = new EventCalendarEntry(
+					id: $entry->id . ':' . $day->format('Y-m-d'),
+					title: $entry->title,
+					description: $entry->description,
+					startDate: $start,
+					endDate: $end,
+					categoryIds: $entry->categoryIds,
+					color: $entry->color,
+					locationName: $entry->locationName,
+					personName: $entry->personName,
+					isDraft: $entry->isDraft,
+					eventId: $entry->eventId,
+				);
+			}
+
+			$day = $day->modify('+1 day');
+		}
+
+		return $entries;
 	}
 
 	/** @return list<int> */

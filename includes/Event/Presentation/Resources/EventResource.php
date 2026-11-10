@@ -25,6 +25,7 @@ final readonly class EventResource implements Resource
 		public ?EventBookingSummaryResource $bookingSummary,
 		public ?EventIncludeResource $includes,
 		public ?SchemaResource $schema,
+		public bool $isDaily,
 
 	) {
 	}
@@ -42,7 +43,8 @@ final readonly class EventResource implements Resource
 			audience: $eventResponse->audience,
 			bookingSummary: $eventResponse->bookingSummary ? EventBookingSummaryResource::from($eventResponse->bookingSummary) : null,
 			includes: EventIncludeResource::fromDto($eventResponse),
-			schema: $route->getSchema($eventResponse->id)
+			schema: $route->getSchema($eventResponse->id),
+			isDaily: $eventResponse->isDaily,
 		);
 	}
 
@@ -60,7 +62,8 @@ final readonly class EventResource implements Resource
 			'audience' => $this->audience,
 			'bookingSummary' => $this->bookingSummary,
 			'includes' => $this->includes,
-			'schema' => $this->schema
+			'schema' => $this->schema,
+			'isDaily' => $this->isDaily,
 		];
 	}
 

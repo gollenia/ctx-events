@@ -100,4 +100,8 @@ function formatTimeRange(start: string, end: string | false = false): string {
     }
 }
 
-export { formatDate, formatDateRange, formatTime, formatTimeRange };
+function formatDailySchedule(start: string, end: string): string {
+	return `${formatDateRange(start, end)}, ${__('daily', 'ctx-events')} ${formatTimeRange(start, end)}`;
+}
+
+export { formatDate, formatDateRange, formatDailySchedule, formatTime, formatTimeRange };

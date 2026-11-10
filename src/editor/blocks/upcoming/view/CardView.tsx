@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { formatDateRange } from '@events/i18n';
+import { formatDailySchedule, formatDateRange } from '@events/i18n';
 import EventIcon from '../../../../shared/icons/EventIcon';
 
 import truncate from './truncate';
@@ -108,7 +108,9 @@ function EventCards({
 								<h2 className="ctx-upcoming-card__title">{item.title}</h2>
 							</a>
 							<h4 className="ctx-upcoming-card__subtitle">
-								{formatDateRange(item.start, item.end)}
+								{item.isDaily
+									? formatDailySchedule(item.start, item.end)
+									: formatDateRange(item.start, item.end)}
 							</h4>
 							<p className="ctx-upcoming-card__text">
 								{truncate(item.excerpt, excerptLength)}

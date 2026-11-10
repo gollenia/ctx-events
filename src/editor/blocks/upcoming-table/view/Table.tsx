@@ -1,4 +1,4 @@
-import { formatDate, formatDateRange } from '@events/i18n';
+import { formatDailySchedule, formatDate, formatDateRange } from '@events/i18n';
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { EventsTableAttributes, EventsTableEvent } from './types';
@@ -123,7 +123,11 @@ export default function Table({ attributes, events }: Props) {
 						<a href={event.link}>
 							<b>{event.title}</b>
 						</a>
-						<div>{formatDateRange(event.start, event.end)}</div>
+						<div>
+							{event.isDaily
+								? formatDailySchedule(event.start, event.end)
+								: formatDateRange(event.start, event.end)}
+						</div>
 					</td>
 				);
 			case 'category':

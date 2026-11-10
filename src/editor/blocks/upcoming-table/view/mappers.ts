@@ -47,6 +47,7 @@ export function mapEventsTableEvent(event: RawEvent): EventsTableEvent {
 		excerpt: event.description ?? '',
 		start: event.startDate,
 		end: event.endDate ?? event.startDate,
+		isDaily: event.isDaily,
 		audience: event.audience ?? null,
 		category: categories[0] ?? null,
 		categories,

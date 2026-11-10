@@ -41,6 +41,7 @@ export type UpcomingViewEvent = {
 	excerpt: string;
 	start: string;
 	end: string;
+	isDaily: boolean;
 	audience: string | null;
 	category: UpcomingTerm | null;
 	categories: UpcomingTerm[];

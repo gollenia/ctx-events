@@ -49,6 +49,7 @@ final readonly class Event
         public ?RecurrenceId $recurrenceId = null,
         public ?OccurrenceKey $recurrenceOccurrenceKey = null,
         public bool $isDetached = false,
+        public bool $isDaily = false,
     ) {
         if ($this->isDetached !== ($this->recurrenceOccurrenceKey !== null)) {
             throw new \InvalidArgumentException('Only a detached event may have a recurrence occurrence key.');

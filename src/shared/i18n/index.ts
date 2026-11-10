@@ -2,6 +2,7 @@ import { getCountries, getCountriesByRegion } from './countries';
 import {
 	formatDate,
 	formatDateRange,
+	formatDailySchedule,
 	formatTime,
 	formatTimeRange,
 } from './datetime';
@@ -15,6 +16,7 @@ export {
 	getCountriesByRegion,
 	formatDate,
 	formatDateRange,
+	formatDailySchedule,
 	formatTime,
 	formatTimeRange,
 	getLocale,

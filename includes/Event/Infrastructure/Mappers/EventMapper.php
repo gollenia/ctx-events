@@ -54,6 +54,7 @@ final class EventMapper implements PostMapper
             recurrenceId: RecurrenceId::from($post->getInt(EventMeta::RECURRENCE_ID)),
             recurrenceOccurrenceKey: self::occurrenceKey($post),
             isDetached: $post->getBool(EventMeta::IS_DETACHED, false) ?? false,
+			isDaily: $post->getBool(EventMeta::EVENT_DAILY, false) ?? false,
             personId: $post->getInt(EventMeta::PERSON_ID)
                 ? PersonId::from($post->getInt(EventMeta::PERSON_ID))
                 : null

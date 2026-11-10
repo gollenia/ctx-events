@@ -36,7 +36,8 @@ class EventResponse implements DTO
         public readonly ?PersonDto $personDto = null,
         public readonly ?TaxonomyCollection $categories = null,
         public readonly ?TaxonomyCollection $tags = null,
-		public readonly ?TicketResponseCollection $ticketDtos = null
+		public readonly ?TicketResponseCollection $ticketDtos = null,
+		public readonly bool $isDaily = false,
     ) {
     }
 
@@ -65,7 +66,8 @@ class EventResponse implements DTO
             personDto: $personDto,
             categories: $categories,
             tags: $tags,
-            ticketDtos: $ticketDtos
+            ticketDtos: $ticketDtos,
+			isDaily: $event->isDaily,
         );
     }
 }

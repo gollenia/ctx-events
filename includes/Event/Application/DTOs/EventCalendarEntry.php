@@ -21,6 +21,7 @@ final readonly class EventCalendarEntry
 		public ?string $personName,
 		public ?int $recurrenceSeriesId = null,
 		public bool $isDraft = false,
+		public ?int $eventId = null,
 	) {
 	}
 }

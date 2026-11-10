@@ -141,6 +141,7 @@ readonly audience: string | null,
 readonly bookingSummary: EventBookingSummary | null,
 readonly includes: EventIncludes | null,
 readonly schema: Schema | null,
+readonly isDaily: boolean,
 };
 export type EventBookingSummary = {
 readonly isBookable: boolean,
