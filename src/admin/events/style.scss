@@ -76,98 +76,13 @@
 	}
 
 	.sx__today-button {
-		box-sizing: border-box;
-		height: 32px;
-		border: var(--sx-border);
-		border-color: var(--sx-color-primary);
+		border: 1px solid var(--sx-color-primary);
 		padding: 0 12px;
 		line-height: 30px;
 		color: var(--sx-color-primary);
 		border-radius: 2px;
 		font-weight: 500;
 		font-size: 13px;
-	}
-
-	.sx__calendar-header {
-		align-items: center;
-		gap: 12px;
-		padding: 12px;
-	}
-
-	.sx__calendar-header-content {
-		gap: 8px;
-	}
-
-	.sx__range-heading {
-		font-size: 16px;
-		font-weight: 600;
-	}
-
-	.sx__forward-backward-navigation {
-		display: flex;
-		gap: 4px;
-		height: 32px;
-	}
-
-	.sx__chevron-wrapper {
-		box-sizing: border-box;
-		width: 32px;
-		height: 32px;
-		min-width: 32px;
-		min-height: 32px;
-		border: 1px solid var(--sx-color-primary);
-		border-radius: 2px;
-		background: #fff;
-	}
-
-	.sx__chevron-wrapper .sx__chevron {
-		border-color: var(--sx-color-primary);
-	}
-
-	.sx__chevron-wrapper:hover,
-	.sx__chevron-wrapper:focus {
-		background: var(--sx-color-primary);
-	}
-
-	.sx__chevron-wrapper:hover .sx__chevron,
-	.sx__chevron-wrapper:focus .sx__chevron {
-		border-color: #fff;
-	}
-
-	.sx__calendar-header .sx__date-input,
-	.sx__view-selection-selected-item {
-		box-sizing: border-box;
-		height: 32px;
-		padding: 0 12px;
-		border-color: #8c8f94;
-		border-radius: 2px;
-		background: #fff;
-		color: #2c3338;
-		font-size: 13px;
-		font-weight: 500;
-	}
-
-	.sx__calendar-header .sx__date-input {
-		padding-right: 32px;
-	}
-
-	.sx__date-input-label,
-	.sx__view-selection-label {
-		color: #50575e;
-	}
-
-	.sx__date-input-chevron-wrapper {
-		right: 10px;
-	}
-
-	.sx__view-selection-selected-item:hover,
-	.sx__view-selection-selected-item:focus {
-		background: rgb(var(--wp-admin-theme-color--rgb) / 8%);
-	}
-
-	.sx__view-selection-items {
-		border: 1px solid #c3c4c7;
-		box-shadow: 0 3px 5px rgb(0 0 0 / 15%);
 	}
 
 	.sx__month-grid-day:hover {
