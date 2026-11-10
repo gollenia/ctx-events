@@ -9,4 +9,5 @@ export type CalendarEvent = {
 	locationName: string | null;
 	personName: string | null;
 	recurrenceSeriesId?: number;
+	isDraft: boolean;
 };

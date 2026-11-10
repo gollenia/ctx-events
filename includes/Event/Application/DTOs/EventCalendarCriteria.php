@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Event\Application\DTOs;
 
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
+
 final readonly class EventCalendarCriteria
 {
 	/**
@@ -15,6 +17,7 @@ final readonly class EventCalendarCriteria
 		public array $categories = [],
 		public ?int $locationId = null,
 		public ?int $personId = null,
+		public ?StatusList $statuses = null,
 	) {
 	}
 }

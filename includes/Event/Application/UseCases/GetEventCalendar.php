@@ -6,6 +6,7 @@ namespace Contexis\Events\Event\Application\UseCases;
 
 use Contexis\Events\Event\Application\DTOs\EventCalendarCriteria;
 use Contexis\Events\Event\Domain\EventCalendarRepository;
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 
 final class GetEventCalendar
 {
@@ -20,6 +21,7 @@ final class GetEventCalendar
 		array $categories = [],
 		?int $locationId = null,
 		?int $personId = null,
+		?StatusList $statuses = null,
 	): array {
 		$criteria = new EventCalendarCriteria(
 			startDate: $startDate,
@@ -27,6 +29,7 @@ final class GetEventCalendar
 			categories: $categories,
 			locationId: $locationId,
 			personId: $personId,
+			statuses: $statuses,
 		);
 
 		return $this->calendarRepository->search($criteria);

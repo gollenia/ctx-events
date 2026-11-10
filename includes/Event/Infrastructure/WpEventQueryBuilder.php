@@ -22,7 +22,7 @@ final class WpEventQueryBuilder extends WpQueryBuilder
     {
         $builder = new self()
             ->withPostType(EventPost::POST_TYPE)
-            ->withStatus(StatusList::public())
+			->withStatus($criteria->statuses ?? StatusList::public())
             ->withTaxonomy(EventTaxonomy::CATEGORIES, $criteria->categories)
             ->withDateOverlap($criteria->startDate, $criteria->endDate)
             ->orderBy(OrderBy::fromMeta(EventMeta::EVENT_START, Order::ASC))

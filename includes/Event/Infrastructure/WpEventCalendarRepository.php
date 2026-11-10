@@ -10,6 +10,7 @@ use Contexis\Events\Event\Application\Service\RecurringOccurrenceLister;
 use Contexis\Events\Event\Domain\EventCalendarRepository;
 use Contexis\Events\Event\Domain\OccurrenceCriteria;
 use Contexis\Events\Event\Domain\RecurringOccurrence;
+use Contexis\Events\Event\Domain\Enums\EventStatus;
 use Contexis\Events\Event\Domain\ValueObjects\EventFilters;
 use Contexis\Events\Event\Domain\ValueObjects\EventStatusList;
 use Contexis\Events\Event\Domain\ValueObjects\OccurrenceWindow;
@@ -53,7 +54,12 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 				locationId: $criteria->locationId,
 				personId: $criteria->personId,
 			),
-			statuses: EventStatusList::public(),
+			statuses: $criteria->statuses === null
+				? EventStatusList::public()
+				: EventStatusList::of(...array_map(
+					static fn (string $status): EventStatus => EventStatus::from($status),
+					$criteria->statuses->toArray(),
+				)),
 		));
 
 		return $occurrences->toArray();
@@ -77,6 +83,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			locationName: $locationId !== null ? get_the_title($locationId) : null,
 			personName: $personId !== null ? get_the_title($personId) : null,
 			recurrenceSeriesId: $seriesId,
+			isDraft: $recurringOccurrence->recurringEvent->status === EventStatus::Draft,
 		);
 	}
 
@@ -100,6 +107,7 @@ final class WpEventCalendarRepository implements EventCalendarRepository
 			color: $this->color($categoryIds),
 			locationName: $locationId !== null ? get_the_title($locationId) : null,
 			personName: $personNames !== [] ? implode(', ', $personNames) : null,
+			isDraft: $post->post_status === 'draft',
 		);
 	}
 

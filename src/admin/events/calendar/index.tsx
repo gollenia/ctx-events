@@ -53,8 +53,8 @@ const getCalendarLocale = (): string => {
 const isHexColor = (value: string | null): value is string =>
 	Boolean(value && /^#[\da-f]{6}$/i.test(value));
 
-const colorNameFor = (color: string): string =>
-	`ctx-event-${color.slice(1).toLowerCase()}`;
+const colorNameFor = (color: string, isDraft = false): string =>
+	`ctx-event-${color.slice(1).toLowerCase()}${isDraft ? '-draft' : ''}`;
 
 const lightenColor = (color: string, amount: number): string => {
 	const channel = (offset: number): string => {
@@ -83,21 +83,22 @@ const registerCategoryColors = (
 	for (const event of events) {
 		if (!isHexColor(event.color)) continue;
 
-		const colorName = colorNameFor(event.color);
+		const colorName = colorNameFor(event.color, event.isDraft);
 		if (calendars[colorName]) continue;
 
-		const container = lightenColor(event.color, 0.88);
+		const main = event.isDraft ? lightenColor(event.color, 0.45) : event.color;
+		const container = lightenColor(event.color, event.isDraft ? 0.94 : 0.88);
 		calendars[colorName] = {
 			colorName,
 			lightColors: {
-				main: event.color,
+				main,
 				container,
 				onContainer: textColorFor(container),
 			},
 		};
 		document.documentElement.style.setProperty(
 			`--sx-color-${colorName}`,
-			event.color,
+			main,
 		);
 		document.documentElement.style.setProperty(
 			`--sx-color-${colorName}-container`,
@@ -115,14 +116,18 @@ const toScheduleEvent = (
 	timezone: string,
 ): ScheduleEvent => ({
 	id: event.id,
-	title: event.recurrenceSeriesId ? `↻ ${event.title}` : event.title,
+	title: `${event.recurrenceSeriesId ? '↻ ' : ''}${event.isDraft ? '✎ ' : ''}${event.title}`,
 	description: event.description,
 	location: event.locationName ?? undefined,
 	people: event.personName ? [event.personName] : undefined,
 	recurrenceSeriesId: event.recurrenceSeriesId,
 	start: Temporal.Instant.from(event.startDate).toZonedDateTimeISO(timezone),
 	end: Temporal.Instant.from(event.endDate).toZonedDateTimeISO(timezone),
-	calendarId: isHexColor(event.color) ? colorNameFor(event.color) : undefined,
+	calendarId: isHexColor(event.color)
+		? colorNameFor(event.color, event.isDraft)
+		: event.isDraft
+			? 'ctx-event-draft'
+			: undefined,
 });
 
 const filtersKey = (filters: Array<DataFilterField>): string =>
@@ -170,7 +175,16 @@ const EventCalendarView = ({ filters, scope }: EventCalendarViewProps) => {
 		if (!container) return;
 
 		const timezone = getTimezone();
-		const calendars: Record<string, CalendarType> = {};
+		const calendars: Record<string, CalendarType> = {
+			'ctx-event-draft': {
+				colorName: 'ctx-event-draft',
+				lightColors: {
+					main: '#8c8f94',
+					container: '#f1f2f3',
+					onContainer: '#1d2327',
+				},
+			},
+		};
 		const eventModal = createEventModalPlugin();
 		const viewStoragePlugin = createViewStoragePlugin(setStoredView);
 		const eventRequests = new Map<string, Promise<Array<ScheduleEvent>>>();

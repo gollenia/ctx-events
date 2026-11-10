@@ -23,6 +23,8 @@ use Contexis\Events\Event\Presentation\Resources\OccurrenceResource;
 use Contexis\Events\Event\Presentation\Resources\EventCalendarEntryResource;
 use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
+use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Contexis\Events\Shared\Presentation\Links;
 use Contexis\Events\Shared\Presentation\RestRoute;
@@ -505,6 +507,11 @@ final class EventController implements RestController
 			return new \WP_REST_Response(['message' => 'Invalid date range'], 400);
 		}
 
+		$userContext = UserContextFactory::createFromCurrentUser();
+		$statuses = $userContext->isAdmin()
+			? StatusList::of(Status::Published, Status::Draft)
+			: StatusList::public();
+
 		$calendarStartedAt = microtime(true);
 		CalendarTiming::reset();
 		$entries = $this->getEventCalendar->execute(
@@ -513,6 +520,7 @@ final class EventController implements RestController
 			categories: array_map('intval', $request->get_param('categories') ?? []),
 			locationId: $request->has_param('location') ? (int) $request->get_param('location') : null,
 			personId: $request->has_param('person') ? (int) $request->get_param('person') : null,
+			statuses: $statuses,
 		);
 		$calendarDuration = (microtime(true) - $calendarStartedAt) * 1000;
 
