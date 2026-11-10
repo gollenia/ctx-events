@@ -10,12 +10,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-10-30 11:30+0000\n"
+"PO-Revision-Date: 2026-11-10 11:29+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Loco-Version: 2.8.8; wp-7.1.3; php-8.5.12"
+"X-Loco-Version: 2.8.9; wp-7.1.3; php-8.5.12"
 
 #: build/admin.js:3
 msgid " time"
@@ -61,7 +61,7 @@ msgstr "(Kein Titel)"
 msgid "0 means unlimited per booking."
 msgstr "0 bedeutet unbegrenzt pro Buchung"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:122
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:131
 msgid "A booking needs manual confirmation"
 msgstr "Eine Buchung benötigt manuelle Freigabe"
 
@@ -71,7 +71,7 @@ msgid "A brief description shown when the user selects the gateway"
 msgstr ""
 "Kurze Beschreibung, die angezeigt wird, wenn der Nutzer das Gateway auswählt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:123
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:132
 msgid ""
 "A new booking was received and requires manual confirmation or offline "
 "payment handling."
@@ -79,29 +79,25 @@ msgstr ""
 "Eine neue Buchung ist eingegangen und benötigt eine manuelle Freigabe oder "
 "die Bearbeitung einer Offline-Zahlung."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:132
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:141
 msgid "A new booking with online payment was created."
 msgstr "Eine neue Buchung mit Online-Zahlung wurde erstellt."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:131
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:140
 msgid "A new online booking was created"
 msgstr "Eine neue Online-Buchung wurde erstellt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:114
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:123
 msgid "A ticket in your booking has been cancelled."
 msgstr "Ein Ticket in deiner Buchung wurde storniert."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:113
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:122
 msgid "A ticket in your booking was cancelled"
 msgstr "Ein Ticket in deiner Buchung wurde storniert"
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:159
 #: build/frontend.js:7
 msgid "Account Holder"
-msgstr "Kontoinhaber"
-
-#: build/admin.js:1
-msgid "Account holder"
 msgstr "Kontoinhaber"
 
 #: build/admin.js:3
@@ -250,11 +246,11 @@ msgstr "Adresse"
 msgid "Admin"
 msgstr "Admin"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:127
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:136
 msgid "Admin: booking created online"
 msgstr "Admin: Online-Buchung erstellt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:118
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:127
 msgid "Admin: booking pending manual"
 msgstr "Admin: Buchung wartet auf manuelle Freigabe"
 
@@ -343,10 +339,6 @@ msgstr "API-Schlüssel für die Live-Umgebung."
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:98
 msgid "API key for the test environment."
 msgstr "API-Schlüssel für die Test-Umgebung."
-
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:168
-msgid "API keys are missing"
-msgstr "API-Schlüssel fehlen"
 
 #: build/editor/blocks/details-audience/index.js:1
 #: build/editor/blocks/details-date/index.js:1
@@ -454,10 +446,6 @@ msgstr "Teilnehmer"
 msgid "Audience"
 msgstr "Zielgruppe"
 
-#: build/admin.js:2
-msgid "Ausgliedern"
-msgstr "Ausgliedern"
-
 #: includes/Booking/Infrastructure/WpBookingOptions.php:47
 msgid ""
 "Automatically deny bookings when their pending payment transaction expires."
@@ -481,7 +469,7 @@ msgstr "Text für verfügbare Plätze"
 msgid "Back"
 msgstr "Zürück"
 
-#: build/admin.js:1 build/frontend.js:7
+#: build/frontend.js:7
 msgid "Bank"
 msgstr "Bank"
 
@@ -507,10 +495,6 @@ msgstr "Details zur Banküberweisung"
 msgid "Banking Details"
 msgstr "Bankverbindung"
 
-#: build/admin.js:2
-msgid "Bearbeiten"
-msgstr "Bearbeiten"
-
 #: build/editor/blocks/form/checkbox/index.js:1
 #: build/editor/blocks/form/country/index.js:1
 #: build/editor/blocks/form/date/index.js:1
@@ -530,7 +514,7 @@ msgstr "Verhalten"
 msgid "Behaviour"
 msgstr "Verhalten"
 
-#: build/admin.js:1 build/frontend.js:7
+#: build/frontend.js:7
 msgid "BIC"
 msgstr "BIC"
 
@@ -551,6 +535,14 @@ msgid "Compose a featured event section from theme-friendly event blocks."
 msgstr ""
 "Erstellt einen Top-Event-Bereich aus Event-Blöcken, die sich an das Theme-"
 "Design anpassen."
+
+#: build/editor/blocks/details-item/block.json
+msgctxt "block description"
+msgid ""
+"Create your very own description item with icon, image and custom content."
+msgstr ""
+"„Erstelle ein eigenes Beschreibungselement mit Symbol, Bild und "
+"individuellem Inhalt."
 
 #: build/editor/blocks/coupon-editor/block.json
 msgctxt "block description"
@@ -656,6 +648,7 @@ msgctxt "block description"
 msgid "Render the featured event title."
 msgstr "Zeigt den Top-Event Titel"
 
+#: build/editor/blocks/details/block.json
 #: build/editor/blocks/form/container/block.json
 msgctxt "block description"
 msgid "Show a list with selected details of the event"
@@ -711,6 +704,18 @@ msgstr "Zeigt eine Liste oder Karten kommender Veranstaltungen an"
 msgctxt "block description"
 msgid "Shows upcoming events in a table"
 msgstr "Zeigt kommende Veranstaltungen in einer Tabelle"
+
+#: build/editor/blocks/details-item/block.json
+#: build/editor/blocks/details/block.json
+msgctxt "block keyword"
+msgid "list"
+msgstr "Liste"
+
+#: build/editor/blocks/details-item/block.json
+#: build/editor/blocks/details/block.json
+msgctxt "block keyword"
+msgid "table"
+msgstr "Tabelle"
 
 #: build/editor/blocks/booking/block.json
 msgctxt "block style label"
@@ -787,6 +792,11 @@ msgctxt "block title"
 msgid "Event Date"
 msgstr "Veranstaltungsdatum"
 
+#: build/editor/blocks/details/block.json
+msgctxt "block title"
+msgid "Event Details"
+msgstr "Event Details"
+
 #: build/editor/blocks/details-location/block.json
 msgctxt "block title"
 msgid "Event Location"
@@ -861,6 +871,11 @@ msgstr "Orts-Editor"
 msgctxt "block title"
 msgid "Number Field"
 msgstr "Zahlenfeld"
+
+#: build/editor/blocks/details-item/block.json
+msgctxt "block title"
+msgid "Other Item"
+msgstr "Anderes Item"
 
 #: build/editor/blocks/person-editor/block.json
 msgctxt "block title"
@@ -987,7 +1002,7 @@ msgctxt "booking attendee status"
 msgid "Checked in"
 msgstr "Eingecheckt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:100
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:109
 msgid "Booking cancelled"
 msgstr "Buchung storniert"
 
@@ -995,11 +1010,11 @@ msgstr "Buchung storniert"
 msgid "Booking completed"
 msgstr "Buchung abgeschlossen"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:46
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:55
 msgid "Booking confirmed manually"
 msgstr "Buchung manuell bestätigt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:55
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:64
 msgid "Booking confirmed online"
 msgstr "Buchung online bestätigt"
 
@@ -1015,7 +1030,7 @@ msgstr "Online-Buchung erstellt"
 msgid "Booking currency"
 msgstr "Buchungswährung"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:91
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:100
 msgid "Booking denied"
 msgstr "Buchung abgelehnt"
 
@@ -1114,8 +1129,8 @@ msgstr "Buchung startet am "
 msgid "Booking will start on"
 msgstr "Buchung startet am"
 
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:83
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:84 build/admin.js:2
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:88
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:89 build/admin.js:2
 #: build/admin.js:3 build/editor.js:1
 msgid "Bookings"
 msgstr "Buchungen"
@@ -1176,6 +1191,11 @@ msgstr "Buchung stornieren"
 msgid "Cancel event"
 msgstr "Veranstaltung absagen"
 
+#: build/admin.js:2 build/admin.js:3
+msgctxt "cancel event"
+msgid "Cancel"
+msgstr "Absagen"
+
 #: build/admin.js:2
 msgid "Cancel instance"
 msgstr "Instanz abbrechen"
@@ -1219,8 +1239,8 @@ msgid "Cards"
 msgstr "Karten"
 
 #: includes/Person/Infrastructure/PersonPost.php:145
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:128
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:129 build/admin.js:3
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:133
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:134 build/admin.js:3
 msgid "Categories"
 msgstr "Kategorien"
 
@@ -1335,6 +1355,10 @@ msgstr "Spalte"
 msgid "Columns"
 msgstr "Spalten"
 
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:50
+msgid "Complete your payment"
+msgstr "Bezahlung abschließen"
+
 #: build/frontend.js:7
 msgid "Complete your payment using the link below."
 msgstr "Schließen Sie Ihre Zahlung über den folgenden Link ab."
@@ -1398,8 +1422,13 @@ msgid "Copy"
 msgstr "Kopieren"
 
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:112
-msgid "Copy this URL to your Next-gen webhook configuration in Mollie."
-msgstr "Kopiere diese URL in deine Next-Gen-Webhook-Konfiguration in Mollie."
+msgid ""
+"Copy this URL to your Next-gen webhook configuration in Mollie. It is also "
+"sent automatically as the Classic payment webhook URL."
+msgstr ""
+"Kopiere diese URL in die Konfiguration deines Next-Gen-Webhooks bei Mollie. "
+"Sie wird außerdem automatisch als Webhook-URL für klassische Zahlungen "
+"übermittelt."
 
 #: build/admin.js:1
 msgid "Could not add attendee."
@@ -1432,6 +1461,10 @@ msgstr "Buchung konnte nicht gespeichert werden."
 #: build/admin.js:1
 msgid "Could not save note."
 msgstr "Notiz konnte nicht gespeichert werden."
+
+#: build/admin.js:1
+msgid "Could not send payment link."
+msgstr "Bezahl-Link konnte nicht versandt werden"
 
 #: build/admin.js:1
 msgid "Could not update attendee."
@@ -1496,8 +1529,8 @@ msgstr "Gutschein-Einstellungen"
 #: includes/Payment/Infrastructure/CouponPost.php:25
 #: includes/Payment/Infrastructure/CouponPost.php:27
 #: includes/Payment/Infrastructure/CouponPost.php:55
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:101
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:102 build/admin.js:2
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:106
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:107 build/admin.js:2
 msgid "Coupons"
 msgstr "Gutscheine"
 
@@ -1506,8 +1539,8 @@ msgid "Create copies"
 msgstr "Kopien erstellen"
 
 #: build/admin.js:2
-msgid "Create one draft copy for each selected date."
-msgstr "Einen Entwurf für jedes ausgewählte Datum ertstellen"
+msgid "Create one published event for each selected date."
+msgstr "Erstelle ein veröffentlichtes Event für jedes ausgewählte Datum"
 
 #: build/admin.js:1
 msgid "Created"
@@ -1685,6 +1718,10 @@ msgstr "Beschreibung"
 msgid "Description for the input field"
 msgstr "Beschreibung für das Eingabefeld"
 
+#: build/admin.js:2
+msgid "Detach"
+msgstr "Herauslösen"
+
 #: build/admin.js:3 build/editor.js:1
 msgid "Detach occurrence"
 msgstr "Termin ausgliedern"
@@ -1692,10 +1729,6 @@ msgstr "Termin ausgliedern"
 #: build/editor.js:1
 msgid "Detached"
 msgstr "Ausgegliedert"
-
-#: build/admin.js:1
-msgid "Details"
-msgstr "Details"
 
 #: build/admin.js:1
 msgctxt "dialog action: abort and close modal"
@@ -1870,10 +1903,6 @@ msgstr "Ausgegliederte Veranstaltung bearbeiten"
 msgid "Edit Event"
 msgstr "Veranstaltung bearbeiten"
 
-#: build/admin.js:3
-msgid "Edit event"
-msgstr "Veranstaltung bearbeiten"
-
 #: includes/Event/Infrastructure/EventTaxonomy.php:61
 msgid "Edit Event Category"
 msgstr "Veranstaltungskategorie bearbeiten"
@@ -1934,8 +1963,8 @@ msgstr "Einstellungen wurden gespeichert."
 
 #: includes/Form/Infrastructure/BookingFormPost.php:47
 #: includes/Person/Infrastructure/PersonPost.php:142
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:119
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:120 build/admin.js:2
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:124
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:125 build/admin.js:2
 msgid "Email"
 msgstr "E-Mail"
 
@@ -2101,9 +2130,11 @@ msgstr "Hier erschient die Zeit"
 #: includes/Event/Infrastructure/EventPost.php:42
 #: includes/Event/Infrastructure/EventPost.php:44
 #: includes/Event/Infrastructure/EventPost.php:71
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:51
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:62
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:63
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:52
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:53
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:56
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:67
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:68
 #: includes/Shared/Infrastructure/Icons/IconRegistry.php:31 build/admin.js:3
 msgid "Events"
 msgstr "Veranstaltungen"
@@ -2303,8 +2334,8 @@ msgstr "Formular-Schlagwort"
 msgid "Form Tags"
 msgstr "Formular-Schlagwörter"
 
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:110
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:111 build/admin.js:3
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:115
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:116 build/admin.js:3
 msgid "Forms"
 msgstr "Formulare"
 
@@ -2352,8 +2383,8 @@ msgstr "Kommende Veranstaltungen"
 msgid "Gateway"
 msgstr "Gateway"
 
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:144
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:145
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:149
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:150
 msgid "Gateways"
 msgstr "Gateways"
 
@@ -2450,7 +2481,7 @@ msgstr ""
 msgid "I would like to support the event with a donation"
 msgstr "Ich möchte die Veranstaltung mit einer Spende unterstützen"
 
-#: build/admin.js:1 build/frontend.js:7
+#: build/frontend.js:7
 msgid "IBAN"
 msgstr "IBAN"
 
@@ -2680,6 +2711,10 @@ msgstr "Live"
 msgid "Live API Key"
 msgstr "Live-API-Schlüssel"
 
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:173
+msgid "Live API key is missing"
+msgstr "Live API Key nicht eingetragen"
+
 #: build/editor/blocks/details-spaces/index.js:1
 msgid "Loading available spaces…"
 msgstr "Verfügbare Plätze werden geladen …"
@@ -2803,7 +2838,8 @@ msgstr ""
 "einfach Veranstaltungen, verwalten Sie Teilnehmer, verfolgen Sie "
 "Verfügbarkeiten und wickeln Sie Zahlungen ab"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:30
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:31
+#: build/admin.js:1
 msgid "Mollie"
 msgstr "Mollie"
 
@@ -2815,7 +2851,7 @@ msgstr "Mollie-Webhook-URL"
 msgid "Monday"
 msgstr "Montag"
 
-#: build/editor/blocks/program-pdf-export/index.js:1
+#: build/admin.js:3 build/editor/blocks/program-pdf-export/index.js:1
 msgid "Month"
 msgstr "Monat"
 
@@ -2916,6 +2952,10 @@ msgstr "Nächstes passendes Event"
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Next month"
 msgstr "Nächsten Monat"
+
+#: build/admin.js:3
+msgid "Next period"
+msgstr "Nächster Zeitraum"
 
 #: build/editor/blocks/featured-event/index.js:1
 msgid "Next upcoming event"
@@ -3135,11 +3175,15 @@ msgstr "Ozeanien"
 msgid "of"
 msgstr "von"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:73
+#: build/admin.js:1
+msgid "Offline"
+msgstr "Offline"
+
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:82
 msgid "Offline payment expired"
 msgstr "Offline-Zahlung abgelaufen"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:64
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:73
 msgid "Offline payment expiring"
 msgstr "Offline-Zahlung läuft ab"
 
@@ -3157,10 +3201,6 @@ msgstr "Nur noch wenige Plätze frei"
 #: build/editor.js:1
 msgid "Open Mail Settings"
 msgstr "Mail-Einstellungen"
-
-#: build/admin.js:1
-msgid "Open payment"
-msgstr "Offene Zahlung"
 
 #: build/admin.js:3
 msgid "Open-ended"
@@ -3294,7 +3334,7 @@ msgstr "Zahlung storniert"
 msgid "Payment expired"
 msgstr "Zahlung abgelaufen"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:82
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:91
 #: build/frontend.js:7
 msgid "Payment failed"
 msgstr "Zahlung fehlgeschlagen"
@@ -3302,6 +3342,10 @@ msgstr "Zahlung fehlgeschlagen"
 #: build/admin.js:3
 msgid "Payment Gateways"
 msgstr "Zahlungs-Gateways"
+
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:46
+msgid "Payment link"
+msgstr "Bezahl-Link"
 
 #: build/admin.js:1
 msgid "Payment link copied to clipboard."
@@ -3311,13 +3355,21 @@ msgstr "Zahlungslink in die Zwischenablage kopiert."
 msgid "Payment link generated."
 msgstr "Zahlungslink wurde erstellt."
 
+#: build/admin.js:1
+msgid "Payment link sent."
+msgstr "Bezahl-Link gesendet"
+
 #: includes/Booking/Infrastructure/Wordpress/BookingPaymentLinkRedirect.php:46
 msgid "Payment link unavailable"
 msgstr "Zahlungslink nicht verfügbar"
 
-#: build/frontend.js:7
+#: build/admin.js:1 build/frontend.js:7
 msgid "Payment method"
 msgstr "Zahlungsmethode"
+
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:168
+msgid "Payment mode is invalid"
+msgstr "Bezahlmethode ist ungültig"
 
 #: build/frontend.js:7
 msgid "Payment pending"
@@ -3417,7 +3469,7 @@ msgstr "Platzhaltertext"
 msgid "Please accept the terms to continue."
 msgstr "Bitte akzeptieren Sie die Bedingungen, um fortzufahren."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:69
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:78
 msgid ""
 "Please complete your payment soon or the reserved spaces may be released."
 msgstr ""
@@ -3432,6 +3484,10 @@ msgstr "Bitte setzen Sie vor dem Speichern ein Startdatum."
 msgid "Please transfer the amount using the following bank details."
 msgstr ""
 "Bitte überweisen Sie den Betrag unter Verwendung der folgenden Bankdaten."
+
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:51
+msgid "Please use the payment link below to complete your booking."
+msgstr "Bitte nutze den Bezahl-Link unten um deine Buchung zu komplettieren"
 
 #: build/editor/blocks/details-spaces/render.php:43
 msgid "Plenty of spaces left"
@@ -3474,6 +3530,10 @@ msgstr "Präfix"
 #: build/admin.js:2
 msgid "Preset"
 msgstr "Voreinstellung"
+
+#: build/admin.js:3
+msgid "Previous period"
+msgstr "Letzte Buchung"
 
 #: build/editor/blocks/details-price/render.php:34
 #: build/editor/blocks/details-price/render.php:44 build/admin.js:1
@@ -3529,8 +3589,8 @@ msgstr "Wiederkehrende Veranstaltung"
 #: includes/Event/Infrastructure/RecurringEventPost.php:16
 #: includes/Event/Infrastructure/RecurringEventPost.php:18
 #: includes/Event/Infrastructure/RecurringEventPost.php:44
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:92
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:93 build/admin.js:3
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:97
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:98 build/admin.js:3
 msgid "Recurring Events"
 msgstr "Wiederkehrende Veranstaltungen"
 
@@ -3574,7 +3634,7 @@ msgstr "Anmeldeformular"
 msgid "Rejected"
 msgstr "Abgelehnt"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:65
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:74
 msgid "Reminder that an offline payment must be completed soon."
 msgstr ""
 "Erinnerung daran, dass eine Offline-Zahlung bald abgeschlossen werden muss."
@@ -3912,26 +3972,34 @@ msgstr "Admin-Mails an diese Person schicken"
 msgid "Send email notification"
 msgstr "E-Mail-Benachrichtigung senden"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:119
+#: build/admin.js:1
+msgid "Send payment link"
+msgstr "Bezahl-Link senden"
+
+#: build/admin.js:1
+msgid "Sending…"
+msgstr "Sende..."
+
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:128
 msgid "Sent to admins when a new booking needs manual handling."
 msgstr ""
 "Wird Administratoren gesendet, wenn eine neue Buchung manuell bearbeitet "
 "werden muss."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:128
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:137
 msgid "Sent to admins when a new online booking was created."
 msgstr ""
 "Wird Administratoren gesendet, wenn eine neue Online-Buchung erstellt wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:101
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:110
 msgid "Sent to participants when a booking was cancelled."
 msgstr "Wird Teilnehmenden gesendet, wenn eine Buchung storniert wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:92
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:101
 msgid "Sent to participants when a booking was denied."
 msgstr "Wird Teilnehmenden gesendet, wenn eine Buchung abgelehnt wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:47
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:56
 msgid "Sent to participants when a booking was manually confirmed."
 msgstr ""
 "Wird Teilnehmenden gesendet, wenn eine Buchung manuell bestätigt wurde."
@@ -3944,7 +4012,7 @@ msgstr ""
 "Wird Teilnehmenden gesendet, wenn eine Buchung eingegangen ist, aber noch "
 "manuell bestätigt werden muss oder eine Offline-Zahlung aussteht."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:110
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:119
 msgid ""
 "Sent to participants when a single attendee ticket in a booking was "
 "cancelled."
@@ -3952,24 +4020,32 @@ msgstr ""
 "Wird Teilnehmenden gesendet, wenn ein einzelnes Ticket innerhalb einer "
 "Buchung storniert wurde."
 
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:47
+msgid ""
+"Sent to participants when an administrator sends a payment link for an "
+"unpaid online booking."
+msgstr ""
+"Wird an Teilnehmende versendet, wenn ein Administrator einen Zahlungslink "
+"für eine noch nicht bezahlte Online-Buchung verschickt."
+
 #: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:38
 msgid "Sent to participants when an online payment booking has been started."
 msgstr ""
 "Wird Teilnehmenden gesendet, wenn für eine Buchung eine Online-Zahlung "
 "gestartet wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:56
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:65
 msgid "Sent to participants when an online payment completed successfully."
 msgstr ""
 "Wird Teilnehmenden gesendet, wenn eine Online-Zahlung erfolgreich "
 "abgeschlossen wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:83
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:92
 msgid "Sent to participants when an online payment failed."
 msgstr ""
 "Wird Teilnehmenden gesendet, wenn eine Online-Zahlung fehlgeschlagen ist."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:74
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:83
 msgid ""
 "Sent when an unpaid offline booking expired and the spaces were released."
 msgstr ""
@@ -3998,8 +4074,8 @@ msgstr ""
 "Gib hier einen Text ein, der angezeigt wird, wenn keine Veranstaltungen "
 "sichtbar sind"
 
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:72
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:73
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:77
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:78
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -4270,8 +4346,8 @@ msgstr "Tabelle"
 msgid "Table options"
 msgstr "Tabellenoptionen"
 
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:136
-#: includes/Platform/Wordpress/Admin/AdminMenu.php:137 build/admin.js:3
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:141
+#: includes/Platform/Wordpress/Admin/AdminMenu.php:142 build/admin.js:3
 #: build/editor/blocks/featured-event/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -4293,6 +4369,10 @@ msgstr "Test"
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:97
 msgid "Test API Key"
 msgstr "Test-API-Schlüssel"
+
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:174
+msgid "Test API key is missing"
+msgstr "Test.API-key fehlt"
 
 #: build/2205.js:1 build/4586.js:1
 msgid "Text"
@@ -4471,7 +4551,7 @@ msgstr "Donnerstag"
 msgid "Ticket"
 msgstr "Ticket"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:109
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:118
 msgid "Ticket cancelled"
 msgstr "Ticket storniert"
 
@@ -4545,9 +4625,13 @@ msgstr "Gesamtanzahl Gutscheine"
 msgid "Total due"
 msgstr "Fälliger Gesamtbetrag"
 
-#: build/admin.js:1 build/admin.js:2
+#: build/admin.js:2
 msgid "Transaction"
 msgstr "Transaktion"
+
+#: build/admin.js:1
+msgid "Transaction ID / Reference"
+msgstr "Transaktions_ID / Referenz"
 
 #: build/admin.js:1
 msgid "Transactions"
@@ -4575,7 +4659,7 @@ msgid ""
 "details on the right."
 msgstr "Zweispaltiges Layout mit Bild links und Event-Details rechts"
 
-#: build/admin.js:3
+#: build/admin.js:1 build/admin.js:3
 msgid "Type"
 msgstr "Typ"
 
@@ -4613,11 +4697,11 @@ msgstr "Deaktiviert"
 msgid "Underline"
 msgstr "Unterstreichen"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:96
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:105
 msgid "Unfortunately, your booking could not be accepted."
 msgstr "Deine Buchung konnte leider nicht angenommen werden."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:87
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:96
 msgid "Unfortunately, your online payment could not be completed."
 msgstr "Deine Online-Zahlung konnte leider nicht abgeschlossen werden."
 
@@ -4730,7 +4814,7 @@ msgstr "Wert"
 #: includes/Form/Infrastructure/BookingFormPost.php:77
 #: includes/Location/Infrastructure/LocationPost.php:32
 #: includes/Payment/Infrastructure/CouponPost.php:31
-#: includes/Person/Infrastructure/PersonPost.php:49
+#: includes/Person/Infrastructure/PersonPost.php:49 build/admin.js:3
 msgid "View"
 msgstr "Ansehen"
 
@@ -4800,7 +4884,7 @@ msgstr "Wir haben deine Buchung erhalten"
 msgid "Webhook signing secret"
 msgstr "Webhook-Signaturschlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:172
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:180
 msgid "Webhook signing secret is missing"
 msgstr "Webhook-Signaturschlüssel fehlt"
 
@@ -4812,7 +4896,7 @@ msgstr "Website"
 msgid "Wednesday"
 msgstr "Mittwoch"
 
-#: build/editor/blocks/program-pdf-export/index.js:1
+#: build/admin.js:3 build/editor/blocks/program-pdf-export/index.js:1
 msgid "Week"
 msgstr "Woche"
 
@@ -4875,7 +4959,7 @@ msgstr ""
 "Schreiben Sie einen Text, den der Benutzer sieht, wenn die "
 "Banküberweisungsinformationen angezeigt werden"
 
-#: build/editor/blocks/program-pdf-export/index.js:1
+#: build/admin.js:3 build/editor/blocks/program-pdf-export/index.js:1
 msgid "Year"
 msgstr "Jahr"
 
@@ -4915,18 +4999,18 @@ msgstr "Du kannst es nochmal mit dem untenstehenden Zahlungs-Link versuchen."
 msgid "You will receive a confirmation email shortly."
 msgstr "Sie erhalten in Kürze eine Bestätigungs-E-Mail."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:78
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:87
 msgid ""
 "Your booking expired because the offline payment was not completed in time."
 msgstr ""
 "Deine Buchung ist abgelaufen, weil die Offline-Zahlung nicht rechtzeitig "
 "abgeschlossen wurde."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:105
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:114
 msgid "Your booking has been cancelled."
 msgstr "Deine Buchung wurde storniert."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:51
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:60
 msgid "Your booking has been confirmed. We look forward to seeing you."
 msgstr "Deine Buchung wurde bestätigt. Wir freuen uns auf dich."
 
@@ -4936,16 +5020,16 @@ msgid ""
 msgstr ""
 "Deine Buchung ist eingegangen und wartet derzeit auf eine manuelle Freigabe."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:77
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:86
 msgid "Your booking has expired"
 msgstr "Deine Buchung ist abgelaufen"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:68
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:77
 msgid "Your booking is about to expire"
 msgstr "Deine Buchung läuft bald ab"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:50
 #: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:59
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:68
 msgid "Your booking is confirmed"
 msgstr "Deine Buchung ist bestätigt"
 
@@ -4953,7 +5037,7 @@ msgstr "Deine Buchung ist bestätigt"
 msgid "Your booking reference"
 msgstr "Ihre Buchungsreferenz"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:104
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:113
 msgid "Your booking was cancelled"
 msgstr "Deine Buchung wurde storniert"
 
@@ -4966,7 +5050,7 @@ msgid "Your booking was created and the online payment process has started."
 msgstr ""
 "Deine Buchung wurde erstellt und der Online-Zahlungsvorgang wurde gestartet."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:95
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:104
 msgid "Your booking was denied"
 msgstr "Deine Buchung wurde abgelehnt"
 
@@ -4974,7 +5058,7 @@ msgstr "Deine Buchung wurde abgelehnt"
 msgid "Your details"
 msgstr "Ihre Daten"
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:60
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:69
 msgid "Your online payment was successful and your booking is now confirmed."
 msgstr ""
 "Deine Online-Zahlung war erfolgreich und deine Buchung ist jetzt bestätigt."
@@ -4983,7 +5067,7 @@ msgstr ""
 msgid "Your payment could not be completed"
 msgstr "Deine Zahlung konnte nicht abgeschlossen werden."
 
-#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:86
+#: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:95
 msgid "Your payment failed"
 msgstr "Deine Zahlung ist fehlgeschlagen"
 
@@ -5014,7 +5098,3 @@ msgstr "PLZ"
 #: build/admin.js:3
 msgid "Änderungen speichern"
 msgstr "Änderungen speichern"
-
-#: build/admin.js:1
-msgid "— None —"
-msgstr "— Keine —"
