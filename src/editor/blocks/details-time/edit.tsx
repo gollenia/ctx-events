@@ -3,7 +3,7 @@ import type {
 	DetailsTimeAttributes,
 	EventDateMeta,
 } from '@events/details/types';
-import { formatTimeRange } from '@events/i18n';
+import { formatDailyTimeRange, formatTimeRange } from '@events/i18n';
 import { RichText, useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { select } from '@wordpress/data';
@@ -32,7 +32,9 @@ const edit = (props: DetailBlockProps<DetailsTimeAttributes>) => {
 			return '';
 		}
 
-		return formatTimeRange(meta._event_start, meta._event_end);
+		return Boolean(Number(meta._event_daily ?? 0))
+			? formatDailyTimeRange(meta._event_start, meta._event_end)
+			: formatTimeRange(meta._event_start, meta._event_end);
 	};
 
 	return (

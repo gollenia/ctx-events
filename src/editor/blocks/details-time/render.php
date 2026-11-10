@@ -10,7 +10,9 @@ if (!$event) {
     return;
 }
 
-$time = BlockEventLoader::formatTimeRange($event->startDate, $event->endDate);
+$time = $event->isDaily
+	? BlockEventLoader::formatDailyTimeRange($event->startDate, $event->endDate)
+	: BlockEventLoader::formatTimeRange($event->startDate, $event->endDate);
 
 ?>
 
