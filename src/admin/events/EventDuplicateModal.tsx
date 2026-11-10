@@ -31,6 +31,7 @@ const EventDuplicateModal = ({
 	const [dateRows, setDateRows] = useState<Array<DuplicateDateRow>>([
 		{ id: 1, date: '' },
 	]);
+	const [title, setTitle] = useState(item.name ?? '');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const validDates = dateRows
 		.map((row) => row.date)
@@ -95,7 +96,10 @@ const EventDuplicateModal = ({
 
 		setIsSubmitting(true);
 		try {
-			await action.callback([item], onActionPerformed, { dates: validDates });
+			await action.callback([item], onActionPerformed, {
+				dates: validDates,
+				title,
+			});
 			onClose();
 		} finally {
 			setIsSubmitting(false);
@@ -130,6 +134,13 @@ const EventDuplicateModal = ({
 			<p>
 				{__('Create one published event for each selected date.', 'ctx-events')}
 			</p>
+			<TextControl
+				__next40pxDefaultSize
+				label={__('Title', 'ctx-events')}
+				disabled={isSubmitting}
+				onChange={setTitle}
+				value={title}
+			/>
 			<SmallDataTable
 				className="ctx-small-data-table widefat striped"
 				fields={fields}

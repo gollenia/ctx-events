@@ -10,7 +10,11 @@ interface EventRepository
 {
     public function find(?EventId $id): ?Event;
     public function get(?EventId $id): Event;
-	public function duplicateAt(EventId $eventId, \DateTimeImmutable $startDate): ?EventId;
+	public function duplicateAt(
+		EventId $eventId,
+		\DateTimeImmutable $startDate,
+		?string $title = null,
+	): ?EventId;
     public function first(EventCriteria $criteria): ?Event;
     public function search(EventCriteria $criteria): EventCollection;
     public function count(EventCriteria $criteria): int;

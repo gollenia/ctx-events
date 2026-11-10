@@ -68,7 +68,11 @@ final class FakeEventRepository implements EventRepository
         throw new \RuntimeException('Event not found (mock)');
     }
 
-	public function duplicateAt(EventId $eventId, \DateTimeImmutable $startDate): ?EventId
+	public function duplicateAt(
+		EventId $eventId,
+		\DateTimeImmutable $startDate,
+		?string $title = null,
+	): ?EventId
 	{
 		if ($this->find($eventId) === null) {
 			return null;

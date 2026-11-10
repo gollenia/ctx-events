@@ -131,6 +131,12 @@ final class EventController implements RestController
 					'type' => 'array',
 					'items' => ['type' => 'string', 'format' => 'date'],
 				],
+				'title' => [
+					'required' => false,
+					'sanitize_callback' => 'sanitize_text_field',
+					'description' => 'The title for the event copies.',
+					'type' => 'string',
+				],
 			],
 		]]);
 
@@ -408,6 +414,7 @@ final class EventController implements RestController
 
 		$newEventIds = $this->duplicateEvent->execute(
 			EventId::from((int) $request->get_param('id')),
+			$request->has_param('title') ? (string) $request->get_param('title') : null,
 			...$startDates,
 		);
 		if ($newEventIds === []) {

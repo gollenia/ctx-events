@@ -18,11 +18,19 @@ final class DuplicateEvent implements UseCase
 	/**
 	 * @return array<EventId>
 	 */
-	public function execute(EventId $eventId, \DateTimeImmutable ...$startDates): array
+	public function execute(
+		EventId $eventId,
+		?string $title,
+		\DateTimeImmutable ...$startDates,
+	): array
 	{
 		$duplicatedEventIds = [];
 		foreach ($startDates as $startDate) {
-			$duplicatedEventId = $this->eventRepository->duplicateAt($eventId, $startDate);
+			$duplicatedEventId = $this->eventRepository->duplicateAt(
+				$eventId,
+				$startDate,
+				$title,
+			);
 			if ($duplicatedEventId !== null) {
 				$duplicatedEventIds[] = $duplicatedEventId;
 			}

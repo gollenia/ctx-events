@@ -7,7 +7,11 @@ use Contexis\Events\Shared\Infrastructure\Wordpress\DuplicatePost;
 
 class EventDuplicatePost extends DuplicatePost
 {
-	public function duplicateAt(int $postId, \DateTimeImmutable $targetDate): ?int
+	public function duplicateAt(
+		int $postId,
+		\DateTimeImmutable $targetDate,
+		?string $title = null,
+	): ?int
 	{
 		$sourcePost = get_post($postId);
 		if (!($sourcePost instanceof \WP_Post) || !$this->supportsPostType($sourcePost->post_type)) {
@@ -22,6 +26,13 @@ class EventDuplicatePost extends DuplicatePost
 		$newPostId = $this->duplicate($postId);
 		if ($newPostId === null) {
 			return null;
+		}
+
+		if ($title !== null) {
+			wp_update_post([
+				'ID' => $newPostId,
+				'post_title' => $title,
+			]);
 		}
 
 		$newStart = $targetDate->setTime(

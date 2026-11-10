@@ -12,6 +12,7 @@ type EventCancelOptions = {
 
 type EventDuplicateOptions = {
 	dates?: Array<string>;
+	title?: string;
 };
 
 const eventPostId = (event: Event): number | string => event.id;
@@ -19,11 +20,12 @@ const eventPostId = (event: Event): number | string => event.id;
 const duplicateEvent = async (
 	event: Event,
 	dates: Array<string>,
+	title: string,
 ): Promise<void> => {
 	await apiFetch({
 		path: `/events/v3/events/${eventPostId(event)}/duplicate`,
 		method: 'POST',
-		data: { dates },
+		data: { dates, title },
 	});
 };
 
@@ -129,7 +131,8 @@ export const createActions = (
 			}
 
 			const dates = (options as EventDuplicateOptions | undefined)?.dates ?? [];
-			await duplicateEvent(event, dates);
+			const title = (options as EventDuplicateOptions | undefined)?.title ?? event.name;
+			await duplicateEvent(event, dates, title);
 			onActionPerformed?.([event]);
 		},
 	},

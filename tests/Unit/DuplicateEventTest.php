@@ -16,17 +16,17 @@ test('duplicate event delegates every selected date to the event repository', fu
 	$eventRepository
 		->shouldReceive('duplicateAt')
 		->once()
-		->with($sourceEventId, $firstDate)
+		->with($sourceEventId, $firstDate, 'Copy title')
 		->andReturn($firstDuplicatedEventId);
 	$eventRepository
 		->shouldReceive('duplicateAt')
 		->once()
-		->with($sourceEventId, $secondDate)
+		->with($sourceEventId, $secondDate, 'Copy title')
 		->andReturn($secondDuplicatedEventId);
 
 	$useCase = new DuplicateEvent($eventRepository);
 
-	expect($useCase->execute($sourceEventId, $firstDate, $secondDate))
+	expect($useCase->execute($sourceEventId, 'Copy title', $firstDate, $secondDate))
 		->toBe([$firstDuplicatedEventId, $secondDuplicatedEventId]);
 });
 
@@ -36,5 +36,7 @@ test('duplicate event skips dates that cannot be duplicated', function () {
 
 	$useCase = new DuplicateEvent($eventRepository);
 
-	expect($useCase->execute(EventId::from(999), new DateTimeImmutable('2026-09-10')))->toBe([]);
+	expect(
+		$useCase->execute(EventId::from(999), null, new DateTimeImmutable('2026-09-10')),
+	)->toBe([]);
 });

@@ -104,9 +104,17 @@ class WpEventRepository implements EventRepository, EventStatusRepository, Event
         return $event;
     }
 
-	public function duplicateAt(EventId $eventId, \DateTimeImmutable $startDate): ?EventId
+	public function duplicateAt(
+		EventId $eventId,
+		\DateTimeImmutable $startDate,
+		?string $title = null,
+	): ?EventId
 	{
-		$newPostId = $this->duplicatePost->duplicateAt($eventId->toInt(), $startDate);
+		$newPostId = $this->duplicatePost->duplicateAt(
+			$eventId->toInt(),
+			$startDate,
+			$title,
+		);
 		if ($newPostId === null) {
 			return null;
 		}
