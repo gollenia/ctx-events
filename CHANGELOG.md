@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.2.5 - 2026-11-10
+
+### Fixed
+
+- Regenerate WordPress rewrite rules for event URLs after installation, updates,
+  and event-slug changes.
+- Clearly label payment gateways as configured or not configured for activation.
+
 ## 0.2.4 - 2026-11-10
 
 ### Added
