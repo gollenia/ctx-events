@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Replaced the event calendar header with WordPress components: native date
+  input, view selector, navigation controls, and a responsive three-part
+  layout.
+- Added text domains to all block metadata and refreshed German translations.
+- Improved calendar affordances with hover feedback for days and pointer
+  cursors for clickable events.
+
+## 0.2.1 - 2026-11-10
+
+### Added
+
+- Display draft events in the admin calendar with a distinct, subdued style.
+
+### Changed
+
+- Allow editors to access the event and recurring-event administration areas.
+- Refined the event calendar styling.
+
 ## 0.2.0 - 2026-11-03
 
 ### Added
