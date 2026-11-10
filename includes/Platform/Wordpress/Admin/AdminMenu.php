@@ -11,7 +11,9 @@ use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Payment\Infrastructure\CouponPost;
 
 final class AdminMenu implements AdminServiceInterface
-{     public const MENU_SLUG = 'ctx_events_admin_menu';
+{
+    public const MENU_SLUG = 'ctx_events_admin_menu';
+    private const EVENT_CAPABILITY = 'edit_posts';
     public string $hook = 'admin_menu';
 
     public function __construct(private BookingRepository $bookingRepository)
@@ -46,11 +48,14 @@ final class AdminMenu implements AdminServiceInterface
     public function register(): void
     {
         $pendingBookings = $this->bookingRepository->countPending();
+        $eventsMenuLabel = current_user_can('manage_options')
+            ? $this->withCounter(__('Events', 'ctx-events'), $pendingBookings)
+            : __('Events', 'ctx-events');
 
         add_menu_page(
             __('Events', 'ctx-events'),
-            $this->withCounter("Events", $pendingBookings),
-            'manage_options',
+            $eventsMenuLabel,
+            self::EVENT_CAPABILITY,
             self::MENU_SLUG,
             fn() => print('<div id="ctx-events-list"></div>'),
             'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgLTk2MCA5NjAgOTYwIiB3aWR0aD0iMjRweCIgZmlsbD0iIzFmMWYxZiI+PHBhdGggZD0iTTUwOS0yNjlxLTI5LTI5LTI5LTcxdDI5LTcxcTI5LTI5IDcxLTI5dDcxIDI5cTI5IDI5IDI5IDcxdC0yOSA3MXEtMjkgMjktNzEgMjl0LTcxLTI5Wk0yMDAtODBxLTMzIDAtNTYuNS0yMy41VDEyMC0xNjB2LTU2MHEwLTMzIDIzLjUtNTYuNVQyMDAtODAwaDQwdi04MGg4MHY4MGgzMjB2LTgwaDgwdjgwaDQwcTMzIDAgNTYuNSAyMy41VDg0MC03MjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC04MEgyMDBabTAtODBoNTYwdi00MDBIMjAwdjQwMFptMC00ODBoNTYwdi04MEgyMDB2ODBabTAgMHYtODAgODBaIi8+PC9zdmc+',
@@ -61,7 +66,7 @@ final class AdminMenu implements AdminServiceInterface
             self::MENU_SLUG,
             __('Events', 'ctx-events'),
             __('Events', 'ctx-events'),
-            'manage_options',
+            self::EVENT_CAPABILITY,
             self::MENU_SLUG,
             fn() => print('<div id="ctx-events-list"></div>'),
             0
@@ -91,7 +96,7 @@ final class AdminMenu implements AdminServiceInterface
             self::MENU_SLUG,
             __('Recurring Events', 'ctx-events'),
             __('Recurring Events', 'ctx-events'),
-            'manage_options',
+            self::EVENT_CAPABILITY,
             'contexis_events_recurring',
             fn() => print('<div id="ctx-recurring-events-admin"></div>')
         );
