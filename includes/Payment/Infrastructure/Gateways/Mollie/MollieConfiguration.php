@@ -43,8 +43,12 @@ final class MollieConfiguration implements GatewayConfiguration
             'enabled' => isset($data['enabled']) ? (bool) $data['enabled'] : false,
             'title' => sanitize_text_field($data['title'] ?? 'Mollie'),
             'mode' => sanitize_key($data['mode'] ?? 'test'),
-            'api_key_live' => sanitize_text_field($data['api_key_live'] ?? ''),
-            'api_key_test' => sanitize_text_field($data['api_key_test'] ?? ''),
+			'api_key_live' => sanitize_text_field(
+				$data['apiKeyLive'] ?? $data['api_key_live'] ?? ''
+			),
+			'api_key_test' => sanitize_text_field(
+				$data['apiKeyTest'] ?? $data['api_key_test'] ?? ''
+			),
             'webhook_signing_secret' => sanitize_text_field($data['webhookSigningSecret'] ?? $data['webhook_signing_secret'] ?? ''),
             'instructions' => wp_kses_post($data['instructions'] ?? ''),
             'description' => sanitize_text_field($data['description'] ?? ''),

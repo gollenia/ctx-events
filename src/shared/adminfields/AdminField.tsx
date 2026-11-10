@@ -110,9 +110,9 @@ const AdminField = ({
 
 	if (type === 'select' || type === 'radio') {
 		const mappedOptions = Object.entries(props.options).map(
-			([optionLabel, optionValue]) => ({
-				label: optionLabel,
-				value: String(optionValue),
+			([optionValue, optionLabel]) => ({
+				label: String(optionLabel),
+				value: optionValue,
 			}),
 		);
 
