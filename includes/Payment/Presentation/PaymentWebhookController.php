@@ -76,13 +76,14 @@ final class PaymentWebhookController implements RestController
         $headers = [];
 
         foreach ($request->get_headers() as $name => $values) {
+            $name = str_replace('_', '-', strtolower($name));
             if (is_array($values)) {
-                $headers[strtolower($name)] = implode(', ', array_map('strval', $values));
+                $headers[$name] = implode(', ', array_map('strval', $values));
                 continue;
             }
 
             if (is_string($values)) {
-                $headers[strtolower($name)] = $values;
+                $headers[$name] = $values;
             }
         }
 
