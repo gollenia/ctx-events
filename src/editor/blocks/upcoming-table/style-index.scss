@@ -1,3 +1,5 @@
+@use '../../../../node_modules/@contexis/wp-react-form/lib/style';
+
 .ctx-events-table-block__content {
 	display: flex;
 	flex-direction: column;
@@ -59,18 +61,6 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--wp--custom--ctx-events--space--sm);
-	}
-
-	button {
-		padding: var(--wp--custom--ctx-events--space--sm) var(--wp--custom--ctx-events--space--md);
-		background: var(--wp--custom--ctx-events--color--surface-muted);
-		border-radius: var(--wp--custom--ctx-events--radius--pill);
-		cursor: pointer;
-
-		&.active {
-			background: var(--wp--custom--ctx-events--color--accent);
-			color: var(--wp--custom--ctx-events--color--text-inverse);
-		}
 	}
 
 	&__tag { display: block; }

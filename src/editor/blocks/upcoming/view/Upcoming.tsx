@@ -1,4 +1,4 @@
-import { InputField } from '@contexis/wp-react-form';
+import { Button, Checkbox, InputField } from '@contexis/wp-react-form';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -214,35 +214,34 @@ function Upcoming({ attributes }: Props) {
 
 						{userStylePicker && (
 							<div className="ctx-upcoming-view-switcher">
-								<button
-									type="button"
+								<Button
 									onClick={() => setCustomView('cards')}
-									className={
-										currentView === 'cards' ? 'button active' : 'button'
-									}
+									variant={currentView === 'cards' ? 'primary' : 'secondary'}
+									aria-label={__('Show cards', 'ctx-events')}
+									aria-pressed={currentView === 'cards'}
 								>
 									<EventIcon name="date" />
-								</button>
-								<button
-									type="button"
+								</Button>
+								<Button
 									onClick={() => setCustomView('list')}
-									className={
-										currentView === 'list' ? 'button active' : 'button'
-									}
+									variant={currentView === 'list' ? 'primary' : 'secondary'}
+									aria-label={__('Show list', 'ctx-events')}
+									aria-pressed={currentView === 'list'}
 								>
 									<EventIcon name="time" />
-								</button>
+								</Button>
 							</div>
 						)}
 
 						<div className="ctx-upcoming-filter-toggle">
-							<button
-								type="button"
-								className="button"
+							<Button
+								variant="secondary"
 								onClick={() => setFilterMobileVisible(!filterMobileVisible)}
+								aria-label={__('Toggle filters', 'ctx-events')}
+								aria-expanded={filterMobileVisible}
 							>
 								<EventIcon name="warning" />
-							</button>
+							</Button>
 						</div>
 					</div>
 
@@ -259,28 +258,28 @@ function Upcoming({ attributes }: Props) {
 									{__('Select category', 'ctx-events')}
 								</h5>
 								<div className="ctx-upcoming-filter-pills">
-									<button
-										type="button"
-										className={filter.category === 0 ? 'active' : ''}
+									<Button
+										variant={filter.category === 0 ? 'primary' : 'secondary'}
+										aria-pressed={filter.category === 0}
 										onClick={() => {
 											changeFilter('category', 0);
 										}}
 									>
 										{__('All', 'ctx-events')}
-									</button>
+									</Button>
 									{Object.values(categories).map((category) => (
-										<button
-											type="button"
+										<Button
 											key={category.id}
-											className={
-												filter.category === category.id ? 'active' : ''
+											variant={
+												filter.category === category.id ? 'primary' : 'secondary'
 											}
+											aria-pressed={filter.category === category.id}
 											onClick={() => {
 												changeFilter('category', category.id);
 											}}
 										>
 											{category.name}
-										</button>
+										</Button>
 									))}
 								</div>
 							</div>
@@ -292,17 +291,13 @@ function Upcoming({ attributes }: Props) {
 									{__('Select tags', 'ctx-events')}
 								</h5>
 								{Object.values(tags).map((tag) => (
-									<div className="filter__box checkbox" key={tag.id}>
-										<label>
-											<input
-												type="checkbox"
-												name={String(tag.id)}
-												onChange={() => toggleTag(tag.id)}
-												checked={filter.tags.includes(tag.id)}
-											/>
-											{tag.name}
-										</label>
-									</div>
+									<Checkbox
+										key={tag.id}
+										name={`tag-${tag.id}`}
+										label={tag.name}
+										value={filter.tags.includes(tag.id)}
+										onChange={() => toggleTag(tag.id)}
+									/>
 								))}
 							</div>
 						)}

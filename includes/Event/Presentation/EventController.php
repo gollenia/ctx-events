@@ -15,6 +15,7 @@ use Contexis\Events\Event\Application\UseCases\ListEvents;
 use Contexis\Events\Event\Application\UseCases\ListOccurrences;
 use Contexis\Events\Event\Application\UseCases\DetachRecurringOccurrence;
 use Contexis\Events\Event\Application\UseCases\CancelRecurringOccurrence;
+use Contexis\Events\Event\Infrastructure\EventTaxonomy;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Event\Domain\ValueObjects\OccurrenceKey;
 use Contexis\Events\Event\Domain\ValueObjects\RecurrenceId;
@@ -23,6 +24,7 @@ use Contexis\Events\Event\Presentation\Resources\OccurrenceResource;
 use Contexis\Events\Event\Presentation\Resources\EventCalendarEntryResource;
 use Contexis\Events\Event\Presentation\Resources\PrepareBookingResource;
 use Contexis\Events\Shared\Infrastructure\Wordpress\UserContextFactory;
+use Contexis\Events\Shared\Infrastructure\Wordpress\TaxonomyLoader;
 use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Domain\ValueObjects\StatusList;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
@@ -42,6 +44,7 @@ final class EventController implements RestController
 		private CancelEvent $cancelEvent,
 		private DuplicateEvent $duplicateEvent,
 		private PrepareBooking $prepareBooking,
+		private TaxonomyLoader $taxonomyLoader,
     ) {
         $this->route = RestRoute::forType('events');
     }
@@ -344,6 +347,7 @@ final class EventController implements RestController
     {
         $userContext = UserContextFactory::createFromCurrentUser();
         $criteria = EventCriteriaMapper::fromRequest($request, $userContext);
+		$includes = EventIncludeRequest::fromArray($request->get_param('include') ?? []);
 
         try {
             $page = $this->listOccurrences->execute($criteria);
@@ -352,7 +356,12 @@ final class EventController implements RestController
         }
 
         $result = array_map(
-            fn ($occurrence) => OccurrenceResource::fromDto($occurrence, $this->route)->toArray(),
+			fn ($occurrence) => OccurrenceResource::fromDto(
+				$occurrence,
+				$this->route,
+				$this->termsForOccurrence($occurrence, EventTaxonomy::CATEGORIES, $includes->categories),
+				$this->termsForOccurrence($occurrence, EventTaxonomy::TAGS, $includes->tags),
+			)->toArray(),
             $page->toArray(),
         );
 
@@ -362,6 +371,22 @@ final class EventController implements RestController
 
         return $response;
     }
+
+	private function termsForOccurrence(
+		\Contexis\Events\Event\Application\DTOs\OccurrenceResponse $occurrence,
+		string $taxonomy,
+		bool $shouldInclude,
+	): ?\Contexis\Events\Shared\Application\ValueObjects\TaxonomyCollection {
+		if (!$shouldInclude) {
+			return null;
+		}
+
+		$postId = $occurrence->eventId ?? $occurrence->seriesId;
+
+		return $postId === null
+			? null
+			: $this->taxonomyLoader->termsForPost($postId, $taxonomy);
+	}
 
     public function prepareBooking(\WP_REST_Request $request): \WP_REST_Response
     {

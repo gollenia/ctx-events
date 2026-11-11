@@ -1,4 +1,5 @@
 @use '../../../../frontend/styles/tokens';
+@use '../../../../../node_modules/@contexis/wp-react-form/lib/style';
 
 @include tokens.register-theme-tokens();
 
@@ -305,17 +306,6 @@
 	flex-wrap: wrap;
 	margin-bottom: var(--wp--custom--ctx-events--space--md);
 
-	button {
-		padding: var(--wp--custom--ctx-events--space--sm) var(--wp--custom--ctx-events--space--md);
-		background: var(--wp--custom--ctx-events--color--surface-muted);
-		border-radius: var(--wp--custom--ctx-events--radius--pill);
-		cursor: pointer;
-
-		&.active {
-			background: var(--wp--custom--ctx-events--color--accent);
-			color: var(--wp--custom--ctx-events--color--text-inverse);
-		}
-	}
 }
 
 .ctx-upcoming-view-switcher,
@@ -326,17 +316,6 @@
 	gap: var(--wp--custom--ctx-events--space--sm);
 	margin-left: var(--wp--custom--ctx-events--space--md);
 
-	button {
-		padding-left: var(--wp--custom--ctx-events--space--sm);
-		padding-right: var(--wp--custom--ctx-events--space--sm);
-		background: var(--wp--custom--ctx-events--color--surface-muted);
-		border-radius: var(--wp--custom--ctx-events--radius--pill);
-
-		&.active {
-			background: var(--wp--custom--ctx-events--color--accent);
-			color: var(--wp--custom--ctx-events--color--text-inverse);
-		}
-	}
 }
 
 .mobile-hidden {

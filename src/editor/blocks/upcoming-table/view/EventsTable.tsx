@@ -1,4 +1,4 @@
-import { InputField } from '@contexis/wp-react-form';
+import { Button, Checkbox, InputField } from '@contexis/wp-react-form';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -155,22 +155,22 @@ export default function EventsTable({ attributes }: Props) {
 							<div>
 								<h5>{__('Select category', 'ctx-events')}</h5>
 								<div className="ctx-events-table-filters__pills">
-									<button
-										type="button"
-										className={filter.category === 0 ? 'active' : ''}
+									<Button
+										variant={filter.category === 0 ? 'primary' : 'secondary'}
+										aria-pressed={filter.category === 0}
 										onClick={() =>
 											setFilter((current) => ({ ...current, category: 0 }))
 										}
 									>
 										{__('All', 'ctx-events')}
-									</button>
+									</Button>
 									{Object.values(categories).map((category) => (
-										<button
-											type="button"
+										<Button
 											key={category.id}
-											className={
-												filter.category === category.id ? 'active' : ''
+											variant={
+												filter.category === category.id ? 'primary' : 'secondary'
 											}
+											aria-pressed={filter.category === category.id}
 											onClick={() =>
 												setFilter((current) => ({
 													...current,
@@ -179,7 +179,7 @@ export default function EventsTable({ attributes }: Props) {
 											}
 										>
 											{category.name}
-										</button>
+										</Button>
 									))}
 								</div>
 							</div>
@@ -188,14 +188,13 @@ export default function EventsTable({ attributes }: Props) {
 						<div>
 							<h5>{__('Select tags', 'ctx-events')}</h5>
 							{Object.values(tags).map((tag) => (
-								<label className="ctx-events-table-filters__tag" key={tag.id}>
-									<input
-										type="checkbox"
-										checked={filter.tags.includes(tag.id)}
-										onChange={() => toggleTag(tag.id)}
-									/>
-									{tag.name}
-								</label>
+								<Checkbox
+									key={tag.id}
+									name={`tag-${tag.id}`}
+									label={tag.name}
+									value={filter.tags.includes(tag.id)}
+									onChange={() => toggleTag(tag.id)}
+								/>
 							))}
 						</div>
 					)}

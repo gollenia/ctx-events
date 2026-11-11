@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Event\Presentation\Resources;
 
 use Contexis\Events\Event\Application\DTOs\OccurrenceResponse;
+use Contexis\Events\Shared\Application\ValueObjects\TaxonomyCollection;
 use Contexis\Events\Shared\Presentation\Contracts\Resource;
 use Contexis\Events\Shared\Presentation\RestRoute;
 
@@ -29,12 +30,21 @@ final readonly class OccurrenceResource implements Resource
         public string $startDate,
         public string $endDate,
         public ?string $audience,
+		/** @var array<int, array<string, mixed>>|null */
+		public ?array $categories,
+		/** @var array<int, array<string, mixed>>|null */
+		public ?array $tags,
         /** @var array{occurrenceId: string, type: 'virtual'|'detached', scheduledStartsAt: string, seriesId: int}|null */
         public ?array $recurrence,
     ) {
     }
 
-    public static function fromDto(OccurrenceResponse $occurrence, RestRoute $route): self
+    public static function fromDto(
+		OccurrenceResponse $occurrence,
+		RestRoute $route,
+		?TaxonomyCollection $categories = null,
+		?TaxonomyCollection $tags = null,
+	): self
     {
         $recurrence = $occurrence->type === 'real'
             ? null
@@ -57,6 +67,8 @@ final readonly class OccurrenceResource implements Resource
             startDate: $occurrence->startDate->format(DATE_ATOM),
             endDate: $occurrence->endDate->format(DATE_ATOM),
             audience: $occurrence->audience,
+			categories: $categories?->toArray(),
+			tags: $tags?->toArray(),
             recurrence: $recurrence,
         );
     }
@@ -77,7 +89,10 @@ final readonly class OccurrenceResource implements Resource
             'endDate' => $this->endDate,
             'audience' => $this->audience,
             'bookingSummary' => null,
-            'includes' => null,
+			'includes' => [
+				'categories' => $this->categories,
+				'tags' => $this->tags,
+			],
             'schema' => null,
             'recurrence' => $this->recurrence,
         ];
