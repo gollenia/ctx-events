@@ -25,6 +25,7 @@ final class ExportCoupons
                 page: 1,
                 perPage: 5000,
                 status: $criteria->status,
+                usedUp: $criteria->usedUp,
             ),
         );
 

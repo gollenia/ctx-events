@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 const STATUSES = [
 	{ value: 'publish', label: __('Published', 'ctx-events'), showEmpty: true },
+	{ value: 'used_up', label: __('Used up', 'ctx-events'), showEmpty: true },
 	{ value: 'draft', label: __('Draft', 'ctx-events'), showEmpty: true },
 	{ value: 'trash', label: __('Trash', 'ctx-events'), showEmpty: true },
 ];

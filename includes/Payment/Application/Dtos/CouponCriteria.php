@@ -16,6 +16,7 @@ final readonly class CouponCriteria implements Criteria
         public int $page = 1,
         public int $perPage = 25,
         public ?StatusList $status = null,
+        public ?bool $usedUp = null,
     ) {
     }
 }
