@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Presentation\Resources;
 
 use Contexis\Events\Payment\Application\Dtos\CouponListItem;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Contexis\Events\Shared\Presentation\Contracts\Resource;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -39,7 +40,9 @@ final readonly class CouponListItemResource implements Resource
             usageLimit: $item->usageLimit,
             usageCount: $item->usageCount,
             isGlobal: $item->isGlobal,
-            status: $item->status->value,
+            status: $item->status === Status::Published && $item->isUsedUp()
+                ? 'used_up'
+                : $item->status->value,
         );
     }
 

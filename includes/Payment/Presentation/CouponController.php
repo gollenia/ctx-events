@@ -59,7 +59,7 @@ final class CouponController implements RestController
                 'status' => [
                     'type' => 'string',
                     'required' => false,
-                    'enum' => ['publish', 'draft', 'trash', 'future', 'private'],
+                    'enum' => ['publish', 'draft', 'trash', 'future', 'private', 'used_up'],
                 ],
             ],
         ]);
@@ -87,7 +87,7 @@ final class CouponController implements RestController
                 'status' => [
                     'type' => 'string',
                     'required' => false,
-                    'enum' => ['publish', 'draft', 'trash', 'future', 'private'],
+                    'enum' => ['publish', 'draft', 'trash', 'future', 'private', 'used_up'],
                 ],
             ],
         ]);
@@ -185,7 +185,15 @@ final class CouponController implements RestController
 
     private function mapCriteria(\WP_REST_Request $request): CouponCriteria
     {
-        $statusParam = $request->get_param('status');
+        $statusParam = (string) ($request->get_param('status') ?? '');
+        $usedUp = null;
+
+        if ($statusParam === 'used_up') {
+            $statusParam = 'publish';
+            $usedUp = true;
+        } elseif ($statusParam === 'publish') {
+            $usedUp = false;
+        }
 
         return new CouponCriteria(
             orderBy: OrderBy::fromField(
@@ -195,9 +203,10 @@ final class CouponController implements RestController
             search: $request->get_param('search'),
             page: (int) $request->get_param('page'),
             perPage: (int) $request->get_param('per_page'),
-            status: is_string($statusParam) && $statusParam !== ''
+            status: $statusParam !== ''
                 ? StatusList::fromStrings([$statusParam])
                 : null,
+            usedUp: $usedUp,
         );
     }
 

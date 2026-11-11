@@ -24,4 +24,13 @@ final readonly class CouponListItem
         public Status $status,
     ) {
     }
+
+    public function isUsedUp(): bool
+    {
+        if ($this->usageLimit === null) {
+            return false;
+        }
+
+        return ($this->usageCount ?? 0) >= $this->usageLimit;
+    }
 }

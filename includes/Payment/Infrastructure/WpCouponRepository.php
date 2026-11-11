@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Infrastructure;
 
 use Contexis\Events\Payment\Application\Dtos\CouponCriteria;
+use Contexis\Events\Payment\Application\Dtos\CouponListItem;
 use Contexis\Events\Payment\Application\Dtos\CouponListResponse;
+use Contexis\Events\Payment\Application\Dtos\CouponStatusCounts;
 use Contexis\Events\Payment\Domain\Coupon;
 use Contexis\Events\Payment\Domain\CouponCollection;
 use Contexis\Events\Payment\Domain\CouponId;
@@ -128,14 +130,36 @@ class WpCouponRepository implements CouponRepository
 
     public function findByCriteria(CouponCriteria $criteria): CouponListResponse
     {
-        $query = WpCouponQueryBuilder::fromCriteria($criteria)->toWpQuery();
+        $builder = WpCouponQueryBuilder::fromCriteria($criteria);
+        if ($criteria->usedUp !== null) {
+            $builder = $builder->addArgs([
+                'posts_per_page' => -1,
+                'paged' => 1,
+            ]);
+        }
+
+        $query = $builder->toWpQuery();
         $coupons = array_map(
             static fn (\WP_Post $post) => CouponListItemMapper::map(PostSnapshot::fromWpPost($post)),
             $query->posts,
         );
 
+        $totalItems = (int) $query->found_posts;
+        if ($criteria->usedUp !== null) {
+            $coupons = array_values(array_filter(
+                $coupons,
+                fn (CouponListItem $coupon): bool => $criteria->usedUp
+                    ? $coupon->isUsedUp()
+                    : !$coupon->isUsedUp(),
+            ));
+
+            $totalItems = count($coupons);
+            $offset = max(0, ($criteria->page - 1) * $criteria->perPage);
+            $coupons = array_slice($coupons, $offset, $criteria->perPage);
+        }
+
         $pagination = Pagination::of(
-            totalItems: (int) $query->found_posts,
+            totalItems: $totalItems,
             currentPage: $criteria->page,
             perPage: $criteria->perPage,
         );
@@ -145,7 +169,18 @@ class WpCouponRepository implements CouponRepository
 
     public function getCountsByStatus(): StatusCountsInterface
     {
-        return $this->mapWpCountsToStatusCounts(wp_count_posts(CouponPost::POST_TYPE));
+        $statusCounts = $this->mapWpCountsToStatusCounts(wp_count_posts(CouponPost::POST_TYPE));
+        $usedUp = $this->countUsedUpPublishedCoupons();
+
+        return new CouponStatusCounts(
+            publish: max(0, $statusCounts->publish - $usedUp),
+            future: $statusCounts->future,
+            draft: $statusCounts->draft,
+            private: $statusCounts->private,
+            pending: $statusCounts->pending,
+            trash: $statusCounts->trash,
+            usedUp: $usedUp,
+        );
     }
 
     public function saveStatus(CouponId $couponId, \Contexis\Events\Shared\Domain\ValueObjects\Status $status): void
@@ -197,5 +232,34 @@ class WpCouponRepository implements CouponRepository
         } while ($this->findByCode($candidate) !== null);
 
         return $candidate;
+    }
+
+    private function countUsedUpPublishedCoupons(): int
+    {
+        $query = new \WP_Query([
+            'post_type' => CouponPost::POST_TYPE,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'no_found_rows' => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+        ]);
+
+        $usedUp = 0;
+        foreach ($query->posts as $postId) {
+            $limitRaw = get_post_meta((int) $postId, CouponMeta::LIMIT, true);
+            if (!is_numeric($limitRaw)) {
+                continue;
+            }
+
+            $usageLimit = (int) $limitRaw;
+            $usageCount = (int) get_post_meta((int) $postId, CouponMeta::USED, true);
+            if ($usageCount >= $usageLimit) {
+                $usedUp++;
+            }
+        }
+
+        return $usedUp;
     }
 }

@@ -69,7 +69,8 @@ const CouponList = () => {
 			order: view.sort?.direction ?? 'desc',
 			search: view.search || '',
 		});
-		const status = view.filters?.find((filter) => filter.field === 'status')?.value;
+		const status =
+			view.filters?.find((filter) => filter.field === 'status')?.value ?? 'publish';
 		if (status !== undefined && status !== '') {
 			params.set('status', String(status));
 		}

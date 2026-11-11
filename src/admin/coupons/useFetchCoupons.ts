@@ -21,7 +21,7 @@ export const useFetchCoupons = (view: DataViewConfig) => {
 			search: view.search || '',
 			status:
 				view.filters?.find((filter) => filter.field === 'status')?.value?.toString() ||
-				'',
+				'publish',
 		});
 
 		return params.toString();

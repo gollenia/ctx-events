@@ -90,6 +90,7 @@ export const createFields = (
 			type: 'text',
 			elements: [
 				{ value: 'publish', label: __('Published', 'ctx-events') },
+				{ value: 'used_up', label: __('Used up', 'ctx-events') },
 				{ value: 'draft', label: __('Draft', 'ctx-events') },
 				{ value: 'trash', label: __('Trash', 'ctx-events') },
 			],
