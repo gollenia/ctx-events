@@ -117,11 +117,13 @@ test('exports bookings with optional attendee sheet', function () {
 
     $bookingExport = $useCase->execute($event->id, false);
     $export = $useCase->execute($event->id, true);
+	$approvedExport = $useCase->execute($event->id, true, [BookingStatus::APPROVED]);
 
     expect($bookingExport->sheets)->toHaveCount(1);
     expect($bookingExport->sheets[0]->name)->toBe('Buchungen');
     expect($export->sheets)->toHaveCount(1);
     expect($export->sheets[0]->name)->toBe('Teilnehmer');
+	expect($approvedExport->sheets[0]->rows)->toHaveCount(2);
     expect($export->sheets[0]->rows[0])->toContain('Firma');
     expect($export->sheets[0]->rows[0])->toContain('Abteilung');
     expect($export->sheets[0]->rows[1])->toContain('Acme GmbH');

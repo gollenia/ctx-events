@@ -49,14 +49,17 @@
 
 .ctx-email-editor__bubble-menu {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 2px;
+	max-width: 420px;
 	padding: 4px;
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
 	background: #fff;
 	box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
+
 
 .ctx-email-editor__tokens-label {
 	font-size: 12px;
@@ -109,16 +112,70 @@
 	font-weight: 600;
 }
 
+.ctx-email-editor__surface .ctx-email-color-box {
+	margin: 12px 0;
+	padding: 12px 16px;
+	border-left: 4px solid #0b57d0;
+	background: #e8f0fe;
+}
+
+.ctx-email-editor__surface .ctx-email-color-box[data-variant='warning'] {
+	border-color: #b06000;
+	background: #fef7e0;
+}
+
+.ctx-email-editor__surface .ctx-email-color-box[data-variant='success'] {
+	border-color: #137333;
+	background: #e6f4ea;
+}
+
+.ctx-email-editor__surface .tableWrapper {
+	margin: 12px 0;
+	overflow-x: auto;
+}
+
+.ctx-email-editor__surface table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.ctx-email-editor__surface th,
+.ctx-email-editor__surface td {
+	min-width: 80px;
+	padding: 6px 10px;
+	border: 1px solid #dcdcde;
+}
+
 .ctx-email-editor__mentions {
-	display: grid;
-	gap: 4px;
 	min-width: 220px;
 	padding: 4px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+	z-index: 100000;
+}
+
+.ctx-email-editor__mention-group {
+	display: grid;
+	gap: 4px;
+}
+
+.ctx-email-editor__mention-separator {
+	height: 1px;
+	margin: 6px 2px;
+	background: #dcdcde;
 }
 
 .ctx-email-editor__mention-item.components-button {
 	justify-content: flex-start;
 	width: 100%;
+	gap: 8px;
+}
+
+.ctx-email-editor__mention-icon {
+	display: inline-flex;
+	flex: 0 0 auto;
 }
 
 .ctx-email-editor__color-menu {

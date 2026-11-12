@@ -25,6 +25,7 @@ use Contexis\Events\Booking\Presentation\Resources\BookingTransactionResource;
 use Contexis\Events\Booking\Presentation\Resources\EditBookingResource;
 use Contexis\Events\Communication\Application\BookingEmailWarnings;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
+use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
 use Contexis\Events\Shared\Presentation\Contracts\RestController;
 use Shuchkin\SimpleXLSXGen;
 
@@ -99,6 +100,7 @@ final class BookingController implements RestController
                 'args'                => [
                     'event_id' => ['type' => 'integer', 'required' => true],
                     'include_attendees' => ['type' => 'boolean', 'required' => false, 'default' => false],
+                    'status' => ['type' => 'array', 'required' => false, 'items' => ['type' => 'integer']],
                 ],
             ],
         ]);
@@ -330,9 +332,21 @@ final class BookingController implements RestController
         }
 
         try {
+			$statuses = array_values(array_filter(
+				array_map(
+					static fn (mixed $status): ?BookingStatus => BookingStatus::tryFrom((int) $status),
+					(array) $request->get_param('status'),
+				),
+			));
+
+			if ($statuses === []) {
+				$statuses = [BookingStatus::APPROVED];
+			}
+
             $export = $this->exportEventBookings->execute(
                 $eventId,
                 (bool) $request->get_param('include_attendees'),
+				$statuses,
             );
         } catch (\DomainException $exception) {
             return new \WP_REST_Response(['message' => $exception->getMessage()], 404);

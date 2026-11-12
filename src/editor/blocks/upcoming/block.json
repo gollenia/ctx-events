@@ -35,6 +35,10 @@
 			"type": "string",
 			"default": "list"
 		},
+		"cardColumns": {
+			"type": "number",
+			"default": 3
+		},
 		"limit": {
 			"type": "number",
 			"default": 99
@@ -105,7 +109,7 @@
 		},
 		"includeRecurring": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"altText": {
 			"type": "string",

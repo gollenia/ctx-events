@@ -23,6 +23,8 @@ use Contexis\Events\Booking\Domain\ValueObjects\LogEntry;
 use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Event\Application\Service\CheckTicketAvailibility;
 use Contexis\Events\Event\Domain\EventRepository;
+use Contexis\Events\Form\Domain\FormRepository;
+use Contexis\Events\Form\Domain\Fields\DateDetails;
 use Contexis\Events\Payment\Domain\Coupon;
 use Contexis\Events\Payment\Domain\CouponRepository;
 use Contexis\Events\Payment\Domain\GatewayRepository;
@@ -49,7 +51,8 @@ final class CreateBooking
         private CheckTicketAvailibility $checkTicketAvailibility,
 		private CalculateBookingPrice $calculateBookingPrice,
 		private CouponRepository $couponRepository,
-		private BookingTokenValidator $tokenValidator
+		private BookingTokenValidator $tokenValidator,
+		private ?FormRepository $formRepository = null,
     ) {}
 
     public function execute(CreateBookingRequest $request): CreateBookingResponse
@@ -75,7 +78,8 @@ final class CreateBooking
         }
 
         $availableTickets = $event->tickets;
-        $attendees = $this->attendeeFactory->fromPayload($request->attendees, $availableTickets);
+        $attendeePayloads = $this->validateAttendeeAgeLimits($request->attendees, $event);
+        $attendees = $this->attendeeFactory->fromPayload($attendeePayloads, $availableTickets);
 
         $this->checkTicketAvailibility->perform($attendees, $ticketBookingsMap, $availableTickets, $now);
 
@@ -171,5 +175,68 @@ final class CreateBooking
         }
 
         return Price::from($amountCents, $currency);
+    }
+
+    /**
+     * Validates the date field explicitly marked to inherit the event's age limits
+     * and stores it under the legacy birth_date metadata key as well.
+     *
+     * @param array<array<string, mixed>> $attendees
+     * @return array<array<string, mixed>>
+     */
+    private function validateAttendeeAgeLimits(array $attendees, \Contexis\Events\Event\Domain\Event $event): array
+    {
+        if ($this->formRepository === null || $event->forms?->attendeeForm === null) {
+            return $attendees;
+        }
+
+        $form = $this->formRepository->find($event->forms->attendeeForm);
+        if ($form === null) {
+            return $attendees;
+        }
+
+        $birthDateField = null;
+        foreach ($form->fields as $field) {
+            if ($field->details instanceof DateDetails && $field->details->useEventAgeLimits) {
+                $birthDateField = $field;
+                break;
+            }
+        }
+
+        if ($birthDateField === null) {
+            return $attendees;
+        }
+
+        $minimumBirthDate = $event->maximumAge === null
+            ? null
+            : $event->startDate->setTime(0, 0)->modify('-' . ($event->maximumAge + 1) . ' years')->modify('+1 day');
+        $maximumBirthDate = $event->minimumAge === null
+            ? null
+            : $event->startDate->setTime(0, 0)->modify('-' . $event->minimumAge . ' years');
+
+        foreach ($attendees as $index => $attendee) {
+            $metadata = is_array($attendee['metadata'] ?? null) ? $attendee['metadata'] : [];
+            $value = $metadata[$birthDateField->name] ?? null;
+            $birthDate = is_string($value)
+                ? \DateTimeImmutable::createFromFormat('!Y-m-d', $value)
+                : false;
+
+            if ($birthDate === false) {
+                throw new \DomainException('A valid birth date is required for each attendee.');
+            }
+
+            if ($minimumBirthDate !== null && $birthDate < $minimumBirthDate) {
+                throw new \DomainException('An attendee exceeds the maximum age for this event.');
+            }
+
+            if ($maximumBirthDate !== null && $birthDate > $maximumBirthDate) {
+                throw new \DomainException('An attendee does not meet the minimum age for this event.');
+            }
+
+            $metadata['birth_date'] = $birthDate->format('Y-m-d');
+            $attendees[$index]['metadata'] = $metadata;
+        }
+
+        return $attendees;
     }
 }

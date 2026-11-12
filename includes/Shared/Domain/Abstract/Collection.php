@@ -71,7 +71,7 @@ abstract readonly class Collection implements \Countable, \IteratorAggregate
 
 	public function filter(callable $callback): static
 	{
-		return new static(...array_filter($this->items, $callback));
+		return new static(array_values(array_filter($this->items, $callback)));
 	}
 
 	public function first(): ?object

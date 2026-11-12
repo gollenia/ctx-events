@@ -28,6 +28,14 @@ const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
 		setAttributes,
 	} = props;
 	const blockProps = useBlockProps();
+	const audience = meta._event_audience?.trim() || (() => {
+		const minimumAge = Number(meta._minimum_age ?? 0);
+		const maximumAge = Number(meta._maximum_age ?? 0);
+		if (minimumAge > 0 && maximumAge > 0) return `${minimumAge}–${maximumAge} ${__('years', 'ctx-events')}`;
+		if (minimumAge > 0) return `${__('from', 'ctx-events')} ${minimumAge} ${__('years', 'ctx-events')}`;
+		if (maximumAge > 0) return `${__('up to', 'ctx-events')} ${maximumAge} ${__('years', 'ctx-events')}`;
+		return '';
+	})();
 
 	return (
 		<div {...blockProps}>
@@ -51,7 +59,7 @@ const edit = (props: DetailBlockProps<DetailsAudienceAttributes>) => {
 						tagName="span"
 						className="event-details-data description-editable"
 						placeholder={__('Enter audience', 'ctx-events')}
-						value={meta._event_audience ?? ''}
+						value={audience}
 						onChange={(value) => {
 							setMeta({ _event_audience: value });
 						}}

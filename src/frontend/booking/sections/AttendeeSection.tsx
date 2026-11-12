@@ -1,10 +1,11 @@
 import { Button, Flex } from '@contexis/wp-react-form';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import EventIcon from '../../../shared/icons/EventIcon';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
 import { SectionFooter } from '../components/SectionFooter';
 import { buildInitialFormValues } from '../formFields';
+import { withEventAgeLimits } from '../ageLimits';
 import type { AttendeePayload, BookingFormData, TicketInfo } from '../types';
 import { isBookingFormComplete, validateBookingFormData } from '../validation';
 
@@ -22,6 +23,9 @@ type Props = {
 	initialAttendees: AttendeePayload[];
 	onRemove: (index: number) => void;
 	onNext: (attendees: AttendeePayload[]) => void;
+	eventStartDate: string;
+	minimumAge: number | null;
+	maximumAge: number | null;
 };
 
 function buildInitialEntries(
@@ -56,14 +60,29 @@ export function AttendeeSection({
 	initialAttendees,
 	onRemove,
 	onNext,
+	eventStartDate,
+	minimumAge,
+	maximumAge,
 }: Props) {
+	const effectiveAttendeeForm = useMemo(
+		() => ({
+			...attendeeForm,
+			fields: withEventAgeLimits(
+				attendeeForm.fields,
+				eventStartDate,
+				minimumAge,
+				maximumAge,
+			),
+		}),
+		[attendeeForm, eventStartDate, minimumAge, maximumAge],
+	);
 	const [entries, setEntries] = useState<AttendeeEntry[]>(() =>
-		buildInitialEntries(tickets, attendeeForm, initialAttendees),
+		buildInitialEntries(tickets, effectiveAttendeeForm, initialAttendees),
 	);
 
 	useEffect(() => {
-		setEntries(buildInitialEntries(tickets, attendeeForm, initialAttendees));
-	}, [tickets, attendeeForm, initialAttendees]);
+		setEntries(buildInitialEntries(tickets, effectiveAttendeeForm, initialAttendees));
+	}, [tickets, effectiveAttendeeForm, initialAttendees]);
 
 	function handleChange(index: number, name: string, value: unknown) {
 		setEntries((prev) =>
@@ -87,7 +106,7 @@ export function AttendeeSection({
 	function handleSubmit() {
 		let hasErrors = false;
 		const updated = entries.map((e) => {
-			const errs = validateBookingFormData(attendeeForm, e.formData);
+			const errs = validateBookingFormData(effectiveAttendeeForm, e.formData);
 			if (Object.keys(errs).length > 0) hasErrors = true;
 			return { ...e, errors: errs };
 		});
@@ -104,7 +123,7 @@ export function AttendeeSection({
 	}
 
 	const canContinue = entries.every((entry) =>
-		isBookingFormComplete(attendeeForm, entry.formData),
+		isBookingFormComplete(effectiveAttendeeForm, entry.formData),
 	);
 
 	return (
@@ -139,7 +158,7 @@ export function AttendeeSection({
 						</button>
 					</Flex>
 					<FormFieldRenderer
-						fields={attendeeForm.fields}
+						fields={effectiveAttendeeForm.fields}
 						formData={entry.formData}
 						errors={entry.errors}
 						onChange={(name, value) => handleChange(entry.index, name, value)}

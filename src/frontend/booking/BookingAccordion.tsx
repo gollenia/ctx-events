@@ -176,6 +176,9 @@ export function BookingAccordion({
 								initialAttendees={state.attendees}
 								onRemove={onAttendeeRemove}
 								onNext={onAttendeesDone}
+								eventStartDate={data.eventStartDate}
+								minimumAge={data.minimumAge}
+								maximumAge={data.maximumAge}
 							/>
 						</AccordionSection>
 					)}

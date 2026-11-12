@@ -21,6 +21,7 @@ export type DateAttributes = {
 	required: boolean;
 	min: string;
 	max: string;
+	useEventAgeLimits: boolean;
 	label: string;
 	context: string;
 	defaultValue: string;

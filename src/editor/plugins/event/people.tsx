@@ -154,6 +154,32 @@ const PeopleSelector = () => {
 						setMeta({ _event_audience: value });
 					}}
 				/>
+
+				<TextControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					label={__('Minimum age', 'ctx-events')}
+					help={__('Leave empty when there is no minimum age.', 'ctx-events')}
+					type="number"
+					min={0}
+					value={meta._minimum_age ?? ''}
+					onChange={(value) =>
+						setMeta({ _minimum_age: value === '' ? 0 : Number(value) })
+					}
+				/>
+
+				<TextControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					label={__('Maximum age', 'ctx-events')}
+					help={__('Leave empty when there is no maximum age.', 'ctx-events')}
+					type="number"
+					min={0}
+					value={meta._maximum_age ?? ''}
+					onChange={(value) =>
+						setMeta({ _maximum_age: value === '' ? 0 : Number(value) })
+					}
+				/>
 			</Flex>
 		</PluginDocumentSettingPanel>
 	);

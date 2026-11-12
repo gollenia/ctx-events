@@ -1,26 +1,31 @@
+import { __ } from '@wordpress/i18n';
+
 export type TiptapDocument = {
 	type: 'doc';
 	content: Array<Record<string, unknown>>;
 };
 
 export const EMAIL_TEMPLATE_TOKENS = [
-	{ token: '{{booking.reference}}', label: 'Booking reference' },
-	{ token: '{{booking.email}}', label: 'Booking email' },
-	{ token: '{{booking.first_name}}', label: 'Booking first name' },
-	{ token: '{{booking.last_name}}', label: 'Booking last name' },
-	{ token: '{{booking.price}}', label: 'Booking price' },
-	{ token: '{{booking.cancellation_reason}}', label: 'Cancellation reason' },
-	{ token: '{{event.name}}', label: 'Event name' },
-	{ token: '{{event.start}}', label: 'Event start' },
-	{ token: '{{event.end}}', label: 'Event end' },
-	{ token: '{{event.location}}', label: 'Event location' },
-	{ token: '{{event.speaker}}', label: 'Event speaker' },
+	{ token: '{{booking.reference}}', label: __('Booking reference', 'ctx-events') },
+	{ token: '{{booking.email}}', label: __('Booking email', 'ctx-events') },
+	{ token: '{{booking.first_name}}', label: __('Booking first name', 'ctx-events') },
+	{ token: '{{booking.last_name}}', label: __('Booking last name', 'ctx-events') },
+	{ token: '{{booking.price}}', label: __('Booking price', 'ctx-events') },
+	{
+		token: '{{booking.cancellation_reason}}',
+		label: __('Cancellation reason', 'ctx-events'),
+	},
+	{ token: '{{event.name}}', label: __('Event name', 'ctx-events') },
+	{ token: '{{event.start}}', label: __('Event start', 'ctx-events') },
+	{ token: '{{event.end}}', label: __('Event end', 'ctx-events') },
+	{ token: '{{event.location}}', label: __('Event location', 'ctx-events') },
+	{ token: '{{event.speaker}}', label: __('Event speaker', 'ctx-events') },
 ] as const;
 
 export const EMAIL_TEMPLATE_BLOCKS = [
-	{ type: 'registrationData', label: 'Registration data' },
-	{ type: 'attendeeTable', label: 'Attendee table' },
-	{ type: 'paymentInformation', label: 'Payment information' },
+	{ type: 'registrationData', label: __('Registration data', 'ctx-events') },
+	{ type: 'attendeeTable', label: __('Attendee table', 'ctx-events') },
+	{ type: 'paymentInformation', label: __('Payment information', 'ctx-events') },
 ] as const;
 
 export type EmailTemplateMentionItem =
@@ -43,7 +48,16 @@ export type EmailTemplateMentionItem =
 			kind: 'command';
 			label: string;
 			searchText: string;
-			command: 'bulletList' | 'orderedList';
+			command:
+				| 'bulletList'
+				| 'orderedList'
+				| 'heading1'
+				| 'heading2'
+				| 'heading3'
+				| 'insertTable'
+				| 'colorBoxInfo'
+				| 'colorBoxWarning'
+				| 'colorBoxSuccess';
 	  };
 
 export const EMAIL_TEMPLATE_TOKEN_MENTION_ITEMS: EmailTemplateMentionItem[] =
@@ -65,16 +79,65 @@ export const EMAIL_TEMPLATE_BLOCK_MENTION_ITEMS: EmailTemplateMentionItem[] =
 			type: block.type,
 		})),
 		{
+			id: 'command:heading1',
+			kind: 'command',
+			label: __('Heading 1', 'ctx-events'),
+			searchText: 'heading überschrift h1 title titel'.toLowerCase(),
+			command: 'heading1' as const,
+		},
+		{
+			id: 'command:heading2',
+			kind: 'command',
+			label: __('Heading 2', 'ctx-events'),
+			searchText: 'heading überschrift h2 subtitle untertitel'.toLowerCase(),
+			command: 'heading2' as const,
+		},
+		{
+			id: 'command:heading3',
+			kind: 'command',
+			label: __('Heading 3', 'ctx-events'),
+			searchText: 'heading überschrift h3'.toLowerCase(),
+			command: 'heading3' as const,
+		},
+		{
+			id: 'command:table',
+			kind: 'command',
+			label: __('Table', 'ctx-events'),
+			searchText: 'table tabelle grid columns spalten rows zeilen'.toLowerCase(),
+			command: 'insertTable' as const,
+		},
+		{
+			id: 'command:color-box-info',
+			kind: 'command',
+			label: __('Info box', 'ctx-events'),
+			searchText: 'info color box farbbox callout hint hinweis'.toLowerCase(),
+			command: 'colorBoxInfo' as const,
+		},
+		{
+			id: 'command:color-box-warning',
+			kind: 'command',
+			label: __('Warning box', 'ctx-events'),
+			searchText: 'warning warnung color box farbbox callout alert'.toLowerCase(),
+			command: 'colorBoxWarning' as const,
+		},
+		{
+			id: 'command:color-box-success',
+			kind: 'command',
+			label: __('Success box', 'ctx-events'),
+			searchText: 'success erfolg color box farbbox callout'.toLowerCase(),
+			command: 'colorBoxSuccess' as const,
+		},
+		{
 			id: 'command:bulletList',
 			kind: 'command' as const,
-			label: 'Bullets',
+			label: __('Bullets', 'ctx-events'),
 			searchText: 'bullets bullet list unordered list'.toLowerCase(),
 			command: 'bulletList' as const,
 		},
 		{
 			id: 'command:orderedList',
 			kind: 'command' as const,
-			label: 'Numbers',
+			label: __('Numbers', 'ctx-events'),
 			searchText: 'numbers numbered ordered list'.toLowerCase(),
 			command: 'orderedList' as const,
 		},

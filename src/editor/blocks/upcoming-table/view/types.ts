@@ -21,7 +21,7 @@ export type EventsTableAttributes = {
 	scope: string;
 	bookedUpWarningThreshold: number;
 	showBookedUp: boolean;
-	includeRecurring: boolean;
+	includeRecurring?: boolean;
 	altText: string;
 };
 

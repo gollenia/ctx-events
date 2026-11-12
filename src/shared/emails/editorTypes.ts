@@ -21,13 +21,6 @@ export type ThemeColor = {
 	slug?: string;
 };
 
-export type BodyCommandState = {
-	trigger: '@' | '/';
-	query: string;
-	from: number;
-	to: number;
-};
-
 export type SubjectCommandState = {
 	query: string;
 	from: number;

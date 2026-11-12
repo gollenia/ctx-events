@@ -23,6 +23,7 @@ const Inspector = (props: InspectorProps) => {
 			required,
 			min,
 			max,
+			useEventAgeLimits,
 			description,
 			visibilityRule,
 			context,
@@ -39,6 +40,15 @@ const Inspector = (props: InspectorProps) => {
 					checked={required}
 					onChange={(value) => setAttributes({ required: value })}
 				/>
+				<ToggleControl
+					label={__('Use age limits from the event', 'ctx-events')}
+					help={__(
+						'Uses the event’s minimum and maximum age to validate this birth date.',
+						'ctx-events',
+					)}
+					checked={useEventAgeLimits}
+					onChange={(value) => setAttributes({ useEventAgeLimits: value })}
+				/>
 
 				<TextControl
 					label={__('Description', 'ctx-events')}
@@ -52,6 +62,7 @@ const Inspector = (props: InspectorProps) => {
 					value={min}
 					onChange={(value) => setAttributes({ min: value })}
 					type="date"
+					disabled={useEventAgeLimits}
 				/>
 				<TextControl
 					label={__('Highest Date', 'ctx-events')}
@@ -59,6 +70,7 @@ const Inspector = (props: InspectorProps) => {
 					value={max}
 					onChange={(value) => setAttributes({ max: value })}
 					type="date"
+					disabled={useEventAgeLimits}
 				/>
 			</PanelBody>
 			<PanelBody title={__('Appearance', 'ctx-events')} initialOpen={true}>

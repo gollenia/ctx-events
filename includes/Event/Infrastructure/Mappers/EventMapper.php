@@ -43,6 +43,8 @@ final class EventMapper implements PostMapper
             status: EventPostStatusMapper::fromPost($post->post_status),
             name: $post->getString('post_title'),
 			audience: $post->getString(EventMeta::AUDIENCE) ?? null,
+			minimumAge: self::optionalAge($post->getInt(EventMeta::MINIMUM_AGE)),
+			maximumAge: self::optionalAge($post->getInt(EventMeta::MAXIMUM_AGE)),
             description: $post->getString('post_excerpt'),
             authorId: new AuthorId($post->getInt('post_author')),
             eventViewConfig: EventViewConfig::fromArray($post->getArray(EventMeta::VIEW_CONFIG, [])),
@@ -99,6 +101,11 @@ final class EventMapper implements PostMapper
         $serialized = $post->getString(EventMeta::RECURRENCE_OCCURRENCE_KEY);
 
         return $serialized === null ? null : OccurrenceKey::fromString($serialized);
+    }
+
+    private static function optionalAge(?int $age): ?int
+    {
+        return $age !== null && $age > 0 ? $age : null;
     }
 
     private static function ticketsFromArray(array $ticketsData, Currency $currency): TicketCollection

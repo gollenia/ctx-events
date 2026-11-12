@@ -57,6 +57,7 @@ const renderBookingWarning = (
 
 function EventCards({
 	attributes: {
+		cardColumns,
 		showImages,
 		showCategory,
 		showLocation,
@@ -70,8 +71,10 @@ function EventCards({
 	},
 	events,
 }: UpcomingViewProps) {
+	const columns = Math.min(4, Math.max(1, Math.trunc(cardColumns ?? 3)));
 	const className = [
 		'ctx-upcoming-grid',
+		`ctx-upcoming-grid--columns-${columns}`,
 		animateOnScroll ? 'ctx-animate-children' : '',
 		animationType ? `ctx-${animationType}` : '',
 	]

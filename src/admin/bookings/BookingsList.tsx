@@ -149,7 +149,7 @@ const BookingsList = () => {
 	);
 	const activeEventId = getActiveEventId(view.filters);
 
-	const buildExportPath = (includeAttendees: boolean): string | null => {
+	const buildExportPath = (includeAttendees: boolean, statuses: number[]): string | null => {
 		if (!activeEventId) {
 			return null;
 		}
@@ -159,12 +159,13 @@ const BookingsList = () => {
 		if (includeAttendees) {
 			searchParams.set('include_attendees', '1');
 		}
+		statuses.forEach((status) => searchParams.append('status[]', String(status)));
 
 		return `/events/v3/bookings/export?${searchParams.toString()}`;
 	};
 
-	const handleExport = (includeAttendees: boolean) => {
-		const path = buildExportPath(includeAttendees);
+	const handleExport = (includeAttendees: boolean, statuses: number[]) => {
+		const path = buildExportPath(includeAttendees, statuses);
 		if (!path) {
 			return;
 		}

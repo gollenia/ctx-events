@@ -10,6 +10,8 @@ class EventMeta extends MetaData
 {
     public const BOOKING_FORM      = '_booking_form';
     public const ATTENDEE_FORM     = '_attendee_form';
+    public const MINIMUM_AGE       = '_minimum_age';
+    public const MAXIMUM_AGE       = '_maximum_age';
     public const PERSON_ID         = '_person_id';
     public const MAIL_TO_RESPONSIBLE = '_mail_to_responsible';
     public const RESPONSIBLE_AS_REPLY = '_responsible_as_reply';
@@ -83,6 +85,8 @@ class EventMeta extends MetaData
     public static array $metadata = [
         self::BOOKING_FORM => ['type' => 'integer'],
         self::ATTENDEE_FORM     => ['type' => 'integer'],
+        self::MINIMUM_AGE       => ['type' => 'integer', 'default' => 0],
+        self::MAXIMUM_AGE       => ['type' => 'integer', 'default' => 0],
         self::BOOKING_CURRENCY => ['type' => 'string'],
         self::BOOKING_REFERENCE_PREFIX => ['type' => 'string', 'default' => ''],
         self::BOOKING_REFERENCE_SUFFIX => ['type' => 'string', 'default' => ''],

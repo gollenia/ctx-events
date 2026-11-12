@@ -25,6 +25,7 @@ type UpcomingAttributes = {
 	columnsLarge?: number;
 	showImages: boolean;
 	view: 'list' | 'cards';
+	cardColumns?: number;
 	scope: string;
 	showCategory: boolean;
 	showLocation: string;
@@ -67,6 +68,7 @@ const Inspector = (props: InspectorProps) => {
 			limit,
 			showImages,
 			view,
+			cardColumns,
 			scope,
 			showCategory,
 			showLocation,
@@ -297,6 +299,18 @@ const Inspector = (props: InspectorProps) => {
 						<div>{__('Cards', 'ctx-events')}</div>
 					</Button>
 				</div>
+				{view === 'cards' && (
+					<RangeControl
+						label={__('Columns', 'ctx-events')}
+						value={cardColumns ?? 3}
+						min={1}
+						max={4}
+						onChange={(value) =>
+							setAttributes({ cardColumns: Number(value) || 1 })
+						}
+						help={__('Applied on large screens', 'ctx-events')}
+					/>
+				)}
 				<CheckboxControl
 					label={__('Let user select style', 'ctx-events')}
 					checked={userStylePicker}

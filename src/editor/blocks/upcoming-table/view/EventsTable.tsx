@@ -37,7 +37,10 @@ export default function EventsTable({ attributes }: Props) {
 			scope: attributes.scope,
 		});
 		params.append('status[]', 'publish');
-		if (attributes.includeRecurring) params.set('with_recurrences', 'true');
+		// Older saved blocks omit this newer attribute. Include recurring
+		// occurrences unless the editor explicitly disabled them.
+		if (attributes.includeRecurring !== false)
+			params.set('with_recurrences', 'true');
 		for (const id of attributes.selectedCategory)
 			params.append('categories', String(id));
 		for (const id of attributes.selectedTags) params.append('tags', String(id));

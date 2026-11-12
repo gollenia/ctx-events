@@ -81,7 +81,10 @@ function Upcoming({ attributes }: Props) {
 			scope,
 		});
 		params.append('status[]', 'publish');
-		if (includeRecurring) {
+		// Saved blocks from before this attribute was introduced do not contain
+		// it in their HTML. Treat that as the new default, while preserving an
+		// explicit opt-out in the block settings.
+		if (includeRecurring !== false) {
 			params.set('with_recurrences', 'true');
 		}
 

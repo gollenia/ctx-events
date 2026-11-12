@@ -6,6 +6,7 @@ export type UpcomingAttributes = {
 	showLocation: '' | 'name' | 'city' | 'country' | 'state';
 	filterPosition: 'top' | 'side';
 	view: 'cards' | 'list';
+	cardColumns?: number;
 	limit: number;
 	order: 'asc' | 'desc';
 	selectedCategory: number[];
@@ -25,7 +26,7 @@ export type UpcomingAttributes = {
 	bookedUpWarningThreshold: number;
 	showBookedUp: boolean;
 	excludeCurrent: boolean;
-	includeRecurring: boolean;
+	includeRecurring?: boolean;
 	altText: string;
 };
 

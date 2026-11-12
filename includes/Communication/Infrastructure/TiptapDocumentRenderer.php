@@ -9,6 +9,7 @@ use Contexis\Events\Communication\Application\DTOs\TiptapRenderedDocument;
 use Contexis\Events\Communication\Application\UseCases\ResolveEmailPaymentInformation;
 use Contexis\Events\Booking\Presentation\BookingPaymentLink;
 use Contexis\Events\Communication\Infrastructure\Tiptap\AttendeeTableNode;
+use Contexis\Events\Communication\Infrastructure\Tiptap\ColorBoxNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\MailTokenNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\PaymentInformationNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\RegistrationDataNode;
@@ -18,6 +19,10 @@ use Contexis\Events\Communication\Domain\ValueObjects\EmailInlineAttachment;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
+use Tiptap\Nodes\Table;
+use Tiptap\Nodes\TableCell;
+use Tiptap\Nodes\TableHeader;
+use Tiptap\Nodes\TableRow;
 
 final class TiptapDocumentRenderer
 {
@@ -42,7 +47,6 @@ final class TiptapDocumentRenderer
         $html = (new Editor([
             'extensions' => [
                 new StarterKit([
-                    'heading' => false,
                     'blockquote' => false,
                     'codeBlock' => false,
                     'horizontalRule' => false,
@@ -65,6 +69,17 @@ final class TiptapDocumentRenderer
                     'renderPaymentInformation' => function () use ($context, &$inlineAttachments): string {
                         return $this->renderPaymentInformation($context, $inlineAttachments);
                     },
+                ]),
+                new ColorBoxNode(),
+                new Table([
+                    'HTMLAttributes' => ['style' => 'border-collapse:collapse;width:100%;margin:12px 0;'],
+                ]),
+                new TableRow(),
+                new TableHeader([
+                    'HTMLAttributes' => ['style' => 'text-align:left;padding:6px 10px;border:1px solid #dcdcde;'],
+                ]),
+                new TableCell([
+                    'HTMLAttributes' => ['style' => 'padding:6px 10px;border:1px solid #dcdcde;'],
                 ]),
             ],
         ]))

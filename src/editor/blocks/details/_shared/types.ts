@@ -25,6 +25,8 @@ export type EventDateMeta = {
 
 export type EventAudienceMeta = {
 	_event_audience?: string;
+	_minimum_age?: number | string;
+	_maximum_age?: number | string;
 };
 
 export type EventLocationMeta = {

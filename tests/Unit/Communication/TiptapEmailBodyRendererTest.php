@@ -90,3 +90,38 @@ test('renders cancellation reason token when present', function () {
 
     expect($rendered->content)->toBe('Reason: Speaker is ill');
 });
+
+test('renders headings, tables and color boxes from the mail editor', function () {
+    $event = FakeEventFactory::create(704);
+    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $renderer = new TiptapEmailBodyRenderer(
+        new TiptapDocumentRenderer(),
+        new EmailTemplateTokenReplacer(),
+    );
+
+    $rendered = $renderer->render(
+        json_encode([
+            'type' => 'doc',
+            'content' => [
+                ['type' => 'heading', 'attrs' => ['level' => 2], 'content' => [['type' => 'text', 'text' => 'Details']]],
+                ['type' => 'colorBox', 'attrs' => ['variant' => 'warning'], 'content' => [['type' => 'text', 'text' => 'Important notice']]],
+                ['type' => 'table', 'content' => [[
+                    'type' => 'tableRow',
+                    'content' => [[
+                        'type' => 'tableHeader',
+                        'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Name']]]],
+                    ]],
+                ]]],
+            ],
+        ], JSON_THROW_ON_ERROR),
+        new TriggeredEmailContext(
+            booking: $booking,
+            event: $event,
+            attendees: AttendeeCollection::empty(),
+            transactions: TransactionCollection::empty(),
+            cancellationReason: null,
+        ),
+    );
+
+    expect($rendered->content)->toContain('<h2>Details</h2>', 'Important notice', '<table', '<th');
+});

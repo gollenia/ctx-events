@@ -8,6 +8,8 @@ export type EventMeta = {
 	_mail_to_responsible?: boolean | number;
 	_responsible_as_reply?: boolean | number;
 	_event_audience?: string;
+	_minimum_age?: number | string;
+	_maximum_age?: number | string;
 	_event_start_date?: string;
 	_event_end_date?: string;
 	_event_start_time?: string;

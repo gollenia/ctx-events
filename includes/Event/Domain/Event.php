@@ -38,6 +38,8 @@ final readonly class Event
 		public ?EventCoupons $eventCoupons = null,
 		public ?string $description = null,
         public ?string $audience = null,
+		public ?int $minimumAge = null,
+		public ?int $maximumAge = null,
 		public ?int $overallCapacity = null,
 		public ?Currency $currency = null,
 		public ?BookingPolicy $bookingPolicy = null,

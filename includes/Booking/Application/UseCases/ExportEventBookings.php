@@ -28,7 +28,8 @@ final class ExportEventBookings
     ) {
     }
 
-    public function execute(EventId $eventId, bool $includeAttendees): BookingExportData
+    /** @param BookingStatus[] $statuses */
+    public function execute(EventId $eventId, bool $includeAttendees, array $statuses = []): BookingExportData
     {
         $event = $this->eventRepository->find($eventId);
 
@@ -37,6 +38,11 @@ final class ExportEventBookings
         }
 
         $bookings = $this->bookingRepository->findByEventId($eventId);
+        if ($statuses !== []) {
+            $bookings = $bookings->filter(
+                static fn (Booking $booking): bool => in_array($booking->status, $statuses, true),
+            );
+        }
         $ticketNames = $this->resolveTicketNames($event);
         $bookingFieldLabels = $this->resolveFormFieldLabels($event->forms?->bookingForm);
         $attendeeFieldLabels = $this->resolveFormFieldLabels($event->forms?->attendeeForm);

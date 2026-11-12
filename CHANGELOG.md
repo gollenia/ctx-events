@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-12
+
+### Added
+
+- Validate attendee age limits using a marked date field in the attendee form.
+- Add richer formatting options to email templates, including tables and colour boxes.
+- Allow the Upcoming Events card view to use one to four columns on large screens.
+
+### Changed
+
+- Include recurring occurrences in Upcoming Events and Events Table blocks by default.
+
+### Fixed
+
+- Prevent browser link styling and duplicate dates in Events Table title cells.
+
 ## 0.3.0 - 2026-11-10
 
 ### Added

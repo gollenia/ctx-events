@@ -75,6 +75,8 @@ final class PrepareBooking
             gateways: $availableGateways,
             bookingForm: $bookingForm,
             attendeeForm: $attendeeForm,
+            minimumAge: $event->minimumAge,
+            maximumAge: $event->maximumAge,
             couponsEnabled: $event->allowsCoupons(),
 			donationEnabled: $event->donationEnabled,
 			donationAdvertisement: $event->donationEnabled ? $this->bookingOptions->donationAdvertisement() : null,

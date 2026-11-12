@@ -53,6 +53,8 @@ export type BookingData = {
 	eventName: string;
 	eventStartDate: string;
 	eventEndDate: string;
+	minimumAge: number | null;
+	maximumAge: number | null;
 	eventDescription: string;
 	tickets: TicketInfo[];
 	gateways: GatewayInfo[];

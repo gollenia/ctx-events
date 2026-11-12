@@ -46,8 +46,14 @@ export const getBookingFieldDefinition = (
 		testId: `booking-field-${field.name}`,
 		placeholder: typeof field.placeholder === 'string' ? field.placeholder : '',
 		pattern: typeof field.pattern === 'string' ? field.pattern : null,
-		min: typeof field.min === 'number' ? field.min : undefined,
-		max: typeof field.max === 'number' ? field.max : undefined,
+		min:
+			typeof field.min === 'number' || typeof field.min === 'string'
+				? field.min
+				: undefined,
+		max:
+			typeof field.max === 'number' || typeof field.max === 'string'
+				? field.max
+				: undefined,
 		content: typeof field.content === 'string' ? field.content : undefined,
 		hasEmptyOption:
 			typeof field.hasNullOption === 'boolean' ? field.hasNullOption : true,

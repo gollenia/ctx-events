@@ -13,10 +13,20 @@ class DateMapper implements DetailsMapper
     public function map(array $attributes): FieldDetails
     {
         return new DateDetails(
-            defaultValue: $attributes['defaultValue'] ?? null,
-			placeholder: $attributes['placeholder'] ?? '',
-			earliestDate: $attributes['earliestDate'] ?? null,
-			latestDate: $attributes['latestDate'] ?? null
+            defaultValue: $this->date($attributes['defaultValue'] ?? null),
+			placeholder: null,
+			earliestDate: $this->date($attributes['min'] ?? null),
+			latestDate: $this->date($attributes['max'] ?? null),
+			useEventAgeLimits: (bool) ($attributes['useEventAgeLimits'] ?? false),
 		);
+    }
+
+    private function date(mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || $value === '') {
+            return null;
+        }
+
+        return \DateTimeImmutable::createFromFormat('!Y-m-d', $value) ?: null;
     }
 }

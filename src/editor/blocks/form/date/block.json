@@ -31,6 +31,10 @@
 			"type": "string",
 			"default": ""
 		},
+		"useEventAgeLimits": {
+			"type": "boolean",
+			"default": false
+		},
 		"label": {
 			"type": "string",
 			"default": ""

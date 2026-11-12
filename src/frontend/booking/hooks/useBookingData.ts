@@ -84,6 +84,8 @@ export function useBookingData(postId: number | null) {
 				eventName: String(raw.eventName ?? ''),
 				eventStartDate: String(raw.eventStartDate ?? ''),
 				eventEndDate: String(raw.eventEndDate ?? ''),
+				minimumAge: toNullableNumber(raw.minimumAge),
+				maximumAge: toNullableNumber(raw.maximumAge),
 				eventDescription: String(raw.eventDescription ?? ''),
 				tickets: Array.isArray(raw.tickets)
 					? raw.tickets

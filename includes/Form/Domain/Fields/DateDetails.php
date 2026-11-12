@@ -17,6 +17,7 @@ class DateDetails implements FieldDetails
         public readonly ?DateTimeImmutable $placeholder = null,
         public readonly ?DateTimeImmutable $earliestDate = null,
         public readonly ?DateTimeImmutable $latestDate = null,
+        public readonly bool $useEventAgeLimits = false,
     ) {}
 
     public function getType(): FieldType
@@ -32,6 +33,7 @@ class DateDetails implements FieldDetails
             'default' => $this->defaultValue?->format('Y-m-d'),
             'min' => $this->earliestDate?->format('Y-m-d'),
             'max' => $this->latestDate?->format('Y-m-d'),
+            'useEventAgeLimits' => $this->useEventAgeLimits,
         ];
     }
 

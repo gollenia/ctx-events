@@ -34,7 +34,7 @@
 		"bookedUpWarningThreshold": { "type": "number", "default": 0 },
 		"showBookedUp": { "type": "boolean", "default": true },
 		"excludeCurrent": { "type": "boolean", "default": true },
-		"includeRecurring": { "type": "boolean", "default": false },
+		"includeRecurring": { "type": "boolean", "default": true },
 		"altText": { "type": "string", "default": "" }
 	},
 	"supports": {

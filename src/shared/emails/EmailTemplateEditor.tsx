@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 
 import type { EmailTemplateEditorProps } from './editorTypes';
 import BodyBubbleMenu from './BodyBubbleMenu';
-import MentionPopover from './MentionPopover';
 import SubjectField from './SubjectField';
 import { getThemeTextColors } from './themeColors';
 import useBodyEditor from './useBodyEditor';
@@ -24,7 +23,6 @@ const EmailTemplateEditor = ({
 	closeLabel = __('Close', 'ctx-events'),
 	showEnabledToggle = true,
 }: EmailTemplateEditorProps) => {
-	const editorSurfaceRef = useRef<HTMLDivElement | null>(null);
 	const subjectInputRef = useRef<HTMLInputElement | null>(null);
 	const bodyEditor = useBodyEditor({ template, onChange });
 	const subjectMentions = useSubjectMentions({
@@ -76,22 +74,13 @@ const EmailTemplateEditor = ({
 				<p className="ctx-email-editor__hint">
 					{__('Type @ for tokens and / for block inserts in the body.', 'ctx-events')}
 				</p>
-				<div className="ctx-email-editor__surface" ref={editorSurfaceRef}>
+				<div className="ctx-email-editor__surface">
 					<EditorContent editor={bodyEditor.editor} />
 					<BodyBubbleMenu
 						editor={bodyEditor.editor}
 						colors={themeTextColors}
 						element={bodyEditor.bubbleMenuElement}
 					/>
-					{bodyEditor.commandState ? (
-						<MentionPopover
-							anchor={editorSurfaceRef.current}
-							items={bodyEditor.items}
-							selectedIndex={bodyEditor.selectedIndex}
-							popoverClassName="ctx-email-editor__mentions-popover"
-							onSelect={bodyEditor.insertMention}
-						/>
-					) : null}
 				</div>
 			</div>
 

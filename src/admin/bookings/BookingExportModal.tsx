@@ -5,15 +5,26 @@ import ActionModal from '../shared/ActionModal';
 
 type Props = {
 	onClose: () => void;
-	onExport: (includeAttendees: boolean) => void;
+	onExport: (includeAttendees: boolean, statuses: number[]) => void;
 };
 
 const BookingExportModal = ({ onClose, onExport }: Props) => {
 	const [includeAttendees, setIncludeAttendees] = useState(false);
+	const [statuses, setStatuses] = useState<number[]>([2]);
 
 	const handleExport = () => {
-		onExport(includeAttendees);
+		onExport(includeAttendees, statuses);
 		onClose();
+	};
+
+	const toggleStatus = (status: number, checked: boolean) => {
+		setStatuses((current) =>
+			checked
+				? [...current, status]
+				: current.length === 1
+					? current
+					: current.filter((item) => item !== status),
+		);
 	};
 
 	return (
@@ -53,6 +64,21 @@ const BookingExportModal = ({ onClose, onExport }: Props) => {
 				checked={includeAttendees}
 				onChange={setIncludeAttendees}
 			/>
+
+			<p>{__('Include booking statuses', 'ctx-events')}</p>
+			{[
+				{ value: 2, label: __('Approved', 'ctx-events') },
+				{ value: 1, label: __('Pending', 'ctx-events') },
+				{ value: 3, label: __('Canceled', 'ctx-events') },
+				{ value: 4, label: __('Expired', 'ctx-events') },
+			].map((status) => (
+				<CheckboxControl
+					key={status.value}
+					label={status.label}
+					checked={statuses.includes(status.value)}
+					onChange={(checked) => toggleStatus(status.value, checked)}
+				/>
+			))}
 
 		</ActionModal>
 	);

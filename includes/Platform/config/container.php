@@ -29,6 +29,7 @@ use Contexis\Events\Booking\Application\Services\CancelBookingsForEvent;
 use Contexis\Events\Booking\Application\UseCases\AddBookingAttendee;
 use Contexis\Events\Booking\Application\UseCases\CancelBooking;
 use Contexis\Events\Booking\Application\UseCases\CancelBookingAttendee;
+use Contexis\Events\Booking\Application\UseCases\CreateBooking;
 use Contexis\Events\Booking\Application\UseCases\UpdateBooking;
 use Contexis\Events\Booking\Application\UseCases\UpdateBookingAttendee;
 
@@ -77,6 +78,7 @@ return [
         ->constructorParameter('paymentBalanceSynchronizer', get(SynchronizeBookingPaymentBalance::class)),
     CancelBooking::class => autowire()
         ->constructorParameter('openTransactionCanceler', get(CancelOpenBookingTransactions::class)),
+    CreateBooking::class => autowire(),
     CancelBookingsForEvent::class => autowire()
         ->constructorParameter('openTransactionCanceler', get(CancelOpenBookingTransactions::class)),
 
