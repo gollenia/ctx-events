@@ -356,12 +356,12 @@ final class EventController implements RestController
         }
 
         $result = array_map(
-			fn ($occurrence) => OccurrenceResource::fromDto(
+			fn ($occurrence) => $this->occurrenceWithIncludes(OccurrenceResource::fromDto(
 				$occurrence,
 				$this->route,
 				$this->termsForOccurrence($occurrence, EventTaxonomy::CATEGORIES, $includes->categories),
 				$this->termsForOccurrence($occurrence, EventTaxonomy::TAGS, $includes->tags),
-			)->toArray(),
+			)->toArray(), $occurrence, $includes, $userContext),
             $page->toArray(),
         );
 
@@ -371,6 +371,29 @@ final class EventController implements RestController
 
         return $response;
     }
+
+	private function occurrenceWithIncludes(array $data, \Contexis\Events\Event\Application\DTOs\OccurrenceResponse $occurrence, EventIncludeRequest $includes, \Contexis\Events\Shared\Application\ValueObjects\UserContext $userContext): array
+	{
+		if ($occurrence->eventId !== null) {
+			$event = $this->getEvent->execute($occurrence->eventId, $includes, $userContext);
+			if ($event !== null) {
+				$eventData = EventResource::fromDto($event, $this->route)->toArray();
+				$data['includes'] = $eventData['includes'];
+				$data['bookingSummary'] = $eventData['bookingSummary'];
+				$data['isDaily'] = $eventData['isDaily'];
+			}
+		} elseif ($includes->image && $occurrence->seriesId !== null) {
+			$imageId = get_post_thumbnail_id($occurrence->seriesId);
+			if ($imageId) {
+				$data['includes']['image'] = [
+					'url' => wp_get_attachment_image_url($imageId, 'full') ?: '',
+					'alt_text' => get_post_meta($imageId, '_wp_attachment_image_alt', true),
+				];
+			}
+		}
+
+		return $data;
+	}
 
 	private function termsForOccurrence(
 		\Contexis\Events\Event\Application\DTOs\OccurrenceResponse $occurrence,

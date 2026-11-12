@@ -299,7 +299,7 @@ const Inspector = (props: InspectorProps) => {
 						<div>{__('Cards', 'ctx-events')}</div>
 					</Button>
 				</div>
-				{view === 'cards' && (
+				{(view === 'cards' || userStylePicker) && (
 					<RangeControl
 						label={__('Columns', 'ctx-events')}
 						value={cardColumns ?? 3}
@@ -308,7 +308,6 @@ const Inspector = (props: InspectorProps) => {
 						onChange={(value) =>
 							setAttributes({ cardColumns: Number(value) || 1 })
 						}
-						help={__('Applied on large screens', 'ctx-events')}
 					/>
 				)}
 				<CheckboxControl

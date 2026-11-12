@@ -22,8 +22,8 @@ class WpPersonRepository implements PersonRepository
 
     public function find(?PersonId $id): ?Person
     {
-        $snapshot = PostSnapshot::fromWpPostId($id->toInt());
-        return PersonMapper::map($snapshot);
+        $snapshot = $id === null ? null : PostSnapshot::fromWpPostId($id->toInt());
+        return $snapshot === null ? null : PersonMapper::map($snapshot);
     }
 
     public function first(PersonCriteria $criteria): ?Person

@@ -24,8 +24,8 @@ class WpLocationRepository implements LocationRepository
 
     public function find(?LocationId $id): ?Location
     {
-        $snapshot = PostSnapshot::fromWpPostId($id->toInt());
-        return LocationMapper::map($snapshot);
+        $snapshot = $id === null ? null : PostSnapshot::fromWpPostId($id->toInt());
+        return $snapshot === null ? null : LocationMapper::map($snapshot);
     }
 
     public function findByIds(array $ids): LocationCollection

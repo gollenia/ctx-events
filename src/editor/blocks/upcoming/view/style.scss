@@ -124,9 +124,15 @@
 
 .ctx-upcoming-grid {
 	flex: 1;
+	min-width: 0;
 	display: grid;
-	grid-template-columns: repeat( 1, 1fr );
 	grid-gap: var(--wp--custom--ctx-events--space--xl);
+}
+
+@for $columns from 1 through 4 {
+	.ctx-upcoming-grid--columns-#{$columns} {
+		grid-template-columns: repeat( $columns, minmax( 0, 1fr ) );
+	}
 }
 
 .ctx-upcoming {
@@ -323,16 +329,6 @@
 }
 
 @media screen and ( min-width: 768px ) {
-	.ctx-upcoming-grid {
-		display: grid;
-		grid-template-columns: repeat( 2, 1fr );
-		grid-gap: var(--wp--custom--ctx-events--space--xl);
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid {
-		grid-template-columns: repeat( 2, 1fr );
-	}
-
 	.ctx-upcoming-list {
 		width: 100%;
 	}
@@ -364,45 +360,4 @@
 		}
 	}
 
-	.ctx-upcoming-grid {
-		display: grid;
-		grid-template-columns: repeat( 3, 1fr );
-		grid-gap: var(--wp--custom--ctx-events--space--xl);
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid {
-		grid-template-columns: repeat( 2, 1fr );
-	}
-
-	.ctx-upcoming-grid--columns-1 {
-		grid-template-columns: repeat( 1, 1fr );
-	}
-
-	.ctx-upcoming-grid--columns-2 {
-		grid-template-columns: repeat( 2, 1fr );
-	}
-
-	.ctx-upcoming-grid--columns-3 {
-		grid-template-columns: repeat( 3, 1fr );
-	}
-
-	.ctx-upcoming-grid--columns-4 {
-		grid-template-columns: repeat( 4, 1fr );
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid--columns-1 {
-		grid-template-columns: repeat( 1, 1fr );
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid--columns-2 {
-		grid-template-columns: repeat( 2, 1fr );
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid--columns-3 {
-		grid-template-columns: repeat( 3, 1fr );
-	}
-
-	.ctx-upcoming--has-filters .ctx-upcoming-grid--columns-4 {
-		grid-template-columns: repeat( 4, 1fr );
-	}
 }
