@@ -2,14 +2,14 @@
 # This file is distributed under the GPL3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Events 0.2.5\n"
+"Project-Id-Version: Events 0.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ctx-events\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-10T18:41:59+00:00\n"
+"POT-Creation-Date: 2026-11-13T15:01:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: ctx-events\n"
@@ -88,7 +88,22 @@ msgstr ""
 msgid "Register"
 msgstr ""
 
-#: build/editor/blocks/details-audience/render.php:22
+#: build/editor/blocks/details-audience/render.php:16
+#, php-format
+msgid "%1$d–%2$d years"
+msgstr ""
+
+#: build/editor/blocks/details-audience/render.php:17
+#, php-format
+msgid "from %d years"
+msgstr ""
+
+#: build/editor/blocks/details-audience/render.php:18
+#, php-format
+msgid "up to %d years"
+msgstr ""
+
+#: build/editor/blocks/details-audience/render.php:34
 #: build/editor.js:1
 #: build/editor/blocks/details-audience/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
@@ -577,7 +592,6 @@ msgstr ""
 #: includes/Event/Infrastructure/BlockEventLoader.php:82
 #: build/editor.js:1
 #: build/editor/blocks/details-time/index.js:1
-#: build/editor/blocks/upcoming-table/view.js:1
 #: build/editor/blocks/upcoming/view/index.js:1
 #, php-format,js-format
 msgid "Each day %s"
@@ -1119,7 +1133,7 @@ msgid "Display locations on your blog."
 msgstr ""
 
 #: includes/Location/Infrastructure/LocationPost.php:87
-#: includes/Payment/Application/UseCases/ExportCoupons.php:33
+#: includes/Payment/Application/UseCases/ExportCoupons.php:34
 #: includes/Payment/Infrastructure/CouponPost.php:82
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:143
 #: includes/Person/Infrastructure/PersonPost.php:141
@@ -1150,47 +1164,47 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:32
+#: includes/Payment/Application/UseCases/ExportCoupons.php:33
 msgid "ID"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:34
+#: includes/Payment/Application/UseCases/ExportCoupons.php:35
 #: build/admin.js:2
 #: build/editor.js:1
 msgid "Code"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:35
+#: includes/Payment/Application/UseCases/ExportCoupons.php:36
 msgid "Discount type"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:36
+#: includes/Payment/Application/UseCases/ExportCoupons.php:37
 msgid "Discount value"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:37
+#: includes/Payment/Application/UseCases/ExportCoupons.php:38
 #: build/admin.js:2
 msgid "Valid from"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:38
+#: includes/Payment/Application/UseCases/ExportCoupons.php:39
 msgid "Expires at"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:39
+#: includes/Payment/Application/UseCases/ExportCoupons.php:40
 msgid "Usage count"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:40
+#: includes/Payment/Application/UseCases/ExportCoupons.php:41
 msgid "Usage limit"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:41
+#: includes/Payment/Application/UseCases/ExportCoupons.php:42
 #: build/admin.js:2
 msgid "Global"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:42
+#: includes/Payment/Application/UseCases/ExportCoupons.php:43
 #: build/admin.js:1
 #: build/admin.js:2
 #: build/admin.js:3
@@ -1198,7 +1212,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:64
+#: includes/Payment/Application/UseCases/ExportCoupons.php:65
 #: includes/Payment/Infrastructure/CouponPost.php:25
 #: includes/Payment/Infrastructure/CouponPost.php:27
 #: includes/Payment/Infrastructure/CouponPost.php:55
@@ -1624,6 +1638,52 @@ msgstr ""
 
 #: build/2205.js:1
 #: build/4586.js:1
+#: build/editor/blocks/upcoming-table/index.js:1
+msgid "Table options"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Add column before"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Add column after"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Delete column"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Add row before"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Add row after"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Delete row"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Toggle header row"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Delete table"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
 msgid "Bold"
 msgstr ""
 
@@ -1675,6 +1735,140 @@ msgstr ""
 #: build/2205.js:1
 #: build/4586.js:1
 msgid "Red"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Booking reference"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Booking email"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Booking first name"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Booking last name"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Booking price"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+#: build/admin.js:1
+#: build/admin.js:2
+msgid "Cancellation reason"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Event name"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Event start"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Event end"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Event location"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Event speaker"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Registration data"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Attendee table"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Payment information"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Heading 1"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Heading 2"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Heading 3"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+#: build/admin.js:1
+#: build/editor.js:1
+msgid "Table"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Info box"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Warning box"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Success box"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Bullets"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Numbers"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Registration data block"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Attendee table block"
+msgstr ""
+
+#: build/2205.js:1
+#: build/4586.js:1
+msgid "Payment information block"
 msgstr ""
 
 #: build/2205.js:1
@@ -1766,11 +1960,6 @@ msgstr ""
 
 #: build/admin.js:1
 #: build/editor.js:1
-msgid "Table"
-msgstr ""
-
-#: build/admin.js:1
-#: build/editor.js:1
 msgid "Screen Options"
 msgstr ""
 
@@ -1800,11 +1989,6 @@ msgstr ""
 
 #: build/admin.js:1
 msgid "Send email notification"
-msgstr ""
-
-#: build/admin.js:1
-#: build/admin.js:2
-msgid "Cancellation reason"
 msgstr ""
 
 #: build/admin.js:1
@@ -1890,12 +2074,16 @@ msgid "Include attendees"
 msgstr ""
 
 #: build/admin.js:1
-#: build/admin.js:3
-msgid "Pending"
+msgid "Include booking statuses"
 msgstr ""
 
 #: build/admin.js:1
 msgid "Approved"
+msgstr ""
+
+#: build/admin.js:1
+#: build/admin.js:3
+msgid "Pending"
 msgstr ""
 
 #: build/admin.js:1
@@ -2338,6 +2526,10 @@ msgstr ""
 #: build/admin.js:2
 #: build/admin.js:3
 msgid "Published"
+msgstr ""
+
+#: build/admin.js:2
+msgid "Used up"
 msgstr ""
 
 #: build/admin.js:2
@@ -3192,6 +3384,22 @@ msgid "Responsible person as Reply-To"
 msgstr ""
 
 #: build/editor.js:1
+msgid "Minimum age"
+msgstr ""
+
+#: build/editor.js:1
+msgid "Leave empty when there is no minimum age."
+msgstr ""
+
+#: build/editor.js:1
+msgid "Maximum age"
+msgstr ""
+
+#: build/editor.js:1
+msgid "Leave empty when there is no maximum age."
+msgstr ""
+
+#: build/editor.js:1
 msgid "Time and Date"
 msgstr ""
 
@@ -3417,6 +3625,18 @@ msgstr ""
 #: build/editor/blocks/form/textarea/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Appearance"
+msgstr ""
+
+#: build/editor/blocks/details-audience/index.js:1
+msgid "years"
+msgstr ""
+
+#: build/editor/blocks/details-audience/index.js:1
+msgid "from"
+msgstr ""
+
+#: build/editor/blocks/details-audience/index.js:1
+msgid "up to"
 msgstr ""
 
 #: build/editor/blocks/details-audience/index.js:1
@@ -4035,6 +4255,14 @@ msgid "Text to display when no country is selected"
 msgstr ""
 
 #: build/editor/blocks/form/date/index.js:1
+msgid "Use age limits from the event"
+msgstr ""
+
+#: build/editor/blocks/form/date/index.js:1
+msgid "Uses the event’s minimum and maximum age to validate this birth date."
+msgstr ""
+
+#: build/editor/blocks/form/date/index.js:1
 msgid "Help text for the date field"
 msgstr ""
 
@@ -4304,6 +4532,7 @@ msgid "Show search bar"
 msgstr ""
 
 #: build/editor/blocks/upcoming-table/index.js:1
+#: build/editor/blocks/upcoming/index.js:1
 msgid "Columns"
 msgstr ""
 
@@ -4315,10 +4544,6 @@ msgstr ""
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Warning threshold"
-msgstr ""
-
-#: build/editor/blocks/upcoming-table/index.js:1
-msgid "Table options"
 msgstr ""
 
 #: build/editor/blocks/upcoming-table/index.js:1
@@ -4449,6 +4674,18 @@ msgstr ""
 
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Upcoming Events"
+msgstr ""
+
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Show cards"
+msgstr ""
+
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Show list"
+msgstr ""
+
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Toggle filters"
 msgstr ""
 
 #: build/frontend.js:1

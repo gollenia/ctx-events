@@ -55,6 +55,8 @@
 
 	.event-details-data {
 		color: var(--ctx-events-details-meta-color);
+		font: inherit;
+		margin: 0;
 	}
 
 	.event-details-status {

@@ -125,3 +125,34 @@ test('renders headings, tables and color boxes from the mail editor', function (
 
     expect($rendered->content)->toContain('<h2>Details</h2>', 'Important notice', '<table', '<th');
 });
+
+test('renders numbered lists and links in email documents', function () {
+    $event = FakeEventFactory::create(705);
+    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $renderer = new TiptapDocumentRenderer();
+    $body = json_encode([
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'orderedList',
+            'content' => [[
+                'type' => 'listItem',
+                'content' => [[
+                    'type' => 'paragraph',
+                    'content' => [[
+                        'type' => 'text', 'text' => 'More information',
+                        'marks' => [['type' => 'link', 'attrs' => ['href' => 'https://example.org/event']]],
+                    ]],
+                ]],
+            ]],
+        ]],
+    ], JSON_THROW_ON_ERROR);
+    $rendered = $renderer->render($body, new TriggeredEmailContext(
+        booking: $booking,
+        event: $event,
+        attendees: AttendeeCollection::empty(),
+        transactions: TransactionCollection::empty(),
+        cancellationReason: null,
+    ));
+
+    expect($rendered->html)->toContain('<ol>', '<li>', 'href="https://example.org/event"', 'More information');
+});

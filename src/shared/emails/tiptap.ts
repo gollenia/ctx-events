@@ -51,6 +51,7 @@ export type EmailTemplateMentionItem =
 			command:
 				| 'bulletList'
 				| 'orderedList'
+				| 'link'
 				| 'heading1'
 				| 'heading2'
 				| 'heading3'
@@ -140,6 +141,13 @@ export const EMAIL_TEMPLATE_BLOCK_MENTION_ITEMS: EmailTemplateMentionItem[] =
 			label: __('Numbers', 'ctx-events'),
 			searchText: 'numbers numbered ordered list'.toLowerCase(),
 			command: 'orderedList' as const,
+		},
+		{
+			id: 'command:link',
+			kind: 'command' as const,
+			label: __('Link', 'ctx-events'),
+			searchText: 'link url web adresse'.toLowerCase(),
+			command: 'link' as const,
 		},
 	];
 

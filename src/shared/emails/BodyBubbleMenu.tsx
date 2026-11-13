@@ -13,7 +13,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	formatBold,
 	formatItalic,
+	formatListNumbered,
 	formatUnderline,
+	link,
 	table,
 	tableColumnAfter,
 	tableColumnBefore,
@@ -141,6 +143,28 @@ const BodyBubbleMenu = ({ editor, colors, element }: Props) => {
 							label={__('Underline', 'ctx-events')}
 							isPressed={editor.isActive('underline')}
 							onClick={() => editor.chain().focus().toggleMark('underline').run()}
+						/>
+						<Button
+							icon={formatListNumbered}
+							label={__('Numbers', 'ctx-events')}
+							isPressed={editor.isActive('orderedList')}
+							onClick={() => editor.chain().focus().toggleOrderedList().run()}
+						/>
+						<Button
+							icon={link}
+							label={__('Link', 'ctx-events')}
+							isPressed={editor.isActive('link')}
+							onClick={() => {
+								const previousUrl = (editor.getAttributes('link').href as string | undefined) ?? 'https://';
+								const url = window.prompt(__('Link URL', 'ctx-events'), previousUrl);
+								if (url === null) return;
+								if (!url.trim()) {
+									editor.chain().focus().extendMarkRange('link').unsetLink().run();
+									return;
+								}
+								if (!/^(https?:\/\/|mailto:|tel:)/i.test(url.trim())) return;
+								editor.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run();
+							}}
 						/>
 						<Button
 							ref={colorButtonRef}

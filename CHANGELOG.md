@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.4.2 - 2026-11-13
+
+### Added
+
+- Add an event countdown block with category, location and tag filters.
+- Add numbered lists and links to the email editor.
+
+### Changed
+
+- Organize email editor insert options into formatting, booking and event groups.
+- Use consistent typography for event details.
+
+### Fixed
+
+- Update featured event countdowns in the editor and format their time consistently.
+
 ## 0.4.1 - 2026-11-12
 
 ### Fixed

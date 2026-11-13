@@ -237,6 +237,16 @@ const insertSuggestionItem = ({
 	range: Range;
 	item: EmailTemplateMentionItem;
 }) => {
+	if (item.kind === 'command' && item.command === 'link') {
+		const url = window.prompt(__('Link URL', 'ctx-events'), 'https://');
+		if (!url?.trim() || !/^(https?:\/\/|mailto:|tel:)/i.test(url.trim())) return;
+		editor.chain().focus().deleteRange(range).insertContent({
+			type: 'text',
+			text: url.trim(),
+			marks: [{ type: 'link', attrs: { href: url.trim() } }],
+		}).run();
+		return;
+	}
 	const chain = editor.chain().focus().deleteRange(range);
 
 	if (item.kind === 'token') {
@@ -288,15 +298,21 @@ const ITEM_ICONS: Record<string, IconType> = {
 	'command:color-box-success': check,
 	'command:bulletList': formatListBullets,
 	'command:orderedList': formatListNumbered,
+	'command:link': link,
 };
 
-const isFormatItem = (item: EmailTemplateMentionItem) =>
-	item.kind === 'command' &&
-	(item.command.startsWith('heading') ||
-		item.command === 'insertTable' ||
-		item.command.startsWith('colorBox') ||
-		item.command === 'bulletList' ||
-		item.command === 'orderedList');
+const getItemGroup = (item: EmailTemplateMentionItem): 'format' | 'booking' | 'event' => {
+	if (item.kind === 'command') return 'format';
+	if (item.kind === 'block' || item.token.startsWith('{{booking.')) return 'booking';
+	return 'event';
+};
+
+const groupOrder = ['format', 'booking', 'event'] as const;
+const groupLabels = {
+	format: __('Formatting', 'ctx-events'),
+	booking: __('Booking Info', 'ctx-events'),
+	event: __('Event details', 'ctx-events'),
+};
 
 const createSuggestionButton = (
 	item: EmailTemplateMentionItem,
@@ -331,12 +347,11 @@ const createSuggestionMenu = () => {
 
 	const render = () => {
 		if (!element || !props) return;
-		const formatItems = props.items.filter(isFormatItem);
-		const contentItems = props.items.filter((item) => !isFormatItem(item));
-		const groups = [formatItems, contentItems].filter((items) => items.length > 0);
+		const groups = groupOrder.map((key) => ({ key, items: props.items.filter((item) => getItemGroup(item) === key) }))
+			.filter(({ items }) => items.length > 0);
 		const children: HTMLElement[] = [];
 
-		groups.forEach((items, groupIndex) => {
+		groups.forEach(({ key, items }, groupIndex) => {
 			if (groupIndex > 0) {
 				const separator = document.createElement('div');
 				separator.className = 'ctx-email-editor__mention-separator';
@@ -346,6 +361,10 @@ const createSuggestionMenu = () => {
 
 			const group = document.createElement('div');
 			group.className = 'ctx-email-editor__mention-group';
+			const heading = document.createElement('div');
+			heading.className = 'ctx-email-editor__mention-heading';
+			heading.textContent = groupLabels[key];
+			group.append(heading);
 			items.forEach((item) => {
 				const index = props?.items.indexOf(item) ?? 0;
 				group.append(
@@ -379,12 +398,14 @@ const createSuggestionMenu = () => {
 				event.preventDefault();
 				selectedIndex = (selectedIndex + 1) % props.items.length;
 				render();
+				element?.querySelector('.is-primary')?.scrollIntoView({ block: 'nearest' });
 				return true;
 			}
 			if (event.key === 'ArrowUp') {
 				event.preventDefault();
 				selectedIndex = (selectedIndex - 1 + props.items.length) % props.items.length;
 				render();
+				element?.querySelector('.is-primary')?.scrollIntoView({ block: 'nearest' });
 				return true;
 			}
 			if (event.key === 'Enter' || event.key === 'Tab') {
@@ -416,7 +437,9 @@ const createEmailSuggestion = (
 		allowedPrefixes: [' ', '\n'],
 		items: ({ query }) => {
 			const normalizedQuery = query.trim().toLowerCase();
-			return items.filter((item) => item.searchText.includes(normalizedQuery)).slice(0, 8);
+			return groupOrder.flatMap((group) => items.filter(
+				(item) => getItemGroup(item) === group && item.searchText.includes(normalizedQuery),
+			));
 		},
 		command: ({ editor, range, props }) => insertSuggestionItem({ editor, range, item: props }),
 		render: createSuggestionMenu,
@@ -434,7 +457,7 @@ export const EmailSuggestions = Extension.create({
 			),
 			createEmailSuggestion(
 				'/',
-				EMAIL_TEMPLATE_BLOCK_MENTION_ITEMS,
+				[...EMAIL_TEMPLATE_BLOCK_MENTION_ITEMS, ...EMAIL_TEMPLATE_TOKEN_MENTION_ITEMS],
 				'emailBlockSuggestion',
 				this.editor,
 			),

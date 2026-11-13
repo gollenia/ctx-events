@@ -21,7 +21,7 @@ $ical = $attributes['iCalLink'] ?? false;
 	</div>
 	<div class="event-details-text">
 		<h4 class="event-details-title"><?= esc_html($attributes['description'] ?: __('Date', 'ctx-events')) ?></h4>
-		<p class="event-details-data"><?= esc_html($date) ?></p>
+		<div class="event-details-data"><?= esc_html($date) ?></div>
 	</div>
 	<?php if ($ical) : ?>
 		<p class="event-details-action">

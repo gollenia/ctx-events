@@ -19,6 +19,7 @@ use Contexis\Events\Communication\Domain\ValueObjects\EmailInlineAttachment;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
+use Tiptap\Marks\Link;
 use Tiptap\Nodes\Table;
 use Tiptap\Nodes\TableCell;
 use Tiptap\Nodes\TableHeader;
@@ -53,6 +54,7 @@ final class TiptapDocumentRenderer
                     'strike' => false,
                 ]),
                 new UnderlineMark(),
+                new Link(),
                 new TextColorMark(),
                 new MailTokenNode([
                     'resolveToken' => function (string $token) use ($context): string {

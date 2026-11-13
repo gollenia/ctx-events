@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-11-10 19:40+0000\n"
+"PO-Revision-Date: 2026-11-13 15:10+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Language: de_DE\n"
@@ -24,6 +24,11 @@ msgstr " Mal"
 #: build/admin.js:3
 msgid " times"
 msgstr "mal"
+
+#: build/editor/blocks/details-audience/render.php:16
+#, php-format
+msgid "%1$d–%2$d years"
+msgstr "%1$d–%2$d Jahre"
 
 #. translators: %d: remaining days until expiration
 #: build/admin.js:2
@@ -136,6 +141,14 @@ msgstr "Teilnehmerformular hinzufügen"
 msgid "Add Booking Form"
 msgstr "Buchungsformular hinzufügen"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Add column after"
+msgstr "Spalte danach einfügen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Add column before"
+msgstr "Spalte davor einfügen"
+
 #: build/frontend.js:7
 msgid "Add contribution"
 msgstr "Beitrag hinzufügen"
@@ -232,6 +245,14 @@ msgstr "Person hinzufügen"
 #: includes/Event/Infrastructure/RecurringEventPost.php:19
 msgid "Add Recurring Event"
 msgstr "Wiederkehrende Veranstaltung hinzufügen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Add row after"
+msgstr "Zeile danach einfügen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Add row before"
+msgstr "Zeile davor einfügen"
 
 #: build/editor/blocks/person-editor/index.js:1
 msgid "Add Social Media Link"
@@ -435,11 +456,19 @@ msgstr "Teilnehmerformular"
 msgid "Attendee Forms"
 msgstr "Teilnehmerformulare"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Attendee table"
+msgstr "Teilnehmertabelle"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Attendee table block"
+msgstr "Tabelle mit Teilnehmerdaten"
+
 #: build/admin.js:1 build/editor.js:1 build/frontend.js:7
 msgid "Attendees"
 msgstr "Teilnehmer"
 
-#: build/editor/blocks/details-audience/render.php:22 build/editor.js:1
+#: build/editor/blocks/details-audience/render.php:34 build/editor.js:1
 #: build/editor/blocks/details-audience/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming-table/view.js:1
@@ -1040,6 +1069,10 @@ msgstr "Buchung abgelehnt"
 msgid "Booking disabled"
 msgstr "Buchungen deaktiviert"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Booking email"
+msgstr "Buchungs E-Mail"
+
 #: build/editor.js:1
 msgid "Booking End"
 msgstr "Buchungsende"
@@ -1061,6 +1094,10 @@ msgstr "Buchung endete am "
 #: build/editor/blocks/details-shutdown/render.php:28
 msgid "Booking ends on"
 msgstr "Buchung endet am"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Booking first name"
+msgstr "Vorname"
 
 #: includes/Form/Infrastructure/BookingFormPost.php:70 build/admin.js:3
 msgid "Booking Form"
@@ -1084,6 +1121,10 @@ msgstr "Buchung endete am"
 msgid "Booking Info"
 msgstr "Buchungsinfo"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Booking last name"
+msgstr "Nachname"
+
 #: build/editor/blocks/booking/render.php:67
 #: includes/Event/Infrastructure/Bindings/BookingBindingSource.php:81
 msgid "Booking not started yet"
@@ -1100,6 +1141,14 @@ msgstr "Buchungsübersicht"
 #: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:28
 msgid "Booking pending manual"
 msgstr "Buchung wartet auf manuelle Freigabe"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Booking price"
+msgstr "Buchungspreis"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Booking reference"
+msgstr "Buchungs-Referenz"
 
 #: build/editor.js:1
 msgid "Booking reference prefix"
@@ -1150,6 +1199,10 @@ msgstr "Gutschein mehrfach klonen"
 #: build/admin.js:2
 msgid "Bulk Multiply"
 msgstr "Mehrfach klonen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Bullets"
+msgstr "Unnummerierte Liste"
 
 #: build/editor/blocks/booking/index.js:1
 msgid "Button Icon"
@@ -1212,7 +1265,7 @@ msgstr "Storniert"
 msgid "Cancellation fee"
 msgstr "Stornierungskosten"
 
-#: build/admin.js:1 build/admin.js:2
+#: build/2205.js:1 build/4586.js:1 build/admin.js:1 build/admin.js:2
 msgid "Cancellation reason"
 msgstr "Grund für die Stornierung"
 
@@ -1335,7 +1388,7 @@ msgstr "Ort"
 msgid "Close"
 msgstr "Schließen"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:34 build/admin.js:2
+#: includes/Payment/Application/UseCases/ExportCoupons.php:35 build/admin.js:2
 #: build/editor.js:1
 msgid "Code"
 msgstr "Code"
@@ -1352,6 +1405,7 @@ msgid "Column"
 msgstr "Spalte"
 
 #: build/editor/blocks/upcoming-table/index.js:1
+#: build/editor/blocks/upcoming/index.js:1
 msgid "Columns"
 msgstr "Spalten"
 
@@ -1521,7 +1575,7 @@ msgstr "Gutschein-Limits"
 msgid "Coupon Settings"
 msgstr "Gutschein-Einstellungen"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:64
+#: includes/Payment/Application/UseCases/ExportCoupons.php:65
 #: includes/Payment/Infrastructure/CouponPost.php:25
 #: includes/Payment/Infrastructure/CouponPost.php:27
 #: includes/Payment/Infrastructure/CouponPost.php:55
@@ -1665,9 +1719,21 @@ msgstr "Löschen"
 msgid "Delete booking"
 msgstr "Buchung löschen"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Delete column"
+msgstr "Spalte löschen"
+
 #: build/admin.js:2
 msgid "Delete permanently"
 msgstr "Dauerhaft löschen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Delete row"
+msgstr "Zeile löschen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Delete table"
+msgstr "Tabelle löschen"
 
 #: build/admin.js:1
 msgid "Deleted"
@@ -1757,11 +1823,11 @@ msgstr "Rabattbetrag"
 msgid "Discount Type"
 msgstr "Rabattart"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:35
+#: includes/Payment/Application/UseCases/ExportCoupons.php:36
 msgid "Discount type"
 msgstr "Art der Preisminderung"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:36
+#: includes/Payment/Application/UseCases/ExportCoupons.php:37
 msgid "Discount value"
 msgstr "Wert der Preisminderung"
 
@@ -1866,7 +1932,6 @@ msgstr "z. B. Mindestalter für einen Teilnehmer"
 
 #: includes/Event/Infrastructure/BlockEventLoader.php:82 build/editor.js:1
 #: build/editor/blocks/details-time/index.js:1
-#: build/editor/blocks/upcoming-table/view.js:1
 #: build/editor/blocks/upcoming/view/index.js:1
 #, js-format
 msgid "Each day %s"
@@ -2097,6 +2162,10 @@ msgstr "Event Details"
 msgid "Event details"
 msgstr "Veranstaltungsdetails"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Event end"
+msgstr "Veranstaltungsende"
+
 #: build/editor/blocks/featured-event/excerpt/index.js:1
 msgid "Event excerpt will appear here."
 msgstr "Hier erscheint die Kurzfassung"
@@ -2105,9 +2174,17 @@ msgstr "Hier erscheint die Kurzfassung"
 msgid "Event image will appear here."
 msgstr "Hier erscheint das Beitragsbild"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Event location"
+msgstr "Veranstaltungsort"
+
 #: build/editor/blocks/featured-event/location/index.js:1
 msgid "Event location will appear here."
 msgstr "Hier erscheint der Ort"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Event name"
+msgstr "Veranstaltungsname"
 
 #: build/editor.js:1
 msgid "Event override"
@@ -2116,6 +2193,14 @@ msgstr "Event überschreiben"
 #: includes/Event/Infrastructure/WpEventOptions.php:36
 msgid "Event slug"
 msgstr "Veranstaltungs-Slug"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Event speaker"
+msgstr "Verantwortlicher"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Event start"
+msgstr "Veranstaltungsbeginn"
 
 #: includes/Event/Infrastructure/EventTaxonomy.php:26
 msgid "Event Tag"
@@ -2194,7 +2279,7 @@ msgstr "Läuft ab"
 msgid "Expires At"
 msgstr "Läuft ab am"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:38
+#: includes/Payment/Application/UseCases/ExportCoupons.php:39
 msgid "Expires at"
 msgstr "Läuft ab am"
 
@@ -2379,6 +2464,15 @@ msgstr "Häufigkeit"
 msgid "Friday"
 msgstr "Freitag"
 
+#: build/editor/blocks/details-audience/index.js:1
+msgid "from"
+msgstr "ab"
+
+#: build/editor/blocks/details-audience/render.php:17
+#, php-format
+msgid "from %d years"
+msgstr "ab %d Jahre"
+
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Future"
@@ -2417,7 +2511,7 @@ msgstr "Generieren"
 msgid "Get payment link"
 msgstr "Zahlungslink abrufen"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:41 build/admin.js:2
+#: includes/Payment/Application/UseCases/ExportCoupons.php:42 build/admin.js:2
 msgid "Global"
 msgstr "Global"
 
@@ -2432,6 +2526,18 @@ msgstr "Grün"
 #: build/admin.js:1
 msgid "Guest"
 msgstr "Gast"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Heading 1"
+msgstr "Überschrift 1"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Heading 2"
+msgstr "Überschrift 2"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Heading 3"
+msgstr "Überschrift 3"
 
 #: build/editor/blocks/form/textarea/index.js:1
 msgid "Height"
@@ -2514,7 +2620,7 @@ msgstr "Symbolfarbe"
 msgid "Icon for Link"
 msgstr "Symbol für Link"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:32
+#: includes/Payment/Application/UseCases/ExportCoupons.php:33
 msgid "ID"
 msgstr "ID"
 
@@ -2626,10 +2732,18 @@ msgstr "Inaktiv"
 msgid "Include attendees"
 msgstr "Teilnehmer einschließen"
 
+#: build/admin.js:1
+msgid "Include booking statuses"
+msgstr "Buchungsstatus"
+
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Include recurring"
 msgstr "Wiederkehrende einschließen"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Info box"
+msgstr "Info-Box"
 
 #: build/editor/blocks/form/number/index.js:1
 msgid "Input"
@@ -2681,6 +2795,14 @@ msgstr "Letzte Uhrzeit"
 #: build/editor.js:1
 msgid "Leave empty for unlimited. 0 means sold out."
 msgstr "Leer lassen für unbegfrenzt. 0 bedeutet ausverkauft."
+
+#: build/editor.js:1
+msgid "Leave empty when there is no maximum age."
+msgstr "Frei lassen wenn es kein Maximalalter gibt"
+
+#: build/editor.js:1
+msgid "Leave empty when there is no minimum age."
+msgstr "Frei lassen wenn es kein Minimalalter gibt"
 
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -2810,6 +2932,10 @@ msgid "Manage exceptions"
 msgstr "Ausnahmen verwalten"
 
 #: build/editor.js:1
+msgid "Maximum age"
+msgstr "Maximales Alter"
+
+#: build/editor.js:1
 msgid "Maximum bookable"
 msgstr "Maximal buchbar"
 
@@ -2828,6 +2954,10 @@ msgstr "Meldung, wenn genügend Plätze frei sind"
 #: build/editor/blocks/details-spaces/index.js:1
 msgid "Message when event is booked up"
 msgstr "Meldung, wenn die Veranstaltung ausgebucht ist"
+
+#: build/editor.js:1
+msgid "Minimum age"
+msgstr "Mindestalter"
 
 #: build/editor.js:1
 msgid "Minimum bookable"
@@ -3172,6 +3302,10 @@ msgstr "Anzahl der Textzeilen"
 msgid "Number of words"
 msgstr "Anzahl der Wörter"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Numbers"
+msgstr "Zahlen"
+
 #: build/editor.js:1
 msgid "Occurrence"
 msgstr "Termin"
@@ -3355,6 +3489,14 @@ msgstr "Zahlung fehlgeschlagen"
 #: build/admin.js:3
 msgid "Payment Gateways"
 msgstr "Zahlungs-Gateways"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Payment information"
+msgstr "Zahlungsinformation"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Payment information block"
+msgstr "Zahlungsinformation"
 
 #: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:46
 msgid "Payment link"
@@ -3638,6 +3780,14 @@ msgstr "Anmelden"
 #: build/editor/blocks/booking/index.js:1
 msgid "Registration"
 msgstr "Anmeldung"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Registration data"
+msgstr "Registrierungsdaten"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Registration data block"
+msgstr "Registrierungsdaten"
 
 #: build/editor.js:1
 msgid "Registration Form"
@@ -4108,6 +4258,10 @@ msgstr "Zielgruppe anzeigen"
 msgid "Show calendar icon"
 msgstr "Kalendersymbol anzeigen"
 
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Show cards"
+msgstr "Karten anzeigen"
+
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Show category"
 msgstr "Kategorie anzeigen"
@@ -4157,6 +4311,10 @@ msgstr "Labels anzeigen"
 #: build/editor/blocks/details-person/index.js:1
 msgid "Show Link"
 msgstr "Link anzeigen"
+
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Show list"
+msgstr "Liste anzeigen"
 
 #: build/editor/blocks/program-pdf-export/index.js:1
 msgid "Show location"
@@ -4300,7 +4458,7 @@ msgstr "Begonnen"
 msgid "State"
 msgstr "Bundesland"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:42 build/admin.js:1
+#: includes/Payment/Application/UseCases/ExportCoupons.php:43 build/admin.js:1
 #: build/admin.js:2 build/admin.js:3 build/editor.js:1
 msgid "Status"
 msgstr "Status"
@@ -4321,6 +4479,10 @@ msgstr "Betreff"
 #: build/admin.js:1 build/frontend.js:7
 msgid "Subtotal"
 msgstr "Zwischensumme"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Success box"
+msgstr "Erfolgs-Box"
 
 #: build/editor/blocks/person-editor/index.js:1
 msgid "Suffix"
@@ -4351,10 +4513,11 @@ msgstr "Systemfeld: Kann nicht geändert werden."
 msgid "T"
 msgstr "T"
 
-#: build/admin.js:1 build/editor.js:1
+#: build/2205.js:1 build/4586.js:1 build/admin.js:1 build/editor.js:1
 msgid "Table"
 msgstr "Tabelle"
 
+#: build/2205.js:1 build/4586.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 msgid "Table options"
 msgstr "Tabellenoptionen"
@@ -4598,7 +4761,7 @@ msgid "Timezone"
 msgstr "Zeitzone"
 
 #: includes/Location/Infrastructure/LocationPost.php:87
-#: includes/Payment/Application/UseCases/ExportCoupons.php:33
+#: includes/Payment/Application/UseCases/ExportCoupons.php:34
 #: includes/Payment/Infrastructure/CouponPost.php:82
 #: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:143
 #: includes/Person/Infrastructure/PersonPost.php:141 build/admin.js:2
@@ -4619,6 +4782,14 @@ msgstr "Heute"
 #: build/editor/blocks/form/checkbox/index.js:1
 msgid "Toggle"
 msgstr "Schalter"
+
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "Toggle filters"
+msgstr "Filter ein/aus"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Toggle header row"
+msgstr "Kopfzeile ein/aus"
 
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -4733,6 +4904,15 @@ msgstr "Unbekannter Fehler"
 msgid "Unknown reason"
 msgstr "Unbekannter Grund"
 
+#: build/editor/blocks/details-audience/index.js:1
+msgid "up to"
+msgstr "bis"
+
+#: build/editor/blocks/details-audience/render.php:18
+#, php-format
+msgid "up to %d years"
+msgstr "bis %d Jahre"
+
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Upcoming Events"
 msgstr "Kommende Veranstaltungen"
@@ -4765,13 +4945,17 @@ msgstr "URL"
 msgid "Usage"
 msgstr "Nutzung"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:39
+#: includes/Payment/Application/UseCases/ExportCoupons.php:40
 msgid "Usage count"
 msgstr "Anzahl der Nutzungen"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:40
+#: includes/Payment/Application/UseCases/ExportCoupons.php:41
 msgid "Usage limit"
 msgstr "Nutzungslimit"
+
+#: build/editor/blocks/form/date/index.js:1
+msgid "Use age limits from the event"
+msgstr "Alterslimit des Events nutzen"
 
 #: build/editor/blocks/upcoming-table/index.js:1
 msgid "Use alternating row colors"
@@ -4810,7 +4994,16 @@ msgstr "Verwendet"
 msgid "Used for calendar highlighting."
 msgstr "Für die Darstellung im Kalender"
 
-#: includes/Payment/Application/UseCases/ExportCoupons.php:37 build/admin.js:2
+#: build/admin.js:2
+msgid "Used up"
+msgstr "Aufgebraucht"
+
+#: build/editor/blocks/form/date/index.js:1
+msgid "Uses the event’s minimum and maximum age to validate this birth date."
+msgstr ""
+"Das Mindest- und Höchstalter des Events nutzen um dieses Feld zu validieren"
+
+#: includes/Payment/Application/UseCases/ExportCoupons.php:38 build/admin.js:2
 msgid "Valid from"
 msgstr "Gültig von"
 
@@ -4882,6 +5075,10 @@ msgstr "Ansichten"
 #: build/editor.js:1
 msgid "W"
 msgstr "M"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Warning box"
+msgstr "Warnungs-Box"
 
 #: build/editor/blocks/details-spaces/index.js:1
 msgid "Warning Threshold"
@@ -4991,6 +5188,10 @@ msgstr "Jahresprogramm %s"
 #: build/editor.js:1
 msgid "Yearly"
 msgstr "Jährlich"
+
+#: build/editor/blocks/details-audience/index.js:1
+msgid "years"
+msgstr "Jahre"
 
 #: build/admin.js:2
 msgid "Yes"
@@ -5118,3 +5319,11 @@ msgstr "PLZ"
 #: build/admin.js:3
 msgid "Änderungen speichern"
 msgstr "Änderungen speichern"
+
+#: src/shared/emails/extensions.ts
+msgid "Formatting"
+msgstr "Formatierungen"
+
+#: src/shared/emails/extensions.ts
+msgid "Link URL"
+msgstr "Link-URL"

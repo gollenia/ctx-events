@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "ctx-events/countdown",
+	"apiVersion": 3,
+	"title": "Event Countdown",
+	"description": "Show a countdown or date for the next matching event.",
+	"textdomain": "ctx-events",
+	"category": "widgets",
+	"icon": "clock",
+	"attributes": {
+		"displayMode": { "type": "string", "default": "countdown" },
+		"categoryId": { "type": "number", "default": 0 },
+		"tagId": { "type": "number", "default": 0 },
+		"locationId": { "type": "number", "default": 0 }
+	},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"align": ["wide", "full"],
+		"color": { "text": true, "background": true },
+		"typography": { "fontSize": true, "lineHeight": true, "fontFamily": true, "fontWeight": true },
+		"spacing": { "margin": true, "padding": true }
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js"
+}
