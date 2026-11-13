@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.4.3 - 2026-11-13
+
+### Fixed
+
+- Update email and booking test fixtures to match the current APIs and a fixed clock.
+
 ## 0.4.2 - 2026-11-13
 
 ### Added

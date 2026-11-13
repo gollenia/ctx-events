@@ -21,7 +21,9 @@ test('lists preset emails by default', function () {
         static fn ($item) => $item->key === EmailTemplateKey::ADMIN_BOOKING_PENDING_MANUAL
     ))[0] ?? null;
 
-    expect($result->count())->toBe(12);
+    expect($result->count())->toBe(count(EmailTemplateKey::cases()));
+    expect(array_map(static fn ($item) => $item->key, $result->toArray()))
+        ->toContain(EmailTemplateKey::BOOKING_PAYMENT_LINK);
     expect($adminTemplate)->not->toBeNull();
     assert($adminTemplate instanceof \Contexis\Events\Communication\Application\DTOs\MailListItem);
     expect($adminTemplate->recipientConfig?->sendToWpAdmin)->toBeTrue();

@@ -12,14 +12,19 @@ use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Communication\Application\Services\LoadBookingEmailContext;
 use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Location\Domain\Location;
+use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
+use Contexis\Events\Shared\Domain\ValueObjects\Status;
 use Tests\Support\FakeAttendeeRepository;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
+use Tests\Support\FakeLocationRepository;
+use Tests\Support\FakePersonRepository;
 use Tests\Support\FakeTransactionRepository;
 
 function makeTriggeredEmailBooking(EventId $eventId): Booking
@@ -66,12 +71,18 @@ test('loads booking event attendees and transactions for a booking id', function
         gateway: 'offline',
     ));
     $attendeeRepository = FakeAttendeeRepository::withBookingAttendees($bookingId, $attendees);
+    $location = new Location($event->locationId, Status::Published, 'Event Hall', null, null, null, null);
+    $person = new Person($event->personId, Status::Published, 'Erika', 'Muster', honorificPrefix: 'Dr.');
+    $locationRepository = new FakeLocationRepository($location);
+    $personRepository = new FakePersonRepository($person);
 
     $loader = new LoadBookingEmailContext(
         bookingRepository: $bookingRepository,
         eventRepository: FakeEventRepository::one($event),
         attendeeRepository: $attendeeRepository,
         transactionRepository: $transactions,
+        locationRepository: $locationRepository,
+        personRepository: $personRepository,
     );
 
     $context = $loader->load($bookingId);
@@ -81,6 +92,10 @@ test('loads booking event attendees and transactions for a booking id', function
     expect($context?->event->id)->toEqual($event->id);
     expect($context?->attendees)->toEqual($attendees);
     expect($context?->transactions->count())->toBe(1);
+    expect($context?->eventLocationName)->toBe('Event Hall');
+    expect($context?->eventSpeakerName)->toBe('Dr. Erika Muster');
+    expect($locationRepository->lastFindArg)->toEqual($event->locationId);
+    expect($personRepository->lastFindArg)->toEqual($event->personId);
     expect($bookingRepository->lastFindArg)->toEqual($bookingId);
     expect($attendeeRepository->lastFindArg)->toEqual($bookingId);
     expect($transactions->lastFindArg)->toEqual($bookingId);
@@ -95,6 +110,8 @@ test('returns null when booking does not exist', function () {
         eventRepository: FakeEventRepository::empty(),
         attendeeRepository: FakeAttendeeRepository::empty(),
         transactionRepository: FakeTransactionRepository::empty(),
+        locationRepository: new FakeLocationRepository(),
+        personRepository: new FakePersonRepository(),
     );
 
     expect($loader->load($bookingId))->toBeNull();
@@ -110,6 +127,8 @@ test('returns null when the booking event does not exist', function () {
         eventRepository: FakeEventRepository::empty(),
         attendeeRepository: FakeAttendeeRepository::empty(),
         transactionRepository: FakeTransactionRepository::empty(),
+        locationRepository: new FakeLocationRepository(),
+        personRepository: new FakePersonRepository(),
     );
 
     expect($loader->load($bookingId))->toBeNull();

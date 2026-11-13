@@ -9,10 +9,11 @@ use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
 use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
 use Contexis\Events\Payment\Domain\TransactionCollection;
 use Tests\Support\FakeEventFactory;
+use Tests\Support\FakeMailBookingFactory;
 
 test('renders legacy mail bodies as plain text with replaced tokens', function () {
     $event = FakeEventFactory::create(701);
-    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $booking = FakeMailBookingFactory::create($event->id);
     $renderer = new TiptapEmailBodyRenderer(
         new TiptapDocumentRenderer(),
         new EmailTemplateTokenReplacer(),
@@ -35,7 +36,7 @@ test('renders legacy mail bodies as plain text with replaced tokens', function (
 
 test('renders tiptap mail bodies as html with replaced tokens', function () {
     $event = FakeEventFactory::create(702);
-    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $booking = FakeMailBookingFactory::create($event->id);
     $renderer = new TiptapEmailBodyRenderer(
         new TiptapDocumentRenderer(),
         new EmailTemplateTokenReplacer(),
@@ -71,7 +72,7 @@ test('renders tiptap mail bodies as html with replaced tokens', function () {
 
 test('renders cancellation reason token when present', function () {
     $event = FakeEventFactory::create(703);
-    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $booking = FakeMailBookingFactory::create($event->id);
     $renderer = new TiptapEmailBodyRenderer(
         new TiptapDocumentRenderer(),
         new EmailTemplateTokenReplacer(),
@@ -93,7 +94,7 @@ test('renders cancellation reason token when present', function () {
 
 test('renders headings, tables and color boxes from the mail editor', function () {
     $event = FakeEventFactory::create(704);
-    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $booking = FakeMailBookingFactory::create($event->id);
     $renderer = new TiptapEmailBodyRenderer(
         new TiptapDocumentRenderer(),
         new EmailTemplateTokenReplacer(),
@@ -128,7 +129,7 @@ test('renders headings, tables and color boxes from the mail editor', function (
 
 test('renders numbered lists and links in email documents', function () {
     $event = FakeEventFactory::create(705);
-    $booking = makeTriggeredEmailProcessorBooking($event->id);
+    $booking = FakeMailBookingFactory::create($event->id);
     $renderer = new TiptapDocumentRenderer();
     $body = json_encode([
         'type' => 'doc',

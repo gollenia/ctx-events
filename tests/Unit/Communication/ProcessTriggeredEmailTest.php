@@ -6,27 +6,17 @@ use Contexis\Events\Communication\Application\ResolveEmailRecipient;
 use Contexis\Events\Communication\Application\Services\LoadBookingEmailContext;
 use Contexis\Events\Communication\Application\Services\SendBookingEmails;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
-use Contexis\Events\Booking\Domain\AttendeeCollection;
 use Contexis\Events\Event\Application\Service\IcalEventCalendarExporter;
 use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
 use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
-use Contexis\Events\Booking\Domain\Booking;
-use Contexis\Events\Booking\Domain\ValueObjects\BookingReference;
-use Contexis\Events\Booking\Domain\ValueObjects\BookingStatus;
-use Contexis\Events\Booking\Domain\ValueObjects\PriceSummary;
-use Contexis\Events\Booking\Domain\ValueObjects\RegistrationData;
 use Contexis\Events\Communication\Application\DTOs\BookingEmailDeliveryResult;
 use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Communication\Domain\Enums\EmailTemplateKey;
 use Contexis\Events\Communication\Infrastructure\DefaultEmailTemplatePresetProvider;
-use Contexis\Events\Event\Domain\ValueObjects\EventId;
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Person\Domain\PersonId;
 use Contexis\Events\Communication\Domain\ValueObjects\EventMailSettings;
-use Contexis\Events\Shared\Domain\ValueObjects\Currency;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
-use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
-use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tests\Support\FakeAttendeeRepository;
 use Tests\Support\FakeBookingRepository;
 use Tests\Support\FakeBookingOptions;
@@ -37,34 +27,9 @@ use Tests\Support\FakeEmailTemplateOverrideStore;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeEventRepository;
 use Tests\Support\FakeLocationRepository;
+use Tests\Support\FakeMailBookingFactory;
 use Tests\Support\FakePersonRepository;
 use Tests\Support\FakeTransactionRepository;
-
-function makeTriggeredEmailProcessorBooking(EventId $eventId): Booking
-{
-    return new Booking(
-        reference: BookingReference::fromString('BOOK-MAIL-1001'),
-        email: new Email('booking@example.test'),
-        name: PersonName::from('Max', 'Mustermann'),
-        priceSummary: PriceSummary::fromValues(
-            bookingPrice: Price::from(5000, Currency::fromCode('EUR')),
-            donationAmount: Price::from(0, Currency::fromCode('EUR')),
-            discountAmount: Price::from(0, Currency::fromCode('EUR'))
-        ),
-        bookingTime: new DateTimeImmutable('2026-03-10 10:00:00'),
-        status: BookingStatus::PENDING,
-        registration: new RegistrationData([
-            'email' => 'booking@example.test',
-            'first_name' => 'Max',
-            'last_name' => 'Mustermann',
-        ]),
-        attendees: AttendeeCollection::empty(),
-        gateway: 'offline',
-        coupon: null,
-        transactions: null,
-        eventId: $eventId,
-    );
-}
 
 function makeTriggeredEmailProcessor(
     FakeBookingRepository $bookingRepository,
@@ -112,7 +77,7 @@ function makeTriggeredEmailProcessor(
 test('sends the customer mail and skips unresolved admin mail for pending manual bookings', function () {
     $event = FakeEventFactory::create(210);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -154,7 +119,7 @@ test('sends the customer mail and skips unresolved admin mail for pending manual
 test('records skipped admin delivery when no admin recipient can be resolved', function () {
     $event = FakeEventFactory::create(211);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -182,7 +147,7 @@ test('records skipped admin delivery when no admin recipient can be resolved', f
 test('sends admin emails to configured recipients', function () {
     $event = FakeEventFactory::create(213);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -231,7 +196,7 @@ test('sends admin mails to the responsible person when enabled for the event', f
         email: Email::tryFrom('responsible@example.com'),
     );
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $emailSender = new FakeEmailSender();
     $overrideStore = new FakeEmailTemplateOverrideStore([
         EmailTemplateKey::ADMIN_BOOKING_PENDING_MANUAL->value => [
@@ -277,7 +242,7 @@ test('uses the responsible person as Reply-To when enabled for the event', funct
         email: Email::tryFrom('responsible@example.com'),
     );
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $emailSender = new FakeEmailSender();
     $overrideStore = new FakeEmailTemplateOverrideStore([
         EmailTemplateKey::BOOKING_PENDING_MANUAL->value => [
@@ -306,7 +271,7 @@ test('uses the responsible person as Reply-To when enabled for the event', funct
 test('logs failed sends', function () {
     $event = FakeEventFactory::create(212);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -329,7 +294,7 @@ test('logs failed sends', function () {
 test('event mail overrides take precedence over global template overrides during sending', function () {
     $event = FakeEventFactory::create(214);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -373,7 +338,7 @@ test('event mail overrides take precedence over global template overrides during
 test('replaces template tokens in the subject during sending', function () {
     $event = FakeEventFactory::create(217);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -402,7 +367,7 @@ test('replaces template tokens in the subject during sending', function () {
 test('passes cancellation reason into cancelled booking emails', function () {
     $event = FakeEventFactory::create(218);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();
@@ -435,7 +400,7 @@ test('passes cancellation reason into cancelled booking emails', function () {
 test('attaches an ical file to booking emails when the setting is enabled', function () {
     $event = FakeEventFactory::create(215);
     $bookingRepository = FakeBookingRepository::empty();
-    $bookingId = $bookingRepository->save(makeTriggeredEmailProcessorBooking($event->id));
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
     $attendeeRepository = FakeAttendeeRepository::empty();
     $transactionRepository = FakeTransactionRepository::empty();
     $emailSender = new FakeEmailSender();

@@ -32,6 +32,11 @@ use Tests\Support\FakeReferenceGenerator;
 use Tests\Support\FakeTokenStore;
 use Uri\Rfc3986\Uri;
 
+function bookingTestNow(): DateTimeImmutable
+{
+    return new DateTimeImmutable('2026-03-10 10:00:00');
+}
+
 // ---------------------------------------------------------------------------
 // Helper: builds a fully-wired CreateBooking use-case
 // ---------------------------------------------------------------------------
@@ -60,7 +65,7 @@ function makeCreateBookingUseCase(
     $couponRepository->allows('findByCode')->andReturn(null);
 
     $clock = Mockery::mock(Clock::class);
-    $clock->allows('now')->andReturn(new DateTimeImmutable('2026-03-10 10:00:00'));
+    $clock->allows('now')->andReturn(bookingTestNow());
 
     return new CreateBooking(
         bookingRepository: $bookingRepository,
@@ -91,7 +96,7 @@ function tokenFor(int $eventId, string $tokenId = 'valid-token', string $session
         tokenId: $tokenId,
         eventId: $eventId,
         sessionHash: $sessionHash,
-        expiresAt: new DateTimeImmutable('+1 hour'),
+        expiresAt: bookingTestNow()->modify('+1 hour'),
     );
 }
 
@@ -195,7 +200,7 @@ test('throws when session hash does not match token', function () {
         tokenId: 'session-mismatch-token',
         eventId: $event->id->toInt(),
         sessionHash: 'stored-session-hash',
-        expiresAt: new DateTimeImmutable('+1 hour'),
+        expiresAt: bookingTestNow()->modify('+1 hour'),
     );
     $tokenStore = FakeTokenStore::withToken($token);
 
@@ -359,8 +364,8 @@ test('triggers created online emails for paid online bookings', function () {
 
 test('throws when booking window has not started yet', function () {
     $event = FakeEventFactory::create(7, [
-        EventMeta::BOOKING_START => (new DateTimeImmutable('+2 weeks'))->format('Y-m-d H:i:s'),
-        EventMeta::BOOKING_END   => (new DateTimeImmutable('+6 weeks'))->format('Y-m-d H:i:s'),
+        EventMeta::BOOKING_START => (bookingTestNow()->modify('+2 weeks'))->format('Y-m-d H:i:s'),
+        EventMeta::BOOKING_END   => (bookingTestNow()->modify('+6 weeks'))->format('Y-m-d H:i:s'),
     ]);
 
     $ticketId = $event->tickets?->toArray()[0]?->id?->toString() ?? 'ticket-1';
@@ -388,8 +393,8 @@ test('throws when booking window has not started yet', function () {
 
 test('throws when booking window has already ended', function () {
     $event = FakeEventFactory::create(8, [
-        EventMeta::BOOKING_START => (new DateTimeImmutable('-3 months'))->format('Y-m-d H:i:s'),
-        EventMeta::BOOKING_END   => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
+        EventMeta::BOOKING_START => (bookingTestNow()->modify('-3 months'))->format('Y-m-d H:i:s'),
+        EventMeta::BOOKING_END   => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
     ]);
 
     $ticketId = $event->tickets?->toArray()[0]?->id?->toString() ?? 'ticket-1';
@@ -430,8 +435,8 @@ test('throws when event is completely sold out', function () {
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-            'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+            'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+            'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
@@ -488,8 +493,8 @@ test('throws when specific ticket is sold out', function () {
                 'ticket_max'         => 1,
                 'ticket_min'         => 1,
                 'ticket_enabled'     => true,
-                'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-                'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+                'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+                'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
                 'ticket_order'       => 1,
                 'ticket_form'        => 1,
             ],
@@ -502,8 +507,8 @@ test('throws when specific ticket is sold out', function () {
                 'ticket_max'         => 5,
                 'ticket_min'         => 1,
                 'ticket_enabled'     => true,
-                'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-                'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+                'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+                'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
                 'ticket_order'       => 2,
                 'ticket_form'        => 1,
             ],
@@ -549,8 +554,8 @@ test('throws when ticket sales period has not started yet', function () {
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('+1 week'))->format('Y-m-d H:i:s'), // future
-            'ticket_end'         => (new DateTimeImmutable('+2 months'))->format('Y-m-d H:i:s'),
+            'ticket_start'       => (bookingTestNow()->modify('+1 week'))->format('Y-m-d H:i:s'), // future
+            'ticket_end'         => (bookingTestNow()->modify('+2 months'))->format('Y-m-d H:i:s'),
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
@@ -659,8 +664,8 @@ test('throws when payment gateway is not found for a paid booking', function () 
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-            'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+            'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+            'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
@@ -702,8 +707,8 @@ test('throws when donation is submitted but event does not accept donations', fu
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-            'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+            'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+            'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],
@@ -742,8 +747,8 @@ test('uses booking reference prefix and suffix from settings provider', function
             'ticket_max'         => 5,
             'ticket_min'         => 1,
             'ticket_enabled'     => true,
-            'ticket_start'       => (new DateTimeImmutable('-1 month'))->format('Y-m-d H:i:s'),
-            'ticket_end'         => (new DateTimeImmutable('+1 month'))->format('Y-m-d H:i:s'),
+            'ticket_start'       => (bookingTestNow()->modify('-1 month'))->format('Y-m-d H:i:s'),
+            'ticket_end'         => (bookingTestNow()->modify('+1 month'))->format('Y-m-d H:i:s'),
             'ticket_order'       => 1,
             'ticket_form'        => 1,
         ]],

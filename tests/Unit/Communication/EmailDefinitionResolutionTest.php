@@ -15,7 +15,7 @@ test('prefers event-specific gateway mail over generic fallbacks', function () {
     $definitions = EmailDefinitionCollection::from(
         new EmailDefinition(
             id: 'global-generic',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: null,
@@ -25,7 +25,7 @@ test('prefers event-specific gateway mail over generic fallbacks', function () {
         ),
         new EmailDefinition(
             id: 'event-generic',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: $eventId,
@@ -35,7 +35,7 @@ test('prefers event-specific gateway mail over generic fallbacks', function () {
         ),
         new EmailDefinition(
             id: 'event-offline',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: $eventId,
@@ -46,7 +46,7 @@ test('prefers event-specific gateway mail over generic fallbacks', function () {
     );
 
     $resolved = $definitions->resolve(new EmailContext(
-        trigger: EmailTrigger::BOOKING_PENDING,
+        trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
         eventId: $eventId,
         target: EmailTarget::CUSTOMER,
         gateway: 'offline',
@@ -62,7 +62,7 @@ test('falls back to event-specific generic mail before global mail', function ()
     $definitions = EmailDefinitionCollection::from(
         new EmailDefinition(
             id: 'global-generic',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: null,
@@ -72,7 +72,7 @@ test('falls back to event-specific generic mail before global mail', function ()
         ),
         new EmailDefinition(
             id: 'event-generic',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: $eventId,
@@ -83,7 +83,7 @@ test('falls back to event-specific generic mail before global mail', function ()
     );
 
     $resolved = $definitions->resolve(new EmailContext(
-        trigger: EmailTrigger::BOOKING_PENDING,
+        trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
         eventId: $eventId,
         target: EmailTarget::CUSTOMER,
         gateway: 'mollie',
@@ -99,7 +99,7 @@ test('falls back to global mail when event has no own template', function () {
     $definitions = EmailDefinitionCollection::from(
         new EmailDefinition(
             id: 'global-generic',
-            trigger: EmailTrigger::BOOKING_PENDING,
+            trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
             target: EmailTarget::CUSTOMER,
             enabled: true,
             eventId: null,
@@ -110,7 +110,7 @@ test('falls back to global mail when event has no own template', function () {
     );
 
     $resolved = $definitions->resolve(new EmailContext(
-        trigger: EmailTrigger::BOOKING_PENDING,
+        trigger: EmailTrigger::BOOKING_PENDING_MANUAL,
         eventId: $eventId,
         target: EmailTarget::CUSTOMER,
     ));
