@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.4.5 - 2026-11-16
+
+### Fixed
+
+- Restore payment method selection when multiple gateways are enabled.
+
 ## 0.4.4 - 2026-11-16
 
 ### Fixed

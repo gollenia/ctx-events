@@ -311,7 +311,7 @@ test.describe('booking app', () => {
 		await fillRegistration(page);
 
 		await expect(page.getByText('Confirm booking')).toBeVisible();
-		await page.locator('.booking-consent__checkbox').check();
+		await page.locator('input[name="privacy-consent"]').check();
 		await page.getByTestId('booking-submit').click();
 
 		await expect(page.getByTestId('booking-section-success')).toBeVisible();
@@ -331,12 +331,30 @@ test.describe('booking app', () => {
 		await expect(page.getByTestId('booking-payment-gateways')).toBeVisible();
 		await expect(page.getByLabel('Credit Card')).toBeVisible();
 		await expect(priceSummary.getByText(/49[,.]00/).first()).toBeVisible();
-		await page.locator('.booking-consent__checkbox').check();
+		await page.locator('input[name="privacy-consent"]').check();
 		await page.getByTestId('booking-submit').click();
 
 		await expect(page.getByTestId('booking-section-success')).toBeVisible();
 		await expect(page.getByText('PAID-98765', { exact: true })).toBeVisible();
 		await expect(page.getByText('Please transfer the amount within 7 days.')).toBeVisible();
+	});
+
+	test('submits the selected payment method', async ({ page }) => {
+		await openBooking(page, PAID_POST_ID);
+		await selectTicket(page, 'paid-ticket');
+		await fillAttendees(page);
+		await fillRegistration(page);
+
+		const gateways = page.getByTestId('booking-payment-gateways');
+		await expect(gateways.getByLabel('Bank Transfer')).toBeChecked();
+		await gateways.getByLabel('Credit Card').check();
+		await expect(gateways.getByLabel('Credit Card')).toBeChecked();
+		await page.locator('input[name="privacy-consent"]').check();
+		const request = page.waitForRequest((request) =>
+			request.url().includes('/wp-json/events/v3/bookings') && request.method() === 'POST',
+		);
+		await page.getByTestId('booking-submit').click();
+		expect((await request).postDataJSON().gateway).toBe('card');
 	});
 
 	test('returns to tickets when the last attendee is removed', async ({ page }) => {

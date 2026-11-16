@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { InputField } from '@contexis/wp-react-form';
+import { Radio } from '@contexis/wp-react-form';
 
 import type { GatewayInfo } from '../types';
 
@@ -23,8 +23,7 @@ export function PaymentGatewaySelect({
 			className="booking-gateway-select"
 			data-testid="booking-payment-gateways"
 		>
-			<InputField
-				type="radio"
+			<Radio
 				name="gateway"
 				label={__('Payment method', 'ctx-events')}
 				width={6}
@@ -32,9 +31,6 @@ export function PaymentGatewaySelect({
 					gateways.map((gateway) => [gateway.id, gateway.title]),
 				)}
 				value={selectedGateway}
-				status="LOADED"
-				formTouched={false}
-				disabled={false}
 				onChange={(value) => onChange(String(value))}
 			/>
 		</div>
