@@ -83,6 +83,7 @@ class EventPost extends PostType implements HasTaxonomies, HasMetaData, HasPatte
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
+			/* translators: %s: number of cancelled events. */
 			'label_count'               => _n_noop('Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'ctx-events'),
 		]);
 		

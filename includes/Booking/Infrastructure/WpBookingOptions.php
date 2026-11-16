@@ -68,6 +68,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
                     'default'     => $this->externalExpirationSyncToken(),
                     'label'       => __('External cron token', 'ctx-events'),
                     'description' => sprintf(
+                        /* translators: 1: cron URL, 2: example cron URL including the token. */
                         __('If you use an external cron, call %1$s every 15 minutes. Example: %2$s', 'ctx-events'),
                         $this->externalExpirationSyncUrl(),
                         $this->externalExpirationSyncExampleUrl()

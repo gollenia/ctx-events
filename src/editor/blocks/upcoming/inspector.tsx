@@ -236,7 +236,7 @@ const Inspector = (props: InspectorProps) => {
 						onChange={(value) => setAttributes({ excludeCurrent: value })}
 						help={__(
 							'If applicable, exclude the current event from the list',
-							'events',
+							'ctx-events',
 						)}
 						__nextHasNoMarginBottom
 					/>
@@ -384,7 +384,7 @@ const Inspector = (props: InspectorProps) => {
 					max={10}
 					help={__(
 						'Show a warning that the event is nearly booked up when only this number of spaces are left',
-						'events',
+						'ctx-events',
 					)}
 				/>
 			</PanelBody>

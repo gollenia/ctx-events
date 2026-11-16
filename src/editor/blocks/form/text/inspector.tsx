@@ -39,7 +39,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Pattern', 'ctx-events')}
 					help={__(
 						'Regular expression to prevent wrong or illegal input',
-						'events',
+						'ctx-events',
 					)}
 					value={pattern}
 					onChange={(value) => setAttributes({ pattern: value })}

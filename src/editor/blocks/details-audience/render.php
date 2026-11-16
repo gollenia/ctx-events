@@ -13,8 +13,11 @@ if (!$audience) {
     $maximumAge = (int) get_post_meta($id, '_maximum_age', true);
 
     $audience = match (true) {
+        /* translators: 1: minimum age, 2: maximum age. */
         $minimumAge > 0 && $maximumAge > 0 => sprintf(__('%1$d–%2$d years', 'ctx-events'), $minimumAge, $maximumAge),
+        /* translators: %d: minimum age. */
         $minimumAge > 0 => sprintf(__('from %d years', 'ctx-events'), $minimumAge),
+        /* translators: %d: maximum age. */
         $maximumAge > 0 => sprintf(__('up to %d years', 'ctx-events'), $maximumAge),
         default => '',
     };

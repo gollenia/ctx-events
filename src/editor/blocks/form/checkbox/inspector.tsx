@@ -38,7 +38,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Error message', 'ctx-events')}
 					help={__(
 						'Text to inform the user that this checkbox must be checked',
-						'events',
+						'ctx-events',
 					)}
 					value={requiredMessage}
 					onChange={(value) => setAttributes({ requiredMessage: value })}

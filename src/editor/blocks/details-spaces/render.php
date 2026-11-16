@@ -30,8 +30,10 @@ $icon = $spaces === 0 ? 'spaces_full' : ($warningThreshold < $spaces ? 'done' : 
 		<div class="event-details-data">
 			<?php if (($attributes['showNumber'] ?? false) && $spaces > 0) : ?>
 				<?php if ($spaces <= $warningThreshold) : ?>
+					<?php /* translators: %s: number of spaces left. */ ?>
 					<div class="event-details-status event-details-status--warning"><?= esc_html(sprintf(_n('Only %s space left', 'Only %s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
 				<?php else : ?>
+					<?php /* translators: %s: number of spaces left. */ ?>
 					<div class="event-details-status event-details-status--ok"><?= esc_html(sprintf(_n('%s space left', '%s spaces left', $spaces, 'ctx-events'), $spaces)) ?></div>
 				<?php endif; ?>
 			<?php else : ?>

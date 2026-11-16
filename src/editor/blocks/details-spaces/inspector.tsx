@@ -40,7 +40,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Warning Threshold', 'ctx-events')}
 					help={__(
 						'Number of spaces when the warning message is shown',
-						'events',
+						'ctx-events',
 					)}
 					value={warningThreshold}
 					onChange={(value) =>
@@ -51,10 +51,13 @@ const Inspector = (props: InspectorProps) => {
 				/>
 				<TextControl
 					label={_n('Message when only few spaces are left', 'ctx-events')}
-					help={__(
-						'Use %s as placeholder for the number of spaces left',
-						'events',
-					)}
+					help={
+						/* translators: %s: the literal placeholder for the number of spaces left. */
+						__(
+							'Use %s as placeholder for the number of spaces left',
+							'ctx-events',
+						)
+					}
 					value={warningText}
 					onChange={(value) => setAttributes({ warningText: value })}
 					placeholder={sprintf(
@@ -62,7 +65,7 @@ const Inspector = (props: InspectorProps) => {
 							'Only %s space left',
 							'Only %s spaces left',
 							warningThreshold,
-							'events',
+							'ctx-events',
 						),
 						warningThreshold,
 					)}

@@ -288,6 +288,23 @@ test.describe('booking app', () => {
 		await registerBookingApiMocks(page);
 	});
 
+	test('renders checkbox descriptions as safe HTML', async ({ page }) => {
+		const data = structuredClone(freeBookingData);
+		data.bookingForm.fields.push({
+			name: 'consent', label: 'Consent', type: 'checkbox', width: 6,
+			required: false, visibilityRule: null,
+			description: 'Read the <a href="https://example.com/terms">terms</a><img src=x onerror="alert(1)">',
+		});
+		await page.route('**/wp-json/events/v3/events/*/prepare-booking**', (route) =>
+			route.fulfill({ status: 200, json: data }),
+		);
+		await openBooking(page, FREE_POST_ID);
+		await selectTicket(page, 'free-ticket');
+		const field = page.getByTestId('booking-field-consent');
+		await expect(field.getByRole('link', { name: 'terms' })).toHaveAttribute('href', 'https://example.com/terms');
+		await expect(field.locator('img')).toHaveCount(0);
+	});
+
 	test('completes a free booking flow with mocked backend', async ({ page }) => {
 		await openBooking(page, FREE_POST_ID);
 		await selectTicket(page, 'free-ticket');

@@ -74,7 +74,7 @@ const DataTableStatusSelect = () => {
 		return (
 			<ul className="subsubsub">
 				<li>
-					<span className="current">{__('Loading...', 'events')}</span>
+					<span className="current">{__('Loading...', 'ctx-events')}</span>
 				</li>
 			</ul>
 		);

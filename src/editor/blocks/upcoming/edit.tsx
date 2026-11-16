@@ -124,7 +124,7 @@ const EditUpcoming = (props: EditProps) => {
 							tagName="p"
 							placeholder={__(
 								'Set a text here to show when no events are visible',
-								'events',
+								'ctx-events',
 							)}
 							value={altText}
 							onChange={(value) => {

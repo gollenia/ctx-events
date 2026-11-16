@@ -83,6 +83,7 @@ const CancelAttendeeModal = ({ attendee, onClose, onConfirm }: Props) => {
 				value={cancellationAmount}
 				onChange={setCancellationAmount}
 				help={sprintf(
+					/* translators: %s: current price for the attendee. */
 					__('Current attendee price: %s', 'ctx-events'),
 					formatPrice(attendee.ticketPrice),
 				)}

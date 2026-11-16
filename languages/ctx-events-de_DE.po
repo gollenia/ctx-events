@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-11-13 15:10+0000\n"
+"PO-Revision-Date: 2026-11-16 08:42+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Language: de_DE\n"
@@ -38,8 +38,8 @@ msgstr "%d Tage"
 
 #: build/admin.js:1
 #, js-format
-msgid "%d h %d min"
-msgstr "%d Std. %d Min."
+msgid "%1$d h %2$d min"
+msgstr "%1$d Std. %2$d Min."
 
 #: build/admin.js:1
 #, js-format
@@ -295,7 +295,8 @@ msgstr "Symbol links ausrichten"
 msgid "Align icon right"
 msgstr "Symbol rechts ausrichten"
 
-#: build/admin.js:3 build/editor/blocks/upcoming-table/view.js:1
+#: build/admin.js:3 build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/upcoming-table/view.js:1
 #: build/editor/blocks/upcoming/view/index.js:1
 msgid "All"
 msgstr "Alle"
@@ -340,6 +341,10 @@ msgstr "Spenden erlauben"
 msgid "Amount"
 msgstr "Betrag"
 
+#: build/editor/blocks/form/select/index.js:1
+msgid "An empty option ist shown and selected as default"
+msgstr "Eine leere Option wird angezeigt und automatisch ausgewählt"
+
 #: build/editor/blocks/upcoming-table/view.js:1
 #: build/editor/blocks/upcoming/view/index.js:1
 msgid "An Error occurred"
@@ -349,6 +354,7 @@ msgstr "Ein Fehler ist aufgetreten"
 msgid "An error occurred while toggling the gateway: "
 msgstr "Beim Umschalten des Gateways ist ein Fehler aufgetreten: "
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/index.js:1
 msgid "Any location"
 msgstr "Jeder Ort"
@@ -677,6 +683,12 @@ msgctxt "block description"
 msgid "Render the featured event title."
 msgstr "Zeigt den Top-Event Titel"
 
+#: build/editor/blocks/countdown/block.json
+msgctxt "block description"
+msgid "Show a countdown or date for the next matching event."
+msgstr ""
+"Zeige einen Countdown oder das Datum des nächsten passenden Termins an."
+
 #: build/editor/blocks/details/block.json
 #: build/editor/blocks/form/container/block.json
 msgctxt "block description"
@@ -815,6 +827,11 @@ msgstr "Buchungsende der Veranstaltung"
 msgctxt "block title"
 msgid "Event Booking Spaces"
 msgstr "Buchungsplätze der Veranstaltung"
+
+#: build/editor/blocks/countdown/block.json
+msgctxt "block title"
+msgid "Event Countdown"
+msgstr "Veranstaltungs-Countdown"
 
 #: build/editor/blocks/details-date/block.json
 msgctxt "block title"
@@ -1117,7 +1134,7 @@ msgstr "Buchungsformulare"
 msgid "Booking has ended on"
 msgstr "Buchung endete am"
 
-#: build/admin.js:1
+#: build/2205.js:1 build/4586.js:1 build/admin.js:1
 msgid "Booking Info"
 msgstr "Buchungsinfo"
 
@@ -1297,6 +1314,7 @@ msgstr "Karten"
 msgid "Categories"
 msgstr "Kategorien"
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming-table/view.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -1520,6 +1538,7 @@ msgstr "Bezahl-Link konnte nicht versandt werden"
 msgid "Could not update attendee."
 msgstr "Teilnehmer konnte nicht aktualisiert werden."
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/schedule/index.js:1
 msgid "Countdown"
 msgstr "Countdown"
@@ -1687,9 +1706,17 @@ msgstr "Datum"
 msgid "Date and time"
 msgstr "Datum und Uhrzeit"
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/schedule/index.js:1
 msgid "Date only"
 msgstr "Nur Datum"
+
+#: build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/countdown/view.js:1
+msgid "day"
+msgid_plural "days"
+msgstr[0] "Tag"
+msgstr[1] "Tage"
 
 #: build/editor.js:1
 msgid "Day of month"
@@ -1831,6 +1858,7 @@ msgstr "Art der Preisminderung"
 msgid "Discount value"
 msgstr "Wert der Preisminderung"
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/schedule/index.js:1
 msgid "Display"
 msgstr "Ansicht"
@@ -2158,7 +2186,7 @@ msgstr "Hier wird das Datum angezeigt."
 msgid "Event Details"
 msgstr "Event Details"
 
-#: build/editor/blocks/upcoming/index.js:1
+#: build/2205.js:1 build/4586.js:1 build/editor/blocks/upcoming/index.js:1
 msgid "Event details"
 msgstr "Veranstaltungsdetails"
 
@@ -2428,6 +2456,10 @@ msgstr "Formular-Schlagwort"
 msgid "Form Tags"
 msgstr "Formular-Schlagwörter"
 
+#: build/2205.js:1 build/4586.js:1
+msgid "Formatting"
+msgstr "Formatierungen"
+
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:115
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:116 build/admin.js:3
 msgid "Forms"
@@ -2624,6 +2656,10 @@ msgstr "Symbol für Link"
 msgid "ID"
 msgstr "ID"
 
+#: build/editor/blocks/upcoming/index.js:1
+msgid "If applicable, exclude the current event from the list"
+msgstr "Falls zutreffend, das aktuelle Event aus der Liste ausschließen."
+
 #: includes/Booking/Infrastructure/WpBookingOptions.php:83
 msgid ""
 "If enabled, an iCal file will be attached to booking confirmation emails."
@@ -2675,41 +2711,28 @@ msgid "Image URL"
 msgstr "Bild URL"
 
 #. translators: 1: minutes, 2: seconds
+#: build/editor/blocks/featured-event/schedule/index.js:4
 #: build/editor/blocks/featured-event/schedule/view.js:4
 #, js-format
 msgid "in %1$02d:%2$02d Minutes"
 msgstr "in %1$02d:%2$02d Minuten"
 
 #. translators: 1: hours, 2: minutes, 3: seconds
+#: build/editor/blocks/featured-event/schedule/index.js:3
 #: build/editor/blocks/featured-event/schedule/view.js:3
 #, js-format
 msgid "in %1$02d:%2$02d:%3$02d Hours"
 msgstr "in %1$02d:%2$02d:%3$02d Stunden"
 
 #. translators: 1: days, 2: hours
+#: build/editor/blocks/featured-event/schedule/index.js:2
 #: build/editor/blocks/featured-event/schedule/view.js:2
 #, js-format
 msgid "in %1$d days %2$02d hours"
 msgstr "in %1$d Tagen %2$02d Stunden"
 
-#. translators: %d: remaining days until the event starts
-#: build/editor/blocks/featured-event/schedule/index.js:2
-#, js-format
-msgid "in %d days"
-msgstr "In %d Tagen"
-
-#: build/editor/blocks/featured-event/schedule/index.js:1
-#, js-format
-msgid "in %d h %d min"
-msgstr "in %d Stunden %d Minuten"
-
-#: build/editor/blocks/featured-event/schedule/index.js:1
-#, js-format
-msgid "in %d min"
-msgstr "in %d Minuten"
-
-#. translators: %d: remaining seconds
-#: build/editor/blocks/featured-event/schedule/view.js:5
+#: build/editor/blocks/featured-event/schedule/index.js:4
+#: build/editor/blocks/featured-event/schedule/view.js:4
 #, js-format
 msgid "in %d Seconds"
 msgstr "in %d Sekunden"
@@ -2822,13 +2845,18 @@ msgstr "Limit"
 msgid "Lines as separators"
 msgstr "Linien als Trenner"
 
-#: build/editor.js:1 build/editor/blocks/details-item/index.js:1
+#: build/2205.js:1 build/4586.js:1 build/editor.js:1
+#: build/editor/blocks/details-item/index.js:1
 msgid "Link"
 msgstr "Link"
 
 #: build/editor/blocks/details-person/index.js:1
 msgid "Link to"
 msgstr "Verlinken zu"
+
+#: build/2205.js:1 build/4586.js:1
+msgid "Link URL"
+msgstr "Link-URL"
 
 #: build/editor/blocks/upcoming/index.js:1
 msgid "List"
@@ -2863,7 +2891,8 @@ msgstr "Zahlungs-QR wird geladen…"
 msgid "Loading..."
 msgstr "Wird geladen..."
 
-#: build/frontend.js:7
+#: build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/countdown/view.js:1 build/frontend.js:7
 msgid "Loading…"
 msgstr "Wird geladen…"
 
@@ -2871,6 +2900,7 @@ msgstr "Wird geladen…"
 #: includes/Event/Infrastructure/Bindings/LocationBindingSource.php:33
 #: includes/Location/Infrastructure/LocationPost.php:25
 #: patterns/event-details-top.php:24 build/admin.js:3 build/editor.js:1
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/details-location/index.js:1
 #: build/editor/blocks/featured-event/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
@@ -3180,6 +3210,8 @@ msgstr "Keine Orte gefunden"
 msgid "No Locations Found in Trash"
 msgstr "Keine Orte im Papierkorb gefunden"
 
+#: build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/countdown/view.js:1
 #: build/editor/blocks/featured-event/index.js:1
 msgid "No matching events found."
 msgstr "Keine passenden Events gefunden."
@@ -3294,6 +3326,11 @@ msgstr "Anzahl der Spalten, die das Eingabefeld einnimmt"
 msgid "Number of copies"
 msgstr "Anzahl der Kopien"
 
+#: build/editor/blocks/details-spaces/index.js:1
+msgid "Number of spaces when the warning message is shown"
+msgstr ""
+"Anzahl der verbleibenden Plätze, ab der die Warnmeldung angezeigt wird."
+
 #: build/editor/blocks/form/textarea/index.js:1
 msgid "Number of text rows"
 msgstr "Anzahl der Textzeilen"
@@ -3335,7 +3372,8 @@ msgid "Offline payment expiring"
 msgstr "Offline-Zahlung läuft ab"
 
 #: build/editor/blocks/details-spaces/render.php:33
-#, php-format
+#: build/editor/blocks/details-spaces/index.js:1
+#, js-format
 msgid "Only %s space left"
 msgid_plural "Only %s spaces left"
 msgstr[0] "Nur noch %s Platz frei"
@@ -3386,6 +3424,15 @@ msgstr "Optional. Für eine Reihe ohne Enddatum leer lassen."
 #: build/editor/blocks/form/select/index.js:1
 msgid "Options"
 msgstr "Optionen"
+
+#: build/editor/blocks/form/radio/index.js:1
+msgid "Options for the radio control. Each line represents one option"
+msgstr "Optionen für die Auswahl. Jede Zeile entspricht einer Option."
+
+#: build/editor/blocks/form/select/index.js:1
+msgid "Options for the select control. Each line represents one option"
+msgstr ""
+"Auswahlmöglichkeiten für das Auswahlfeld. Jede Zeile entspricht einer Option"
 
 #: build/2205.js:1 build/4586.js:1
 msgid "Orange"
@@ -3793,6 +3840,11 @@ msgstr "Registrierungsdaten"
 msgid "Registration Form"
 msgstr "Anmeldeformular"
 
+#: build/editor/blocks/form/text/index.js:1
+msgid "Regular expression to prevent wrong or illegal input"
+msgstr ""
+"Regulärer Ausdruck zur Verhinderung ungültiger oder unzulässiger Eingaben."
+
 #: build/admin.js:1
 msgid "Rejected"
 msgstr "Abgelehnt"
@@ -4123,6 +4175,7 @@ msgstr "Ausgewählt"
 msgid "Selected event"
 msgstr "Ausgewählte Veranstaltung"
 
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/index.js:1
 msgid "Selection"
 msgstr "Auswahl"
@@ -4232,6 +4285,7 @@ msgid "Separate person categories with commas"
 msgstr "Personenkategorien mit Kommas trennen"
 
 #: build/editor/blocks/upcoming-table/index.js:1
+#: build/editor/blocks/upcoming/index.js:1
 msgid "Set a text here to show when no events are visible"
 msgstr ""
 "Gib hier einen Text ein, der angezeigt wird, wenn keine Veranstaltungen "
@@ -4245,6 +4299,14 @@ msgstr "Einstellungen"
 #: build/admin.js:1
 msgid "Show"
 msgstr "Anzeigen"
+
+#: build/editor/blocks/upcoming/index.js:1
+msgid ""
+"Show a warning that the event is nearly booked up when only this number of "
+"spaces are left"
+msgstr ""
+"Warnung anzeigen, wenn nur noch die angegebene Anzahl an Plätzen verfügbar "
+"ist."
 
 #: build/editor/blocks/details-location/index.js:1
 msgid "Show Address"
@@ -4524,6 +4586,7 @@ msgstr "Tabellenoptionen"
 
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:141
 #: includes/Platform/Wordpress/Admin/AdminMenu.php:142 build/admin.js:3
+#: build/editor/blocks/countdown/index.js:1
 #: build/editor/blocks/featured-event/index.js:1
 #: build/editor/blocks/upcoming-table/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -4562,6 +4625,10 @@ msgstr "Textfarbe"
 msgid "Text to display when no country is selected"
 msgstr "Text, der angezeigt wird, wenn kein Land ausgewählt ist"
 
+#: build/editor/blocks/form/checkbox/index.js:1
+msgid "Text to inform the user that this checkbox must be checked"
+msgstr "Hinweistext, dass dieses Kontrollkästchen aktiviert werden muss."
+
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:176
 msgid "The BIC of the account"
 msgstr "BIC des Kontos"
@@ -4581,6 +4648,8 @@ msgstr ""
 "Die Veranstaltung wird an jedem ausgewählten Tag zwischen der Start- und "
 "Endzeit angezeigt."
 
+#: build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/countdown/view.js:1
 #: build/editor/blocks/featured-event/index.js:1
 msgid "The event search failed."
 msgstr "Die Eventsuche ist fehlgeschlagen."
@@ -4953,6 +5022,12 @@ msgstr "Anzahl der Nutzungen"
 msgid "Usage limit"
 msgstr "Nutzungslimit"
 
+#: build/editor/blocks/details-spaces/index.js:1
+#, js-format
+msgid "Use %s as placeholder for the number of spaces left"
+msgstr ""
+"Verwende %s als Platzhalter für die Anzahl der verbleibenden freien Plätze."
+
 #: build/editor/blocks/form/date/index.js:1
 msgid "Use age limits from the event"
 msgstr "Alterslimit des Events nutzen"
@@ -5028,6 +5103,7 @@ msgstr "Wert"
 #: includes/Location/Infrastructure/LocationPost.php:32
 #: includes/Payment/Infrastructure/CouponPost.php:31
 #: includes/Person/Infrastructure/PersonPost.php:49 build/admin.js:3
+#: build/editor/blocks/countdown/index.js:1
 msgid "View"
 msgstr "Ansehen"
 
@@ -5319,11 +5395,3 @@ msgstr "PLZ"
 #: build/admin.js:3
 msgid "Änderungen speichern"
 msgstr "Änderungen speichern"
-
-#: src/shared/emails/extensions.ts
-msgid "Formatting"
-msgstr "Formatierungen"
-
-#: src/shared/emails/extensions.ts
-msgid "Link URL"
-msgstr "Link-URL"

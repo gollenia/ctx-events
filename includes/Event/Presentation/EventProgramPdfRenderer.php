@@ -152,14 +152,17 @@ final class EventProgramPdfRenderer
 	{
 		return match ($program->mode) {
 			'week' => sprintf(
+				/* translators: %s: date range of the week. */
 				__('Week program %s', 'ctx-events'),
 				wp_date(get_option('date_format'), $program->startDate->getTimestamp()) . ' - ' . wp_date(get_option('date_format'), $program->endDate->getTimestamp()),
 			),
 			'year' => sprintf(
+				/* translators: %s: year of the program. */
 				__('Year program %s', 'ctx-events'),
 				wp_date('Y', $program->startDate->getTimestamp()),
 			),
 			default => sprintf(
+				/* translators: %s: month and year of the program. */
 				__('Month program %s', 'ctx-events'),
 				wp_date('F Y', $program->startDate->getTimestamp()),
 			),

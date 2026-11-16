@@ -79,6 +79,7 @@ final class BlockEventLoader
     public static function formatDailyTimeRange(\DateTimeImmutable $start, \DateTimeImmutable $end): string
     {
         return sprintf(
+            /* translators: %s: daily time range. */
             __('Each day %s', 'ctx-events'),
             self::formatTimeRange($start, $end),
         );

@@ -44,5 +44,8 @@ export function formatCountdownLabel(targetIso: string, now = Date.now()): strin
 			__('in %1$02d:%2$02d Minutes', 'ctx-events'), pad(minutes), pad(seconds),
 		);
 	}
-	return sprintf(__('in %d Seconds', 'ctx-events'), remaining);
+	return sprintf(
+		/* translators: %d: seconds remaining until the event starts. */
+		__('in %d Seconds', 'ctx-events'), remaining,
+	);
 }

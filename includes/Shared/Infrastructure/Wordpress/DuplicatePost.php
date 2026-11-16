@@ -16,7 +16,7 @@ abstract class DuplicatePost
 			return null;
 		}
 
-		$newPostId = wp_insert_post($this->buildPostData($sourcePost), true);
+		$newPostId = wp_insert_post(wp_slash($this->buildPostData($sourcePost)), true);
 		if (is_wp_error($newPostId)) {
 			return null;
 		}

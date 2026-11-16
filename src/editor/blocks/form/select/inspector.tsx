@@ -53,7 +53,7 @@ const Inspector = (props: InspectorProps) => {
 					label={__('Empty option', 'ctx-events')}
 					help={__(
 						'An empty option ist shown and selected as default',
-						'events',
+						'ctx-events',
 					)}
 					checked={hasEmptyOption}
 					disabled={required}
@@ -66,7 +66,7 @@ const Inspector = (props: InspectorProps) => {
 					onChange={(value) => setAttributes({ options: value.split('\n') })}
 					help={__(
 						'Options for the select control. Each line represents one option',
-						'events',
+						'ctx-events',
 					)}
 				/>
 			</PanelBody>

@@ -43,7 +43,7 @@ const Inspector = (props: InspectorProps) => {
 					onChange={(value) => setAttributes({ options: value.split('\n') })}
 					help={__(
 						'Options for the radio control. Each line represents one option',
-						'events',
+						'ctx-events',
 					)}
 				/>
 			</PanelBody>

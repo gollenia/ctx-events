@@ -110,7 +110,7 @@ const edit = (props: SpacesBlockProps) => {
 														'Only %s space left',
 														'Only %s spaces left',
 														showNumber ? spaces : __('few', 'ctx-events'),
-														'events',
+														'ctx-events',
 													),
 													showNumber ? spaces : __('few', 'ctx-events'),
 												)}

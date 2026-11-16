@@ -50,13 +50,17 @@ const getExpiresCountdown = (
 
 		if (hours <= 0) {
 			return {
-				label: sprintf(__('%d min', 'ctx-events'), Math.max(1, minutes)),
+				label: sprintf(
+					/* translators: %d: remaining minutes until expiration. */
+					__('%d min', 'ctx-events'), Math.max(1, minutes)),
 				isWarning: true,
 			};
 		}
 
 		return {
-			label: sprintf(__('%d h %d min', 'ctx-events'), hours, minutes),
+			label: sprintf(
+				/* translators: 1: remaining hours, 2: remaining minutes. */
+				__('%1$d h %2$d min', 'ctx-events'), hours, minutes),
 			isWarning: true,
 		};
 	}

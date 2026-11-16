@@ -92,6 +92,7 @@ export function DonationAdvertisement({
 				<div className="booking-donation-advertisement__panel">
 					<p className="booking-donation-advertisement__help">
 						{sprintf(
+							/* translators: %s: currency used for the contribution. */
 							__(
 								'Choose an amount with the slider or enter a custom contribution in %s.',
 								'ctx-events',

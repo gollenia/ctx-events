@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.4.4 - 2026-11-16
+
+### Fixed
+
+- Load booking translations and frontend styles using plugin-specific identifiers.
+- Preserve form content when duplicating and render checkbox descriptions as sanitized HTML.
+- Clarify translation placeholders and update German translations.
+
 ## 0.4.3 - 2026-11-13
 
 ### Fixed
