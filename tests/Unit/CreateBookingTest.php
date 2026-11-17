@@ -193,6 +193,28 @@ test('throws when token belongs to a different event', function () {
         ->toThrow(\DomainException::class, 'Booking token does not match event.');
 });
 
+test('requires consent before creating a booking', function () {
+    $event = FakeEventFactory::create(900);
+    $useCase = makeCreateBookingUseCase(
+        FakeEventRepository::one($event),
+        FakeBookingRepository::empty(),
+        FakeTokenStore::withToken(tokenFor($event->id->toInt())),
+    );
+    $ticketId = $event->tickets?->toArray()[0]?->id->toString() ?? 'ticket-1';
+
+    $request = new CreateBookingRequest(
+        eventId: $event->id,
+        registration: registrationPayload(),
+        attendees: attendeePayload($ticketId),
+        gateway: 'offline',
+        consent: false,
+        token: 'valid-token',
+    );
+
+    expect(fn () => $useCase->execute($request))
+        ->toThrow(\DomainException::class, 'Consent is required.');
+});
+
 test('throws when session hash does not match token', function () {
     $event = FakeEventFactory::create(4);
 
@@ -310,12 +332,15 @@ test('triggers pending manual emails for offline bookings', function () {
         token: 'valid-token',
     ));
 
-    $call = $bookingEmailTrigger->lastCall();
+    $calls = $bookingEmailTrigger->calls;
     $bookingId = $bookingRepository->findByReference($response->reference->toString())?->id;
 
-    expect($call['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_PENDING_MANUAL);
+    expect($calls)->toHaveCount(2);
+    expect($calls[0]['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_PENDING_MANUAL);
+    expect($calls[1]['trigger'] ?? null)->toBe(EmailTrigger::RESPONSIBLE_BOOKING_CREATED);
     expect($bookingId)->not->toBeNull();
-    expect($call['bookingId'] ?? null)->toEqual($bookingId);
+    expect($calls[0]['bookingId'] ?? null)->toEqual($bookingId);
+    expect($calls[1]['bookingId'] ?? null)->toEqual($bookingId);
 });
 
 test('triggers created online emails for paid online bookings', function () {
@@ -354,12 +379,15 @@ test('triggers created online emails for paid online bookings', function () {
         token: 'valid-token',
     ));
 
-    $call = $bookingEmailTrigger->lastCall();
+    $calls = $bookingEmailTrigger->calls;
     $bookingId = $bookingRepository->findByReference($response->reference->toString())?->id;
 
-    expect($call['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CREATED_ONLINE);
+    expect($calls)->toHaveCount(2);
+    expect($calls[0]['trigger'] ?? null)->toBe(EmailTrigger::BOOKING_CREATED_ONLINE);
+    expect($calls[1]['trigger'] ?? null)->toBe(EmailTrigger::RESPONSIBLE_BOOKING_CREATED);
     expect($bookingId)->not->toBeNull();
-    expect($call['bookingId'] ?? null)->toEqual($bookingId);
+    expect($calls[0]['bookingId'] ?? null)->toEqual($bookingId);
+    expect($calls[1]['bookingId'] ?? null)->toEqual($bookingId);
 });
 
 test('throws when booking window has not started yet', function () {

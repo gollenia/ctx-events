@@ -41,10 +41,6 @@ final class Assets implements Registrar
 
         wp_set_script_translations('ctx-events-frontend', 'ctx-events', PluginInfo::getPluginDir('/languages'));
 
-        wp_localize_script('ctx-events-frontend', 'eventBlocksLocalization', [
-            "consent" => get_option("dbem_privacy_message", __('I consent to my personal data being stored and used as per the Privacy Policy', 'ctx-events')),
-            "donation" => get_option("dbem_donation_message", __('I would like to support the event with a donation', 'ctx-events')),
-        ]);
     }
 
     public function frontendStyle(): void

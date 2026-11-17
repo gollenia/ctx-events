@@ -1,4 +1,4 @@
-import { isFieldVisible } from '@contexis/wp-react-form';
+import { isFieldVisible } from '@contexis/wp-ui';
 import { InputField } from '../../../shared/admin-form';
 import type { BookingFormField } from '../../../types/types';
 import {

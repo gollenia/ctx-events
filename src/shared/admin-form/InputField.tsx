@@ -15,7 +15,7 @@ import {
 	getCountryOptions,
 	type SelectOptions,
 	sanitizeHtml,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 
 type NormalizedOption = {
 	label: string;

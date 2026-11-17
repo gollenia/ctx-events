@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Add a configurable, localized consent message that customers must accept before submitting a booking.
+- Add a dedicated booking-created email template for the responsible event contact.
+- Add browser autofill metadata to text form fields.
+- Add contact-person images and selectable event-image, contact-person or date leading content to Upcoming Events lists.
+
+### Changed
+
+- Refresh booking and event-list interfaces with the shared WordPress UI components.
+- Present online payment handoff as one prominent checkout action.
+- Update Upcoming Events card and list displays.
+
+### Fixed
+
+- Use form labels instead of internal keys and localize payment and attendee tables in booking emails.
+- Remove the legacy `dbem_version` option and old booking-script localization data.
+
 ## 0.4.5 - 2026-11-16
 
 ### Fixed

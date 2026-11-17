@@ -93,7 +93,13 @@ export function useBookingData(postId: number | null) {
 							.filter((ticket): ticket is TicketInfo => ticket !== null)
 					: [],
 				gateways: Array.isArray(raw.gateways) ? raw.gateways : [],
-				bookingForm: (raw.bookingForm as BookingData['bookingForm']) ?? { id: 0, type: 'booking', name: '', description: null, fields: [] },
+				bookingForm: (raw.bookingForm as BookingData['bookingForm']) ?? {
+					id: 0,
+					type: 'booking',
+					name: '',
+					description: null,
+					fields: [],
+				},
 				attendeeForm: (raw.attendeeForm as BookingData['attendeeForm']) ?? null,
 				couponsEnabled: Boolean(raw.couponsEnabled),
 				donationEnabled: Boolean(raw.donationEnabled),
@@ -101,6 +107,7 @@ export function useBookingData(postId: number | null) {
 					typeof raw.donationAdvertisement === 'string'
 						? raw.donationAdvertisement
 						: null,
+				consentMessage: String(raw.consentMessage ?? ''),
 				token: String(raw.token ?? ''),
 			};
 

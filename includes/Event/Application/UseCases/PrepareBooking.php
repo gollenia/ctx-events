@@ -80,6 +80,7 @@ final class PrepareBooking
             couponsEnabled: $event->allowsCoupons(),
 			donationEnabled: $event->donationEnabled,
 			donationAdvertisement: $event->donationEnabled ? $this->bookingOptions->donationAdvertisement() : null,
+			consentMessage: $this->bookingOptions->consentMessage(),
             token: $token,
         );
     }

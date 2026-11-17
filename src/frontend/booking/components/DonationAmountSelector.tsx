@@ -1,4 +1,4 @@
-import { Flex, Input, Range } from '@contexis/wp-react-form';
+import { Flex, Input, Range } from '@contexis/wp-ui';
 
 const MAX_SLIDER_AMOUNT = 500;
 const MID_SLIDER_AMOUNT = 100;

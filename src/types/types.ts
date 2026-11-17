@@ -58,9 +58,12 @@ tickets: Array<any>,
 gateways: Array<any>,
 bookingForm: Array<any>,
 attendeeForm: Array<any> | null,
+minimumAge: number | null,
+maximumAge: number | null,
 couponsEnabled: boolean,
 donationEnabled: boolean,
 donationAdvertisement: string | null,
+consentMessage: string,
 token: string,
 };
 export type BookingListItem = {
@@ -126,8 +129,8 @@ readonly status: string,
 export type DatabaseOutput = 'OBJECT' | 'ARRAY_A' | 'ARRAY_N';
 export type DiscountType = 'percent' | 'fixed';
 export type EmailTarget = 'customer' | 'admin' | 'billing_contact' | 'event_contact';
-export type EmailTemplateKey = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled' | 'admin_booking_pending_manual' | 'admin_booking_created_online';
-export type EmailTrigger = 'booking_pending_manual' | 'booking_created_online' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled';
+export type EmailTemplateKey = 'booking_pending_manual' | 'booking_created_online' | 'booking_payment_link' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled' | 'admin_booking_pending_manual' | 'admin_booking_created_online' | 'responsible_booking_created';
+export type EmailTrigger = 'booking_pending_manual' | 'booking_created_online' | 'booking_payment_link' | 'booking_confirmed_manual' | 'booking_confirmed_online' | 'booking_offline_expiring' | 'booking_offline_expired' | 'booking_payment_failed' | 'booking_denied' | 'booking_cancelled' | 'ticket_cancelled' | 'responsible_booking_created';
 export type ErrorType = 'ERROR' | 'WARNING' | 'INFO';
 export type Event = {
 readonly id: number,

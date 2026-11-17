@@ -305,6 +305,58 @@ test.describe('booking app', () => {
 		await expect(field.locator('img')).toHaveCount(0);
 	});
 
+	test('exposes address fields to browser autofill', async ({ page }) => {
+		const data = structuredClone(freeBookingData);
+		data.bookingForm.fields.push(
+			{
+				name: 'custom_address',
+				label: 'Adresse',
+				type: 'input',
+				inputType: 'text',
+				width: 6,
+			},
+			{
+				name: 'custom_zip',
+				label: 'Postleitzahl',
+				type: 'input',
+				inputType: 'text',
+				width: 6,
+			},
+			{
+				name: 'custom_city',
+				label: 'Ort',
+				type: 'input',
+				inputType: 'text',
+				width: 6,
+			},
+			{
+				name: 'custom_name',
+				label: 'Person',
+				type: 'input',
+				inputType: 'text',
+				autoComplete: 'family-name',
+				width: 6,
+			},
+		);
+		await page.route(
+			'**/wp-json/events/v3/events/*/prepare-booking**',
+			(route) => route.fulfill({ status: 200, json: data }),
+		);
+		await openBooking(page, FREE_POST_ID);
+		await selectTicket(page, 'free-ticket');
+		for (const [name, autocomplete] of [
+			['custom_address', 'address-line1'],
+			['custom_zip', 'postal-code'],
+			['custom_city', 'address-level2'],
+			['custom_name', 'family-name'],
+		]) {
+			await expect(
+				page.getByTestId(`booking-field-${name}`).locator('input'),
+			).toHaveAttribute('autocomplete', autocomplete);
+		}
+	});
+
+
 	test('completes a free booking flow with mocked backend', async ({ page }) => {
 		await openBooking(page, FREE_POST_ID);
 		await selectTicket(page, 'free-ticket');

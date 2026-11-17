@@ -1,6 +1,6 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@contexis/wp-react-form';
+import { Button } from '@contexis/wp-ui';
 import { FormFieldRenderer } from '../components/FormFieldRenderer';
 import { SectionFooter } from '../components/SectionFooter';
 import { buildInitialFormValues } from '../formFields';

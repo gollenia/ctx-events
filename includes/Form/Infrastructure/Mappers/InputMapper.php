@@ -18,6 +18,7 @@ class InputMapper implements DetailsMapper
             placeholder: $attributes['placeholder'] ?? '',
             defaultValue: $attributes['defaultValue'] ?? null,
             pattern: $attributes['pattern'] ?? null,
+            autoComplete: $attributes['autoComplete'] ?? null,
         );
     }
 }

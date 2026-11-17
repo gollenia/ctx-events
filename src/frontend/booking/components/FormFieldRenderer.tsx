@@ -4,7 +4,7 @@ import {
 	isFieldVisible,
 	normalizeFieldValue,
 	sanitizeInlineHtml,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 import { getBookingFieldDefinition } from '../formFields';
 
 type Props = {

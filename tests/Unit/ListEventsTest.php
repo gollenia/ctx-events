@@ -50,7 +50,7 @@ test('lists events with pagination and status counts', function () {
     $assembler = new EventResponseAssembler(
         locations: EventLocations::create(new FakeLocationRepository()),
         images: EventImages::create(new FakeImageRepository()),
-        persons: EventPersons::create(new FakePersonRepository()),
+        persons: EventPersons::create(new FakePersonRepository(), new FakeImageRepository()),
         taxonomyLoader: new TaxonomyLoader(),
         clock: $clock,
         bookingRepository: FakeBookingRepository::empty(),

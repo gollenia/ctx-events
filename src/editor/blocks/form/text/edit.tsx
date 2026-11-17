@@ -15,6 +15,7 @@ export type TextAttributes = {
 	width: number;
 	required: boolean;
 	pattern: string;
+	autoComplete: string;
 	label: string;
 	placeholder: string;
 	visibilityRule?: VisibilityRule | null;

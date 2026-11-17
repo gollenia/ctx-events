@@ -1,1 +1,1 @@
-export { isFieldVisible } from '@contexis/wp-react-form';
+export { isFieldVisible } from '@contexis/wp-ui';

@@ -10,10 +10,11 @@ test('provides all v1 communication presets', function () {
     $provider = new DefaultEmailTemplatePresetProvider();
     $presets = $provider->all();
 
-    expect($presets->count())->toBe(13);
+    expect($presets->count())->toBe(14);
     expect($provider->find(EmailTemplateKey::BOOKING_PENDING_MANUAL))->not->toBeNull();
     expect($provider->find(EmailTemplateKey::BOOKING_PAYMENT_LINK))->not->toBeNull();
     expect($provider->find(EmailTemplateKey::ADMIN_BOOKING_CREATED_ONLINE))->not->toBeNull();
+    expect($provider->find(EmailTemplateKey::RESPONSIBLE_BOOKING_CREATED))->not->toBeNull();
 });
 
 test('marks admin presets with admin target', function () {

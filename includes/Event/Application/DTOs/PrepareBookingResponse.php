@@ -26,6 +26,7 @@ final readonly class PrepareBookingResponse
         public bool $couponsEnabled,
 		public bool $donationEnabled,
 		public ?string $donationAdvertisement,
+		public string $consentMessage,
 		public string $token, 
     ) {
     }
@@ -44,6 +45,7 @@ final readonly class PrepareBookingResponse
         bool $couponsEnabled,
 		bool $donationEnabled,
 		?string $donationAdvertisement,
+		string $consentMessage,
         string $token
     ): self {
         return new self(
@@ -60,6 +62,7 @@ final readonly class PrepareBookingResponse
             couponsEnabled: $couponsEnabled,
 			donationEnabled: $donationEnabled,
 			donationAdvertisement: $donationAdvertisement,
+			consentMessage: $consentMessage,
 			token: $token,
         );
     }
@@ -80,6 +83,7 @@ final readonly class PrepareBookingResponse
             'hasCoupons' => $this->couponsEnabled,
 			'donationEnabled' => $this->donationEnabled,
 			'donationAdvertisement' => $this->donationAdvertisement,
+			'consentMessage' => $this->consentMessage,
 			'_token' => $this->token, 
         ];
     }

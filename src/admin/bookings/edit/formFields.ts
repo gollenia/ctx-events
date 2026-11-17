@@ -3,7 +3,7 @@ import type {
 	FieldValue,
 	FormFieldDefinition,
 	InputType,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 import type { BookingFormField } from 'src/types/types';
 
 export type BookingFormValues = Record<string, unknown>;

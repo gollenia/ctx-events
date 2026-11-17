@@ -1,5 +1,6 @@
 export type UpcomingAttributes = {
 	showImages: boolean;
+	listLeading?: '' | 'event' | 'person' | 'date';
 	roundImages?: boolean;
 	imageSize?: number;
 	showCategory: boolean;
@@ -68,6 +69,11 @@ export type UpcomingViewEvent = {
 	person: {
 		id: number;
 		name: string;
+		image: {
+			url: string;
+			altText: string;
+			sizes: Record<string, { url?: string }>;
+		} | null;
 	} | null;
 };
 

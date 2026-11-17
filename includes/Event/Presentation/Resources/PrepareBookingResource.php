@@ -24,6 +24,7 @@ final class PrepareBookingResource
 		public bool $couponsEnabled,
 		public bool $donationEnabled,
 		public ?string $donationAdvertisement,
+		public string $consentMessage,
 		public string $token,
 	) {
 	}
@@ -48,6 +49,7 @@ final class PrepareBookingResource
 			couponsEnabled: $response->couponsEnabled,
 			donationEnabled: $response->donationEnabled,
 			donationAdvertisement: $response->donationAdvertisement,
+			consentMessage: $response->consentMessage,
 			token: $response->token,
 		);
 	}
@@ -68,6 +70,7 @@ final class PrepareBookingResource
 			'couponsEnabled' => $this->couponsEnabled,
 			'donationEnabled' => $this->donationEnabled,
 			'donationAdvertisement' => $this->donationAdvertisement,
+			'consentMessage' => $this->consentMessage,
 			'token' => $this->token,
 		];
 	}

@@ -1,4 +1,4 @@
-import { Button, Checkbox, InputField } from '@contexis/wp-react-form';
+import { Button, Checkbox, InputField } from '@contexis/wp-ui';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';

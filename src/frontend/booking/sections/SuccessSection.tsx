@@ -1,6 +1,6 @@
-import { Button } from '@contexis/wp-react-form';
+import { Button } from '@contexis/wp-ui';
 import { formatPrice } from '@events/i18n';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { BookingCard } from '../components/BookingCard';
 import { usePaymentQr } from '../hooks/usePaymentQr';
 import type { BookingPayment, PaymentReturnStatus } from '../types';
@@ -120,9 +120,13 @@ function renderPaymentDetails(payment: BookingPayment, reference: string) {
 						{payment.instructions}
 					</p>
 				)}
-				<a className="ctx-button" href={payment.checkoutUrl}>
+				<Button
+					variant="primary"
+					fullWidth
+					onClick={() => window.location.assign(payment.checkoutUrl)}
+				>
 					{__('Continue to payment', 'ctx-events')}
-				</a>
+				</Button>
 			</div>
 		);
 	}
@@ -238,13 +242,19 @@ export function SuccessSection({
 												)}
 								</p>
 							)}
-							{paymentStatus !== null && returnCopy.showRetry && (
-								<div className="booking-success__retry">
-									<a className="ctx-button" href={retryPaymentLink}>
-										{__('Continue to payment', 'ctx-events')}
-									</a>
-								</div>
-							)}
+							{payment === null &&
+								paymentStatus !== null &&
+								returnCopy.showRetry && (
+									<div className="booking-success__retry">
+										<Button
+											variant="primary"
+											fullWidth
+											onClick={() => window.location.assign(retryPaymentLink)}
+										>
+											{__('Continue to payment', 'ctx-events')}
+										</Button>
+									</div>
+								)}
 							{payment && customerEmailFailed && (
 								<p className="booking-success__note booking-error" role="alert">
 									{__(

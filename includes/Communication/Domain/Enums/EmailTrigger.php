@@ -17,4 +17,5 @@ enum EmailTrigger: string
     case BOOKING_DENIED = 'booking_denied';
     case BOOKING_CANCELLED = 'booking_cancelled';
     case TICKET_CANCELLED = 'ticket_cancelled';
+    case RESPONSIBLE_BOOKING_CREATED = 'responsible_booking_created';
 }

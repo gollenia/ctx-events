@@ -25,6 +25,7 @@ type RawIncludes = {
 		givenName?: string;
 		familyName?: string;
 		honorificSuffix?: string | null;
+		image?: RawImage | null;
 	} | null;
 	categories?: UpcomingTerm[] | null;
 	tags?: UpcomingTerm[] | null;
@@ -89,6 +90,13 @@ export function mapUpcomingEvent(event: RawEvent): UpcomingViewEvent {
 						.map((part) => part?.trim())
 						.filter(Boolean)
 						.join(' '),
+				image: person.image
+					? {
+							url: person.image.url ?? '',
+							altText: person.image.alt_text ?? '',
+							sizes: person.image.sizes ?? {},
+						}
+					: null,
 				}
 			: null,
 	};

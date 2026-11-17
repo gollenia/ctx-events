@@ -4,6 +4,7 @@ import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	RangeControl,
+	SelectControl,
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
@@ -19,7 +20,15 @@ interface InspectorProps {
 
 const Inspector = (props: InspectorProps) => {
 	const {
-		attributes: { width, required, pattern, name, visibilityRule, context },
+		attributes: {
+			width,
+			required,
+			pattern,
+			name,
+			visibilityRule,
+			context,
+			autoComplete,
+		},
 		setAttributes,
 		clientId,
 	} = props;
@@ -34,6 +43,37 @@ const Inspector = (props: InspectorProps) => {
 					checked={required}
 					disabled={lockName}
 					onChange={(value) => setAttributes({ required: value })}
+				/>
+				<SelectControl
+					label={__('Browser autofill', 'ctx-events')}
+					help={__(
+						'Choose what information this field contains so browsers can fill it in.',
+						'ctx-events',
+					)}
+					value={autoComplete || ''}
+					onChange={(value) => setAttributes({ autoComplete: value })}
+					options={[
+						{ label: __('Automatic', 'ctx-events'), value: '' },
+						{ label: __('Disabled', 'ctx-events'), value: 'off' },
+						{ label: __('First name', 'ctx-events'), value: 'given-name' },
+						{ label: __('Last name', 'ctx-events'), value: 'family-name' },
+						{ label: __('Full name', 'ctx-events'), value: 'name' },
+						{
+							label: __('Street address', 'ctx-events'),
+							value: 'address-line1',
+						},
+						{
+							label: __('Address line 2', 'ctx-events'),
+							value: 'address-line2',
+						},
+						{ label: __('Postal code', 'ctx-events'), value: 'postal-code' },
+						{ label: __('City', 'ctx-events'), value: 'address-level2' },
+						{
+							label: __('State or region', 'ctx-events'),
+							value: 'address-level1',
+						},
+						{ label: __('Organization', 'ctx-events'), value: 'organization' },
+					]}
 				/>
 				<TextControl
 					label={__('Pattern', 'ctx-events')}

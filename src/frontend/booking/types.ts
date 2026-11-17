@@ -63,6 +63,7 @@ export type BookingData = {
 	couponsEnabled: boolean;
 	donationEnabled: boolean;
 	donationAdvertisement: string | null;
+	consentMessage: string;
 	token: string;
 };
 

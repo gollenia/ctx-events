@@ -1,4 +1,4 @@
-import { Button, Flex } from '@contexis/wp-react-form';
+import { Button, Flex } from '@contexis/wp-ui';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import EventIcon from '../../../shared/icons/EventIcon';

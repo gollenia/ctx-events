@@ -1,4 +1,4 @@
-import { Flex, FlexItem } from '@contexis/wp-react-form';
+import { Flex, FlexItem } from '@contexis/wp-ui';
 import { CurrencyField } from '@events/adminfields';
 import { formatPrice } from '@events/i18n';
 import { Panel, PanelBody } from '@wordpress/components';

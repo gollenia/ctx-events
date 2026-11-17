@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { Radio } from '@contexis/wp-react-form';
+import { Radio } from '@contexis/wp-ui';
 
 import type { GatewayInfo } from '../types';
 

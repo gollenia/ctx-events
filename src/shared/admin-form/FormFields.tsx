@@ -2,11 +2,11 @@ import type {
 	FieldValue,
 	FormFieldDefinition,
 	FormState,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 import {
 	isFieldVisible,
 	normalizeFieldValue,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 import InputField from './InputField';
 
 type Props = {

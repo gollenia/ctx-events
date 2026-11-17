@@ -11,6 +11,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"listLeading": {
+			"type": "string",
+			"default": ""
+		},
 		"roundImages": {
 			"type": "boolean",
 			"default": false

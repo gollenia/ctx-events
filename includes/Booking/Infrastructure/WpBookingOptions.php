@@ -19,6 +19,7 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
     public const BOOKING_ADMIN_EMAIL = 'ctx_events_booking_admin_email';
 	public const BOOKING_ATTACH_ICAL = 'ctx_events_booking_attach_ical';
 	public const BOOKING_DONATION_ADVERTISEMENT = 'ctx_events_booking_donation_advertisement';
+	public const BOOKING_CONSENT_MESSAGE = 'ctx_events_booking_consent_message';
 
     public function fields(): array
     {
@@ -107,6 +108,17 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 					'section_label' => __('Notification recipients', 'ctx-events'),
 					'order'       => 50,
 				],
+
+				self::BOOKING_CONSENT_MESSAGE => [
+					'type'        => 'string',
+					'default'     => __('I consent to my personal data being stored and used as per the Privacy Policy', 'ctx-events'),
+					'label'       => __('Consent message', 'ctx-events'),
+					'description' => __('Message to display for user consent.', 'ctx-events'),
+					'domain'      => 'booking',
+					'section'     => 'booking_notifications',
+					'section_label' => __('Notification recipients', 'ctx-events'),
+					'order'       => 60,
+				],
         ];
     }
 
@@ -172,5 +184,10 @@ final class WpBookingOptions extends WpOptions implements BookingOptions
 	{
 		$advertisement = $this->getString(self::BOOKING_DONATION_ADVERTISEMENT, '');
 		return $advertisement !== '' ? $advertisement : null;
+	}
+
+	public function consentMessage(): string
+	{
+		return $this->getString(self::BOOKING_CONSENT_MESSAGE, __('I consent to my personal data being stored and used as per the Privacy Policy', 'ctx-events'));
 	}
 }

@@ -18,4 +18,5 @@ interface BookingOptions extends Options
     public function adminNotificationEmail(): ?Email;
 	public function attachIcalToBookingEmail(): bool;
 	public function donationAdvertisement(): ?string;
+	public function consentMessage(): string;
 }

@@ -1,5 +1,7 @@
 @use '../../../../frontend/styles/tokens';
-@use '../../../../../node_modules/@contexis/wp-react-form/lib/style';
+@use '../../../../../node_modules/@contexis/wp-ui/lib/style';
+@use '../../../../../node_modules/@contexis/wp-ui/lib/card';
+@use '../../../../../node_modules/@contexis/wp-ui/lib/list';
 
 @include tokens.register-theme-tokens();
 
@@ -19,7 +21,7 @@
 		margin: 0;
 	}
 
-	background-color: var(--wp--custom--ctx-events--color--surface);
+	background-color: var(--ctx-ui-card-background, var(--wp--custom--ctx--ui--card--background, var(--wp--custom--ctx-events--color--surface)));
 	list-style-type: none;
 
 	&__content {
@@ -127,6 +129,17 @@
 	min-width: 0;
 	display: grid;
 	grid-gap: var(--wp--custom--ctx-events--space--xl);
+
+	> li {
+		display: flex;
+		min-width: 0;
+		list-style: none;
+	}
+
+	> li > .ctx-upcoming-card {
+		flex: 1;
+		min-width: 0;
+	}
 }
 
 @for $columns from 1 through 4 {
@@ -169,52 +182,116 @@
 }
 
 .ctx-upcoming-list {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	justify-content: flex-start;
+	--ctx-ui-list-gap: var(--wp--custom--ctx-events--space--lg);
+	--ctx-ui-list-item-gap: var(--wp--custom--ctx-events--space--md);
 
-	gap: var(--wp--custom--ctx-events--space--xl);
 	align-self: baseline;
 
-	.ctx-upcoming-card {
+	&__item {
+		position: relative;
 		width: 100%;
-		align-items: center;
+		padding: var(--wp--custom--ctx-events--space--md);
+		background-color: var(--wp--custom--ctx-events--color--surface);
+	}
+
+	&__content {
 		display: flex;
-		flex-direction: row;
-		align-items: flex-start;
-		justify-content: flex-start;
-		gap: var(--wp--custom--ctx-events--space--md);
+		flex-direction: column;
+		gap: var(--wp--custom--ctx-events--space--xs);
+	}
 
-		&__image {
-			aspect-ratio: 1 / 1;
-			align-self: center;
-			width: 6rem;
-			height: 6rem;
-		}
+	&__image,
+	&__portrait,
+	&__date,
+	&__person-placeholder {
+		width: 5.5rem;
+		height: 5.5rem;
+		flex: 0 0 auto;
+	}
 
-		&__title {
-			font-size: 1rem;
-			padding: 0;
-			margin: 0;
-			font-weight: 700;
-			line-height: 1rem;
-		}
-		&__subtitle {
-			font-size: 0.875rem;
-			padding: 0;
-			margin: 0;
-			font-weight: 700;
-		}
+	&__image,
+	&__portrait {
+		display: block;
+		overflow: hidden;
 
-		&__content {
-			flex: 1;
-		}
 		img {
 			width: 100%;
-			aspect-ratio: 1 / 1;
+			height: 100%;
 			object-fit: cover;
 		}
+	}
+
+	&__portrait,
+	&__person-placeholder {
+		border-radius: 50%;
+	}
+
+	&__date,
+	&__person-placeholder {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--wp--custom--ctx-events--color--surface-muted);
+		color: var(--wp--custom--ctx-events--color--text);
+	}
+
+	&__date {
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+
+		strong {
+			font-size: 1.75rem;
+			line-height: 1;
+		}
+	}
+
+	&__person-placeholder svg {
+		width: 2.25rem;
+		height: 2.25rem;
+	}
+
+	&__label,
+	&__schedule,
+	&__text {
+		margin: 0;
+	}
+
+	&__label,
+	&__schedule {
+		font-size: 0.875rem;
+		color: var(--wp--custom--ctx-events--color--text-faint);
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 1.125rem;
+		line-height: 1.35;
+		font-weight: 700;
+		color: var(--wp--custom--ctx-events--color--text);
+	}
+
+	&__event-link::after {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		content: '';
+	}
+
+	.ctx-ui-list-item__action {
+		position: relative;
+		z-index: 2;
+	}
+
+	&__text {
+		font-size: 0.9375rem;
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--wp--custom--ctx-events--space--xs);
 	}
 }
 

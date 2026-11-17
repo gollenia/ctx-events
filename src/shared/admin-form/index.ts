@@ -9,5 +9,5 @@ export type {
 	FormValues,
 	InputType,
 	VisibilityRule,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 export { FormFields, InputField };

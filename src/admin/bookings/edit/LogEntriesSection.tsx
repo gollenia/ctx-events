@@ -1,4 +1,4 @@
-import { Flex, FlexItem } from '@contexis/wp-react-form';
+import { Flex, FlexItem } from '@contexis/wp-ui';
 import { formatDate } from '@events/i18n/datetime';
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';

@@ -77,6 +77,7 @@ test('prepare booking returns response with forms, tickets and token', function 
     expect($response->bookingForm)->not->toBeNull();
     expect($response->attendeeForm)->not->toBeNull();
     expect($response->tickets->count())->toBeGreaterThan(0);
+	 expect($response->consentMessage)->toBe('Test consent message');
     expect($response->token)->toBe('token-prepare-booking');
 });
 

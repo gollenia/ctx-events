@@ -1,4 +1,4 @@
-import { Accordion, AccordionSection } from '@contexis/wp-react-form';
+import { Accordion, AccordionSection } from '@contexis/wp-ui';
 import { __ } from '@wordpress/i18n';
 import { BookingSummarySlot } from './components/BookingSummarySlot';
 import { SectionHeading } from './components/SectionHeading';
@@ -11,8 +11,8 @@ import type {
 	AttendeePayload,
 	BookingData,
 	BookingPayment,
-	PaymentReturnStatus,
 	BookingState,
+	PaymentReturnStatus,
 	PaymentStateUpdates,
 	SectionId,
 	SubmitResult,
@@ -38,6 +38,7 @@ type Props = {
 		registration: Record<string, unknown>;
 		attendees: AttendeePayload[];
 		gateway: string;
+		consent: boolean;
 		coupon_code?: string;
 		donation_amount?: number;
 	}) => Promise<SubmitResult>;

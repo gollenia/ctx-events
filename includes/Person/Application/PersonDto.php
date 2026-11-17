@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Person\Application;
 
+use Contexis\Events\Media\Application\ImageDto;
 use Contexis\Events\Person\Domain\Person;
 use Contexis\Events\Shared\Domain\ValueObjects\Email;
 
@@ -19,11 +20,12 @@ final class PersonDto
         public readonly ?string $telephone,
         public readonly ?array $sameAs,
         public readonly ?string $jobTitle,
-        public readonly ?string $worksFor
+        public readonly ?string $worksFor,
+        public readonly ?ImageDto $image = null,
     ) {
     }
 
-    public static function fromDomainModel(Person $person): self
+    public static function fromDomainModel(Person $person, ?ImageDto $image = null): self
     {
         return new self(
             id: $person->id->toInt(),
@@ -35,7 +37,8 @@ final class PersonDto
             telephone: $person->telephone,
             sameAs: $person->sameAs,
             jobTitle: $person->jobTitle,
-            worksFor: $person->worksFor
+            worksFor: $person->worksFor,
+            image: $image,
         );
     }
 }

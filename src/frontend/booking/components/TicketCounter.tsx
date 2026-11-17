@@ -1,4 +1,4 @@
-import { Stepper } from '@contexis/wp-react-form';
+import { Stepper } from '@contexis/wp-ui';
 import { formatPrice } from '@events/i18n';
 import { __ } from '@wordpress/i18n';
 import type { TicketInfo } from '../types';

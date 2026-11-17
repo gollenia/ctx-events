@@ -1,6 +1,6 @@
+import { Button, Checkbox } from '@contexis/wp-ui';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, Checkbox } from '@contexis/wp-react-form';
 import { DonationAdvertisement } from '../components/DonationAdvertisement';
 import { PaymentGatewaySelect } from '../components/PaymentGatewaySelect';
 import { SectionFooter } from '../components/SectionFooter';
@@ -23,6 +23,7 @@ type Props = {
 		registration: Record<string, unknown>;
 		attendees: AttendeePayload[];
 		gateway: string;
+		consent: boolean;
 		coupon_code?: string;
 		donation_amount?: number;
 	}) => Promise<SubmitResult>;
@@ -60,6 +61,7 @@ export function PaymentSection({
 			registration: bookingState.registration,
 			attendees: bookingState.attendees,
 			gateway,
+			consent: true,
 			coupon_code: bookingState.couponCode.trim() || undefined,
 			donation_amount: donationAmount > 0 ? donationAmount : undefined,
 		});
@@ -102,10 +104,7 @@ export function PaymentSection({
 					width={6}
 					value={consent}
 					error={consentError || undefined}
-					label={__(
-						'I agree to the <a href="/privacy" target="_blank">privacy policy</a>.',
-						'ctx-events',
-					)}
+					label={data.consentMessage}
 					onChange={(value) => {
 						setConsent(Boolean(value));
 						setConsentError('');

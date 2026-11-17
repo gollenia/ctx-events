@@ -140,6 +140,15 @@ final readonly class DefaultEmailTemplatePresetProvider implements EmailTemplate
                 subject: __('A new online booking was created', 'ctx-events'),
                 body: __('A new booking with online payment was created.', 'ctx-events'),
             ),
+            EmailTemplatePreset::create(
+                key: EmailTemplateKey::RESPONSIBLE_BOOKING_CREATED,
+                label: __('Responsible: booking created', 'ctx-events'),
+                description: __('Sent to the responsible person when a new booking is created.', 'ctx-events'),
+                trigger: EmailTrigger::RESPONSIBLE_BOOKING_CREATED,
+                target: EmailTarget::EVENT_CONTACT,
+                subject: __('A new booking was received', 'ctx-events'),
+                body: __('A new booking was received for {{event.name}}.', 'ctx-events'),
+            ),
         );
     }
 

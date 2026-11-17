@@ -14,6 +14,7 @@ type SubmitPayload = {
 	registration: Record<string, unknown>;
 	attendees: AttendeePayload[];
 	gateway: string;
+	consent: boolean;
 	coupon_code?: string;
 	donation_amount?: number;
 };

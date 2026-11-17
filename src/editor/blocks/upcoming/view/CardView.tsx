@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { Card } from '@contexis/wp-ui/card';
 
 import { formatDailySchedule, formatDateRange } from '@events/i18n';
 import EventIcon from '../../../../shared/icons/EventIcon';
@@ -87,64 +88,71 @@ function EventCards({
 				const location = getLocationLabel(item, showLocation);
 
 				return (
-					<li className="ctx-upcoming-card" key={item.id}>
-						{showPerson === 'image' && item.person ? (
-							<div className="ctx-upcoming-card__speaker">
-								<div>
-									<div>{item.person.name}</div>
-								</div>
-							</div>
-						) : null}
-						{showImages && item.image?.url ? (
-							<a href={item.link} className="ctx-upcoming-card__image">
-								<img
-									src={item.image.sizes?.large?.url || item.image.url}
-									alt={item.image.altText || item.title}
-								/>
-							</a>
-						) : null}
-						<div className="ctx-upcoming-card__content">
-							{item.category && showCategory ? (
-								<span className="ctx-upcoming-card__label">{item.category.name}</span>
-							) : null}
-							<a href={item.link}>
-								<h2 className="ctx-upcoming-card__title">{item.title}</h2>
-							</a>
-							<h4 className="ctx-upcoming-card__subtitle">
-								{item.isDaily
-									? formatDailySchedule(item.start, item.end)
-									: formatDateRange(item.start, item.end)}
-							</h4>
-							<p className="ctx-upcoming-card__text">
-								{truncate(item.excerpt, excerptLength)}
-							</p>
-							{showAudience || showPerson || showLocation || showBookedUp ? (
-								<div className="ctx-upcoming-card__footer">
-									<div className="ctx-upcoming-card__footer-details">
-										<div className="ctx-upcoming-card__footer-text">
-											{showLocation && item.location?.id ? (
-												<div className="ctx-upcoming-card__detail">
-													<EventIcon name="location" />{' '}
-													<span>{location}</span>
-												</div>
-											) : null}
-											{showAudience && item.audience?.length ? (
-												<div className="ctx-upcoming-card__detail">
-													<EventIcon name="audience" />{' '}
-													<span>{item.audience}</span>
-												</div>
-											) : null}
-										</div>
+					<li key={item.id}>
+						<Card className="ctx-upcoming-card">
+							{showPerson === 'image' && item.person ? (
+								<div className="ctx-upcoming-card__speaker">
+									<div>
+										<div>{item.person.name}</div>
 									</div>
-
-									{renderBookingWarning(
-										item,
-										showBookedUp,
-										bookedUpWarningThreshold,
-									)}
 								</div>
 							) : null}
-						</div>
+							{showImages && item.image?.url ? (
+								<a
+									href={item.link}
+									className="ctx-upcoming-card__image ctx-ui-card__image"
+								>
+									<img
+										src={item.image.sizes?.large?.url || item.image.url}
+										alt={item.image.altText || item.title}
+									/>
+								</a>
+							) : null}
+							<div className="ctx-upcoming-card__content">
+								{item.category && showCategory ? (
+									<span className="ctx-upcoming-card__label">
+										{item.category.name}
+									</span>
+								) : null}
+								<a href={item.link}>
+									<h2 className="ctx-upcoming-card__title">{item.title}</h2>
+								</a>
+								<h4 className="ctx-upcoming-card__subtitle">
+									{item.isDaily
+										? formatDailySchedule(item.start, item.end)
+										: formatDateRange(item.start, item.end)}
+								</h4>
+								<p className="ctx-upcoming-card__text">
+									{truncate(item.excerpt, excerptLength)}
+								</p>
+								{showAudience || showPerson || showLocation || showBookedUp ? (
+									<div className="ctx-upcoming-card__footer">
+										<div className="ctx-upcoming-card__footer-details">
+											<div className="ctx-upcoming-card__footer-text">
+												{showLocation && item.location?.id ? (
+													<div className="ctx-upcoming-card__detail">
+														<EventIcon name="location" />{' '}
+														<span>{location}</span>
+													</div>
+												) : null}
+												{showAudience && item.audience?.length ? (
+													<div className="ctx-upcoming-card__detail">
+														<EventIcon name="audience" />{' '}
+														<span>{item.audience}</span>
+													</div>
+												) : null}
+											</div>
+										</div>
+
+										{renderBookingWarning(
+											item,
+											showBookedUp,
+											bookedUpWarningThreshold,
+										)}
+									</div>
+								) : null}
+							</div>
+						</Card>
 					</li>
 				);
 			})}

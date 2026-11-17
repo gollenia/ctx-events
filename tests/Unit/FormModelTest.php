@@ -16,6 +16,7 @@ use Contexis\Events\Form\Domain\Fields\FormField;
 use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
 use Contexis\Events\Form\Domain\Fields\HtmlDetails;
 use Contexis\Events\Form\Domain\Fields\InputDetails;
+use Contexis\Events\Form\Infrastructure\Mappers\InputMapper;
 use Contexis\Events\Form\Domain\Fields\NumberDetails;
 use Contexis\Events\Form\Domain\Fields\SelectDetails;
 use Contexis\Events\Form\Domain\Fields\TextareaDetails;
@@ -155,4 +156,13 @@ test('validates all form fields for valid and invalid payloads', function () {
         expect($result->errors)->toHaveKey($fieldName);
         expect($result->errors[$fieldName])->toBe($expectedError);
     }
+});
+
+test('text field autocomplete setting is preserved when mapped for the frontend', function () {
+    $field = (new InputMapper())->map([
+        'inputType' => 'text',
+        'autoComplete' => 'postal-code',
+    ]);
+
+    expect($field->toArray()['autoComplete'])->toBe('postal-code');
 });

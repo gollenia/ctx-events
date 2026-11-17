@@ -231,6 +231,38 @@ test('sends admin mails to the responsible person when enabled for the event', f
     ))->toEqualCanonicalizing(['booking@example.test', 'responsible@example.com']);
 });
 
+test('sends the responsible booking template only to the event responsible person', function () {
+    $event = FakeEventFactory::create(221);
+    $personId = $event->personId ?? PersonId::from(1);
+    $person = new Person(
+        id: $personId,
+        status: \Contexis\Events\Shared\Domain\ValueObjects\Status::Published,
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+        email: Email::tryFrom('responsible@example.com'),
+    );
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
+    $emailSender = new FakeEmailSender();
+
+    $processor = makeTriggeredEmailProcessor(
+        $bookingRepository,
+        FakeEventRepository::one($event),
+        FakeAttendeeRepository::empty(),
+        FakeTransactionRepository::empty(),
+        $emailSender,
+        personRepository: new FakePersonRepository($person),
+    );
+
+    $result = $processor->trigger(EmailTrigger::RESPONSIBLE_BOOKING_CREATED, $bookingId);
+
+    expect($result->deliveries)->toHaveCount(1)
+        ->and($result->deliveries[0]->key)->toBe(EmailTemplateKey::RESPONSIBLE_BOOKING_CREATED)
+        ->and($emailSender->lastEmail?->to->toString())->toBe('responsible@example.com')
+        ->and($emailSender->lastEmail?->subject)->toBe('A new booking was received')
+        ->and($emailSender->lastEmail?->body)->toContain($event->name);
+});
+
 test('uses the responsible person as Reply-To when enabled for the event', function () {
     $event = FakeEventFactory::create(220);
     $personId = $event->personId ?? PersonId::from(1);

@@ -12,11 +12,13 @@ The plugin is not a fork of, nor compatible with, WP Events Manager. It has its 
 - Duplicate an event to one or more dates
 - Sell tickets with capacities, booking windows and availability tracking
 - Manage bookings, attendees, notes, cancellations and exports
-- Create custom booking and attendee forms
+- Create custom booking and attendee forms, including browser-autofill metadata for text fields
 - Configure online and offline payment gateways, including SEPA payment QR codes
+- Collect a required, configurable and localized consent before a booking is submitted
 - Create and manage coupons
-- Configure transactional email templates and booking notifications
-- Build event pages with Gutenberg blocks, including booking, event details, upcoming events, featured events and programme PDF exports
+- Configure transactional email templates and separate booking notifications for event contacts
+- Send booking emails with localized payment and attendee information using the form's field labels
+- Build event pages with Gutenberg blocks, including booking, event details, upcoming events, featured events and programme PDF exports; Upcoming Events supports card and list displays with event images, contact portraits or date badges
 
 ## Requirements
 
@@ -52,7 +54,7 @@ npm start
 
 ## Getting started
 
-1. Open **Events → Settings** and configure the general and payment settings needed for your site.
+1. Open **Events → Settings** and configure the general and payment settings needed for your site. Under **Bookings**, set the consent text shown before customers submit a booking.
 2. Add payment gateways under **Events → Gateways** when bookings require payment.
 3. Create locations, people, forms or coupons as needed.
 4. Create an event from **Events → New Event**, set its dates, booking settings and tickets, then publish it.

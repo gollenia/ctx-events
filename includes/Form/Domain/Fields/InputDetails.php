@@ -16,6 +16,7 @@ final class InputDetails implements FieldDetails
 		public readonly ?string $placeholder = null,
 		public readonly ?string $defaultValue = null,
 		public readonly ?string $pattern = null,
+		public readonly ?string $autoComplete = null,
 	) {}
 
 	public function getType(): FieldType
@@ -64,6 +65,7 @@ final class InputDetails implements FieldDetails
 			'placeholder' => $this->placeholder,
 			'defaultValue' => $this->defaultValue,
 			'pattern' => $this->pattern,
+			'autoComplete' => $this->autoComplete,
 		];
 	}
 }

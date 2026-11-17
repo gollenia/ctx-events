@@ -19,4 +19,5 @@ enum EmailTemplateKey: string
     case TICKET_CANCELLED = 'ticket_cancelled';
     case ADMIN_BOOKING_PENDING_MANUAL = 'admin_booking_pending_manual';
     case ADMIN_BOOKING_CREATED_ONLINE = 'admin_booking_created_online';
+    case RESPONSIBLE_BOOKING_CREATED = 'responsible_booking_created';
 }

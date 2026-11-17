@@ -24,6 +24,7 @@ type UpcomingAttributes = {
 	columnsMedium?: number;
 	columnsLarge?: number;
 	showImages: boolean;
+	listLeading?: '' | 'event' | 'person' | 'date';
 	view: 'list' | 'cards';
 	cardColumns?: number;
 	scope: string;
@@ -67,6 +68,7 @@ const Inspector = (props: InspectorProps) => {
 		attributes: {
 			limit,
 			showImages,
+			listLeading,
 			view,
 			cardColumns,
 			scope,
@@ -115,6 +117,7 @@ const Inspector = (props: InspectorProps) => {
 		{ value: 'image', label: __('Name and image', 'ctx-events') },
 	];
 	const personView = showPerson || '';
+	const resolvedListLeading = listLeading || (showImages ? 'event' : 'date');
 
 	const scopeOptions = [
 		{ value: 'future', label: __('Future', 'ctx-events') },
@@ -317,6 +320,23 @@ const Inspector = (props: InspectorProps) => {
 				/>
 			</PanelBody>
 			<PanelBody title={__('Event details', 'ctx-events')} initialOpen={true}>
+				{(view === 'list' || userStylePicker) && (
+					<SelectControl
+						label={__('Show on the left', 'ctx-events')}
+						value={resolvedListLeading}
+						options={[
+							{ value: 'event', label: __('Event image', 'ctx-events') },
+							{ value: 'person', label: __('Person', 'ctx-events') },
+							{ value: 'date', label: __('Date', 'ctx-events') },
+						]}
+						__next40pxDefaultSize
+						onChange={(value) =>
+							setAttributes({
+								listLeading: value as 'event' | 'person' | 'date',
+							})
+						}
+					/>
+				)}
 				<SelectControl
 					label={__('Location', 'ctx-events')}
 					value={showLocation}
@@ -352,13 +372,15 @@ const Inspector = (props: InspectorProps) => {
 						onChange={(value) => setAttributes({ showAudience: value })}
 					/>
 				</PanelRow>
-				<PanelRow>
-					<CheckboxControl
-						label={__('Show image', 'ctx-events')}
-						checked={showImages}
-						onChange={(value) => setAttributes({ showImages: value })}
-					/>
-				</PanelRow>
+				{(view === 'cards' || userStylePicker) && (
+					<PanelRow>
+						<CheckboxControl
+							label={__('Show image', 'ctx-events')}
+							checked={showImages}
+							onChange={(value) => setAttributes({ showImages: value })}
+						/>
+					</PanelRow>
+				)}
 				<PanelRow>
 					<CheckboxControl
 						label={__('Show category', 'ctx-events')}

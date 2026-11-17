@@ -16,6 +16,7 @@ final class FakeBookingOptions implements BookingOptions
         private string $externalExpirationSyncToken = 'test-cron-token',
         private ?Email $adminNotificationEmail = null,
         private bool $attachIcalToBookingEmail = false,
+        private string $consentMessage = 'Test consent message',
     ) {
     }
 
@@ -69,5 +70,10 @@ final class FakeBookingOptions implements BookingOptions
     public function donationAdvertisement(): ?string
     {
         return null;
+    }
+
+    public function consentMessage(): string
+    {
+        return $this->consentMessage;
     }
 }

@@ -2,8 +2,9 @@ import type {
 	FieldValue,
 	FormFieldDefinition,
 	InputType,
-} from '@contexis/wp-react-form';
+} from '@contexis/wp-ui';
 import type { FormField } from './types';
+import { getFieldAutoComplete } from './getFieldAutoComplete';
 
 export type BookingFormValues = Record<string, unknown>;
 
@@ -38,6 +39,7 @@ export const getBookingFieldDefinition = (
 	const definition: FormFieldDefinition = {
 		name: field.name,
 		label: field.label,
+		autoComplete: getFieldAutoComplete(field),
 		description: field.description,
 		type: getBookingFieldInputType(field),
 		required: field.required,

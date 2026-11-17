@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Contexis\Events\Person\Presentation;
 
+use Contexis\Events\Media\Presentation\Resources\ImageResource;
 use Contexis\Events\Person\Application\PersonDto;
 use Contexis\Events\Shared\Presentation\Links;
 
@@ -39,6 +40,9 @@ final class PersonResource implements \JsonSerializable
 			'email' => $this->personDto->email?->address(),
             'telephone' => $this->personDto->telephone,
             'sameAs' => $this->personDto->sameAs,
+			'image' => $this->personDto->image !== null
+				? ImageResource::fromDto($this->personDto->image)
+				: null,
         ];
     }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@contexis/wp-react-form';
+import { Button } from '@contexis/wp-ui';
 import Chevron from '../../../shared/icons/Chevron';
 import { DonationAmountSelector } from './DonationAmountSelector';
 

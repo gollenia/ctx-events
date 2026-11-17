@@ -51,6 +51,9 @@ final class GetEvent
 
 		$location = $includes->location ? $this->locationRepository->find($event->locationId) : null;
 		$person = $includes->person ? $this->personRepository->find($event->personId) : null;
+		$personImage = $person?->imageId !== null
+			? $this->imageRepository->find($person->imageId)
+			: null;
 		$image = $includes->image ? $this->imageRepository->find($event->imageId) : null;
 		$categories = $includes->categories ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::CATEGORIES) : null;
 		$tags = $includes->tags ? $this->taxonomyLoader->termsForPost($event->id->toInt(), EventTaxonomy::TAGS) : null;
@@ -71,7 +74,12 @@ final class GetEvent
 			event: $event,
 			locationDto: $location ? LocationDto::fromDomainModel($location) : null,
 			imageDto: $image ? ImageDto::fromDomainModel($image) : null,
-			personDto: $person ? PersonDto::fromDomainModel($person) : null,
+			personDto: $person
+				? PersonDto::fromDomainModel(
+					$person,
+					$personImage ? ImageDto::fromDomainModel($personImage) : null,
+				)
+				: null,
 			categories: $categories,
 			tags: $tags,
 			bookingSummary: $bookingSummary,

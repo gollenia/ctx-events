@@ -1,4 +1,4 @@
-import { Flex } from '@contexis/wp-react-form';
+import { Flex } from '@contexis/wp-ui';
 import {
 	Button,
 	Notice,

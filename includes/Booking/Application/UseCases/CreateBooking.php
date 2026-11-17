@@ -63,6 +63,10 @@ final class CreateBooking
 
         $this->tokenValidator->perform($request->eventId, $request->token);
 
+		if (!$request->consent) {
+			throw new \DomainException('Consent is required.');
+		}
+
         $now = $this->clock->now();
         $event = $this->eventRepository->find($request->eventId);
 
@@ -141,6 +145,14 @@ final class CreateBooking
                 : EmailTrigger::BOOKING_CREATED_ONLINE,
             $bookingId,
         );
+        $responsibleEmailResult = $this->bookingEmailTrigger->trigger(
+            EmailTrigger::RESPONSIBLE_BOOKING_CREATED,
+            $bookingId,
+        );
+        $emailResult = new BookingEmailResult([
+            ...$emailResult->deliveries,
+            ...$responsibleEmailResult->deliveries,
+        ]);
 
         $logEntries = BookingEmailWarnings::appendToLogEntries(
             $booking->logEntries,
