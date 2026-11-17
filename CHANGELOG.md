@@ -2,7 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased
+## 0.5.1
+
+ - Added translation strings
+
+## 0.5.0
 
 ### Added
 
