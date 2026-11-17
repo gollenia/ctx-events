@@ -16,6 +16,7 @@ use Contexis\Events\Communication\Infrastructure\Tiptap\RegistrationDataNode;
 use Contexis\Events\Communication\Infrastructure\Tiptap\TextColorMark;
 use Contexis\Events\Communication\Infrastructure\Tiptap\UnderlineMark;
 use Contexis\Events\Communication\Domain\ValueObjects\EmailInlineAttachment;
+use Contexis\Events\Form\Domain\FormRepository;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
@@ -29,6 +30,7 @@ final class TiptapDocumentRenderer
 {
     public function __construct(
         private readonly ?ResolveEmailPaymentInformation $paymentInformation = null,
+        private readonly ?FormRepository $formRepository = null,
     ) {
     }
     public function isTiptapDocument(string $body): bool
@@ -94,6 +96,7 @@ final class TiptapDocumentRenderer
     private function renderRegistrationData(TriggeredEmailContext $context): string
     {
         $rows = [];
+        $labels = $this->registrationFieldLabels($context);
 
         foreach ($context->booking->registration->all() as $key => $value) {
             if (!is_scalar($value) || $value === '') {
@@ -102,7 +105,7 @@ final class TiptapDocumentRenderer
 
             $rows[] = sprintf(
                 '<tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><td style="padding:6px 10px;border:1px solid #dcdcde;">%s</td></tr>',
-                htmlspecialchars($this->humanizeKey((string) $key), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                htmlspecialchars($labels[$key] ?? $this->humanizeKey((string) $key), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
                 htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             );
         }
@@ -141,7 +144,13 @@ final class TiptapDocumentRenderer
             return '';
         }
 
-        return '<table style="border-collapse:collapse;width:100%;margin:12px 0;"><thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">Name</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">Ticket</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">Birth date</th></tr></thead><tbody>' . implode('', $rows) . '</tbody></table>';
+        return sprintf(
+            '<table style="border-collapse:collapse;width:100%%;margin:12px 0;"><thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th></tr></thead><tbody>%s</tbody></table>',
+            htmlspecialchars($this->translate('Name'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            htmlspecialchars($this->translate('Ticket'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            htmlspecialchars($this->translate('Date'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            implode('', $rows),
+        );
     }
 
     /** @param list<EmailInlineAttachment> $inlineAttachments */
@@ -158,28 +167,28 @@ final class TiptapDocumentRenderer
 
         $transaction = $payment->transaction;
         $rows = [
-            $this->paymentRow('Payment method', $payment->gatewayTitle),
-            $this->paymentRow('Amount', $this->formatPrice($transaction->amount)),
+            $this->paymentRow($this->translate('Payment method'), $payment->gatewayTitle),
+            $this->paymentRow($this->translate('Amount'), $this->formatPrice($transaction->amount)),
         ];
 
         if ($transaction->expiresAt !== null) {
-            $rows[] = $this->paymentRow('Pay by', $transaction->expiresAt->format('d.m.Y'));
+            $rows[] = $this->paymentRow($this->translate('Expires at'), $transaction->expiresAt->format('d.m.Y'));
         }
 
         if ($transaction->isOffline() && $transaction->bankData !== null) {
             $bankData = $transaction->bankData;
-            $rows[] = $this->paymentRow('Account holder', $bankData->accountHolder);
-            $rows[] = $this->paymentRow('Bank', $bankData->bankName);
-            $rows[] = $this->paymentRow('IBAN', $bankData->iban);
-            $rows[] = $this->paymentRow('BIC', $bankData->bic);
-            $rows[] = $this->paymentRow('Reference', $context->booking->reference->toString());
+            $rows[] = $this->paymentRow($this->translate('Account Holder'), $bankData->accountHolder);
+            $rows[] = $this->paymentRow($this->translate('Bank'), $bankData->bankName);
+            $rows[] = $this->paymentRow($this->translate('IBAN'), $bankData->iban);
+            $rows[] = $this->paymentRow($this->translate('BIC'), $bankData->bic);
+            $rows[] = $this->paymentRow($this->translate('Reference'), $context->booking->reference->toString());
         }
 
         $content = '<table style="border-collapse:collapse;width:100%;margin:12px 0;"><tbody>' . implode('', $rows) . '</tbody></table>';
 
         if ($transaction->checkoutUrl !== null) {
             $content .= sprintf(
-                '<p style="margin:16px 0;"><a href="%s" style="display:inline-block;padding:10px 16px;background:#2271b1;color:#ffffff;text-decoration:none;border-radius:3px;">Pay now</a></p>',
+                '<p style="margin:16px 0;"><a href="%s" style="display:inline-block;padding:10px 16px;background:#2271b1;color:#ffffff;text-decoration:none;border-radius:3px;">%s</a></p>',
                 // Never mail Mollie's short-lived checkout URL. This stable
                 // booking URL checks the previous transaction when clicked and
                 // creates a replacement payment only when it is no longer usable.
@@ -188,6 +197,7 @@ final class TiptapDocumentRenderer
                     ENT_QUOTES | ENT_SUBSTITUTE,
                     'UTF-8',
                 ),
+                htmlspecialchars($this->translate('Complete your payment'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             );
         }
 
@@ -207,8 +217,9 @@ final class TiptapDocumentRenderer
                 );
             }
             $content .= sprintf(
-                '<p style="margin:16px 0;"><img src="cid:%s" width="180" height="180" alt="Payment QR code" style="display:block;width:180px;height:180px;" /></p>',
+                '<p style="margin:16px 0;"><img src="cid:%s" width="180" height="180" alt="%s" style="display:block;width:180px;height:180px;" /></p>',
                 htmlspecialchars($contentId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                htmlspecialchars($this->translate('QR code for bank transfer payment'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             );
         }
 
@@ -232,5 +243,31 @@ final class TiptapDocumentRenderer
     private function humanizeKey(string $key): string
     {
         return ucfirst(str_replace('_', ' ', $key));
+    }
+
+    /** @return array<string, string> */
+    private function registrationFieldLabels(TriggeredEmailContext $context): array
+    {
+        $formId = $context->event->forms?->bookingForm;
+        if ($this->formRepository === null || $formId === null) {
+            return [];
+        }
+
+        $form = $this->formRepository->find($formId);
+        if ($form === null) {
+            return [];
+        }
+
+        $labels = [];
+        foreach ($form->fields as $field) {
+            $labels[$field->name] = $field->label;
+        }
+
+        return $labels;
+    }
+
+    private function translate(string $text): string
+    {
+        return function_exists('__') ? \__($text, 'ctx-events') : $text;
     }
 }

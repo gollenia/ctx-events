@@ -7,8 +7,15 @@ use Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
 use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
 use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
+use Contexis\Events\Form\Domain\BookingForm;
+use Contexis\Events\Form\Domain\Enums\FormType;
+use Contexis\Events\Form\Domain\Enums\InputType;
+use Contexis\Events\Form\Domain\Fields\FormField;
+use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
+use Contexis\Events\Form\Domain\Fields\InputDetails;
 use Contexis\Events\Payment\Domain\TransactionCollection;
 use Tests\Support\FakeEventFactory;
+use Tests\Support\FakeFormRepository;
 use Tests\Support\FakeMailBookingFactory;
 
 test('renders legacy mail bodies as plain text with replaced tokens', function () {
@@ -156,4 +163,34 @@ test('renders numbered lists and links in email documents', function () {
     ));
 
     expect($rendered->html)->toContain('<ol>', '<li>', 'href="https://example.org/event"', 'More information');
+});
+
+test('renders booking form labels instead of stored field keys in registration data', function () {
+    $event = FakeEventFactory::create(706, ['_booking_form' => 706]);
+    $booking = FakeMailBookingFactory::create($event->id);
+    $form = new BookingForm(
+        id: \Contexis\Events\Form\Domain\FormId::from(706),
+        type: FormType::BOOKING,
+        fields: FormFieldCollection::from(
+            new FormField('first_name', 'Vorname', true, new InputDetails(InputType::TEXT)),
+            new FormField('last_name', 'Nachname', true, new InputDetails(InputType::TEXT)),
+        ),
+        name: 'Buchungsformular',
+        description: null,
+    );
+    $renderer = new TiptapDocumentRenderer(null, new FakeFormRepository($form));
+
+    $rendered = $renderer->render(
+        json_encode(['type' => 'doc', 'content' => [['type' => 'registrationData']]], JSON_THROW_ON_ERROR),
+        new TriggeredEmailContext(
+            booking: $booking,
+            event: $event,
+            attendees: AttendeeCollection::empty(),
+            transactions: TransactionCollection::empty(),
+        ),
+    );
+
+    expect($rendered->html)
+        ->toContain('Vorname', 'Nachname')
+        ->not->toContain('First name', 'Last name');
 });

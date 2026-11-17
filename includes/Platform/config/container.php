@@ -59,7 +59,10 @@ return [
 	=> autowire(\Contexis\Events\Shared\Infrastructure\Wordpress\WpSessionHashResolver::class),
     EmailTemplatePresetProvider::class => autowire(DefaultEmailTemplatePresetProvider::class),
     EmailTemplateTokenReplacer::class => autowire(),
-    TiptapDocumentRenderer::class => autowire()->constructor(get(ResolveEmailPaymentInformation::class)),
+    TiptapDocumentRenderer::class => autowire()->constructor(
+        get(ResolveEmailPaymentInformation::class),
+        get(\Contexis\Events\Form\Domain\FormRepository::class),
+    ),
     EmailBodyRenderer::class => autowire(TiptapEmailBodyRenderer::class),
     EventMailTemplateOverrideStore::class => autowire(WpEventMailTemplateOverrideStore::class),
     EventMailSettingsProvider::class => autowire(WpEventMailSettingsProvider::class),
