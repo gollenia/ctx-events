@@ -89,6 +89,41 @@ body.post-type-ctx-event-person {
 	}
 }
 
+body.post-type-ctx-event-location {
+	.wp-list-table {
+		th.column-image,
+		td.column-image {
+			box-sizing: border-box;
+			width: 60px;
+			min-width: 60px;
+			max-width: 60px;
+		}
+
+		.ctx-location-list-image,
+		.ctx-location-list-image-placeholder {
+			display: block;
+			width: 48px;
+			height: 48px;
+			border: 1px solid #dcdcde;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+
+		.ctx-location-list-image {
+			object-fit: contain;
+			background: #fff;
+		}
+
+		.ctx-location-list-image-placeholder {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: #f6f7f7;
+			color: #8c8f94;
+		}
+	}
+}
+
 
 
 

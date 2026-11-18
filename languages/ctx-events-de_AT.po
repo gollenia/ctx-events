@@ -8,7 +8,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-11-17 13:49+0000\n"
+"PO-Revision-Date: 2026-11-18 19:18+0000\n"
 "Language: de_AT\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
@@ -72,7 +72,7 @@ msgstr "0 bedeutet unbegrenzt pro Buchung"
 msgid "A booking needs manual confirmation"
 msgstr "Eine Buchung benötigt manuelle Freigabe"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:130
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:135
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:140
 msgid "A brief description shown when the user selects the gateway"
 msgstr ""
@@ -272,7 +272,7 @@ msgstr "Social-Media-Link hinzufügen"
 msgid "Add Ticket"
 msgstr "Ticket hinzufügen"
 
-#: includes/Location/Infrastructure/LocationPost.php:88
+#: includes/Location/Infrastructure/LocationPost.php:89
 #: build/editor/blocks/location-editor/index.js:1
 msgid "Address"
 msgstr "Adresse"
@@ -373,11 +373,11 @@ msgstr "Beim Umschalten des Gateways ist ein Fehler aufgetreten: "
 msgid "Any location"
 msgstr "Jeder Ort"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:94
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:99
 msgid "API key for the live environment."
 msgstr "API-Schlüssel für die Live-Umgebung."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:102
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:107
 msgid "API key for the test environment."
 msgstr "API-Schlüssel für die Test-Umgebung."
 
@@ -536,7 +536,7 @@ msgstr "Bankname"
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:36
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:133
-#: includes/Payment/Infrastructure/Gateways/Offline/OfflineGateway.php:30
+#: includes/Payment/Infrastructure/Gateways/Offline/OfflineGateway.php:31
 msgid "Bank Transfer"
 msgstr "Banküberweisung"
 
@@ -1424,7 +1424,7 @@ msgstr ""
 msgid "Choose which booking data should be included in the export."
 msgstr "Wählen Sie, welche Buchungsdaten im Export enthalten sein sollen."
 
-#: includes/Location/Infrastructure/LocationPost.php:90
+#: includes/Location/Infrastructure/LocationPost.php:91
 #: build/editor/blocks/form/text/index.js:1
 #: build/editor/blocks/location-editor/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
@@ -1467,14 +1467,6 @@ msgstr "Schließen Sie Ihre Zahlung über den folgenden Link ab."
 #: build/editor/blocks/upcoming-table/index.js:1
 msgid "Configure columns"
 msgstr "Spalten konfigurieren"
-
-#: build/admin.js:6
-msgid "Configured"
-msgstr "Konfiguriert"
-
-#: build/admin.js:6
-msgid "Configured for activation"
-msgstr "Für Aktivierung konfiguriert"
 
 #: build/frontend.js:8
 msgid "Confirm booking"
@@ -1522,7 +1514,7 @@ msgstr "Beitrag"
 msgid "Copy"
 msgstr "Kopieren"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:116
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:121
 msgid ""
 "Copy this URL to your Next-gen webhook configuration in Mollie. It is also "
 "sent automatically as the Classic payment webhook URL."
@@ -1575,7 +1567,7 @@ msgstr "Teilnehmer konnte nicht aktualisiert werden."
 msgid "Countdown"
 msgstr "Countdown"
 
-#: includes/Location/Infrastructure/LocationPost.php:91
+#: includes/Location/Infrastructure/LocationPost.php:92
 #: build/editor/blocks/location-editor/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Country"
@@ -1682,7 +1674,7 @@ msgstr "Aktuell ausgewählte Gutscheine:"
 msgid "Custom Link"
 msgstr "Benutzerdefinierter Link"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:144
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:149
 msgid "Custom title for the payment gateway."
 msgstr "Benutzerdefinierter Titel für das Zahlungs-Gateway."
 
@@ -1824,7 +1816,7 @@ msgstr "Absteigend"
 msgid "Describe the event..."
 msgstr "Veranstaltung beschreiben..."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:129
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:134
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:139
 #: build/admin.js:5 build/admin.js:6 build/editor.js:1
 #: build/editor/blocks/coupon-editor/index.js:1
@@ -2734,6 +2726,7 @@ msgstr ""
 "Wenn Sie einen externen Cron verwenden, rufen Sie %1$s alle 15 Minuten auf. "
 "Beispiel: %2$s"
 
+#: includes/Location/Infrastructure/LocationPost.php:87
 #: build/editor/blocks/details-item/index.js:1
 msgid "Image"
 msgstr "Bild"
@@ -2813,7 +2806,7 @@ msgstr "Info-Box"
 msgid "Input"
 msgstr "Eingabe"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:136
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:141
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:189
 msgid "Instructions"
 msgstr "Anweisungen"
@@ -2907,15 +2900,15 @@ msgstr "Link-URL"
 msgid "List"
 msgstr "Liste"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:114
 msgid "Live"
 msgstr "Live"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:93
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:98
 msgid "Live API Key"
 msgstr "Live-API-Schlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:177
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:182
 msgid "Live API key is missing"
 msgstr "Live-API Schlüssel fehlt"
 
@@ -3046,6 +3039,10 @@ msgstr "Mindestens buchbar"
 msgid "Minimum value"
 msgstr "Kleinster Wert"
 
+#: build/admin.js:6
+msgid "Missing configuration"
+msgstr "Konfiguration unvollständig"
+
 #. Description of the plugin
 #: ctx-events.php
 msgid ""
@@ -3056,12 +3053,12 @@ msgstr ""
 "einfach Veranstaltungen, verwalten Sie Teilnehmer, verfolgen Sie "
 "Verfügbarkeiten und wickeln Sie Zahlungen ab"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:31
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:32
 #: build/admin.js:2
 msgid "Mollie"
 msgstr "Mollie"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:115
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:120
 msgid "Mollie webhook URL"
 msgstr "Mollie-Webhook-URL"
 
@@ -3244,6 +3241,10 @@ msgstr "Keine Formulare im Papierkorb gefunden"
 msgid "No gateways found."
 msgstr "Keine Gateways gefunden."
 
+#: includes/Location/Infrastructure/LocationPost.php:116
+msgid "No image set"
+msgstr "Kein Bild"
+
 #: build/admin.js:1 build/editor.js:1
 msgid "No items found."
 msgstr "Keine Einträge gefunden."
@@ -3335,10 +3336,6 @@ msgstr "Nordamerika"
 #: includes/Event/Infrastructure/Bindings/BookingBindingSource.php:85
 msgid "Not bookable"
 msgstr "Nicht buchbar"
-
-#: build/admin.js:6
-msgid "Not Configured for activation"
-msgstr "Nicht für Aktivierung konfiguriert"
 
 #: build/admin.js:2
 msgid "Notes"
@@ -3622,7 +3619,7 @@ msgstr "Zahlungslink nicht verfügbar"
 msgid "Payment method"
 msgstr "Zahlungsmethode"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:172
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:177
 msgid "Payment mode is invalid"
 msgstr "Zahlungsmethode ungültig"
 
@@ -3779,7 +3776,7 @@ msgstr "Abgesagt"
 msgid "Postal code"
 msgstr "Postleitzahl"
 
-#: includes/Location/Infrastructure/LocationPost.php:89
+#: includes/Location/Infrastructure/LocationPost.php:90
 msgid "Postcode"
 msgstr "Postleitzahl"
 
@@ -3957,7 +3954,7 @@ msgstr "Antwort-an"
 msgid "Required"
 msgstr "Erforderlich"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:123
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:128
 msgid "Required to verify signed Mollie Next-gen webhooks."
 msgstr "Wird verwendet, um signierte Mollie-Next-Gen-Webhooks zu verifizieren."
 
@@ -4218,7 +4215,7 @@ msgstr "Schlagwörter auswählen"
 msgid "Select visible columns and arrange them by drag and drop."
 msgstr "Wähle sichtbare Spalten aus und ordne sie per Drag-and-drop an."
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:110
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:115
 msgid "Select whether to use the test or live environment for payments."
 msgstr ""
 "Wählen Sie, ob für Zahlungen die Test- oder Live-Umgebung verwendet werden "
@@ -4680,17 +4677,21 @@ msgstr "Teilnehmervorlagen"
 msgid "Telephone"
 msgstr "Telefon"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:114
 msgid "Test"
 msgstr "Test"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:101
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:106
 msgid "Test API Key"
 msgstr "Test-API-Schlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:178
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:183
 msgid "Test API key is missing"
 msgstr "Live-API Schlüssel fehlt"
+
+#: build/admin.js:6
+msgid "Test mode"
+msgstr "Testmodus"
 
 #: build/2205.js:1 build/4586.js:1
 msgid "Text"
@@ -4908,10 +4909,10 @@ msgstr "Nur Zeit"
 msgid "Timezone"
 msgstr "Zeitzone"
 
-#: includes/Location/Infrastructure/LocationPost.php:87
+#: includes/Location/Infrastructure/LocationPost.php:88
 #: includes/Payment/Application/UseCases/ExportCoupons.php:34
 #: includes/Payment/Infrastructure/CouponPost.php:82
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:143
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:148
 #: includes/Person/Infrastructure/PersonPost.php:141 build/admin.js:5
 #: build/admin.js:6 build/editor.js:1
 msgid "Title"
@@ -5255,11 +5256,11 @@ msgstr "Wir haben deine Bezahlung erhalten und deine Buchung freigegeben."
 msgid "We received your booking"
 msgstr "Wir haben deine Buchung erhalten"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:122
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:127
 msgid "Webhook signing secret"
 msgstr "Webhook-Signaturschlüssel"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:184
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:189
 msgid "Webhook signing secret is missing"
 msgstr "Webhook-Signaturschlüssel fehlt"
 
@@ -5319,7 +5320,7 @@ msgstr "Breite"
 msgid "WordPress-Cron"
 msgstr "WordPress-Cron"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:108
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:113
 msgid "Work Mode"
 msgstr "Betriebsmodus"
 
@@ -5327,7 +5328,7 @@ msgstr "Betriebsmodus"
 msgid "World"
 msgstr "Welt"
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:137
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:142
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:190
 msgid ""
 "Write a text that the user sees when the bank transfer information is shown"

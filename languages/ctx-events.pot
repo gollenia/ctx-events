@@ -2,14 +2,14 @@
 # This file is distributed under the GPL3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Events 0.5.0\n"
+"Project-Id-Version: Events 0.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ctx-events\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T13:43:38+00:00\n"
+"POT-Creation-Date: 2026-11-18T19:03:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: ctx-events\n"
@@ -1180,9 +1180,14 @@ msgid "Display locations on your blog."
 msgstr ""
 
 #: includes/Location/Infrastructure/LocationPost.php:87
+#: build/editor/blocks/details-item/index.js:1
+msgid "Image"
+msgstr ""
+
+#: includes/Location/Infrastructure/LocationPost.php:88
 #: includes/Payment/Application/UseCases/ExportCoupons.php:34
 #: includes/Payment/Infrastructure/CouponPost.php:82
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:143
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:148
 #: includes/Person/Infrastructure/PersonPost.php:141
 #: build/admin.js:5
 #: build/admin.js:6
@@ -1190,26 +1195,30 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: includes/Location/Infrastructure/LocationPost.php:88
+#: includes/Location/Infrastructure/LocationPost.php:89
 #: build/editor/blocks/location-editor/index.js:1
 msgid "Address"
 msgstr ""
 
-#: includes/Location/Infrastructure/LocationPost.php:89
+#: includes/Location/Infrastructure/LocationPost.php:90
 msgid "Postcode"
 msgstr ""
 
-#: includes/Location/Infrastructure/LocationPost.php:90
+#: includes/Location/Infrastructure/LocationPost.php:91
 #: build/editor/blocks/form/text/index.js:1
 #: build/editor/blocks/location-editor/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "City"
 msgstr ""
 
-#: includes/Location/Infrastructure/LocationPost.php:91
+#: includes/Location/Infrastructure/LocationPost.php:92
 #: build/editor/blocks/location-editor/index.js:1
 #: build/editor/blocks/upcoming/index.js:1
 msgid "Country"
+msgstr ""
+
+#: includes/Location/Infrastructure/LocationPost.php:116
+msgid "No image set"
 msgstr ""
 
 #: includes/Payment/Application/UseCases/ExportCoupons.php:33
@@ -1326,55 +1335,55 @@ msgstr ""
 msgid "Usage"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:93
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:98
 msgid "Live API Key"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:94
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:99
 msgid "API key for the live environment."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:101
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:106
 msgid "Test API Key"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:102
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:107
 msgid "API key for the test environment."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:108
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:113
 msgid "Work Mode"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:114
 msgid "Test"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:109
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:114
 msgid "Live"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:110
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:115
 msgid "Select whether to use the test or live environment for payments."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:115
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:120
 msgid "Mollie webhook URL"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:116
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:121
 msgid "Copy this URL to your Next-gen webhook configuration in Mollie. It is also sent automatically as the Classic payment webhook URL."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:122
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:127
 msgid "Webhook signing secret"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:123
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:128
 msgid "Required to verify signed Mollie Next-gen webhooks."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:129
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:134
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:139
 #: build/admin.js:5
 #: build/admin.js:6
@@ -1388,49 +1397,49 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:130
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:135
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:140
 msgid "A brief description shown when the user selects the gateway"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:136
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:141
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:189
 msgid "Instructions"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:137
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:142
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:190
 msgid "Write a text that the user sees when the bank transfer information is shown"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:144
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:149
 msgid "Custom title for the payment gateway."
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:172
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:177
 msgid "Payment mode is invalid"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:177
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:182
 msgid "Live API key is missing"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:178
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:183
 msgid "Test API key is missing"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:184
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieConfiguration.php:189
 msgid "Webhook signing secret is missing"
 msgstr ""
 
-#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:31
+#: includes/Payment/Infrastructure/Gateways/Mollie/MollieGateway.php:32
 #: build/admin.js:2
 msgid "Mollie"
 msgstr ""
 
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:36
 #: includes/Payment/Infrastructure/Gateways/Offline/OfflineConfiguration.php:133
-#: includes/Payment/Infrastructure/Gateways/Offline/OfflineGateway.php:30
+#: includes/Payment/Infrastructure/Gateways/Offline/OfflineGateway.php:31
 msgid "Bank Transfer"
 msgstr ""
 
@@ -2972,10 +2981,11 @@ msgid "Save Changes"
 msgstr ""
 
 #: build/admin.js:6
-#: build/editor/blocks/countdown/index.js:1
-#: build/editor/blocks/upcoming-table/view.js:1
-#: build/editor/blocks/upcoming/view/index.js:1
-msgid "All"
+msgid "Missing configuration"
+msgstr ""
+
+#: build/admin.js:6
+msgid "Inactive"
 msgstr ""
 
 #: build/admin.js:6
@@ -2983,7 +2993,14 @@ msgid "Active"
 msgstr ""
 
 #: build/admin.js:6
-msgid "Inactive"
+msgid "Test mode"
+msgstr ""
+
+#: build/admin.js:6
+#: build/editor/blocks/countdown/index.js:1
+#: build/editor/blocks/upcoming-table/view.js:1
+#: build/editor/blocks/upcoming/view/index.js:1
+msgid "All"
 msgstr ""
 
 #: build/admin.js:6
@@ -2992,18 +3009,6 @@ msgstr ""
 
 #: build/admin.js:6
 msgid "Activate"
-msgstr ""
-
-#: build/admin.js:6
-msgid "Configured"
-msgstr ""
-
-#: build/admin.js:6
-msgid "Configured for activation"
-msgstr ""
-
-#: build/admin.js:6
-msgid "Not Configured for activation"
 msgstr ""
 
 #: build/admin.js:6
@@ -3789,10 +3794,6 @@ msgstr ""
 
 #: build/editor/blocks/details-item/index.js:1
 msgid "Icon for Link"
-msgstr ""
-
-#: build/editor/blocks/details-item/index.js:1
-msgid "Image"
 msgstr ""
 
 #: build/editor/blocks/details-item/index.js:1

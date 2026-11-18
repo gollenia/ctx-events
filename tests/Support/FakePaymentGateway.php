@@ -6,6 +6,7 @@ namespace Tests\Support;
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Payment\Domain\Enums\GatewayStatus;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 final class FakePaymentGateway implements PaymentGateway
@@ -24,7 +25,14 @@ final class FakePaymentGateway implements PaymentGateway
     public function getTitle(): string { return 'Fake'; }
     public function getDescription(): ?string { return null; }
     public function isEnabled(): bool { return $this->enabled; }
-    public function isValid(): bool { return $this->valid; }
+    public function getStatus(): GatewayStatus
+    {
+        if (!$this->valid) {
+            return GatewayStatus::MissingConfiguration;
+        }
+
+        return $this->enabled ? GatewayStatus::Active : GatewayStatus::Inactive;
+    }
     public function supportsCheckoutLink(): bool { return $this->id !== 'offline'; }
     public function setEnabled(bool $active): void { $this->enabled = $active; }
     public function save(): void {}

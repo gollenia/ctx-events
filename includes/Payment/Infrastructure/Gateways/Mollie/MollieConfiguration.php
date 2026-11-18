@@ -36,6 +36,11 @@ final class MollieConfiguration implements GatewayConfiguration
 		return $this->mode === 'live' ? $this->apiKeyLive : $this->apiKeyTest;
 	}
 
+    public function isTestMode(): bool
+    {
+        return $this->mode === 'test';
+    }
+
     /** @param array<string, mixed> $data */
 	public function updateFromArray(array $data): void	
     {

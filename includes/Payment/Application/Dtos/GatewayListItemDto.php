@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Application\Dtos;
 
 use Contexis\Events\Payment\Domain\PaymentGateway;
+use Contexis\Events\Payment\Domain\Enums\GatewayStatus;
 
 final class GatewayListItemDto
 {
@@ -14,7 +15,7 @@ final class GatewayListItemDto
         public string $title,
         public ?string $description,
         public bool $active,
-        public bool $isValid,
+        public GatewayStatus $status,
         public bool $supportsCheckoutLink,
     ) {
     }
@@ -27,7 +28,7 @@ final class GatewayListItemDto
             $gateway->getTitle(),
             $gateway->getDescription(),
             $gateway->isEnabled(),
-            $gateway->isValid(),
+            $gateway->getStatus(),
             $gateway->supportsCheckoutLink()
         );
     }
@@ -43,7 +44,7 @@ final class GatewayListItemDto
             'title' => $this->title,
             'description' => $this->description,
             'active' => $this->active,
-            'isValid' => $this->isValid,
+            'status' => $this->status->value,
             'supportsCheckoutLink' => $this->supportsCheckoutLink,
         ];
     }

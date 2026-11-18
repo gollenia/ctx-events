@@ -13,8 +13,30 @@ import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import type { Gateway } from 'src/types/types';
-import StatusPill from '../../shared/status-pill';
+import StatusPill, { type StatusPillState } from '../../shared/status-pill';
 import GatewayModal from './GatewayModal';
+
+const gatewayStatusConfig: Record<
+	Gateway['status'],
+	{ label: string; state: StatusPillState }
+> = {
+	missing_configuration: {
+		label: __('Missing configuration', 'ctx-events'),
+		state: 'error',
+	},
+	inactive: {
+		label: __('Inactive', 'ctx-events'),
+		state: 'info',
+	},
+	active: {
+		label: __('Active', 'ctx-events'),
+		state: 'success',
+	},
+	test_mode: {
+		label: __('Test mode', 'ctx-events'),
+		state: 'info',
+	},
+};
 
 const GatewayTable = () => {
 	const [gateways, setGateways] = useState<Gateway[]>([]);
@@ -29,7 +51,7 @@ const GatewayTable = () => {
 		search: '',
 		page: 1,
 		perPage: 100,
-		fields: ['title', 'adminName', 'isValid'],
+		fields: ['title', 'adminName', 'status'],
 		layout: {},
 		filters: [],
 		titleField: 'title',
@@ -52,8 +74,6 @@ const GatewayTable = () => {
 			inactive: gateways.filter((gateway) => !gateway.enabled).length,
 		});
 	}, [gateways]);
-
-	console.log('Gateways:', gatewayStatusItems);
 
 	const actions: Array<DataTableAction> = [
 		{
@@ -100,16 +120,17 @@ const GatewayTable = () => {
 			enableSorting: true,
 		},
 		{
-			label: __('Configured', 'ctx-events'),
-			id: 'isValid',
+			label: __('Status', 'ctx-events'),
+			id: 'status',
 			enableSorting: true,
-			render: (gateway) => (
-				<StatusPill state={gateway.isValid ? 'success' : 'error'}>
-					{gateway.isValid
-						? __('Configured for activation', 'ctx-events')
-						: __('Not Configured for activation', 'ctx-events')}
-				</StatusPill>
-			),
+			render: (gateway) => {
+				const status = gatewayStatusConfig[gateway.status] ?? {
+					label: gateway.status,
+					state: 'info' as const,
+				};
+
+				return <StatusPill state={status.state}>{status.label}</StatusPill>;
+			},
 		},
 		{
 			label: __('Status', 'ctx-events'),

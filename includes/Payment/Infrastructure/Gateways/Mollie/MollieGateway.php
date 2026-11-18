@@ -8,6 +8,7 @@ use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Booking\Presentation\BookingReturnLink;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
+use Contexis\Events\Payment\Domain\Enums\GatewayStatus;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
 use Mollie\Api\MollieApiClient;
@@ -19,8 +20,8 @@ final class MollieGateway implements PaymentGateway
     private ?MollieApiClient $client = null;
 	private MollieConfiguration $config;
 
-	public function __construct() {
-		$this->config = new MollieConfiguration();
+	public function __construct(?MollieConfiguration $config = null) {
+		$this->config = $config ?? new MollieConfiguration();
 	}
     public function getId(): string
     {
@@ -200,9 +201,21 @@ final class MollieGateway implements PaymentGateway
 		$this->config->setEnabled($active);
 	}
 
-	public function isValid(): bool {
-		return $this->config->isValid();
-	}
+
+    public function getStatus(): GatewayStatus
+    {
+        if (!$this->config->isValid()) {
+            return GatewayStatus::MissingConfiguration;
+        }
+
+        if ($this->config->isTestMode()) {
+            return GatewayStatus::TestMode;
+        }
+
+        return $this->config->isEnabled
+            ? GatewayStatus::Active
+            : GatewayStatus::Inactive;
+    }
 
     public function supportsCheckoutLink(): bool
     {

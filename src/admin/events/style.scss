@@ -71,8 +71,17 @@
 	width: 100%;
 
 	&__mount .sx__calendar-wrapper {
-		height: 720px;
 		font-family: inherit;
+	}
+
+	&__mount .sx__calendar-wrapper,
+	&__mount .sx__calendar {
+		height: auto;
+	}
+
+	&__mount .sx__view-container {
+		flex: none;
+		overflow-y: visible;
 	}
 
 	.sx__calendar-header {

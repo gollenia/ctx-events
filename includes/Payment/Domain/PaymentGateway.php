@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Contexis\Events\Payment\Domain;
 
 use Contexis\Events\Booking\Domain\Booking;
+use Contexis\Events\Payment\Domain\Enums\GatewayStatus;
 use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Shared\Domain\ValueObjects\Price;
 
@@ -23,7 +24,7 @@ interface PaymentGateway
     public function getDescription(): ?string;
     public function setEnabled(bool $active): void;
     public function isEnabled(): bool;
-    public function isValid(): bool;
+    public function getStatus(): GatewayStatus;
     public function supportsCheckoutLink(): bool;
     public function save(): void;
 }

@@ -188,7 +188,7 @@ readonly adminName: string,
 readonly enabled: boolean,
 readonly supportsCheckoutLink: boolean,
 readonly settings: any[],
-readonly isValid: boolean,
+readonly status: 'missing_configuration' | 'inactive' | 'active' | 'test_mode',
 };
 export type InputType = 'email' | 'tel' | 'url' | 'text' | 'number' | 'date';
 export type Location = {

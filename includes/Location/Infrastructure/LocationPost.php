@@ -84,6 +84,7 @@ class LocationPost extends PostType implements HasMetaData, HasHooks
 
         return [
             'cb' => $columns['cb'] ?? '<input type="checkbox" />',
+            'image' => __('Image', 'ctx-events'),
             'title' => $columns['title'] ?? __('Title', 'ctx-events'),
             'address' => __('Address', 'ctx-events'),
 			'postcode' => __('Postcode', 'ctx-events'),
@@ -95,6 +96,26 @@ class LocationPost extends PostType implements HasMetaData, HasHooks
     public function renderColumn(string $column, int $postId): void
     {
         switch ($column) {
+			case 'image':
+				$thumbnail = get_the_post_thumbnail(
+					$postId,
+					[48, 48],
+					[
+						'class' => 'ctx-location-list-image',
+						'alt' => get_the_title($postId),
+					]
+				);
+
+				if (is_string($thumbnail) && $thumbnail !== '') {
+					echo $thumbnail;
+					break;
+				}
+
+				printf(
+					'<span class="ctx-location-list-image-placeholder" role="img" aria-label="%s"><span class="dashicons dashicons-format-image" aria-hidden="true"></span></span>',
+					esc_attr__('No image set', 'ctx-events'),
+				);
+				break;
 
             case 'address':
                 echo esc_html((string) get_post_meta($postId, LocationMeta::ADDRESS, true) ?: '—');

@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.0
+
+### Added
+
+- Show each location's featured image, or an accessible placeholder, in the admin list.
+- Expose operational payment-gateway states, including Mollie test mode.
+
+### Changed
+
+- Let the event calendar grow to the content of the selected view instead of scrolling internally.
+- Refresh German language catalogs.
+
 ## 0.5.1
 
  - Added translation strings

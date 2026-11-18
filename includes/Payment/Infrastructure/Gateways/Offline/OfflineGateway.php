@@ -6,6 +6,7 @@ namespace Contexis\Events\Payment\Infrastructure\Gateways\Offline;
 
 use Contexis\Events\Booking\Domain\Booking;
 use Contexis\Events\Payment\Domain\Enums\TransactionStatus;
+use Contexis\Events\Payment\Domain\Enums\GatewayStatus;
 use Contexis\Events\Payment\Domain\PaymentGateway;
 use Contexis\Events\Payment\Domain\Transaction;
 use Contexis\Events\Payment\Domain\ValueObjects\BankData;
@@ -89,10 +90,17 @@ final class OfflineGateway implements PaymentGateway
 		return $this->config->isEnabled;
 	}
 
-	public function isValid(): bool
-	{
-		return $this->config->isValid();
-	}
+
+    public function getStatus(): GatewayStatus
+    {
+        if (!$this->config->isValid()) {
+            return GatewayStatus::MissingConfiguration;
+        }
+
+        return $this->config->isEnabled
+            ? GatewayStatus::Active
+            : GatewayStatus::Inactive;
+    }
 
     public function supportsCheckoutLink(): bool
     {
