@@ -104,7 +104,7 @@ final class TiptapDocumentRenderer
             }
 
             $rows[] = sprintf(
-                '<tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><td style="padding:6px 10px;border:1px solid #dcdcde;">%s</td></tr>',
+                '<tr><th style="text-align:left;white-space:nowrap;padding:6px 10px;border:1px solid #dcdcde;">%s</th><td style="padding:6px 10px;border:1px solid #dcdcde;">%s</td></tr>',
                 htmlspecialchars($labels[$key] ?? $this->humanizeKey((string) $key), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
                 htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             );
@@ -114,7 +114,7 @@ final class TiptapDocumentRenderer
             return '';
         }
 
-        return '<table style="border-collapse:collapse;width:100%;margin:12px 0;"><tbody>' . implode('', $rows) . '</tbody></table>';
+        return '<table style="border-collapse:collapse;margin:12px 0;"><tbody>' . implode('', $rows) . '</tbody></table>';
     }
 
     private function renderAttendeeTable(TriggeredEmailContext $context): string
@@ -145,7 +145,7 @@ final class TiptapDocumentRenderer
         }
 
         return sprintf(
-            '<table style="border-collapse:collapse;width:100%%;margin:12px 0;"><thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th></tr></thead><tbody>%s</tbody></table>',
+            '<table style="border-collapse:collapse;margin:12px 0;"><thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th><th style="text-align:left;padding:6px 10px;border:1px solid #dcdcde;">%s</th></tr></thead><tbody>%s</tbody></table>',
             htmlspecialchars($this->translate('Name'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             htmlspecialchars($this->translate('Ticket'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             htmlspecialchars($this->translate('Date'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),

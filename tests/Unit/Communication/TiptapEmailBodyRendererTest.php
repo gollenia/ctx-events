@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Contexis\Events\Booking\Domain\AttendeeCollection;
+use Contexis\Events\Booking\Domain\Attendee;
 use Contexis\Events\Communication\Application\DTOs\TriggeredEmailContext;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
 use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
@@ -14,6 +15,7 @@ use Contexis\Events\Form\Domain\Fields\FormField;
 use Contexis\Events\Form\Domain\Fields\FormFieldCollection;
 use Contexis\Events\Form\Domain\Fields\InputDetails;
 use Contexis\Events\Payment\Domain\TransactionCollection;
+use Contexis\Events\Shared\Domain\ValueObjects\PersonName;
 use Tests\Support\FakeEventFactory;
 use Tests\Support\FakeFormRepository;
 use Tests\Support\FakeMailBookingFactory;
@@ -165,7 +167,7 @@ test('renders numbered lists and links in email documents', function () {
     expect($rendered->html)->toContain('<ol>', '<li>', 'href="https://example.org/event"', 'More information');
 });
 
-test('renders booking form labels instead of stored field keys in registration data', function () {
+test('renders compact booking data tables in email documents', function () {
     $event = FakeEventFactory::create(706, ['_booking_form' => 706]);
     $booking = FakeMailBookingFactory::create($event->id);
     $form = new BookingForm(
@@ -181,16 +183,21 @@ test('renders booking form labels instead of stored field keys in registration d
     $renderer = new TiptapDocumentRenderer(null, new FakeFormRepository($form));
 
     $rendered = $renderer->render(
-        json_encode(['type' => 'doc', 'content' => [['type' => 'registrationData']]], JSON_THROW_ON_ERROR),
+        json_encode(['type' => 'doc', 'content' => [['type' => 'registrationData'], ['type' => 'attendeeTable']]], JSON_THROW_ON_ERROR),
         new TriggeredEmailContext(
             booking: $booking,
             event: $event,
-            attendees: AttendeeCollection::empty(),
+            attendees: AttendeeCollection::from(new Attendee(
+                ticketId: $event->tickets->toArray()[0]->id,
+                ticketPrice: $event->tickets->toArray()[0]->price,
+                name: PersonName::from('Erika', 'Muster'),
+            )),
             transactions: TransactionCollection::empty(),
         ),
     );
 
     expect($rendered->html)
         ->toContain('Vorname', 'Nachname')
-        ->not->toContain('First name', 'Last name');
+        ->toContain('Name', 'Ticket', 'white-space:nowrap')
+        ->not->toContain('First name', 'Last name', 'width:100%');
 });

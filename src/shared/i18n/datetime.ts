@@ -105,7 +105,10 @@ function formatDailySchedule(start: string, end: string): string {
 }
 
 function formatDailyTimeRange(start: string, end: string): string {
-	return sprintf(__('Each day %s', 'ctx-events'), formatTimeRange(start, end));
+	// A daily event spans multiple dates, so Intl.DateTimeFormat#formatRange
+	// includes both dates even when given time-only options. Format the times
+	// individually to keep the daily schedule limited to its hours.
+	return sprintf(__('Each day %s', 'ctx-events'), `${formatTime(start)} – ${formatTime(end)}`);
 }
 
 export { formatDate, formatDateRange, formatDailySchedule, formatDailyTimeRange, formatTime, formatTimeRange };

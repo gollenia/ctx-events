@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.1
+
+### Fixed
+
+- Keep daily event schedules from repeating the date in their time range.
+- Let registration-data and attendee tables in email templates use their natural width.
+
 ## 0.6.0
 
 ### Added
