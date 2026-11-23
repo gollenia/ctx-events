@@ -3,7 +3,6 @@ import {
 	InputField,
 	isFieldVisible,
 	normalizeFieldValue,
-	sanitizeInlineHtml,
 } from '@contexis/wp-ui';
 import { getBookingFieldDefinition } from '../formFields';
 
@@ -31,19 +30,11 @@ export function FormFieldRenderer({
 						data-testid={field.testId}
 						key={field.name}
 					>
-						{field.description &&
-							(field.type === 'checkbox' || field.type === 'toggle' ? (
-								<div
-									className="ctx-form-field-description"
-									dangerouslySetInnerHTML={{
-										__html: sanitizeInlineHtml(field.description),
-									}}
-								/>
-							) : (
-								<p className="ctx-form-field-description">
-									{field.description}
-								</p>
-							))}
+						{field.description && (
+							<p className="ctx-form-field-description">
+								{field.description}
+							</p>
+						)}
 						<InputField
 							{...field}
 							status="LOADED"

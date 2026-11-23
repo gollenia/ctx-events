@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.2
+
+### Fixed
+
+- Show only the display text for checkboxes and toggles in booking and attendee forms when it is configured.
+
 ## 0.6.1
 
 ### Fixed

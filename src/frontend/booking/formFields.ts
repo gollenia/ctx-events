@@ -38,9 +38,12 @@ export const getBookingFieldDefinition = (
 ): FormFieldDefinition => {
 	const definition: FormFieldDefinition = {
 		name: field.name,
-		label: field.label,
+		label:
+			field.type === 'checkbox'
+				? field.description?.trim() || field.label
+				: field.label,
 		autoComplete: getFieldAutoComplete(field),
-		description: field.description,
+		description: field.type === 'checkbox' ? undefined : field.description,
 		type: getBookingFieldInputType(field),
 		required: field.required,
 		width: field.width,

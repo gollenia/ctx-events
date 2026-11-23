@@ -288,7 +288,7 @@ test.describe('booking app', () => {
 		await registerBookingApiMocks(page);
 	});
 
-	test('renders checkbox descriptions as safe HTML', async ({ page }) => {
+	test('uses the checkbox display text as its only visible label', async ({ page }) => {
 		const data = structuredClone(freeBookingData);
 		data.bookingForm.fields.push({
 			name: 'consent', label: 'Consent', type: 'checkbox', width: 6,
@@ -301,6 +301,8 @@ test.describe('booking app', () => {
 		await openBooking(page, FREE_POST_ID);
 		await selectTicket(page, 'free-ticket');
 		const field = page.getByTestId('booking-field-consent');
+		await expect(field.getByRole('checkbox', { name: 'Read the terms' })).toBeVisible();
+		await expect(field.getByText('Consent', { exact: true })).toHaveCount(0);
 		await expect(field.getByRole('link', { name: 'terms' })).toHaveAttribute('href', 'https://example.com/terms');
 		await expect(field.locator('img')).toHaveCount(0);
 	});
