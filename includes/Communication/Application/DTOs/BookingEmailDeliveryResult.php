@@ -13,6 +13,7 @@ final readonly class BookingEmailDeliveryResult
     public const STATUS_SENT = 'sent';
     public const STATUS_SKIPPED = 'skipped';
     public const STATUS_FAILED = 'failed';
+    public const REASON_NO_EVENT_CONTACT = 'no_event_contact';
 
     public function __construct(
         public EmailTemplateKey $key,

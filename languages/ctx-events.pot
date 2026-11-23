@@ -2,14 +2,14 @@
 # This file is distributed under the GPL3.
 msgid ""
 msgstr ""
-"Project-Id-Version: Events 0.5.1\n"
+"Project-Id-Version: Events 0.6.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ctx-events\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T19:03:18+00:00\n"
+"POT-Creation-Date: 2026-11-23T14:47:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: ctx-events\n"
@@ -371,6 +371,81 @@ msgstr ""
 
 #: includes/Booking/Infrastructure/WpBookingOptions.php:116
 msgid "Message to display for user consent."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:51
+#, php-format
+msgid "Attendee added for ticket %s."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:53
+#, php-format
+msgid "Attendee %1$s moved from ticket %2$s to %3$s."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:55
+#, php-format
+msgid "Attendee %s updated."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:57
+#, php-format
+msgid "Attendee %s cancelled"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:59
+#, php-format
+msgid "The booking total was reduced. Refund %s externally."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:61
+#, php-format
+msgid "Open payment of %s created after booking update."
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:78
+msgctxt "booking email recipient"
+msgid "customer"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:79
+msgctxt "booking email recipient"
+msgid "admin"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:80
+msgctxt "booking email recipient"
+msgid "billing contact"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:81
+msgctxt "booking email recipient"
+msgid "event contact"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:85
+msgid "recipient could not be resolved"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:86
+msgid "booking context could not be loaded"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:87
+msgid "mail transport rejected the message"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:88
+msgid "mail transport raised an exception"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:89
+msgid "mail could not be sent"
+msgstr ""
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:93
+#, php-format
+msgid "Email warning for %1$s: %2$s."
 msgstr ""
 
 #: includes/Communication/Infrastructure/DefaultEmailTemplatePresetProvider.php:28

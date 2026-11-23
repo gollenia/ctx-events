@@ -137,6 +137,10 @@
 		}
 	}
 
+	.sx__month-grid-wrapper {
+		min-height: 400px;
+	}
+
 	.sx__month-grid-day:hover {
 		background: #fafafa;
 		cursor: pointer;

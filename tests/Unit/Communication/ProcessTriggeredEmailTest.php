@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use Contexis\Events\Communication\Application\BookingEmailWarnings;
 use Contexis\Events\Communication\Application\ResolveEmailRecipient;
 use Contexis\Events\Communication\Application\Services\LoadBookingEmailContext;
 use Contexis\Events\Communication\Application\Services\SendBookingEmails;
 use Contexis\Events\Communication\Infrastructure\EmailTemplateTokenReplacer;
 use Contexis\Events\Event\Application\Service\IcalEventCalendarExporter;
+use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Communication\Infrastructure\TiptapDocumentRenderer;
 use Contexis\Events\Communication\Infrastructure\TiptapEmailBodyRenderer;
 use Contexis\Events\Communication\Application\DTOs\BookingEmailDeliveryResult;
@@ -262,6 +264,30 @@ test('sends the responsible booking template only to the event responsible perso
         ->and($emailSender->lastEmail?->subject)->toBe('A new booking was received')
         ->and($emailSender->lastEmail?->body)->toContain($event->name);
 });
+
+test('only warns about an unresolved event contact when a responsible person is assigned', function (bool $assigned) {
+    $event = FakeEventFactory::create(221, [EventMeta::PERSON_ID => $assigned ? 1 : 0]);
+
+    $bookingRepository = FakeBookingRepository::empty();
+    $bookingId = $bookingRepository->save(FakeMailBookingFactory::create($event->id));
+    $emailSender = new FakeEmailSender();
+    $processor = makeTriggeredEmailProcessor(
+        $bookingRepository,
+        FakeEventRepository::one($event),
+        FakeAttendeeRepository::empty(),
+        FakeTransactionRepository::empty(),
+        $emailSender,
+    );
+
+    $result = $processor->trigger(EmailTrigger::RESPONSIBLE_BOOKING_CREATED, $bookingId);
+
+    expect($emailSender->lastEmail)->toBeNull()
+        ->and($result->deliveries)->toHaveCount(1)
+        ->and($result->deliveries[0]->status)->toBe(BookingEmailDeliveryResult::STATUS_SKIPPED)
+        ->and(BookingEmailWarnings::messages($result))->toBe(
+            $assigned ? ['Email warning for event contact: recipient could not be resolved.'] : [],
+        );
+})->with([true, false]);
 
 test('uses the responsible person as Reply-To when enabled for the event', function () {
     $event = FakeEventFactory::create(220);

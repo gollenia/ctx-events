@@ -62,7 +62,9 @@ final class FakeEventFactory
             description: fake()->paragraph(),
             audience: fake()->word(),
             locationId: LocationId::from((int) $metadata[EventMeta::LOCATION_ID]),
-            personId: PersonId::from((int) $metadata[EventMeta::PERSON_ID]),
+            personId: $metadata[EventMeta::PERSON_ID]
+                ? PersonId::from((int) $metadata[EventMeta::PERSON_ID])
+                : null,
             imageId: ImageId::from((int) $metadata['_thumbnail_id']),
             recurrenceId: null
         );

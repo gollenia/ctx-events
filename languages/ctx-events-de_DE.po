@@ -8,16 +8,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-04-07T06:25:49+00:00\n"
-"PO-Revision-Date: 2026-11-18 19:16+0000\n"
+"PO-Revision-Date: 2026-11-23 14:51+0000\n"
 "Language: de_DE\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: ctx-events\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Loco-Version: 2.8.9; wp-7.1.4; php-8.5.12\n"
+"X-Loco-Version: 2.8.10; wp-7.1.5; php-8.5.8"
 
 #: build/admin.js:6
 msgid " time"
-msgstr " Mal"
+msgstr " mal"
 
 #: build/admin.js:6
 msgid " times"
@@ -5481,3 +5481,79 @@ msgstr "PLZ"
 #: build/admin.js:6
 msgid "Änderungen speichern"
 msgstr "Änderungen speichern"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:51
+#, php-format
+msgid "Attendee added for ticket %s."
+msgstr "Teilnehmer für Ticket %s hinzugefügt."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:53
+#, php-format
+msgid "Attendee %1$s moved from ticket %2$s to %3$s."
+msgstr "Teilnehmer %1$s von Ticket %2$s auf Ticket %3$s umgebucht."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:55
+#, php-format
+msgid "Attendee %s updated."
+msgstr "Teilnehmer %s aktualisiert."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:57
+#, php-format
+msgid "Attendee %s cancelled"
+msgstr "Teilnehmer %s storniert"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:59
+#, php-format
+msgid "The booking total was reduced. Refund %s externally."
+msgstr "Der Buchungsbetrag wurde reduziert. Bitte %s extern erstatten."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:61
+#, php-format
+msgid "Open payment of %s created after booking update."
+msgstr ""
+"Nach der Änderung der Buchung wurde eine offene Zahlung über %s angelegt."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:93
+#, php-format
+msgid "Email warning for %1$s: %2$s."
+msgstr "E-Mail-Warnung (%1$s): %2$s."
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:78
+msgctxt "booking email recipient"
+msgid "customer"
+msgstr "Kunde"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:79
+msgctxt "booking email recipient"
+msgid "admin"
+msgstr "Administration"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:80
+msgctxt "booking email recipient"
+msgid "billing contact"
+msgstr "Rechnungskontakt"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:81
+msgctxt "booking email recipient"
+msgid "event contact"
+msgstr "Veranstaltungskontakt"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:85
+msgid "recipient could not be resolved"
+msgstr "Der Empfänger konnte nicht ermittelt werden"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:86
+msgid "booking context could not be loaded"
+msgstr "Die Buchungsdaten konnten nicht geladen werden"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:87
+msgid "mail transport rejected the message"
+msgstr "Der Mailversand hat die Nachricht abgelehnt"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:88
+msgid "mail transport raised an exception"
+msgstr "Beim Mailversand ist ein Fehler aufgetreten"
+
+#: includes/Booking/Presentation/Resources/BookingLogEntryResource.php:89
+msgid "mail could not be sent"
+msgstr "Die E-Mail konnte nicht gesendet werden"

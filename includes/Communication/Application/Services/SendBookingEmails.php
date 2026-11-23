@@ -18,6 +18,7 @@ use Contexis\Events\Communication\Application\DTOs\BookingEmailResult;
 use Contexis\Events\Communication\Application\ResolveEmailRecipient;
 use Contexis\Events\Communication\Domain\EmailDefinition;
 use Contexis\Events\Communication\Domain\EmailTemplatePreset;
+use Contexis\Events\Communication\Domain\Enums\EmailTarget;
 use Contexis\Events\Communication\Domain\Enums\EmailTemplateKey;
 use Contexis\Events\Communication\Domain\Enums\EmailTrigger;
 use Contexis\Events\Communication\Domain\ValueObjects\EmailAttachment;
@@ -117,6 +118,10 @@ final readonly class SendBookingEmails implements BookingEmailTrigger
 
         if (!$definition->enabled) {
             return $this->skippedResult($result, $preset, $definition, 'template_disabled');
+        }
+
+        if ($definition->target === EmailTarget::EVENT_CONTACT && $context->event->personId === null) {
+            return $this->skippedResult($result, $preset, $definition, BookingEmailDeliveryResult::REASON_NO_EVENT_CONTACT);
         }
 
         $recipients = $this->resolveRecipients($definition, $recipientConfig, $context, $eventMailSettings);

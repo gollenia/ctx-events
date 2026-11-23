@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.3
+
+### Fixed
+
+- Localize booking history details and email warnings, including entries from existing bookings.
+- Skip event-contact booking emails without a warning when no event contact is assigned.
+- Keep the admin calendar's month grid at a usable minimum height.
+
+### Changed
+
+- Refresh the German language catalogs for Austria, Germany, and Switzerland.
+
 ## 0.6.2
 
 ### Fixed

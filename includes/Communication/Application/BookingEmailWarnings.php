@@ -57,7 +57,7 @@ final class BookingEmailWarnings
             return null;
         }
 
-        if ($delivery->reason === 'template_disabled') {
+        if (in_array($delivery->reason, ['template_disabled', BookingEmailDeliveryResult::REASON_NO_EVENT_CONTACT], true)) {
             return null;
         }
 
