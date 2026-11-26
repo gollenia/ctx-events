@@ -7,7 +7,7 @@ import {
 import { DataTableFilter } from '@events/datatable/Filter';
 import { mapStatusItems } from '@events/datatable/statusItems';
 import apiFetch from '@wordpress/api-fetch';
-import { NoticeList, SnackbarList } from '@wordpress/components';
+import { SnackbarList } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -155,38 +155,24 @@ const GatewayTable = () => {
 	}, [activeSlug]);
 
 	const onToggle = (slug: string, isActive: boolean) => {
-		apiFetch({
+		apiFetch<{ active: boolean; status: Gateway['status'] }>({
 			path: `/events/v3/gateways/${slug}`,
 			method: 'PATCH',
 			data: { enabled: !isActive },
 		})
-			.then((data: Gateway) => {
-				console.log(data);
-				setGateways((prev) => {
-					const updatedGateways = prev.map((gateway) => {
-						if (gateway.slug === slug) {
-							return {
-								...gateway,
-								enabled: !isActive,
-							};
-						}
-						return gateway;
-					});
-					return updatedGateways;
-				});
-				setLoading(false);
+			.then(({ active, status }) => {
+				setGateways((previous) => previous.map((gateway) =>
+					gateway.slug === slug ? { ...gateway, enabled: active, status } : gateway,
+				));
 			})
 			.catch((err) => {
-				setError(err.message);
-				console.error(err);
-				const message =
-					__('An error occurred while toggling the gateway: ', 'ctx-events') +
-					err.error;
+				const message = err?.error || err?.message ||
+					__('An error occurred while toggling the gateway.', 'ctx-events');
 				createErrorNotice(message, {
+					id: slug,
 					type: 'snackbar',
 					explicitDismiss: false,
 				});
-				setLoading(false);
 			});
 	};
 
@@ -213,10 +199,10 @@ const GatewayTable = () => {
 			>
 				<DataTable.Header />
 				<DataTable.StatusSelect />
-				<NoticeList notices={notices} />
 				<DataTable.Table />
 				<DataTable.Pagination />
 			</DataTable>
+			<SnackbarList notices={notices.filter((notice) => notice.type === 'snackbar')} onRemove={removeNotice} />
 
 			{activeSlug && <GatewayModal key={activeSlug} slug={activeSlug} onCancel={onCancel} />}
 		</div>
