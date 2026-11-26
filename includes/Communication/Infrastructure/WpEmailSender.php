@@ -11,13 +11,14 @@ use Contexis\Events\Communication\Domain\ValueObjects\ResolvedEmail;
 
 final class WpEmailSender implements EmailSender
 {
+    public function __construct(private readonly EmailHtmlFormatter $formatter)
+    {
+    }
+
     public function send(ResolvedEmail $email): bool
     {
-        $headers = [
-            $email->isHtml
-                ? 'Content-Type: text/html; charset=UTF-8'
-                : 'Content-Type: text/plain; charset=UTF-8',
-        ];
+        $body = $this->formatter->format($email);
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
 
         if ($email->replyTo !== null) {
             $headers[] = 'Reply-To: ' . $email->replyTo->toString();
@@ -45,7 +46,7 @@ final class WpEmailSender implements EmailSender
             return wp_mail(
                 $email->to->toString(),
                 $email->subject,
-                $email->body,
+                $body,
                 $headers,
                 $attachments,
             );

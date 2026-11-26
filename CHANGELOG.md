@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Add a global email layout and custom CSS under Events settings, with syntax highlighting for HTML and CSS.
+
+### Changed
+
+- Send all CTX Events emails as HTML, including messages generated from existing plain-text templates.
+
 ## 1.0.0
 
 ### Changed

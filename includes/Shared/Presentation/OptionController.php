@@ -39,6 +39,7 @@ final class OptionController implements RestController
 
         $result = [];
         foreach ($fields as $key => $field) {
+            unset($field['normalize']);
             $field['value'] = get_option($key, $field['default'] ?? null);
             $field['key'] = $key;
             $result[] = $field;
@@ -52,12 +53,26 @@ final class OptionController implements RestController
         $fields = $this->definitions->all();
         $body   = $request->get_param('values') ?? [];
 
-        foreach ($fields as $key => $field) {
-            if (!array_key_exists($key, $body)) {
-                continue;
-            }
+        if (!is_array($body)) {
+            return new \WP_REST_Response(['message' => __('Invalid settings.', 'ctx-events')], 400);
+        }
 
-            update_option($key, $body[$key]);
+        $values = [];
+        try {
+            foreach ($fields as $key => $field) {
+                if (!array_key_exists($key, $body)) {
+                    continue;
+                }
+
+                $normalize = $field['normalize'] ?? null;
+                $values[$key] = is_callable($normalize) ? $normalize($body[$key]) : $body[$key];
+            }
+        } catch (\InvalidArgumentException $error) {
+            return new \WP_REST_Response(['message' => $error->getMessage()], 400);
+        }
+
+        foreach ($values as $key => $value) {
+            update_option($key, $value);
         }
 
         return new \WP_REST_Response(['success' => true]);

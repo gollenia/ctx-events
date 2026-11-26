@@ -11,6 +11,7 @@ import {
 } from '@wordpress/components';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import CodeField, { type CodeEditorSettings, type CodeMode } from './CodeField';
 
 type OptionSelectValue = {
 	label: string;
@@ -20,6 +21,7 @@ type OptionSelectValue = {
 type OptionField = {
 	key: string;
 	type?: string;
+	editor?: CodeMode;
 	label: string;
 	description?: string;
 	value: unknown;
@@ -63,8 +65,22 @@ const domainLabel = (domain: string) => {
 const renderFieldControl = (
 	field: OptionField,
 	onChange: (value: unknown) => void,
+	codeEditors: CodeEditorSettings,
 ) => {
 	const { type, label, description, value } = field;
+
+	if (field.editor === 'html' || field.editor === 'css') {
+		return (
+			<CodeField
+				id={field.key}
+				label={label}
+				description={description}
+				value={value == null ? '' : String(value)}
+				onChange={onChange}
+				settings={codeEditors[field.editor]}
+			/>
+		);
+	}
 
 	switch (type) {
 		case 'bool':
@@ -132,7 +148,7 @@ const renderFieldControl = (
 	}
 };
 
-const Options = () => {
+const Options = ({ codeEditors }: { codeEditors: CodeEditorSettings }) => {
 	const [fields, setFields] = useState<OptionField[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -190,8 +206,11 @@ const Options = () => {
 			.then(() => {
 				setNotice(__('Einstellungen wurden gespeichert.', 'ctx-events'));
 			})
-			.catch(() => {
-				setError(__('Fehler beim Speichern der Einstellungen.', 'ctx-events'));
+			.catch((error: { message?: string }) => {
+				setError(
+					error?.message ||
+						__('Fehler beim Speichern der Einstellungen.', 'ctx-events'),
+				);
 			})
 			.finally(() => setSaving(false));
 	};
@@ -245,8 +264,11 @@ const Options = () => {
 													key={field.key}
 													className="ctx-events-settings-field"
 												>
-													{renderFieldControl(field, (newValue) =>
-														handleFieldChange(field.key, newValue),
+													{renderFieldControl(
+														field,
+														(newValue) =>
+															handleFieldChange(field.key, newValue),
+														codeEditors,
 													)}
 												</div>
 											))}

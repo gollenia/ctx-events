@@ -53,7 +53,8 @@
         "php-di/php-di": "^7.1.1",
         "psr/clock": "^1.0.0",
         "ueberdosis/tiptap-php": "^2.1",
-        "contexis/wp-github-updater": "^0.4.0"
+        "contexis/wp-github-updater": "^0.4.0",
+        "pelago/emogrifier": "^8.3"
     },
     "autoload": {
         "psr-4": {

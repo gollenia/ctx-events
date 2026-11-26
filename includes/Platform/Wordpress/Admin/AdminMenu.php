@@ -45,6 +45,30 @@ final class AdminMenu implements AdminServiceInterface
         return $parent_file;
     }
 
+    /** @var array<string, array<string, mixed>> */
+    private array $codeEditorSettings = [];
+
+    public function loadSettingsEditor(): void
+    {
+        $arguments = ['codemirror' => ['lint' => false, 'lineNumbers' => true]];
+        $html = wp_enqueue_code_editor(['type' => 'text/html', ...$arguments]);
+
+        if ($html !== false) {
+            $this->codeEditorSettings = [
+                'html' => $html,
+                'css' => wp_get_code_editor_settings(['type' => 'text/css', ...$arguments]),
+            ];
+        }
+    }
+
+    public function renderSettings(): void
+    {
+        printf(
+            '<div id="ctx-options-admin" data-code-editor="%s"></div>',
+            esc_attr((string) wp_json_encode($this->codeEditorSettings)),
+        );
+    }
+
     public function register(): void
     {
         $pendingBookings = $this->bookingRepository->countPending();
@@ -72,16 +96,18 @@ final class AdminMenu implements AdminServiceInterface
             0
         );
 
-        add_submenu_page(
+        $settingsHook = add_submenu_page(
             self::MENU_SLUG,
             __('Settings', 'ctx-events'),
             __('Settings', 'ctx-events'),
             'manage_options',
             'contexis_events_settings',
-            function () {
-                echo '<div id="ctx-options-admin"></div>';
-            }
+            [$this, 'renderSettings']
         );
+
+        if ($settingsHook !== false) {
+            add_action('load-' . $settingsHook, [$this, 'loadSettingsEditor']);
+        }
 
         add_submenu_page(
             self::MENU_SLUG,
