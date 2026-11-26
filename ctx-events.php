@@ -6,7 +6,7 @@ declare(strict_types=1);
 Plugin Name: Events
 Plugin URI: https://github.com/gollenia/ctx-events
 Description: Modern event and booking management for WordPress. Easily create events, manage attendees, track availability and handle payments
-Version: 0.7.0
+Version: 0.7.1
 Requires at least: 7.1.0
 Tested up to: 7.1.0
 Requires PHP: 8.5
@@ -33,7 +33,29 @@ if (is_readable($wpUiBootstrap)) {
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
 if (is_callable([Contexis\WpGitHubUpdater\ReleaseInfo::class, 'fromTag'])) {
-    Contexis\WpGitHubUpdater\WordPressPluginUpdater::fromPluginFile(__FILE__)->registerHooks();
+    $plugin = Contexis\WpGitHubUpdater\PluginMetadata::fromPluginFile(__FILE__);
+    $repository = Contexis\WpGitHubUpdater\GitHubRepository::fromPluginUri($plugin->data['PluginURI']);
+    $releaseProvider = Contexis\WpGitHubUpdater\GitHubReleaseProvider::forPlugin($repository, $plugin);
+    (new Contexis\WpGitHubUpdater\WordPressPluginUpdater($plugin, $repository, $releaseProvider))->registerHooks();
+
+    // Updater 0.4.1 builds the package URL from the normalized version.
+    $useReleaseTagForPackage = static function (mixed $updates) use ($plugin, $repository, $releaseProvider): mixed {
+        $update = $updates->response[$plugin->pluginSlug] ?? null;
+        if (!isset($update->new_version, $update->package)) {
+            return $updates;
+        }
+
+        $release = $releaseProvider->getLatestRelease();
+        if ($update->new_version === $release->version
+            && $update->package === $repository->downloadPackageUrl($release->version, $plugin->packageName)
+        ) {
+            $update->package = $repository->downloadPackageUrl($release->tag, $plugin->packageName);
+        }
+
+        return $updates;
+    };
+    add_filter('site_transient_update_plugins', $useReleaseTagForPackage, 11);
+    add_filter('pre_set_site_transient_update_plugins', $useReleaseTagForPackage, 11);
 }
 
 register_activation_hook(__FILE__, static function (): void {

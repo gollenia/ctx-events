@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 0.7.1
+
+### Fixed
+
+- Use the actual GitHub release tag in WordPress update download URLs, including tags with a `v` prefix.
+
 ## 0.7.0
 
 ### Changed
