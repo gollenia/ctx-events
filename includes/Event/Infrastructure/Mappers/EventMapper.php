@@ -30,13 +30,15 @@ use Contexis\Events\Event\Infrastructure\EventMeta;
 use Contexis\Events\Shared\Infrastructure\Wordpress\PostSnapshot;
 use Contexis\Events\Shared\Presentation\Contracts\CriteriaMapper;
 use DateTimeImmutable;
+use DateTimeZone;
 
 final class EventMapper implements PostMapper
 {
     public static function map(PostSnapshot $post): Event
     {
 
-        $timezone = $post->getString('_timezone') ?? wp_timezone();
+        $timezoneName = $post->getString('_timezone');
+        $timezone = $timezoneName ? new DateTimeZone($timezoneName) : wp_timezone();
 
         $event = new Event(
             id: EventId::from($post->id),
@@ -78,7 +80,7 @@ final class EventMapper implements PostMapper
 
 		$event = $event->withBookings(
 			bookingPolicy: $booking_policy,
-			tickets: self::ticketsFromArray($post->getArray(EventMeta::TICKETS, []), $currency),
+			tickets: self::ticketsFromArray($post->getArray(EventMeta::TICKETS, []), $currency, $timezone),
 			currency: $currency,
 			forms: new EventForms(
                 bookingForm: FormId::from($post->getInt(EventMeta::BOOKING_FORM)),
@@ -108,11 +110,16 @@ final class EventMapper implements PostMapper
         return $age !== null && $age > 0 ? $age : null;
     }
 
-    private static function ticketsFromArray(array $ticketsData, Currency $currency): TicketCollection
+    /** @param array<mixed>|null $ticketsData */
+    private static function ticketsFromArray(?array $ticketsData, Currency $currency, DateTimeZone $timezone): TicketCollection
     {
         $tickets = [];
-        foreach ($ticketsData as $ticketData) {
-            $tickets[] = TicketMapper::fromArray($ticketData, $currency);
+        foreach ($ticketsData ?? [] as $ticketData) {
+            if (!is_array($ticketData)) {
+                continue;
+            }
+
+            $tickets[] = TicketMapper::fromArray($ticketData, $currency, $timezone);
         }
         return TicketCollection::from(...$tickets);
     }

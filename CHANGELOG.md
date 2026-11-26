@@ -12,6 +12,10 @@ All notable changes to this project are documented in this file.
 
 - Send all CTX Events emails as HTML, including messages generated from existing plain-text templates.
 
+### Fixed
+
+- Prevent ticket sales dates without a time from breaking event pages. Date-only sales periods use the event timezone, and tickets with invalid saved dates cannot be booked.
+
 ## 1.0.0
 
 ### Changed
