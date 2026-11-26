@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "contexis/events",
-    "version": "0.7.1",
+    "version": "1.0.0",
     "description": "Events Manager",
     "type": "project",
     "homepage": "http://www.kids-team.at",
@@ -27,6 +27,7 @@
     "extra": {
         "wp-github-release": {
             "plugin_file": "ctx-events.php",
+            "tag_prefix": "v",
             "build_command": "npm run build"
         }
     },

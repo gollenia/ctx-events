@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 1.0.0
+
+### Changed
+
+- Restore the `v` prefix for GitHub release tags.
+
 ## 0.7.1
 
 ### Fixed
