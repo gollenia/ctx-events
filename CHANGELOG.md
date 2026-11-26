@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+## 1.1.0
+
 ### Added
 
 - Add a global email layout and custom CSS under Events settings, with syntax highlighting for HTML and CSS.
