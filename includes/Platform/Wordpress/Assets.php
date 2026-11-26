@@ -28,7 +28,7 @@ final class Assets implements Registrar
     public function frontendScript(): void
     {
         $script_asset = $this->getAssetData('frontend');
-        if (!$script_asset) {
+        if (!$script_asset || !wp_script_is('wp-ui-v1', 'registered')) {
             return;
         }
 
@@ -57,7 +57,7 @@ final class Assets implements Registrar
         wp_enqueue_style(
             'ctx-events-frontend-style',
             PluginInfo::getPluginUrl(self::ASSET_PATH . '/style-frontend.css'),
-            [],
+            ['wp-ui-v1-style'],
             $script_asset['version'],
             'all'
         );
@@ -70,6 +70,9 @@ final class Assets implements Registrar
         }
 
         $script_asset = $this->getAssetData('admin');
+        if (!$script_asset || !wp_script_is('wp-ui-v1', 'registered')) {
+            return;
+        }
         wp_enqueue_style('wp-components');
         wp_enqueue_style('wp-preferences');
         wp_enqueue_script(
@@ -85,7 +88,7 @@ final class Assets implements Registrar
         wp_enqueue_style(
             'ctx-events-admin-style',
             PluginInfo::getPluginUrl(self::ASSET_PATH . '/style-admin.css'),
-            [],
+            ['wp-ui-v1-style'],
             $script_asset['version'],
             'all'
         );

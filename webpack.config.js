@@ -1,8 +1,9 @@
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const { getWebpackEntryPoints } = require('@wordpress/scripts/utils/config');
 const path = require('path');
+const { withWpUI } = require('@contexis/wp-ui/webpack');
 
-module.exports = {
+module.exports = withWpUI({
 	...defaultConfig,
 
 	resolve: {
@@ -34,4 +35,4 @@ module.exports = {
 		filename: '[name].js',
 		path: path.resolve(__dirname, 'build'),
 	},
-};
+});

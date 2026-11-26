@@ -134,7 +134,7 @@
 		}
 	},
 	"editorScript": "file:./index.js",
-	"style": "file:./view/style-index.css",
+	"style": ["wp-ui-v1-style", "wp-ui-v1-card", "wp-ui-v1-list", "file:./view/style-index.css"],
 	"viewScript": "file:./view/index.js",
 	"editorStyle": "file:./index.css"
 }

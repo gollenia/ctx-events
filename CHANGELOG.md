@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Use the shared wp-ui runtime for booking forms, admin screens, and event-list blocks. Compatible plugins share one copy of the runtime per major version.
+
 ### Fixed
 
 - Reject invalid offline gateway bank details with a validation error and show a toast when saving gateway settings fails. Keep the form open so the details can be corrected.

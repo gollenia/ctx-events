@@ -48,7 +48,7 @@
 		}
 	},
 	"editorScript": "file:./index.js",
-	"style": "file:./view.css",
+	"style": ["wp-ui-v1-style", "file:./view.css"],
 	"viewScript": "file:./view.js",
 	"editorStyle": "file:./index.css"
 }

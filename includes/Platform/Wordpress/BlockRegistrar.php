@@ -32,6 +32,21 @@ final class BlockRegistrar implements Registrar
 			return;
 		}
 
+		if (!wp_script_is('wp-ui-v1', 'registered')) {
+			add_filter('block_type_metadata', static function (array $metadata): array {
+				if (!in_array($metadata['name'] ?? '', ['ctx-events/upcoming', 'ctx-events/events-table'], true)) {
+					return $metadata;
+				}
+
+				unset($metadata['viewScript']);
+				$metadata['style'] = array_values(array_filter(
+					(array) ($metadata['style'] ?? []),
+					static fn (string $style): bool => !str_starts_with($style, 'wp-ui-v1-')
+				));
+				return $metadata;
+			});
+		}
+
 		$iterator = new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator($blocksPath, RecursiveDirectoryIterator::SKIP_DOTS)
 		);

@@ -18,6 +18,18 @@ Text Domain: ctx-events
 Domain Path: /languages
 */
 
+$wpUiDirectory = __DIR__ . '/build/wp-ui';
+$wpUiBootstrap = $wpUiDirectory . '/bootstrap.php';
+if (is_readable($wpUiBootstrap)) {
+    (require $wpUiBootstrap)(__FILE__, $wpUiDirectory);
+} else {
+    add_action('admin_notices', static function (): void {
+        if (!wp_script_is('wp-ui-v1', 'registered') && current_user_can('activate_plugins')) {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Events is missing its wp-ui runtime. Reinstall the complete plugin package.', 'ctx-events') . '</p></div>';
+        }
+    });
+}
+
 require_once(plugin_dir_path(__FILE__) . '/vendor/autoload.php');
 
 if (is_callable([Contexis\WpGitHubUpdater\ReleaseInfo::class, 'fromTag'])) {

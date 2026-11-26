@@ -1,7 +1,4 @@
 @use '../../../../frontend/styles/tokens';
-@use '../../../../../node_modules/@contexis/wp-ui/lib/style';
-@use '../../../../../node_modules/@contexis/wp-ui/lib/card';
-@use '../../../../../node_modules/@contexis/wp-ui/lib/list';
 
 @include tokens.register-theme-tokens();
 
