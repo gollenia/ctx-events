@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
-import { Button, FlexItem, Modal, Flex } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { Button, FlexItem, Modal, Flex, Notice, SnackbarList } from '@wordpress/components';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import AdminField from '../../shared/adminfields/AdminField';
 
@@ -9,6 +9,10 @@ const GatewayModal = ({ slug, onCancel }) => {
 	const [gateway, setGateway] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+	const [saveError, setSaveError] = useState('');
+	const [saveToastId, setSaveToastId] = useState<string | null>(null);
+	const saveAttempt = useRef(0);
+	const saveErrorMessage = __('Could not save the gateway settings.', 'ctx-events');
 
 	const collectSettings = () => {
 		const settings = {};
@@ -35,19 +39,23 @@ const GatewayModal = ({ slug, onCancel }) => {
 	}, [slug]);
 
 	const onSave = () => {
+		const toastId = String(++saveAttempt.current);
+		setSaveError('');
+		setSaveToastId(null);
 		setSaving(true);
 		apiFetch({
 			path: `/events/v3/gateways/${slug}`,
 			method: 'PUT',
 			data: { settings: collectSettings() },
 		})
-			.then((data) => {
-				console.log('save data:', data);
+			.then(() => {
 				onCancel();
-				setSaving(false);
 			})
 			.catch((err) => {
-				console.error('Fehler beim Speichern des Gateways:', err);
+				setSaveError(err?.error || err?.message || saveErrorMessage);
+				setSaveToastId(toastId);
+			})
+			.finally(() => {
 				setSaving(false);
 			});
 	};
@@ -62,6 +70,9 @@ const GatewayModal = ({ slug, onCancel }) => {
 				>
 					<form>
 						<Flex direction="column" className="events-ticket-modal-content">
+							{saveError && (
+								<Notice status="error" isDismissible={false}>{saveError}</Notice>
+							)}
 							{Array.isArray(gateway?.settings) &&
 								gateway?.settings?.map((field, index) => {
 									return (
@@ -99,6 +110,11 @@ const GatewayModal = ({ slug, onCancel }) => {
 							</Flex>
 						</Flex>
 					</form>
+					<SnackbarList
+						className="events-gateway-save-toasts"
+						notices={saveToastId ? [{ id: saveToastId, content: saveErrorMessage }] : []}
+						onRemove={(id) => setSaveToastId((current) => current === id ? null : current)}
+					/>
 				</Modal>
 			)}
 		</>

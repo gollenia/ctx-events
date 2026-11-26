@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Reject invalid offline gateway bank details with a validation error and show a toast when saving gateway settings fails. Keep the form open so the details can be corrected.
+
 ## 0.6.3
 
 ### Fixed

@@ -218,7 +218,7 @@ const GatewayTable = () => {
 				<DataTable.Pagination />
 			</DataTable>
 
-			<GatewayModal slug={activeSlug} onCancel={onCancel} />
+			{activeSlug && <GatewayModal key={activeSlug} slug={activeSlug} onCancel={onCancel} />}
 		</div>
 	);
 };

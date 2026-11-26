@@ -3,3 +3,13 @@
 		border-color: #f00 !important;
 	}
 }
+
+.components-snackbar-list.events-gateway-save-toasts {
+	position: sticky;
+	bottom: 0;
+	height: 0;
+}
+
+.events-gateway-save-toasts .components-snackbar-list__notice-container {
+	transform: translateY(-100%);
+}

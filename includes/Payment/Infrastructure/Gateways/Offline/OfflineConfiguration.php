@@ -32,18 +32,18 @@ final class OfflineConfiguration implements GatewayConfiguration
 
 	private function mapDataToProperties(array $data): void
     {
-        $this->isEnabled = (bool) ($data['enabled'] ?? $data['enabled'] ?? false);
+        $this->bankData = BankData::fromValues(
+            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData->accountHolder ?? ''),
+            (string) ($data['iban'] ?? $this->bankData->iban ?? ''),
+            (string) ($data['bic'] ?? $this->bankData->bic ?? ''),
+            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData->bankName ?? '')
+        );
+
+        $this->isEnabled = (bool) ($data['enabled'] ?? false);
         $this->title = (string) ($data['title'] ?? $this->title ?? __('Bank Transfer', 'ctx-events'));
 		$this->description = (string) ($data['description'] ?? $this->description ?? '');
         $this->paymentTerm = (int) ($data['paymentTerm'] ?? $data['payment_term'] ?? 0); // Handle snake_case from DB vs camelCase from Form
         $this->instructions = (string) ($data['instructions'] ?? $this->instructions ?? '');
-
-        $this->bankData = BankData::fromValues(
-            (string) ($data['accountHolder'] ?? $data['account_holder'] ?? $this->bankData->accountHolder ?? ''),
-            (string) ($data['iban'] ?? $data['iban'] ?? $this->bankData->iban ?? ''),
-            (string) ($data['bic'] ?? $data['bic'] ?? $this->bankData->bic ?? ''),
-            (string) ($data['bankName'] ?? $data['bank_name'] ?? $this->bankData->bankName ?? '')
-        );
 
 		if (!$this->isEnabled) {
 			return;
@@ -56,7 +56,7 @@ final class OfflineConfiguration implements GatewayConfiguration
 
     public function updateFromArray(array $data): void
     {
-		$allowedKeys = ['enabled', 'title', 'paymentTerm', 'instructions', 'accountHolder', 'iban', 'bic', 'bankName'];
+		$allowedKeys = ['enabled', 'title', 'description', 'paymentTerm', 'instructions', 'accountHolder', 'iban', 'bic', 'bankName'];
     	$filteredData = array_intersect_key($data, array_flip($allowedKeys));
 
 		if (empty($filteredData)) {
@@ -78,7 +78,11 @@ final class OfflineConfiguration implements GatewayConfiguration
 			'bankName' => sanitize_text_field($data['bankName'] ?? $this->bankData->bankName ?? '')
 		];
 
-		$this->mapDataToProperties($cleanData);
+		try {
+			$this->mapDataToProperties($cleanData);
+		} catch (\InvalidArgumentException $exception) {
+			throw new \DomainException(__('Invalid banking data', 'ctx-events'), 400, $exception);
+		}
     }
 
 	public function save(): void

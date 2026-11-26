@@ -20,8 +20,8 @@ final readonly class BankData
         string $bic,
         string $bankName
     ): self {
-        $cleanIban = !empty($iban) ? self::checkIban($iban) : '';
-        $cleanBic = !empty($bic) ? self::checkBic($bic) : '';
+        $cleanIban = $iban !== '' ? self::checkIban($iban) : '';
+        $cleanBic = $bic !== '' ? self::checkBic($bic) : '';
 
         return new self(
             $accountHolder,
@@ -42,6 +42,10 @@ final readonly class BankData
         $len = strlen($clean);
         if ($len < 15 || $len > 34) {
             throw new \InvalidArgumentException("BANK_DATA_INVALID_IBAN_LENGTH ($len characters).");
+        }
+
+        if (!preg_match('/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/D', $clean)) {
+            throw new \InvalidArgumentException('BANK_DATA_INVALID_IBAN_FORMAT');
         }
 
         self::verifyChecksum($clean);
